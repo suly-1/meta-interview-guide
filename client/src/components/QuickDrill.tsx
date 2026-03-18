@@ -5,6 +5,7 @@ import { Shuffle, Eye, RotateCcw, Star, ChevronRight, Zap } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
 import { useStreak } from "@/hooks/useStreak";
 import { useSpacedRepetition } from "@/hooks/useSpacedRepetition";
+import { onKeyEvent } from "@/lib/keyEvents";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DRILL_DURATION = 30; // seconds to recall before reveal
@@ -112,10 +113,17 @@ export default function QuickDrill() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [running]);
 
-  const handleReveal = () => {
+  const handleReveal = useCallback(() => {
     setRunning(false);
     setRevealed(true);
-  };
+  }, []);
+
+  // Subscribe to keyboard shortcut: R → reveal answer
+  useEffect(() => {
+    return onKeyEvent("drill:reveal", () => {
+      if (active && !revealed) handleReveal();
+    });
+  }, [active, revealed, handleReveal]);
 
   const handleRate = (rating: number) => {
     if (!pattern) return;

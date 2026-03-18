@@ -4,9 +4,10 @@ import InterviewTimer from "@/components/InterviewTimer";
 import QuickDrill from "@/components/QuickDrill";
 import PatternHeatmap from "@/components/PatternHeatmap";
 import SessionLog from "@/components/SessionLog";
-import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X } from "lucide-react";
+import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X, StickyNote, Trash2 } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
 import { useProgress } from "@/hooks/useProgress";
+import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DIFF_COLORS: Record<string, string> = {
@@ -30,13 +31,16 @@ type FilterFreq    = "all" | "5" | "4+" | "3+";
 type FilterMastery = "all" | "todo" | "done";
 
 function PatternRow({
-  p, onExpand, expanded, done, onToggleDone,
+  p, onExpand, expanded, done, onToggleDone, note, onNoteChange, onNoteClear,
 }: {
   p: typeof PATTERNS[0];
   onExpand: () => void;
   expanded: boolean;
   done: boolean;
   onToggleDone: (e: React.MouseEvent) => void;
+  note: string;
+  onNoteChange: (text: string) => void;
+  onNoteClear: () => void;
 }) {
   return (
     <>
@@ -129,6 +133,33 @@ function PatternRow({
                   ))}
                 </div>
               </div>
+              {/* Pattern Notes */}
+              <div className="bg-white rounded-xl border border-purple-100 p-4 md:col-span-2 lg:col-span-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <StickyNote size={13} className="text-purple-500" />
+                    <span className="text-xs font-bold text-purple-700 uppercase tracking-wide">My Notes</span>
+                    <span className="text-[11px] text-gray-400">mnemonics, edge cases, personal reminders</span>
+                  </div>
+                  {note && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNoteClear(); }}
+                      className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-600 transition-colors"
+                      title="Clear notes"
+                    >
+                      <Trash2 size={11} /> Clear
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={note}
+                  onChange={(e) => onNoteChange(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Jot down your mnemonic, a tricky edge case, or a reminder for next time..."
+                  rows={3}
+                  className="w-full text-sm text-gray-700 bg-purple-50/50 border border-purple-100 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder:text-gray-400 font-mono leading-relaxed"
+                />
+              </div>
             </div>
           </td>
         </tr>
@@ -147,6 +178,7 @@ export default function CodingTab() {
   const [masteryFilter, setMasteryFilter] = useState<FilterMastery>("all");
 
   const toggle = (id: string) => setExpandedPattern((prev) => (prev === id ? null : id));
+  const { getNote, setNote, clearNote } = usePatternNotes();
 
   const filtered = useMemo(() => {
     return PATTERNS.filter((p) => {
@@ -410,6 +442,9 @@ export default function CodingTab() {
                         onExpand={() => toggle(p.id)}
                         done={patterns.checked.has(p.id)}
                         onToggleDone={(e) => { e.stopPropagation(); patterns.toggle(p.id); }}
+                        note={getNote(p.id)}
+                        onNoteChange={(text) => setNote(p.id, text)}
+                        onNoteClear={() => clearNote(p.id)}
                       />
                     ))
                   )}

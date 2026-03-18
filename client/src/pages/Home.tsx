@@ -3,6 +3,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { emitKeyEvent } from "@/lib/keyEvents";
+import OnboardingModal from "@/components/OnboardingModal";
 import Hero from "@/components/Hero";
 import CodingTab from "@/components/CodingTab";
 import AIRoundTab from "@/components/AIRoundTab";
@@ -30,6 +33,16 @@ export default function Home() {
   const { streak, activatedToday } = useStreak();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onTabSwitch: (i) => {
+      const tab = TABS[i];
+      if (tab) handleTabChange(tab.id);
+    },
+    onTimerToggle: () => emitKeyEvent("timer:toggle"),
+    onReveal:      () => emitKeyEvent("drill:reveal"),
+  });
 
   const currentIndex = TABS.findIndex((t) => t.id === activeTab);
 
@@ -145,6 +158,8 @@ export default function Home() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <OnboardingModal />
 
       {/* Footer */}
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm">

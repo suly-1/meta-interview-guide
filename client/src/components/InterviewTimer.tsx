@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Play, Pause, RotateCcw, Timer, ChevronDown, ChevronUp } from "lucide-react";
 import { useSessionLog } from "@/hooks/useSessionLog";
+import { onKeyEvent } from "@/lib/keyEvents";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PRESETS = [
@@ -49,6 +50,14 @@ export default function InterviewTimer() {
   const [sessionStart, setSessionStart] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { addSession } = useSessionLog();
+
+  // Subscribe to keyboard shortcut: Space → toggle timer
+  useEffect(() => {
+    return onKeyEvent("timer:toggle", () => {
+      handleToggle();
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Tick
   useEffect(() => {
