@@ -4,7 +4,7 @@ import InterviewTimer from "@/components/InterviewTimer";
 import QuickDrill from "@/components/QuickDrill";
 import PatternHeatmap from "@/components/PatternHeatmap";
 import SessionLog from "@/components/SessionLog";
-import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X, StickyNote, Trash2 } from "lucide-react";
+import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X, StickyNote, Trash2, Search } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
 import { useProgress } from "@/hooks/useProgress";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
@@ -176,11 +176,13 @@ export default function CodingTab() {
   const [diffFilter,    setDiffFilter]    = useState<FilterDiff>("all");
   const [freqFilter,    setFreqFilter]    = useState<FilterFreq>("all");
   const [masteryFilter, setMasteryFilter] = useState<FilterMastery>("all");
+  const [searchQuery,   setSearchQuery]   = useState("");
 
   const toggle = (id: string) => setExpandedPattern((prev) => (prev === id ? null : id));
   const { getNote, setNote, clearNote } = usePatternNotes();
 
   const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return PATTERNS.filter((p) => {
       if (diffFilter !== "all" && p.difficultyColor !== diffFilter) return false;
       if (freqFilter === "5"  && p.frequency !== 5) return false;
@@ -188,11 +190,22 @@ export default function CodingTab() {
       if (freqFilter === "3+" && p.frequency < 3)   return false;
       if (masteryFilter === "done" && !patterns.checked.has(p.id))  return false;
       if (masteryFilter === "todo" &&  patterns.checked.has(p.id))  return false;
+      if (q) {
+        const haystack = [
+          p.name,
+          p.keyIdea,
+          p.summary,
+          p.metaNote,
+          ...p.problems,
+        ].join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
       return true;
     });
-  }, [diffFilter, freqFilter, masteryFilter, patterns.checked]);
+  }, [diffFilter, freqFilter, masteryFilter, searchQuery, patterns.checked]);
 
   const hasActiveFilter = diffFilter !== "all" || freqFilter !== "all" || masteryFilter !== "all";
+  const hasSearch = searchQuery.trim().length > 0;
 
   const clearFilters = () => {
     setDiffFilter("all");
@@ -316,6 +329,26 @@ export default function CodingTab() {
           <p className="text-sm text-gray-500 mt-1">Click any row to expand details · Use the filters below to focus your study session</p>
         </div>
 
+        {/* ── Search Bar ── */}
+        <div className="relative mb-3">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search patterns, key ideas, or practice problems…"
+            className="w-full pl-9 pr-9 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-400 transition-all"
+          />
+          {hasSearch && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
         {/* ── Filter Bar ── */}
         <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl">
           <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500 mr-1">
@@ -391,11 +424,12 @@ export default function CodingTab() {
           <div className="ml-auto flex items-center gap-2">
             <span className="text-xs text-gray-500 font-medium">
               {filtered.length} of {PATTERNS.length} shown
+              {hasSearch && <span className="text-blue-500 ml-1">for "{searchQuery.trim()}"</span>}
             </span>
             {hasActiveFilter && (
               <button onClick={clearFilters}
                 className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
-                <X size={11} /> Clear
+                <X size={11} /> Clear filters
               </button>
             )}
           </div>

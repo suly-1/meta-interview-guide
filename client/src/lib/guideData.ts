@@ -240,6 +240,42 @@ export const BEHAVIORAL_FOCUS_AREAS = [
           "What was the outcome?",
         ],
       },
+      {
+        question: "Describe a time you had to influence a team or stakeholder you had no authority over.",
+        probes: [
+          "What was the goal you were trying to achieve?",
+          "What was the resistance or misalignment you encountered?",
+          "What approach did you take to build alignment?",
+          "What was the outcome and what did you learn about influence?",
+        ],
+      },
+      {
+        question: "Tell me about a time you drove alignment on a technically ambiguous or contested decision.",
+        probes: [
+          "What made the decision ambiguous or contested?",
+          "Who were the key stakeholders and what were their positions?",
+          "How did you structure the discussion and drive toward a decision?",
+          "What was the final outcome and how did you handle dissenters?",
+        ],
+      },
+      {
+        question: "Give me an example of a time you expanded the scope of a project beyond its original charter.",
+        probes: [
+          "What triggered you to expand the scope?",
+          "How did you get buy-in for the expanded scope?",
+          "What was the incremental impact of the expansion?",
+          "What trade-offs did you have to make?",
+        ],
+      },
+      {
+        question: "Tell me about a time you had to coordinate a large release or launch across multiple teams.",
+        probes: [
+          "How many teams were involved and what were their dependencies?",
+          "How did you manage communication and risk across teams?",
+          "What went wrong and how did you handle it?",
+          "What would you do differently next time?",
+        ],
+      },
     ],
   },
   {
@@ -281,6 +317,42 @@ export const BEHAVIORAL_FOCUS_AREAS = [
           "What was the final outcome?",
         ],
       },
+      {
+        question: "Tell me about a time you had to give difficult feedback to a peer or senior engineer.",
+        probes: [
+          "What was the situation and what feedback did you need to deliver?",
+          "How did you prepare and frame the conversation?",
+          "How did the person respond and what was the outcome?",
+          "What did you learn about delivering hard feedback?",
+        ],
+      },
+      {
+        question: "Describe a time when you disagreed with your manager or leadership on a technical or product decision.",
+        probes: [
+          "What was the decision and why did you disagree?",
+          "How did you raise your concerns?",
+          "What was the final decision and how did you respond?",
+          "Looking back, who was right and what did you learn?",
+        ],
+      },
+      {
+        question: "Tell me about a time a project was at risk of failure due to interpersonal tension on the team.",
+        probes: [
+          "What was the source of the tension?",
+          "What role did you play in addressing it?",
+          "How did you keep the project on track while resolving the tension?",
+          "What was the outcome?",
+        ],
+      },
+      {
+        question: "Give me an example of a time you had to advocate for a position that was unpopular.",
+        probes: [
+          "What was the position and why was it unpopular?",
+          "How did you build your case?",
+          "What was the reaction and how did you handle pushback?",
+          "What was the final outcome?",
+        ],
+      },
     ],
   },
   {
@@ -319,6 +391,41 @@ export const BEHAVIORAL_FOCUS_AREAS = [
           "What was the impact of your intervention?",
         ],
       },
+      {
+        question: "Tell me about a time you had to choose between two technically sound but competing approaches.",
+        probes: [
+          "What were the two approaches and their trade-offs?",
+          "How did you evaluate and decide?",
+          "How did you communicate the decision to stakeholders?",
+          "In hindsight, was it the right call?",
+        ],
+      },
+      {
+        question: "Describe a time you had to debug or resolve a production incident under pressure.",
+        probes: [
+          "What was the incident and what was the customer impact?",
+          "How did you diagnose the root cause?",
+          "What was your communication strategy during the incident?",
+          "What did you change to prevent recurrence?",
+        ],
+      },
+      {
+        question: "Tell me about a time you had to simplify a complex system or process.",
+        probes: [
+          "What made it complex and why did it need simplification?",
+          "What was your approach to reducing complexity?",
+          "What trade-offs did you accept?",
+          "What was the measurable impact of the simplification?",
+        ],
+      },
+      {
+        question: "Give me an example of a time you used data or metrics to change a direction or decision.",
+        probes: [
+          "What was the original direction and what data did you find?",
+          "How did you present the data to drive a change?",
+          "What was the outcome and what did you learn about data-driven decisions?",
+        ],
+      },
     ],
   },
   {
@@ -353,6 +460,41 @@ export const BEHAVIORAL_FOCUS_AREAS = [
         probes: [
           "Why Meta over other companies?",
           "What problems do you most want to work on?",
+        ],
+      },
+      {
+        question: "Tell me about a time you had to communicate a complex technical concept to a non-technical audience.",
+        probes: [
+          "Who was the audience and what was the concept?",
+          "How did you tailor your communication?",
+          "How did you know they understood?",
+          "What would you do differently next time?",
+        ],
+      },
+      {
+        question: "Describe a time you had to deliver bad news to a stakeholder or leadership.",
+        probes: [
+          "What was the bad news and what was the context?",
+          "How did you prepare and frame the message?",
+          "How did the stakeholder react and how did you manage it?",
+          "What was the outcome?",
+        ],
+      },
+      {
+        question: "Tell me about a time you proactively communicated a risk or issue before being asked.",
+        probes: [
+          "What was the risk and how did you identify it?",
+          "How did you decide when and how to raise it?",
+          "What was the reaction and what happened as a result?",
+        ],
+      },
+      {
+        question: "Give me an example of a time you wrote documentation or a design doc that significantly helped your team.",
+        probes: [
+          "What was the context and why was documentation needed?",
+          "How did you structure and write it?",
+          "How was it received and what was its impact?",
+          "How do you think about the right level of documentation?",
         ],
       },
     ],

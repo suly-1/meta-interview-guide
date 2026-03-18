@@ -162,10 +162,50 @@ export default function Home() {
       <OnboardingModal />
 
       {/* Footer */}
-      <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm">
+      <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
         <p className="font-semibold text-white/90 mb-1">Meta IC6/IC7 Behavioral &amp; Coding Interview Guide</p>
         <p>Updated March 2026 · Content synthesized from candidate reports, NeetCode, Coditioning, HelloInterview, igotanoffer, and Taro.</p>
       </footer>
+
+      {/* Mobile Bottom Navigation — visible only on small screens */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="flex items-stretch">
+          {TABS.map((tab) => {
+            const isActive = tab.id === activeTab;
+            const colorMap: Record<string, string> = {
+              blue:    "text-blue-600",
+              teal:    "text-teal-600",
+              amber:   "text-amber-600",
+              emerald: "text-emerald-600",
+            };
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex flex-col items-center justify-center flex-1 py-2.5 px-1 gap-1 text-[10px] font-semibold transition-all relative ${
+                  isActive
+                    ? colorMap[tab.color]
+                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                }`}
+              >
+                {isActive && (
+                  <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full ${
+                    tab.color === "blue" ? "bg-blue-600" :
+                    tab.color === "teal" ? "bg-teal-600" :
+                    tab.color === "amber" ? "bg-amber-600" : "bg-emerald-600"
+                  }`} />
+                )}
+                <span className={isActive ? "" : "opacity-60"}>{tab.icon}</span>
+                <span className="leading-none text-center">
+                  {tab.id === "coding" ? "Coding" :
+                   tab.id === "ai-round" ? "AI Round" :
+                   tab.id === "behavioral" ? "Behavioral" : "Timeline"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
