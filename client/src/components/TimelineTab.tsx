@@ -12,6 +12,7 @@ import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
 import { useConfetti } from "@/hooks/useConfetti";
 import ProgressBar from "@/components/ProgressBar";
+import PatternHeatmap from "@/components/PatternHeatmap";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TAG_COLORS: Record<string, string> = {
@@ -354,6 +355,19 @@ export default function TimelineTab() {
           <ProgressBar count={patterns.count} total={patterns.total} pct={patterns.pct} label="LeetCode Patterns" color="bg-blue-500" onReset={patterns.reset} />
           <ProgressBar count={stories.count}  total={stories.total}  pct={stories.pct}  label="STAR Story Bank"  color="bg-amber-500" onReset={stories.reset} />
         </div>
+      </section>
+
+      {/* ── Pattern Mastery Heatmap ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Pattern Mastery Heatmap
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            All 14 patterns color-coded by your Quick Drill ratings — red is weak, green is strong
+          </p>
+        </div>
+        <PatternHeatmap />
       </section>
 
       {/* ── Pattern Checklist ── */}

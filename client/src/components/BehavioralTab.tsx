@@ -464,6 +464,346 @@ const IC_COLOR_MAP: Record<string, { header: string; ic6: string; ic7: string; b
   indigo:  { header: "bg-indigo-50 text-indigo-800 border-indigo-200", ic6: "bg-indigo-50/50", ic7: "bg-indigo-100/60", badge: "bg-indigo-600" },
 };
 
+
+// ── Full Mock Mode Component ────────────────────────────────────────────────
+type MockQuestion = QuestionEntry & { areaIndex: number };
+
+function FullMockMode() {
+  const [active, setActive]           = useState(false);
+  const [queue, setQueue]             = useState<MockQuestion[]>([]);
+  const [currentIdx, setCurrentIdx]   = useState(0);
+  const [remaining, setRemaining]     = useState(PRACTICE_DURATION);
+  const [running, setRunning]         = useState(false);
+  const [finished, setFinished]       = useState(false);
+  const [showProbes, setShowProbes]   = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [ratings, setRatings]         = useState<(number | null)[]>([null, null, null, null]);
+  const [sessionDone, setSessionDone] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { addRating } = usePracticeRatings();
+  const { recordActivity } = useStreak();
+
+  const buildQueue = useCallback((): MockQuestion[] => {
+    return BEHAVIORAL_FOCUS_AREAS.map((area, i) => {
+      const q = area.questions[Math.floor(Math.random() * area.questions.length)];
+      return {
+        question: q.question,
+        probes: q.probes,
+        areaTitle: area.title,
+        areaColor: area.color,
+        areaBg: area.bgColor,
+        areaBorder: area.borderColor,
+        areaIconColor: area.iconColor,
+        areaTitleColor: area.titleColor,
+        areaIndex: i,
+      };
+    });
+  }, []);
+
+  const startMock = useCallback(() => {
+    const q = buildQueue();
+    setQueue(q);
+    setCurrentIdx(0);
+    setRemaining(PRACTICE_DURATION);
+    setRunning(false);
+    setFinished(false);
+    setShowProbes(false);
+    setRatings([null, null, null, null]);
+    setSessionDone(false);
+    setActive(true);
+    setHoverRating(0);
+  }, [buildQueue]);
+
+  const advanceToNext = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    const next = currentIdx + 1;
+    if (next >= queue.length) {
+      setSessionDone(true);
+      return;
+    }
+    setCurrentIdx(next);
+    setRemaining(PRACTICE_DURATION);
+    setRunning(false);
+    setFinished(false);
+    setShowProbes(false);
+    setHoverRating(0);
+  }, [currentIdx, queue.length]);
+
+  const handleRate = useCallback((rating: number) => {
+    const q = queue[currentIdx];
+    if (!q) return;
+    addRating(q.question, rating);
+    recordActivity();
+    setRatings((prev) => {
+      const next = [...prev];
+      next[currentIdx] = rating;
+      return next;
+    });
+  }, [queue, currentIdx, addRating, recordActivity]);
+
+  const closeMock = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setActive(false);
+    setSessionDone(false);
+  }, []);
+
+  // Timer tick
+  useEffect(() => {
+    if (running) {
+      intervalRef.current = setInterval(() => {
+        setRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current!);
+            setRunning(false);
+            setFinished(true);
+            playBeep(660, 0.2);
+            setTimeout(() => playBeep(660, 0.2), 300);
+            setTimeout(() => playBeep(880, 0.4), 600);
+            return 0;
+          }
+          if (prev === 61) playBeep(440, 0.12);
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running]);
+
+  const current = queue[currentIdx];
+  const progress = remaining / PRACTICE_DURATION;
+  const urgency = finished ? "finished" : remaining <= 30 ? "critical" : remaining <= 60 ? "warning" : "normal";
+  const ringColor = urgency === "finished" ? "#10b981" : urgency === "critical" ? "#ef4444" : urgency === "warning" ? "#f59e0b" : "#6366f1";
+  const radius = 22; const circumference = 2 * Math.PI * radius;
+  const avgRating = ratings.filter((r): r is number => r !== null).reduce((a, b) => a + b, 0) / (ratings.filter((r) => r !== null).length || 1);
+  const ratingLabels = ["", "Needs a lot of work", "Needs improvement", "Decent", "Good", "Excellent"];
+
+  if (!active) {
+    return (
+      <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <h3 className="font-bold text-gray-900 text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Full Mock Session
+            </h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              4 questions · one per focus area · 3 min each · ~12 min total
+            </p>
+          </div>
+          <button
+            onClick={startMock}
+            className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm flex-shrink-0"
+          >
+            <Play size={14} fill="currentColor" /> Start Full Mock
+          </button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {BEHAVIORAL_FOCUS_AREAS.map((area, i) => (
+            <div key={area.id} className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+              <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                style={{ background: area.iconColor }}>{i + 1}</span>
+              <span className="text-xs font-medium text-gray-700 leading-tight">{area.title.replace("Focus Area \d+: ", "").replace(/Focus Area \d+: /, "")}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionDone) {
+    const rated = ratings.filter((r): r is number => r !== null).length;
+    return (
+      <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}
+        className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
+        <div className="text-center mb-6">
+          <div className="text-4xl mb-2">🎉</div>
+          <h3 className="text-xl font-extrabold text-gray-900 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Full Mock Complete!
+          </h3>
+          <p className="text-sm text-gray-500">You answered all 4 focus areas — here's your session summary</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+          {queue.map((q, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-xl p-3.5">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                  style={{ background: q.areaBg, color: q.areaTitleColor, border: `1px solid ${q.areaBorder}` }}>
+                  {q.areaTitle.replace(/Focus Area \d+: /, "")}
+                </span>
+                {ratings[i] !== null && (
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    {[1,2,3,4,5].map((s) => (
+                      <Star key={s} size={12} className={s <= (ratings[i] ?? 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-700 leading-snug line-clamp-2">{q.question}</p>
+              {ratings[i] !== null && (
+                <p className="text-[11px] text-gray-400 mt-1">{ratingLabels[ratings[i] ?? 0]}</p>
+              )}
+            </div>
+          ))}
+        </div>
+        {rated > 0 && (
+          <div className="flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-xl p-3 mb-4">
+            <span className="text-sm font-semibold text-gray-700">Session avg:</span>
+            <div className="flex items-center gap-0.5">
+              {[1,2,3,4,5].map((s) => (
+                <Star key={s} size={16} className={s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+              ))}
+            </div>
+            <span className="text-sm font-bold text-amber-700">{avgRating.toFixed(1)} / 5</span>
+          </div>
+        )}
+        <div className="flex gap-3 justify-center">
+          <button onClick={startMock} className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
+            <RotateCcw size={13} /> New Mock
+          </button>
+          <button onClick={closeMock} className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all">
+            <X size={13} /> Close
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      {current && (
+        <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.25 }}
+          className="rounded-xl border overflow-hidden shadow-md" style={{ borderColor: current.areaBorder }}>
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3" style={{ background: current.areaBg }}>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1">
+                {queue.map((_, i) => (
+                  <div key={i} className={`h-1.5 rounded-full transition-all ${
+                    i < currentIdx ? "w-6 bg-emerald-500" : i === currentIdx ? "w-8 bg-purple-600" : "w-6 bg-gray-200"
+                  }`} />
+                ))}
+              </div>
+              <span className="text-xs font-bold" style={{ color: current.areaTitleColor }}>
+                Question {currentIdx + 1} of {queue.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: current.areaBg, color: current.areaTitleColor, border: `1px solid ${current.areaBorder}` }}>
+                {current.areaTitle.replace(/Focus Area \d+: /, "")}
+              </span>
+              <button onClick={closeMock} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="bg-white p-5 space-y-4">
+            {/* Timer ring */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-shrink-0">
+                <svg width="56" height="56" viewBox="0 0 56 56">
+                  <circle cx="28" cy="28" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="4" />
+                  <circle cx="28" cy="28" r={radius} fill="none" stroke={ringColor} strokeWidth="4"
+                    strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)}
+                    strokeLinecap="round" transform="rotate(-90 28 28)"
+                    style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s" }} />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-extrabold" style={{ color: ringColor }}>
+                  {formatTime(remaining)}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-bold text-gray-900 leading-snug">{current.question}</p>
+              </div>
+            </div>
+
+            {/* Timer controls */}
+            <div className="flex items-center gap-2">
+              <button onClick={() => setRunning((v) => !v)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                  running ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-purple-600 hover:bg-purple-700 text-white"
+                }`}>
+                {running ? <><Pause size={13} /> Pause</> : <><Play size={13} fill="currentColor" /> {remaining < PRACTICE_DURATION ? "Resume" : "Start Timer"}</>}
+              </button>
+              <button onClick={() => { setRemaining(PRACTICE_DURATION); setRunning(false); setFinished(false); }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-sm font-medium transition-all">
+                <RotateCcw size={12} /> Reset
+              </button>
+            </div>
+
+            {/* Rating (after timer finishes) */}
+            <AnimatePresence>
+              {finished && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                  <p className="text-sm font-bold text-indigo-800 mb-2">Time's up — how well did you answer?</p>
+                  {ratings[currentIdx] === null ? (
+                    <div className="flex items-center gap-1">
+                      {[1,2,3,4,5].map((star) => (
+                        <button key={star} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
+                          onClick={() => handleRate(star)} className="transition-transform hover:scale-110">
+                          <Star size={24} className={`transition-colors ${star <= (hoverRating || 0) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                        </button>
+                      ))}
+                      <span className="ml-2 text-xs text-gray-400">
+                        {hoverRating ? ratingLabels[hoverRating] : "Tap a star"}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-0.5">
+                        {[1,2,3,4,5].map((s) => (
+                          <Star key={s} size={18} className={s <= (ratings[currentIdx] ?? 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                        ))}
+                      </div>
+                      <span className="text-xs font-semibold text-indigo-700">{ratingLabels[ratings[currentIdx] ?? 0]} — saved!</span>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Follow-up probes */}
+            <div className="border-t border-gray-100 pt-3">
+              <button onClick={() => setShowProbes((v) => !v)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                <ChevronRight size={13} className={`transition-transform ${showProbes ? "rotate-90" : ""}`} />
+                {showProbes ? "Hide" : "Show"} follow-up probes ({current.probes.length})
+              </button>
+              <AnimatePresence>
+                {showProbes && (
+                  <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }} className="mt-2 space-y-1.5 overflow-hidden">
+                    {current.probes.map((p, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <ChevronRight size={12} className="text-indigo-400 flex-shrink-0 mt-0.5" />{p}
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-t border-gray-100">
+            <p className="text-xs text-gray-400">Answer out loud — treat this as a real interview</p>
+            <button onClick={advanceToNext}
+              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
+              {currentIdx < queue.length - 1 ? <><Shuffle size={13} /> Next Question</> : <><CheckCircle2 size={13} /> Finish Mock</>}
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // ── Main Export ─────────────────────────────────────────────────────────────
 export default function BehavioralTab() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -527,6 +867,19 @@ export default function BehavioralTab() {
           </p>
         </div>
         <PracticeMode />
+      </section>
+
+      {/* Full Mock Mode */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Full Mock Session
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Simulate a complete 12-minute behavioral round — one question per focus area, 3 minutes each, back-to-back
+          </p>
+        </div>
+        <FullMockMode />
       </section>
 
       {/* Meta's 6 Core Values */}
