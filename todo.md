@@ -29,6 +29,8 @@
 - [x] Weekly Progress Email Digest procedure (owner notification)
 
 ## Pending — Coding Practice Features
+- [x] AI-Enabled Round guide (Coditioning article content integrated into Coding tab)
+- [x] CTCI 500 Question Tracker (Dinesh Varyani spreadsheet — first 50 shown with search/filter)
 - [ ] Monaco in-browser code editor with test cases for 20 patterns
 - [ ] Time-Boxed Pattern Sprint Mode (5 patterns, 2 min each)
 - [ ] Pattern Dependency Graph (d3-force interactive graph)

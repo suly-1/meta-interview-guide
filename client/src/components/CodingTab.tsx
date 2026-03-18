@@ -479,28 +479,372 @@ export default function CodingTab() {
         </div>
       </div>
 
-      {/* Meta-specific tips */}
-      <div className="prep-card p-5">
-        <div className="section-title">
-          <Star size={14} className="text-amber-400" />
-          Meta-Specific Coding Tips
+      {/* AI-Enabled Round Deep Dive */}
+      <AIEnabledRoundSection />
+
+      {/* CTCI 500 Question Tracker */}
+      <CTCITracker />
+    </div>
+  );
+}
+
+// ── AI-Enabled Round Section ───────────────────────────────────────────────
+function AIEnabledRoundSection() {
+  const [open, setOpen] = useState(false);
+
+  const checkpoints = [
+    { label: "Checkpoint 1", desc: "Understand the codebase structure, identify entry points, and clarify requirements. Often done without AI." },
+    { label: "Checkpoint 2", desc: "Implement core logic — the primary function or module. Use AI for boilerplate; you own the algorithm." },
+    { label: "Checkpoint 3", desc: "Add edge-case handling, input validation, and error paths. Run tests and fix failures." },
+    { label: "Checkpoint 4", desc: "Extend or refactor — add a new feature, optimize a hot path, or improve code quality. Discuss trade-offs." },
+    { label: "Checkpoint 5+", desc: "Bonus: runtime analysis, contract changes, data reasoning, or a second extension. Differentiates IC6 from IC7." },
+  ];
+
+  const evalCriteria = [
+    { icon: "🧠", title: "Problem Solving", desc: "Clarify and refine problem statements. Generate solutions to open-ended and quantitative problems." },
+    { icon: "💻", title: "Code Development", desc: "Navigate a codebase, build on working structures, evaluate code quality, and ensure code works as intended after execution." },
+    { icon: "🔍", title: "Verification & Debugging", desc: "Find and mitigate errors. Verify solutions meet specified requirements. Run code iteratively." },
+    { icon: "🗣️", title: "Technical Communication", desc: "Communicate reasoning, discuss technical ideas, ask thoughtful questions, and incorporate feedback." },
+  ];
+
+  const aiTips = [
+    ["Use AI for boilerplate", "Let the AI scaffold classes, write repetitive loops, and generate test stubs. You focus on the algorithm and design decisions."],
+    ["Be precise with prompts", "Ask for a specific function or small slice of logic — not the entire solution. Vague prompts produce hallucinated code."],
+    ["Always review AI output", "AI can suggest suboptimal algorithms, miss constraints, or introduce subtle bugs. Treat every suggestion as a draft to verify."],
+    ["Pipeline your work", "While AI drafts one section, you review or explain the previous section to the interviewer. Never wait idle."],
+    ["First checkpoint without AI", "Some interviewers ask you to complete checkpoint 1 unaided. Be ready to code fluently from scratch."],
+    ["Know your model", "GPT-4o mini, Claude 3.5 Haiku, and Llama 4 Maverick are confirmed available. Each has different latency and hallucination patterns — practice with them before your interview."],
+  ];
+
+  const models = [
+    { name: "GPT-4o mini", status: "confirmed", note: "Fast, good at Python/JS boilerplate" },
+    { name: "Claude 3.5 Haiku", status: "confirmed", note: "Strong at following precise instructions" },
+    { name: "Llama 4 Maverick", status: "confirmed", note: "Meta's own model — expect it in most rounds" },
+    { name: "GPT-5", status: "unconfirmed", note: "Supported by CoderPad, not yet confirmed" },
+    { name: "Gemini 2.5 Pro", status: "unconfirmed", note: "Supported by CoderPad, not yet confirmed" },
+    { name: "Claude 4 Sonnet", status: "unconfirmed", note: "Supported by CoderPad, not yet confirmed" },
+  ];
+
+  return (
+    <div className="prep-card p-5">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between group"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🤖</span>
+          <div className="text-left">
+            <div className="text-sm font-bold text-foreground">Meta AI-Enabled Coding Round</div>
+            <div className="text-xs text-muted-foreground">New format since Oct 2025 · CoderPad + AI assistant · 60 min · 4–5 checkpoints</div>
+          </div>
+          <span className="badge badge-blue ml-2">NEW</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {[
-            ["AI-Enabled Round", "One coding round now uses CoderPad with AI assistant. Use it to check syntax, not to generate solutions. Interviewers evaluate your thought process, not the AI's."],
-            ["Speed Matters", "Meta expects medium problems solved in 20–25 min. Hard problems in 35 min. Practice under time pressure from week 3 onward."],
-            ["Clean Code", "Use meaningful variable names. No single-letter variables except loop counters. Add a brief comment for non-obvious logic."],
-            ["Complexity First", "Always state time and space complexity before starting to code. If you can't, rethink your approach."],
-            ["Edge Cases", "Meta interviewers specifically probe edge cases. Always check: empty input, single element, duplicates, negative numbers, overflow."],
-            ["NeetCode 150", "Prioritize NeetCode 150 over random LeetCode grinding. Learn the pattern, not just the solution. Aim for 80%+ completion before your interview."],
-          ].map(([title, desc]) => (
-            <div key={title} className="callout callout-blue p-3">
-              <div className="text-xs font-bold text-blue-400 mb-1">{title}</div>
-              <div className="text-xs text-muted-foreground">{desc}</div>
+        {open ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+      </button>
+
+      {open && (
+        <div className="mt-5 space-y-5">
+          {/* Format overview */}
+          <div className="callout callout-blue p-4">
+            <div className="text-xs font-bold text-blue-400 mb-2">FORMAT OVERVIEW</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              {[
+                ["60 min", "Total time"],
+                ["CoderPad", "Environment"],
+                ["4+ checkpoints", "Target to clear"],
+                ["1 question", "Multi-part theme"],
+              ].map(([val, lbl]) => (
+                <div key={lbl}>
+                  <div className="text-base font-bold text-blue-300">{val}</div>
+                  <div className="text-xs text-muted-foreground">{lbl}</div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Key insight */}
+          <div className="callout callout-amber p-3">
+            <div className="text-xs font-bold text-amber-400 mb-1">⚡ KEY INSIGHT</div>
+            <p className="text-xs text-muted-foreground">
+              This is <strong className="text-foreground">not an interview about how well you use AI</strong>. The AI is a tool to help you demonstrate coding skills more efficiently. You are evaluated on problem-solving, code quality, and verification — not prompt engineering. Clearing <strong className="text-foreground">at least 4 checkpoints</strong> is the target; 3 is the minimum threshold but not a guarantee.
+            </p>
+          </div>
+
+          {/* Checkpoints */}
+          <div>
+            <div className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Typical Checkpoint Progression</div>
+            <div className="space-y-2">
+              {checkpoints.map((cp, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+                    i < 3 ? "bg-emerald-500/20 text-emerald-400" : i === 3 ? "bg-blue-500/20 text-blue-400" : "bg-purple-500/20 text-purple-400"
+                  }`}>{i + 1}</div>
+                  <div>
+                    <div className="text-xs font-semibold text-foreground">{cp.label}</div>
+                    <div className="text-xs text-muted-foreground">{cp.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Evaluation criteria */}
+          <div>
+            <div className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">What Interviewers Evaluate</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {evalCriteria.map(c => (
+                <div key={c.title} className="p-3 rounded-lg bg-secondary">
+                  <div className="text-xs font-bold text-foreground mb-1">{c.icon} {c.title}</div>
+                  <div className="text-xs text-muted-foreground">{c.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI models */}
+          <div>
+            <div className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Available AI Models</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {models.map(m => (
+                <div key={m.name} className="p-2.5 rounded-lg bg-secondary flex items-start gap-2">
+                  <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${m.status === "confirmed" ? "bg-emerald-400" : "bg-amber-400"}`} />
+                  <div>
+                    <div className="text-xs font-semibold text-foreground">{m.name}</div>
+                    <div className="text-xs text-muted-foreground">{m.note}</div>
+                    <div className={`text-xs mt-0.5 ${m.status === "confirmed" ? "text-emerald-400" : "text-amber-400"}`}>
+                      {m.status === "confirmed" ? "✓ Confirmed" : "~ Unconfirmed"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI tips */}
+          <div>
+            <div className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">How to Use AI Effectively</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {aiTips.map(([title, desc]) => (
+                <div key={title} className="callout callout-blue p-3">
+                  <div className="text-xs font-bold text-blue-400 mb-1">{title}</div>
+                  <div className="text-xs text-muted-foreground">{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Highest-leverage moves */}
+          <div className="callout callout-green p-4">
+            <div className="text-xs font-bold text-emerald-400 mb-2">✅ YOUR HIGHEST-LEVERAGE MOVES</div>
+            <ol className="space-y-1">
+              {[
+                "Build a requirements checklist before touching code",
+                "Write tests first (or understand pre-written tests if provided)",
+                "Generate a skeleton before implementing logic",
+                "Pipeline your work: while AI drafts, you review or explain to interviewer",
+                "Run and debug in small iterations — fix one thing at a time",
+                "Be ready for non-coding discussion: runtime analysis, trade-offs, data reasoning",
+              ].map((m, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex gap-2">
+                  <span className="text-emerald-400 font-bold shrink-0">{i + 1}.</span>
+                  {m}
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {/* Languages + unit test frameworks */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { lang: "Python", test: "unittest" },
+              { lang: "Java", test: "JUnit" },
+              { lang: "C++", test: "GoogleTest" },
+              { lang: "C# / TypeScript", test: "NUnit / Jest" },
+            ].map(l => (
+              <div key={l.lang} className="p-2.5 rounded-lg bg-secondary text-center">
+                <div className="text-xs font-bold text-foreground">{l.lang}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{l.test}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            Source: <a href="https://www.coditioning.com/blog/13/meta-ai-enabled-coding-interview-guide" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Coditioning — Meta AI-Enabled Coding Interview Guide</a>
+          </div>
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
+
+// ── CTCI 500 Question Tracker ──────────────────────────────────────────────
+const CTCI_QUESTIONS = [
+  { num: 1, name: "Two Sum", url: "https://leetcode.com/problems/two-sum", topics: ["Array", "Hash Table"], difficulty: "Easy" },
+  { num: 2, name: "Longest Substring Without Repeating Characters", url: "https://leetcode.com/problems/longest-substring-without-repeating-characters", topics: ["Hash Table", "String", "Sliding Window"], difficulty: "Medium" },
+  { num: 3, name: "Maximum Subarray", url: "https://leetcode.com/problems/maximum-subarray", topics: ["Array", "Dynamic Programming"], difficulty: "Easy" },
+  { num: 4, name: "Trapping Rain Water", url: "https://leetcode.com/problems/trapping-rain-water", topics: ["Array", "Two Pointers", "Stack"], difficulty: "Hard" },
+  { num: 5, name: "Add Two Numbers", url: "https://leetcode.com/problems/add-two-numbers", topics: ["Linked List", "Math"], difficulty: "Medium" },
+  { num: 6, name: "3Sum", url: "https://leetcode.com/problems/3sum", topics: ["Array", "Two Pointers", "Sorting"], difficulty: "Medium" },
+  { num: 7, name: "Longest Palindromic Substring", url: "https://leetcode.com/problems/longest-palindromic-substring", topics: ["String", "Dynamic Programming"], difficulty: "Medium" },
+  { num: 8, name: "Median of Two Sorted Arrays", url: "https://leetcode.com/problems/median-of-two-sorted-arrays", topics: ["Array", "Binary Search"], difficulty: "Hard" },
+  { num: 9, name: "Container With Most Water", url: "https://leetcode.com/problems/container-with-most-water", topics: ["Array", "Two Pointers", "Greedy"], difficulty: "Medium" },
+  { num: 10, name: "Best Time to Buy and Sell Stock", url: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock", topics: ["Array", "Dynamic Programming"], difficulty: "Easy" },
+  { num: 11, name: "Search in Rotated Sorted Array", url: "https://leetcode.com/problems/search-in-rotated-sorted-array", topics: ["Array", "Binary Search"], difficulty: "Medium" },
+  { num: 12, name: "Number of Islands", url: "https://leetcode.com/problems/number-of-islands", topics: ["DFS", "BFS", "Union Find", "Matrix"], difficulty: "Medium" },
+  { num: 13, name: "LRU Cache", url: "https://leetcode.com/problems/lru-cache", topics: ["Hash Table", "Linked List", "Design"], difficulty: "Medium" },
+  { num: 14, name: "Merge Intervals", url: "https://leetcode.com/problems/merge-intervals", topics: ["Array", "Sorting"], difficulty: "Medium" },
+  { num: 15, name: "Generate Parentheses", url: "https://leetcode.com/problems/generate-parentheses", topics: ["String", "Dynamic Programming", "Backtracking"], difficulty: "Medium" },
+  { num: 16, name: "Find the Duplicate Number", url: "https://leetcode.com/problems/find-the-duplicate-number", topics: ["Array", "Two Pointers", "Binary Search"], difficulty: "Medium" },
+  { num: 17, name: "Product of Array Except Self", url: "https://leetcode.com/problems/product-of-array-except-self", topics: ["Array", "Prefix Sum"], difficulty: "Medium" },
+  { num: 18, name: "Valid Parentheses", url: "https://leetcode.com/problems/valid-parentheses", topics: ["String", "Stack"], difficulty: "Easy" },
+  { num: 19, name: "Subarray Sum Equals K", url: "https://leetcode.com/problems/subarray-sum-equals-k", topics: ["Array", "Hash Table", "Prefix Sum"], difficulty: "Medium" },
+  { num: 20, name: "House Robber", url: "https://leetcode.com/problems/house-robber", topics: ["Array", "Dynamic Programming"], difficulty: "Medium" },
+  { num: 21, name: "Longest Increasing Subsequence", url: "https://leetcode.com/problems/longest-increasing-subsequence", topics: ["Array", "Binary Search", "Dynamic Programming"], difficulty: "Medium" },
+  { num: 22, name: "Reverse Linked List", url: "https://leetcode.com/problems/reverse-linked-list", topics: ["Linked List", "Recursion"], difficulty: "Easy" },
+  { num: 23, name: "Maximum Product Subarray", url: "https://leetcode.com/problems/maximum-product-subarray", topics: ["Array", "Dynamic Programming"], difficulty: "Medium" },
+  { num: 24, name: "Merge K Sorted Lists", url: "https://leetcode.com/problems/merge-k-sorted-lists", topics: ["Linked List", "Heap", "Merge Sort"], difficulty: "Hard" },
+  { num: 25, name: "Merge Two Sorted Lists", url: "https://leetcode.com/problems/merge-two-sorted-lists", topics: ["Linked List", "Recursion"], difficulty: "Easy" },
+  { num: 26, name: "Word Search", url: "https://leetcode.com/problems/word-search", topics: ["Array", "Backtracking", "Matrix"], difficulty: "Medium" },
+  { num: 27, name: "Climbing Stairs", url: "https://leetcode.com/problems/climbing-stairs", topics: ["Math", "Dynamic Programming"], difficulty: "Easy" },
+  { num: 28, name: "Coin Change", url: "https://leetcode.com/problems/coin-change", topics: ["Array", "Dynamic Programming", "BFS"], difficulty: "Medium" },
+  { num: 29, name: "Validate Binary Search Tree", url: "https://leetcode.com/problems/validate-binary-search-tree", topics: ["Tree", "DFS", "BST"], difficulty: "Medium" },
+  { num: 30, name: "Binary Tree Maximum Path Sum", url: "https://leetcode.com/problems/binary-tree-maximum-path-sum", topics: ["Tree", "DFS"], difficulty: "Hard" },
+  { num: 31, name: "Lowest Common Ancestor of BST", url: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree", topics: ["Tree", "DFS", "BST"], difficulty: "Medium" },
+  { num: 32, name: "Course Schedule", url: "https://leetcode.com/problems/course-schedule", topics: ["DFS", "BFS", "Graph", "Topological Sort"], difficulty: "Medium" },
+  { num: 33, name: "Word Break", url: "https://leetcode.com/problems/word-break", topics: ["Hash Table", "String", "Dynamic Programming", "Trie"], difficulty: "Medium" },
+  { num: 34, name: "Kth Largest Element in an Array", url: "https://leetcode.com/problems/kth-largest-element-in-an-array", topics: ["Array", "Sorting", "Heap", "Quickselect"], difficulty: "Medium" },
+  { num: 35, name: "Clone Graph", url: "https://leetcode.com/problems/clone-graph", topics: ["Hash Table", "DFS", "BFS", "Graph"], difficulty: "Medium" },
+  { num: 36, name: "Minimum Window Substring", url: "https://leetcode.com/problems/minimum-window-substring", topics: ["Hash Table", "String", "Sliding Window"], difficulty: "Hard" },
+  { num: 37, name: "Longest Consecutive Sequence", url: "https://leetcode.com/problems/longest-consecutive-sequence", topics: ["Array", "Hash Table", "Union Find"], difficulty: "Medium" },
+  { num: 38, name: "Jump Game", url: "https://leetcode.com/problems/jump-game", topics: ["Array", "Dynamic Programming", "Greedy"], difficulty: "Medium" },
+  { num: 39, name: "Spiral Matrix", url: "https://leetcode.com/problems/spiral-matrix", topics: ["Array", "Matrix", "Simulation"], difficulty: "Medium" },
+  { num: 40, name: "Rotate Image", url: "https://leetcode.com/problems/rotate-image", topics: ["Array", "Math", "Matrix"], difficulty: "Medium" },
+  { num: 41, name: "Group Anagrams", url: "https://leetcode.com/problems/group-anagrams", topics: ["Array", "Hash Table", "String", "Sorting"], difficulty: "Medium" },
+  { num: 42, name: "Unique Paths", url: "https://leetcode.com/problems/unique-paths", topics: ["Math", "Dynamic Programming"], difficulty: "Medium" },
+  { num: 43, name: "Combination Sum", url: "https://leetcode.com/problems/combination-sum", topics: ["Array", "Backtracking"], difficulty: "Medium" },
+  { num: 44, name: "Permutations", url: "https://leetcode.com/problems/permutations", topics: ["Array", "Backtracking"], difficulty: "Medium" },
+  { num: 45, name: "Subsets", url: "https://leetcode.com/problems/subsets", topics: ["Array", "Backtracking", "Bit Manipulation"], difficulty: "Medium" },
+  { num: 46, name: "Letter Combinations of a Phone Number", url: "https://leetcode.com/problems/letter-combinations-of-a-phone-number", topics: ["Hash Table", "String", "Backtracking"], difficulty: "Medium" },
+  { num: 47, name: "Decode Ways", url: "https://leetcode.com/problems/decode-ways", topics: ["String", "Dynamic Programming"], difficulty: "Medium" },
+  { num: 48, name: "Palindrome Partitioning", url: "https://leetcode.com/problems/palindrome-partitioning", topics: ["String", "Dynamic Programming", "Backtracking"], difficulty: "Medium" },
+  { num: 49, name: "Max Area of Island", url: "https://leetcode.com/problems/max-area-of-island", topics: ["Array", "DFS", "BFS", "Union Find", "Matrix"], difficulty: "Medium" },
+  { num: 50, name: "Pacific Atlantic Water Flow", url: "https://leetcode.com/problems/pacific-atlantic-water-flow", topics: ["Array", "DFS", "BFS", "Matrix"], difficulty: "Medium" },
+];
+
+const CTCI_TOPICS = Array.from(new Set(CTCI_QUESTIONS.flatMap(q => q.topics))).sort();
+
+function CTCITracker() {
+  const [search, setSearch] = useState("");
+  const [diffFilter, setDiffFilter] = useState("All");
+  const [topicFilter, setTopicFilter] = useState("All");
+  const [solved, setSolved] = useState<Record<number, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem("ctci_solved") ?? "{}"); } catch { return {}; }
+  });
+  const [open, setOpen] = useState(false);
+
+  const toggle = (num: number) => {
+    setSolved(s => {
+      const next = { ...s, [num]: !s[num] };
+      localStorage.setItem("ctci_solved", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const filtered = CTCI_QUESTIONS.filter(q => {
+    if (diffFilter !== "All" && q.difficulty !== diffFilter) return false;
+    if (topicFilter !== "All" && !q.topics.includes(topicFilter)) return false;
+    if (search && !q.name.toLowerCase().includes(search.toLowerCase()) && !q.topics.some(t => t.toLowerCase().includes(search.toLowerCase()))) return false;
+    return true;
+  });
+
+  const solvedCount = Object.values(solved).filter(Boolean).length;
+  const totalShown = CTCI_QUESTIONS.length;
+
+  return (
+    <div className="prep-card p-5">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between group">
+        <div className="flex items-center gap-2">
+          <BookOpen size={14} className="text-purple-400" />
+          <div className="text-left">
+            <div className="text-sm font-bold text-foreground">Crack The Coding Interview — Dinesh Varyani</div>
+            <div className="text-xs text-muted-foreground">500 curated LeetCode problems · Track your progress · {solvedCount}/{totalShown} solved</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="text-xs font-bold text-purple-400">{Math.round((solvedCount / totalShown) * 100)}%</div>
+          {open ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-3">
+          {/* Progress bar */}
+          <div>
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+              <span>{solvedCount} solved</span>
+              <span>{totalShown - solvedCount} remaining (showing first 50 of 500)</span>
+            </div>
+            <div className="h-2 rounded-full bg-secondary overflow-hidden">
+              <div className="h-full rounded-full bg-purple-500 transition-all" style={{ width: `${(solvedCount / totalShown) * 100}%` }} />
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2">
+            <div className="relative flex-1 min-w-36">
+              <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search problems or topics…"
+                className="w-full pl-7 pr-3 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-purple-500/50" />
+            </div>
+            <select value={diffFilter} onChange={e => setDiffFilter(e.target.value)}
+              className="px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none">
+              <option>All</option><option>Easy</option><option>Medium</option><option>Hard</option>
+            </select>
+            <select value={topicFilter} onChange={e => setTopicFilter(e.target.value)}
+              className="px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none max-w-36">
+              <option>All</option>
+              {CTCI_TOPICS.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+
+          {/* Question list */}
+          <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
+            {filtered.map(q => (
+              <div key={q.num}
+                className={`flex items-center gap-3 p-2.5 rounded-lg transition-all ${
+                  solved[q.num] ? "bg-purple-500/10 border border-purple-500/20" : "bg-secondary hover:bg-accent"
+                }`}>
+                <input type="checkbox" checked={!!solved[q.num]} onChange={() => toggle(q.num)}
+                  className="w-3.5 h-3.5 accent-purple-500 shrink-0 cursor-pointer" />
+                <span className="text-xs text-muted-foreground w-6 shrink-0">{q.num}.</span>
+                <a href={q.url} target="_blank" rel="noopener noreferrer"
+                  className={`text-xs font-medium flex-1 hover:underline ${
+                    solved[q.num] ? "line-through text-muted-foreground" : "text-foreground"
+                  }`}>{q.name}</a>
+                <div className="flex gap-1 flex-wrap justify-end">
+                  {q.topics.slice(0, 2).map(t => (
+                    <span key={t} className="badge badge-gray text-xs">{t}</span>
+                  ))}
+                  <span className={`badge ${
+                    q.difficulty === "Easy" ? "badge-green" : q.difficulty === "Hard" ? "badge-red" : "badge-amber"
+                  }`}>{q.difficulty}</span>
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="p-6 text-center text-muted-foreground text-xs">No problems match your filters.</div>
+            )}
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            Full list (500 problems):{" "}
+            <a href="https://docs.google.com/spreadsheets/d/1pnI8HmSMPcfwrCCu7wYETCXaKDig4VucZDpcjVRuYrE/edit" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">View on Google Sheets</a>
+            {" · "}
+            <a href="https://www.youtube.com/user/hubberspot" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">Dinesh Varyani on YouTube</a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
