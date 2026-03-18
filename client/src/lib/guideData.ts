@@ -537,34 +537,66 @@ export const META_VALUES = [
 export const TIMELINE_WEEKS = [
   {
     weeks: "Week 1",
-    focus: "DSA Foundations + Pattern Triage",
+    focus: "DSA Foundations — Language & Core Patterns",
     detail:
-      "Days 1–2: Confirm your language of choice (Python, Java, or C++) and review its standard library. Days 3–5: Work through the top 7 high-frequency patterns (Arrays & Hashing, Two Pointers, Trees BFS/DFS, Sliding Window, Graphs, Heaps, Binary Search) — 2–3 problems per pattern. Days 6–7: Filter LeetCode by Meta company tag and solve 10 easy/medium problems under timed conditions (25 min each). Goal: no hesitation on basic data structure operations.",
-    tag: "Foundations",
+      "Days 1–2: Confirm your language of choice (Python, Java, or C++) and review its standard library, built-in data structures, and common idioms. Days 3–5: Work through the top 7 high-frequency patterns — Arrays & Hashing, Two Pointers, Trees BFS/DFS, Sliding Window, Graphs, Heaps, and Binary Search — solving 2–3 Meta-tagged problems per pattern under 25-minute timed conditions. Days 6–7: Filter LeetCode by Meta company tag and solve 10 easy/medium problems. Goal: no hesitation on basic data structure operations.",
+    tag: "Coding",
     tagColor: "blue",
   },
   {
     weeks: "Week 2",
-    focus: "Meta LeetCode Blitz + AI-Enabled Round Prep",
+    focus: "Coding Deep Dive — Remaining Patterns + AI-Enabled Round",
     detail:
-      "Days 1–4: Drill the remaining 7 patterns (Linked Lists, Dynamic Programming, Backtracking, Tries, Intervals, Stack/Monotonic, Math & Bit Manipulation). Solve 3–5 Meta-tagged problems per day. Days 5–6: Practice with CoderPad's AI assistant — drill the 6-step workflow: clarify → analyze → assertions → skeleton → iterative pipeline → verify. Day 7: First full mock coding interview (45 min, timed). Request the practice CoderPad from your recruiter.",
+      "Days 1–4: Drill the remaining 7 patterns — Linked Lists, Dynamic Programming, Backtracking, Tries, Intervals, Stack/Monotonic, and Math & Bit Manipulation. Solve 3–5 Meta-tagged problems per day. Days 5–6: Practice with CoderPad's AI assistant — drill the 6-step workflow: clarify → analyze → assertions → skeleton → iterative pipeline → verify. Day 7: First full mock coding interview (45 min, timed). Use the Quick Drill Due-Today mode to reinforce weak patterns.",
     tag: "Coding",
     tagColor: "indigo",
   },
   {
     weeks: "Week 3",
-    focus: "Behavioral Prep + STAR Story Bank",
+    focus: "Behavioral Foundations — STAR Story Bank",
     detail:
-      "Days 1–3: Draft all 8 STAR stories covering: high-impact projects, XFN collaboration, conflict resolution, technical failures, decision under ambiguity, mentoring, proactive risk identification, and culture change. Map each story to Meta's 4 behavioral focus areas and 6 core values. Days 4–5: Do 2+ mock behavioral interviews (use Practice Mode daily). Days 6–7: Refine stories with metrics — every Result must include a number (latency %, users impacted, revenue, time saved).",
+      "Days 1–3: Draft all 8 STAR stories covering: high-impact projects, XFN collaboration, conflict resolution, technical failures, decision under ambiguity, mentoring, proactive risk identification, and culture change. Map each story to Meta's 4 behavioral focus areas and 6 core values. Days 4–5: Do 2+ mock behavioral interviews using Practice Mode daily. Days 6–7: Refine stories with metrics — every Result must include a quantified number (latency %, users impacted, revenue, time saved).",
     tag: "Behavioral",
     tagColor: "amber",
   },
   {
     weeks: "Week 4",
-    focus: "Full Mock Loops + Weak Area Reinforcement",
+    focus: "Behavioral Deep Dive — Full Mock Sessions",
     detail:
-      "Days 1–2: Revisit every pattern you scored below 3 stars in Quick Drill. Re-solve the hardest Meta-tagged problems in those areas. Days 3–4: Do 2 full mock interview loops (coding + behavioral back-to-back, 90 min each). Days 5–6: Refine STAR stories based on mock feedback. Day 7: Light review only — re-read your story bank, skim pattern key ideas, prepare 3–5 thoughtful questions to ask your interviewers. Rest well.",
-    tag: "Review",
+      "Days 1–2: Run 2 Full Mock behavioral sessions (4 questions, 12 minutes each). Review your self-ratings and identify your lowest-scoring focus areas. Days 3–4: Drill the 3 weakest behavioral questions identified by the Weak-Spot Dashboard. Refine those STAR stories with sharper metrics and cleaner structure. Days 5–6: Practice cold answering — use Practice Mode without notes. Day 7: Review all 8 stories end-to-end. Every story should be deliverable in under 2 minutes.",
+    tag: "Behavioral",
+    tagColor: "amber",
+  },
+  {
+    weeks: "Week 5",
+    focus: "Coding Reinforcement — Weak Patterns + Hard Problems",
+    detail:
+      "Days 1–2: Check the Pattern Mastery Heatmap and revisit every pattern rated below 3 stars. Re-solve the hardest Meta-tagged problems in those areas. Days 3–4: Attempt 5–8 hard-difficulty Meta problems across Dynamic Programming, Graphs, and Trees. Focus on recognizing the pattern quickly rather than brute-forcing. Days 5–6: Timed mock coding sessions (45 min each) using the Mock Interview Timer. Day 7: Review all 14 pattern key ideas and time/space complexities from memory.",
+    tag: "Coding",
+    tagColor: "indigo",
+  },
+  {
+    weeks: "Week 6",
+    focus: "Behavioral Reinforcement + Coding Fluency",
+    detail:
+      "Days 1–2: Re-run the Full Mock behavioral session. Target a session average of 4+ stars. Days 3–4: Continue daily Quick Drill sessions — focus exclusively on Due-Today patterns from the spaced repetition scheduler. Days 5–6: Practice explaining your STAR stories out loud (record yourself if possible) and refine for clarity and conciseness. Day 7: Cross-check your story bank against all 4 behavioral focus areas — ensure each area has at least 2 strong stories.",
+    tag: "Integration",
+    tagColor: "purple",
+  },
+  {
+    weeks: "Week 7",
+    focus: "Full Loop Mock Interviews",
+    detail:
+      "Days 1–2: Complete 2 full mock interview loops — coding (45 min) + behavioral (15 min) back-to-back, simulating the real interview day experience. Days 3–4: Debrief each mock: review session log ratings, identify weak spots, and drill those specific patterns and questions. Days 5–6: Practice the AI-Enabled Round workflow — use CoderPad with AI assistance and rehearse the 6-step approach. Day 7: Rest and light review only. No new material.",
+    tag: "Mock",
+    tagColor: "rose",
+  },
+  {
+    weeks: "Week 8",
+    focus: "Final Review + Interview Day Preparation",
+    detail:
+      "Days 1–2: Final Quick Drill pass — all 14 patterns, targeting 4+ stars on every card. Days 3–4: Final behavioral review — read all 8 STAR stories aloud, confirm metrics are sharp, and prepare 3–5 thoughtful questions to ask your interviewers. Day 5: Light mock session only — no new problems. Day 6: Complete the Interview Day Checklist (Evening Before phase). Day 7 (Interview Day): Morning routine, 5-minute warm-up problem, skim story bank, and go. Trust your preparation.",
+    tag: "Final",
     tagColor: "emerald",
   },
 ];
