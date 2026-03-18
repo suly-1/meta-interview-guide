@@ -4,7 +4,7 @@
 // with peer comparison, progress export, interview day checklist
 import { useState } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
-import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
+import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
 import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 
@@ -264,42 +264,110 @@ function InterviewCountdown() {
 // ── Prep Timeline ──────────────────────────────────────────────────────────
 function PrepTimeline() {
   const [interviewDate] = useInterviewDate();
+  const [mode, setMode] = useState<"standard" | "fast">("standard");
+
+  const timeline = mode === "fast" ? FAST_TRACK_TIMELINE : PREP_TIMELINE;
+
   const currentWeek = (() => {
     if (!interviewDate) return -1;
     const days = getDaysUntil(interviewDate);
-    if (days > 49) return 0;
-    if (days > 35) return 1;
-    if (days > 21) return 2;
-    if (days > 14) return 3;
-    if (days > 7) return 4;
-    return 4;
+    if (mode === "fast") {
+      if (days > 7) return 0;
+      return 1;
+    }
+    if (days > 21) return 0;
+    if (days > 14) return 1;
+    if (days > 7) return 2;
+    return 3;
   })();
 
   return (
     <div className="prep-card p-5">
-      <div className="section-title">8-Week Prep Timeline</div>
+      {/* Header with toggle */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="section-title mb-0 pb-0 border-0">Prep Timeline</div>
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary border border-border">
+          <button
+            onClick={() => setMode("standard")}
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+              mode === "standard"
+                ? "bg-blue-600 text-white shadow"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            4-Week
+          </button>
+          <button
+            onClick={() => setMode("fast")}
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+              mode === "fast"
+                ? "bg-orange-600 text-white shadow"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            ⚡ 2-Week
+          </button>
+        </div>
+      </div>
+
+      {/* Fast-track warning */}
+      {mode === "fast" && (
+        <div className="mb-3 p-3 rounded-lg border border-orange-500/30 bg-orange-500/5 text-xs text-orange-300">
+          <span className="font-semibold text-orange-400">⚠️ Fast-Track: </span>
+          Requires 3–4 hours of focused daily practice. Best for candidates with strong CS fundamentals who need to sharpen interview-specific skills quickly.
+        </div>
+      )}
+
+      {/* Week cards */}
       <div className="space-y-3">
-        {PREP_TIMELINE.map((week, i) => (
-          <div key={i} className={`p-3 rounded-lg border transition-all ${i === currentWeek ? "border-blue-500/40 bg-blue-500/5" : "border-border bg-secondary/30"}`}>
-            <div className="flex items-center gap-2 mb-2">
+        {timeline.map((week, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-lg border transition-all ${
+              i === currentWeek
+                ? mode === "fast"
+                  ? "border-orange-500/40 bg-orange-500/5"
+                  : "border-blue-500/40 bg-blue-500/5"
+                : "border-border bg-secondary/30"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="text-xs font-bold text-foreground">{week.week}</span>
-              <span className={`badge ${i === currentWeek ? "badge-blue" : "badge-gray"}`}>{week.focus}</span>
-              {i === currentWeek && <span className="badge badge-blue text-xs">← You are here</span>}
+              <span className={`badge ${
+                i === currentWeek
+                  ? mode === "fast" ? "badge-orange" : "badge-blue"
+                  : "badge-gray"
+              }`}>{week.focus}</span>
+              {i === currentWeek && (
+                <span className={`badge text-xs ${mode === "fast" ? "badge-orange" : "badge-blue"}`}>
+                  ← You are here
+                </span>
+              )}
             </div>
             <ul className="space-y-1">
               {week.items.map((item, j) => (
                 <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <span className="text-blue-400 mt-0.5">·</span>{item}
+                  <span className={`mt-0.5 ${mode === "fast" ? "text-orange-400" : "text-blue-400"}`}>·</span>
+                  {item}
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
+
+      {/* Footer */}
+      <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+        <span>
+          Total: <span className="font-semibold text-foreground">{mode === "fast" ? "2 weeks" : "4 weeks"}</span> to interview-ready
+        </span>
+        {interviewDate && (
+          <span>Interview in <span className="font-semibold text-foreground">{getDaysUntil(interviewDate)} days</span></span>
+        )}
+      </div>
     </div>
   );
 }
-
 // ── STAR Story Bank ────────────────────────────────────────────────────────
 function StarStoryBank() {
   const [notes, setNotes] = useStarNotes();

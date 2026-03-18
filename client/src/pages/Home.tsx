@@ -64,6 +64,7 @@ export default function Home() {
     if (e.key === "2") setActiveTab("coding");
     if (e.key === "3") setActiveTab("behavioral");
     if (e.key === "4") setActiveTab("design");
+    if (e.key === "5") setActiveTab("collab");
   }, []);
 
   useEffect(() => {
@@ -118,13 +119,14 @@ export default function Home() {
         {activeTab === "coding" && <CodingTab />}
         {activeTab === "behavioral" && <BehavioralTab />}
         {activeTab === "design" && <SystemDesignTab />}
+        {activeTab === "collab" && <CollabLobby />}
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border py-6 mt-8">
         <div className="container text-center text-xs text-muted-foreground space-y-1">
           <div>Meta IC6/IC7 Interview Prep Guide · All progress saved locally in your browser</div>
-          <div>Press <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">1</kbd>–<kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">4</kbd> to switch tabs</div>
+          <div>Press <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">1</kbd>–<kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">5</kbd> to switch tabs</div>
         </div>
       </footer>
 
@@ -133,6 +135,77 @@ export default function Home() {
 
       {/* Notification banner */}
       <NotificationBanner />
+    </div>
+  );
+}
+
+// Inline lobby component — redirects to /room/:id
+function CollabLobby() {
+  const [roomId, setRoomId] = useState("");
+  const [name, setName] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const generateId = () => Math.random().toString(36).slice(2, 8).toUpperCase();
+
+  const handleCreate = () => {
+    if (!name.trim()) return;
+    const id = generateId();
+    window.location.href = `/room/${id}?name=${encodeURIComponent(name.trim())}`;
+  };
+
+  const handleJoin = () => {
+    if (!name.trim() || !roomId.trim()) return;
+    window.location.href = `/room/${roomId.trim().toUpperCase()}?name=${encodeURIComponent(name.trim())}`;
+  };
+
+  return (
+    <div className="max-w-md mx-auto space-y-4 pt-4">
+      <div className="prep-card p-6">
+        <div className="section-title text-blue-400 mb-4">🤝 Collaborative Mock Interview</div>
+        <p className="text-sm text-muted-foreground mb-5">
+          Practice system design interviews with a partner in real-time. One person acts as the interviewer, the other as the candidate. Share a whiteboard, chat, and score each other's performance.
+        </p>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Your display name</label>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Alice"
+              className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50" />
+          </div>
+          <button onClick={handleCreate} disabled={!name.trim()}
+            className="w-full py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-sm font-semibold transition-all">
+            Create New Room
+          </button>
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">or join existing</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <div className="flex gap-2">
+            <input value={roomId} onChange={e => setRoomId(e.target.value.toUpperCase())} placeholder="Room code (e.g. AB12CD)"
+              className="flex-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 font-mono tracking-widest" />
+            <button onClick={handleJoin} disabled={!name.trim() || !roomId.trim()}
+              className="px-4 py-2 rounded-lg bg-secondary hover:bg-accent border border-border disabled:opacity-40 text-sm font-semibold text-foreground transition-all">
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="prep-card p-4">
+        <div className="text-xs font-semibold text-muted-foreground mb-2">How it works</div>
+        <div className="space-y-2">
+          {[
+            ["1", "Create a room and share the 6-character code with your partner"],
+            ["2", "One person picks a system design question; the other answers"],
+            ["3", "Use the shared whiteboard to draw diagrams together"],
+            ["4", "Chat in real-time and score each other at the end"],
+          ].map(([n, t]) => (
+            <div key={n} className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{n}</span>
+              {t}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

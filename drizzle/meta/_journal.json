@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1773872107108,
+      "tag": "0000_shocking_tony_stark",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1773872486494,
+      "tag": "0001_spotty_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1773872658927,
+      "tag": "0002_jazzy_mindworm",
+      "breakpoints": true
+    }
+  ]
+}

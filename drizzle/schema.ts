@@ -1,0 +1,80 @@
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, bigint } from "drizzle-orm/mysql-core";
+
+/**
+ * Core user table backing auth flow.
+ * Extend this file with additional tables as your product grows.
+ * Columns use camelCase to match both database fields and generated types.
+ */
+export const users = mysqlTable("users", {
+  /**
+   * Surrogate primary key. Auto-incremented numeric value managed by the database.
+   * Use this for relations between tables.
+   */
+  id: int("id").autoincrement().primaryKey(),
+  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
+  openId: varchar("openId", { length: 64 }).notNull().unique(),
+  name: text("name"),
+  email: varchar("email", { length: 320 }),
+  loginMethod: varchar("loginMethod", { length: 64 }),
+  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+});
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+// ── Collab Rooms ──────────────────────────────────────────────────────────
+export const collabRooms = mysqlTable("collab_rooms", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("roomCode", { length: 16 }).notNull().unique(),
+  questionId: varchar("questionId", { length: 64 }),
+  questionTitle: text("questionTitle"),
+  mode: mysqlEnum("mode", ["human", "ai"]).default("human").notNull(),
+  status: mysqlEnum("status", ["waiting", "active", "ended"]).default("waiting").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  endedAt: timestamp("endedAt"),
+});
+export type CollabRoom = typeof collabRooms.$inferSelect;
+
+// ── Session Events (for replay) ───────────────────────────────────────────
+export const sessionEvents = mysqlTable("session_events", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("roomCode", { length: 16 }).notNull(),
+  eventType: varchar("eventType", { length: 32 }).notNull(),
+  payload: json("payload").notNull(),
+  actorName: varchar("actorName", { length: 128 }),
+  ts: bigint("ts", { mode: "number" }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type SessionEvent = typeof sessionEvents.$inferSelect;
+
+// ── Scorecards ────────────────────────────────────────────────────────────
+export const scorecards = mysqlTable("scorecards", {
+  id: int("id").autoincrement().primaryKey(),
+  roomCode: varchar("roomCode", { length: 16 }).notNull(),
+  scorerName: varchar("scorerName", { length: 128 }),
+  candidateName: varchar("candidateName", { length: 128 }),
+  requirementsScore: int("requirementsScore").notNull().default(3),
+  architectureScore: int("architectureScore").notNull().default(3),
+  scalabilityScore: int("scalabilityScore").notNull().default(3),
+  communicationScore: int("communicationScore").notNull().default(3),
+  overallFeedback: text("overallFeedback"),
+  aiCoachingNote: text("aiCoachingNote"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Scorecard = typeof scorecards.$inferSelect;
+
+// ── Leaderboard ────────────────────────────────────────────────────────────
+export const leaderboardEntries = mysqlTable("leaderboard_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  anonHandle: varchar("anonHandle", { length: 32 }).notNull(),
+  streakDays: int("streakDays").notNull().default(0),
+  patternsMastered: int("patternsMastered").notNull().default(0),
+  mockSessions: int("mockSessions").notNull().default(0),
+  overallPct: int("overallPct").notNull().default(0),
+  badges: json("badges").notNull().$type<string[]>().default([]),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `leaderboard_entries` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `anonHandle` varchar(32) NOT NULL,\n  `streakDays` int NOT NULL DEFAULT 0,\n  `patternsMastered` int NOT NULL DEFAULT 0,\n  `mockSessions` int NOT NULL DEFAULT 0,\n  `overallPct` int NOT NULL DEFAULT 0,\n  `badges` json NOT NULL,\n  `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `leaderboard_entries_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute CREATE TABLE IF NOT EXISTS `leaderboard_entries` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `anonHandle` varchar(32) NOT NULL,\n  `streakDays` int NOT NULL DEFAULT 0,\n  `patternsMastered` int NOT NULL DEFAULT 0,\n  `mockSessions` int NOT NULL DEFAULT 0,\n  `overallPct` int NOT NULL DEFAULT 0,\n  `badges` json NOT NULL,\n  `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `leaderboard_entries_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 592
+}

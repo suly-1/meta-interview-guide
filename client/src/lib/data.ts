@@ -91,11 +91,67 @@ export const RESOURCES = [
 ];
 
 export const PREP_TIMELINE = [
-  { week:"Weeks 1–2", focus:"Foundation",   items:["Complete NeetCode patterns 1–7 (arrays, strings, trees)","Set up behavioral story bank (6 core stories)","Read DDIA chapters 1–5"] },
-  { week:"Weeks 3–4", focus:"Depth",        items:["Complete NeetCode patterns 8–14 (graphs, DP, heaps)","Practice 2 system design problems end-to-end","Refine behavioral stories with STAR format"] },
-  { week:"Weeks 5–6", focus:"Speed",        items:["Timed coding sessions (35 min per problem)","Mock system design with a peer","Full behavioral mock (record yourself)"] },
-  { week:"Week 7",    focus:"Simulation",   items:["Full mock interview day (coding + design + behavioral)","Review weak patterns — focus drill mode","Rest and review notes"] },
-  { week:"Week 8",    focus:"Final Polish", items:["Light coding maintenance (2–3 problems/day)","Review all STAR stories aloud","Logistics: CoderPad setup, time zone, quiet space"] },
+  {
+    week: "Week 1", focus: "Foundation",
+    items: [
+      "Master patterns 1–7: Two Pointers, Sliding Window, Binary Search, Prefix Sum, Hash Map, Stack, Linked List",
+      "Build 4 core STAR stories (ownership, conflict, impact, failure)",
+      "Read DDIA chapters 1–3 (reliability, scalability, maintainability)",
+      "Complete 2 system design overviews (URL shortener, rate limiter)",
+    ],
+  },
+  {
+    week: "Week 2", focus: "Depth",
+    items: [
+      "Master patterns 8–14: Trees, Graphs, BFS/DFS, Heaps, Trie, Dynamic Programming, Backtracking",
+      "Expand STAR bank to 8 stories covering all 7 focus areas",
+      "Deep-dive 2 system design problems end-to-end (news feed, distributed cache)",
+      "First full behavioral mock — record and review",
+    ],
+  },
+  {
+    week: "Week 3", focus: "Speed & Simulation",
+    items: [
+      "Master patterns 15–20: Intervals, Bit Manipulation, Math, Monotonic Stack, Union-Find, Segment Tree",
+      "Timed coding sessions: 35 min per problem, no hints",
+      "Peer mock system design (use Collab Room)",
+      "Full mock interview day: coding + design + behavioral back-to-back",
+    ],
+  },
+  {
+    week: "Week 4", focus: "Final Polish & Readiness",
+    items: [
+      "Focus drill on all patterns rated ★★ or below (use Weak Spots filter)",
+      "Re-record behavioral answers for any story rated < 4 stars",
+      "Second full mock interview day with a different peer or AI Interviewer",
+      "Review IC6 vs IC7 expectations, calibrate story selection, logistics check",
+    ],
+  },
+];
+
+// Fast-track 2-week plan
+export const FAST_TRACK_TIMELINE = [
+  {
+    week: "Week 1 (Days 1–7)", focus: "Core Patterns + Stories",
+    items: [
+      "Days 1–2: Patterns 1–7 (arrays, strings, trees, graphs) — 2–3 hrs/day",
+      "Days 3–4: Patterns 8–14 (DP, heaps, BFS/DFS, backtracking) — 2–3 hrs/day",
+      "Days 5–6: Patterns 15–20 (intervals, bit manipulation, union-find) — 2–3 hrs/day",
+      "Day 7: Build 6 STAR stories (one per focus area), first full behavioral mock",
+      "Every evening: 1 system design overview (30 min, no deep dive)",
+    ],
+  },
+  {
+    week: "Week 2 (Days 8–14)", focus: "Simulation & Polish",
+    items: [
+      "Day 8: Full timed coding session (3 problems × 35 min, no hints)",
+      "Day 9: System design deep-dive — 2 problems end-to-end with diagrams",
+      "Day 10: Full mock interview day (coding + design + behavioral back-to-back)",
+      "Days 11–12: Weak spot drill — re-rate all patterns, fix gaps",
+      "Day 13: Second full mock with peer or AI Interviewer",
+      "Day 14: Review all STAR stories aloud, logistics check, rest",
+    ],
+  },
 ];
 
 export const INTERVIEW_DAY_CHECKLIST = [
