@@ -3,6 +3,8 @@ import { useState, useCallback } from "react";
 import { TIMELINE_WEEKS, STORY_BANK, PATTERNS } from "@/lib/guideData";
 import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check } from "lucide-react";
 import WeeklyDigest from "@/components/WeeklyDigest";
+import WeakSpotDashboard from "@/components/WeakSpotDashboard";
+import ShareableLink from "@/components/ShareableLink";
 import { useProgress } from "@/hooks/useProgress";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
@@ -280,6 +282,19 @@ export default function TimelineTab() {
   return (
     <div className="space-y-10">
 
+      {/* ── Weak-Spot Dashboard ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Weak-Spot Dashboard
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Your 3 lowest-rated coding patterns and behavioral questions — based on your Quick Drill and Practice Mode sessions
+          </p>
+        </div>
+        <WeakSpotDashboard />
+      </section>
+
       {/* ── Countdown ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
@@ -418,6 +433,19 @@ export default function TimelineTab() {
           </p>
         </div>
         <WeeklyDigest />
+      </section>
+
+      {/* ── Shareable Link ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Share Your Prep State
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Bookmark or share a link that restores your interview date and checklist progress on any device
+          </p>
+        </div>
+        <ShareableLink />
       </section>
 
       {/* ── 4-Week Plan ── */}
