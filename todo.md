@@ -34,6 +34,10 @@
 - [x] Load all 500 CTCI problems with pagination
 - [x] Add Meta Frequency tags to CTCI problems
 - [x] Voice-to-STAR recorder UI in BehavioralTab
+
+## Disclaimer Gate
+- [x] Full-screen disclaimer gate component (React web app)
+- [x] Full-screen disclaimer gate injected into standalone HTML file
 - [ ] Monaco in-browser code editor with test cases for 20 patterns
 - [ ] Time-Boxed Pattern Sprint Mode (5 patterns, 2 min each)
 - [ ] Pattern Dependency Graph (d3-force interactive graph)

@@ -13,6 +13,7 @@ import SystemDesignTab from "@/components/SystemDesignTab";
 import OnboardingModal from "@/components/OnboardingModal";
 import NotificationBanner from "@/components/NotificationBanner";
 import { AlertTriangle, X } from "lucide-react";
+import DisclaimerGate, { useDisclaimerAcknowledged } from "@/components/DisclaimerGate";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -33,6 +34,7 @@ function triggerConfetti() {
 }
 
 export default function Home() {
+  const [acknowledged, confirmDisclaimer] = useDisclaimerAcknowledged();
   const [activeTab, setActiveTab] = useState("overview");
   const [darkMode, setDarkMode] = useState(true);
   const [onboardingDismissed, setOnboardingDismissed] = useOnboardingDismissed();
@@ -71,6 +73,11 @@ export default function Home() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  // Show full-screen disclaimer gate until explicitly acknowledged
+  if (!acknowledged) {
+    return <DisclaimerGate onConfirm={confirmDisclaimer} />;
+  }
 
   return (
     <div className={`min-h-screen bg-background text-foreground ${darkMode ? "dark" : ""}`}>
