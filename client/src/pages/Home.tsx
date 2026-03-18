@@ -1,7 +1,6 @@
-// Design: Structured Clarity — sticky tab nav, smooth tab transitions, Space Grotesk headings
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
@@ -11,13 +10,15 @@ import CodingTab from "@/components/CodingTab";
 import AIRoundTab from "@/components/AIRoundTab";
 import BehavioralTab from "@/components/BehavioralTab";
 import TimelineTab from "@/components/TimelineTab";
+import CTCITrackerTab from "@/components/CTCITrackerTab";
 import { useStreak } from "@/hooks/useStreak";
 
 const TABS = [
-  { id: "coding",      label: "Coding Interview",    icon: <Code2 size={15} />,        color: "blue"    },
-  { id: "ai-round",   label: "AI-Enabled Round",     icon: <Cpu size={15} />,          color: "teal"    },
-  { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />, color: "amber"  },
-  { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,     color: "emerald" },
+  { id: "coding",      label: "Coding Interview",    icon: <Code2 size={15} />,         color: "blue"    },
+  { id: "ai-round",   label: "AI-Enabled Round",     icon: <Cpu size={15} />,           color: "teal"    },
+  { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />, color: "amber"   },
+  { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,      color: "emerald" },
+  { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,    color: "violet"  },
 ];
 
 const ACTIVE_COLORS: Record<string, string> = {
@@ -25,6 +26,7 @@ const ACTIVE_COLORS: Record<string, string> = {
   teal:    "text-teal-600 border-teal-600",
   amber:   "text-amber-600 border-amber-600",
   emerald: "text-emerald-600 border-emerald-600",
+  violet:  "text-violet-600 border-violet-600",
 };
 
 export default function Home() {
@@ -34,7 +36,7 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (1-5 now for 5 tabs)
   useKeyboardShortcuts({
     onTabSwitch: (i) => {
       const tab = TABS[i];
@@ -154,6 +156,7 @@ export default function Home() {
               {activeTab === "ai-round"   && <AIRoundTab />}
               {activeTab === "behavioral" && <BehavioralTab />}
               {activeTab === "timeline"   && <TimelineTab />}
+              {activeTab === "ctci"       && <CTCITrackerTab />}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -177,6 +180,7 @@ export default function Home() {
               teal:    "text-teal-600",
               amber:   "text-amber-600",
               emerald: "text-emerald-600",
+              violet:  "text-violet-600",
             };
             return (
               <button
@@ -190,16 +194,18 @@ export default function Home() {
               >
                 {isActive && (
                   <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full ${
-                    tab.color === "blue" ? "bg-blue-600" :
-                    tab.color === "teal" ? "bg-teal-600" :
-                    tab.color === "amber" ? "bg-amber-600" : "bg-emerald-600"
+                    tab.color === "blue"    ? "bg-blue-600"    :
+                    tab.color === "teal"   ? "bg-teal-600"    :
+                    tab.color === "amber"  ? "bg-amber-600"   :
+                    tab.color === "violet" ? "bg-violet-600"  : "bg-emerald-600"
                   }`} />
                 )}
                 <span className={isActive ? "" : "opacity-60"}>{tab.icon}</span>
                 <span className="leading-none text-center">
-                  {tab.id === "coding" ? "Coding" :
-                   tab.id === "ai-round" ? "AI Round" :
-                   tab.id === "behavioral" ? "Behavioral" : "Timeline"}
+                  {tab.id === "coding"    ? "Coding"     :
+                   tab.id === "ai-round"  ? "AI Round"   :
+                   tab.id === "behavioral"? "Behavioral" :
+                   tab.id === "ctci"      ? "Tracker"    : "Timeline"}
                 </span>
               </button>
             );
