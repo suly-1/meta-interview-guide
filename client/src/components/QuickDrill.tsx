@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Shuffle, Eye, RotateCcw, Star, ChevronRight, Zap } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
 import { useStreak } from "@/hooks/useStreak";
+import { useSpacedRepetition } from "@/hooks/useSpacedRepetition";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DRILL_DURATION = 30; // seconds to recall before reveal
@@ -55,6 +56,7 @@ export default function QuickDrill() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { rate, latest, attempts } = useDrillRatings();
   const { recordActivity } = useStreak();
+  const { scheduleReview, isDue, dueToday } = useSpacedRepetition();
 
   const pickRandom = useCallback((exclude?: typeof PATTERNS[0]) => {
     const pool = exclude ? PATTERNS.filter((p) => p.id !== exclude.id) : PATTERNS;
@@ -110,6 +112,7 @@ export default function QuickDrill() {
     rate(pattern.id, rating);
     setSaved(rating);
     recordActivity();
+    scheduleReview(pattern.id, rating);
   };
 
   const DIFF_COLORS: Record<string, string> = {
@@ -126,15 +129,25 @@ export default function QuickDrill() {
       {/* Entry */}
       {!active && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <button
-            onClick={startDrill}
-            className="flex items-center gap-2.5 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"
-          >
-            <Zap size={16} />
-            Start Quick Drill
-            <span className="text-[11px] font-normal bg-white/20 px-2 py-0.5 rounded-full">{PATTERNS.length} patterns</span>
-          </button>
-          <p className="text-xs text-gray-500">30 seconds to recall the approach — then reveal and rate yourself</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={startDrill}
+                className="flex items-center gap-2.5 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"
+              >
+                <Zap size={16} />
+                Start Quick Drill
+                <span className="text-[11px] font-normal bg-white/20 px-2 py-0.5 rounded-full">{PATTERNS.length} patterns</span>
+              </button>
+              {dueToday.length > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-700 animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                  {dueToday.length} pattern{dueToday.length > 1 ? "s" : ""} due for review today
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-500">30 seconds to recall the approach — then reveal and rate yourself. Your rating schedules the next review.</p>
+          </div>
         </div>
       )}
 
@@ -158,6 +171,9 @@ export default function QuickDrill() {
                   {pattern.difficulty}
                 </span>
                 <span className="text-[11px] text-amber-500 font-bold">{"★".repeat(pattern.frequency)}</span>
+                {isDue(pattern.id) && (
+                  <span className="text-[11px] font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">Due today</span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 {attempts(pattern.id) > 0 && (
@@ -291,6 +307,9 @@ export default function QuickDrill() {
                           </div>
                           <span className="text-xs font-semibold text-indigo-700">
                             {saved === 1 ? "Blank" : saved === 2 ? "Vague idea" : saved === 3 ? "Mostly right" : saved === 4 ? "Solid" : "Perfect recall"} — logged!
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            Next review in {saved !== null ? (saved <= 2 ? "1 day" : saved === 3 ? "3 days" : saved === 4 ? "7 days" : "14 days") : ""}
                           </span>
                         </div>
                       )}

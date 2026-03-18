@@ -2,6 +2,7 @@
 // Presets: 25 / 35 / 45 min. SVG ring shows progress. Color shifts amber → red as time runs low.
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Play, Pause, RotateCcw, Timer, ChevronDown, ChevronUp } from "lucide-react";
+import { useSessionLog } from "@/hooks/useSessionLog";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PRESETS = [
@@ -45,7 +46,9 @@ export default function InterviewTimer() {
   const [running, setRunning]       = useState(false);
   const [collapsed, setCollapsed]   = useState(false);
   const [finished, setFinished]     = useState(false);
+  const [sessionStart, setSessionStart] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { addSession } = useSessionLog();
 
   // Tick
   useEffect(() => {
@@ -60,6 +63,14 @@ export default function InterviewTimer() {
             playBeep(660, 0.2);
             setTimeout(() => playBeep(660, 0.2), 300);
             setTimeout(() => playBeep(880, 0.4), 600);
+            // Log session
+            setSessionStart((start) => {
+              if (start !== null) {
+                const elapsed = Math.round((Date.now() - start) / 1000);
+                addSession({ type: "coding", durationSec: elapsed, label: "Mock Interview" });
+              }
+              return null;
+            });
             return 0;
           }
           // Warning beeps at 5 min and 1 min remaining
@@ -89,8 +100,11 @@ export default function InterviewTimer() {
 
   const handleToggle = useCallback(() => {
     if (finished) { handleReset(); return; }
+    if (!running && sessionStart === null) {
+      setSessionStart(Date.now());
+    }
     setRunning((v) => !v);
-  }, [finished, handleReset]);
+  }, [finished, handleReset, running, sessionStart]);
 
   // SVG ring
   const radius = 28;
