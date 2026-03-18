@@ -1,7 +1,8 @@
 // Design: Structured Clarity — sticky tab nav, smooth tab transitions, Space Grotesk headings
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Flame } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import Hero from "@/components/Hero";
 import CodingTab from "@/components/CodingTab";
 import AIRoundTab from "@/components/AIRoundTab";
@@ -27,6 +28,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("coding");
   const [direction, setDirection]  = useState(1);
   const { streak, activatedToday } = useStreak();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   const currentIndex = TABS.findIndex((t) => t.id === activeTab);
 
@@ -37,11 +40,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Hero />
 
       {/* Sticky Nav */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="container">
           <div className="flex items-center gap-2">
             {/* Tab buttons */}
@@ -55,7 +58,7 @@ export default function Home() {
                     className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium border-b-2 whitespace-nowrap transition-all flex-shrink-0 ${
                       isActive
                         ? ACTIVE_COLORS[tab.color] + " font-semibold"
-                        : "text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-50"
+                        : "text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                     }`}
                   >
                     <span className={isActive ? "" : "opacity-60"}>{tab.icon}</span>
@@ -65,8 +68,19 @@ export default function Home() {
               })}
             </div>
 
+            {/* Dark mode toggle */}
+            <div className="flex-shrink-0 pl-2 border-l border-gray-100">
+              <button
+                onClick={() => toggleTheme?.()}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+            </div>
+
             {/* Streak badge */}
-            <div className="flex-shrink-0 pl-2 pr-1 border-l border-gray-100">
+            <div className="flex-shrink-0 pr-1">
               <motion.div
                 key={streak}
                 initial={{ scale: 0.85, opacity: 0 }}
@@ -114,7 +128,7 @@ export default function Home() {
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {/* PDF capture target */}
-            <div id="pdf-content" className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <div id="pdf-content" className="bg-white dark:bg-gray-900 rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
               {/* PDF header — visible only in PDF via print, hidden on screen */}
               <div className="hidden print:block mb-6 pb-4 border-b border-gray-200">
                 <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Meta IC6/IC7 Interview Guide</p>

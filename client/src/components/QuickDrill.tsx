@@ -45,6 +45,7 @@ function useDrillRatings() {
 
 export default function QuickDrill() {
   const [active, setActive]       = useState(false);
+  const [dueMode, setDueMode]     = useState(false); // true = only drill due patterns
   const [pattern, setPattern]     = useState<typeof PATTERNS[0] | null>(null);
   const [revealed, setRevealed]   = useState(false);
   const [remaining, setRemaining] = useState(DRILL_DURATION);
@@ -58,10 +59,19 @@ export default function QuickDrill() {
   const { recordActivity } = useStreak();
   const { scheduleReview, isDue, dueToday } = useSpacedRepetition();
 
+  // Pool of patterns for the current mode
+  const drillPool = useCallback((exclude?: typeof PATTERNS[0]) => {
+    const base = dueMode
+      ? PATTERNS.filter((p) => dueToday.includes(p.id))
+      : PATTERNS;
+    const pool = exclude ? base.filter((p) => p.id !== exclude.id) : base;
+    return pool.length > 0 ? pool : PATTERNS.filter((p) => exclude ? p.id !== exclude.id : true);
+  }, [dueMode, dueToday]);
+
   const pickRandom = useCallback((exclude?: typeof PATTERNS[0]) => {
-    const pool = exclude ? PATTERNS.filter((p) => p.id !== exclude.id) : PATTERNS;
+    const pool = drillPool(exclude);
     return pool[Math.floor(Math.random() * pool.length)];
-  }, []);
+  }, [drillPool]);
 
   const startDrill = useCallback(() => {
     const p = pickRandom(pattern ?? undefined);
@@ -140,10 +150,14 @@ export default function QuickDrill() {
                 <span className="text-[11px] font-normal bg-white/20 px-2 py-0.5 rounded-full">{PATTERNS.length} patterns</span>
               </button>
               {dueToday.length > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-700 animate-pulse">
-                  <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-                  {dueToday.length} pattern{dueToday.length > 1 ? "s" : ""} due for review today
-                </div>
+                <button
+                  onClick={() => { setDueMode(true); startDrill(); }}
+                  className="flex items-center gap-1.5 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all animate-pulse"
+                >
+                  <span className="w-2 h-2 rounded-full bg-white flex-shrink-0" />
+                  Drill Due Patterns
+                  <span className="text-[11px] font-normal bg-white/20 px-2 py-0.5 rounded-full">{dueToday.length} due</span>
+                </button>
               )}
             </div>
             <p className="text-xs text-gray-500">30 seconds to recall the approach — then reveal and rate yourself. Your rating schedules the next review.</p>
@@ -166,6 +180,9 @@ export default function QuickDrill() {
             <div className="flex items-center justify-between px-4 py-3 bg-blue-50">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-blue-600">Quick Drill</span>
+                {dueMode && (
+                  <span className="text-[11px] font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">Due-Today Mode</span>
+                )}
                 <span className="text-[11px] text-gray-400">·</span>
                 <span className={`text-[11px] font-semibold border px-2 py-0.5 rounded-full ${DIFF_COLORS[pattern.difficultyColor]}`}>
                   {pattern.difficulty}
@@ -321,7 +338,7 @@ export default function QuickDrill() {
 
             {/* Footer */}
             <div className="flex items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-t border-gray-100">
-              <button onClick={() => setActive(false)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              <button onClick={() => { setActive(false); setDueMode(false); }} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
                 Exit drill
               </button>
               <button

@@ -6,6 +6,7 @@ import WeeklyDigest from "@/components/WeeklyDigest";
 import WeakSpotDashboard from "@/components/WeakSpotDashboard";
 import ShareableLink from "@/components/ShareableLink";
 import InterviewDayChecklist from "@/components/InterviewDayChecklist";
+import ProgressExport from "@/components/ProgressExport";
 import { useProgress } from "@/hooks/useProgress";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
@@ -519,6 +520,19 @@ export default function TimelineTab() {
           </p>
         </div>
         <InterviewDayChecklist />
+      </section>
+
+      {/* ── Progress Export ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Export Progress Report
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Download or copy a full summary of your readiness, patterns, stories, weak spots, and session history
+          </p>
+        </div>
+        <ProgressExport />
       </section>
 
       {/* ── IC6 vs IC7 Bar ── */}
