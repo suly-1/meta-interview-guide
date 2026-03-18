@@ -1,8 +1,9 @@
 // QuickDrill — spaced-repetition flash card for coding patterns
 // Shows key idea + complexity, hides problems list. 30-second recall timer.
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Shuffle, Eye, EyeOff, RotateCcw, Star, ChevronRight, Zap } from "lucide-react";
+import { Shuffle, Eye, RotateCcw, Star, ChevronRight, Zap } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
+import { useStreak } from "@/hooks/useStreak";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DRILL_DURATION = 30; // seconds to recall before reveal
@@ -53,6 +54,7 @@ export default function QuickDrill() {
   const [round, setRound]         = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { rate, latest, attempts } = useDrillRatings();
+  const { recordActivity } = useStreak();
 
   const pickRandom = useCallback((exclude?: typeof PATTERNS[0]) => {
     const pool = exclude ? PATTERNS.filter((p) => p.id !== exclude.id) : PATTERNS;
@@ -107,6 +109,7 @@ export default function QuickDrill() {
     if (!pattern) return;
     rate(pattern.id, rating);
     setSaved(rating);
+    recordActivity();
   };
 
   const DIFF_COLORS: Record<string, string> = {

@@ -5,6 +5,7 @@ import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, 
 import WeeklyDigest from "@/components/WeeklyDigest";
 import WeakSpotDashboard from "@/components/WeakSpotDashboard";
 import ShareableLink from "@/components/ShareableLink";
+import InterviewDayChecklist from "@/components/InterviewDayChecklist";
 import { useProgress } from "@/hooks/useProgress";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
@@ -505,6 +506,19 @@ export default function TimelineTab() {
             })}
           </div>
         </div>
+      </section>
+
+      {/* ── Interview Day Checklist ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Interview Day Checklist
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            A short, printable day-of checklist — from the night before to right after the interview
+          </p>
+        </div>
+        <InterviewDayChecklist />
       </section>
 
       {/* ── IC6 vs IC7 Bar ── */}

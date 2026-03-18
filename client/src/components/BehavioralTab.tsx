@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
+import { useStreak } from "@/hooks/useStreak";
 import { motion, AnimatePresence } from "framer-motion";
 
 const VALUE_COLORS: Record<string, { bg: string; border: string; title: string }> = {
@@ -128,6 +129,7 @@ function PracticeMode() {
   const [savedRating, setSavedRating] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { addRating, getLatestRating, getAttemptCount } = usePracticeRatings();
+  const { recordActivity } = useStreak();
 
   const pickRandom = useCallback((exclude?: QuestionEntry) => {
     const pool = exclude ? QUESTION_POOL.filter((q) => q.question !== exclude.question) : QUESTION_POOL;
@@ -151,7 +153,8 @@ function PracticeMode() {
     if (!question) return;
     addRating(question.question, rating);
     setSavedRating(rating);
-  }, [question, addRating]);
+    recordActivity();
+  }, [question, addRating, recordActivity]);
 
   const nextQuestion = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
