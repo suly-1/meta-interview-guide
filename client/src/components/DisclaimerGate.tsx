@@ -139,7 +139,7 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
             border: "1px solid rgba(217,119,6,0.4)",
             borderRadius: "10px",
             padding: "16px 20px",
-            marginBottom: "24px",
+            marginBottom: "20px",
             display: "flex",
             gap: "12px",
             alignItems: "flex-start",
@@ -147,48 +147,50 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
         >
           <span style={{ fontSize: "20px", flexShrink: 0, marginTop: "1px" }}>⚠️</span>
           <div>
-            <p style={{ color: "#fbbf24", fontWeight: 700, fontSize: "14px", margin: "0 0 4px" }}>
+            <p style={{ color: "#fbbf24", fontWeight: 700, fontSize: "14px", margin: "0 0 2px" }}>
               Important Disclaimer
             </p>
-            <p style={{ color: "#fcd34d", fontSize: "13px", margin: 0, lineHeight: 1.5 }}>
-              This guide is provided as <strong>supplementary preparation material only</strong> and is
-              intended to offer additional support as you prepare for your upcoming interviews. It does
-              not replace any official communication or preparation resources.
+            <p style={{ color: "#fcd34d", fontSize: "12px", margin: 0, lineHeight: 1.4, fontStyle: "italic" }}>
+              Please read carefully before proceeding
             </p>
           </div>
         </div>
 
-        {/* Disclaimer bullets */}
+        {/* Main disclaimer body */}
         <div
           style={{
             background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "10px",
             padding: "20px",
-            marginBottom: "24px",
+            marginBottom: "20px",
           }}
         >
-          <ul style={{ margin: 0, padding: "0 0 0 18px", listStyle: "none" }}>
+          <p style={{ color: "#cbd5e1", fontSize: "13px", lineHeight: 1.7, margin: "0 0 14px" }}>
+            This guide is an <strong style={{ color: "#e2e8f0" }}>independent study resource</strong> created to help engineers prepare for software engineering interviews at senior levels (IC6/IC7). It is{" "}
+            <strong style={{ color: "#fbbf24" }}>not affiliated with, endorsed by, sponsored by, or connected to Meta Platforms, Inc.</strong>{" "}in any way.
+          </p>
+          <ul style={{ margin: 0, padding: "0 0 0 4px", listStyle: "none" }}>
             {[
-              "Your official interview preparation materials will be sent to you directly via email — please follow those guidelines closely.",
-              "For the most up-to-date and comprehensive guidance on Meta's interview process, please visit metacareers.com.",
-              "If there is any discrepancy between this guide and the official materials, always defer to the official resources.",
+              "All company names, product names, and trademarks mentioned are the property of their respective owners. References to Meta, its interview process, or its engineering levels are based on publicly available information and community reports only, and do not represent official guidance from Meta.",
+              "Interview formats, evaluation criteria, and level expectations change frequently. The information in this guide may be outdated, incomplete, or inaccurate. Always verify current details directly with your recruiter or hiring manager.",
+              "This guide is provided \"as is\" without warranty of any kind. The author(s) accept no liability for decisions made based on its content. Use it as one input among many — not as a definitive source of truth.",
             ].map((item, i) => (
               <li
                 key={i}
                 style={{
-                  color: "#cbd5e1",
-                  fontSize: "13px",
+                  color: "#94a3b8",
+                  fontSize: "12px",
                   lineHeight: 1.6,
-                  marginBottom: i < 2 ? "12px" : 0,
-                  paddingLeft: "8px",
+                  marginBottom: i < 2 ? "10px" : 0,
+                  paddingLeft: "16px",
                   position: "relative",
                 }}
               >
                 <span
                   style={{
                     position: "absolute",
-                    left: "-14px",
+                    left: "0",
                     color: "#60a5fa",
                     fontWeight: 700,
                   }}
@@ -199,26 +201,6 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
               </li>
             ))}
           </ul>
-        </div>
-
-        {/* Confidentiality notice */}
-        <div
-          style={{
-            background: "rgba(239,68,68,0.1)",
-            border: "1px solid rgba(239,68,68,0.25)",
-            borderRadius: "8px",
-            padding: "12px 16px",
-            marginBottom: "28px",
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ fontSize: "16px" }}>🔐</span>
-          <p style={{ color: "#fca5a5", fontSize: "12px", margin: 0, lineHeight: 1.5 }}>
-            This document is shared in confidence to support your preparation.{" "}
-            <strong>Please do not distribute, copy, or share its contents externally.</strong>
-          </p>
         </div>
 
         {/* Acknowledgement checkbox */}
@@ -249,10 +231,10 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
               cursor: "pointer",
             }}
           />
-          <span style={{ color: "#e2e8f0", fontSize: "14px", lineHeight: 1.5 }}>
-            I have read and understood the disclaimer above. I acknowledge that this is supplementary
-            material only, I will not distribute it externally, and I will defer to official Meta
-            resources for authoritative guidance.
+          <span style={{ color: "#e2e8f0", fontSize: "13px", lineHeight: 1.5 }}>
+            I have read and understood this disclaimer. I acknowledge that this guide is an independent
+            resource, not affiliated with Meta Platforms, Inc., and that I will verify current interview
+            details with my recruiter.
           </span>
         </label>
 
