@@ -1,7 +1,8 @@
 // Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X } from "lucide-react";
+import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
+import { usePracticeRatings } from "@/hooks/usePracticeRatings";
 import { motion, AnimatePresence } from "framer-motion";
 
 const VALUE_COLORS: Record<string, { bg: string; border: string; title: string }> = {
@@ -116,14 +117,17 @@ function playBeep(freq = 880, dur = 0.15) {
 
 // ── Practice Mode Component ─────────────────────────────────────────────────
 function PracticeMode() {
-  const [active, setActive]         = useState(false);
-  const [question, setQuestion]     = useState<QuestionEntry | null>(null);
-  const [remaining, setRemaining]   = useState(PRACTICE_DURATION);
-  const [running, setRunning]       = useState(false);
-  const [finished, setFinished]     = useState(false);
-  const [showProbes, setShowProbes] = useState(false);
-  const [round, setRound]           = useState(0);
+  const [active, setActive]           = useState(false);
+  const [question, setQuestion]       = useState<QuestionEntry | null>(null);
+  const [remaining, setRemaining]     = useState(PRACTICE_DURATION);
+  const [running, setRunning]         = useState(false);
+  const [finished, setFinished]       = useState(false);
+  const [showProbes, setShowProbes]   = useState(false);
+  const [round, setRound]             = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [savedRating, setSavedRating] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { addRating, getLatestRating, getAttemptCount } = usePracticeRatings();
 
   const pickRandom = useCallback((exclude?: QuestionEntry) => {
     const pool = exclude ? QUESTION_POOL.filter((q) => q.question !== exclude.question) : QUESTION_POOL;
@@ -139,7 +143,15 @@ function PracticeMode() {
     setShowProbes(false);
     setActive(true);
     setRound((r) => r + 1);
+    setSavedRating(null);
+    setHoverRating(0);
   }, [pickRandom, question]);
+
+  const handleRate = useCallback((rating: number) => {
+    if (!question) return;
+    addRating(question.question, rating);
+    setSavedRating(rating);
+  }, [question, addRating]);
 
   const nextQuestion = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -311,6 +323,64 @@ function PracticeMode() {
                   <span key={chip} className="text-[11px] font-semibold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{chip}</span>
                 ))}
               </div>
+
+              {/* Self-rating prompt — shown after timer finishes */}
+              <AnimatePresence>
+                {finished && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mb-4 p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl"
+                  >
+                    <p className="text-xs font-bold text-indigo-700 mb-2.5 uppercase tracking-wide">
+                      How well did you answer?
+                    </p>
+                    {savedRating === null ? (
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            onClick={() => handleRate(star)}
+                            className="transition-transform hover:scale-110"
+                          >
+                            <Star
+                              size={24}
+                              className={`transition-colors ${
+                                star <= (hoverRating || 0)
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        <span className="ml-2 text-xs text-gray-400">
+                          {hoverRating === 1 ? "Needs a lot of work" : hoverRating === 2 ? "Needs improvement" : hoverRating === 3 ? "Decent" : hoverRating === 4 ? "Good" : hoverRating === 5 ? "Excellent" : "Tap a star"}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star key={star} size={18} className={star <= savedRating ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                          ))}
+                        </div>
+                        <span className="text-xs font-semibold text-indigo-700">
+                          {savedRating === 1 ? "Needs a lot of work" : savedRating === 2 ? "Needs improvement" : savedRating === 3 ? "Decent" : savedRating === 4 ? "Good" : "Excellent"} — saved!
+                        </span>
+                        {question && getAttemptCount(question.question) > 1 && (
+                          <span className="text-[11px] text-gray-400 ml-1">
+                            ({getAttemptCount(question.question)} attempts)
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Follow-up probes (reveal after timer or on demand) */}
               <div className="border-t border-gray-100 pt-3">

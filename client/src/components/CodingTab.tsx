@@ -1,6 +1,7 @@
 // Design: Structured Clarity — coding tab with full pattern table + filter bar + expandable cards
 import { useState, useMemo } from "react";
 import InterviewTimer from "@/components/InterviewTimer";
+import QuickDrill from "@/components/QuickDrill";
 import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
 import { useProgress } from "@/hooks/useProgress";
@@ -211,6 +212,17 @@ export default function CodingTab() {
         <div className="max-w-sm">
           <InterviewTimer />
         </div>
+      </section>
+
+      {/* Quick Drill */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Quick Drill — Pattern Flash Cards
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">30 seconds to recall the key idea and complexity — then reveal and rate yourself. Spaced-repetition style.</p>
+        </div>
+        <QuickDrill />
       </section>
 
       {/* 7-Step Approach */}

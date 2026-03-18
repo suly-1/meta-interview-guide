@@ -2,6 +2,7 @@
 import { useState, useCallback } from "react";
 import { TIMELINE_WEEKS, STORY_BANK, PATTERNS } from "@/lib/guideData";
 import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check } from "lucide-react";
+import WeeklyDigest from "@/components/WeeklyDigest";
 import { useProgress } from "@/hooks/useProgress";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
@@ -406,10 +407,23 @@ export default function TimelineTab() {
         </div>
       </section>
 
-      {/* ── 10-Week Plan ── */}
+      {/* ── Weekly Digest ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>10-Week Study Timeline</h2>
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Weekly Prep Digest
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Enter your email and interview date to generate a personalized week-by-week checklist you can copy into a doc or email to yourself
+          </p>
+        </div>
+        <WeeklyDigest />
+      </section>
+
+      {/* ── 4-Week Plan ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>4-Week Study Timeline</h2>
           <p className="text-sm text-gray-500 mt-1">
             {activeWeekIndex >= 0
               ? `Based on your interview date, you should currently be on ${TIMELINE_WEEKS[activeWeekIndex].weeks}.`
