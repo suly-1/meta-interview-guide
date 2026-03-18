@@ -3,6 +3,7 @@
 // IC6/IC7 comparison table, mock history log, meta values, STAR framework
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Brain, Play, RotateCcw, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import VoiceToStar from "@/components/VoiceToStar";
 import { BEHAVIORAL_QUESTIONS, IC_COMPARISON, META_VALUES } from "@/lib/data";
 import { useBehavioralRatings, useMockHistory, type MockSession } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
@@ -422,6 +423,9 @@ export default function BehavioralTab() {
 
       {/* Mock History */}
       <MockHistoryLog history={history} onClear={() => { setHistory([]); toast.success("History cleared."); }} />
+
+      {/* Voice-to-STAR Recorder + Answer Quality Scorer */}
+      <VoiceToStar />
 
       {/* STAR Framework */}
       <div className="prep-card p-5">

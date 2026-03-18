@@ -31,6 +31,9 @@
 ## Pending — Coding Practice Features
 - [x] AI-Enabled Round guide (Coditioning article content integrated into Coding tab)
 - [x] CTCI 500 Question Tracker (Dinesh Varyani spreadsheet — first 50 shown with search/filter)
+- [x] Load all 500 CTCI problems with pagination
+- [x] Add Meta Frequency tags to CTCI problems
+- [x] Voice-to-STAR recorder UI in BehavioralTab
 - [ ] Monaco in-browser code editor with test cases for 20 patterns
 - [ ] Time-Boxed Pattern Sprint Mode (5 patterns, 2 min each)
 - [ ] Pattern Dependency Graph (d3-force interactive graph)

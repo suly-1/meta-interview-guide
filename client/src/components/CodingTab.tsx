@@ -678,65 +678,16 @@ function AIEnabledRoundSection() {
 }
 
 // ── CTCI 500 Question Tracker ──────────────────────────────────────────────
-const CTCI_QUESTIONS = [
-  { num: 1, name: "Two Sum", url: "https://leetcode.com/problems/two-sum", topics: ["Array", "Hash Table"], difficulty: "Easy" },
-  { num: 2, name: "Longest Substring Without Repeating Characters", url: "https://leetcode.com/problems/longest-substring-without-repeating-characters", topics: ["Hash Table", "String", "Sliding Window"], difficulty: "Medium" },
-  { num: 3, name: "Maximum Subarray", url: "https://leetcode.com/problems/maximum-subarray", topics: ["Array", "Dynamic Programming"], difficulty: "Easy" },
-  { num: 4, name: "Trapping Rain Water", url: "https://leetcode.com/problems/trapping-rain-water", topics: ["Array", "Two Pointers", "Stack"], difficulty: "Hard" },
-  { num: 5, name: "Add Two Numbers", url: "https://leetcode.com/problems/add-two-numbers", topics: ["Linked List", "Math"], difficulty: "Medium" },
-  { num: 6, name: "3Sum", url: "https://leetcode.com/problems/3sum", topics: ["Array", "Two Pointers", "Sorting"], difficulty: "Medium" },
-  { num: 7, name: "Longest Palindromic Substring", url: "https://leetcode.com/problems/longest-palindromic-substring", topics: ["String", "Dynamic Programming"], difficulty: "Medium" },
-  { num: 8, name: "Median of Two Sorted Arrays", url: "https://leetcode.com/problems/median-of-two-sorted-arrays", topics: ["Array", "Binary Search"], difficulty: "Hard" },
-  { num: 9, name: "Container With Most Water", url: "https://leetcode.com/problems/container-with-most-water", topics: ["Array", "Two Pointers", "Greedy"], difficulty: "Medium" },
-  { num: 10, name: "Best Time to Buy and Sell Stock", url: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock", topics: ["Array", "Dynamic Programming"], difficulty: "Easy" },
-  { num: 11, name: "Search in Rotated Sorted Array", url: "https://leetcode.com/problems/search-in-rotated-sorted-array", topics: ["Array", "Binary Search"], difficulty: "Medium" },
-  { num: 12, name: "Number of Islands", url: "https://leetcode.com/problems/number-of-islands", topics: ["DFS", "BFS", "Union Find", "Matrix"], difficulty: "Medium" },
-  { num: 13, name: "LRU Cache", url: "https://leetcode.com/problems/lru-cache", topics: ["Hash Table", "Linked List", "Design"], difficulty: "Medium" },
-  { num: 14, name: "Merge Intervals", url: "https://leetcode.com/problems/merge-intervals", topics: ["Array", "Sorting"], difficulty: "Medium" },
-  { num: 15, name: "Generate Parentheses", url: "https://leetcode.com/problems/generate-parentheses", topics: ["String", "Dynamic Programming", "Backtracking"], difficulty: "Medium" },
-  { num: 16, name: "Find the Duplicate Number", url: "https://leetcode.com/problems/find-the-duplicate-number", topics: ["Array", "Two Pointers", "Binary Search"], difficulty: "Medium" },
-  { num: 17, name: "Product of Array Except Self", url: "https://leetcode.com/problems/product-of-array-except-self", topics: ["Array", "Prefix Sum"], difficulty: "Medium" },
-  { num: 18, name: "Valid Parentheses", url: "https://leetcode.com/problems/valid-parentheses", topics: ["String", "Stack"], difficulty: "Easy" },
-  { num: 19, name: "Subarray Sum Equals K", url: "https://leetcode.com/problems/subarray-sum-equals-k", topics: ["Array", "Hash Table", "Prefix Sum"], difficulty: "Medium" },
-  { num: 20, name: "House Robber", url: "https://leetcode.com/problems/house-robber", topics: ["Array", "Dynamic Programming"], difficulty: "Medium" },
-  { num: 21, name: "Longest Increasing Subsequence", url: "https://leetcode.com/problems/longest-increasing-subsequence", topics: ["Array", "Binary Search", "Dynamic Programming"], difficulty: "Medium" },
-  { num: 22, name: "Reverse Linked List", url: "https://leetcode.com/problems/reverse-linked-list", topics: ["Linked List", "Recursion"], difficulty: "Easy" },
-  { num: 23, name: "Maximum Product Subarray", url: "https://leetcode.com/problems/maximum-product-subarray", topics: ["Array", "Dynamic Programming"], difficulty: "Medium" },
-  { num: 24, name: "Merge K Sorted Lists", url: "https://leetcode.com/problems/merge-k-sorted-lists", topics: ["Linked List", "Heap", "Merge Sort"], difficulty: "Hard" },
-  { num: 25, name: "Merge Two Sorted Lists", url: "https://leetcode.com/problems/merge-two-sorted-lists", topics: ["Linked List", "Recursion"], difficulty: "Easy" },
-  { num: 26, name: "Word Search", url: "https://leetcode.com/problems/word-search", topics: ["Array", "Backtracking", "Matrix"], difficulty: "Medium" },
-  { num: 27, name: "Climbing Stairs", url: "https://leetcode.com/problems/climbing-stairs", topics: ["Math", "Dynamic Programming"], difficulty: "Easy" },
-  { num: 28, name: "Coin Change", url: "https://leetcode.com/problems/coin-change", topics: ["Array", "Dynamic Programming", "BFS"], difficulty: "Medium" },
-  { num: 29, name: "Validate Binary Search Tree", url: "https://leetcode.com/problems/validate-binary-search-tree", topics: ["Tree", "DFS", "BST"], difficulty: "Medium" },
-  { num: 30, name: "Binary Tree Maximum Path Sum", url: "https://leetcode.com/problems/binary-tree-maximum-path-sum", topics: ["Tree", "DFS"], difficulty: "Hard" },
-  { num: 31, name: "Lowest Common Ancestor of BST", url: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree", topics: ["Tree", "DFS", "BST"], difficulty: "Medium" },
-  { num: 32, name: "Course Schedule", url: "https://leetcode.com/problems/course-schedule", topics: ["DFS", "BFS", "Graph", "Topological Sort"], difficulty: "Medium" },
-  { num: 33, name: "Word Break", url: "https://leetcode.com/problems/word-break", topics: ["Hash Table", "String", "Dynamic Programming", "Trie"], difficulty: "Medium" },
-  { num: 34, name: "Kth Largest Element in an Array", url: "https://leetcode.com/problems/kth-largest-element-in-an-array", topics: ["Array", "Sorting", "Heap", "Quickselect"], difficulty: "Medium" },
-  { num: 35, name: "Clone Graph", url: "https://leetcode.com/problems/clone-graph", topics: ["Hash Table", "DFS", "BFS", "Graph"], difficulty: "Medium" },
-  { num: 36, name: "Minimum Window Substring", url: "https://leetcode.com/problems/minimum-window-substring", topics: ["Hash Table", "String", "Sliding Window"], difficulty: "Hard" },
-  { num: 37, name: "Longest Consecutive Sequence", url: "https://leetcode.com/problems/longest-consecutive-sequence", topics: ["Array", "Hash Table", "Union Find"], difficulty: "Medium" },
-  { num: 38, name: "Jump Game", url: "https://leetcode.com/problems/jump-game", topics: ["Array", "Dynamic Programming", "Greedy"], difficulty: "Medium" },
-  { num: 39, name: "Spiral Matrix", url: "https://leetcode.com/problems/spiral-matrix", topics: ["Array", "Matrix", "Simulation"], difficulty: "Medium" },
-  { num: 40, name: "Rotate Image", url: "https://leetcode.com/problems/rotate-image", topics: ["Array", "Math", "Matrix"], difficulty: "Medium" },
-  { num: 41, name: "Group Anagrams", url: "https://leetcode.com/problems/group-anagrams", topics: ["Array", "Hash Table", "String", "Sorting"], difficulty: "Medium" },
-  { num: 42, name: "Unique Paths", url: "https://leetcode.com/problems/unique-paths", topics: ["Math", "Dynamic Programming"], difficulty: "Medium" },
-  { num: 43, name: "Combination Sum", url: "https://leetcode.com/problems/combination-sum", topics: ["Array", "Backtracking"], difficulty: "Medium" },
-  { num: 44, name: "Permutations", url: "https://leetcode.com/problems/permutations", topics: ["Array", "Backtracking"], difficulty: "Medium" },
-  { num: 45, name: "Subsets", url: "https://leetcode.com/problems/subsets", topics: ["Array", "Backtracking", "Bit Manipulation"], difficulty: "Medium" },
-  { num: 46, name: "Letter Combinations of a Phone Number", url: "https://leetcode.com/problems/letter-combinations-of-a-phone-number", topics: ["Hash Table", "String", "Backtracking"], difficulty: "Medium" },
-  { num: 47, name: "Decode Ways", url: "https://leetcode.com/problems/decode-ways", topics: ["String", "Dynamic Programming"], difficulty: "Medium" },
-  { num: 48, name: "Palindrome Partitioning", url: "https://leetcode.com/problems/palindrome-partitioning", topics: ["String", "Dynamic Programming", "Backtracking"], difficulty: "Medium" },
-  { num: 49, name: "Max Area of Island", url: "https://leetcode.com/problems/max-area-of-island", topics: ["Array", "DFS", "BFS", "Union Find", "Matrix"], difficulty: "Medium" },
-  { num: 50, name: "Pacific Atlantic Water Flow", url: "https://leetcode.com/problems/pacific-atlantic-water-flow", topics: ["Array", "DFS", "BFS", "Matrix"], difficulty: "Medium" },
-];
+import { CTCI_QUESTIONS, CTCI_ALL_TOPICS } from "@/lib/ctciData";
 
-const CTCI_TOPICS = Array.from(new Set(CTCI_QUESTIONS.flatMap(q => q.topics))).sort();
+const PAGE_SIZE = 25;
 
 function CTCITracker() {
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState("All");
   const [topicFilter, setTopicFilter] = useState("All");
+  const [freqFilter, setFreqFilter] = useState("All");
+  const [page, setPage] = useState(1);
   const [solved, setSolved] = useState<Record<number, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem("ctci_solved") ?? "{}"); } catch { return {}; }
   });
@@ -753,12 +704,23 @@ function CTCITracker() {
   const filtered = CTCI_QUESTIONS.filter(q => {
     if (diffFilter !== "All" && q.difficulty !== diffFilter) return false;
     if (topicFilter !== "All" && !q.topics.includes(topicFilter)) return false;
+    if (freqFilter !== "All" && q.metaFreq !== freqFilter) return false;
     if (search && !q.name.toLowerCase().includes(search.toLowerCase()) && !q.topics.some(t => t.toLowerCase().includes(search.toLowerCase()))) return false;
     return true;
   });
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
+    setter(v);
+    setPage(1);
+  };
+
   const solvedCount = Object.values(solved).filter(Boolean).length;
-  const totalShown = CTCI_QUESTIONS.length;
+  const highFreqSolved = CTCI_QUESTIONS.filter(q => q.metaFreq === "High" && solved[q.num]).length;
+  const highFreqTotal = CTCI_QUESTIONS.filter(q => q.metaFreq === "High").length;
 
   return (
     <div className="prep-card p-5">
@@ -767,25 +729,52 @@ function CTCITracker() {
           <BookOpen size={14} className="text-purple-400" />
           <div className="text-left">
             <div className="text-sm font-bold text-foreground">Crack The Coding Interview — Dinesh Varyani</div>
-            <div className="text-xs text-muted-foreground">500 curated LeetCode problems · Track your progress · {solvedCount}/{totalShown} solved</div>
+            <div className="text-xs text-muted-foreground">500 curated LeetCode problems · Meta Frequency tags · {solvedCount}/500 solved</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="text-xs font-bold text-purple-400">{Math.round((solvedCount / totalShown) * 100)}%</div>
+          <div className="text-xs font-bold text-purple-400">{Math.round((solvedCount / 500) * 100)}%</div>
           {open ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
         </div>
       </button>
 
       {open && (
         <div className="mt-4 space-y-3">
-          {/* Progress bar */}
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="p-2.5 rounded-lg bg-secondary text-center">
+              <div className="text-base font-bold text-foreground">{solvedCount}</div>
+              <div className="text-xs text-muted-foreground">Total Solved</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+              <div className="text-base font-bold text-red-400">{highFreqSolved}/{highFreqTotal}</div>
+              <div className="text-xs text-muted-foreground">🔥 High Freq Solved</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-secondary text-center">
+              <div className="text-base font-bold text-foreground">{500 - solvedCount}</div>
+              <div className="text-xs text-muted-foreground">Remaining</div>
+            </div>
+          </div>
+
+          {/* Overall progress bar */}
           <div>
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>{solvedCount} solved</span>
-              <span>{totalShown - solvedCount} remaining (showing first 50 of 500)</span>
+              <span>Overall progress</span>
+              <span>{Math.round((solvedCount / 500) * 100)}%</span>
             </div>
             <div className="h-2 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full rounded-full bg-purple-500 transition-all" style={{ width: `${(solvedCount / totalShown) * 100}%` }} />
+              <div className="h-full rounded-full bg-purple-500 transition-all" style={{ width: `${(solvedCount / 500) * 100}%` }} />
+            </div>
+          </div>
+
+          {/* High-freq progress bar */}
+          <div>
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+              <span>🔥 High Meta Frequency ({highFreqTotal} problems)</span>
+              <span>{Math.round((highFreqSolved / highFreqTotal) * 100)}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+              <div className="h-full rounded-full bg-red-500 transition-all" style={{ width: `${(highFreqSolved / highFreqTotal) * 100}%` }} />
             </div>
           </div>
 
@@ -793,38 +782,57 @@ function CTCITracker() {
           <div className="flex flex-wrap gap-2">
             <div className="relative flex-1 min-w-36">
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input value={search} onChange={e => setSearch(e.target.value)}
+              <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Search problems or topics…"
                 className="w-full pl-7 pr-3 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-purple-500/50" />
             </div>
-            <select value={diffFilter} onChange={e => setDiffFilter(e.target.value)}
+            <select value={freqFilter} onChange={e => handleFilterChange(setFreqFilter)(e.target.value)}
+              className="px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none">
+              <option value="All">All Freq</option>
+              <option value="High">🔥 High (Meta)</option>
+              <option value="Medium">⚡ Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <select value={diffFilter} onChange={e => handleFilterChange(setDiffFilter)(e.target.value)}
               className="px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none">
               <option>All</option><option>Easy</option><option>Medium</option><option>Hard</option>
             </select>
-            <select value={topicFilter} onChange={e => setTopicFilter(e.target.value)}
+            <select value={topicFilter} onChange={e => handleFilterChange(setTopicFilter)(e.target.value)}
               className="px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none max-w-36">
               <option>All</option>
-              {CTCI_TOPICS.map(t => <option key={t}>{t}</option>)}
+              {CTCI_ALL_TOPICS.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
 
+          {/* Results count */}
+          <div className="text-xs text-muted-foreground">
+            Showing {paginated.length} of {filtered.length} problems
+            {filtered.length < 500 && <span className="ml-1">(filtered from 500)</span>}
+          </div>
+
           {/* Question list */}
-          <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
-            {filtered.map(q => (
+          <div className="space-y-1">
+            {paginated.map(q => (
               <div key={q.num}
                 className={`flex items-center gap-3 p-2.5 rounded-lg transition-all ${
                   solved[q.num] ? "bg-purple-500/10 border border-purple-500/20" : "bg-secondary hover:bg-accent"
                 }`}>
                 <input type="checkbox" checked={!!solved[q.num]} onChange={() => toggle(q.num)}
                   className="w-3.5 h-3.5 accent-purple-500 shrink-0 cursor-pointer" />
-                <span className="text-xs text-muted-foreground w-6 shrink-0">{q.num}.</span>
+                <span className="text-xs text-muted-foreground w-7 shrink-0 font-mono">{q.num}.</span>
                 <a href={q.url} target="_blank" rel="noopener noreferrer"
                   className={`text-xs font-medium flex-1 hover:underline ${
                     solved[q.num] ? "line-through text-muted-foreground" : "text-foreground"
                   }`}>{q.name}</a>
-                <div className="flex gap-1 flex-wrap justify-end">
-                  {q.topics.slice(0, 2).map(t => (
-                    <span key={t} className="badge badge-gray text-xs">{t}</span>
+                <div className="flex gap-1 flex-wrap justify-end items-center">
+                  {q.metaFreq === "High" && (
+                    <span className="badge badge-red text-xs">🔥 Meta</span>
+                  )}
+                  {q.metaFreq === "Medium" && (
+                    <span className="badge badge-amber text-xs">⚡ Meta</span>
+                  )}
+                  {q.topics.slice(0, 1).map(t => (
+                    <span key={t} className="badge badge-gray text-xs hidden sm:inline">{t}</span>
                   ))}
                   <span className={`badge ${
                     q.difficulty === "Easy" ? "badge-green" : q.difficulty === "Hard" ? "badge-red" : "badge-amber"
@@ -837,11 +845,30 @@ function CTCITracker() {
             )}
           </div>
 
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1.5 rounded-lg bg-secondary text-xs text-foreground disabled:opacity-40 hover:bg-accent transition-colors"
+              >← Prev</button>
+              <div className="text-xs text-muted-foreground">
+                Page {page} of {totalPages} · {filtered.length} problems
+              </div>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1.5 rounded-lg bg-secondary text-xs text-foreground disabled:opacity-40 hover:bg-accent transition-colors"
+              >Next →</button>
+            </div>
+          )}
+
           <div className="text-xs text-muted-foreground">
-            Full list (500 problems):{" "}
-            <a href="https://docs.google.com/spreadsheets/d/1pnI8HmSMPcfwrCCu7wYETCXaKDig4VucZDpcjVRuYrE/edit" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">View on Google Sheets</a>
+            🔥 High = frequently reported in Meta coding rounds (community data) ·{" "}
+            <a href="https://docs.google.com/spreadsheets/d/1pnI8HmSMPcfwrCCu7wYETCXaKDig4VucZDpcjVRuYrE/edit" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">Full Spreadsheet</a>
             {" · "}
-            <a href="https://www.youtube.com/user/hubberspot" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">Dinesh Varyani on YouTube</a>
+            <a href="https://www.youtube.com/user/hubberspot" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">YouTube</a>
           </div>
         </div>
       )}
