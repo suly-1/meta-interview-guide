@@ -1,7 +1,7 @@
 // Design: Structured Clarity — timeline tab with countdown, progress tracker, story notes, IC6 vs IC7 bar
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { TIMELINE_WEEKS, STORY_BANK, PATTERNS } from "@/lib/guideData";
-import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
@@ -116,8 +116,42 @@ function StoryRow({
   onNoteChange: (v: string) => void;
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const id = `story-${index}`;
   const hasNote = note.trim().length > 0;
+
+  const handleCopySTAR = useCallback(() => {
+    const template = [
+      `STAR Story: ${s.type}`,
+      `Focus Areas: ${s.focusAreas}`,
+      `Meta Values: ${s.values}`,
+      ``,
+      `SITUATION`,
+      `----------`,
+      ``,
+      `TASK`,
+      `----------`,
+      ``,
+      `ACTION`,
+      `----------`,
+      ``,
+      `RESULT (include metrics)`,
+      `----------`,
+      ``,
+    ].join("\n");
+
+    // If the user has notes, append them below the template
+    const content = note.trim()
+      ? `${template}\n--- Your Notes ---\n${note.trim()}`
+      : template;
+
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // fallback: select textarea
+    });
+  }, [s, note]);
 
   return (
     <div className={`rounded-xl border transition-all ${done ? "bg-amber-50 border-amber-300" : "bg-white border-gray-200 hover:border-amber-300"}`}>
@@ -204,12 +238,24 @@ function StoryRow({
               />
               <div className="flex items-center justify-between mt-1.5">
                 <p className="text-[11px] text-gray-400">Saved automatically as you type</p>
-                {note.trim() && (
-                  <button onClick={() => onNoteChange("")}
-                    className="text-[11px] text-red-400 hover:text-red-600 transition-colors">
-                    Clear notes
+                <div className="flex items-center gap-3">
+                  {/* Copy STAR template button */}
+                  <button
+                    onClick={handleCopySTAR}
+                    className={`flex items-center gap-1 text-[11px] font-semibold transition-colors ${
+                      copied ? "text-emerald-600" : "text-blue-500 hover:text-blue-700"
+                    }`}
+                  >
+                    {copied ? <Check size={11} /> : <Copy size={11} />}
+                    {copied ? "Copied!" : "Copy STAR template"}
                   </button>
-                )}
+                  {note.trim() && (
+                    <button onClick={() => onNoteChange("")}
+                      className="text-[11px] text-red-400 hover:text-red-600 transition-colors">
+                      Clear
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>

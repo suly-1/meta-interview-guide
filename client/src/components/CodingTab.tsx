@@ -1,5 +1,6 @@
 // Design: Structured Clarity — coding tab with full pattern table + filter bar + expandable cards
 import { useState, useMemo } from "react";
+import InterviewTimer from "@/components/InterviewTimer";
 import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
 import { useProgress } from "@/hooks/useProgress";
@@ -196,6 +197,19 @@ export default function CodingTab() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Mock Interview Timer */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Mock Interview Timer
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Simulate real interview pressure — start the timer before you begin a practice problem</p>
+        </div>
+        <div className="max-w-sm">
+          <InterviewTimer />
         </div>
       </section>
 

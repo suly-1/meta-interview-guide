@@ -1,14 +1,12 @@
 // Design: Structured Clarity — sticky tab nav, smooth tab transitions, Space Grotesk headings
-// PDF export: each tab content is wrapped in a div with id="pdf-content", captured by usePdfExport
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Download, Loader2 } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar } from "lucide-react";
 import Hero from "@/components/Hero";
 import CodingTab from "@/components/CodingTab";
 import AIRoundTab from "@/components/AIRoundTab";
 import BehavioralTab from "@/components/BehavioralTab";
 import TimelineTab from "@/components/TimelineTab";
-import { usePdfExport } from "@/hooks/usePdfExport";
 
 const TABS = [
   { id: "coding",      label: "Coding Interview",    icon: <Code2 size={15} />,        color: "blue"    },
@@ -24,17 +22,9 @@ const ACTIVE_COLORS: Record<string, string> = {
   emerald: "text-emerald-600 border-emerald-600",
 };
 
-const PDF_FILENAMES: Record<string, string> = {
-  coding:      "Meta-IC6-IC7_Coding-Interview-Guide.pdf",
-  "ai-round":  "Meta-IC6-IC7_AI-Enabled-Round-Guide.pdf",
-  behavioral:  "Meta-IC6-IC7_Behavioral-Interview-Guide.pdf",
-  timeline:    "Meta-IC6-IC7_Study-Timeline.pdf",
-};
-
 export default function Home() {
   const [activeTab, setActiveTab] = useState("coding");
   const [direction, setDirection]  = useState(1);
-  const { exportToPdf, exporting } = usePdfExport();
 
   const currentIndex = TABS.findIndex((t) => t.id === activeTab);
 
@@ -44,10 +34,6 @@ export default function Home() {
     setActiveTab(id);
   };
 
-  const handleDownload = () => {
-    exportToPdf("pdf-content", PDF_FILENAMES[activeTab] ?? "Meta-Interview-Guide.pdf");
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Hero />
@@ -55,7 +41,7 @@ export default function Home() {
       {/* Sticky Nav */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="container">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
             {/* Tab buttons */}
             <div className="flex overflow-x-auto scrollbar-hide flex-1 min-w-0">
               {TABS.map((tab) => {
@@ -77,31 +63,12 @@ export default function Home() {
               })}
             </div>
 
-            {/* PDF Download button */}
-            <div className="flex-shrink-0 pl-2 pr-1 border-l border-gray-100 ml-1" data-pdf-hide>
-              <button
-                onClick={handleDownload}
-                disabled={exporting}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-              >
-                {exporting ? (
-                  <>
-                    <Loader2 size={13} className="animate-spin" />
-                    <span className="hidden sm:inline">Generating…</span>
-                  </>
-                ) : (
-                  <>
-                    <Download size={13} />
-                    <span className="hidden sm:inline">Download PDF</span>
-                  </>
-                )}
-              </button>
-            </div>
+
           </div>
         </div>
       </div>
 
-      {/* Tab Content — wrapped in #pdf-content for capture */}
+      {/* Tab Content */}
       <div className="container py-8 md:py-10">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div

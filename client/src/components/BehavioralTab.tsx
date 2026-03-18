@@ -1,7 +1,8 @@
-// Design: Structured Clarity — behavioral tab with focus areas, STAR cards, Meta values
-import { useState } from "react";
-import { ChevronRight, ExternalLink } from "lucide-react";
+// Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
+import { motion, AnimatePresence } from "framer-motion";
 
 const VALUE_COLORS: Record<string, { bg: string; border: string; title: string }> = {
   blue:    { bg: "bg-blue-50",    border: "border-blue-200",    title: "text-blue-800"    },
@@ -62,32 +63,300 @@ function FocusArea({ area }: { area: typeof BEHAVIORAL_FOCUS_AREAS[0] }) {
 }
 
 const STAR_ITEMS = [
-  {
-    letter: "S",
-    title: "Situation",
-    desc: "Set the context. What was the project, team size, timeline? What was at stake? Include scale metrics (users, revenue, team size). Keep this brief — 15–20% of your answer.",
-    pct: "15–20%",
-  },
-  {
-    letter: "T",
-    title: "Task",
-    desc: "What was your specific responsibility? What was the challenge or goal? Be clear about YOUR role vs the team's role. Interviewers want to know what you personally owned.",
-    pct: "10–15%",
-  },
-  {
-    letter: "A",
-    title: "Action",
-    desc: "What did YOU specifically do? Walk through your decision-making process. Include technical details, stakeholder management, and trade-offs considered. This is the most important part.",
-    pct: "50–60%",
-  },
-  {
-    letter: "R",
-    title: "Result",
-    desc: "What was the measurable outcome? Include metrics: latency reduction %, users impacted, revenue generated, time saved. What did you learn? What would you do differently?",
-    pct: "15–20%",
-  },
+  { letter: "S", title: "Situation", desc: "Set the context. What was the project, team size, timeline? What was at stake? Include scale metrics (users, revenue, team size). Keep this brief — 15–20% of your answer.", pct: "15–20%" },
+  { letter: "T", title: "Task",      desc: "What was your specific responsibility? What was the challenge or goal? Be clear about YOUR role vs the team's role. Interviewers want to know what you personally owned.", pct: "10–15%" },
+  { letter: "A", title: "Action",    desc: "What did YOU specifically do? Walk through your decision-making process. Include technical details, stakeholder management, and trade-offs considered. This is the most important part.", pct: "50–60%" },
+  { letter: "R", title: "Result",    desc: "What was the measurable outcome? Include metrics: latency reduction %, users impacted, revenue generated, time saved. What did you learn? What would you do differently?", pct: "15–20%" },
 ];
 
+// ── Flatten all questions from all focus areas into a pool ──────────────────
+type QuestionEntry = {
+  question: string;
+  probes: string[];
+  areaTitle: string;
+  areaColor: string;
+  areaBg: string;
+  areaBorder: string;
+  areaIconColor: string;
+  areaTitleColor: string;
+};
+
+const QUESTION_POOL: QuestionEntry[] = BEHAVIORAL_FOCUS_AREAS.flatMap((area) =>
+  area.questions.map((q) => ({
+    question: q.question,
+    probes: q.probes,
+    areaTitle: area.title,
+    areaColor: area.color,
+    areaBg: area.bgColor,
+    areaBorder: area.borderColor,
+    areaIconColor: area.iconColor,
+    areaTitleColor: area.titleColor,
+  }))
+);
+
+const PRACTICE_DURATION = 3 * 60; // 3 minutes in seconds
+
+function pad(n: number) { return String(n).padStart(2, "0"); }
+function formatTime(s: number) { return `${pad(Math.floor(s / 60))}:${pad(s % 60)}`; }
+
+function playBeep(freq = 880, dur = 0.15) {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + dur);
+  } catch { /* ignore */ }
+}
+
+// ── Practice Mode Component ─────────────────────────────────────────────────
+function PracticeMode() {
+  const [active, setActive]         = useState(false);
+  const [question, setQuestion]     = useState<QuestionEntry | null>(null);
+  const [remaining, setRemaining]   = useState(PRACTICE_DURATION);
+  const [running, setRunning]       = useState(false);
+  const [finished, setFinished]     = useState(false);
+  const [showProbes, setShowProbes] = useState(false);
+  const [round, setRound]           = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const pickRandom = useCallback((exclude?: QuestionEntry) => {
+    const pool = exclude ? QUESTION_POOL.filter((q) => q.question !== exclude.question) : QUESTION_POOL;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }, []);
+
+  const startSession = useCallback(() => {
+    const q = pickRandom(question ?? undefined);
+    setQuestion(q);
+    setRemaining(PRACTICE_DURATION);
+    setRunning(false);
+    setFinished(false);
+    setShowProbes(false);
+    setActive(true);
+    setRound((r) => r + 1);
+  }, [pickRandom, question]);
+
+  const nextQuestion = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    startSession();
+  }, [startSession]);
+
+  const closeSession = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setActive(false);
+    setRunning(false);
+    setFinished(false);
+    setQuestion(null);
+  }, []);
+
+  // Timer tick
+  useEffect(() => {
+    if (running) {
+      intervalRef.current = setInterval(() => {
+        setRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current!);
+            setRunning(false);
+            setFinished(true);
+            playBeep(660, 0.2);
+            setTimeout(() => playBeep(660, 0.2), 300);
+            setTimeout(() => playBeep(880, 0.4), 600);
+            return 0;
+          }
+          if (prev === 60 + 1) playBeep(440, 0.12); // 1-min warning
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running]);
+
+  const progress = remaining / PRACTICE_DURATION;
+  const urgency = finished ? "finished" : remaining <= 30 ? "critical" : remaining <= 60 ? "warning" : "normal";
+  const ringColor = urgency === "finished" ? "#10b981" : urgency === "critical" ? "#ef4444" : urgency === "warning" ? "#f59e0b" : "#6366f1";
+  const radius = 22;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - progress);
+
+  return (
+    <div>
+      {/* Entry button */}
+      {!active && (
+        <button
+          onClick={startSession}
+          className="flex items-center gap-2.5 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"
+        >
+          <Shuffle size={16} />
+          Start Practice Mode
+          <span className="text-[11px] font-normal bg-white/20 px-2 py-0.5 rounded-full">{QUESTION_POOL.length} questions</span>
+        </button>
+      )}
+
+      {/* Active session */}
+      <AnimatePresence>
+        {active && question && (
+          <motion.div
+            key={`round-${round}`}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.3 }}
+            className="rounded-2xl border-2 overflow-hidden shadow-lg"
+            style={{ borderColor: question.areaBorder }}
+          >
+            {/* Header bar */}
+            <div className="flex items-center justify-between px-4 py-3" style={{ background: question.areaBg }}>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: question.areaIconColor }}>
+                  Practice Mode
+                </span>
+                <span className="text-[11px] text-gray-400">·</span>
+                <span className="text-[11px] font-semibold" style={{ color: question.areaTitleColor }}>
+                  {question.areaTitle.replace("Focus Area 1: ", "").replace("Focus Area 2: ", "").replace("Focus Area 3: ", "").replace("Focus Area 4: ", "")}
+                </span>
+              </div>
+              <button onClick={closeSession} className="text-gray-400 hover:text-gray-700 transition-colors">
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Question */}
+            <div className="bg-white px-5 pt-5 pb-4">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Interview Question</p>
+              <p className="text-lg font-bold text-gray-900 leading-snug mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {question.question}
+              </p>
+
+              {/* Timer row */}
+              <div className="flex items-center gap-4 mb-5">
+                {/* SVG ring */}
+                <div className="relative flex-shrink-0">
+                  <svg width="56" height="56" viewBox="0 0 56 56" className="-rotate-90">
+                    <circle cx="28" cy="28" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="5" />
+                    <motion.circle
+                      cx="28" cy="28" r={radius}
+                      fill="none"
+                      stroke={ringColor}
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      strokeDasharray={circumference}
+                      animate={{ strokeDashoffset: dashOffset }}
+                      transition={{ duration: 0.5, ease: "linear" }}
+                    />
+                  </svg>
+                </div>
+
+                <div className="flex-1">
+                  <motion.p
+                    className={`text-3xl font-extrabold font-mono leading-none ${
+                      urgency === "finished" ? "text-emerald-600" : urgency === "critical" ? "text-red-600" : urgency === "warning" ? "text-amber-600" : "text-gray-900"
+                    }`}
+                    animate={urgency === "critical" && running ? { scale: [1, 1.05, 1] } : {}}
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                  >
+                    {formatTime(remaining)}
+                  </motion.p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {finished ? "Time's up — review your answer" : urgency === "critical" ? "⚠️ Wrap up now" : urgency === "warning" ? "1 min left — start your Result" : running ? "Speak your STAR answer out loud" : "Press Start when ready"}
+                  </p>
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {!finished ? (
+                    <button
+                      onClick={() => setRunning((v) => !v)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                        running ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                      }`}
+                    >
+                      {running ? <><Pause size={13} /> Pause</> : <><Play size={13} /> {remaining < PRACTICE_DURATION ? "Resume" : "Start"}</>}
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold bg-emerald-100 text-emerald-700">
+                      <CheckCircle2 size={13} /> Done
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { setRemaining(PRACTICE_DURATION); setRunning(false); setFinished(false); }}
+                    disabled={remaining === PRACTICE_DURATION && !running && !finished}
+                    className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    title="Reset timer"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: ringColor }}
+                  animate={{ width: `${progress * 100}%` }}
+                  transition={{ duration: 0.5, ease: "linear" }}
+                />
+              </div>
+
+              {/* STAR reminder chips */}
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {["S — Situation (15%)", "T — Task (15%)", "A — Action (55%)", "R — Result (15%)"].map((chip) => (
+                  <span key={chip} className="text-[11px] font-semibold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{chip}</span>
+                ))}
+              </div>
+
+              {/* Follow-up probes (reveal after timer or on demand) */}
+              <div className="border-t border-gray-100 pt-3">
+                <button
+                  onClick={() => setShowProbes((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  <ChevronRight size={13} className={`transition-transform ${showProbes ? "rotate-90" : ""}`} />
+                  {showProbes ? "Hide" : "Show"} follow-up probes ({question.probes.length})
+                </button>
+                <AnimatePresence>
+                  {showProbes && (
+                    <motion.ul
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-2 space-y-1.5 overflow-hidden"
+                    >
+                      {question.probes.map((p, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <ChevronRight size={12} className="text-indigo-400 flex-shrink-0 mt-0.5" />{p}
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Footer actions */}
+            <div className="flex items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-t border-gray-100">
+              <p className="text-xs text-gray-400">Tip: answer out loud as if in a real interview</p>
+              <button
+                onClick={nextQuestion}
+                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm"
+              >
+                <Shuffle size={13} /> Next Question
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Main Export ─────────────────────────────────────────────────────────────
 export default function BehavioralTab() {
   return (
     <div className="space-y-10">
@@ -119,6 +388,19 @@ export default function BehavioralTab() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Practice Mode */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Practice Mode
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Get a random question from the 4 focus areas and answer it out loud in 3 minutes — simulating real interview pressure
+          </p>
+        </div>
+        <PracticeMode />
       </section>
 
       {/* Meta's 6 Core Values */}
@@ -208,21 +490,14 @@ export default function BehavioralTab() {
             { tag: "AI Tool", tagColor: "cyan", title: "Ethan Evans AI Career Coach", desc: "AI-powered executive career coach by Ethan Evans (ex-Amazon VP). Excellent for senior-level behavioral prep and leadership storytelling.", url: "https://chatgpt.com/g/g-673f8563b070819195e9956bae3313da-ethan-evans-ai-executive-career-coach" },
             { tag: "Guide", tagColor: "blue", title: "Meta Behavioral Interview Guide — igotanoffer", desc: "Detailed guide on Meta's behavioral interview format, focus areas, and preparation strategy with example answers.", url: "https://igotanoffer.com/en/advice/meta-behavioral-interviews" },
           ].map((r) => (
-            <a
-              key={r.title}
-              href={r.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col gap-2 bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all"
-            >
+            <a key={r.title} href={r.url} target="_blank" rel="noopener noreferrer"
+              className="group flex flex-col gap-2 bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className={`text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1.5 inline-block bg-${r.tagColor}-100 text-${r.tagColor}-700`}>
                     {r.tag}
                   </span>
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors leading-snug">
-                    {r.title}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors leading-snug">{r.title}</p>
                 </div>
                 <ExternalLink size={13} className="text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0 mt-1" />
               </div>
