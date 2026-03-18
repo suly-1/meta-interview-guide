@@ -1,6 +1,6 @@
 // Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
-import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star } from "lucide-react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
 import { useStreak } from "@/hooks/useStreak";
@@ -429,8 +429,61 @@ function PracticeMode() {
   );
 }
 
+// ── IC6 vs IC7 Comparison Data ─────────────────────────────────────────────
+const IC_COMPARISON = [
+  {
+    area: "XFN Collaboration & Scope",
+    color: "blue",
+    ic6: "Leads a project with 2–3 XFN partners. Owns the technical scope within your team. Aligns stakeholders at the team level.",
+    ic7: "Leads org-wide or multi-team initiatives. Defines scope across multiple teams. Aligns VP-level stakeholders and drives roadmap decisions.",
+  },
+  {
+    area: "Conflict Resolution",
+    color: "amber",
+    ic6: "Resolves conflicts within your immediate team or with one adjacent team. Finds compromise and keeps the project moving.",
+    ic7: "Resolves conflicts across org boundaries. Mediates between senior leaders. Shapes team culture to prevent systemic conflict.",
+  },
+  {
+    area: "Problem Solving",
+    color: "emerald",
+    ic6: "Identifies and solves complex technical problems independently. Makes sound decisions with incomplete data. Learns from failures.",
+    ic7: "Solves ambiguous, org-level technical problems. Sets the technical direction for multiple teams. Decisions have multi-quarter impact.",
+  },
+  {
+    area: "Communication",
+    color: "indigo",
+    ic6: "Communicates clearly to your team and immediate stakeholders. Writes good design docs. Mentors 1–2 junior engineers.",
+    ic7: "Communicates vision to the entire org. Produces docs that shape engineering culture. Grows and develops senior engineers.",
+  },
+];
+
+const IC_COLOR_MAP: Record<string, { header: string; ic6: string; ic7: string; badge: string }> = {
+  blue:    { header: "bg-blue-50 text-blue-800 border-blue-200",    ic6: "bg-blue-50/50",    ic7: "bg-blue-100/60",    badge: "bg-blue-600" },
+  amber:   { header: "bg-amber-50 text-amber-800 border-amber-200",  ic6: "bg-amber-50/50",  ic7: "bg-amber-100/60",  badge: "bg-amber-600" },
+  emerald: { header: "bg-emerald-50 text-emerald-800 border-emerald-200", ic6: "bg-emerald-50/50", ic7: "bg-emerald-100/60", badge: "bg-emerald-600" },
+  indigo:  { header: "bg-indigo-50 text-indigo-800 border-indigo-200", ic6: "bg-indigo-50/50", ic7: "bg-indigo-100/60", badge: "bg-indigo-600" },
+};
+
 // ── Main Export ─────────────────────────────────────────────────────────────
 export default function BehavioralTab() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredAreas = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return BEHAVIORAL_FOCUS_AREAS;
+    return BEHAVIORAL_FOCUS_AREAS.map((area) => ({
+      ...area,
+      questions: area.questions.filter(
+        (question) =>
+          question.question.toLowerCase().includes(q) ||
+          question.probes.some((p) => p.toLowerCase().includes(q))
+      ),
+    })).filter((area) => area.questions.length > 0);
+  }, [searchQuery]);
+
+  const totalMatches = useMemo(() => filteredAreas.reduce((sum, a) => sum + a.questions.length, 0), [filteredAreas]);
+  const hasSearch = searchQuery.trim().length > 0;
+
   return (
     <div className="space-y-10">
       {/* Overview */}
@@ -499,6 +552,58 @@ export default function BehavioralTab() {
         </div>
       </section>
 
+      {/* IC6 vs IC7 Comparison */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            IC6 vs IC7 Evaluation Bar
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">How the behavioral bar differs by level — know which standard you are being held to</p>
+        </div>
+        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="text-left px-4 py-3 font-bold text-gray-700 w-1/4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus Area</th>
+                <th className="text-left px-4 py-3 font-bold text-blue-700 w-[37.5%]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    IC6 — Senior Engineer
+                  </span>
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-purple-700 w-[37.5%]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                    IC7 — Staff Engineer
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {IC_COMPARISON.map((row, i) => {
+                const c = IC_COLOR_MAP[row.color];
+                return (
+                  <tr key={row.area} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                    <td className="px-4 py-4 align-top">
+                      <span className={`inline-block text-xs font-bold px-2 py-1 rounded-full ${c.header} border`}>
+                        {row.area}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <p className="text-sm text-gray-700 leading-relaxed">{row.ic6}</p>
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <p className="text-sm text-gray-800 font-medium leading-relaxed">{row.ic7}</p>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-xs text-gray-400 mt-3 italic">IC7 answers require demonstrably larger scope, cross-org influence, and measurable org-level impact. If targeting IC7, every STAR story should reflect this scale.</p>
+      </section>
+
       {/* 4 Focus Areas */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
@@ -507,11 +612,52 @@ export default function BehavioralTab() {
           </h2>
           <p className="text-sm text-gray-500 mt-1">Real questions and follow-up probes used by Meta interviewers in 2025–2026</p>
         </div>
-        <div className="space-y-5">
-          {BEHAVIORAL_FOCUS_AREAS.map((area) => (
-            <FocusArea key={area.id} area={area} />
-          ))}
+
+        {/* Search bar */}
+        <div className="relative mb-5">
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search questions by keyword — e.g. failure, mentoring, deadline…"
+            className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent placeholder:text-gray-400 transition-all dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+          />
+          {hasSearch && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
+
+        {hasSearch && (
+          <div className="mb-4 flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-gray-500">
+              {totalMatches === 0 ? "No questions match" : `${totalMatches} question${totalMatches !== 1 ? "s" : ""} match`}
+            </span>
+            <span className="text-sm font-semibold text-amber-700">"{searchQuery}"</span>
+            {totalMatches === 0 && (
+              <button onClick={() => setSearchQuery("")} className="text-xs text-blue-600 hover:underline ml-1">Clear search</button>
+            )}
+          </div>
+        )}
+
+        {totalMatches === 0 && hasSearch ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Search size={32} className="text-gray-200 mb-3" />
+            <p className="text-sm font-semibold text-gray-500">No questions found for "{searchQuery}"</p>
+            <p className="text-xs text-gray-400 mt-1">Try a different keyword like "conflict", "failure", "stakeholder", or "deadline"</p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {filteredAreas.map((area) => (
+              <FocusArea key={area.id} area={area} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* STAR Framework */}

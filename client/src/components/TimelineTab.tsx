@@ -1,7 +1,7 @@
 // Design: Structured Clarity — timeline tab with countdown, progress tracker, story notes, IC6 vs IC7 bar
 import { useState, useCallback } from "react";
 import { TIMELINE_WEEKS, STORY_BANK, PATTERNS } from "@/lib/guideData";
-import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check } from "lucide-react";
+import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check, PartyPopper } from "lucide-react";
 import WeeklyDigest from "@/components/WeeklyDigest";
 import WeakSpotDashboard from "@/components/WeakSpotDashboard";
 import ShareableLink from "@/components/ShareableLink";
@@ -10,6 +10,7 @@ import ProgressExport from "@/components/ProgressExport";
 import { useProgress } from "@/hooks/useProgress";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 import { useStoryNotes } from "@/hooks/useStoryNotes";
+import { useConfetti } from "@/hooks/useConfetti";
 import ProgressBar from "@/components/ProgressBar";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -280,6 +281,10 @@ export default function TimelineTab() {
   const totalItems = PATTERNS.length + STORY_BANK.length;
   const totalDone  = patterns.count + stories.count;
   const overallPct = Math.round((totalDone / totalItems) * 100);
+  const isComplete = totalDone === totalItems && totalItems > 0;
+
+  // Fire confetti when user reaches 100%
+  useConfetti(isComplete);
 
   return (
     <div className="space-y-10">
@@ -317,15 +322,26 @@ export default function TimelineTab() {
           <p className="text-sm text-gray-500 mt-1">Track your patterns and STAR stories — saved automatically in your browser</p>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-5 text-white mb-4 shadow-md">
+        <div className={`bg-gradient-to-r ${isComplete ? "from-emerald-500 to-teal-500" : "from-blue-600 to-indigo-600"} rounded-xl p-5 text-white mb-4 shadow-md transition-all duration-700`}>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-0.5">Overall Readiness</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-white/70 mb-0.5">
+                {isComplete ? "🎉 100% Ready!" : "Overall Readiness"}
+              </p>
               <p className="text-3xl font-extrabold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{overallPct}%</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-blue-200">{totalDone} of {totalItems} items</p>
-              <p className="text-xs text-blue-300 mt-0.5">Patterns + Stories</p>
+              {isComplete ? (
+                <div className="flex items-center gap-2 justify-end">
+                  <PartyPopper size={20} className="text-white" />
+                  <p className="text-sm font-bold">All done — good luck!</p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-white/80">{totalDone} of {totalItems} items</p>
+                  <p className="text-xs text-white/60 mt-0.5">Patterns + Stories</p>
+                </>
+              )}
             </div>
           </div>
           <div className="h-3 bg-white/20 rounded-full overflow-hidden">
