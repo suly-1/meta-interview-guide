@@ -72,3 +72,6 @@
 - [x] Difficulty Estimator trend chart (avg self-rating vs official rating per difficulty tier in Stats)
 - [x] Study plan Markdown export (Copy as Markdown button in generated study plan)
 - [x] Speed Run 24-hour problem lock after Rematch (prevent same problem in next different Speed Run)
+- [x] Difficulty Estimator clear-ratings button (wipe stale assessments from Difficulty Perception card)
+- [x] Study plan .ics calendar export (Add to Calendar button generating one ICS event per block)
+- [x] Speed Run consecutive-day streak badge (flame badge next to Speed Run button)

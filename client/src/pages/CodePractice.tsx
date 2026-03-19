@@ -328,12 +328,13 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
 }
 
 // ─── Personal Stats Dashboard ──────────────────────────────────────────────
-function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments }: {
+function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments, onClearAssessments }: {
   session: SessionEntry[];
   progress: Record<number, { solved: boolean; starred: boolean; notes: string }>;
   leaderboard: SpeedRunEntry[];
   sprintHistory: SprintHistoryEntry[];
   assessments: DifficultyAssessment[];
+  onClearAssessments: () => void;
 }) {
   const totalSolved = useMemo(() => Object.values(progress).filter(p => p.solved).length, [progress]);
   const totalStarred = useMemo(() => Object.values(progress).filter(p => p.starred).length, [progress]);
@@ -626,7 +627,17 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp size={13} className="text-indigo-500" />
               <span className="text-xs font-semibold text-foreground">Difficulty Perception</span>
-              <span className="text-xs text-muted-foreground ml-auto">{assessments.length} rated</span>
+              <span className="text-xs text-muted-foreground">{assessments.length} rated</span>
+              <button
+                onClick={() => {
+                  if (!window.confirm("Clear all difficulty ratings? This cannot be undone.")) return;
+                  onClearAssessments();
+                }}
+                className="ml-auto text-[10px] font-semibold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                title="Clear all self-assessments"
+              >
+                <Trash2 size={10} /> Clear ratings
+              </button>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {harderthanExpected.length > 0 && (
@@ -885,6 +896,7 @@ export default function CodePractice() {
   const [studyPlannerOpen, setStudyPlannerOpen] = useState(false);
   const [studyPlanDuration, setStudyPlanDuration] = useState<30 | 60 | 90>(60);
   const [planCopied, setPlanCopied] = useState(false);
+  const [planIcsDownloaded, setPlanIcsDownloaded] = useState(false);
   const [studyPlan, setStudyPlan] = useState<{
     headline: string;
     focusAreas: string[];
@@ -1081,6 +1093,38 @@ export default function CodePractice() {
     } catch { /* fallback: select all */ }
   }, [code]);
 
+  // Speed Run streak (consecutive days with at least one completed Speed Run)
+  const SR_STREAK_KEY = "cp_sr_streak";
+  const loadSRStreak = (): { streak: number; lastDate: string | null; longestStreak: number } => {
+    try { return JSON.parse(localStorage.getItem(SR_STREAK_KEY) ?? "null") ?? { streak: 0, lastDate: null, longestStreak: 0 }; } catch { return { streak: 0, lastDate: null, longestStreak: 0 }; }
+  };
+  const saveSRStreak = (d: { streak: number; lastDate: string | null; longestStreak: number }) => {
+    localStorage.setItem(SR_STREAK_KEY, JSON.stringify(d));
+  };
+  const [srStreak, setSRStreak] = useState(() => {
+    const d = loadSRStreak();
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = (() => { const x = new Date(); x.setDate(x.getDate() - 1); return x.toISOString().slice(0, 10); })();
+    // Reset broken streak on mount
+    if (d.streak > 0 && d.lastDate !== today && d.lastDate !== yesterday) {
+      const reset = { ...d, streak: 0 };
+      saveSRStreak(reset);
+      return reset;
+    }
+    return d;
+  });
+  const recordSRStreakDay = () => {
+    setSRStreak(prev => {
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = (() => { const x = new Date(); x.setDate(x.getDate() - 1); return x.toISOString().slice(0, 10); })();
+      if (prev.lastDate === today) return prev; // already recorded today
+      const newStreak = prev.lastDate === yesterday ? prev.streak + 1 : 1;
+      const updated = { streak: newStreak, lastDate: today, longestStreak: Math.max(prev.longestStreak, newStreak) };
+      saveSRStreak(updated);
+      return updated;
+    });
+  };
+
   // Speed Run — 24-hour problem lock (prevents repeats in non-rematch runs)
   const SR_LOCK_KEY = "cp_sr_recent_ids";
   const loadRecentSpeedRunIds = (): { id: number; ts: number }[] => {
@@ -1135,6 +1179,7 @@ export default function CodePractice() {
     const score = Math.max(0, rawScore - hintPenalty);
     setSpeedRunScore({ solved, timeSec, score, baseScore, timeBonus, hintPenalty, hintsUsed: hintsUsedThisRun });
     setSpeedRunActive(false);
+    recordSRStreakDay();
     // Save to leaderboard
     const entry: SpeedRunEntry = {
       id: `${Date.now()}`,
@@ -1162,6 +1207,7 @@ export default function CodePractice() {
             clearInterval(speedRunRef.current!);
             setSpeedRunActive(false);
             setSpeedRunScore({ solved: false, timeSec: 20 * 60, score: 0, baseScore: 0, timeBonus: 0, hintPenalty: 0, hintsUsed: 0 });
+            recordSRStreakDay();
             return 0;
           }
           return s - 1;
@@ -1585,7 +1631,7 @@ export default function CodePractice() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {mainView === "stats" ? (
-          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} />
+          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} onClearAssessments={() => { saveAssessments([]); setAssessments([]); }} />
         ) : (
           <>
             {/* Toolbar */}
@@ -1628,6 +1674,20 @@ export default function CodePractice() {
               </button>
               {/* Speed Run group */}
               <div className="flex items-center gap-1">
+                {/* Speed Run streak badge */}
+                {srStreak.streak >= 2 && (
+                  <div
+                    className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border transition-all ${
+                      srStreak.streak >= 5
+                        ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400"
+                    }`}
+                    title={`Speed Run streak: ${srStreak.streak} consecutive days${srStreak.longestStreak > srStreak.streak ? ` (best: ${srStreak.longestStreak})` : ""}`}
+                  >
+                    <Flame size={9} className={srStreak.streak >= 5 ? "text-orange-500 fill-current" : "text-amber-500"} />
+                    {srStreak.streak}d
+                  </div>
+                )}
                 {!speedRunActive && (
                   <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5">
                     {(["All", "Easy", "Med", "Hard"] as const).map(d => {
@@ -2252,6 +2312,69 @@ export default function CodePractice() {
                     className="w-full py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors flex items-center justify-center gap-1.5"
                   >
                     {planCopied ? <><CheckCircle2 size={12} className="text-emerald-500" /> Copied!</> : <><Copy size={12} /> Copy as Markdown</>}
+                  </button>
+                  {/* Add to Calendar (.ics) */}
+                  <button
+                    onClick={() => {
+                      if (!studyPlan) return;
+                      // Build ICS file: one VEVENT per block, starting from now
+                      const pad = (n: number) => String(n).padStart(2, "0");
+                      const toICSDate = (d: Date) =>
+                        `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+                      const typeEmoji: Record<string, string> = {
+                        coding: "💻", behavioral: "💬", sr_review: "🔄", system_design: "🏗️", break: "☕",
+                      };
+                      let cursor = new Date();
+                      // Round up to next 15-min slot
+                      const mins = cursor.getMinutes();
+                      const roundedMins = Math.ceil(mins / 15) * 15;
+                      cursor.setMinutes(roundedMins, 0, 0);
+
+                      const events: string[] = [];
+                      studyPlan.blocks.forEach((block, i) => {
+                        const start = new Date(cursor);
+                        const end = new Date(cursor.getTime() + block.durationMinutes * 60 * 1000);
+                        const emoji = typeEmoji[block.type] ?? "📌";
+                        const description = block.tasks.map(t => `• ${t}`).join("\\n");
+                        events.push([
+                          "BEGIN:VEVENT",
+                          `UID:study-plan-${Date.now()}-${i}@meta-guide`,
+                          `DTSTART:${toICSDate(start)}`,
+                          `DTEND:${toICSDate(end)}`,
+                          `SUMMARY:${emoji} ${block.title}`,
+                          `DESCRIPTION:${description}\\n\\nPriority: ${block.priority}`,
+                          `CATEGORIES:${block.type.toUpperCase()}`,
+                          "END:VEVENT",
+                        ].join("\r\n"));
+                        cursor = end;
+                      });
+
+                      const ics = [
+                        "BEGIN:VCALENDAR",
+                        "VERSION:2.0",
+                        "PRODID:-//Meta Interview Guide//Study Planner//EN",
+                        "CALSCALE:GREGORIAN",
+                        "METHOD:PUBLISH",
+                        `X-WR-CALNAME:${studyPlan.headline}`,
+                        ...events,
+                        "END:VCALENDAR",
+                      ].join("\r\n");
+
+                      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "study-plan.ics";
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      setPlanIcsDownloaded(true);
+                      setTimeout(() => setPlanIcsDownloaded(false), 2500);
+                    }}
+                    className="w-full py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    {planIcsDownloaded
+                      ? <><CheckCircle2 size={12} className="text-emerald-500" /> Downloaded!</>
+                      : <><Download size={12} /> Add to Calendar (.ics)</>}
                   </button>
                   <div className="flex gap-2">
                     <button
