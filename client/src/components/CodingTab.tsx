@@ -8,6 +8,7 @@ import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, C
 import { PATTERNS, PATTERN_PREREQUISITES } from "@/lib/guideData";
 import { useDrillRatings } from "@/hooks/useDrillRatings";
 import PatternQuickReference from "@/components/PatternQuickReference";
+import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 import { useProgress } from "@/hooks/useProgress";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -613,6 +614,18 @@ export default function CodingTab() {
           </h2>
         </div>
         <PatternQuickReference />
+      </section>
+
+      {/* Pattern Dependency Graph */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-violet-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Pattern Dependency Graph
+          </h2>
+          <p className="text-sm text-gray-500">Click any node to view the pattern card. Drag to reposition. Scroll to zoom. Green glow = mastered (★4+)</p>
+        </div>
+        <PatternDependencyGraph />
       </section>
     </div>
   );

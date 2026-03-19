@@ -31,6 +31,7 @@
 - [x] Remove CTCI banner from Coding tab only
 
 ## In Progress
+- [x] Add Pattern Dependency Graph to Coding tab (after Pattern Quick Reference)
 - [ ] Wire MockInterviewSimulator as its own navigation tab
 - [ ] Pattern Dependency Unlock Flow visual indicators in CodingTab PatternRow
 - [ ] Per-pattern Stuck? hint ladder (AIHintPanel compact) inside each expanded PatternRow
