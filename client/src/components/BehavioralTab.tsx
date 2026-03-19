@@ -5,6 +5,9 @@ import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
 import { useStreak } from "@/hooks/useStreak";
 import { motion, AnimatePresence } from "framer-motion";
+import STARGapAnalyzer from "@/components/STARGapAnalyzer";
+import InterviewerPersonaSimulator from "@/components/InterviewerPersonaSimulator";
+import IC7AnswerUpgrader from "@/components/IC7AnswerUpgrader";
 
 const VALUE_COLORS: Record<string, { bg: string; border: string; title: string }> = {
   blue:    { bg: "bg-blue-50",    border: "border-blue-200",    title: "text-blue-800"    },
@@ -643,39 +646,110 @@ function FullMockMode() {
 
   if (sessionDone) {
     const rated = ratings.filter((r): r is number => r !== null).length;
+    const ratedRatings = ratings.filter((r): r is number => r !== null);
+    const weakestIdx: number = ratedRatings.length > 0
+      ? ratings.reduce((minI: number, r, i) => (r !== null && (ratings[minI] === null || r < (ratings[minI] ?? 6))) ? i : minI, 0)
+      : -1;
+
+    // Meta value mapping per focus area
+    const AREA_VALUES: Record<string, string[]> = {
+      xfn:             ["Build Awesome Things", "Focus on Long-Term Impact", "Meta, Metamates, Me"],
+      conflict:        ["Be Direct & Respect Your Colleagues", "Meta, Metamates, Me", "Move Fast"],
+      "problem-solving": ["Move Fast", "Focus on Long-Term Impact", "Live in the Future"],
+      communication:   ["Be Direct & Respect Your Colleagues", "Meta, Metamates, Me", "Build Awesome Things"],
+    };
+    const AREA_IDS = ["xfn", "conflict", "problem-solving", "communication"];
+
+    const buildMarkdown = () => {
+      const now = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const lines = [
+        `# Mock Interview Scorecard — ${now}`,
+        ``,
+        `**Session Average:** ${avgRating.toFixed(1)} / 5`,
+        ``,
+        `## Per-Question Results`,
+        ``,
+      ];
+      queue.forEach((q, i) => {
+        const areaLabel = q.areaTitle.replace(/Focus Area \d+: /, "");
+        const r = ratings[i];
+        const stars = r !== null ? "★".repeat(r) + "☆".repeat(5 - r) : "Not rated";
+        const label = r !== null ? ratingLabels[r] : "Not rated";
+        const vals = AREA_VALUES[AREA_IDS[i]] ?? [];
+        lines.push(`### Q${i + 1}: ${areaLabel}`);
+        lines.push(`**Question:** ${q.question}`);
+        lines.push(`**Rating:** ${stars} ${label}`);
+        lines.push(`**Meta Values:** ${vals.join(", ")}`);
+        if (weakestIdx >= 0 && i === weakestIdx) lines.push(`⚠️ **Weakest Area — prioritize this in your next session**`);
+        lines.push(``);
+      });
+        if (weakestIdx >= 0) {
+          lines.push(`## Recommended Next Step`);
+          lines.push(`Focus your next practice session on **${queue[weakestIdx]?.areaTitle.replace(/Focus Area \d+: /, "")}** — your lowest-rated area this session.`);
+        }
+      return lines.join("\n");
+    };
+
+    const handleCopyMarkdown = () => {
+      navigator.clipboard.writeText(buildMarkdown()).catch(() => {});
+    };
+
     return (
       <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}
         className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
-        <div className="text-center mb-6">
+        <div className="text-center mb-5">
           <div className="text-4xl mb-2">🎉</div>
           <h3 className="text-xl font-extrabold text-gray-900 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Full Mock Complete!
           </h3>
-          <p className="text-sm text-gray-500">You answered all 4 focus areas — here's your session summary</p>
+          <p className="text-sm text-gray-500">Scorecard — per-question ratings, Meta values demonstrated, and weakest area</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-          {queue.map((q, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-xl p-3.5">
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                  style={{ background: q.areaBg, color: q.areaTitleColor, border: `1px solid ${q.areaBorder}` }}>
-                  {q.areaTitle.replace(/Focus Area \d+: /, "")}
-                </span>
-                {ratings[i] !== null && (
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
-                    {[1,2,3,4,5].map((s) => (
-                      <Star key={s} size={12} className={s <= (ratings[i] ?? 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
-                    ))}
+
+        {/* Per-question scorecard */}
+        <div className="space-y-3 mb-5">
+          {queue.map((q, i) => {
+            const isWeakest = i === weakestIdx && rated > 0;
+            const vals = AREA_VALUES[AREA_IDS[i]] ?? [];
+            return (
+              <div key={i} className={`bg-white border rounded-xl p-4 ${isWeakest ? "border-red-300 ring-1 ring-red-200" : "border-gray-200"}`}>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                      style={{ background: q.areaBg, color: q.areaTitleColor, border: `1px solid ${q.areaBorder}` }}>
+                      {q.areaTitle.replace(/Focus Area \d+: /, "")}
+                    </span>
+                    {isWeakest && (
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                        ⚠ Weakest Area
+                      </span>
+                    )}
                   </div>
+                  {ratings[i] !== null && (
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      {[1,2,3,4,5].map((s) => (
+                        <Star key={s} size={12} className={s <= (ratings[i] ?? 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-700 leading-snug mb-2">{q.question}</p>
+                {ratings[i] !== null && (
+                  <p className="text-[11px] text-gray-500 mb-2">{ratingLabels[ratings[i] ?? 0]}</p>
                 )}
+                {/* Meta values demonstrated */}
+                <div className="flex flex-wrap gap-1.5">
+                  {vals.map((v) => (
+                    <span key={v} className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                      {v}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <p className="text-xs text-gray-700 leading-snug line-clamp-2">{q.question}</p>
-              {ratings[i] !== null && (
-                <p className="text-[11px] text-gray-400 mt-1">{ratingLabels[ratings[i] ?? 0]}</p>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        {/* Session average */}
         {rated > 0 && (
           <div className="flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-xl p-3 mb-4">
             <span className="text-sm font-semibold text-gray-700">Session avg:</span>
@@ -687,9 +761,30 @@ function FullMockMode() {
             <span className="text-sm font-bold text-amber-700">{avgRating.toFixed(1)} / 5</span>
           </div>
         )}
-        <div className="flex gap-3 justify-center">
+
+        {/* Weakest area callout */}
+        {weakestIdx >= 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3.5 mb-4 flex items-start gap-2.5">
+            <span className="text-red-500 mt-0.5 flex-shrink-0">⚠</span>
+            <div>
+              <p className="text-xs font-bold text-red-800 mb-0.5">Weakest Area This Session</p>
+              <p className="text-xs text-red-700">
+                <strong>{queue[weakestIdx]?.areaTitle.replace(/Focus Area \d+: /, "")}</strong> — rated {ratingLabels[ratings[weakestIdx] ?? 0]?.toLowerCase()}. Prioritize this in your next practice session.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-3 justify-center">
           <button onClick={startMock} className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
             <RotateCcw size={13} /> New Mock
+          </button>
+          <button onClick={handleCopyMarkdown} className="flex items-center gap-2 px-5 py-2.5 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all shadow-sm">
+            <CheckCircle2 size={13} /> Copy as Markdown
+          </button>
+          <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-sm">
+            <ExternalLink size={13} /> Print / Save PDF
           </button>
           <button onClick={closeMock} className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all">
             <X size={13} /> Close
@@ -1129,6 +1224,39 @@ export default function BehavioralTab() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* STAR Gap Analyzer */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            STAR Story Gap Analyzer
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Cross-reference your completed STAR stories against IC7 key signals to find gaps and single points of failure.</p>
+        </div>
+        <STARGapAnalyzer />
+      </section>
+
+      {/* IC7 Answer Upgrader */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            "What Would an IC7 Say?" Answer Upgrader
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Side-by-side IC6 vs IC7 answer snippets for the same scenario — see the scope delta concretely.</p>
+        </div>
+        <IC7AnswerUpgrader />
+      </section>
+
+      {/* Interviewer Persona Simulator */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Interviewer Persona Simulator
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Practice with 4 distinct interviewer styles — The Prober, The Skeptic, The Friendly, and The Quiet — to handle any interview dynamic.</p>
+        </div>
+        <InterviewerPersonaSimulator />
       </section>
 
       {/* Resources */}

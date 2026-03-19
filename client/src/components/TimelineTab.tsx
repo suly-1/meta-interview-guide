@@ -30,6 +30,7 @@ import ActivityCalendar60 from "@/components/ActivityCalendar60";
 import PrepTimeline4Week from "@/components/PrepTimeline4Week";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 import DailyNotificationReminder from "@/components/DailyNotificationReminder";
+import CodingSessionDebriefLog from "@/components/CodingSessionDebriefLog";
 
 const TAG_COLORS: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700",
@@ -660,6 +661,20 @@ export default function TimelineTab() {
             </ul>
           </div>
         </div>
+      </section>
+
+      {/* Coding Session Debrief Log */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-indigo-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Coding Session Debrief Log
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500">
+          After each coding session, log a structured debrief: what pattern you used, where you got stuck, and what you’d do differently. Stored in your browser and searchable over time.
+        </p>
+        <CodingSessionDebriefLog />
       </section>
 
       {/* Daily Notification Reminder */}

@@ -627,6 +627,9 @@ export default function PatternQuickReference() {
 // Wrapper that respects both local and global expand state
 function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand: boolean }) {
   const [localExpanded, setLocalExpanded] = useState(false);
+  const [teachMode, setTeachMode] = useState(false);
+  const [teachInput, setTeachInput] = useState({ idea: "", signals: "", example: "" });
+  const [teachRevealed, setTeachRevealed] = useState(false);
   const expanded = forceExpand || localExpanded;
   const styles = TIER_STYLES[p.tier];
 
@@ -646,12 +649,21 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
               </span>
             </div>
           </div>
-          <button
-            onClick={() => setLocalExpanded(e => !e)}
-            className="flex-shrink-0 p-1 rounded-lg hover:bg-white/60 transition-colors"
-          >
-            {expanded ? <ChevronUp size={14} className="text-gray-500" /> : <ChevronDown size={14} className="text-gray-500" />}
-          </button>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              onClick={() => { setTeachMode(m => !m); setTeachRevealed(false); setTeachInput({ idea: "", signals: "", example: "" }); }}
+              className="text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-colors bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+              title="Teach It Back mode"
+            >
+              Teach It Back
+            </button>
+            <button
+              onClick={() => setLocalExpanded(e => !e)}
+              className="p-1 rounded-lg hover:bg-white/60 transition-colors"
+            >
+              {expanded ? <ChevronUp size={14} className="text-gray-500" /> : <ChevronDown size={14} className="text-gray-500" />}
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           <span className="flex items-center gap-1 text-[10px] font-semibold bg-white/70 text-gray-700 px-2 py-0.5 rounded-full border border-gray-200">
@@ -676,6 +688,79 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
           ))}
         </div>
       </div>
+
+      {/* Teach It Back mode */}
+      {teachMode && (
+        <div className="border-t border-amber-200 bg-amber-50/60 px-4 py-4 space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-bold text-amber-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Teach It Back — {p.name}</p>
+            <button onClick={() => setTeachMode(false)} className="text-[11px] text-amber-600 hover:text-amber-900 font-semibold">Close</button>
+          </div>
+          <div className="space-y-2.5">
+            <div>
+              <label className="text-[11px] font-bold text-amber-700 block mb-1">1. Key Idea (in your own words)</label>
+              <textarea
+                value={teachInput.idea}
+                onChange={e => setTeachInput(prev => ({ ...prev, idea: e.target.value }))}
+                placeholder="Explain the core idea of this pattern without looking..."
+                className="w-full text-xs border border-amber-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold text-amber-700 block mb-1">2. Key Signals (when to use it)</label>
+              <textarea
+                value={teachInput.signals}
+                onChange={e => setTeachInput(prev => ({ ...prev, signals: e.target.value }))}
+                placeholder="List 2-3 signals that tell you to use this pattern..."
+                className="w-full text-xs border border-amber-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold text-amber-700 block mb-1">3. Canonical Example Problem</label>
+              <textarea
+                value={teachInput.example}
+                onChange={e => setTeachInput(prev => ({ ...prev, example: e.target.value }))}
+                placeholder="Name one canonical problem and briefly describe the approach..."
+                className="w-full text-xs border border-amber-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
+                rows={2}
+              />
+            </div>
+          </div>
+          <button
+            onClick={() => setTeachRevealed(true)}
+            disabled={teachInput.idea.length < 10 || teachInput.signals.length < 5 || teachInput.example.length < 5}
+            className="w-full py-2 text-xs font-bold rounded-xl bg-amber-600 hover:bg-amber-700 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Reveal Reference Answer
+          </button>
+          {teachRevealed && (
+            <div className="rounded-xl border border-amber-300 bg-white p-4 space-y-3 mt-2">
+              <div>
+                <p className="text-[11px] font-bold text-amber-700 mb-1">Reference Key Idea</p>
+                <p className="text-xs text-gray-700 leading-relaxed">{p.keyIdea}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-amber-700 mb-1">Reference Signals</p>
+                <div className="flex flex-wrap gap-1">
+                  {p.keySignals.map(s => (
+                    <span key={s} className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md font-medium">{s}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-amber-700 mb-1">Canonical Problems</p>
+                <div className="flex flex-wrap gap-1">
+                  {p.canonicalProblems.slice(0, 3).map(prob => (
+                    <span key={prob} className="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-100 px-1.5 py-0.5 rounded-md font-medium">{prob}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {expanded && (
         <div className="border-t border-gray-100">

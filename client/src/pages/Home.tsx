@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2 } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2, Layers } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
@@ -12,6 +12,7 @@ import BehavioralTab from "@/components/BehavioralTab";
 import TimelineTab from "@/components/TimelineTab";
 import CTCITrackerTab from "@/components/CTCITrackerTab";
 import ReadinessTab from "@/components/ReadinessTab";
+import SystemDesignTab from "@/components/SystemDesignTab";
 import { useStreak } from "@/hooks/useStreak";
 
 const TABS = [
@@ -21,6 +22,7 @@ const TABS = [
   { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,      color: "emerald" },
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,    color: "violet"  },
   { id: "readiness",  label: "Readiness",            icon: <BarChart2 size={15} />,     color: "rose"    },
+  { id: "sysdesign",  label: "System Design",         icon: <Layers size={15} />,        color: "slate"   },
 ];
 
 const ACTIVE_COLORS: Record<string, string> = {
@@ -30,6 +32,7 @@ const ACTIVE_COLORS: Record<string, string> = {
   emerald: "text-emerald-600 border-emerald-600",
   violet:  "text-violet-600 border-violet-600",
   rose:    "text-rose-600 border-rose-600",
+  slate:   "text-slate-600 border-slate-600",
 };
 
 export default function Home() {
@@ -161,6 +164,7 @@ export default function Home() {
               {activeTab === "timeline"   && <TimelineTab />}
               {activeTab === "ctci"       && <CTCITrackerTab />}
               {activeTab === "readiness"  && <ReadinessTab />}
+              {activeTab === "sysdesign"  && <SystemDesignTab />}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -186,6 +190,7 @@ export default function Home() {
               emerald: "text-emerald-600",
               violet:  "text-violet-600",
               rose:    "text-rose-600",
+              slate:   "text-slate-600",
             };
             return (
               <button
@@ -211,7 +216,9 @@ export default function Home() {
                   {tab.id === "coding"    ? "Coding"     :
                    tab.id === "ai-round"  ? "AI Round"   :
                    tab.id === "behavioral"? "Behavioral" :
-                   tab.id === "ctci"      ? "Tracker"    : "Timeline"}
+                   tab.id === "ctci"      ? "Tracker"    :
+                   tab.id === "readiness" ? "Readiness"  :
+                   tab.id === "sysdesign" ? "Sys Design" : "Timeline"}
                 </span>
               </button>
             );
