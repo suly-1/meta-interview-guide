@@ -5,17 +5,18 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Brain, Play, RotateCcw, ChevronDown, ChevronUp, Trash2, Shuffle, Timer, X, SkipForward, Zap } from "lucide-react";
 import VoiceToStar from "@/components/VoiceToStar";
 import { BEHAVIORAL_QUESTIONS, IC_COMPARISON, META_VALUES } from "@/lib/data";
-import { useBehavioralRatings, useMockHistory, useStoryStrengthHistory, type MockSession, type StoryRatingEntry } from "@/hooks/useLocalStorage";
+import { useBehavioralRatings, useMockHistory, useStoryStrengthHistory, useTechRetroProjects, type MockSession, type StoryRatingEntry, type TechRetroProject } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
 
-const AREAS = ["All", "Conflict & Influence", "Ownership & Ambiguity", "Scale & Impact", "Failure & Learning"];
+const AREAS = ["All", "Conflict & Influence", "Ownership & Ambiguity", "Scale & Impact", "Failure & Learning", "XFN Partnership"];
 const AREA_COLORS: Record<string, string> = {
   "Conflict & Influence": "badge-red",
   "Ownership & Ambiguity": "badge-amber",
   "Scale & Impact": "badge-blue",
   "Failure & Learning": "badge-purple",
+  "XFN Partnership": "badge-teal",
 };
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -623,6 +624,212 @@ function StoryStrengthTracker({ ratings, storyHistory }: {
   );
 }
 
+// ── Technical Retrospective Project Planner ────────────────────────────────────────────
+const EMPTY_PROJECT: Omit<TechRetroProject, 'id' | 'createdAt'> = {
+  name: '', scope: '', tradeoffs: '', biggestBug: '', outcome: '', lessonsLearned: '',
+};
+
+function TechRetroPlanner() {
+  const [projects, setProjects] = useTechRetroProjects();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<Omit<TechRetroProject, 'id' | 'createdAt'>>(EMPTY_PROJECT);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const set = (k: keyof typeof EMPTY_PROJECT, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSave = () => {
+    if (!form.name.trim()) { toast.error('Project name is required.'); return; }
+    if (editId) {
+      setProjects(ps => ps.map(p => p.id === editId ? { ...p, ...form } : p));
+      toast.success('Project updated!');
+    } else {
+      setProjects(ps => [...ps, { ...form, id: nanoid(), createdAt: Date.now() }]);
+      toast.success('Project saved!');
+    }
+    setForm(EMPTY_PROJECT);
+    setEditId(null);
+    setOpen(false);
+  };
+
+  const handleEdit = (p: TechRetroProject) => {
+    setForm({ name: p.name, scope: p.scope, tradeoffs: p.tradeoffs, biggestBug: p.biggestBug, outcome: p.outcome, lessonsLearned: p.lessonsLearned });
+    setEditId(p.id);
+    setOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    setProjects(ps => ps.filter(p => p.id !== id));
+    toast.success('Project deleted.');
+  };
+
+  const exportExcalidraw = (p: TechRetroProject) => {
+    // Generate Excalidraw-compatible JSON with text elements arranged as a structured outline
+    const elements: object[] = [];
+    let y = 0;
+    const addText = (text: string, x: number, fontSize: number, color: string, bold: boolean) => {
+      elements.push({
+        type: 'text', id: nanoid(), x, y, width: 700, height: fontSize * 1.5,
+        angle: 0, strokeColor: color, backgroundColor: 'transparent',
+        fillStyle: 'solid', strokeWidth: 1, strokeStyle: 'solid',
+        roughness: 0, opacity: 100, groupIds: [], frameId: null, roundness: null,
+        seed: Math.floor(Math.random() * 100000), version: 1, versionNonce: 0,
+        isDeleted: false, boundElements: null, updated: Date.now(), link: null, locked: false,
+        text, fontSize, fontFamily: 1, textAlign: 'left',
+        verticalAlign: 'top', containerId: null, originalText: text,
+        lineHeight: 1.25, baseline: fontSize,
+        fontWeight: bold ? 'bold' : 'normal',
+      });
+      y += fontSize * 2;
+    };
+    const addRect = (label: string, accentColor: string) => {
+      elements.push({
+        type: 'rectangle', id: nanoid(), x: -10, y: y - 4, width: 720, height: 28,
+        angle: 0, strokeColor: accentColor, backgroundColor: accentColor + '22',
+        fillStyle: 'solid', strokeWidth: 1.5, strokeStyle: 'solid',
+        roughness: 0, opacity: 80, groupIds: [], frameId: null, roundness: { type: 3 },
+        seed: Math.floor(Math.random() * 100000), version: 1, versionNonce: 0,
+        isDeleted: false, boundElements: null, updated: Date.now(), link: null, locked: false,
+      });
+    };
+
+    const sections: [string, string, string][] = [
+      ['Project Name', p.name, '#8b5cf6'],
+      ['Scope', p.scope, '#3b82f6'],
+      ['Key Trade-offs', p.tradeoffs, '#f59e0b'],
+      ['Biggest Bug / Incident', p.biggestBug, '#ef4444'],
+      ['Outcome & Impact', p.outcome, '#10b981'],
+      ['Lessons Learned', p.lessonsLearned, '#06b6d4'],
+    ];
+
+    sections.forEach(([label, value, color]) => {
+      addRect(label, color);
+      addText(label.toUpperCase(), 0, 13, color, true);
+      value.split('\n').forEach(line => addText(line || ' ', 20, 14, '#e2e8f0', false));
+      y += 16;
+    });
+
+    const excalidrawData = {
+      type: 'excalidraw', version: 2, source: 'meta-prep-guide',
+      elements, appState: { viewBackgroundColor: '#0f172a', gridSize: null },
+      files: {},
+    };
+
+    const blob = new Blob([JSON.stringify(excalidrawData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tech-retro-${p.name.replace(/\s+/g, '-').toLowerCase()}.excalidraw`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Exported! Open in excalidraw.com → File → Open');
+  };
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-violet-400 text-lg">💼</span>
+          <div>
+            <div className="text-sm font-bold text-foreground">Technical Retrospective Project Planner</div>
+            <div className="text-xs text-muted-foreground">{projects.length} project{projects.length !== 1 ? 's' : ''} saved · exports Excalidraw-ready outline</div>
+          </div>
+        </div>
+        <button onClick={() => { setForm(EMPTY_PROJECT); setEditId(null); setOpen(o => !o); }}
+          className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+            open ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+          }`}>
+          {open ? '✕ Cancel' : '+ New Project'}
+        </button>
+      </div>
+
+      {/* Form */}
+      {open && (
+        <div className="p-4 border-b border-border space-y-3 bg-violet-500/5">
+          <div className="text-xs font-bold text-violet-400 mb-1">Fill in your project details for the Technical Retrospective round</div>
+          {([
+            ['name', 'Project Name *', 'e.g. Ads Ranking Revamp, Feed Integrity Pipeline'],
+            ['scope', 'Scope & Scale', 'e.g. 3 engineers, 6 months, 10M users affected, $2M infra cost'],
+            ['tradeoffs', 'Key Trade-offs', 'e.g. Consistency vs latency, build vs buy, monolith vs microservices'],
+            ['biggestBug', 'Biggest Bug / Incident', 'e.g. Race condition in distributed lock, caused 2h outage, P0'],
+            ['outcome', 'Outcome & Impact', 'e.g. 40% latency reduction, 2× throughput, $500k/yr savings'],
+            ['lessonsLearned', 'Lessons Learned', 'e.g. Should have load-tested earlier, needed clearer ownership boundaries'],
+          ] as [keyof typeof EMPTY_PROJECT, string, string][]).map(([k, label, placeholder]) => (
+            <div key={k}>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">{label}</label>
+              <textarea
+                value={form[k]}
+                onChange={e => set(k, e.target.value)}
+                placeholder={placeholder}
+                rows={k === 'tradeoffs' || k === 'lessonsLearned' ? 3 : 2}
+                className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-violet-500/50 resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+              />
+            </div>
+          ))}
+          <button onClick={handleSave}
+            className="px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-400 text-sm font-bold transition-all">
+            {editId ? 'Update Project' : 'Save Project'}
+          </button>
+        </div>
+      )}
+
+      {/* Saved projects */}
+      {projects.length > 0 && (
+        <div className="divide-y divide-border">
+          {projects.map(p => (
+            <div key={p.id}>
+              <div className="p-3 flex items-center gap-3 cursor-pointer hover:bg-accent/30 transition-colors"
+                onClick={() => setExpandedId(id => id === p.id ? null : p.id)}>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-bold text-foreground truncate">{p.name}</div>
+                  <div className="text-xs text-muted-foreground truncate">{p.scope || 'No scope defined'}</div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={e => { e.stopPropagation(); exportExcalidraw(p); }}
+                    className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-xs font-semibold transition-all">
+                    🎨 Export
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); handleEdit(p); }}
+                    className="text-muted-foreground hover:text-foreground transition-colors text-xs px-1">✏️</button>
+                  <button onClick={e => { e.stopPropagation(); handleDelete(p.id); }}
+                    className="text-muted-foreground hover:text-red-400 transition-colors">
+                    <Trash2 size={13} />
+                  </button>
+                  {expandedId === p.id ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
+                </div>
+              </div>
+              {expandedId === p.id && (
+                <div className="px-4 pb-4 space-y-3 bg-secondary/30">
+                  {([
+                    ['Key Trade-offs', p.tradeoffs, 'text-amber-400'],
+                    ['Biggest Bug / Incident', p.biggestBug, 'text-red-400'],
+                    ['Outcome & Impact', p.outcome, 'text-emerald-400'],
+                    ['Lessons Learned', p.lessonsLearned, 'text-cyan-400'],
+                  ] as [string, string, string][]).filter(([, v]) => v).map(([label, value, color]) => (
+                    <div key={label}>
+                      <div className={`text-xs font-bold mb-1 ${color}`}>{label}</div>
+                      <div className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{value}</div>
+                    </div>
+                  ))}
+                  <div className="text-xs text-muted-foreground pt-1">Saved {new Date(p.createdAt).toLocaleDateString()}</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {projects.length === 0 && !open && (
+        <div className="p-6 text-center text-muted-foreground text-sm">
+          <div className="text-3xl mb-2">💼</div>
+          <div>No projects yet.</div>
+          <div className="text-xs mt-1">Add a project to prepare your Technical Retrospective story and export it as an Excalidraw diagram.</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AnswerScorer() {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
@@ -960,6 +1167,9 @@ export default function BehavioralTab() {
           </div>
         </div>
       </div>
+
+      {/* Technical Retrospective Project Planner */}
+      <TechRetroPlanner />
 
       {/* AI Answer Scorer */}
       <AnswerScorer />

@@ -234,3 +234,24 @@ export interface StoryRatingEntry {
 export function useStoryStrengthHistory() {
   return useLocalStorage<Record<string, StoryRatingEntry[]>>("meta_story_strength_v1", {});
 }
+
+// ── Technical Retrospective Projects ──────────────────────────────────────────
+export interface TechRetroProject {
+  id: string;
+  name: string;
+  scope: string;
+  tradeoffs: string;
+  biggestBug: string;
+  outcome: string;
+  lessonsLearned: string;
+  createdAt: number;
+}
+export function useTechRetroProjects() {
+  return useLocalStorage<TechRetroProject[]>("meta_tech_retro_projects_v1", []);
+}
+
+// ── Flash Card Spaced Repetition due dates ─────────────────────────────────
+// Keys are flash card indices (as strings), values are ISO date strings (YYYY-MM-DD)
+export function useFlashCardSRDue() {
+  return useLocalStorage<Record<string, string>>("meta_sd_flashcard_sr_v1", {});
+}

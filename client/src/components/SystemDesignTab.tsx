@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { SYSTEM_DESIGN_QUESTIONS } from "@/lib/data";
 import { ChevronDown, ChevronUp, ExternalLink, Brain, Database, Server, Shield, BarChart3, Zap, GitBranch, Search } from "lucide-react";
+import { useFlashCardSRDue } from "@/hooks/useLocalStorage";
 
 const FRAMEWORK_STEPS = [
   { step: "1. Requirements", time: "5 min", items: ["Functional: what the system must do", "Non-functional: scale, latency, availability, consistency", "Ask: DAU, QPS, data volume, read/write ratio", "Clarify: global vs regional, mobile vs web"] },
@@ -903,10 +904,29 @@ function SystemDesignFlashCards() {
   });
   const [sessionScore, setSessionScore] = useState({ known: 0, review: 0 });
   const [sessionDone, setSessionDone] = useState(false);
+  const [srDue, setSrDue] = useFlashCardSRDue();
 
   const tags = ["All", ...Array.from(new Set(FLASH_CARDS.map(c => c.tag)))];
   const deck = filterTag === "All" ? FLASH_CARDS : FLASH_CARDS.filter(c => c.tag === filterTag);
-  const drillDeck = deck.filter(c => !knownCards.has(FLASH_CARDS.indexOf(c)));
+  // In drill mode, show cards that are NOT mastered OR are due for SR review today
+  const today = new Date().toISOString().split('T')[0];
+  const drillDeck = deck.filter(c => {
+    const globalIdx = FLASH_CARDS.indexOf(c);
+    const isKnown = knownCards.has(globalIdx);
+    const isDue = srDue[String(globalIdx)] && srDue[String(globalIdx)] <= today;
+    return !isKnown || isDue;
+  });
+
+  // SR interval: 1 day after first review, 3 days, 7 days, 14 days (SM-2 simplified)
+  const getNextSRDate = (globalIdx: number): string => {
+    const existing = srDue[String(globalIdx)];
+    const lastDate = existing ? new Date(existing) : new Date();
+    const daysSince = existing ? Math.round((Date.now() - lastDate.getTime()) / 86400000) : 0;
+    const interval = daysSince < 1 ? 1 : daysSince < 3 ? 3 : daysSince < 7 ? 7 : 14;
+    const next = new Date();
+    next.setDate(next.getDate() + interval);
+    return next.toISOString().split('T')[0];
+  };
 
   const saveKnown = (set: Set<number>) => {
     localStorage.setItem("sd_known_cards", JSON.stringify(Array.from(set)));
@@ -918,11 +938,20 @@ function SystemDesignFlashCards() {
     next.add(globalIdx);
     setKnownCards(next);
     saveKnown(next);
+    // Remove from SR due (mastered, no need to review)
+    setSrDue(d => { const n = { ...d }; delete n[String(globalIdx)]; return n; });
     setSessionScore(s => ({ ...s, known: s.known + 1 }));
     nextCard();
   };
 
   const markReview = () => {
+    const globalIdx = FLASH_CARDS.indexOf(deck[cardIdx]);
+    // Remove from known (needs more practice) and schedule SR review
+    const next = new Set(knownCards);
+    next.delete(globalIdx);
+    setKnownCards(next);
+    saveKnown(next);
+    setSrDue(d => ({ ...d, [String(globalIdx)]: getNextSRDate(globalIdx) }));
     setSessionScore(s => ({ ...s, review: s.review + 1 }));
     nextCard();
   };
@@ -978,7 +1007,14 @@ function SystemDesignFlashCards() {
           <span className="text-yellow-400 text-lg">🃏</span>
           <div>
             <div className="text-sm font-bold text-foreground">System Design Flash Cards</div>
-            <div className="text-xs text-muted-foreground">{FLASH_CARDS.length} cards · {knownCards.size} mastered · {FLASH_CARDS.length - knownCards.size} to review</div>
+            <div className="text-xs text-muted-foreground">
+              {FLASH_CARDS.length} cards · {knownCards.size} mastered
+              {Object.values(srDue).filter(d => d <= today).length > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold">
+                  ⏰ {Object.values(srDue).filter(d => d <= today).length} due today
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -1064,10 +1100,20 @@ function SystemDesignFlashCards() {
                   className="flex-1 py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-sm font-bold transition-all">
                   ✅ Got it!
                 </button>
-                <button onClick={markReview}
-                  className="flex-1 py-2.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 text-sm font-bold transition-all">
-                  🔄 Review Again
-                </button>
+                <div className="flex-1 flex flex-col gap-1">
+                  <button onClick={markReview}
+                    className="w-full py-2.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 text-sm font-bold transition-all">
+                    🔄 Review Again
+                  </button>
+                  <div className="text-[10px] text-center text-muted-foreground">
+                    ⏰ Scheduled for SR review in {(() => {
+                      const globalIdx = FLASH_CARDS.indexOf(deck[cardIdx]);
+                      const existing = srDue[String(globalIdx)];
+                      const daysSince = existing ? Math.round((Date.now() - new Date(existing).getTime()) / 86400000) : 0;
+                      return daysSince < 1 ? 1 : daysSince < 3 ? 3 : daysSince < 7 ? 7 : 14;
+                    })()} day(s)
+                  </div>
+                </div>
               </div>
             )}
             {!flipped && (

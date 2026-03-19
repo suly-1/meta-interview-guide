@@ -62,7 +62,14 @@ export const BEHAVIORAL_QUESTIONS = [
   { id:"bq25", area:"Failure & Learning",    q:"Describe a time you received critical feedback that was hard to hear. How did you respond?",                                          hint:"Show openness to feedback and concrete behavior change." },
   { id:"bq26", area:"Failure & Learning",    q:"Tell me about a time you shipped something that had unintended negative consequences.",                                                hint:"Monitoring, rollback, post-mortem, prevention." },
   { id:"bq27", area:"Failure & Learning",    q:"Describe a time you underestimated the complexity of a project. What happened?",                                                      hint:"Estimation skills, early signals, course correction." },
-  { id:"bq28", area:"Failure & Learning",    q:"Tell me about a time you had to deliver bad news to stakeholders. How did you handle it?",                                            hint:"Transparency, options, path forward." },
+  { id:"bq28", area:"Failure & Learning",    q:"Tell me about a time you had to deliver bad news to stakeholders. How did you handle it?",                            hint:"Transparency, options, path forward." },
+  // XFN Partnership (IC7 exclusive round)
+  { id:"bq29", area:"XFN Partnership",        q:"Tell me about an XFN partnership that went particularly well. What made it successful, and what could have gone better?",        hint:"Show mutual respect, shared impact, and honest reflection on gaps." },
+  { id:"bq30", area:"XFN Partnership",        q:"Who is the most challenging person or function you've had to work with? If I called them, what would they say about you?",         hint:"Show self-awareness and growth — don't just say 'they'd say great things'." },
+  { id:"bq31", area:"XFN Partnership",        q:"Walk me through a project that required collaboration across multiple functions. How did you ensure effectiveness and alignment?",  hint:"Quantify the scope: how many teams, what disciplines, what was at stake." },
+  { id:"bq32", area:"XFN Partnership",        q:"When have you had to manage through competing goals or lack of alignment across functions? How did you resolve it?",              hint:"Show strategic thinking: how you found shared ground or escalated appropriately." },
+  { id:"bq33", area:"XFN Partnership",        q:"Have you ever been in a situation where a key XFN partner was missing or underperforming? How did you handle it?",               hint:"Show accountability without blame — what did YOU do to fill the gap?" },
+  { id:"bq34", area:"XFN Partnership",        q:"What were your go-to methods for communicating and gathering feedback across functions? Have any ever backfired?",               hint:"Specific tools/rituals + honest reflection on what didn't work." },
 ];
 
 export const STAR_STORIES = [

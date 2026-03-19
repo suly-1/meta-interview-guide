@@ -1,6 +1,6 @@
 // Design: Bold Engineering Dashboard — dark charcoal, Space Grotesk, blue accent
 import { Sun, Moon, BookOpen, CalendarClock } from "lucide-react";
-import { useStreak, useInterviewDate, useSpacedRepetition, useBehavioralRatings } from "@/hooks/useLocalStorage";
+import { useStreak, useInterviewDate, useSpacedRepetition, useBehavioralRatings, useFlashCardSRDue } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 
 interface TopNavProps {
@@ -60,6 +60,7 @@ function CountdownPill({ onTabChange }: { onTabChange: (tab: string) => void }) 
 function useSRDueCounts() {
   const [srDue] = useSpacedRepetition();
   const [bqRatings] = useBehavioralRatings();
+  const [flashCardSRDue] = useFlashCardSRDue();
   const today = new Date().toISOString().split("T")[0];
 
   // Coding patterns due
@@ -69,18 +70,21 @@ function useSRDueCounts() {
   // is past due as "due". We reuse the same srDue store keyed by question id.
   const behavioralDue = BEHAVIORAL_QUESTIONS.filter(q => srDue[q.id] && srDue[q.id] <= today).length;
 
-  return { codingDue, behavioralDue };
+  // Flash card SR due count (System Design tab)
+  const flashCardDue = Object.values(flashCardSRDue).filter(d => d <= today).length;
+
+  return { codingDue, behavioralDue, flashCardDue };
 }
 
 export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark }: TopNavProps) {
   const streak = useStreak();
-  const { codingDue, behavioralDue } = useSRDueCounts();
+  const { codingDue, behavioralDue, flashCardDue } = useSRDueCounts();
 
   const TABS = [
     { id: "overview",   label: "Overview",      due: 0 },
     { id: "coding",     label: "Coding",        due: codingDue },
     { id: "behavioral", label: "Behavioral",    due: behavioralDue },
-    { id: "design",     label: "System Design", due: 0 },
+    { id: "design",     label: "System Design", due: flashCardDue },
   ];
 
   return (

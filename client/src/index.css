@@ -194,6 +194,7 @@
   .badge-indigo  { background: oklch(0.55 0.2 280 / 0.15); color: oklch(0.68 0.2 280); border: 1px solid oklch(0.55 0.2 280 / 0.25); }
   .badge-gray    { background: oklch(1 0 0 / 0.05); color: var(--muted-foreground); border: 1px solid var(--border); }
   .badge-orange  { background: oklch(0.7 0.18 45 / 0.15); color: oklch(0.78 0.18 45); border: 1px solid oklch(0.7 0.18 45 / 0.25); }
+  .badge-teal    { background: oklch(0.62 0.16 195 / 0.15); color: oklch(0.72 0.16 195); border: 1px solid oklch(0.62 0.16 195 / 0.25); }
 
   /* ── Progress bar ───────────────────────────────────────────────────── */
   .progress-bar {
