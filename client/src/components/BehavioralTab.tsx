@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Brain, Play, RotateCcw, ChevronDown, ChevronUp, Trash2, Shuffle, Timer, X, SkipForward, Zap } from "lucide-react";
 import VoiceToStar from "@/components/VoiceToStar";
 import { BEHAVIORAL_QUESTIONS, IC_COMPARISON, META_VALUES } from "@/lib/data";
-import { useBehavioralRatings, useMockHistory, type MockSession } from "@/hooks/useLocalStorage";
+import { useBehavioralRatings, useMockHistory, useStoryStrengthHistory, type MockSession, type StoryRatingEntry } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { trpc } from "@/lib/trpc";
@@ -510,6 +510,119 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
   );
 }
 
+// ── Behavioral Story Strength Tracker ──────────────────────────────────────────
+function StoryStrengthTracker({ ratings, storyHistory }: {
+  ratings: Record<string, number>;
+  storyHistory: Record<string, StoryRatingEntry[]>;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const rated = BEHAVIORAL_QUESTIONS.filter(q => ratings[q.id] || (storyHistory[q.id]?.length ?? 0) > 0);
+  if (rated.length === 0) {
+    return (
+      <div className="prep-card p-5">
+        <div className="section-title">
+          <span className="text-teal-400">📈</span> Behavioral Story Strength Tracker
+        </div>
+        <div className="text-center py-4 text-muted-foreground text-sm">
+          <div className="text-3xl mb-2">📝</div>
+          <div>No stories rated yet.</div>
+          <div className="text-xs mt-1">Rate your answers below to track strength trends over time.</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Sort by current rating descending
+  const sorted = [...rated].sort((a, b) => (ratings[b.id] ?? 0) - (ratings[a.id] ?? 0));
+
+  // Sparkline SVG for a single question
+  function Sparkline({ entries }: { entries: StoryRatingEntry[] }) {
+    if (entries.length < 2) {
+      return <span className="text-xs text-muted-foreground">({entries.length} rating)</span>;
+    }
+    const W = 80, H = 24, pad = 2;
+    const vals = entries.map(e => e.rating);
+    const min = 1, max = 5;
+    const pts = vals.map((v, i) => {
+      const x = pad + (i / (vals.length - 1)) * (W - pad * 2);
+      const y = H - pad - ((v - min) / (max - min)) * (H - pad * 2);
+      return `${x},${y}`;
+    }).join(' ');
+    const last = vals[vals.length - 1];
+    const trend = vals.length >= 2 ? last - vals[vals.length - 2] : 0;
+    const color = trend > 0 ? '#10b981' : trend < 0 ? '#ef4444' : '#6b7280';
+    return (
+      <svg width={W} height={H} className="shrink-0">
+        <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        {vals.map((v, i) => {
+          const x = pad + (i / (vals.length - 1)) * (W - pad * 2);
+          const y = H - pad - ((v - min) / (max - min)) * (H - pad * 2);
+          return <circle key={i} cx={x} cy={y} r={i === vals.length - 1 ? 3 : 1.5} fill={color} />;
+        })}
+      </svg>
+    );
+  }
+
+  const AREA_BADGE: Record<string, string> = {
+    "Conflict & Influence": "text-red-400 bg-red-500/10 border-red-500/20",
+    "Ownership & Ambiguity": "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    "Scale & Impact": "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    "Failure & Learning": "text-purple-400 bg-purple-500/10 border-purple-500/20",
+  };
+
+  const displayList = expanded ? sorted : sorted.slice(0, 5);
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-teal-400 text-lg">📈</span>
+          <div>
+            <div className="text-sm font-bold text-foreground">Behavioral Story Strength Tracker</div>
+            <div className="text-xs text-muted-foreground">{rated.length} stories tracked · trend lines show improvement over time</div>
+          </div>
+        </div>
+        <button onClick={() => setExpanded(e => !e)} className="text-muted-foreground hover:text-foreground transition-colors">
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+      </div>
+      <div className="divide-y divide-border">
+        {displayList.map(q => {
+          const entries = storyHistory[q.id] ?? [];
+          const current = ratings[q.id] ?? 0;
+          const trend = entries.length >= 2 ? entries[entries.length - 1].rating - entries[entries.length - 2].rating : 0;
+          const trendIcon = trend > 0 ? '↑' : trend < 0 ? '↓' : '—';
+          const trendColor = trend > 0 ? 'text-emerald-400' : trend < 0 ? 'text-red-400' : 'text-muted-foreground';
+          return (
+            <div key={q.id} className="p-3 flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-foreground truncate">{q.q.slice(0, 60)}{q.q.length > 60 ? '…' : ''}</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded border ${AREA_BADGE[q.area] ?? 'text-muted-foreground bg-secondary border-border'}`}>{q.area}</span>
+                  <span className="text-xs text-muted-foreground">{entries.length} rating{entries.length !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
+              <Sparkline entries={entries} />
+              <div className="text-right shrink-0">
+                <div className="text-sm font-black text-foreground">★{current || '—'}</div>
+                <div className={`text-xs font-bold ${trendColor}`}>{trendIcon}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {sorted.length > 5 && (
+        <div className="p-3 border-t border-border text-center">
+          <button onClick={() => setExpanded(e => !e)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            {expanded ? 'Show less' : `Show all ${sorted.length} stories`}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AnswerScorer() {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
@@ -655,6 +768,7 @@ Result: ..."
 export default function BehavioralTab() {
   const [ratings, setRatings] = useBehavioralRatings();
   const [history, setHistory] = useMockHistory();
+  const [storyHistory, setStoryHistory] = useStoryStrengthHistory();
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("All");
   const [expandedQ, setExpandedQ] = useState<string | null>(null);
@@ -662,7 +776,13 @@ export default function BehavioralTab() {
   const [showPractice, setShowPractice] = useState(false);
   const [showSurprise, setShowSurprise] = useState(false);
 
-  const handleRate = (id: string, v: number) => setRatings(r => ({ ...r, [id]: v }));
+  const handleRate = (id: string, v: number) => {
+    setRatings(r => ({ ...r, [id]: v }));
+    setStoryHistory(h => ({
+      ...h,
+      [id]: [...(h[id] ?? []), { timestamp: Date.now(), rating: v }].slice(-20),
+    }));
+  };
 
   const handleMockComplete = (session: MockSession) => {
     setHistory(h => [...h, session]);
@@ -678,6 +798,169 @@ export default function BehavioralTab() {
 
   return (
     <div className="space-y-5">
+
+      {/* ===== IC7 EXCLUSIVE: TECHNICAL RETROSPECTIVE + XFN PARTNERSHIP ===== */}
+      <div className="relative overflow-hidden rounded-xl" style={{
+        background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #1e3a5f 60%, #0f172a 100%)",
+        boxShadow: "0 0 40px rgba(139,92,246,0.3), 0 0 80px rgba(59,130,246,0.15)",
+        border: "2px solid transparent",
+        backgroundClip: "padding-box"
+      }}>
+        {/* Animated gradient border overlay */}
+        <div className="absolute inset-0 rounded-xl pointer-events-none" style={{
+          background: "linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #8b5cf6)",
+          backgroundSize: "300% 100%",
+          animation: "gradientShift 4s linear infinite",
+          padding: "2px",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude"
+        }} />
+
+        <div className="relative p-5">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="text-3xl animate-bounce">🎤</div>
+            <div>
+              <div className="text-lg font-black text-white tracking-tight">IC7 EXCLUSIVE INTERVIEW ROUNDS</div>
+              <div className="text-xs font-bold text-violet-300">Technical Retrospective · XFN Partnership · MUST PREPARE ‼️</div>
+            </div>
+            <div className="ml-auto flex gap-1.5 flex-wrap justify-end">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-violet-500/30 text-violet-200 border border-violet-500/50 animate-pulse">IC7 ONLY</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-500/30 text-blue-200 border border-blue-500/50">45 MIN EACH</span>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+
+            {/* === TECHNICAL RETROSPECTIVE === */}
+            <div className="rounded-xl border border-violet-500/30 bg-violet-500/10 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">1️⃣</span>
+                <div>
+                  <div className="text-sm font-black text-violet-200">Technical Retrospective</div>
+                  <div className="text-[10px] text-violet-400">45-min discussion · NOT a presentation · Excalidraw preferred</div>
+                </div>
+              </div>
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="font-bold text-white mb-1.5">📋 What to Prepare</div>
+                  <ul className="space-y-1 text-slate-300">
+                    <li>• Choose a <strong className="text-violet-300">recent project spanning 18–24 months</strong> at IC7 scope</li>
+                    <li>• Prepare an <strong className="text-violet-300">alternative backup project</strong> (in case of NDA)</li>
+                    <li>• Focus on <strong className="text-violet-300">production projects</strong>, not toy ones</li>
+                    <li>• Prepare: high-level architecture, low-level details, trade-offs, metrics, roadblocks</li>
+                  </ul>
+                </div>
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="font-bold text-white mb-1.5">🎯 Evaluation Criteria</div>
+                  <ul className="space-y-1 text-slate-300">
+                    <li>• <strong className="text-violet-300">Technical depth & breadth</strong> — box diagram → nitty-gritty details</li>
+                    <li>• <strong className="text-violet-300">Context-setting</strong> — communicate the technical landscape clearly</li>
+                    <li>• <strong className="text-violet-300">System architecture & trade-offs</strong> — good judgment in design decisions</li>
+                    <li>• <strong className="text-violet-300">Scope</strong> — does the project reflect IC7-level impact?</li>
+                  </ul>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                    <div className="font-bold text-emerald-400 mb-1">✅ DO</div>
+                    <ul className="space-y-0.5 text-slate-300">
+                      <li>• Show breadth AND depth</li>
+                      <li>• Discuss what you'd do differently</li>
+                      <li>• Talk about biggest bug / SEV</li>
+                      <li>• Use <strong className="text-emerald-300">Excalidraw</strong> live</li>
+                      <li>• Prepare code samples</li>
+                    </ul>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30">
+                    <div className="font-bold text-red-400 mb-1">❌ DON'T</div>
+                    <ul className="space-y-0.5 text-slate-300">
+                      <li>• No slide decks</li>
+                      <li>• Don't over-explain biz context</li>
+                      <li>• Don't pick early-career projects</li>
+                      <li>• Don't rehearse a pitch</li>
+                      <li>• Don't claim no mistakes</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs">
+                  <span className="font-bold">💡 Pro tip:</span> Drawing live on{" "}
+                  <a href="https://excalidraw.com" target="_blank" rel="noopener noreferrer" className="underline text-amber-300 hover:text-amber-100">Excalidraw</a>{" "}
+                  is <strong>preferred</strong> — practice before your interview!
+                </div>
+              </div>
+            </div>
+
+            {/* === XFN PARTNERSHIP === */}
+            <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">2️⃣</span>
+                <div>
+                  <div className="text-sm font-black text-blue-200">XFN Partnership & Communication</div>
+                  <div className="text-[10px] text-blue-400">Discussion Q&A · ~5 questions + follow-ups</div>
+                </div>
+              </div>
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="font-bold text-white mb-1.5">📋 5 Core Competencies</div>
+                  <ul className="space-y-1 text-slate-300">
+                    <li>• <strong className="text-blue-300">Building & maintaining XFN relationships</strong> — mutual respect, shared impact</li>
+                    <li>• <strong className="text-blue-300">Working through conflict</strong> — competing goals, misalignment</li>
+                    <li>• <strong className="text-blue-300">Communicating effectively</strong> — keeping teams aligned, gathering feedback</li>
+                    <li>• <strong className="text-blue-300">Strategic thinking</strong> — your process & approach to partnerships</li>
+                    <li>• <strong className="text-blue-300">Influencing at scale</strong> — driving outcomes without direct authority</li>
+                  </ul>
+                </div>
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="font-bold text-white mb-1.5">❓ Example Questions to Prepare</div>
+                  <ul className="space-y-1 text-slate-300">
+                    <li>• Tell me about an XFN partnership that went well. What could have gone better?</li>
+                    <li>• Who's the most challenging person you've worked with? What would they say about you?</li>
+                    <li>• Walk me through a project requiring multi-function collaboration.</li>
+                    <li>• When have you managed through competing goals or lack of alignment?</li>
+                    <li>• Have you had a key XFN partner who was underperforming? How did you handle it?</li>
+                    <li>• What were your go-to methods for communicating? Have any ever backfired?</li>
+                  </ul>
+                </div>
+                <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+                  <div className="font-bold text-cyan-300 mb-1.5">🏆 IC7-Level Expectations</div>
+                  <ul className="space-y-1 text-slate-300">
+                    <li>• Cross-org collaboration at <strong className="text-cyan-300">significant scale</strong></li>
+                    <li>• Influencing decisions <strong className="text-cyan-300">without direct authority</strong></li>
+                    <li>• Managing through <strong className="text-cyan-300">complexity and ambiguity</strong></li>
+                    <li>• Building trust with diverse stakeholders (PMs, designers, data scientists)</li>
+                  </ul>
+                </div>
+                <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <div className="font-bold text-emerald-400 mb-1">✅ Tips for Success</div>
+                  <ul className="space-y-0.5 text-slate-300">
+                    <li>• Have <strong className="text-emerald-300">2–3 strong, detailed examples</strong> ready covering different aspects</li>
+                    <li>• Be specific about <strong className="text-emerald-300">YOUR role</strong> and actions, not just the team's</li>
+                    <li>• Show <strong className="text-emerald-300">self-awareness</strong> — what you learned and would do differently</li>
+                    <li>• Balance breadth & depth; stay responsive to follow-up questions</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* General Tips Footer */}
+          <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
+            <div className="font-bold text-white text-xs mb-2">📋 General Tips for Both Interviews</div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-300">
+              <div>⏱️ <strong className="text-white">Time management</strong> — manage both time and depth</div>
+              <div>💬 <strong className="text-white">Be interactive</strong> — discussions, not monologues</div>
+              <div>🪞 <strong className="text-white">Show self-reflection</strong> — candid reflections on mistakes</div>
+              <div>🕐 <strong className="text-white">Stay recent</strong> — use most recent, relevant examples</div>
+              <div>🎨 <strong className="text-white">Prepare Excalidraw</strong> — practice at{" "}
+                <a href="https://excalidraw.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-300">excalidraw.com</a>
+              </div>
+              <div>🎯 <strong className="text-white">IC7 scope</strong> — every example should reflect IC7-level impact</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* AI Answer Scorer */}
       <AnswerScorer />
 
@@ -745,6 +1028,9 @@ export default function BehavioralTab() {
       {showSurprise && <SurpriseMe ratings={ratings} onRate={handleRate} onClose={() => setShowSurprise(false)} />}
       {showPractice && <PracticeMode ratings={ratings} onRate={handleRate} />}
       {showMock && <FullMockSession onComplete={handleMockComplete} />}
+
+      {/* Behavioral Story Strength Tracker */}
+      <StoryStrengthTracker ratings={ratings} storyHistory={storyHistory} />
 
       {/* Mock History */}
       <MockHistoryLog history={history} onClear={() => { setHistory([]); toast.success("History cleared."); }} />

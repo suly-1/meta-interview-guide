@@ -225,3 +225,12 @@ export interface DifficultyEstimate {
 export function useCTCIDifficultyEstimates() {
   return useLocalStorage<Record<string, DifficultyEstimate>>("meta_ctci_difficulty_v1", {});
 }
+
+// ── Behavioral Story Strength Tracker (per-question rating history) ───────────
+export interface StoryRatingEntry {
+  timestamp: number;
+  rating: number;
+}
+export function useStoryStrengthHistory() {
+  return useLocalStorage<Record<string, StoryRatingEntry[]>>("meta_story_strength_v1", {});
+}

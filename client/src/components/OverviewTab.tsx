@@ -5,7 +5,8 @@
 import { useState } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics } from "@/hooks/useLocalStorage";
+import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates } from "@/hooks/useLocalStorage";
+import { CTCI_QUESTIONS } from "@/lib/ctciData";
 import { toast } from "sonner";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
 import { trpc } from "@/lib/trpc";
@@ -1140,6 +1141,143 @@ function StudySessionPlanner() {
   );
 }
 
+// ── CTCI Divergence Report ─────────────────────────────────────────────────
+function CTCIDivergenceReport() {
+  const [diffEstimates] = useCTCIDifficultyEstimates();
+  const [expanded, setExpanded] = useState(false);
+
+  const SELF_IDX: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2, "Very Hard": 3 };
+  const OFF_IDX: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
+
+  const divergences = CTCI_QUESTIONS
+    .filter(q => diffEstimates[q.num])
+    .map(q => {
+      const self = diffEstimates[q.num].selfRating;
+      const official = q.difficulty;
+      const gap = SELF_IDX[self] - OFF_IDX[official];
+      return { ...q, selfRating: self, gap };
+    })
+    .filter(q => q.gap !== 0)
+    .sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
+
+  const harder = divergences.filter(q => q.gap > 0);
+  const easier = divergences.filter(q => q.gap < 0);
+
+  if (Object.keys(diffEstimates).length === 0) {
+    return (
+      <div className="prep-card p-5">
+        <div className="section-title">
+          <span className="text-pink-400">📊</span> CTCI Difficulty Divergence Report
+        </div>
+        <div className="text-center py-6 text-muted-foreground text-sm">
+          <div className="text-3xl mb-2">🔍</div>
+          <div>No self-assessments yet.</div>
+          <div className="text-xs mt-1">Rate problem difficulty in the Coding tab to see your calibration report.</div>
+        </div>
+      </div>
+    );
+  }
+
+  const total = Object.keys(diffEstimates).length;
+  const diverged = divergences.length;
+  const calibrationPct = Math.round(((total - diverged) / total) * 100);
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-pink-400 text-lg">📊</span>
+          <div>
+            <div className="text-sm font-bold text-foreground">CTCI Difficulty Divergence Report</div>
+            <div className="text-xs text-muted-foreground">{total} problems rated · {calibrationPct}% calibration accuracy</div>
+          </div>
+        </div>
+        <button onClick={() => setExpanded(e => !e)} className="text-muted-foreground hover:text-foreground transition-colors">
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+      </div>
+
+      {/* Summary bar */}
+      <div className="p-4 grid grid-cols-3 gap-3">
+        <div className="text-center p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+          <div className="text-xl font-black text-emerald-400 stat-num">{total - diverged}</div>
+          <div className="text-xs text-muted-foreground">Calibrated</div>
+        </div>
+        <div className="text-center p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+          <div className="text-xl font-black text-orange-400 stat-num">{harder.length}</div>
+          <div className="text-xs text-muted-foreground">Harder than expected</div>
+        </div>
+        <div className="text-center p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+          <div className="text-xl font-black text-blue-400 stat-num">{easier.length}</div>
+          <div className="text-xs text-muted-foreground">Easier than expected</div>
+        </div>
+      </div>
+
+      {/* Calibration bar */}
+      <div className="px-4 pb-3">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-xs text-muted-foreground">Calibration</span>
+          <span className="text-xs font-bold text-foreground">{calibrationPct}%</span>
+        </div>
+        <div className="h-2 rounded-full bg-secondary overflow-hidden">
+          <div className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${calibrationPct}%`, background: calibrationPct >= 80 ? "oklch(0.65 0.18 145)" : calibrationPct >= 60 ? "oklch(0.78 0.17 75)" : "oklch(0.65 0.22 25)" }} />
+        </div>
+      </div>
+
+      {expanded && divergences.length > 0 && (
+        <div className="border-t border-border divide-y divide-border">
+          {harder.length > 0 && (
+            <div className="p-4">
+              <div className="text-xs font-bold text-orange-400 mb-2">⚠️ Harder Than Expected — Focus Here</div>
+              <div className="space-y-2">
+                {harder.slice(0, 5).map(q => (
+                  <div key={q.num} className="flex items-center gap-3 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                    <span className="text-xs font-mono text-muted-foreground w-6">#{q.num}</span>
+                    <a href={q.url} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-medium text-foreground hover:text-orange-400 flex-1 truncate transition-colors">{q.name}</a>
+                    <span className="text-xs text-muted-foreground shrink-0">{q.difficulty} → {q.selfRating}</span>
+                    <div className="flex gap-0.5 shrink-0">
+                      {Array.from({ length: q.gap }).map((_, i) => (
+                        <span key={i} className="text-orange-400 text-xs">▲</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {easier.length > 0 && (
+            <div className="p-4">
+              <div className="text-xs font-bold text-blue-400 mb-2">💪 Easier Than Expected — Strong Areas</div>
+              <div className="space-y-2">
+                {easier.slice(0, 5).map(q => (
+                  <div key={q.num} className="flex items-center gap-3 p-2 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                    <span className="text-xs font-mono text-muted-foreground w-6">#{q.num}</span>
+                    <a href={q.url} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-medium text-foreground hover:text-blue-400 flex-1 truncate transition-colors">{q.name}</a>
+                    <span className="text-xs text-muted-foreground shrink-0">{q.difficulty} → {q.selfRating}</span>
+                    <div className="flex gap-0.5 shrink-0">
+                      {Array.from({ length: Math.abs(q.gap) }).map((_, i) => (
+                        <span key={i} className="text-blue-400 text-xs">▼</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {expanded && divergences.length === 0 && (
+        <div className="p-4 text-center text-sm text-emerald-400">
+          🎯 Perfect calibration! Your self-assessments match official difficulty on all rated problems.
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OverviewTab() {
   return (
     <div className="space-y-6">
@@ -1153,6 +1291,7 @@ export default function OverviewTab() {
       <ResourcesSection />
       <ReadinessGoalSetter />
       <StudySessionPlanner />
+      <CTCIDivergenceReport />
       <MostHintedBadge />
       <WeeklyDigest />
       <div className="flex justify-start">

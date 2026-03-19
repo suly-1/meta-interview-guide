@@ -121,3 +121,11 @@
 - [x] Integrate Meta System Design Interview Prep 2026 guide into System Design tab (highlighted, emoji-rich, fun + challenging)
 - [x] CTCI Problem Difficulty Estimator (self-assessment vs official, divergence analytics)
 - [x] AI Study Session Planner (30/60/90-min plans, LLM-powered, SR + hint + goal data)
+
+## New Features — Round 16
+- [x] CTCI Divergence Report (Perception vs Reality card in Overview tab, top 5 blind spots)
+- [x] Behavioral Story Strength Tracker (persist rating history per story, sparkline trend lines)
+- [x] System Design Flash Cards (flip-card drill mode in System Design tab, 15 cards, Got it/Review Again)
+
+## New Features — Round 17
+- [x] Add Technical Retrospective + XFN Partnership interview guides to Behavioral tab (highlighted, emoji-rich, do/don't sections, animated gradient border)

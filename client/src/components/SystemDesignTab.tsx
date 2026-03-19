@@ -867,6 +867,224 @@ export default function SystemDesignTab() {
           ))}
         </div>
       </div>
+
+      {/* System Design Flash Cards Drill Mode */}
+      <SystemDesignFlashCards />
+    </div>
+  );
+}
+
+// ── System Design Flash Cards ─────────────────────────────────────────────────
+const FLASH_CARDS = [
+  { q: "What is the CAP theorem?", a: "A distributed system can guarantee at most 2 of: Consistency (every read gets the latest write), Availability (every request gets a response), Partition Tolerance (system works despite network splits). In practice, P is unavoidable, so you choose CP or AP.", tag: "Fundamentals" },
+  { q: "When would you use consistent hashing?", a: "When distributing data across nodes where nodes can join/leave frequently (e.g., distributed caches, DHTs). It minimizes key remapping when topology changes — only K/N keys move on average (K=keys, N=nodes). Used in Cassandra, DynamoDB, Memcached.", tag: "Fundamentals" },
+  { q: "Explain the difference between SQL and NoSQL. When do you choose each?", a: "SQL: ACID, structured schema, strong consistency, vertical scaling, great for relational data and complex queries. NoSQL: flexible schema, horizontal scaling, eventual consistency, great for high-throughput unstructured/semi-structured data. Choose SQL for financial/transactional systems; NoSQL for social feeds, logs, catalogs.", tag: "Databases" },
+  { q: "What is a write-ahead log (WAL) and why is it important?", a: "WAL records every change to a log before applying it to the database. Ensures durability: if the system crashes mid-write, the log can replay the operation. Used in PostgreSQL, Kafka (commit log), and most ACID databases. Key for crash recovery and replication.", tag: "Databases" },
+  { q: "How does a CDN work and when should you use one?", a: "CDN caches static assets (images, JS, CSS, video) at edge nodes geographically close to users. Reduces latency, offloads origin servers, improves availability. Use for: static assets, media streaming, API acceleration. Key concepts: cache-control headers, TTL, cache invalidation, origin pull vs push.", tag: "Scalability" },
+  { q: "What is the difference between horizontal and vertical scaling?", a: "Vertical (scale-up): add more CPU/RAM to existing machine. Simple but has limits and single point of failure. Horizontal (scale-out): add more machines. Enables near-infinite scale, better fault tolerance. Requires stateless services, load balancing, and distributed data management.", tag: "Scalability" },
+  { q: "Explain the fan-out problem in social networks.", a: "When a user with millions of followers posts, you need to update millions of feeds. Push model (write-time fan-out): write to all follower feeds on post — fast reads, slow writes. Pull model (read-time fan-out): compute feed on read — slow reads, fast writes. Hybrid: push for normal users, pull for celebrities (>threshold followers).", tag: "Meta-Specific" },
+  { q: "What is a circuit breaker pattern?", a: "Prevents cascading failures: wraps calls to a service and tracks failure rate. States: Closed (normal), Open (failing — fast-fail all requests), Half-Open (probe with limited traffic). When failure rate exceeds threshold, opens circuit. After timeout, tries half-open. Used in Netflix Hystrix, resilience4j.", tag: "Reliability" },
+  { q: "How do you design a rate limiter?", a: "Algorithms: Token Bucket (smooth, allows bursts), Leaky Bucket (strict rate), Fixed Window Counter (simple, boundary spikes), Sliding Window Log (accurate, memory-heavy), Sliding Window Counter (balanced). For distributed: use Redis with atomic operations (INCR + EXPIRE or Lua scripts). Store per user/IP/API key.", tag: "Meta-Specific" },
+  { q: "What is eventual consistency and when is it acceptable?", a: "Eventual consistency: all replicas converge to the same value given no new updates. Acceptable for: social media likes/views, shopping cart (resolve on checkout), DNS, product catalogs. NOT acceptable for: financial transactions, inventory (overselling), authentication. Tradeoff: availability and performance vs strong consistency.", tag: "Fundamentals" },
+  { q: "How would you design a distributed job queue?", a: "Components: Producer (enqueues jobs), Queue (Kafka/SQS/RabbitMQ), Workers (consume and process), Dead Letter Queue (failed jobs), Scheduler (delayed/recurring jobs). Key concerns: at-least-once delivery, idempotency (dedup by job ID), priority queues, visibility timeout, backpressure, monitoring lag.", tag: "Meta-Specific" },
+  { q: "Explain the Saga pattern for distributed transactions.", a: "Manages distributed transactions without 2PC. Two types: Choreography (services emit events, react to each other — decoupled but hard to track) and Orchestration (central coordinator calls each service — easier to reason about). Each step has a compensating transaction for rollback. Used when ACID across services is infeasible.", tag: "Reliability" },
+  { q: "What is CQRS and when should you use it?", a: "Command Query Responsibility Segregation: separate read (Query) and write (Command) models. Write model optimizes for consistency and business rules; read model optimizes for query performance (denormalized, pre-computed). Use when read/write patterns differ significantly, need high read throughput, or want event sourcing. Adds complexity — don't use for simple CRUD.", tag: "Databases" },
+  { q: "How do you handle hot spots in a distributed database?", a: "Hot spots occur when one shard/partition gets disproportionate traffic. Solutions: (1) Add random suffix to hot keys to spread across shards, (2) Pre-split hot partitions, (3) Caching layer in front of hot data, (4) Read replicas for hot reads, (5) Application-level sharding with consistent hashing, (6) Adaptive load balancing.", tag: "Scalability" },
+  { q: "What is the difference between a message queue and a stream?", a: "Message Queue (RabbitMQ, SQS): each message consumed by one consumer, deleted after processing. Good for task distribution, work queues. Stream (Kafka, Kinesis): messages retained for a period, multiple consumers can read independently at their own offset. Good for event sourcing, audit logs, analytics, replay. Kafka is both.", tag: "Fundamentals" },
+];
+
+function SystemDesignFlashCards() {
+  const [mode, setMode] = useState<"browse" | "drill">("browse");
+  const [cardIdx, setCardIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [filterTag, setFilterTag] = useState("All");
+  const [knownCards, setKnownCards] = useState<Set<number>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("sd_known_cards") ?? "[]") as number[]); } catch { return new Set(); }
+  });
+  const [sessionScore, setSessionScore] = useState({ known: 0, review: 0 });
+  const [sessionDone, setSessionDone] = useState(false);
+
+  const tags = ["All", ...Array.from(new Set(FLASH_CARDS.map(c => c.tag)))];
+  const deck = filterTag === "All" ? FLASH_CARDS : FLASH_CARDS.filter(c => c.tag === filterTag);
+  const drillDeck = deck.filter(c => !knownCards.has(FLASH_CARDS.indexOf(c)));
+
+  const saveKnown = (set: Set<number>) => {
+    localStorage.setItem("sd_known_cards", JSON.stringify(Array.from(set)));
+  };
+
+  const markKnown = () => {
+    const globalIdx = FLASH_CARDS.indexOf(deck[cardIdx]);
+    const next = new Set(knownCards);
+    next.add(globalIdx);
+    setKnownCards(next);
+    saveKnown(next);
+    setSessionScore(s => ({ ...s, known: s.known + 1 }));
+    nextCard();
+  };
+
+  const markReview = () => {
+    setSessionScore(s => ({ ...s, review: s.review + 1 }));
+    nextCard();
+  };
+
+  const nextCard = () => {
+    setFlipped(false);
+    const activeDeck = mode === "drill" ? drillDeck : deck;
+    if (cardIdx + 1 >= activeDeck.length) {
+      setSessionDone(true);
+    } else {
+      setCardIdx(i => i + 1);
+    }
+  };
+
+  const startDrill = () => {
+    setMode("drill");
+    setCardIdx(0);
+    setFlipped(false);
+    setSessionScore({ known: 0, review: 0 });
+    setSessionDone(false);
+  };
+
+  const resetSession = () => {
+    setCardIdx(0);
+    setFlipped(false);
+    setSessionScore({ known: 0, review: 0 });
+    setSessionDone(false);
+  };
+
+  const resetAll = () => {
+    const next = new Set<number>();
+    setKnownCards(next);
+    saveKnown(next);
+    resetSession();
+    setMode("browse");
+  };
+
+  const activeDeck = mode === "drill" ? drillDeck : deck;
+  const currentCard = activeDeck[cardIdx];
+
+  const TAG_COLORS: Record<string, string> = {
+    "Fundamentals": "text-blue-400 bg-blue-500/10 border-blue-500/30",
+    "Databases": "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    "Scalability": "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+    "Reliability": "text-red-400 bg-red-500/10 border-red-500/30",
+    "Meta-Specific": "text-purple-400 bg-purple-500/10 border-purple-500/30",
+  };
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-yellow-400 text-lg">🃏</span>
+          <div>
+            <div className="text-sm font-bold text-foreground">System Design Flash Cards</div>
+            <div className="text-xs text-muted-foreground">{FLASH_CARDS.length} cards · {knownCards.size} mastered · {FLASH_CARDS.length - knownCards.size} to review</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={startDrill}
+            className="px-3 py-1.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 text-xs font-bold transition-all">
+            ⚡ Drill Mode
+          </button>
+          {knownCards.size > 0 && (
+            <button onClick={resetAll} className="text-xs text-muted-foreground hover:text-foreground transition-colors">↺ Reset</button>
+          )}
+        </div>
+      </div>
+
+      {/* Tag filter */}
+      <div className="p-3 border-b border-border flex gap-2 flex-wrap">
+        {tags.map(t => (
+          <button key={t} onClick={() => { setFilterTag(t); setCardIdx(0); setFlipped(false); setSessionDone(false); }}
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+              filterTag === t ? (TAG_COLORS[t] ?? 'bg-secondary border-border text-foreground') : 'bg-transparent border-border text-muted-foreground hover:text-foreground'
+            }`}>{t}</button>
+        ))}
+      </div>
+
+      {/* Card area */}
+      <div className="p-5">
+        {sessionDone ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-3">🎉</div>
+            <div className="text-lg font-black text-foreground mb-1">Session Complete!</div>
+            <div className="flex justify-center gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-black text-emerald-400">{sessionScore.known}</div>
+                <div className="text-xs text-muted-foreground">Got it</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-black text-orange-400">{sessionScore.review}</div>
+                <div className="text-xs text-muted-foreground">Review</div>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <button onClick={resetSession} className="px-4 py-2 rounded-lg bg-secondary hover:bg-accent border border-border text-sm font-semibold text-foreground transition-all">Restart</button>
+              <button onClick={() => { setMode("browse"); resetSession(); }} className="px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-sm font-semibold transition-all">Browse All</button>
+            </div>
+          </div>
+        ) : currentCard ? (
+          <div className="space-y-4">
+            {/* Progress */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{mode === "drill" ? "⚡ Drill" : "📖 Browse"} · Card {cardIdx + 1} of {activeDeck.length}</span>
+              <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${TAG_COLORS[currentCard.tag] ?? 'text-muted-foreground border-border'}`}>{currentCard.tag}</span>
+            </div>
+            <div className="h-1 rounded-full bg-secondary overflow-hidden">
+              <div className="h-full rounded-full bg-yellow-500/60 transition-all duration-300" style={{ width: `${((cardIdx + 1) / activeDeck.length) * 100}%` }} />
+            </div>
+
+            {/* Flash card */}
+            <div
+              onClick={() => setFlipped(f => !f)}
+              className={`relative rounded-xl border cursor-pointer transition-all duration-300 min-h-36 p-5 flex flex-col justify-center ${
+                flipped
+                  ? 'bg-emerald-500/5 border-emerald-500/30'
+                  : 'bg-secondary border-border hover:border-yellow-500/30'
+              }`}
+            >
+              {!flipped ? (
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold text-yellow-400 uppercase tracking-wider">Question</div>
+                  <div className="text-sm font-semibold text-foreground leading-relaxed">{currentCard.q}</div>
+                  <div className="text-xs text-muted-foreground mt-3">Click to reveal answer</div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Answer</div>
+                  <div className="text-xs text-foreground leading-relaxed">{currentCard.a}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            {flipped && (
+              <div className="flex gap-3">
+                <button onClick={markKnown}
+                  className="flex-1 py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-sm font-bold transition-all">
+                  ✅ Got it!
+                </button>
+                <button onClick={markReview}
+                  className="flex-1 py-2.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 text-sm font-bold transition-all">
+                  🔄 Review Again
+                </button>
+              </div>
+            )}
+            {!flipped && (
+              <button onClick={() => setFlipped(true)}
+                className="w-full py-2.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 text-sm font-bold transition-all">
+                Reveal Answer
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <div className="text-3xl mb-2">🎉</div>
+            <div className="text-sm">All cards mastered in this category!</div>
+            <button onClick={resetAll} className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors">Reset and start over</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
