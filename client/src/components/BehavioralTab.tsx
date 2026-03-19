@@ -1,5 +1,6 @@
 // Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useXPContext } from "@/contexts/XPContext";
 import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
@@ -123,6 +124,7 @@ function playBeep(freq = 880, dur = 0.15) {
 
 // ── Practice Mode Component ─────────────────────────────────────────────────
 function PracticeMode() {
+  const { addXP } = useXPContext();
   const [active, setActive]           = useState(false);
   const [question, setQuestion]       = useState<QuestionEntry | null>(null);
   const [remaining, setRemaining]     = useState(PRACTICE_DURATION);
@@ -159,7 +161,9 @@ function PracticeMode() {
     addRating(question.question, rating);
     setSavedRating(rating);
     recordActivity();
-  }, [question, addRating, recordActivity]);
+    // Award XP for completing a behavioral practice session
+    addXP('behavioral_session', `Behavioral: ${question.question.slice(0, 50)}`);
+  }, [question, addRating, recordActivity, addXP]);
 
   const nextQuestion = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);

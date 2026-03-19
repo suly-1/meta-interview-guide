@@ -16,6 +16,8 @@ import SystemDesignTab from "@/components/SystemDesignTab";
 import MockInterviewSimulator from "@/components/MockInterviewSimulator";
 import CodePractice from "@/pages/CodePractice";
 import { useStreak } from "@/hooks/useStreak";
+import XPLevelBar from "@/components/XPLevelBar";
+import { useXPContext } from "@/contexts/XPContext";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
@@ -44,6 +46,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("ctci");
   const [direction, setDirection]  = useState(1);
   const { streak, activatedToday } = useStreak();
+  const { totalXP, events } = useXPContext();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
@@ -105,6 +108,10 @@ export default function Home() {
               </button>
             </div>
 
+            {/* XP Level Bar */}
+            <div className="flex-shrink-0 hidden sm:block">
+              <XPLevelBar totalXP={totalXP} events={events} />
+            </div>
             {/* Streak badge */}
             <div className="flex-shrink-0 pr-1">
               <motion.div

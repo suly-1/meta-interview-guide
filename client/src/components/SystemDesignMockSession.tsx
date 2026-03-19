@@ -1,6 +1,7 @@
 // SystemDesignMockSession — 45-min timed mock with 5-section answer panels + LLM IC-level debrief
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
+import { useXPContext } from "@/contexts/XPContext";
 import {
   Clock, Play, Square, ChevronDown, ChevronUp, RotateCcw,
   CheckCircle2, AlertCircle, Loader2, Zap, Trophy, Target,
@@ -292,6 +293,7 @@ function ScoreBar({ score, label, feedback }: { score: number; label: string; fe
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function SystemDesignMockSession() {
+  const { addXP } = useXPContext();
   const [phase, setPhase] = useState<SessionPhase>("setup");
   const [selectedProblem, setSelectedProblem] = useState<DesignProblem>(PROBLEMS[0]);
   const [targetLevel, setTargetLevel] = useState<ICLevel>("IC6");
@@ -365,8 +367,17 @@ export default function SystemDesignMockSession() {
       const updated = [...loadMockHistory(), entry];
       saveMockHistory(updated);
       setMockHistory(updated);
+      // Award XP for completing an SD mock session
+      const isFirstMock = loadMockHistory().length === 0;
+      if (isFirstMock) {
+        addXP('first_mock', `First SD Mock: ${selectedProblem.title}`);
+      } else {
+        const verdict = result.icLevelVerdict;
+        const bonus = verdict === 'Strong Hire' ? 20 : verdict === 'Hire' ? 10 : 0;
+        addXP('sd_mock', `SD Mock (${verdict}): ${selectedProblem.title}`, 40 + bonus);
+      }
     }
-  }, [debrief, targetLevel, selectedProblem, secsElapsed, answers]);
+  }, [debrief, targetLevel, selectedProblem, secsElapsed, answers, addXP]);
 
   // Countdown timer
   useEffect(() => {

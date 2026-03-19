@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { XPProvider } from "./contexts/XPContext";
 import Home from "./pages/Home";
 import DisclaimerGate from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
@@ -26,14 +27,16 @@ function App() {
         defaultTheme="light"
         switchable
       >
-        <TooltipProvider>
-          <Toaster />
-          {/* DisclaimerGate blocks ALL content until the user explicitly acknowledges the disclaimer */}
-          <DisclaimerGate>
-            <Router />
-            <PatternUnlockCelebration />
-          </DisclaimerGate>
-        </TooltipProvider>
+        <XPProvider>
+          <TooltipProvider>
+            <Toaster />
+            {/* DisclaimerGate blocks ALL content until the user explicitly acknowledges the disclaimer */}
+            <DisclaimerGate>
+              <Router />
+              <PatternUnlockCelebration />
+            </DisclaimerGate>
+          </TooltipProvider>
+        </XPProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

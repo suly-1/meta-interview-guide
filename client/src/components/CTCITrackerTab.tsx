@@ -10,6 +10,7 @@ import { CTCI_PROBLEMS, CTCI_TOPICS, DIFFICULTY_COLORS } from '@/lib/ctciProblem
 import { useCTCIProgress } from '@/hooks/useCTCIProgress';
 import { useCTCIStreak } from '@/hooks/useCTCIStreak';
 import CTCIExport from '@/components/CTCIExport';
+import { useXPContext } from '@/contexts/XPContext';
 import {
   CheckCircle2, Circle, Star, StarOff, ExternalLink,
   ChevronDown, ChevronUp, Search, X, RotateCcw, SlidersHorizontal,
@@ -21,6 +22,7 @@ const PAGE_SIZE = 50;
 export default function CTCITrackerTab() {
   const { progress, toggleSolved, toggleStarred, setNotes, resetAll, getSolvedCount, getStarredCount } = useCTCIProgress();
   const { streak, longestStreak, activatedToday, recordSolve } = useCTCIStreak();
+  const { addXP } = useXPContext();
 
   // Filters
   const [search, setSearch] = useState('');
@@ -81,7 +83,16 @@ export default function CTCITrackerTab() {
     const wasSolved = progress[id]?.solved;
     toggleSolved(id);
     // Record streak only when marking as solved (not unsolved)
-    if (!wasSolved) recordSolve();
+    if (!wasSolved) {
+      recordSolve();
+      const currentSolved = getSolvedCount();
+      // First solve milestone
+      if (currentSolved === 0) {
+        addXP('first_solve', 'First CTCI problem solved!');
+      } else {
+        addXP('ctci_solve', `Solved CTCI problem #${id}`);
+      }
+    }
   };
   const handleToggleStarred = (id: number) => { toggleStarred(id); };
   const handleExpand = (id: number) => {

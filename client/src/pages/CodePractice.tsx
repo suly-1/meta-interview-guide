@@ -13,6 +13,7 @@ import { useCTCIProgress } from "@/hooks/useCTCIProgress";
 import { useSpacedRepetition } from "@/hooks/useSpacedRepetition";
 import { getWeakestPatterns } from "@/hooks/useDrillRatings";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
+import { useXPContext } from "@/contexts/XPContext";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
@@ -1033,6 +1034,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
 // ─── Main component ────────────────────────────────────────────────────────
 export default function CodePractice() {
   const { progress, toggleSolved, toggleStarred, setNotes: setProgressNotes } = useCTCIProgress();
+  const { addXP } = useXPContext();
 
   // Problem selection
   const [search, setSearch] = useState("");
@@ -1491,9 +1493,16 @@ export default function CodePractice() {
           problemNames,
           date: Date.now(),
         };
-        const updated = [entry, ...loadSprintHistory()];
+         const updated = [entry, ...loadSprintHistory()];
         saveSprintHistory(updated);
         setSprintHistory(updated);
+        // Award XP for completing a sprint
+        const isFirstSprint = loadSprintHistory().length === 0;
+        if (isFirstSprint) {
+          addXP('first_sprint', `First sprint completed: ${prev.topic}`);
+        } else {
+          addXP('sprint_complete', `Topic Sprint: ${prev.topic}`);
+        }
         return { ...prev, active: false, scores, done: true };
       }
       setSelectedId(prev.queue[nextIdx]);
@@ -1501,8 +1510,7 @@ export default function CodePractice() {
       timerSecsRef.current = 0;
       return { ...prev, currentIdx: nextIdx, secsLeft: 10 * 60, hintsUsed: 0, scores };
     });
-  }, [hintsUsedThisRun]);
-
+  }, [hintsUsedThisRun, addXP]);
   // Topic Sprint countdown
   useEffect(() => {
     if (sprint.active) {

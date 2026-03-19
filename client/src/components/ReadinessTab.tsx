@@ -4,10 +4,13 @@
  * 2. Recruiter-Ready Summary (printable one-page PDF)
  */
 import { useRef, useMemo } from "react";
-import { Printer, BarChart2, FileDown, ShieldCheck } from "lucide-react";
+import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
+import AchievementBadgeWall from "@/components/AchievementBadgeWall";
+import XPStatsPanel from "@/components/XPStatsPanel";
+import { useXPContext } from "@/contexts/XPContext";
 import { PATTERNS, BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { computeReadiness } from "@/hooks/useReadinessScore";
@@ -293,8 +296,45 @@ function RecruiterSummaryPrint() {
 }
 
 export default function ReadinessTab() {
+  const { totalXP, events } = useXPContext();
   return (
     <div className="space-y-10">
+      {/* ── XP Level & Progress ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Zap size={20} className="text-yellow-500" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                XP Level & Progress
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Earn XP by solving problems, completing sprints, and running mock interviews. Level up from Rookie to Distinguished Engineer.
+              </p>
+            </div>
+          </div>
+        </div>
+        <XPStatsPanel totalXP={totalXP} events={events} />
+      </section>
+
+      {/* ── Achievement Badges ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Trophy size={20} className="text-amber-500" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Achievement Badges
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                30 badges across Coding, Behavioral, Mock Interviews, Streaks, and Milestones — automatically unlocked as you practice.
+              </p>
+            </div>
+          </div>
+        </div>
+        <AchievementBadgeWall />
+      </section>
+
       {/* ── Readiness Goal Setter ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

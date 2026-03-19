@@ -131,8 +131,8 @@
 - [ ] SR due-date heatmap (GitHub-style 30-day calendar)
 - [ ] Weak-pattern drill auto-queue (Fix My Weaknesses button)
 - [ ] Time-of-day performance chart
-- [ ] Achievement badge wall
-- [ ] Daily XP system
+- [x] Achievement badge wall
+- [x] Daily XP system
 - [ ] Interview countdown in sticky nav
 - [ ] System Design pattern comparison table
 - [ ] Keyboard shortcut overlay (? key)

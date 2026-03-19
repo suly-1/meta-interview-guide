@@ -6,6 +6,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
+import { useXPContext } from "@/contexts/XPContext";
 import {
   Bug, PlusCircle, TrendingUp, Clock, Play, Square, ChevronDown, ChevronUp,
   CheckCircle2, AlertTriangle, Lightbulb, RotateCcw, Target, Brain,
@@ -495,6 +496,7 @@ const VERDICT_STYLES: Record<string, string> = {
 type Phase_ = "setup" | "session" | "debrief";
 
 export default function AIRoundMockSession() {
+  const { addXP } = useXPContext();
   const [phase, setPhase] = useState<Phase_>("setup");
   const [selectedProblem, setSelectedProblem] = useState<MockProblem | null>(null);
   const [randomize, setRandomize] = useState(false);
@@ -590,8 +592,18 @@ export default function AIRoundMockSession() {
       };
       const history = loadAIHistory();
       saveAIHistory([...history, entry]);
+      // Award XP for completing an AI mock session
+      const verdict = result.icLevelVerdict;
+      const isFirstMock = loadAIHistory().length <= 1;
+      if (isFirstMock) {
+        addXP('first_mock', `First AI Mock: ${selectedProblem.title}`);
+      } else {
+        // Bonus XP for strong performance
+        const bonus = verdict === 'Strong Hire' ? 20 : verdict === 'Hire' ? 10 : 0;
+        addXP('ai_mock', `AI Mock (${verdict}): ${selectedProblem.title}`, 40 + bonus);
+      }
     }
-  }, [selectedProblem, phaseAnswers, workflowNotes, aiUsageNotes, targetLevel, timeLeft, debrief]);
+  }, [selectedProblem, phaseAnswers, workflowNotes, aiUsageNotes, targetLevel, timeLeft, debrief, addXP]);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
