@@ -29,6 +29,7 @@ import BlindSpotDetector from "@/components/BlindSpotDetector";
 import ActivityCalendar60 from "@/components/ActivityCalendar60";
 import PrepTimeline4Week from "@/components/PrepTimeline4Week";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
+import DailyNotificationReminder from "@/components/DailyNotificationReminder";
 
 const TAG_COLORS: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700",
@@ -659,6 +660,20 @@ export default function TimelineTab() {
             </ul>
           </div>
         </div>
+      </section>
+
+      {/* Daily Notification Reminder */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-green-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Daily Practice Reminder
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500">
+          Set a browser notification to fire daily with your personalized recommended problems — keeping your streak alive without manually opening the guide.
+        </p>
+        <DailyNotificationReminder />
       </section>
     </div>
   );

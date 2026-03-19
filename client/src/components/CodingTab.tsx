@@ -6,6 +6,7 @@ import PatternHeatmap from "@/components/PatternHeatmap";
 import SessionLog from "@/components/SessionLog";
 import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X, StickyNote, Trash2, Search } from "lucide-react";
 import { PATTERNS } from "@/lib/guideData";
+import PatternQuickReference from "@/components/PatternQuickReference";
 import { useProgress } from "@/hooks/useProgress";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -519,6 +520,17 @@ export default function CodingTab() {
             </a>
           ))}
         </div>
+      </section>
+
+      {/* Pattern Quick Reference */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-indigo-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Pattern Quick Reference
+          </h2>
+        </div>
+        <PatternQuickReference />
       </section>
     </div>
   );

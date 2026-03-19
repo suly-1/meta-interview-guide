@@ -1,5 +1,6 @@
 // Design: Structured Clarity — AI-enabled round tab enriched with Coditioning article content
 import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, ExternalLink, Info, Zap, BookOpen, Users, Mic } from "lucide-react";
+import AIMockProblemBank from "@/components/AIMockProblemBank";
 
 const LENSES = [
   {
@@ -356,6 +357,17 @@ export default function AIRoundTab() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* AI Mock Problem Bank */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-violet-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            AI-Enabled Mock Problem Bank
+          </h2>
+        </div>
+        <AIMockProblemBank />
       </section>
 
       {/* Final Thoughts */}
