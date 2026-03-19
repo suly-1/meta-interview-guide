@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CheckCircle2, Circle, Flame, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useDailyChecklist, useOnboardingProgress, usePatternRatings, useBehavioralRatings, useInterviewDate, useSpacedRepetition } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
+import { trpc } from "@/lib/trpc";
 
 // ── Daily Study Checklist ─────────────────────────────────────────────────────
 function getDailyTasks(
@@ -190,6 +191,57 @@ export function OnboardingChecklist() {
   const [dismissed, setDismissed] = useState(() => {
     return localStorage.getItem("meta_onboarding_checklist_dismissed") === "true";
   });
+  const [patternRatings] = usePatternRatings();
+  const dbSynced = useRef(false);
+
+  // Load from DB on mount (for logged-in users) — merges with localStorage
+  const { data: dbData } = trpc.onboarding.get.useQuery(undefined, { retry: false });
+  const saveMutation = trpc.onboarding.save.useMutation();
+
+  useEffect(() => {
+    if (dbData && !dbSynced.current) {
+      dbSynced.current = true;
+      // Merge DB state into localStorage (DB wins for completed steps)
+      setProgress(local => {
+        const merged: Record<string, boolean> = { ...local };
+        for (const [k, v] of Object.entries(dbData.progress)) {
+          if (v) merged[k] = true; // only propagate completions, not un-completions
+        }
+        return merged;
+      });
+      if (dbData.dismissed) {
+        localStorage.setItem("meta_onboarding_checklist_dismissed", "true");
+        setDismissed(true);
+      }
+    }
+  }, [dbData, setProgress]);
+
+  // Auto-complete step 2 (rate_patterns) when ≥3 patterns are rated
+  useEffect(() => {
+    if (progress.rate_patterns) return;
+    const ratedCount = Object.values(patternRatings).filter(r => r > 0).length;
+    if (ratedCount >= 3) {
+      setProgress(p => ({ ...p, rate_patterns: true }));
+    }
+  }, [patternRatings, progress.rate_patterns, setProgress]);
+
+  // Auto-complete step 5 (run_mock) when any mock history exists
+  useEffect(() => {
+    if (progress.run_mock) return;
+    const hasCodingMock = (localStorage.getItem("coding_mock_history_v1") ?? "[]") !== "[]";
+    const hasSDMock = (localStorage.getItem("sd_mock_history_v1") ?? "[]") !== "[]";
+    const hasXFNMock = (localStorage.getItem("xfn_mock_history_v1") ?? "[]") !== "[]";
+    if (hasCodingMock || hasSDMock || hasXFNMock) {
+      setProgress(p => ({ ...p, run_mock: true }));
+    }
+  }, [progress.run_mock, setProgress]);
+
+  // Sync progress to DB whenever it changes (debounced via useEffect)
+  useEffect(() => {
+    if (!dbSynced.current) return; // don't save before initial load
+    saveMutation.mutate({ progress, dismissed });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress, dismissed]);
 
   const completedCount = ONBOARDING_STEPS.filter(s => progress[s.id]).length;
   const allDone = completedCount === ONBOARDING_STEPS.length;

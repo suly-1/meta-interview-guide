@@ -78,3 +78,13 @@ export const leaderboardEntries = mysqlTable("leaderboard_entries", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
+
+// ── Onboarding Progress ───────────────────────────────────────────────────
+export const onboardingProgress = mysqlTable("onboarding_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  progress: json("progress").notNull().$type<Record<string, boolean>>(),
+  dismissed: int("dismissed").notNull().default(0), // 0 = false, 1 = true
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type OnboardingProgress = typeof onboardingProgress.$inferSelect;

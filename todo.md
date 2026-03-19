@@ -200,6 +200,11 @@
 - [x] Global Search — ⌘K command palette searching across 200+ items (patterns, CTCI, behavioral questions, system design topics, flash cards)
 - [x] Onboarding Checklist — 5-step guided checklist for new users (set date, rate patterns, add story, flash drill, run mock); dismissible
 
+## New Features — Round 39
+- [ ] IC level badge in Coding Mock running session header (next to phase timer)
+- [ ] Onboarding step auto-complete: rate 3 patterns auto-checks step 2, mock completion auto-checks step 5
+- [ ] Onboarding progress DB sync (tRPC mutation + query, merges with localStorage for logged-in users)
+
 ## New Features — Round 38
 - [x] Coding Mock IC6/IC7 difficulty selector on entry card with level-specific AI rubric (mirrors XFN mock toggle; blue for IC6, violet for IC7)
 - [x] Deep-link chips on each Onboarding Checklist step (navigates to correct tab+section via URL params + popstate)

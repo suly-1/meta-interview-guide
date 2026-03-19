@@ -580,6 +580,11 @@ export function CodingMockSession() {
           </div>
           <div className="flex items-center gap-2">
             <span className={`badge ${selectedPattern?.diff === "Hard" ? "badge-red" : selectedPattern?.diff === "Easy" ? "badge-green" : "badge-blue"}`}>{selectedPattern?.diff}</span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+              icMode === "IC7"
+                ? "bg-violet-500/20 border-violet-500/40 text-violet-400"
+                : "bg-blue-500/20 border-blue-500/40 text-blue-400"
+            }`}>{icMode}</span>
             <button onClick={() => { setRunning(false); setView("entry"); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">✕ Exit</button>
           </div>
         </div>

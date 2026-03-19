@@ -22,6 +22,20 @@
       "when": 1773872658927,
       "tag": "0002_jazzy_mindworm",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1773935369200,
+      "tag": "0003_clean_serpent_society",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1773935583896,
+      "tag": "0004_clammy_excalibur",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import { collabRouter } from "./routers/collab";
 import { leaderboardRouter } from "./routers/leaderboard";
 import { ctciRouter } from "./routers/ctci";
 import { aiRouter } from "./routers/ai";
+import { onboardingRouter } from "./routers/onboarding";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -25,6 +26,7 @@ export const appRouter = router({
 
   collab: collabRouter,
   leaderboard: leaderboardRouter,
+  onboarding: onboardingRouter,
 });
 
 export type AppRouter = typeof appRouter;
