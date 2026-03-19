@@ -19,6 +19,8 @@ import { useStreak } from "@/hooks/useStreak";
 import XPLevelBar from "@/components/XPLevelBar";
 import NavCountdownChip from "@/components/NavCountdownChip";
 import { useXPContext } from "@/contexts/XPContext";
+import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
+import { HelpCircle } from "lucide-react";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
@@ -50,6 +52,7 @@ export default function Home() {
   const { totalXP, events } = useXPContext();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
 
   // Keyboard shortcuts (1-5 now for 5 tabs)
   useKeyboardShortcuts({
@@ -99,13 +102,20 @@ export default function Home() {
             </div>
 
             {/* Dark mode toggle */}
-            <div className="flex-shrink-0 pl-2 border-l border-gray-100">
+            <div className="flex-shrink-0 pl-2 border-l border-gray-100 flex items-center gap-1">
               <button
                 onClick={() => toggleTheme?.()}
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}
                 className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               >
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+              <button
+                onClick={() => setShortcutOpen(true)}
+                title="Keyboard shortcuts (?)"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                <HelpCircle size={15} />
               </button>
             </div>
 
@@ -188,6 +198,7 @@ export default function Home() {
       </div>
 
       <OnboardingModal />
+      <KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
 
       {/* Footer */}
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">

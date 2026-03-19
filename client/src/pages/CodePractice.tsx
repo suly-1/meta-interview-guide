@@ -14,6 +14,7 @@ import { useSpacedRepetition } from "@/hooks/useSpacedRepetition";
 import { getWeakestPatterns } from "@/hooks/useDrillRatings";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { useXPContext } from "@/contexts/XPContext";
+import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
@@ -1058,6 +1059,8 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         );
       })()}
 
+      {/* SR Due-Date Heatmap */}
+      <SRDueDateHeatmap />
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target } from "lucide-react";
 import SystemDesignMockSession from "./SystemDesignMockSession";
+import SystemDesignComparisonTable from "./SystemDesignComparisonTable";
+import { Table2 } from "lucide-react";
 
 interface DesignPattern {
   id: string;
@@ -577,7 +579,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -635,6 +637,16 @@ export default function SystemDesignTab() {
         >
           <Target size={12} /> Mock Session
         </button>
+        <button
+          onClick={() => setActiveView("compare")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+            activeView === "compare"
+              ? "bg-violet-600 text-white border-violet-600"
+              : "bg-white text-gray-600 border-gray-200 hover:border-violet-400"
+          }`}
+        >
+          <Table2 size={12} /> Compare Patterns
+        </button>
       </div>
 
       {/* Design Patterns */}
@@ -656,6 +668,18 @@ export default function SystemDesignTab() {
       {/* Mock Session */}
       {activeView === "mock" && (
         <SystemDesignMockSession />
+      )}
+
+      {/* Pattern Comparison Table */}
+      {activeView === "compare" && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-violet-200 bg-violet-50 p-3.5">
+            <p className="text-xs text-violet-800 leading-relaxed">
+              <strong>How to use:</strong> This matrix lets you compare all 8 patterns side-by-side before a mock session. Click any column header to highlight that dimension across all rows. Use this to quickly recall trade-offs — e.g., which patterns use eventual consistency, or which are read-heavy.
+            </p>
+          </div>
+          <SystemDesignComparisonTable />
+        </div>
       )}
 
       {/* Blog Feed */}
