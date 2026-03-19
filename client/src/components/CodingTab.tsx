@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Download, Flame, Clock, ChevronDown, ChevronUp, Star, Zap, BarChart2, BookOpen, Filter, Timer, Trophy, X, SkipForward, ChevronRight } from "lucide-react";
 import { PATTERNS, PATTERN_PREREQS } from "@/lib/data";
-import { usePatternRatings, usePatternNotes, useSpacedRepetition, useCodingHistory, usePatternTime, useCTCIStreak } from "@/hooks/useLocalStorage";
+import { usePatternRatings, usePatternNotes, useSpacedRepetition, useCodingHistory, usePatternTime, useCTCIStreak, useHintAnalytics } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
@@ -592,16 +592,43 @@ export default function CodingTab() {
   const patternHintMutation = trpc.ctci.patternHint.useMutation({
     onError: () => toast.error("Could not generate hint. Try again."),
   });
+  const [hintAnalytics, setHintAnalytics] = useHintAnalytics();
 
   const today = new Date().toISOString().split("T")[0];
 
+  // Confetti burst for unlock celebrations
+  const triggerUnlockConfetti = (patternName: string) => {
+    const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
+    for (let i = 0; i < 60; i++) {
+      const el = document.createElement("div");
+      el.style.cssText = `position:fixed;top:0;left:${Math.random()*100}vw;width:8px;height:8px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?"50%":"2px"};z-index:9999;pointer-events:none;animation:confetti-fall ${1.5+Math.random()}s ease-in forwards;transform:rotate(${Math.random()*360}deg);`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+    toast.success(`🔓 ${patternName} unlocked!`, { duration: 4000 });
+  };
+
   const handleRate = (id: string, rating: number) => {
+    const prevRatings = ratings;
     setRatings(r => ({ ...r, [id]: rating }));
     // Spaced repetition scheduling
     const days = rating <= 2 ? 1 : rating === 3 ? 3 : rating === 4 ? 7 : 14;
     const due = new Date();
     due.setDate(due.getDate() + days);
     setSrDue(d => ({ ...d, [id]: due.toISOString().split("T")[0] }));
+    // Check if any pattern just got unlocked by this rating change
+    if (rating >= 3) {
+      const updatedRatings = { ...prevRatings, [id]: rating };
+      PATTERNS.forEach(p => {
+        const prereqs = PATTERN_PREREQS[p.id];
+        if (!prereqs || prereqs.length === 0) return;
+        const wasLocked = prereqs.some(pid => (prevRatings[pid] ?? 0) < 3);
+        const nowUnlocked = prereqs.every(pid => (updatedRatings[pid] ?? 0) >= 3);
+        if (wasLocked && nowUnlocked) {
+          setTimeout(() => triggerUnlockConfetti(p.name), 300);
+        }
+      });
+    }
   };
 
   const handleSessionEnd = (duration: number) => {
@@ -611,6 +638,15 @@ export default function CodingTab() {
 
   const getPatternHint = async (p: typeof PATTERNS[0], level: "gentle"|"medium"|"full") => {
     setStuckHints(h => ({ ...h, [p.id]: { level, hint: "", loading: true } }));
+    // Track hint usage analytics
+    setHintAnalytics(a => ({
+      ...a,
+      [p.id]: {
+        gentle: (a[p.id]?.gentle ?? 0) + (level === "gentle" ? 1 : 0),
+        medium: (a[p.id]?.medium ?? 0) + (level === "medium" ? 1 : 0),
+        full:   (a[p.id]?.full   ?? 0) + (level === "full"   ? 1 : 0),
+      },
+    }));
     try {
       const res = await patternHintMutation.mutateAsync({
         patternName: p.name,

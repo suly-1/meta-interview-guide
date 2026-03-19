@@ -2,10 +2,11 @@
 // 45-minute session: 25 min coding + 10 min BQ1 + 10 min BQ2
 // Generates LLM post-session debrief with IC-level assessment
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Play, Square, ChevronRight, RotateCcw, Zap, X, Timer, Code2, Brain, Trophy } from "lucide-react";
+import { Play, Square, ChevronRight, RotateCcw, Zap, X, Timer, Code2, Brain, Trophy, History, ChevronDown, ChevronUp } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useSimulatorHistory, type SimulatorSession } from "@/hooks/useLocalStorage";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Phase = "setup" | "coding" | "bq1" | "bq2" | "debrief";
@@ -104,8 +105,11 @@ export default function MockInterviewSimulator() {
   const [session, setSession] = useState<SessionState | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [running, setRunning] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseStartRef = useRef<number>(0);
+  const [simulatorHistory, setSimulatorHistory] = useSimulatorHistory();
 
   const debriefMutation = trpc.ctci.generateDebrief.useMutation({
     onError: () => toast.error("Debrief generation failed. Try again."),
@@ -189,6 +193,42 @@ export default function MockInterviewSimulator() {
     }
   }, [phase, session, stopTimer, debriefMutation]);
 
+  // Save completed session to history
+  const saveToHistory = useCallback((sess: SessionState, d: typeof debriefMutation.data) => {
+    if (!d) return;
+    const record: SimulatorSession = {
+      id: Date.now().toString(),
+      date: new Date().toISOString().split("T")[0],
+      icTarget: sess.icTarget,
+      codingProblem: sess.codingProblem,
+      codingNotes: sess.codingNotes,
+      bq1Question: sess.bq1Question,
+      bq1Answer: sess.bq1Answer,
+      bq2Question: sess.bq2Question,
+      bq2Answer: sess.bq2Answer,
+      totalTimeUsed: Math.floor((Date.now() - sess.startedAt) / 1000),
+      overallVerdict: d.overallVerdict,
+      overallScore: d.overallScore,
+      codingScore: d.codingScore,
+      behavioralScore: d.behavioralScore,
+      icLevelAssessment: d.icLevelAssessment,
+      codingAssessment: d.codingAssessment,
+      behavioralAssessment: d.behavioralAssessment,
+      topStrengths: d.topStrengths,
+      criticalGaps: d.criticalGaps,
+      nextSteps: d.nextSteps,
+    };
+    setSimulatorHistory(h => [record, ...h].slice(0, 20)); // keep last 20
+  }, [setSimulatorHistory]);
+
+  // Auto-save when debrief arrives
+  useEffect(() => {
+    if (debriefMutation.data && session && phase === "debrief") {
+      saveToHistory(session, debriefMutation.data);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debriefMutation.data]);
+
   const resetSession = () => {
     stopTimer();
     setPhase("setup");
@@ -269,6 +309,74 @@ export default function MockInterviewSimulator() {
                     ))}
                   </div>
                 </div>
+
+                {/* Past Sessions Accordion */}
+                {simulatorHistory.length > 0 && (
+                  <div className="border border-border rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setShowHistory(h => !h)}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-secondary/50 hover:bg-secondary transition-colors">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <History size={13} className="text-blue-400" />
+                        Past Sessions
+                        <span className="badge badge-blue">{simulatorHistory.length}</span>
+                      </div>
+                      {showHistory ? <ChevronUp size={13} className="text-muted-foreground" /> : <ChevronDown size={13} className="text-muted-foreground" />}
+                    </button>
+                    {showHistory && (
+                      <div className="divide-y divide-border max-h-96 overflow-y-auto">
+                        {simulatorHistory.map(s => (
+                          <div key={s.id}>
+                            <button
+                              onClick={() => setExpandedHistoryId(expandedHistoryId === s.id ? null : s.id)}
+                              className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/50 transition-colors text-left">
+                              <div className="flex items-center gap-3">
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${verdictColor(s.overallVerdict)}`}>{s.overallVerdict}</span>
+                                <div>
+                                  <div className="text-xs font-semibold text-foreground">{s.icTarget} · {s.date}</div>
+                                  <div className="text-xs text-muted-foreground truncate max-w-48">{s.codingProblem}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <div className="text-xs text-amber-400">{[1,2,3,4,5].map(n => n <= s.overallScore ? "★" : "☆").join("")}</div>
+                                {expandedHistoryId === s.id ? <ChevronUp size={11} className="text-muted-foreground" /> : <ChevronDown size={11} className="text-muted-foreground" />}
+                              </div>
+                            </button>
+                            {expandedHistoryId === s.id && (
+                              <div className="px-4 pb-4 space-y-3 bg-background/30">
+                                <div className="grid sm:grid-cols-2 gap-2">
+                                  <div className="p-2 rounded-lg bg-secondary border border-border">
+                                    <div className="text-xs font-bold text-blue-400 mb-1">💻 Coding ({s.codingScore}/5)</div>
+                                    <div className="text-xs text-muted-foreground leading-relaxed">{s.codingAssessment}</div>
+                                  </div>
+                                  <div className="p-2 rounded-lg bg-secondary border border-border">
+                                    <div className="text-xs font-bold text-purple-400 mb-1">🧠 Behavioral ({s.behavioralScore}/5)</div>
+                                    <div className="text-xs text-muted-foreground leading-relaxed">{s.behavioralAssessment}</div>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-foreground leading-relaxed p-2 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                                  <span className="font-bold text-blue-400">IC Assessment: </span>{s.icLevelAssessment}
+                                </div>
+                                {s.nextSteps.length > 0 && (
+                                  <div>
+                                    <div className="text-xs font-bold text-amber-400 mb-1">📋 Next Steps</div>
+                                    <ol className="space-y-0.5">
+                                      {s.nextSteps.map((step, i) => (
+                                        <li key={i} className="text-xs text-muted-foreground flex gap-2">
+                                          <span className="text-amber-400 font-bold shrink-0">{i + 1}.</span>{step}
+                                        </li>
+                                      ))}
+                                    </ol>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

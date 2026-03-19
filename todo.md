@@ -111,3 +111,8 @@
 
 ## New Features — Round 13
 - [x] Per-pattern "Stuck?" 3-step hint ladder (gentle → medium → full walkthrough, LLM-powered)
+
+## New Features — Round 14
+- [x] Mock Interview History (localStorage persistence + Past Sessions accordion in simulator)
+- [x] Prerequisite Unlock Celebration (confetti burst + toast when pattern unlocked)
+- [x] Hint Usage Analytics (track hint counts per pattern, Most-hinted badge in Overview)

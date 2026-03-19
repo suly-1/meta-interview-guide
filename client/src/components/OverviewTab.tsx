@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal } from "@/hooks/useLocalStorage";
+import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
 import { trpc } from "@/lib/trpc";
@@ -908,6 +908,72 @@ function WeeklyDigest() {
   );
 }
 
+// ── Most-Hinted Patterns Badge ─────────────────────────────────────────────
+function MostHintedBadge() {
+  const [hintAnalytics] = useHintAnalytics();
+
+  const entries = Object.entries(hintAnalytics)
+    .map(([id, counts]) => ({
+      id,
+      name: PATTERNS.find(p => p.id === id)?.name ?? id,
+      total: (counts.gentle ?? 0) + (counts.medium ?? 0) + (counts.full ?? 0),
+      gentle: counts.gentle ?? 0,
+      medium: counts.medium ?? 0,
+      full: counts.full ?? 0,
+    }))
+    .filter(e => e.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
+
+  if (entries.length === 0) return null;
+
+  const maxTotal = entries[0].total;
+
+  return (
+    <div className="prep-card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Flame size={14} className="text-orange-400" />
+        <span className="text-sm font-bold text-foreground">Hint Usage Analytics</span>
+        <span className="badge badge-amber text-xs">Most-Hinted Patterns</span>
+      </div>
+      <div className="text-xs text-muted-foreground mb-4">
+        Patterns where you've used the Stuck? hint ladder most — these need the most dedicated practice.
+      </div>
+      <div className="space-y-2">
+        {entries.map((e, i) => (
+          <div key={e.id} className="flex items-center gap-3">
+            <span className={`text-xs font-bold w-5 text-center ${
+              i === 0 ? 'text-amber-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-orange-600' : 'text-muted-foreground'
+            }`}>{i + 1}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold text-foreground truncate">{e.name}</span>
+                <span className="text-xs text-muted-foreground ml-2 shrink-0">{e.total} hints</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
+                  style={{ width: `${(e.total / maxTotal) * 100}%` }}
+                />
+              </div>
+              <div className="flex gap-2 mt-1">
+                {e.gentle > 0 && <span className="text-[10px] text-emerald-400">💡 {e.gentle}×</span>}
+                {e.medium > 0 && <span className="text-[10px] text-amber-400">🔍 {e.medium}×</span>}
+                {e.full > 0 && <span className="text-[10px] text-red-400">📖 {e.full}×</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 pt-3 border-t border-border flex gap-4 text-[10px] text-muted-foreground">
+        <span>💡 Gentle hint</span>
+        <span>🔍 Medium hint</span>
+        <span>📖 Full walkthrough</span>
+      </div>
+    </div>
+  );
+}
+
 export default function OverviewTab() {
   return (
     <div className="space-y-6">
@@ -920,6 +986,7 @@ export default function OverviewTab() {
       <InterviewDayChecklist />
       <ResourcesSection />
       <ReadinessGoalSetter />
+      <MostHintedBadge />
       <WeeklyDigest />
       <div className="flex justify-start">
         <ProgressExport />

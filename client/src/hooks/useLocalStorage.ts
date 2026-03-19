@@ -175,3 +175,43 @@ export interface ReadinessGoal {
 export function useReadinessGoal() {
   return useLocalStorage<ReadinessGoal | null>("meta_readiness_goal_v1", null);
 }
+
+// ── Mock Interview Simulator history ──────────────────────────────────────────
+export interface SimulatorSession {
+  id: string;
+  date: string;           // ISO date YYYY-MM-DD
+  icTarget: "IC5" | "IC6" | "IC7";
+  codingProblem: string;
+  codingNotes: string;
+  bq1Question: string;
+  bq1Answer: string;
+  bq2Question: string;
+  bq2Answer: string;
+  totalTimeUsed: number;  // seconds
+  // Debrief results
+  overallVerdict: string;
+  overallScore: number;
+  codingScore: number;
+  behavioralScore: number;
+  icLevelAssessment: string;
+  codingAssessment: string;
+  behavioralAssessment: string;
+  topStrengths: string[];
+  criticalGaps: string[];
+  nextSteps: string[];
+}
+
+export function useSimulatorHistory() {
+  return useLocalStorage<SimulatorSession[]>("meta_simulator_history_v1", []);
+}
+
+// ── Hint usage analytics (per pattern: { gentle, medium, full } counts) ───────
+export interface HintCounts {
+  gentle: number;
+  medium: number;
+  full: number;
+}
+
+export function useHintAnalytics() {
+  return useLocalStorage<Record<string, HintCounts>>("meta_hint_analytics_v1", {});
+}
