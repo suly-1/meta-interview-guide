@@ -61,3 +61,6 @@
 - [x] Choose-your-topic Sprint dropdown (target specific weak area)
 - [x] Sprint history (persist completed sprints in localStorage, show in Stats view)
 - [x] Speed Run difficulty filter (Easy/Medium/Hard radio buttons in Speed Run start flow)
+- [x] Sprint streak badge (flame badge in sidebar when 3+ sprints completed today)
+- [x] Weak-topic auto-suggest (pre-select lowest avg-score topic in Sprint dropdown)
+- [x] Speed Run score breakdown panel (base score + time bonus - hint penalty breakdown)

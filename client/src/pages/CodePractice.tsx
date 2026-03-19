@@ -646,7 +646,10 @@ export default function CodePractice() {
   // Speed Run mode
   const [speedRunActive, setSpeedRunActive] = useState(false);
   const [speedRunSecsLeft, setSpeedRunSecsLeft] = useState(20 * 60);
-  const [speedRunScore, setSpeedRunScore] = useState<{ solved: boolean; timeSec: number; score: number } | null>(null);
+  const [speedRunScore, setSpeedRunScore] = useState<{
+    solved: boolean; timeSec: number; score: number;
+    baseScore: number; timeBonus: number; hintPenalty: number; hintsUsed: number;
+  } | null>(null);
   const speedRunRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Copied state for export button
@@ -882,9 +885,10 @@ export default function CodePractice() {
     const timeSec = 20 * 60 - speedRunSecsLeft;
     const timeBonus = solved ? Math.max(0, Math.round((1 - timeSec / (20 * 60)) * 50)) : 0;
     const hintPenalty = hintsUsedThisRun * 10;
-    const rawScore = solved ? 50 + timeBonus : 0;
+    const baseScore = solved ? 50 : 0;
+    const rawScore = baseScore + timeBonus;
     const score = Math.max(0, rawScore - hintPenalty);
-    setSpeedRunScore({ solved, timeSec, score });
+    setSpeedRunScore({ solved, timeSec, score, baseScore, timeBonus, hintPenalty, hintsUsed: hintsUsedThisRun });
     setSpeedRunActive(false);
     // Save to leaderboard
     const entry: SpeedRunEntry = {
@@ -912,7 +916,7 @@ export default function CodePractice() {
           if (s <= 1) {
             clearInterval(speedRunRef.current!);
             setSpeedRunActive(false);
-            setSpeedRunScore({ solved: false, timeSec: 20 * 60, score: 0 });
+            setSpeedRunScore({ solved: false, timeSec: 20 * 60, score: 0, baseScore: 0, timeBonus: 0, hintPenalty: 0, hintsUsed: 0 });
             return 0;
           }
           return s - 1;
@@ -1034,6 +1038,32 @@ export default function CodePractice() {
     return session.filter(e => new Date(e.solvedAt).toDateString() === today);
   }, [session]);
 
+  // Sprint streak: count completed sprints today
+  const sprintStreakToday = useMemo(() => {
+    const today = new Date().toDateString();
+    return sprintHistory.filter(e => new Date(e.date).toDateString() === today).length;
+  }, [sprintHistory]);
+
+  // Weak-topic auto-suggest: topic with lowest avg score across sprint history
+  const weakTopicSuggestion = useMemo(() => {
+    if (sprintHistory.length === 0) return null;
+    const topicScores: Record<string, number[]> = {};
+    sprintHistory.forEach(e => {
+      if (!topicScores[e.topic]) topicScores[e.topic] = [];
+      topicScores[e.topic].push(e.totalScore);
+    });
+    // Only suggest topics that have been attempted at least once
+    const entries = Object.entries(topicScores)
+      .map(([topic, scores]) => ({
+        topic,
+        avg: scores.reduce((a, b) => a + b, 0) / scores.length,
+        count: scores.length,
+      }))
+      .filter(e => e.count >= 1)
+      .sort((a, b) => a.avg - b.avg);
+    return entries.length > 0 ? entries[0] : null;
+  }, [sprintHistory]);
+
   const passCount = testCases.filter(tc => tc.result === "pass").length;
   const failCount = testCases.filter(tc => tc.result === "fail" || tc.result === "error").length;
 
@@ -1050,6 +1080,14 @@ export default function CodePractice() {
       <div className={`flex flex-col border-r border-border bg-card transition-all duration-200 ${sidebarOpen ? "w-72 min-w-[220px]" : "w-10"} flex-shrink-0`}>
         <div className="flex items-center justify-between px-3 py-2 border-b border-border">
           {sidebarOpen && <span className="text-xs font-bold text-foreground uppercase tracking-wide">Problems ({filtered.length})</span>}
+          {sidebarOpen && sprintStreakToday >= 3 && (
+            <span
+              title={`${sprintStreakToday} sprints completed today — on fire! 🔥`}
+              className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700 animate-pulse ml-auto mr-1"
+            >
+              🔥 {sprintStreakToday}
+            </span>
+          )}
           <button onClick={() => setSidebarOpen(o => !o)} className="text-muted-foreground hover:text-foreground transition-colors ml-auto">
             {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
@@ -1103,6 +1141,17 @@ export default function CodePractice() {
                 </div>
               ) : (
                 <div className="space-y-1">
+                  {/* Weak-topic suggestion chip */}
+                  {weakTopicSuggestion && (
+                    <button
+                      onClick={() => setSprintTopic(weakTopicSuggestion.topic)}
+                      className="w-full text-left text-[10px] px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                      title={`Your weakest topic — avg ${Math.round(weakTopicSuggestion.avg)} pts over ${weakTopicSuggestion.count} sprint${weakTopicSuggestion.count > 1 ? 's' : ''}`}
+                    >
+                      🎯 Focus area: <span className="font-bold">{weakTopicSuggestion.topic}</span>
+                      <span className="ml-1 opacity-70">(avg {Math.round(weakTopicSuggestion.avg)}pts)</span>
+                    </button>
+                  )}
                   {/* Topic selector */}
                   <select
                     value={sprintTopic}
@@ -1325,26 +1374,54 @@ export default function CodePractice() {
 
             {/* Speed Run score panel */}
             {speedRunScore && (
-              <div className={`px-4 py-3 border-b flex items-center gap-4 flex-shrink-0 ${
+              <div className={`px-4 py-3 border-b flex-shrink-0 ${
                 speedRunScore.solved
                   ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
                   : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
               }`}>
-                <span className="text-2xl">{speedRunScore.solved ? "🏆" : "⏰"}</span>
-                <div className="flex-1">
-                  <div className={`text-sm font-bold ${speedRunScore.solved ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"}`}>
-                    {speedRunScore.solved ? "Speed Run Complete!" : "Time's Up!"}
+                {/* Header row */}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">{speedRunScore.solved ? "🏆" : "⏰"}</span>
+                  <div className="flex-1">
+                    <div className={`text-sm font-bold ${speedRunScore.solved ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"}`}>
+                      {speedRunScore.solved ? "Speed Run Complete!" : "Time's Up!"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {speedRunScore.solved
+                        ? `Solved in ${Math.floor(speedRunScore.timeSec/60)}m ${speedRunScore.timeSec%60}s`
+                        : `Problem: ${problem.name}`}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {speedRunScore.solved
-                      ? `Solved in ${Math.floor(speedRunScore.timeSec/60)}m ${speedRunScore.timeSec%60}s · Score: ${speedRunScore.score}/100`
-                      : `Problem: ${problem.name} · Score: 0/100`}
-                  </div>
+                  <div className={`text-3xl font-black ${speedRunScore.solved ? "text-emerald-600" : "text-red-500"}`}>{speedRunScore.score}</div>
+                  <button onClick={() => setSpeedRunScore(null)} className="text-muted-foreground hover:text-foreground p-1 rounded">
+                    <X size={14} />
+                  </button>
                 </div>
-                <div className={`text-3xl font-black ${speedRunScore.solved ? "text-emerald-600" : "text-red-500"}`}>{speedRunScore.score}</div>
-                <button onClick={() => setSpeedRunScore(null)} className="text-muted-foreground hover:text-foreground p-1 rounded">
-                  <X size={14} />
-                </button>
+                {/* Score breakdown */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] text-muted-foreground font-medium">Score breakdown:</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    Base {speedRunScore.baseScore}
+                  </span>
+                  {speedRunScore.timeBonus > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      +{speedRunScore.timeBonus} time bonus
+                    </span>
+                  )}
+                  {speedRunScore.hintPenalty > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      −{speedRunScore.hintPenalty} hints ({speedRunScore.hintsUsed}×💡)
+                    </span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground">=</span>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    speedRunScore.score >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                    speedRunScore.score >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                  }`}>
+                    {speedRunScore.score} pts
+                  </span>
+                </div>
               </div>
             )}
 
