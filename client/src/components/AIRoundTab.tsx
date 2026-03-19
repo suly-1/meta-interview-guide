@@ -1,6 +1,8 @@
 // Design: Structured Clarity — AI-enabled round tab enriched with Coditioning article content
-import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, ExternalLink, Info, Zap, BookOpen, Users, Mic } from "lucide-react";
+import { useState } from "react";
+import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, ExternalLink, Info, Zap, BookOpen, Users, Mic, Target } from "lucide-react";
 import AIMockProblemBank from "@/components/AIMockProblemBank";
+import AIRoundMockSession from "@/components/AIRoundMockSession";
 
 const LENSES = [
   {
@@ -131,8 +133,36 @@ const FAQ = [
 ];
 
 export default function AIRoundTab() {
+  const [view, setView] = useState<"guide" | "mock">("guide");
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
+      {/* View switcher */}
+      <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+        <button
+          onClick={() => setView("guide")}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+            view === "guide" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <BookOpen size={14} /> Guide
+        </button>
+        <button
+          onClick={() => setView("mock")}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+            view === "mock" ? "bg-white text-violet-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Target size={14} /> Mock Session
+        </button>
+      </div>
+
+      {view === "mock" && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <AIRoundMockSession />
+        </div>
+      )}
+
+      {view === "guide" && <div className="space-y-10">
       {/* Overview */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
@@ -383,6 +413,7 @@ export default function AIRoundTab() {
         </div>
       </section>
 
+    </div>}
     </div>
   );
 }

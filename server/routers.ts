@@ -553,6 +553,194 @@ Do not be overly generous. Return a structured JSON debrief.`;
           };
         }
       }),
+    followUp: publicProcedure
+      .input(
+        z.object({
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          problem: z.object({ id: z.string(), title: z.string(), difficulty: z.string(), tagline: z.string() }),
+          sections: z.object({
+            requirements: z.string(),
+            dataModel: z.string(),
+            api: z.string(),
+            scaleBottlenecks: z.string(),
+            metaTips: z.string(),
+          }),
+          verdict: z.string(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const systemPrompt = `You are a senior Meta interviewer conducting a follow-up drill after a system design debrief for ${levelLabel}.
+The candidate just received a "${input.verdict}" verdict on "${input.problem.title}".
+Generate 3 probing follow-up questions that target the weakest areas of their response.
+Questions should be specific, realistic, and escalate in difficulty. Return structured JSON.`;
+        const userContent = [
+          `Requirements: ${input.sections.requirements || "(not addressed)"}`,
+          `Data Model: ${input.sections.dataModel || "(not addressed)"}`,
+          `API: ${input.sections.api || "(not addressed)"}`,
+          `Scale: ${input.sections.scaleBottlenecks || "(not addressed)"}`,
+          `Meta Depth: ${input.sections.metaTips || "(not addressed)"}`,
+        ].join("\n");
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userContent },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "follow_up_questions",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  questions: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        question: { type: "string" },
+                        dimension: { type: "string" },
+                        hint: { type: "string" },
+                      },
+                      required: ["question", "dimension", "hint"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["questions"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as { questions: Array<{ question: string; dimension: string; hint: string }> };
+        } catch {
+          return { questions: [
+            { question: "How would you handle a 10× traffic spike?", dimension: "Scale & Bottlenecks", hint: "Think about horizontal scaling, caching layers, and rate limiting." },
+            { question: "What happens if the primary database goes down?", dimension: "Data Model", hint: "Consider replication, failover, and consistency trade-offs." },
+            { question: "How would you version your API without breaking existing clients?", dimension: "API Design", hint: "Consider versioning strategies: URL path, header, or query param." },
+          ]};
+        }
+      }),
+  }),
+
+  /**
+   * aiRound.debrief — LLM-powered IC-level debrief for AI-Enabled Round mock sessions.
+   * Evaluates the 4 lenses: Problem Solving, Code Development, Verification & Debugging, Technical Communication.
+   * Also scores AI tool usage and workflow adherence.
+   */
+  aiRound: router({
+    debrief: publicProcedure
+      .input(
+        z.object({
+          problemTitle: z.string(),
+          problemScenario: z.string(),
+          phases: z.array(z.object({
+            type: z.enum(["bug-fix", "feature", "optimize"]),
+            title: z.string(),
+            answer: z.string(),
+          })),
+          workflowNotes: z.string().optional(),
+          aiUsageNotes: z.string().optional(),
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          elapsedSeconds: z.number().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelBar = input.targetLevel === "IC7"
+          ? "IC7 Staff Engineer (owns large systems, drives technical direction, mentors others)"
+          : "IC6 Senior Engineer (independently solves complex problems, strong code quality and verification)";
+        const phaseSummary = input.phases.map((p, i) =>
+          `Phase ${i + 1} (${p.type} — ${p.title}):\n${p.answer || "(no answer provided)"}`
+        ).join("\n\n");
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `You are a senior Meta engineering interviewer evaluating an AI-Enabled Coding Round mock session.
+You evaluate candidates on 4 lenses:
+1. Problem Solving — clarification, requirements, approach selection
+2. Code Development & Understanding — code quality, correctness, style matching
+3. Verification & Debugging — test coverage, bug identification, iterative fixing
+4. Technical Communication — narration, trade-off discussion, AI tool guidance
+Also evaluate AI Tool Usage — how well the candidate directed the AI vs. letting it drive.
+Return ONLY valid JSON matching the schema exactly.`,
+            },
+            {
+              role: "user",
+              content: `Problem: ${input.problemTitle}\nScenario: ${input.problemScenario}\nTarget level: ${levelBar}\n\nCandidate responses by phase:\n${phaseSummary}\n\nWorkflow notes: ${input.workflowNotes || "none"}\nAI usage notes: ${input.aiUsageNotes || "none"}\nTime elapsed: ${input.elapsedSeconds ? Math.round(input.elapsedSeconds / 60) + " min" : "unknown"}\n\nEvaluate and return JSON.`,
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "ai_round_debrief",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  icLevelVerdict: { type: "string", enum: ["Strong Hire", "Hire", "Borderline", "No Hire"] },
+                  overallSummary: { type: "string" },
+                  problemSolvingScore: { type: "number" },
+                  problemSolvingFeedback: { type: "string" },
+                  codeDevelopmentScore: { type: "number" },
+                  codeDevelopmentFeedback: { type: "string" },
+                  verificationScore: { type: "number" },
+                  verificationFeedback: { type: "string" },
+                  communicationScore: { type: "number" },
+                  communicationFeedback: { type: "string" },
+                  aiToolUsageScore: { type: "number" },
+                  aiToolUsageFeedback: { type: "string" },
+                  topStrengths: { type: "array", items: { type: "string" } },
+                  topImprovements: { type: "array", items: { type: "string" } },
+                  nextSteps: { type: "array", items: { type: "string" } },
+                },
+                required: [
+                  "icLevelVerdict", "overallSummary",
+                  "problemSolvingScore", "problemSolvingFeedback",
+                  "codeDevelopmentScore", "codeDevelopmentFeedback",
+                  "verificationScore", "verificationFeedback",
+                  "communicationScore", "communicationFeedback",
+                  "aiToolUsageScore", "aiToolUsageFeedback",
+                  "topStrengths", "topImprovements", "nextSteps",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            icLevelVerdict: "Strong Hire" | "Hire" | "Borderline" | "No Hire";
+            overallSummary: string;
+            problemSolvingScore: number; problemSolvingFeedback: string;
+            codeDevelopmentScore: number; codeDevelopmentFeedback: string;
+            verificationScore: number; verificationFeedback: string;
+            communicationScore: number; communicationFeedback: string;
+            aiToolUsageScore: number; aiToolUsageFeedback: string;
+            topStrengths: string[]; topImprovements: string[]; nextSteps: string[];
+          };
+        } catch {
+          return {
+            icLevelVerdict: "Borderline" as const,
+            overallSummary: "Unable to parse debrief. Please try again.",
+            problemSolvingScore: 3, problemSolvingFeedback: "",
+            codeDevelopmentScore: 3, codeDevelopmentFeedback: "",
+            verificationScore: 3, verificationFeedback: "",
+            communicationScore: 3, communicationFeedback: "",
+            aiToolUsageScore: 3, aiToolUsageFeedback: "",
+            topStrengths: [], topImprovements: [], nextSteps: [],
+          };
+        }
+      }),
   }),
 });
 

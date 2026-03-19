@@ -8,6 +8,66 @@ import {
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+interface MockHistoryEntry {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  targetLevel: string;
+  verdict: string;
+  scores: { requirements: number; dataModel: number; api: number; scale: number; metaDepth: number };
+  durationSec: number;
+  date: number;
+}
+
+const MOCK_HISTORY_KEY = "sd_mock_history_v1";
+
+function loadMockHistory(): MockHistoryEntry[] {
+  try { return JSON.parse(localStorage.getItem(MOCK_HISTORY_KEY) || "[]"); } catch { return []; }
+}
+
+function saveMockHistory(entries: MockHistoryEntry[]) {
+  localStorage.setItem(MOCK_HISTORY_KEY, JSON.stringify(entries.slice(-30)));
+}
+
+// ─── Radar chart (SVG, no external dep) ──────────────────────────────────────
+function RadarChart({ scores }: { scores: { label: string; value: number }[] }) {
+  const N = scores.length;
+  const cx = 80; const cy = 80; const r = 60;
+  const angleStep = (2 * Math.PI) / N;
+  const angle = (i: number) => -Math.PI / 2 + i * angleStep;
+  const pt = (i: number, radius: number) => ({
+    x: cx + radius * Math.cos(angle(i)),
+    y: cy + radius * Math.sin(angle(i)),
+  });
+  const levels = [1, 2, 3, 4, 5];
+  const dataPoints = scores.map((s, i) => pt(i, (s.value / 5) * r));
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ") + " Z";
+  return (
+    <svg viewBox="0 0 160 160" className="w-full max-w-[180px] mx-auto">
+      {levels.map(l => {
+        const pts = scores.map((_, i) => pt(i, (l / 5) * r));
+        const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ") + " Z";
+        return <path key={l} d={path} fill="none" stroke="#e5e7eb" strokeWidth={l === 5 ? 1.5 : 0.8} />;
+      })}
+      {scores.map((_, i) => {
+        const outer = pt(i, r);
+        return <line key={i} x1={cx} y1={cy} x2={outer.x.toFixed(1)} y2={outer.y.toFixed(1)} stroke="#e5e7eb" strokeWidth={0.8} />;
+      })}
+      <path d={dataPath} fill="rgba(99,102,241,0.15)" stroke="#6366f1" strokeWidth={2} />
+      {dataPoints.map((p, i) => <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={3} fill="#6366f1" />)}
+      {scores.map((s, i) => {
+        const lp = pt(i, r + 14);
+        return (
+          <text key={i} x={lp.x.toFixed(1)} y={lp.y.toFixed(1)} textAnchor="middle" dominantBaseline="middle"
+            fontSize={7} fill="#6b7280" fontWeight={600}>
+            {s.label.split(" ")[0]}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
 interface DesignProblem {
   id: string;
   title: string;
@@ -245,9 +305,12 @@ export default function SystemDesignMockSession() {
     requirements: false, dataModel: false, api: false, scaleBottlenecks: false, metaTips: false,
   });
   const [randomMode, setRandomMode] = useState(false);
+  const [mockHistory, setMockHistory] = useState<MockHistoryEntry[]>(() => loadMockHistory());
+  const [showHistory, setShowHistory] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const debrief = trpc.systemDesign.debrief.useMutation();
+  const followUp = trpc.systemDesign.followUp.useMutation();
 
   const startSession = useCallback(() => {
     const problem = randomMode
@@ -265,7 +328,7 @@ export default function SystemDesignMockSession() {
   const endSession = useCallback(async () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setPhase("debrief");
-    await debrief.mutateAsync({
+    const result = await debrief.mutateAsync({
       targetLevel,
       problem: {
         id: selectedProblem.id,
@@ -282,6 +345,27 @@ export default function SystemDesignMockSession() {
         metaTips: answers.metaTips,
       },
     });
+    if (result) {
+      const entry: MockHistoryEntry = {
+        id: Date.now().toString(),
+        problemId: selectedProblem.id,
+        problemTitle: selectedProblem.title,
+        targetLevel,
+        verdict: result.icLevelVerdict,
+        scores: {
+          requirements: result.requirementsScore,
+          dataModel: result.dataModelScore,
+          api: result.apiScore,
+          scale: result.scaleScore,
+          metaDepth: result.metaDepthScore,
+        },
+        durationSec: secsElapsed,
+        date: Date.now(),
+      };
+      const updated = [...loadMockHistory(), entry];
+      saveMockHistory(updated);
+      setMockHistory(updated);
+    }
   }, [debrief, targetLevel, selectedProblem, secsElapsed, answers]);
 
   // Countdown timer
@@ -600,6 +684,57 @@ export default function SystemDesignMockSession() {
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Radar chart */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-3">Dimension Profile</p>
+            <RadarChart scores={[
+              { label: "Requirements", value: result.requirementsScore },
+              { label: "Data Model", value: result.dataModelScore },
+              { label: "API Design", value: result.apiScore },
+              { label: "Scale", value: result.scaleScore },
+              { label: "Meta Depth", value: result.metaDepthScore },
+            ]} />
+          </div>
+
+          {/* Follow-up drill */}
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50 dark:bg-indigo-900/10 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Drill Deeper — Follow-up Questions</p>
+              {!followUp.data && (
+                <button
+                  onClick={() => followUp.mutate({
+                    targetLevel,
+                    problem: { id: selectedProblem.id, title: selectedProblem.title, difficulty: selectedProblem.difficulty, tagline: selectedProblem.tagline },
+                    sections: { requirements: answers.requirements, dataModel: answers.dataModel, api: answers.api, scaleBottlenecks: answers.scaleBottlenecks, metaTips: answers.metaTips },
+                    verdict: result.icLevelVerdict,
+                  })}
+                  disabled={followUp.isPending}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+                >
+                  {followUp.isPending ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
+                  {followUp.isPending ? "Generating…" : "Generate 3 Questions"}
+                </button>
+              )}
+            </div>
+            {followUp.data && (
+              <div className="space-y-3">
+                {followUp.data.questions.map((q, i) => (
+                  <details key={i} className="rounded-lg border border-indigo-200 bg-white dark:bg-indigo-900/20 overflow-hidden">
+                    <summary className="flex items-start gap-2 px-3 py-2.5 cursor-pointer text-xs font-semibold text-indigo-900 dark:text-indigo-200 select-none">
+                      <span className="shrink-0 w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] font-bold mt-0.5">{i + 1}</span>
+                      <span className="flex-1">{q.question}</span>
+                      <span className="text-[9px] font-bold text-indigo-500 shrink-0 mt-0.5">{q.dimension}</span>
+                    </summary>
+                    <div className="px-3 pb-3 pt-1 border-t border-indigo-100">
+                      <p className="text-[11px] text-indigo-700 dark:text-indigo-300 leading-relaxed"><span className="font-bold">Hint: </span>{q.hint}</p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            )}
+            {followUp.isError && <p className="text-xs text-red-500">Failed to generate questions. Please try again.</p>}
           </div>
 
           {/* Session transcript */}

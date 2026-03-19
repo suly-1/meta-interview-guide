@@ -89,3 +89,7 @@
 - [ ] Sprint history line chart (score-over-time per topic in Sprint History Stats section)
 - [ ] Mock Interview session replay (collapsible transcript panel in debrief: question + typed answer pairs)
 - [x] System Design Mock Session (45-min timed mock in System Design tab, problem picker, answer panel, LLM IC-level debrief using all 8 patterns + key signals)
+- [x] AI-Enabled Round Mock Session (timed mock in AI Round tab, scenario picker, answer panels, LLM IC-level debrief using all tab content)
+- [x] System Design mock session history (persist results in localStorage, show in Stats view)
+- [x] System Design debrief follow-up question mode (Drill deeper button → LLM generates 2-3 probing questions)
+- [x] System Design debrief radar chart (spider chart of 5 dimension scores alongside score bars)
