@@ -49,3 +49,6 @@
 - [x] Per-pattern Stuck? 3-step hint ladder inside expanded PatternRow
 - [x] In-app coding practice environment (Monaco editor, language selector, code execution via Judge0, AI hints, timer, solve tracking)
 - [x] Code Practice tab (Monaco editor, Judge0 execution, AI hints, timer, session history, solve tracking)
+- [x] Custom test case editor in Code Practice (input/expected output pairs, pass/fail summary)
+- [x] Per-problem submission history in Code Practice (code snapshot, output, timestamp, language)
+- [x] Personal stats dashboard tab (solve counts, avg time per difficulty, most-used language, weekly chart)
