@@ -75,3 +75,6 @@
 - [x] Difficulty Estimator clear-ratings button (wipe stale assessments from Difficulty Perception card)
 - [x] Study plan .ics calendar export (Add to Calendar button generating one ICS event per block)
 - [x] Speed Run consecutive-day streak badge (flame badge next to Speed Run button)
+- [x] Speed Run streak stats row in Stats view (current streak, longest streak, last active date)
+- [x] ICS block colour metadata (CATEGORIES per block type for Google Calendar / Outlook colour coding)
+- [x] Difficulty Estimator CSV export (Copy as CSV button in Difficulty Perception card)

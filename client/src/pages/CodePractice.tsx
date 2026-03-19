@@ -328,13 +328,14 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
 }
 
 // ─── Personal Stats Dashboard ──────────────────────────────────────────────
-function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments, onClearAssessments }: {
+function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments, onClearAssessments, srStreak }: {
   session: SessionEntry[];
   progress: Record<number, { solved: boolean; starred: boolean; notes: string }>;
   leaderboard: SpeedRunEntry[];
   sprintHistory: SprintHistoryEntry[];
   assessments: DifficultyAssessment[];
   onClearAssessments: () => void;
+  srStreak: { streak: number; lastDate: string | null; longestStreak: number };
 }) {
   const totalSolved = useMemo(() => Object.values(progress).filter(p => p.solved).length, [progress]);
   const totalStarred = useMemo(() => Object.values(progress).filter(p => p.starred).length, [progress]);
@@ -548,6 +549,41 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         </div>
       )}
 
+      {/* Speed Run Streak Stats */}
+      {(srStreak.streak > 0 || srStreak.longestStreak > 0) && (
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Flame size={13} className="text-orange-500" />
+            <span className="text-xs font-semibold text-foreground">Speed Run Streak</span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800 p-3 text-center">
+              <div className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 mb-1 uppercase tracking-wide">Current</div>
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 font-mono">{srStreak.streak}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">days</div>
+            </div>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-3 text-center">
+              <div className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 mb-1 uppercase tracking-wide">Best</div>
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 font-mono">{srStreak.longestStreak}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">days</div>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+              <div className="text-[10px] font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Last Run</div>
+              {srStreak.lastDate ? (
+                <div className="text-xs font-bold text-foreground">
+                  {new Date(srStreak.lastDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
+              ) : (
+                <div className="text-xs text-muted-foreground">—</div>
+              )}
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                {srStreak.lastDate === new Date().toISOString().slice(0, 10) ? '✅ today' : srStreak.lastDate ? 'keep it up!' : 'no runs yet'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sprint History + Personal Best */}
       {sprintHistory.length > 0 && (() => {
         // Compute personal best per topic
@@ -628,16 +664,46 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
               <TrendingUp size={13} className="text-indigo-500" />
               <span className="text-xs font-semibold text-foreground">Difficulty Perception</span>
               <span className="text-xs text-muted-foreground">{assessments.length} rated</span>
-              <button
-                onClick={() => {
-                  if (!window.confirm("Clear all difficulty ratings? This cannot be undone.")) return;
-                  onClearAssessments();
-                }}
-                className="ml-auto text-[10px] font-semibold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                title="Clear all self-assessments"
-              >
-                <Trash2 size={10} /> Clear ratings
-              </button>
+              <div className="ml-auto flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    // Build CSV: header + one row per assessment
+                    const rows = [
+                      ["Problem", "Official Difficulty", "Self Rating", "Date"].join(","),
+                      ...assessments.map(a =>
+                        [
+                          `"${a.problemName.replace(/"/g, '""')}"`,
+                          a.officialDifficulty,
+                          a.selfRating,
+                          new Date(a.date).toLocaleDateString(),
+                        ].join(",")
+                      ),
+                    ];
+                    navigator.clipboard.writeText(rows.join("\n")).catch(() => {
+                      // fallback: download as file
+                      const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = "difficulty-ratings.csv"; a.click();
+                      URL.revokeObjectURL(url);
+                    });
+                  }}
+                  className="text-[10px] font-semibold text-muted-foreground hover:text-blue-500 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  title="Copy all ratings as CSV"
+                >
+                  <Copy size={10} /> CSV
+                </button>
+                <button
+                  onClick={() => {
+                    if (!window.confirm("Clear all difficulty ratings? This cannot be undone.")) return;
+                    onClearAssessments();
+                  }}
+                  className="text-[10px] font-semibold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                  title="Clear all self-assessments"
+                >
+                  <Trash2 size={10} /> Clear
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {harderthanExpected.length > 0 && (
@@ -1631,7 +1697,7 @@ export default function CodePractice() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {mainView === "stats" ? (
-          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} onClearAssessments={() => { saveAssessments([]); setAssessments([]); }} />
+          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} onClearAssessments={() => { saveAssessments([]); setAssessments([]); }} srStreak={srStreak} />
         ) : (
           <>
             {/* Toolbar */}
@@ -2330,12 +2396,21 @@ export default function CodePractice() {
                       const roundedMins = Math.ceil(mins / 15) * 15;
                       cursor.setMinutes(roundedMins, 0, 0);
 
+                      // Colour map: Apple Calendar color hex + Google Calendar color name via CATEGORIES
+                      const typeColor: Record<string, { hex: string; gcal: string }> = {
+                        coding:        { hex: "#1a73e8", gcal: "Blueberry" },
+                        behavioral:    { hex: "#f9ab00", gcal: "Banana" },
+                        sr_review:     { hex: "#0f9d58", gcal: "Sage" },
+                        system_design: { hex: "#9334e6", gcal: "Grape" },
+                        break:         { hex: "#34a853", gcal: "Basil" },
+                      };
                       const events: string[] = [];
                       studyPlan.blocks.forEach((block, i) => {
                         const start = new Date(cursor);
                         const end = new Date(cursor.getTime() + block.durationMinutes * 60 * 1000);
                         const emoji = typeEmoji[block.type] ?? "📌";
                         const description = block.tasks.map(t => `• ${t}`).join("\\n");
+                        const color = typeColor[block.type];
                         events.push([
                           "BEGIN:VEVENT",
                           `UID:study-plan-${Date.now()}-${i}@meta-guide`,
@@ -2343,7 +2418,10 @@ export default function CodePractice() {
                           `DTEND:${toICSDate(end)}`,
                           `SUMMARY:${emoji} ${block.title}`,
                           `DESCRIPTION:${description}\\n\\nPriority: ${block.priority}`,
-                          `CATEGORIES:${block.type.toUpperCase()}`,
+                          // CATEGORIES drives Google Calendar colour when it matches a known colour name
+                          `CATEGORIES:${color?.gcal ?? block.type.toUpperCase()}`,
+                          // X-APPLE-CALENDAR-COLOR drives Apple Calendar / Outlook colour
+                          ...(color ? [`X-APPLE-CALENDAR-COLOR:${color.hex}`, `COLOR:${color.hex}`] : []),
                           "END:VEVENT",
                         ].join("\r\n"));
                         cursor = end;
