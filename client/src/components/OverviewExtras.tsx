@@ -3,6 +3,7 @@ import { CheckCircle2, Circle, Flame, AlertTriangle, ChevronDown, ChevronUp } fr
 import { useDailyChecklist, useOnboardingProgress, usePatternRatings, useBehavioralRatings, useInterviewDate, useSpacedRepetition } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ── Daily Study Checklist ─────────────────────────────────────────────────────
 function getDailyTasks(
@@ -245,6 +246,43 @@ export function OnboardingChecklist() {
 
   const completedCount = ONBOARDING_STEPS.filter(s => progress[s.id]).length;
   const allDone = completedCount === ONBOARDING_STEPS.length;
+  const celebrationFired = useRef(false);
+
+  // Fire confetti + share toast when all steps complete
+  useEffect(() => {
+    if (!allDone || celebrationFired.current) return;
+    celebrationFired.current = true;
+    // Confetti burst
+    const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
+    for (let i = 0; i < 100; i++) {
+      const el = document.createElement("div");
+      el.style.cssText = `position:fixed;top:0;left:${Math.random()*100}vw;width:8px;height:8px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?"50%":"2px"};z-index:9999;pointer-events:none;animation:confetti-fall ${1.5+Math.random()}s ease-in forwards;transform:rotate(${Math.random()*360}deg);`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+    // Share toast
+    const tweetText = "I just finished onboarding on my Meta IC6 interview prep! 🎉 #SoftwareEngineering #MetaInterview #IC6";
+    toast(
+      <div className="flex flex-col gap-2">
+        <div className="text-sm font-bold text-emerald-400">🎉 Onboarding complete!</div>
+        <div className="text-xs text-muted-foreground">You’ve completed all 5 getting-started steps. Time to go deep!</div>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(tweetText).then(() => toast.success("Tweet copied! Open Twitter to share."));
+          }}
+          className="self-start text-xs px-3 py-1.5 rounded-md bg-sky-500/20 border border-sky-500/30 text-sky-400 hover:bg-sky-500/30 transition-colors font-medium"
+        >
+          📤 Share on Twitter
+        </button>
+      </div>,
+      { duration: 10000 }
+    );
+    // Auto-dismiss after celebration
+    setTimeout(() => {
+      localStorage.setItem("meta_onboarding_checklist_dismissed", "true");
+      setDismissed(true);
+    }, 2000);
+  }, [allDone, setDismissed]);
 
   const handleDismiss = () => {
     localStorage.setItem("meta_onboarding_checklist_dismissed", "true");

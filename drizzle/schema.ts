@@ -88,3 +88,13 @@ export const onboardingProgress = mysqlTable("onboarding_progress", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type OnboardingProgress = typeof onboardingProgress.$inferSelect;
+
+// ── User Ratings (pattern + behavioral question ratings) ─────────────────────
+export const userRatings = mysqlTable("user_ratings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  ratingType: varchar("ratingType", { length: 32 }).notNull(), // 'pattern' | 'bq'
+  ratings: json("ratings").notNull().$type<Record<string, number>>(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type UserRating = typeof userRatings.$inferSelect;

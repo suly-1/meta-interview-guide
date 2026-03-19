@@ -1428,6 +1428,25 @@ export default function BehavioralTab() {
   const [ratings, setRatings] = useBehavioralRatings();
   const [history, setHistory] = useMockHistory();
   const [storyHistory, setStoryHistory] = useStoryStrengthHistory();
+
+  // DB sync for BQ ratings
+  const bqDbSynced = useRef(false);
+  const { data: dbRatingsData } = trpc.ratings.getAll.useQuery(undefined, { retry: false });
+  const saveBqRatingsMutation = trpc.ratings.saveBqRatings.useMutation();
+
+  // Load from DB on mount — merge DB ratings into localStorage (DB wins for higher ratings)
+  useEffect(() => {
+    if (dbRatingsData?.bqRatings && !bqDbSynced.current) {
+      bqDbSynced.current = true;
+      setRatings(local => {
+        const merged = { ...local };
+        for (const [k, v] of Object.entries(dbRatingsData.bqRatings!)) {
+          if ((v ?? 0) > (local[k] ?? 0)) merged[k] = v;
+        }
+        return merged;
+      });
+    }
+  }, [dbRatingsData, setRatings]);
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("All");
   const [filterTier, setFilterTier] = useState("All");
@@ -1472,7 +1491,12 @@ export default function BehavioralTab() {
   const [xfnPrePopulate, setXfnPrePopulate] = useState<{ scope: string; outcome: string } | null>(null);
 
   const handleRate = (id: string, v: number) => {
+    const updatedRatings = { ...ratings, [id]: v };
     setRatings(r => ({ ...r, [id]: v }));
+    // Persist to DB if logged in
+    if (bqDbSynced.current) {
+      saveBqRatingsMutation.mutate({ ratings: updatedRatings });
+    }
     setStoryHistory(h => ({
       ...h,
       [id]: [...(h[id] ?? []), { timestamp: Date.now(), rating: v }].slice(-20),

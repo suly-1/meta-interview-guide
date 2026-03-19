@@ -793,6 +793,25 @@ export default function CodingTab() {
   const [sessions, setSessions] = useCodingHistory();
   const [patternTime, setPatternTime] = usePatternTime();
 
+  // DB sync for pattern ratings
+  const patternDbSynced = useRef(false);
+  const { data: dbRatingsData } = trpc.ratings.getAll.useQuery(undefined, { retry: false });
+  const savePatternRatingsMutation = trpc.ratings.savePatternRatings.useMutation();
+
+  // Load from DB on mount — merge DB ratings into localStorage (DB wins for higher ratings)
+  useEffect(() => {
+    if (dbRatingsData?.patternRatings && !patternDbSynced.current) {
+      patternDbSynced.current = true;
+      setRatings(local => {
+        const merged = { ...local };
+        for (const [k, v] of Object.entries(dbRatingsData.patternRatings!)) {
+          if ((v ?? 0) > (local[k] ?? 0)) merged[k] = v;
+        }
+        return merged;
+      });
+    }
+  }, [dbRatingsData, setRatings]);
+
   const handleTimeLogged = (id: string, seconds: number) => {
     setPatternTime(t => ({ ...t, [id]: (t[id] ?? 0) + seconds }));
   };
@@ -846,7 +865,12 @@ export default function CodingTab() {
 
   const handleRate = (id: string, rating: number) => {
     const prevRatings = ratings;
+    const updatedRatings = { ...prevRatings, [id]: rating };
     setRatings(r => ({ ...r, [id]: rating }));
+    // Persist to DB if logged in
+    if (patternDbSynced.current) {
+      savePatternRatingsMutation.mutate({ ratings: updatedRatings });
+    }
     // Spaced repetition scheduling
     const days = rating <= 2 ? 1 : rating === 3 ? 3 : rating === 4 ? 7 : 14;
     const due = new Date();
@@ -854,7 +878,6 @@ export default function CodingTab() {
     setSrDue(d => ({ ...d, [id]: due.toISOString().split("T")[0] }));
     // Check if any pattern just got unlocked by this rating change
     if (rating >= 3) {
-      const updatedRatings = { ...prevRatings, [id]: rating };
       PATTERNS.forEach(p => {
         const prereqs = PATTERN_PREREQS[p.id];
         if (!prereqs || prereqs.length === 0) return;

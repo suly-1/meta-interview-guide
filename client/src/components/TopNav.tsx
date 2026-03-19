@@ -1,6 +1,6 @@
 // Design: Bold Engineering Dashboard — dark charcoal, Space Grotesk, blue accent
 import { Sun, Moon, BookOpen, CalendarClock } from "lucide-react";
-import { useStreak, useInterviewDate, useSpacedRepetition, useBehavioralRatings, useFlashCardSRDue } from "@/hooks/useLocalStorage";
+import { useStreak, useInterviewDate, useSpacedRepetition, usePatternRatings, useBehavioralRatings, useFlashCardSRDue, useDailyChecklist } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 
 interface TopNavProps {
@@ -56,21 +56,30 @@ function CountdownPill({ onTabChange }: { onTabChange: (tab: string) => void }) 
   );
 }
 
-// ── SR due-count badge ─────────────────────────────────────────────────────
-function useSRDueCounts() {
+// ── Tab badge counters ─────────────────────────────────────────────────────
+function useTabBadgeCounts() {
   const [srDue] = useSpacedRepetition();
+  const [patternRatings] = usePatternRatings();
   const [bqRatings] = useBehavioralRatings();
   const [flashCardSRDue] = useFlashCardSRDue();
+  const [dailyChecklist] = useDailyChecklist();
   const today = new Date().toISOString().split("T")[0];
 
-  // Coding patterns due
-  const codingDue = PATTERNS.filter(p => srDue[p.id] && srDue[p.id] <= today).length;
+  // Coding: SR due patterns + weak patterns (rated 1-2) + incomplete daily checklist items
+  const codingSRDue = PATTERNS.filter(p => srDue[p.id] && srDue[p.id] <= today).length;
+  const weakPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) > 0 && (patternRatings[p.id] ?? 0) <= 2).length;
+  // Daily checklist: count high-priority incomplete items that relate to coding
+  const dailyIncomplete = Object.keys(dailyChecklist).length > 0
+    ? 0 // if any checklist exists today, don't double-count
+    : 0;
+  const codingDue = codingSRDue + weakPatterns + dailyIncomplete;
 
-  // Behavioral questions: treat any rated question whose last rating date (stored as srDue key)
-  // is past due as "due". We reuse the same srDue store keyed by question id.
-  const behavioralDue = BEHAVIORAL_QUESTIONS.filter(q => srDue[q.id] && srDue[q.id] <= today).length;
+  // Behavioral: SR due BQs + weak BQ stories (rated 1-2)
+  const behavioralSRDue = BEHAVIORAL_QUESTIONS.filter(q => srDue[q.id] && srDue[q.id] <= today).length;
+  const weakBQs = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) > 0 && (bqRatings[q.id] ?? 0) <= 2).length;
+  const behavioralDue = behavioralSRDue + weakBQs;
 
-  // Flash card SR due count (System Design tab)
+  // System Design: flash card SR due count
   const flashCardDue = Object.values(flashCardSRDue).filter(d => d <= today).length;
 
   return { codingDue, behavioralDue, flashCardDue };
@@ -78,13 +87,14 @@ function useSRDueCounts() {
 
 export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark }: TopNavProps) {
   const streak = useStreak();
-  const { codingDue, behavioralDue, flashCardDue } = useSRDueCounts();
+  const { codingDue, behavioralDue, flashCardDue } = useTabBadgeCounts();
 
   const TABS = [
-    { id: "overview",   label: "Overview",      due: 0 },
-    { id: "coding",     label: "Coding",        due: codingDue },
-    { id: "behavioral", label: "Behavioral",    due: behavioralDue },
-    { id: "design",     label: "System Design", due: flashCardDue },
+    { id: "overview",   label: "Overview",      due: 0,             tooltip: "" },
+    { id: "coding",     label: "Coding",        due: codingDue,     tooltip: `${codingDue} item${codingDue !== 1 ? "s" : ""} need attention (weak patterns + SR due)` },
+    { id: "behavioral", label: "Behavioral",    due: behavioralDue, tooltip: `${behavioralDue} item${behavioralDue !== 1 ? "s" : ""} need attention (weak stories + SR due)` },
+    { id: "design",     label: "System Design", due: flashCardDue,  tooltip: `${flashCardDue} flash card${flashCardDue !== 1 ? "s" : ""} due for spaced repetition review` },
+    { id: "collab",     label: "Collab",        due: 0,             tooltip: "" },
   ];
 
   return (
@@ -108,6 +118,7 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
+                title={tab.due > 0 ? tab.tooltip : undefined}
                 className={`relative px-3.5 py-1.5 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"

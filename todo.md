@@ -277,3 +277,9 @@
 - [x] Answer Recording Mode — Voice-to-STAR recorder already implemented in VoiceToStar.tsx (MediaRecorder, S3 upload, Whisper transcription, STAR structuring, AI scoring)
 - [x] Behavioral Mock Difficulty Selector — IC6 vs IC7 toggle added to XFN Behavioral Mock Session entry card; icMode passed to xfnMockScorecard procedure with level-specific rubric
 - [x] System Design Diagram Templates — 3 pre-built Excalidraw JSON templates (News Feed, Messenger, Instagram) in SystemDesignDiagramTemplates.tsx with Download + Open buttons
+
+## New Features — Round 40
+- [x] Sync patternRatings to DB (new user_ratings table, tRPC get/save, merge on mount)
+- [x] Sync bqRatings to DB (same table, separate type field)
+- [x] Onboarding all-done confetti burst + share-to-Twitter toast
+- [x] Tab badge counters: Coding (weak patterns + SR due), Behavioral (weak BQs), System Design (SR due flash cards)
