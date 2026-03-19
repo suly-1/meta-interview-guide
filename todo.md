@@ -29,4 +29,3 @@
 ## In Progress
 - [ ] Mock Interview Simulator (45-min timed session: 1 coding + 2 behavioral, LLM debrief)
 - [ ] Pattern Dependency Unlock Flow (grey out advanced patterns until prerequisites rated ≥3)
-- [ ] Per-pattern "Stuck?" escalation flow (3-step hint ladder: gentle → medium → full walkthrough on each pattern card)

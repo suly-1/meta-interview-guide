@@ -199,6 +199,27 @@ export const PATTERNS = [
   },
 ];
 
+/**
+ * PATTERN_PREREQUISITES — defines which patterns must be rated ≥3 in Quick Drill
+ * before an advanced pattern unlocks in the Coding tab.
+ * Key = locked pattern id; Value = array of prerequisite pattern ids.
+ * Patterns not listed are always unlocked (Foundation tier).
+ */
+export const PATTERN_PREREQUISITES: Record<string, string[]> = {
+  // Tier 2 — require one Foundation pattern
+  "sliding-window":  ["arrays-hashing"],
+  "heaps":           ["arrays-hashing"],
+  "binary-search":   ["arrays-hashing"],
+  "graphs":          ["trees-bfs-dfs"],
+  "intervals":       ["two-pointers"],
+  // Tier 3 — require two patterns
+  "backtracking":    ["trees-bfs-dfs", "graphs"],
+  "tries":           ["trees-bfs-dfs", "arrays-hashing"],
+  "monotonic-stack": ["arrays-hashing", "two-pointers"],
+  "prefix-sum":      ["arrays-hashing"],
+  "union-find":      ["graphs"],
+};
+
 export const BEHAVIORAL_FOCUS_AREAS = [
   {
     id: "xfn",

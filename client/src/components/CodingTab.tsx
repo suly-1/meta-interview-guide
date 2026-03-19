@@ -216,6 +216,68 @@ export default function CodingTab() {
 
   return (
     <div className="space-y-10">
+
+      {/* ══════════════════════════════════════════════════════
+           MUST-DO PROGRESSION TRACKER BANNER
+         ══════════════════════════════════════════════════════ */}
+      <a
+        href="https://docs.google.com/spreadsheets/d/1pnI8HmSMPcfwrCCu7wYETCXaKDig4VucZDpcjVRuYrE/edit?gid=237636947#gid=237636947"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block group"
+      >
+        <div className="relative overflow-hidden rounded-2xl border-4 border-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.25)] bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 p-0.5">
+          <div className="bg-white rounded-xl px-5 py-4">
+            {/* Pulsing top badge */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm animate-pulse">
+                  🚨 MUST DO ‼️
+                </span>
+                <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-bold px-2.5 py-1 rounded-full border border-orange-300">
+                  ⚡ HIGH PRIORITY
+                </span>
+              </div>
+              <span className="text-xs text-gray-400 group-hover:text-blue-600 transition-colors font-medium">
+                Click to open in Google Sheets →
+              </span>
+            </div>
+
+            {/* Main content */}
+            <div className="mt-3 flex items-start gap-4">
+              <div className="text-4xl select-none flex-shrink-0">📊</div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-extrabold text-gray-900 leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  🎯 Dinesh Varyani — CRACK THE CODING INTERVIEW
+                  <span className="ml-2 text-red-600">💎🚀</span>
+                </h3>
+                <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                  <strong className="text-red-700">Track every problem you solve.</strong> This spreadsheet is your single source of truth for progression — mark problems as solved, rate your confidence, and identify gaps before your interview.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2.5">
+                  {["✅ Mark problems solved", "📈 Track confidence", "🔍 Spot weak areas", "🏆 Stay accountable"].map(tag => (
+                    <span key={tag} className="text-[11px] bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-semibold border border-gray-200">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTA bar */}
+            <div className="mt-4 flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl px-4 py-3 group-hover:from-red-100 group-hover:to-orange-100 transition-colors">
+              <span className="text-xl">👉</span>
+              <span className="text-sm font-bold text-red-700 flex-1">
+                Open your progression tracker now — don't start practicing without it!
+              </span>
+              <span className="flex-shrink-0 flex items-center gap-1 text-xs font-bold text-white bg-red-600 group-hover:bg-red-700 px-3 py-1.5 rounded-lg transition-colors">
+                <ExternalLink size={11} /> Open Sheet
+              </span>
+            </div>
+          </div>
+        </div>
+      </a>
+
       {/* Overview */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

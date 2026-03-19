@@ -161,6 +161,95 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
         return { hint } as const;
       }),
   }),
+
+  /**
+   * mockInterview.debrief — LLM post-session IC-level assessment.
+   * Receives coding result + behavioral answers and returns a structured debrief.
+   */
+  mockInterview: router({
+    debrief: publicProcedure
+      .input(
+        z.object({
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          coding: z.object({
+            problemName: z.string(),
+            difficulty: z.string(),
+            solved: z.boolean(),
+            durationSec: z.number(),
+            notes: z.string().optional(),
+          }),
+          behavioral: z.array(
+            z.object({
+              question: z.string(),
+              answer: z.string(),
+            })
+          ).min(1).max(3),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const codingResult = input.coding.solved
+          ? `Solved in ${Math.round(input.coding.durationSec / 60)} min`
+          : `Did not solve within ${Math.round(input.coding.durationSec / 60)} min`;
+        const behavioralSection = input.behavioral
+          .map((b, i) => `Q${i + 1}: ${b.question}\nA${i + 1}: ${b.answer}`)
+          .join("\n\n");
+        const systemPrompt = `You are a Meta engineering interview panel evaluating a candidate for ${levelLabel}.
+You have just completed a mock interview loop with one coding round and ${input.behavioral.length} behavioral questions.
+Evaluate the candidate holistically and return a structured JSON debrief.
+Be direct, specific, and calibrated to the ${input.targetLevel} bar at Meta.
+Do not be overly generous — IC7 requires demonstrable staff-level scope and impact.
+Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
+        const userMessage = `=== CODING ROUND ===\nProblem: ${input.coding.problemName} (${input.coding.difficulty})\nResult: ${codingResult}${input.coding.notes ? `\nCandidate notes: ${input.coding.notes}` : ""}\n\n=== BEHAVIORAL ROUNDS ===\n${behavioralSection}`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "mock_interview_debrief",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  icLevelVerdict: { type: "string", enum: ["Strong Hire", "Hire", "Borderline", "No Hire"] },
+                  overallSummary: { type: "string" },
+                  codingScore: { type: "integer" },
+                  codingFeedback: { type: "string" },
+                  behavioralScore: { type: "integer" },
+                  behavioralFeedback: { type: "string" },
+                  topStrengths: { type: "array", items: { type: "string" } },
+                  topImprovements: { type: "array", items: { type: "string" } },
+                  nextSteps: { type: "array", items: { type: "string" } },
+                },
+                required: ["icLevelVerdict", "overallSummary", "codingScore", "codingFeedback", "behavioralScore", "behavioralFeedback", "topStrengths", "topImprovements", "nextSteps"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            icLevelVerdict: "Strong Hire" | "Hire" | "Borderline" | "No Hire";
+            overallSummary: string; codingScore: number; codingFeedback: string;
+            behavioralScore: number; behavioralFeedback: string;
+            topStrengths: string[]; topImprovements: string[]; nextSteps: string[];
+          };
+        } catch {
+          return {
+            icLevelVerdict: "Borderline" as const,
+            overallSummary: "Unable to parse debrief. Please try again.",
+            codingScore: 3, codingFeedback: "", behavioralScore: 3, behavioralFeedback: "",
+            topStrengths: [], topImprovements: [], nextSteps: [],
+          };
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
