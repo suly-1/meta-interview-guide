@@ -185,6 +185,39 @@ interface Submission {
   memory: number | null;
 }
 
+// Speed Run leaderboard
+interface SpeedRunEntry {
+  id: string;
+  problemId: number;
+  problemName: string;
+  difficulty: string;
+  solved: boolean;
+  timeSec: number;
+  score: number;
+  hintsUsed: number;
+  date: number;
+}
+
+const LEADERBOARD_KEY = "cp_speedrun_leaderboard";
+function loadLeaderboard(): SpeedRunEntry[] {
+  try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) ?? "[]"); } catch { return []; }
+}
+function saveLeaderboard(entries: SpeedRunEntry[]) {
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries.slice(0, 50)));
+}
+
+// Topic Sprint types
+interface TopicSprintState {
+  active: boolean;
+  topic: string;
+  queue: number[];        // problem IDs
+  currentIdx: number;
+  secsLeft: number;
+  hintsUsed: number;
+  scores: number[];       // score per problem
+  done: boolean;
+}
+
 function loadSession(): SessionEntry[] {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) ?? "[]"); } catch { return []; }
 }
@@ -249,7 +282,11 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
 }
 
 // ─── Personal Stats Dashboard ──────────────────────────────────────────────
-function StatsDashboard({ session, progress }: { session: SessionEntry[]; progress: Record<number, { solved: boolean; starred: boolean; notes: string }> }) {
+function StatsDashboard({ session, progress, leaderboard }: {
+  session: SessionEntry[];
+  progress: Record<number, { solved: boolean; starred: boolean; notes: string }>;
+  leaderboard: SpeedRunEntry[];
+}) {
   const totalSolved = useMemo(() => Object.values(progress).filter(p => p.solved).length, [progress]);
   const totalStarred = useMemo(() => Object.values(progress).filter(p => p.starred).length, [progress]);
 
@@ -433,6 +470,35 @@ function StatsDashboard({ session, progress }: { session: SessionEntry[]; progre
         </div>
       </div>
 
+      {/* Speed Run Leaderboard */}
+      {leaderboard.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Trophy size={13} className="text-orange-500" />
+            <span className="text-xs font-semibold text-foreground">Speed Run Personal Best</span>
+            <span className="text-xs text-muted-foreground ml-auto">{leaderboard.length} runs</span>
+          </div>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {leaderboard.slice(0, 10).map((e, i) => {
+              const mins = Math.floor(e.timeSec / 60);
+              const secs = e.timeSec % 60;
+              const dc = { Easy: "text-emerald-600", Medium: "text-amber-600", Hard: "text-red-600" }[e.difficulty] ?? "";
+              return (
+                <div key={e.id} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground w-4 text-center">{i + 1}</span>
+                  {e.solved ? <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0" /> : <X size={11} className="text-red-400 flex-shrink-0" />}
+                  <span className="font-medium text-foreground truncate flex-1">{e.problemName}</span>
+                  <span className={`font-semibold text-[10px] ${dc}`}>{e.difficulty}</span>
+                  {e.hintsUsed > 0 && <span className="text-[10px] text-amber-500" title="Hints used">💡{e.hintsUsed}</span>}
+                  <span className="text-muted-foreground text-[10px] font-mono">{mins}:{String(secs).padStart(2, "0")}</span>
+                  <span className="text-orange-600 dark:text-orange-400 font-bold text-[10px]">{e.score}pts</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -528,6 +594,19 @@ export default function CodePractice() {
 
   // Copied state for export button
   const [copied, setCopied] = useState(false);
+
+  // Speed Run leaderboard
+  const [leaderboard, setLeaderboard] = useState<SpeedRunEntry[]>(() => loadLeaderboard());
+
+  // Topic Sprint state
+  const [sprint, setSprint] = useState<TopicSprintState>({
+    active: false, topic: "", queue: [], currentIdx: 0,
+    secsLeft: 10 * 60, hintsUsed: 0, scores: [], done: false,
+  });
+  const sprintRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Hint penalty counter (resets per problem)
+  const [hintsUsedThisRun, setHintsUsedThisRun] = useState(0);
 
   const problem = useMemo(() => CTCI_PROBLEMS.find(p => p.id === selectedId)!, [selectedId]);
   const prog = progress[selectedId] || { solved: false, starred: false, notes: "" };
@@ -680,12 +759,14 @@ export default function CodePractice() {
 
   const handleGetHint = useCallback(async () => {
     setHintText("");
+    // Track hint usage for Speed Run penalty
+    if (speedRunActive || sprint.active) setHintsUsedThisRun(h => h + 1);
     try {
       const result = await hintMutation.mutateAsync({ problemName: problem.name, currentCode: code, hintLevel });
       const hintStr = typeof result.hint === "string" ? result.hint : String(result.hint);
       setHintText(hintStr);
     } catch { setHintText("Failed to get hint. Please try again."); }
-  }, [problem.name, code, hintLevel]);
+  }, [problem.name, code, hintLevel, speedRunActive, sprint.active]);
 
   const handleReset = useCallback(() => {
     setCode(getBoilerplate(langId, problem));
@@ -729,10 +810,28 @@ export default function CodePractice() {
     if (speedRunRef.current) clearInterval(speedRunRef.current);
     const timeSec = 20 * 60 - speedRunSecsLeft;
     const timeBonus = solved ? Math.max(0, Math.round((1 - timeSec / (20 * 60)) * 50)) : 0;
-    const score = solved ? 50 + timeBonus : 0;
+    const hintPenalty = hintsUsedThisRun * 10;
+    const rawScore = solved ? 50 + timeBonus : 0;
+    const score = Math.max(0, rawScore - hintPenalty);
     setSpeedRunScore({ solved, timeSec, score });
     setSpeedRunActive(false);
-  }, [speedRunSecsLeft]);
+    // Save to leaderboard
+    const entry: SpeedRunEntry = {
+      id: `${Date.now()}`,
+      problemId: selectedId,
+      problemName: problem.name,
+      difficulty: problem.difficulty,
+      solved,
+      timeSec,
+      score,
+      hintsUsed: hintsUsedThisRun,
+      date: Date.now(),
+    };
+    const updated = [entry, ...loadLeaderboard()].sort((a, b) => b.score - a.score);
+    saveLeaderboard(updated);
+    setLeaderboard(updated);
+    setHintsUsedThisRun(0);
+  }, [speedRunSecsLeft, hintsUsedThisRun, selectedId, problem]);
 
   // Speed Run countdown
   useEffect(() => {
@@ -753,6 +852,70 @@ export default function CodePractice() {
     }
     return () => { if (speedRunRef.current) clearInterval(speedRunRef.current); };
   }, [speedRunActive]);
+
+  // ─── Topic Sprint handlers ────────────────────────────────────────────────
+  const startTopicSprint = useCallback((topic: string) => {
+    const pool = CTCI_PROBLEMS.filter(p =>
+      p.topic.toLowerCase().includes(topic.toLowerCase()) && !progress[p.id]?.solved
+    );
+    const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+    if (shuffled.length === 0) return;
+    setSprint({
+      active: true, topic, queue: shuffled.map(p => p.id),
+      currentIdx: 0, secsLeft: 10 * 60, hintsUsed: 0, scores: [], done: false,
+    });
+    setSelectedId(shuffled[0].id);
+    setHintsUsedThisRun(0);
+    setTimerRunning(false);
+    timerSecsRef.current = 0;
+  }, [progress]);
+
+  const advanceTopicSprint = useCallback((solved: boolean) => {
+    setSprint(prev => {
+      const timeSec = 10 * 60 - prev.secsLeft;
+      const timeBonus = solved ? Math.max(0, Math.round((1 - timeSec / (10 * 60)) * 30)) : 0;
+      const hintPenalty = hintsUsedThisRun * 10;
+      const score = Math.max(0, (solved ? 40 + timeBonus : 0) - hintPenalty);
+      const scores = [...prev.scores, score];
+      const nextIdx = prev.currentIdx + 1;
+      if (nextIdx >= prev.queue.length) {
+        if (sprintRef.current) clearInterval(sprintRef.current);
+        return { ...prev, active: false, scores, done: true };
+      }
+      setSelectedId(prev.queue[nextIdx]);
+      setHintsUsedThisRun(0);
+      timerSecsRef.current = 0;
+      return { ...prev, currentIdx: nextIdx, secsLeft: 10 * 60, hintsUsed: 0, scores };
+    });
+  }, [hintsUsedThisRun]);
+
+  // Topic Sprint countdown
+  useEffect(() => {
+    if (sprint.active) {
+      sprintRef.current = setInterval(() => {
+        setSprint(prev => {
+          if (prev.secsLeft <= 1) {
+            clearInterval(sprintRef.current!);
+            // Time up on this problem — advance with unsolved
+            const timeSec = 10 * 60;
+            const scores = [...prev.scores, 0];
+            const nextIdx = prev.currentIdx + 1;
+            if (nextIdx >= prev.queue.length) {
+              return { ...prev, active: false, scores, done: true };
+            }
+            setSelectedId(prev.queue[nextIdx]);
+            setHintsUsedThisRun(0);
+            timerSecsRef.current = 0;
+            return { ...prev, currentIdx: nextIdx, secsLeft: 10 * 60, scores };
+          }
+          return { ...prev, secsLeft: prev.secsLeft - 1 };
+        });
+      }, 1000);
+    } else {
+      if (sprintRef.current) clearInterval(sprintRef.current);
+    }
+    return () => { if (sprintRef.current) clearInterval(sprintRef.current); };
+  }, [sprint.active]);
 
   const handleMarkSolved = useCallback(() => {
     toggleSolved(selectedId);
@@ -812,6 +975,50 @@ export default function CodePractice() {
               >
                 <BarChart2 size={10} /> Stats
               </button>
+            </div>
+
+            {/* Topic Sprint button */}
+            <div className="px-2 pt-1 pb-1">
+              {sprint.done ? (
+                <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-300 dark:border-violet-700 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-violet-700 dark:text-violet-300">🏁 Sprint Complete!</span>
+                    <button onClick={() => setSprint(s => ({ ...s, done: false }))} className="text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+                  </div>
+                  <div className="text-xs text-violet-600 dark:text-violet-400">
+                    Total: <span className="font-bold">{sprint.scores.reduce((a, b) => a + b, 0)}</span> pts
+                    &nbsp;({sprint.scores.join(" + ")})
+                  </div>
+                </div>
+              ) : sprint.active ? (
+                <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-300 dark:border-violet-700 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-violet-700 dark:text-violet-300">⚡ Topic Sprint: {sprint.topic}</span>
+                    <button onClick={() => { if (sprintRef.current) clearInterval(sprintRef.current); setSprint(s => ({ ...s, active: false })); }} className="text-[10px] text-muted-foreground hover:text-foreground">Stop</button>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span>Problem {sprint.currentIdx + 1}/{sprint.queue.length}</span>
+                    <span className="font-mono text-violet-600 dark:text-violet-400">{Math.floor(sprint.secsLeft / 60)}:{String(sprint.secsLeft % 60).padStart(2, "0")}</span>
+                  </div>
+                  <button
+                    onClick={() => advanceTopicSprint(true)}
+                    className="mt-1.5 w-full text-[10px] font-semibold py-1 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors"
+                  >✓ Mark Solved &amp; Next</button>
+                </div>
+              ) : (
+                <div className="relative group">
+                  <button
+                    onClick={() => {
+                      const topics = Array.from(new Set(CTCI_PROBLEMS.map(p => p.topic.split(",")[0].trim())));
+                      const t = topics[Math.floor(Math.random() * topics.length)];
+                      startTopicSprint(t);
+                    }}
+                    className="w-full text-[10px] font-semibold py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors flex items-center justify-center gap-1"
+                  >
+                    ⚡ Random Topic Sprint
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Search */}
@@ -909,7 +1116,7 @@ export default function CodePractice() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {mainView === "stats" ? (
-          <StatsDashboard session={session} progress={progress} />
+          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} />
         ) : (
           <>
             {/* Toolbar */}

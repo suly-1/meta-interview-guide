@@ -55,3 +55,6 @@
 - [x] Difficulty progression lock (grey out Hard until ≥60% Easy + ≥40% Medium solved)
 - [x] Code export (download file + copy to clipboard) in editor toolbar
 - [x] Speed Run timed challenge mode (hidden problem name, 20-min countdown, correctness + time scoring)
+- [x] Speed Run leaderboard (localStorage, personal best table in Stats view)
+- [x] Hint penalty system (−10 per hint used in Speed Run, deducted from final score)
+- [x] Topic Sprint mode (topic selector, 3-problem timed set, aggregate score)
