@@ -16,11 +16,11 @@ import SystemDesignTab from "@/components/SystemDesignTab";
 import { useStreak } from "@/hooks/useStreak";
 
 const TABS = [
+  { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,    color: "violet"  },
   { id: "coding",      label: "Coding Interview",    icon: <Code2 size={15} />,         color: "blue"    },
   { id: "ai-round",   label: "AI-Enabled Round",     icon: <Cpu size={15} />,           color: "teal"    },
   { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />, color: "amber"   },
   { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,      color: "emerald" },
-  { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,    color: "violet"  },
   { id: "readiness",  label: "Readiness",            icon: <BarChart2 size={15} />,     color: "rose"    },
   { id: "sysdesign",  label: "System Design",         icon: <Layers size={15} />,        color: "slate"   },
 ];
@@ -36,7 +36,7 @@ const ACTIVE_COLORS: Record<string, string> = {
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("coding");
+  const [activeTab, setActiveTab] = useState("ctci");
   const [direction, setDirection]  = useState(1);
   const { streak, activatedToday } = useStreak();
   const { theme, toggleTheme } = useTheme();
