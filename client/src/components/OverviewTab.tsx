@@ -8,6 +8,7 @@ import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK
 import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates } from "@/hooks/useLocalStorage";
 import { CTCI_QUESTIONS } from "@/lib/ctciData";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
 import { FullMockDaySimulator } from "@/components/FullMockDaySimulator";
 import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/components/OverviewExtras";
@@ -1500,6 +1501,21 @@ function QuickActionsRow() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const clearTodayPlan = () => {
+    try {
+      const history = JSON.parse(localStorage.getItem("study_plan_history_v1") ?? "[]") as Array<{ date: string }>;
+      const filtered = history.filter(h => h.date !== today);
+      localStorage.setItem("study_plan_history_v1", JSON.stringify(filtered));
+      // Force page re-render by dispatching a storage event
+      window.dispatchEvent(new Event("storage"));
+      scrollTo("study-session-planner");
+    } catch { scrollTo("study-session-planner"); }
+  };
+
+  const lastActiveFormatted = streak.lastVisit
+    ? new Date(streak.lastVisit + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })
+    : null;
+
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Quick Actions</span>
@@ -1511,6 +1527,15 @@ function QuickActionsRow() {
           <Brain size={12} />
           {hasTodayPlan ? "Resume Today's Plan" : "Plan Today's Session"}
         </button>
+        {hasTodayPlan && (
+          <button
+            onClick={clearTodayPlan}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all"
+            title="Clear today's plan and generate a new one"
+          >
+            New Plan
+          </button>
+        )}
         <button
           onClick={() => scrollTo("full-mock-day")}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 text-xs font-semibold transition-all"
@@ -1520,9 +1545,19 @@ function QuickActionsRow() {
         </button>
       </div>
       {streak.currentStreak > 0 && (
-        <span className="flex items-center gap-1 text-xs font-bold text-amber-400 whitespace-nowrap ml-auto">
-          🔥 {streak.currentStreak} day{streak.currentStreak !== 1 ? "s" : ""}
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="flex items-center gap-1 text-xs font-bold text-amber-400 whitespace-nowrap ml-auto cursor-default select-none">
+              🔥 {streak.currentStreak} day{streak.currentStreak !== 1 ? "s" : ""}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs space-y-1">
+            <div className="font-semibold">Daily Prep Streak</div>
+            <div>Current: {streak.currentStreak} day{streak.currentStreak !== 1 ? "s" : ""}</div>
+            <div>Best: {streak.longestStreak} day{streak.longestStreak !== 1 ? "s" : ""}</div>
+            {lastActiveFormatted && <div className="text-muted-foreground">Last active: {lastActiveFormatted}</div>}
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );

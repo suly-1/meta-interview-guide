@@ -78,6 +78,32 @@ export default function SystemDesignTab() {
 
   return (
     <div className="space-y-5">
+      {/* Quick Actions sticky row */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Quick Actions</span>
+        <div className="flex gap-2 flex-1 flex-wrap">
+          <button
+            onClick={() => {
+              const el = document.getElementById("sysdesign-diagram-templates");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/30 text-violet-300 text-xs font-semibold transition-all"
+          >
+            <GitBranch size={12} />
+            Open Diagram Template
+          </button>
+          <button
+            onClick={() => {
+              const el = document.getElementById("sysdesign-capacity-calc");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/30 text-cyan-300 text-xs font-semibold transition-all"
+          >
+            <Database size={12} />
+            Start Capacity Calc
+          </button>
+        </div>
+      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
            🚨 META SYSTEM DESIGN PREP 2026 — MUST READ GUIDE
@@ -873,9 +899,13 @@ export default function SystemDesignTab() {
       </div>
 
       {/* System Design Diagram Templates */}
-      <SystemDesignDiagramTemplates />
+      <div id="sysdesign-diagram-templates">
+        <SystemDesignDiagramTemplates />
+      </div>
       {/* Capacity Estimation Calculator */}
-      <CapacityCalculator />
+      <div id="sysdesign-capacity-calc">
+        <CapacityCalculator />
+      </div>
 
       {/* Design Pattern Library */}
       <DesignPatternLibrary />

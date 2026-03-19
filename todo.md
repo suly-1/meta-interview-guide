@@ -200,6 +200,11 @@
 - [x] Global Search — ⌘K command palette searching across 200+ items (patterns, CTCI, behavioral questions, system design topics, flash cards)
 - [x] Onboarding Checklist — 5-step guided checklist for new users (set date, rate patterns, add story, flash drill, run mock); dismissible
 
+## New Features — Round 34
+- [x] Quick Actions sticky row on SystemDesignTab (Open Diagram Template, Start Capacity Calc)
+- [x] Streak tooltip on Overview Quick Actions bar (longest streak + last active date on hover)
+- [x] New Plan secondary button alongside Resume Today's Plan (clears today's plan from localStorage and scrolls to planner)
+
 ## New Features — Round 33
 - [x] Streak counter in Overview Quick Actions row (🔥 N days inline)
 - [x] Resume Today's Plan button — replaces Plan Today's Session if a plan was already generated today; full plan stored in localStorage and auto-restored on page load
