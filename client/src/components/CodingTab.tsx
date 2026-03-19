@@ -1,9 +1,9 @@
-// Design: Bold Engineering Dashboard — Coding Tab
+// Design: Bold Engineering Dashboard — System Design Tab
 // Features: search, difficulty/freq/mastery filter, quick drill with 30s timer,
 // spaced repetition, heatmap, Anki export, weak-spots filter, pattern notes,
-// mock interview timer (25/35/45 min), session history
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Download, Flame, Clock, ChevronDown, ChevronUp, Star, Zap, BarChart2, BookOpen, Filter } from "lucide-react";
+// mock interview timer (25/35/45 min), session history, sprint mode
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Search, Download, Flame, Clock, ChevronDown, ChevronUp, Star, Zap, BarChart2, BookOpen, Filter, Timer, Trophy, X, SkipForward, ChevronRight } from "lucide-react";
 import { PATTERNS } from "@/lib/data";
 import { usePatternRatings, usePatternNotes, useSpacedRepetition, useCodingHistory } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
@@ -255,7 +255,222 @@ function MockTimer({ onSessionEnd }: { onSessionEnd: (duration: number) => void 
   );
 }
 
-// ── Main CodingTab ─────────────────────────────────────────────────────────
+/// ── Sprint Mode ─────────────────────────────────────────────────────
+const SPRINT_DURATION = 120; // 2 minutes per pattern
+const SPRINT_COUNT = 5;
+
+type SprintResult = { patternId: string; rated: number; skipped: boolean };
+
+function SprintMode({ ratings, onRate, onClose }: {
+  ratings: Record<string, number>;
+  onRate: (id: string, rating: number) => void;
+  onClose: () => void;
+}) {
+  // Pick N unmastered (rating < 4) patterns at random; fall back to all if not enough
+  const pool = useMemo(() => {
+    const unmastered = PATTERNS.filter(p => (ratings[p.id] ?? 0) < 4);
+    const source = unmastered.length >= SPRINT_COUNT ? unmastered : PATTERNS;
+    const shuffled = [...source].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, SPRINT_COUNT);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // fixed at mount
+
+  const [idx, setIdx] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(SPRINT_DURATION);
+  const [revealed, setRevealed] = useState(false);
+  const [results, setResults] = useState<SprintResult[]>([]);
+  const [done, setDone] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const current = pool[idx];
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
+
+  const startTimer = useCallback(() => {
+    stopTimer();
+    setTimeLeft(SPRINT_DURATION);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) {
+          clearInterval(timerRef.current!);
+          setRevealed(true);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+  }, [stopTimer]);
+
+  useEffect(() => {
+    startTimer();
+    return stopTimer;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx]);
+
+  useEffect(() => () => stopTimer(), [stopTimer]);
+
+  const advance = (rated: number, skipped: boolean) => {
+    stopTimer();
+    if (!skipped && rated > 0) onRate(current.id, rated);
+    const newResults = [...results, { patternId: current.id, rated, skipped }];
+    setResults(newResults);
+    if (idx + 1 >= pool.length) {
+      setDone(true);
+    } else {
+      setIdx(i => i + 1);
+      setRevealed(false);
+    }
+  };
+
+  const pct = (timeLeft / SPRINT_DURATION) * 100;
+  const urgent = timeLeft <= 20;
+  const warning = timeLeft <= 60;
+
+  if (done) {
+    const ratedCount = results.filter(r => !r.skipped && r.rated > 0).length;
+    const avgRated = ratedCount > 0
+      ? (results.filter(r => !r.skipped).reduce((s, r) => s + r.rated, 0) / ratedCount).toFixed(1)
+      : "—";
+    return (
+      <div className="prep-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Trophy size={18} className="text-amber-400" />
+            <span className="text-base font-bold text-foreground">Sprint Complete!</span>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X size={16} /></button>
+        </div>
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          {[["🎯", "Patterns", `${pool.length}`], ["⭐", "Avg Rating", avgRated], ["⏩", "Skipped", `${results.filter(r => r.skipped).length}`]].map(([e, l, v]) => (
+            <div key={l as string} className="p-3 rounded-lg bg-secondary text-center">
+              <div className="text-lg">{e}</div>
+              <div className="text-lg font-bold text-foreground">{v}</div>
+              <div className="text-xs text-muted-foreground">{l}</div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2 mb-5">
+          {results.map((r, i) => {
+            const p = pool[i];
+            return (
+              <div key={p.id} className="flex items-center gap-3 text-xs">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${r.skipped ? "bg-muted-foreground" : r.rated >= 4 ? "bg-emerald-400" : r.rated >= 3 ? "bg-amber-400" : "bg-red-400"}`} />
+                <span className="flex-1 text-foreground font-medium">{p.name}</span>
+                <span className="text-muted-foreground">{r.skipped ? "Skipped" : `★ ${r.rated}`}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 px-4 py-2 rounded-lg bg-secondary hover:bg-accent border border-border text-sm font-semibold text-foreground transition-all">Close</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="prep-card p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Timer size={14} className="text-orange-400" />
+          <span className="text-sm font-bold text-foreground">Sprint Mode</span>
+          <span className="badge badge-gray">{idx + 1}/{pool.length}</span>
+        </div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors"><X size={14} /></button>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-1.5 rounded-full bg-secondary mb-4 overflow-hidden">
+        <div className="h-full rounded-full bg-orange-400 transition-all" style={{ width: `${((idx) / pool.length) * 100}%` }} />
+      </div>
+
+      {/* Timer ring + pattern */}
+      <div className="flex gap-5 items-start mb-4">
+        {/* Circular timer */}
+        <div className="relative w-20 h-20 shrink-0">
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="oklch(0.28 0.012 264)" strokeWidth="8" />
+            <circle cx="50" cy="50" r="40" fill="none"
+              stroke={urgent ? "oklch(0.65 0.22 25)" : warning ? "oklch(0.78 0.17 75)" : "oklch(0.72 0.18 45)"}
+              strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 40}`}
+              strokeDashoffset={`${2 * Math.PI * 40 * (1 - pct / 100)}`}
+              style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s" }} />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-400" : "text-foreground"}`}>
+              {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:{String(timeLeft % 60).padStart(2, "0")}
+            </span>
+          </div>
+        </div>
+
+        {/* Pattern info */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-base font-bold text-foreground">{current.name}</span>
+            <span className={`badge ${DIFF_COLOR[current.diff]}`}>{current.diff}</span>
+            {(ratings[current.id] ?? 0) > 0 && (
+              <span className="badge badge-gray">★ {ratings[current.id]}</span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mb-2">{current.desc}</p>
+          {!revealed ? (
+            <button onClick={() => setRevealed(true)}
+              className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-xs font-semibold text-foreground transition-all">
+              Reveal Key Idea
+            </button>
+          ) : (
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <div className="text-xs font-bold text-emerald-400 mb-1">Key Idea</div>
+              <div className="text-xs text-foreground mb-2">{current.keyIdea}</div>
+              <div className="flex flex-wrap gap-1">
+                {current.examples.map(e => (
+                  <span key={e} className="badge badge-gray">{e}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Rating + Skip */}
+      {revealed && (
+        <div className="space-y-3">
+          <div className="text-xs text-muted-foreground font-medium">How well did you explain it?</div>
+          <div className="flex gap-2 flex-wrap">
+            {[1, 2, 3, 4, 5].map(r => (
+              <button key={r} onClick={() => advance(r, false)}
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg border text-xs font-semibold transition-all ${
+                  r <= 2 ? "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                  : r === 3 ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+                  : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                }`}>
+                ★ {r}
+              </button>
+            ))}
+            <button onClick={() => advance(0, true)}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg bg-secondary border border-border text-muted-foreground text-xs font-semibold hover:text-foreground transition-all">
+              <SkipForward size={11} /> Skip
+            </button>
+          </div>
+        </div>
+      )}
+      {!revealed && (
+        <div className="flex justify-end">
+          <button onClick={() => advance(0, true)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary border border-border text-muted-foreground text-xs font-semibold hover:text-foreground transition-all">
+            <SkipForward size={11} /> Skip
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main CodingTab ─────────────────────────────────────────────────────
 export default function CodingTab() {
   const [ratings, setRatings] = usePatternRatings();
   const [notes, setNotes] = usePatternNotes();
@@ -268,6 +483,7 @@ export default function CodingTab() {
   const [weakOnly, setWeakOnly] = useState(false);
   const [expandedNote, setExpandedNote] = useState<string | null>(null);
   const [showDrillMode, setShowDrillMode] = useState(false);
+  const [showSprintMode, setShowSprintMode] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(true);
 
   const today = new Date().toISOString().split("T")[0];
@@ -359,9 +575,17 @@ export default function CodingTab() {
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => setShowDrillMode(d => !d)}
+        <button onClick={() => { setShowDrillMode(d => !d); setShowSprintMode(false); }}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 text-sm font-semibold transition-all">
           <Zap size={13} /> {showDrillMode ? "Hide" : "Show"} Quick Drill
+        </button>
+        <button onClick={() => { setShowSprintMode(s => !s); setShowDrillMode(false); }}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
+            showSprintMode
+              ? "bg-orange-500/25 border-orange-500/50 text-orange-300"
+              : "bg-orange-500/15 hover:bg-orange-500/25 border-orange-500/30 text-orange-400"
+          }`}>
+          <Timer size={13} /> {showSprintMode ? "Hide" : "Start"} Sprint Mode
         </button>
         <button onClick={() => setShowHeatmap(h => !h)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-sm font-semibold transition-all">
@@ -372,6 +596,15 @@ export default function CodingTab() {
           <Download size={13} /> Export Anki CSV
         </button>
       </div>
+
+      {/* Sprint Mode */}
+      {showSprintMode && (
+        <SprintMode
+          ratings={ratings}
+          onRate={handleRate}
+          onClose={() => setShowSprintMode(false)}
+        />
+      )}
 
       {/* Quick Drill */}
       {showDrillMode && <QuickDrill ratings={ratings} onRate={handleRate} weakOnly={weakOnly} />}

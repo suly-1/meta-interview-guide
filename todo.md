@@ -47,6 +47,11 @@
 ## New Features — Round 4
 - [x] ML System Design guide section in System Design tab (from systemdesignhandbook.com)
 
+## New Features — Round 5
+- [x] Achievement Badges UI (hero section, unlock on milestones)
+- [x] Time-Boxed Pattern Sprint Mode (5 random unmastered patterns, 2 min each)
+- [x] Offline PWA support (service worker + manifest.json)
+
 - [ ] Monaco in-browser code editor with test cases for 20 patterns
 - [ ] Time-Boxed Pattern Sprint Mode (5 patterns, 2 min each)
 - [ ] Pattern Dependency Graph (d3-force interactive graph)

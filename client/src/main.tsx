@@ -59,3 +59,13 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </trpc.Provider>
 );
+
+// Register service worker for offline support (production only)
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then(() => console.log("[SW] Registered"))
+      .catch((err) => console.warn("[SW] Registration failed:", err));
+  });
+}

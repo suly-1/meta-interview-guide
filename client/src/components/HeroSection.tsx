@@ -1,8 +1,55 @@
 // Design: Bold Engineering Dashboard — large stat numbers, fire streak, progress bar
 import { useStreak, usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
-import { Flame, Target, Brain, Calendar, TrendingUp } from "lucide-react";
+import { Flame, Target, Brain, Calendar, TrendingUp, Award } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
+
+// ── Achievement Badges ─────────────────────────────────────────────────────
+const BADGE_DEFS = [
+  { id: "first_blood",   emoji: "🩸", label: "First Blood",    desc: "Master your first pattern",         check: (p: number, _m: number, _s: number) => p >= 1 },
+  { id: "on_fire",       emoji: "🔥", label: "On Fire",        desc: "7-day study streak",                 check: (_p: number, _m: number, s: number) => s >= 7 },
+  { id: "half_way",      emoji: "⚡", label: "Half-Way There", desc: "Master 7 of 14 patterns",           check: (p: number, _m: number, _s: number) => p >= 7 },
+  { id: "mock_veteran",  emoji: "🎯", label: "Mock Veteran",   desc: "Complete 5 mock sessions",          check: (_p: number, m: number, _s: number) => m >= 5 },
+  { id: "ic7_ready",     emoji: "⭐", label: "IC7 Ready",      desc: "Master all 14 patterns",            check: (p: number, _m: number, _s: number) => p >= PATTERNS.length },
+] as const;
+
+function AchievementBadges({ masteredPatterns, mockSessions, streak }: { masteredPatterns: number; mockSessions: number; streak: number }) {
+  const earned = BADGE_DEFS.filter(b => b.check(masteredPatterns, mockSessions, streak));
+  const locked = BADGE_DEFS.filter(b => !b.check(masteredPatterns, mockSessions, streak));
+  return (
+    <div className="prep-card p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Award size={14} className="text-amber-400" />
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Achievement Badges</span>
+        <span className="badge badge-amber ml-auto">{earned.length}/{BADGE_DEFS.length} earned</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {BADGE_DEFS.map(b => {
+          const isEarned = b.check(masteredPatterns, mockSessions, streak);
+          return (
+            <div
+              key={b.id}
+              title={b.desc}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                isEarned
+                  ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
+                  : "bg-secondary border-border text-muted-foreground opacity-40 grayscale"
+              }`}
+            >
+              <span>{b.emoji}</span>
+              <span>{b.label}</span>
+            </div>
+          );
+        })}
+      </div>
+      {locked.length > 0 && (
+        <div className="mt-2 text-xs text-muted-foreground">
+          Next: <span className="text-foreground font-medium">{locked[0].emoji} {locked[0].label}</span> — {locked[0].desc}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface HeroSectionProps {
   onTabChange: (tab: string) => void;
@@ -176,6 +223,11 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
           </button>
         </div>
       </div>
+      {/* Achievement Badges */}
+      <div className="container mt-4">
+        <AchievementBadges masteredPatterns={masteredPatterns} mockSessions={mockHistory.length} streak={streak.currentStreak} />
+      </div>
+
       {/* Leaderboard */}
       <div className="mt-4">
         <Leaderboard />
