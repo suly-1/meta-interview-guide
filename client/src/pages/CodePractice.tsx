@@ -199,11 +199,29 @@ interface SpeedRunEntry {
 }
 
 const LEADERBOARD_KEY = "cp_speedrun_leaderboard";
+const SPRINT_HISTORY_KEY = "cp_sprint_history";
 function loadLeaderboard(): SpeedRunEntry[] {
   try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) ?? "[]"); } catch { return []; }
 }
 function saveLeaderboard(entries: SpeedRunEntry[]) {
   localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries.slice(0, 50)));
+}
+
+// Sprint history
+interface SprintHistoryEntry {
+  id: string;
+  topic: string;
+  totalScore: number;
+  scores: number[];
+  problemNames: string[];
+  date: number;
+}
+
+function loadSprintHistory(): SprintHistoryEntry[] {
+  try { return JSON.parse(localStorage.getItem(SPRINT_HISTORY_KEY) ?? "[]"); } catch { return []; }
+}
+function saveSprintHistory(entries: SprintHistoryEntry[]) {
+  localStorage.setItem(SPRINT_HISTORY_KEY, JSON.stringify(entries.slice(0, 100)));
 }
 
 // Topic Sprint types
@@ -282,10 +300,11 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
 }
 
 // ─── Personal Stats Dashboard ──────────────────────────────────────────────
-function StatsDashboard({ session, progress, leaderboard }: {
+function StatsDashboard({ session, progress, leaderboard, sprintHistory }: {
   session: SessionEntry[];
   progress: Record<number, { solved: boolean; starred: boolean; notes: string }>;
   leaderboard: SpeedRunEntry[];
+  sprintHistory: SprintHistoryEntry[];
 }) {
   const totalSolved = useMemo(() => Object.values(progress).filter(p => p.solved).length, [progress]);
   const totalStarred = useMemo(() => Object.values(progress).filter(p => p.starred).length, [progress]);
@@ -499,6 +518,44 @@ function StatsDashboard({ session, progress, leaderboard }: {
         </div>
       )}
 
+      {/* Sprint History */}
+      {sprintHistory.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap size={13} className="text-violet-500" />
+            <span className="text-xs font-semibold text-foreground">Topic Sprint History</span>
+            <span className="text-xs text-muted-foreground ml-auto">{sprintHistory.length} sprints</span>
+          </div>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {sprintHistory.slice(0, 15).map((entry, i) => (
+              <div key={entry.id} className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg px-3 py-2">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-muted-foreground w-4 text-center">{i + 1}</span>
+                    <span className="text-xs font-semibold text-violet-700 dark:text-violet-300">⚡ {entry.topic}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-violet-600 dark:text-violet-400">{entry.totalScore} pts</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(entry.date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {entry.scores.map((s, j) => (
+                    <span key={j} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                      s >= 60 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                      s >= 30 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                    }`} title={entry.problemNames[j]}>
+                      P{j + 1}: {s}pts
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -597,6 +654,15 @@ export default function CodePractice() {
 
   // Speed Run leaderboard
   const [leaderboard, setLeaderboard] = useState<SpeedRunEntry[]>(() => loadLeaderboard());
+
+  // Sprint history
+  const [sprintHistory, setSprintHistory] = useState<SprintHistoryEntry[]>(() => loadSprintHistory());
+
+  // Speed Run difficulty filter
+  const [speedRunDifficulty, setSpeedRunDifficulty] = useState<"All" | "Easy" | "Medium" | "Hard">("All");
+
+  // Topic Sprint — chosen topic (empty = random)
+  const [sprintTopic, setSprintTopic] = useState<string>("");
 
   // Topic Sprint state
   const [sprint, setSprint] = useState<TopicSprintState>({
@@ -794,9 +860,13 @@ export default function CodePractice() {
 
   // Speed Run
   const startSpeedRun = useCallback(() => {
-    // Pick a random unsolved problem
-    const unsolved = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
-    const pool = unsolved.length > 0 ? unsolved : CTCI_PROBLEMS;
+    // Pick a random unsolved problem, filtered by difficulty if set
+    let pool = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
+    if (pool.length === 0) pool = CTCI_PROBLEMS;
+    if (speedRunDifficulty !== "All") {
+      const filtered = pool.filter(p => p.difficulty === speedRunDifficulty);
+      if (filtered.length > 0) pool = filtered;
+    }
     const pick = pool[Math.floor(Math.random() * pool.length)];
     setSelectedId(pick.id);
     setSpeedRunActive(true);
@@ -804,7 +874,8 @@ export default function CodePractice() {
     setSpeedRunScore(null);
     setTimerRunning(false);
     timerSecsRef.current = 0;
-  }, [progress]);
+    setHintsUsedThisRun(0);
+  }, [progress, speedRunDifficulty]);
 
   const stopSpeedRun = useCallback((solved: boolean) => {
     if (speedRunRef.current) clearInterval(speedRunRef.current);
@@ -877,9 +948,22 @@ export default function CodePractice() {
       const hintPenalty = hintsUsedThisRun * 10;
       const score = Math.max(0, (solved ? 40 + timeBonus : 0) - hintPenalty);
       const scores = [...prev.scores, score];
+      const problemNames = prev.queue.map(id => CTCI_PROBLEMS.find(p => p.id === id)?.name ?? `#${id}`);
       const nextIdx = prev.currentIdx + 1;
       if (nextIdx >= prev.queue.length) {
         if (sprintRef.current) clearInterval(sprintRef.current);
+        // Persist sprint history
+        const entry: SprintHistoryEntry = {
+          id: `${Date.now()}`,
+          topic: prev.topic,
+          totalScore: scores.reduce((a, b) => a + b, 0),
+          scores,
+          problemNames,
+          date: Date.now(),
+        };
+        const updated = [entry, ...loadSprintHistory()];
+        saveSprintHistory(updated);
+        setSprintHistory(updated);
         return { ...prev, active: false, scores, done: true };
       }
       setSelectedId(prev.queue[nextIdx]);
@@ -897,10 +981,22 @@ export default function CodePractice() {
           if (prev.secsLeft <= 1) {
             clearInterval(sprintRef.current!);
             // Time up on this problem — advance with unsolved
-            const timeSec = 10 * 60;
             const scores = [...prev.scores, 0];
+            const problemNames = prev.queue.map(id => CTCI_PROBLEMS.find(p => p.id === id)?.name ?? `#${id}`);
             const nextIdx = prev.currentIdx + 1;
             if (nextIdx >= prev.queue.length) {
+              // Persist sprint history on time-out completion
+              const entry: SprintHistoryEntry = {
+                id: `${Date.now()}`,
+                topic: prev.topic,
+                totalScore: scores.reduce((a, b) => a + b, 0),
+                scores,
+                problemNames,
+                date: Date.now(),
+              };
+              const updated = [entry, ...loadSprintHistory()];
+              saveSprintHistory(updated);
+              setSprintHistory(updated);
               return { ...prev, active: false, scores, done: true };
             }
             setSelectedId(prev.queue[nextIdx]);
@@ -1006,16 +1102,27 @@ export default function CodePractice() {
                   >✓ Mark Solved &amp; Next</button>
                 </div>
               ) : (
-                <div className="relative group">
+                <div className="space-y-1">
+                  {/* Topic selector */}
+                  <select
+                    value={sprintTopic}
+                    onChange={e => setSprintTopic(e.target.value)}
+                    className="w-full text-[10px] bg-background border border-border rounded-lg px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  >
+                    <option value="">🎲 Random Topic</option>
+                    {Array.from(new Set(CTCI_PROBLEMS.map(p => p.topic.split(",")[0].trim()))).sort().map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
                   <button
                     onClick={() => {
                       const topics = Array.from(new Set(CTCI_PROBLEMS.map(p => p.topic.split(",")[0].trim())));
-                      const t = topics[Math.floor(Math.random() * topics.length)];
+                      const t = sprintTopic || topics[Math.floor(Math.random() * topics.length)];
                       startTopicSprint(t);
                     }}
                     className="w-full text-[10px] font-semibold py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors flex items-center justify-center gap-1"
                   >
-                    ⚡ Random Topic Sprint
+                    ⚡ {sprintTopic ? `Sprint: ${sprintTopic.length > 14 ? sprintTopic.slice(0, 14) + '…' : sprintTopic}` : 'Random Topic Sprint'}
                   </button>
                 </div>
               )}
@@ -1116,7 +1223,7 @@ export default function CodePractice() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {mainView === "stats" ? (
-          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} />
+          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} />
         ) : (
           <>
             {/* Toolbar */}
@@ -1157,18 +1264,42 @@ export default function CodePractice() {
               <button onClick={handleCopyCode} title={copied ? "Copied!" : "Copy code"} className={`transition-colors p-1.5 rounded-lg hover:bg-muted ${copied ? "text-emerald-500" : "text-muted-foreground hover:text-foreground"}`}>
                 <Copy size={14} />
               </button>
-              <button
-                onClick={speedRunActive ? () => stopSpeedRun(false) : startSpeedRun}
-                title={speedRunActive ? "Stop Speed Run" : "Start Speed Run (20 min, random problem)"}
-                className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
-                  speedRunActive
-                    ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
-                    : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Timer size={13} />
-                {speedRunActive ? `${Math.floor(speedRunSecsLeft/60)}:${String(speedRunSecsLeft%60).padStart(2,"0")}` : "Speed Run"}
-              </button>
+              {/* Speed Run group */}
+              <div className="flex items-center gap-1">
+                {!speedRunActive && (
+                  <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5">
+                    {(["All", "Easy", "Med", "Hard"] as const).map(d => {
+                      const val = d === "Med" ? "Medium" : d as "All" | "Easy" | "Hard";
+                      const active = speedRunDifficulty === val;
+                      const color = d === "Easy" ? "text-emerald-600" : d === "Med" ? "text-amber-600" : d === "Hard" ? "text-red-600" : "text-foreground";
+                      return (
+                        <button
+                          key={d}
+                          onClick={() => setSpeedRunDifficulty(val)}
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md transition-all ${
+                            active ? `bg-background shadow-sm ${color}` : "text-muted-foreground hover:text-foreground"
+                          }`}
+                          title={`Speed Run: ${val} problems only`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  onClick={speedRunActive ? () => stopSpeedRun(false) : startSpeedRun}
+                  title={speedRunActive ? "Stop Speed Run" : `Start Speed Run (20 min${speedRunDifficulty !== "All" ? `, ${speedRunDifficulty} only` : ""})`}
+                  className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
+                    speedRunActive
+                      ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
+                      : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Timer size={13} />
+                  {speedRunActive ? `${Math.floor(speedRunSecsLeft/60)}:${String(speedRunSecsLeft%60).padStart(2,"00")}` : "Speed Run"}
+                </button>
+              </div>
               <button
                 onClick={() => toggleStarred(selectedId)}
                 className={`transition-colors p-1.5 rounded-lg hover:bg-muted ${prog.starred ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-400"}`}

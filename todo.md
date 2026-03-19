@@ -58,3 +58,6 @@
 - [x] Speed Run leaderboard (localStorage, personal best table in Stats view)
 - [x] Hint penalty system (−10 per hint used in Speed Run, deducted from final score)
 - [x] Topic Sprint mode (topic selector, 3-problem timed set, aggregate score)
+- [x] Choose-your-topic Sprint dropdown (target specific weak area)
+- [x] Sprint history (persist completed sprints in localStorage, show in Stats view)
+- [x] Speed Run difficulty filter (Easy/Medium/Hard radio buttons in Speed Run start flow)
