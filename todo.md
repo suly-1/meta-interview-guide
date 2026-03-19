@@ -292,3 +292,10 @@
 ## New Features — Round 42
 - [x] Full-screen disclaimer modal (blocks access, checkbox acknowledgment, localStorage persistence)
 - [x] Bump disclaimer key to v2 so all existing users see it fresh on next visit
+
+## New Features — Round 43
+- [x] Add disclaimer_acknowledged_at column to users table (DB migration)
+- [x] tRPC mutation: disclaimer.acknowledge — writes timestamp for logged-in users
+- [x] tRPC query: disclaimer.status — returns acknowledged_at for the current user
+- [x] Wire frontend: call mutation on "I Understand" click for logged-in users
+- [x] Show "Acknowledged on [date]" status in Overview tab for logged-in users

@@ -14,6 +14,26 @@ import { FullMockDaySimulator } from "@/components/FullMockDaySimulator";
 import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/components/OverviewExtras";
 import { trpc } from "@/lib/trpc";
 
+// ── Disclaimer Status Badge ──────────────────────────────────────────────────
+function DisclaimerStatusBadge() {
+  const { data } = trpc.disclaimer.status.useQuery();
+
+  if (!data?.acknowledged || !data.acknowledgedAt) return null;
+
+  const date = new Date(data.acknowledgedAt).toLocaleString();
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400">
+      <span className="text-emerald-400">✓</span>
+      <span>
+        <span className="font-semibold">Disclaimer acknowledged</span>
+        {" — "}
+        <span className="text-muted-foreground">Server record saved on {date}</span>
+      </span>
+    </div>
+  );
+}
+
 function getDaysUntil(dateStr: string): number {
   const target = new Date(dateStr);
   const now = new Date();
@@ -1679,6 +1699,7 @@ export default function OverviewTab() {
       <div className="flex justify-start">
         <ProgressExport />
       </div>
+      <DisclaimerStatusBadge />
     </div>
   );
 }

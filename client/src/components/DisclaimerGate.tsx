@@ -1,9 +1,11 @@
 // DisclaimerGate — full-screen blocker that must be explicitly acknowledged
 // before any guide content is visible. Persists to localStorage.
+// For logged-in users, also writes a server-side audit timestamp via tRPC.
 // Key: "meta_prep_disclaimer_v2"
 
 import { useState } from "react";
 import { ShieldAlert, CheckSquare, Square } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 const STORAGE_KEY = "meta_prep_disclaimer_v2";
 
@@ -28,6 +30,18 @@ interface Props {
 
 export default function DisclaimerGate({ onConfirm }: Props) {
   const [checked, setChecked] = useState(false);
+  const acknowledgeMutation = trpc.disclaimer.acknowledge.useMutation();
+
+  const handleConfirm = () => {
+    if (!checked) return;
+    // Fire-and-forget DB write for logged-in users; localStorage is the source of truth for gating
+    acknowledgeMutation.mutate(undefined, {
+      onError: () => {
+        // Silently ignore — user may not be logged in; localStorage gate still works
+      },
+    });
+    onConfirm();
+  };
 
   return (
     /* Full-viewport overlay — sits above everything, z-index 9999 */
@@ -130,7 +144,7 @@ export default function DisclaimerGate({ onConfirm }: Props) {
 
           {/* Confirm button */}
           <button
-            onClick={() => { if (checked) onConfirm(); }}
+            onClick={handleConfirm}
             disabled={!checked}
             className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 ${
               checked
