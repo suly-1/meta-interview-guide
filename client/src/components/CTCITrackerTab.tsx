@@ -8,6 +8,8 @@
 import { useState, useMemo, useRef } from 'react';
 import { CTCI_PROBLEMS, CTCI_TOPICS, DIFFICULTY_COLORS } from '@/lib/ctciProblems';
 import { useCTCIProgress } from '@/hooks/useCTCIProgress';
+import { useCTCIStreak } from '@/hooks/useCTCIStreak';
+import CTCIExport from '@/components/CTCIExport';
 import {
   CheckCircle2, Circle, Star, StarOff, ExternalLink,
   ChevronDown, ChevronUp, Search, X, RotateCcw, SlidersHorizontal,
@@ -18,6 +20,7 @@ const PAGE_SIZE = 50;
 
 export default function CTCITrackerTab() {
   const { progress, toggleSolved, toggleStarred, setNotes, resetAll, getSolvedCount, getStarredCount } = useCTCIProgress();
+  const { streak, longestStreak, activatedToday, recordSolve } = useCTCIStreak();
 
   // Filters
   const [search, setSearch] = useState('');
@@ -64,7 +67,12 @@ export default function CTCITrackerTab() {
   };
   const hasActiveFilters = search || diffFilter !== 'All' || topicFilter !== 'All' || statusFilter !== 'All';
 
-  const handleToggleSolved = (id: number) => { toggleSolved(id); };
+  const handleToggleSolved = (id: number) => {
+    const wasSolved = progress[id]?.solved;
+    toggleSolved(id);
+    // Record streak only when marking as solved (not unsolved)
+    if (!wasSolved) recordSolve();
+  };
   const handleToggleStarred = (id: number) => { toggleStarred(id); };
   const handleExpand = (id: number) => {
     setExpandedId(prev => prev === id ? null : id);
@@ -90,12 +98,45 @@ export default function CTCITrackerTab() {
               <ExternalLink className="w-3 h-3" /> View original spreadsheet
             </a>
           </div>
-          <button
-            onClick={resetAll}
-            className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg border border-blue-700 hover:border-red-500"
-          >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset All
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            {/* CTCI Streak Badge */}
+            <div
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
+                streak >= 7
+                  ? 'bg-orange-500/20 border-orange-400/50 text-orange-200'
+                  : streak >= 3
+                  ? 'bg-amber-500/20 border-amber-400/50 text-amber-200'
+                  : streak >= 1
+                  ? 'bg-yellow-500/20 border-yellow-400/50 text-yellow-200'
+                  : 'bg-blue-800/40 border-blue-600/40 text-blue-300'
+              }`}
+              title={streak === 0 ? 'Solve a problem today to start your streak!' : `${streak}-day streak${activatedToday ? ' — active today ✓' : ' — solve today to keep it going!'}`}
+            >
+              <Flame
+                className={`w-5 h-5 ${
+                  streak >= 7 ? 'text-orange-400' : streak >= 3 ? 'text-amber-400' : streak >= 1 ? 'text-yellow-400' : 'text-blue-400'
+                }`}
+                fill={streak >= 3 ? 'currentColor' : 'none'}
+              />
+              <div className="text-right">
+                <div className="text-sm font-bold leading-none">
+                  {streak === 0 ? 'No streak' : `${streak}-day streak`}
+                </div>
+                {longestStreak > 0 && (
+                  <div className="text-xs opacity-70 leading-none mt-0.5">Best: {longestStreak}</div>
+                )}
+              </div>
+              {activatedToday && streak > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" title="Active today" />
+              )}
+            </div>
+            <button
+              onClick={resetAll}
+              className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg border border-blue-700 hover:border-red-500"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Reset All
+            </button>
+          </div>
         </div>
 
         {/* Overall progress bar */}
@@ -352,6 +393,9 @@ export default function CTCITrackerTab() {
           </div>
         )}
       </div>
+
+      {/* Export */}
+      <CTCIExport />
 
       {/* Pagination */}
       {totalPages > 1 && (

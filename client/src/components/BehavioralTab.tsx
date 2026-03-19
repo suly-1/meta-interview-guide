@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import STARGapAnalyzer from "@/components/STARGapAnalyzer";
 import InterviewerPersonaSimulator from "@/components/InterviewerPersonaSimulator";
 import IC7AnswerUpgrader from "@/components/IC7AnswerUpgrader";
+import BehavioralAnswerScorer from "@/components/BehavioralAnswerScorer";
 
 const VALUE_COLORS: Record<string, { bg: string; border: string; title: string }> = {
   blue:    { bg: "bg-blue-50",    border: "border-blue-200",    title: "text-blue-800"    },
@@ -1257,6 +1258,17 @@ export default function BehavioralTab() {
           <p className="text-sm text-gray-500 mt-1">Practice with 4 distinct interviewer styles — The Prober, The Skeptic, The Friendly, and The Quiet — to handle any interview dynamic.</p>
         </div>
         <InterviewerPersonaSimulator />
+      </section>
+
+      {/* Answer Scorer */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            AI Answer Scorer
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Paste your STAR answer and get an LLM-powered rubric score across 5 dimensions: Specificity, Impact, IC-Level Fit, Structure, and Conciseness.</p>
+        </div>
+        <BehavioralAnswerScorer />
       </section>
 
       {/* Resources */}

@@ -7,6 +7,7 @@ import { useRef, useMemo } from "react";
 import { Printer, BarChart2, FileDown, ShieldCheck } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
+import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
 import { PATTERNS, BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { computeReadiness } from "@/hooks/useReadinessScore";
@@ -294,6 +295,21 @@ function RecruiterSummaryPrint() {
 export default function ReadinessTab() {
   return (
     <div className="space-y-10">
+      {/* ── Readiness Goal Setter ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Interview Goal Planner
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">Set a target readiness score and interview date to get a personalized daily task plan.</p>
+            </div>
+          </div>
+        </div>
+        <ReadinessGoalSetter />
+      </section>
+
       {/* ── Overall Readiness Dashboard ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
