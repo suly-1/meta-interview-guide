@@ -915,6 +915,33 @@ export default function CodingTab() {
 
   return (
     <div className="space-y-5">
+      {/* Quick Actions sticky row */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Quick Actions</span>
+        <div className="flex gap-2 flex-1 flex-wrap">
+          <button
+            onClick={() => {
+              const el = document.getElementById("coding-mock-session");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 text-xs font-semibold transition-all"
+          >
+            <Code2 size={12} />
+            Start Coding Mock
+          </button>
+          <button
+            onClick={() => {
+              setWeakOnly(true);
+              const el = document.getElementById("coding-patterns-list");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+          >
+            <Zap size={12} />
+            Jump to Weak Patterns
+          </button>
+        </div>
+      </div>
       {/* CTCI 500 Question Tracker — top of page */}
       <CTCITracker />
 
@@ -925,7 +952,7 @@ export default function CodingTab() {
       <MockInterviewSimulator />
 
       {/* Controls bar */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div id="coding-patterns-list" className="flex flex-wrap gap-2 items-center">
         {/* Search */}
         <div className="relative flex-1 min-w-48">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -1992,7 +2019,7 @@ Key insight:
       )}
 
       {/* Coding Mock Session */}
-      <div className="mt-6">
+      <div id="coding-mock-session" className="mt-6">
         <CodingMockSession />
       </div>
       </div>

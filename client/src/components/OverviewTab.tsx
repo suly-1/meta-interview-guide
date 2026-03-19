@@ -1146,13 +1146,19 @@ function MostHintedBadge() {
   );
 }
 
-/// ── Study Session Planner ─────────────────────────────────────────────────
+//// ── Study Session Planner ─────────────────────────────────────────────────
 const STUDY_PLAN_HISTORY_KEY = "study_plan_history_v1";
-function loadStudyPlanHistory(): Array<{ date: string; durationMins: string; icTarget: string; headline: string }> {
+type StudyPlanRecord = {
+  date: string;
+  durationMins: string;
+  icTarget: string;
+  headline: string;
+  plan?: { headline: string; blocks: { emoji: string; title: string; durationMins: number; tasks: string[] }[]; tip: string; warningIfAny: string | null };
+};
+function loadStudyPlanHistory(): StudyPlanRecord[] {
   try { return JSON.parse(localStorage.getItem(STUDY_PLAN_HISTORY_KEY) ?? "[]"); }
   catch { return []; }
 }
-
 function StudySessionPlanner() {
   const [patternRatings] = usePatternRatings();
   const [bqRatings] = useBehavioralRatings();
@@ -1160,19 +1166,28 @@ function StudySessionPlanner() {
   const [interviewDate] = useInterviewDate();
   const [duration, setDuration] = useState<"30" | "60" | "90">("60");
   const [icTarget, setIcTarget] = useState<"IC5" | "IC6" | "IC7">("IC6");
+
+  // Auto-restore today's plan if one exists
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayRecord = (() => {
+    const h = loadStudyPlanHistory();
+    const rec = h.length ? h[h.length - 1] : null;
+    return rec?.date === todayStr && rec.plan ? rec : null;
+  })();
+
   const [plan, setPlan] = useState<{
     headline: string;
     blocks: { emoji: string; title: string; durationMins: number; tasks: string[] }[];
     tip: string;
     warningIfAny: string | null;
-  } | null>(null);
+  } | null>(todayRecord?.plan ?? null);
   const lastPlan = (() => { const h = loadStudyPlanHistory(); return h.length ? h[h.length - 1] : null; })();
   const planMutation = trpc.ctci.studyPlan.useMutation({
     onSuccess: (data) => {
       setPlan(data);
       try {
         const history = loadStudyPlanHistory();
-        history.push({ date: new Date().toISOString().split("T")[0], durationMins: duration, icTarget, headline: data.headline });
+        history.push({ date: new Date().toISOString().split("T")[0], durationMins: duration, icTarget, headline: data.headline, plan: data });
         localStorage.setItem(STUDY_PLAN_HISTORY_KEY, JSON.stringify(history.slice(-20)));
       } catch { /* ignore */ }
     },
@@ -1470,20 +1485,31 @@ function CTCIDivergenceReport() {
 }
 
 function QuickActionsRow() {
+  const streak = useStreak();
+  const today = new Date().toISOString().split("T")[0];
+  // Check if a plan was already generated today
+  const hasTodayPlan = (() => {
+    try {
+      const history = JSON.parse(localStorage.getItem("study_plan_history_v1") ?? "[]") as Array<{ date: string }>;
+      return history.length > 0 && history[history.length - 1].date === today;
+    } catch { return false; }
+  })();
+
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Quick Actions</span>
-      <div className="flex gap-2 flex-1">
+      <div className="flex gap-2 flex-1 flex-wrap">
         <button
           onClick={() => scrollTo("study-session-planner")}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all"
         >
           <Brain size={12} />
-          Plan Today’s Session
+          {hasTodayPlan ? "Resume Today's Plan" : "Plan Today's Session"}
         </button>
         <button
           onClick={() => scrollTo("full-mock-day")}
@@ -1493,6 +1519,11 @@ function QuickActionsRow() {
           Start Full Mock Day
         </button>
       </div>
+      {streak.currentStreak > 0 && (
+        <span className="flex items-center gap-1 text-xs font-bold text-amber-400 whitespace-nowrap ml-auto">
+          🔥 {streak.currentStreak} day{streak.currentStreak !== 1 ? "s" : ""}
+        </span>
+      )}
     </div>
   );
 }

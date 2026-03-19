@@ -200,6 +200,12 @@
 - [x] Global Search — ⌘K command palette searching across 200+ items (patterns, CTCI, behavioral questions, system design topics, flash cards)
 - [x] Onboarding Checklist — 5-step guided checklist for new users (set date, rate patterns, add story, flash drill, run mock); dismissible
 
+## New Features — Round 33
+- [x] Streak counter in Overview Quick Actions row (🔥 N days inline)
+- [x] Resume Today's Plan button — replaces Plan Today's Session if a plan was already generated today; full plan stored in localStorage and auto-restored on page load
+- [x] Quick Actions sticky row on CodingTab (Start Coding Mock, Jump to Weak Patterns + activates weak-only filter)
+- [x] Quick Actions sticky row on BehavioralTab (Record STAR Answer, Start XFN Mock)
+
 ## New Features — Round 32
 - [x] Move AI Study Session Planner and Full Mock Day Simulator to top of Overview tab (above LevelCards)
 - [x] Quick Actions sticky row at top of Overview (Plan Today's Session / Start Full Mock Day scroll buttons)

@@ -1459,17 +1459,42 @@ export default function BehavioralTab() {
       (!s || q.q.toLowerCase().includes(s) || q.hint.toLowerCase().includes(s));
   });
 
-  return (
+    return (
     <div className="space-y-5">
-
+      {/* Quick Actions sticky row */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Quick Actions</span>
+        <div className="flex gap-2 flex-1 flex-wrap">
+          <button
+            onClick={() => {
+              const el = document.getElementById("behavioral-voice-star");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all"
+          >
+            <Brain size={12} />
+            Record STAR Answer
+          </button>
+          <button
+            onClick={() => {
+              const el = document.getElementById("behavioral-xfn-mock");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 text-xs font-semibold transition-all"
+          >
+            <Zap size={12} />
+            Start XFN Mock
+          </button>
+        </div>
+      </div>
       {/* XFN Story Builder */}
       <XFNStoryBuilder onPopulatePlanner={(scope, outcome) => setXfnPrePopulate({ scope, outcome })} />
-
       {/* Technical Retrospective Project Planner */}
       <TechRetroPlanner prePopulate={xfnPrePopulate} />
-
       {/* XFN Behavioral Mock Session */}
-      <BehavioralMockSession />
+      <div id="behavioral-xfn-mock">
+        <BehavioralMockSession />
+      </div>
 
       {/* ===== IC7 EXCLUSIVE: TECHNICAL RETROSPECTIVE + XFN PARTNERSHIP ===== */}
       <div className="relative overflow-hidden rounded-xl" style={{
@@ -1715,7 +1740,9 @@ export default function BehavioralTab() {
       <MockHistoryLog history={history} onClear={() => { setHistory([]); toast.success("History cleared."); }} />
 
       {/* Voice-to-STAR Recorder + Answer Quality Scorer */}
-      <VoiceToStar />
+      <div id="behavioral-voice-star">
+        <VoiceToStar />
+      </div>
 
       {/* STAR Framework */}
       <div className="prep-card p-5">
