@@ -205,6 +205,43 @@ interface SpeedRunEntry {
 }
 
 const LEADERBOARD_KEY = "cp_speedrun_leaderboard";
+const TOURNAMENT_KEY = "cp_tournament_history";
+
+// Tournament bracket types
+interface TournamentRound {
+  problemId: number;
+  problemName: string;
+  difficulty: string;
+  solved: boolean;
+  timeSec: number;
+  score: number;
+  hintsUsed: number;
+}
+
+interface TournamentState {
+  active: boolean;
+  queue: number[];          // 5 problem IDs
+  currentIdx: number;
+  secsLeft: number;         // 45 min total, counts down
+  rounds: TournamentRound[];
+  done: boolean;
+  difficulty: "All" | "Easy" | "Medium" | "Hard";
+}
+
+interface TournamentRecord {
+  id: string;
+  date: number;
+  rounds: TournamentRound[];
+  totalScore: number;
+  difficulty: string;
+}
+
+function loadTournamentHistory(): TournamentRecord[] {
+  try { return JSON.parse(localStorage.getItem(TOURNAMENT_KEY) ?? "[]"); } catch { return []; }
+}
+function saveTournamentHistory(entries: TournamentRecord[]) {
+  localStorage.setItem(TOURNAMENT_KEY, JSON.stringify(entries.slice(0, 20)));
+}
 const SPRINT_HISTORY_KEY = "cp_sprint_history";
 const DAILY_GOAL_KEY = "cp_daily_goal";
 const DIFF_ASSESSMENTS_KEY = "cp_diff_assessments";
@@ -1231,6 +1268,14 @@ export default function CodePractice() {
   // Speed Run leaderboard
   const [leaderboard, setLeaderboard] = useState<SpeedRunEntry[]>(() => loadLeaderboard());
 
+  // Tournament mode
+  const [tournament, setTournament] = useState<TournamentState>({
+    active: false, queue: [], currentIdx: 0,
+    secsLeft: 45 * 60, rounds: [], done: false, difficulty: "All",
+  });
+  const tournamentRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [tournamentOpen, setTournamentOpen] = useState(false);
+
   // Sprint history
   const [sprintHistory, setSprintHistory] = useState<SprintHistoryEntry[]>(() => loadSprintHistory());
 
@@ -1682,6 +1727,88 @@ export default function CodePractice() {
     return () => { if (sprintRef.current) clearInterval(sprintRef.current); };
   }, [sprint.active]);
 
+  // ─── Tournament handlers ──────────────────────────────────────────────────
+  const startTournament = useCallback((difficulty: "All" | "Easy" | "Medium" | "Hard") => {
+    let pool = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
+    if (pool.length < 5) pool = CTCI_PROBLEMS;
+    if (difficulty !== "All") {
+      const filtered = pool.filter(p => p.difficulty === difficulty);
+      if (filtered.length >= 5) pool = filtered;
+    }
+    const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
+    setTournament({
+      active: true, queue: shuffled.map(p => p.id),
+      currentIdx: 0, secsLeft: 45 * 60, rounds: [], done: false, difficulty,
+    });
+    setSelectedId(shuffled[0].id);
+    setHintsUsedThisRun(0);
+    setTimerRunning(false);
+    timerSecsRef.current = 0;
+    setTournamentOpen(false);
+  }, [progress]);
+
+  const advanceTournament = useCallback((solved: boolean) => {
+    setTournament(prev => {
+      const timeSec = timerSecsRef.current;
+      const timeBonus = solved ? Math.max(0, Math.round((1 - timeSec / (9 * 60)) * 40)) : 0;
+      const hintPenalty = hintsUsedThisRun * 10;
+      const score = Math.max(0, (solved ? 60 + timeBonus : 0) - hintPenalty);
+      const currentProblem = CTCI_PROBLEMS.find(p => p.id === prev.queue[prev.currentIdx])!;
+      const round: TournamentRound = {
+        problemId: prev.queue[prev.currentIdx],
+        problemName: currentProblem?.name ?? `#${prev.queue[prev.currentIdx]}`,
+        difficulty: currentProblem?.difficulty ?? "?",
+        solved, timeSec, score, hintsUsed: hintsUsedThisRun,
+      };
+      const rounds = [...prev.rounds, round];
+      const nextIdx = prev.currentIdx + 1;
+      if (nextIdx >= prev.queue.length) {
+        if (tournamentRef.current) clearInterval(tournamentRef.current);
+        const totalScore = rounds.reduce((a, b) => a + b.score, 0);
+        const record: TournamentRecord = { id: `${Date.now()}`, date: Date.now(), rounds, totalScore, difficulty: prev.difficulty };
+        const updated = [record, ...loadTournamentHistory()];
+        saveTournamentHistory(updated);
+        addXP('sprint_complete', `Tournament complete! ${totalScore}pts`);
+        return { ...prev, active: false, rounds, done: true };
+      }
+      setSelectedId(prev.queue[nextIdx]);
+      setHintsUsedThisRun(0);
+      timerSecsRef.current = 0;
+      return { ...prev, currentIdx: nextIdx, rounds };
+    });
+  }, [hintsUsedThisRun, addXP]);
+
+  // Tournament countdown
+  useEffect(() => {
+    if (tournament.active) {
+      tournamentRef.current = setInterval(() => {
+        setTournament(prev => {
+          if (prev.secsLeft <= 1) {
+            clearInterval(tournamentRef.current!);
+            // Time's up — score current problem as unsolved and finish
+            const currentProblem = CTCI_PROBLEMS.find(p => p.id === prev.queue[prev.currentIdx]);
+            const round: TournamentRound = {
+              problemId: prev.queue[prev.currentIdx],
+              problemName: currentProblem?.name ?? `#${prev.queue[prev.currentIdx]}`,
+              difficulty: currentProblem?.difficulty ?? "?",
+              solved: false, timeSec: timerSecsRef.current, score: 0, hintsUsed: hintsUsedThisRun,
+            };
+            const rounds = [...prev.rounds, round];
+            const totalScore = rounds.reduce((a, b) => a + b.score, 0);
+            const record: TournamentRecord = { id: `${Date.now()}`, date: Date.now(), rounds, totalScore, difficulty: prev.difficulty };
+            const updated = [record, ...loadTournamentHistory()];
+            saveTournamentHistory(updated);
+            return { ...prev, active: false, rounds, done: true, secsLeft: 0 };
+          }
+          return { ...prev, secsLeft: prev.secsLeft - 1 };
+        });
+      }, 1000);
+    } else {
+      if (tournamentRef.current) clearInterval(tournamentRef.current);
+    }
+    return () => { if (tournamentRef.current) clearInterval(tournamentRef.current); };
+  }, [tournament.active]);
+
   const handleMarkSolved = useCallback(() => {
     toggleSolved(selectedId);
     if (!prog.solved) {
@@ -1695,6 +1822,8 @@ export default function CodePractice() {
       saveSession(updated);
       // If Speed Run is active, score it
       if (speedRunActive) stopSpeedRun(true);
+      // If Tournament is active, advance it
+      if (tournament.active) advanceTournament(true);
       // Trigger difficulty self-assessment
       setPendingAssessmentProblem({ id: selectedId, name: problem.name, difficulty: problem.difficulty });
       setDiffEstimatorOpen(true);
@@ -2096,6 +2225,28 @@ export default function CodePractice() {
                   {speedRunActive ? `${Math.floor(speedRunSecsLeft/60)}:${String(speedRunSecsLeft%60).padStart(2,"00")}` : "Speed Run"}
                 </button>
               </div>
+              {/* Tournament button */}
+              <button
+                onClick={() => {
+                  if (tournament.active) {
+                    if (tournamentRef.current) clearInterval(tournamentRef.current);
+                    setTournament(t => ({ ...t, active: false }));
+                  } else {
+                    setTournamentOpen(true);
+                  }
+                }}
+                title={tournament.active ? "Stop tournament" : "Start Speed Run Tournament (5 problems, 45 min)"}
+                className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
+                  tournament.active
+                    ? "bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 animate-pulse"
+                    : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Trophy size={13} />
+                {tournament.active
+                  ? `${Math.floor(tournament.secsLeft/60)}:${String(tournament.secsLeft%60).padStart(2,"0")} · ${tournament.currentIdx+1}/5`
+                  : "Tournament"}
+              </button>
               <button
                 onClick={() => toggleStarred(selectedId)}
                 className={`transition-colors p-1.5 rounded-lg hover:bg-muted ${prog.starred ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-400"}`}
@@ -2180,6 +2331,80 @@ export default function CodePractice() {
                     <RotateCcw size={10} /> Rematch
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* Tournament active banner */}
+            {tournament.active && (
+              <div className="px-4 py-2 border-b flex-shrink-0 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-3">
+                  <Trophy size={14} className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400">🏆 Tournament — Problem {tournament.currentIdx + 1} of 5</span>
+                      <span className="text-[10px] text-yellow-600 dark:text-yellow-500 font-mono">{Math.floor(tournament.secsLeft/60)}:{String(tournament.secsLeft%60).padStart(2,"0")} left</span>
+                    </div>
+                    {/* Bracket progress */}
+                    <div className="flex items-center gap-1 mt-1">
+                      {tournament.queue.map((_, i) => {
+                        const round = tournament.rounds[i];
+                        const isCurrent = i === tournament.currentIdx;
+                        const isPast = i < tournament.currentIdx;
+                        return (
+                          <div key={i} className={`flex-1 h-1.5 rounded-full transition-all ${
+                            isPast
+                              ? (round?.solved ? "bg-emerald-500" : "bg-red-400")
+                              : isCurrent
+                              ? "bg-yellow-500 animate-pulse"
+                              : "bg-yellow-200 dark:bg-yellow-800"
+                          }`} title={isPast ? `${round?.problemName}: ${round?.score}pts` : isCurrent ? "Current" : "Upcoming"} />
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400">
+                      {tournament.rounds.reduce((a, b) => a + b.score, 0)} pts
+                    </span>
+                    <button
+                      onClick={() => advanceTournament(false)}
+                      className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-300 hover:bg-yellow-300 dark:hover:bg-yellow-700 transition-colors"
+                    >Skip →</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tournament done panel */}
+            {tournament.done && (
+              <div className="px-4 py-3 border-b flex-shrink-0 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">🏆</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-yellow-700 dark:text-yellow-400">Tournament Complete!</div>
+                    <div className="text-xs text-muted-foreground">{tournament.rounds.filter(r => r.solved).length}/5 solved</div>
+                  </div>
+                  <div className="text-3xl font-black text-yellow-600 dark:text-yellow-400">{tournament.rounds.reduce((a, b) => a + b.score, 0)}</div>
+                  <button onClick={() => setTournament(t => ({ ...t, done: false }))} className="text-muted-foreground hover:text-foreground p-1 rounded"><X size={14} /></button>
+                </div>
+                {/* Round-by-round bracket */}
+                <div className="grid grid-cols-5 gap-1 mb-2">
+                  {tournament.rounds.map((r, i) => (
+                    <div key={i} className={`rounded-lg p-1.5 text-center border ${
+                      r.solved
+                        ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
+                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                    }`}>
+                      <div className="text-[10px] font-bold">{r.solved ? "✅" : "❌"}</div>
+                      <div className="text-[9px] text-muted-foreground truncate" title={r.problemName}>{r.problemName.slice(0,12)}{r.problemName.length > 12 ? "…" : ""}</div>
+                      <div className={`text-[10px] font-bold ${r.solved ? "text-emerald-600" : "text-red-500"}`}>{r.score}pts</div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => { setTournament(t => ({ ...t, done: false })); setTournamentOpen(true); }}
+                  className="w-full text-xs font-semibold py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+                >Play Again</button>
               </div>
             )}
 
@@ -2804,6 +3029,88 @@ export default function CodePractice() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tournament Launch Modal ── */}
+      {tournamentOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🏆</span>
+              <div>
+                <div className="text-base font-bold text-foreground">Speed Run Tournament</div>
+                <div className="text-xs text-muted-foreground">Race through 5 problems in 45 minutes. Fastest clean solve wins the round.</div>
+              </div>
+              <button onClick={() => setTournamentOpen(false)} className="ml-auto text-muted-foreground hover:text-foreground"><X size={16} /></button>
+            </div>
+
+            {/* Scoring explanation */}
+            <div className="bg-muted/40 rounded-xl p-3 mb-4 space-y-1">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">Scoring per problem</div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-foreground">Base score (solved)</span>
+                <span className="font-bold text-emerald-600">60 pts</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-foreground">Time bonus (faster = more)</span>
+                <span className="font-bold text-blue-600">up to +40 pts</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-foreground">Hint penalty (per hint)</span>
+                <span className="font-bold text-red-500">−10 pts</span>
+              </div>
+              <div className="flex items-center justify-between text-xs border-t border-border pt-1 mt-1">
+                <span className="font-semibold text-foreground">Max total (5 problems)</span>
+                <span className="font-black text-yellow-600">500 pts</span>
+              </div>
+            </div>
+
+            {/* Difficulty selector */}
+            <div className="mb-4">
+              <div className="text-xs font-semibold text-foreground mb-2">Problem difficulty</div>
+              <div className="grid grid-cols-4 gap-2">
+                {(["All", "Easy", "Medium", "Hard"] as const).map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setTournament(t => ({ ...t, difficulty: d }))}
+                    className={`py-2 rounded-xl border-2 text-xs font-bold transition-all ${
+                      tournament.difficulty === d
+                        ? d === "Easy" ? "bg-emerald-100 border-emerald-400 text-emerald-700" :
+                          d === "Medium" ? "bg-amber-100 border-amber-400 text-amber-700" :
+                          d === "Hard" ? "bg-red-100 border-red-400 text-red-700" :
+                          "bg-yellow-100 border-yellow-400 text-yellow-700"
+                        : "bg-background border-border text-muted-foreground hover:bg-muted"
+                    }`}
+                  >{d}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent tournament history */}
+            {loadTournamentHistory().length > 0 && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-foreground mb-2">Recent results</div>
+                <div className="space-y-1">
+                  {loadTournamentHistory().slice(0, 3).map(rec => (
+                    <div key={rec.id} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-2.5 py-1.5">
+                      <span className="text-muted-foreground">{new Date(rec.date).toLocaleDateString()}</span>
+                      <span className="text-muted-foreground">{rec.difficulty}</span>
+                      <span className="ml-auto font-bold text-yellow-600">{rec.totalScore} pts</span>
+                      <span className="text-muted-foreground">{rec.rounds.filter(r => r.solved).length}/5 solved</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => startTournament(tournament.difficulty)}
+              className="w-full py-3 rounded-xl bg-yellow-500 text-white font-bold text-sm hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2"
+            >
+              <Trophy size={16} /> Start Tournament
+            </button>
           </div>
         </div>
       )}

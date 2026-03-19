@@ -3,8 +3,8 @@
  * 1. Overall Readiness Dashboard (live in-page view)
  * 2. Recruiter-Ready Summary (printable one-page PDF)
  */
-import { useRef, useMemo } from "react";
-import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap } from "lucide-react";
+import { useRef, useMemo, useState, useEffect } from "react";
+import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap, Target, ChevronRight, Dumbbell, CheckCircle2, AlertTriangle } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
@@ -14,6 +14,8 @@ import { useXPContext } from "@/contexts/XPContext";
 import { PATTERNS, BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { computeReadiness } from "@/hooks/useReadinessScore";
+import { getWeakestPatterns } from "@/hooks/useDrillRatings";
+import { PATTERN_TO_CTCI_TOPICS, problemMatchesTopics } from "@/lib/ctciTopicMap";
 
 const DRILL_KEY = "meta-guide-drill-ratings";
 const CTCI_KEY  = "ctci_progress_v1";
@@ -295,6 +297,286 @@ function RecruiterSummaryPrint() {
   );
 }
 
+// ─── Fix My Weaknesses Component ─────────────────────────────────────────────
+const SPRINT_HISTORY_KEY = "cp_sprint_history";
+
+interface SprintQueueEntry {
+  id: number;
+  name: string;
+  difficulty: string;
+  topic: string;
+  url: string;
+  patternId: string;
+  patternName: string;
+}
+
+function FixMyWeaknesses() {
+  const [queue, setQueue] = useState<SprintQueueEntry[] | null>(null);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [secsLeft, setSecsLeft] = useState(20 * 60);
+  const [active, setActive] = useState(false);
+  const [done, setDone] = useState(false);
+  const [solvedCount, setSolvedCount] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const weakPatterns = useMemo(() => getWeakestPatterns(3), []);
+
+  const buildQueue = (): SprintQueueEntry[] => {
+    const ctciProgress: Record<number, { solved: boolean }> = (() => {
+      try { return JSON.parse(localStorage.getItem("ctci_progress_v1") ?? "{}"); } catch { return {}; }
+    })();
+
+    const problems: SprintQueueEntry[] = [];
+    for (const pattern of weakPatterns) {
+      const keywords = PATTERN_TO_CTCI_TOPICS[pattern.patternId] ?? [];
+      if (keywords.length === 0) continue;
+      const matching = CTCI_PROBLEMS
+        .filter(p => !ctciProgress[p.id]?.solved && problemMatchesTopics(p.topic, keywords))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2);
+      matching.forEach(p => problems.push({
+        id: p.id, name: p.name, difficulty: p.difficulty,
+        topic: p.topic, url: p.url,
+        patternId: pattern.patternId, patternName: pattern.patternName,
+      }));
+    }
+    // Pad to 5 if needed with unsolved problems
+    if (problems.length < 5) {
+      const existing = new Set(problems.map(p => p.id));
+      const extras = CTCI_PROBLEMS
+        .filter(p => !ctciProgress[p.id]?.solved && !existing.has(p.id))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 5 - problems.length);
+      extras.forEach(p => problems.push({
+        id: p.id, name: p.name, difficulty: p.difficulty,
+        topic: p.topic, url: p.url,
+        patternId: "general", patternName: "General",
+      }));
+    }
+    return problems.slice(0, 5);
+  };
+
+  const startSprint = () => {
+    const q = buildQueue();
+    setQueue(q);
+    setCurrentIdx(0);
+    setSecsLeft(20 * 60);
+    setSolvedCount(0);
+    setDone(false);
+    setActive(true);
+  };
+
+  useEffect(() => {
+    if (active) {
+      timerRef.current = setInterval(() => {
+        setSecsLeft(s => {
+          if (s <= 1) {
+            clearInterval(timerRef.current!);
+            setActive(false);
+            setDone(true);
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [active]);
+
+  const markSolved = () => {
+    setSolvedCount(c => c + 1);
+    const ctciProgress: Record<number, { solved: boolean }> = (() => {
+      try { return JSON.parse(localStorage.getItem("ctci_progress_v1") ?? "{}"); } catch { return {}; }
+    })();
+    if (queue) {
+      ctciProgress[queue[currentIdx].id] = { solved: true };
+      localStorage.setItem("ctci_progress_v1", JSON.stringify(ctciProgress));
+    }
+    if (queue && currentIdx + 1 >= queue.length) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setActive(false);
+      setDone(true);
+    } else {
+      setCurrentIdx(i => i + 1);
+    }
+  };
+
+  const skipProblem = () => {
+    if (queue && currentIdx + 1 >= queue.length) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setActive(false);
+      setDone(true);
+    } else {
+      setCurrentIdx(i => i + 1);
+    }
+  };
+
+  const formatTime = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+
+  if (weakPatterns.length === 0) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
+        <AlertTriangle size={20} className="text-amber-500 mx-auto mb-2" />
+        <p className="text-sm font-semibold text-amber-700">No drill data yet</p>
+        <p className="text-xs text-amber-600 mt-1">Complete some Quick Drills in the Coding tab to identify your weak patterns.</p>
+      </div>
+    );
+  }
+
+  if (done) {
+    return (
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
+        <CheckCircle2 size={28} className="text-emerald-500 mx-auto mb-3" />
+        <div className="text-lg font-bold text-emerald-700 mb-1">Weakness Sprint Complete!</div>
+        <div className="text-sm text-emerald-600 mb-4">{solvedCount} of {queue?.length ?? 5} problems solved</div>
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={() => { setQueue(null); setDone(false); }}
+            className="px-4 py-2 rounded-xl border border-emerald-300 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition-colors"
+          >View Summary</button>
+          <button
+            onClick={startSprint}
+            className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
+          >Run Again</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (active && queue) {
+    const current = queue[currentIdx];
+    const diffColor = current.difficulty === "Easy" ? "text-emerald-600 bg-emerald-50 border-emerald-200" :
+      current.difficulty === "Medium" ? "text-amber-600 bg-amber-50 border-amber-200" :
+      "text-red-600 bg-red-50 border-red-200";
+    return (
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Dumbbell size={16} className="text-rose-500" />
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Weakness Sprint</span>
+            <span className="text-xs text-gray-500">Problem {currentIdx + 1} of {queue.length}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`font-mono text-sm font-bold ${secsLeft < 120 ? "text-red-500 animate-pulse" : "text-gray-700 dark:text-gray-300"}`}>
+              {formatTime(secsLeft)}
+            </span>
+            <button
+              onClick={() => { if (timerRef.current) clearInterval(timerRef.current); setActive(false); setQueue(null); }}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            >Stop</button>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="flex gap-1">
+          {queue.map((_, i) => (
+            <div key={i} className={`flex-1 h-1.5 rounded-full transition-all ${
+              i < currentIdx ? "bg-emerald-500" :
+              i === currentIdx ? "bg-rose-500 animate-pulse" :
+              "bg-gray-200 dark:bg-gray-700"
+            }`} />
+          ))}
+        </div>
+
+        {/* Pattern badge */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+            Weak pattern: {current.patternName}
+          </span>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${diffColor}`}>
+            {current.difficulty}
+          </span>
+        </div>
+
+        {/* Problem card */}
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2">
+          <div className="text-sm font-bold text-gray-900 dark:text-gray-100">{current.name}</div>
+          <div className="text-xs text-gray-500">{current.topic}</div>
+          <a
+            href={current.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            Open on LeetCode <ChevronRight size={12} />
+          </a>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <button
+            onClick={markSolved}
+            className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5"
+          >
+            <CheckCircle2 size={14} /> Solved
+          </button>
+          <button
+            onClick={skipProblem}
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            Skip →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Idle state — show the CTA
+  return (
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 space-y-4">
+      {/* Weak patterns preview */}
+      <div>
+        <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Your bottom 3 patterns</div>
+        <div className="space-y-2">
+          {weakPatterns.map((p, i) => (
+            <div key={p.patternId} className="flex items-center gap-3">
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white flex-shrink-0 ${
+                i === 0 ? "bg-red-500" : i === 1 ? "bg-orange-500" : "bg-amber-500"
+              }`}>{i + 1}</span>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{p.patternName}</span>
+                  <span className="text-xs text-gray-500">
+                    {p.avg !== null ? `${p.avg.toFixed(1)}★ avg` : "Not drilled"}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      i === 0 ? "bg-red-400" : i === 1 ? "bg-orange-400" : "bg-amber-400"
+                    }`}
+                    style={{ width: p.avg !== null ? `${(p.avg / 5) * 100}%` : "5%" }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sprint details */}
+      <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl p-3">
+        <div className="text-xs font-semibold text-rose-700 dark:text-rose-400 mb-1">What this sprint does</div>
+        <ul className="text-xs text-rose-600 dark:text-rose-500 space-y-0.5">
+          <li>• Picks 5 unsolved problems from your weakest patterns</li>
+          <li>• Gives you 20 minutes to work through them</li>
+          <li>• Marks solved problems in your CTCI tracker automatically</li>
+        </ul>
+      </div>
+
+      <button
+        onClick={startSprint}
+        className="w-full py-3 rounded-xl bg-rose-600 text-white font-bold text-sm hover:bg-rose-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
+      >
+        <Dumbbell size={16} /> Fix My Weaknesses
+      </button>
+    </div>
+  );
+}
+
 export default function ReadinessTab() {
   const { totalXP, events } = useXPContext();
   return (
@@ -348,6 +630,24 @@ export default function ReadinessTab() {
           </div>
         </div>
         <ReadinessGoalSetter />
+      </section>
+
+      {/* ── Fix My Weaknesses ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Dumbbell size={20} className="text-rose-500" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Fix My Weaknesses
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Auto-queues a 20-minute focused sprint on your lowest-rated patterns. Problems are pulled from your CTCI tracker.
+              </p>
+            </div>
+          </div>
+        </div>
+        <FixMyWeaknesses />
       </section>
 
       {/* ── Overall Readiness Dashboard ── */}

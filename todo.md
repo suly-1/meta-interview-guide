@@ -141,3 +141,8 @@
 - [ ] Speed Run tournament mode
 - [ ] Mock warm-up mode (5-min pre-session)
 - [ ] IC6 vs IC7 answer comparison in BehavioralTab
+
+## Current Batch (Speed Run Tournament + Weak-Pattern Queue + Density Toggle)
+- [x] Speed Run tournament bracket mode (5 problems, 45 min, bracket progression UI in Code Practice)
+- [x] Weak-pattern drill auto-queue (Fix My Weaknesses button in Readiness tab)
+- [x] Font size/density toggle (compact/comfortable/spacious in sticky nav)

@@ -106,6 +106,42 @@
   }
 }
 
+/* ─── Density / Font-size Modes ─────────────────────────────────────────── */
+:root {
+  --density-font-scale: 1;
+  --density-space-scale: 1;
+}
+
+html.density-compact {
+  --density-font-scale: 0.875;
+  --density-space-scale: 0.8;
+  font-size: calc(16px * 0.875);
+}
+
+html.density-comfortable {
+  --density-font-scale: 1;
+  --density-space-scale: 1;
+  font-size: 16px;
+}
+
+html.density-spacious {
+  --density-font-scale: 1.125;
+  --density-space-scale: 1.2;
+  font-size: calc(16px * 1.125);
+}
+
+/* Compact: tighter spacing on containers */
+html.density-compact .container {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+/* Spacious: more breathing room */
+html.density-spacious .container {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
 @layer components {
   .container {
     width: 100%;

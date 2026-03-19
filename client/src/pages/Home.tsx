@@ -5,6 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
 import OnboardingModal from "@/components/OnboardingModal";
+import { useDensity, type Density } from "@/contexts/DensityContext";
 import Hero from "@/components/Hero";
 import CodingTab from "@/components/CodingTab";
 import AIRoundTab from "@/components/AIRoundTab";
@@ -51,6 +52,7 @@ export default function Home() {
   const { streak, activatedToday } = useStreak();
   const { totalXP, events } = useXPContext();
   const { theme, toggleTheme } = useTheme();
+  const { density, setDensity } = useDensity();
   const isDark = theme === "dark";
   const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
 
@@ -103,6 +105,25 @@ export default function Home() {
 
             {/* Dark mode toggle */}
             <div className="flex-shrink-0 pl-2 border-l border-gray-100 flex items-center gap-1">
+              {/* Density toggle */}
+              <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-0.5 gap-0.5" title="Font size / density">
+                {(["compact", "comfortable", "spacious"] as Density[]).map(d => {
+                  const labels: Record<Density, string> = { compact: "S", comfortable: "M", spacious: "L" };
+                  const titles: Record<Density, string> = { compact: "Compact", comfortable: "Comfortable", spacious: "Spacious" };
+                  return (
+                    <button
+                      key={d}
+                      onClick={() => setDensity(d)}
+                      title={titles[d]}
+                      className={`w-6 h-6 rounded-full text-[10px] font-bold transition-all ${
+                        density === d
+                          ? "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm"
+                          : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                      }`}
+                    >{labels[d]}</button>
+                  );
+                })}
+              </div>
               <button
                 onClick={() => toggleTheme?.()}
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}

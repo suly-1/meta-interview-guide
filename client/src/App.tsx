@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { XPProvider } from "./contexts/XPContext";
+import { DensityProvider } from "./contexts/DensityContext";
 import Home from "./pages/Home";
 import DisclaimerGate from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
@@ -23,6 +24,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
+      <DensityProvider>
       <ThemeProvider
         defaultTheme="light"
         switchable
@@ -38,6 +40,7 @@ function App() {
           </TooltipProvider>
         </XPProvider>
       </ThemeProvider>
+      </DensityProvider>
     </ErrorBoundary>
   );
 }
