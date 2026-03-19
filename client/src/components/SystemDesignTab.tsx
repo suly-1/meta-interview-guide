@@ -1,7 +1,6 @@
 // SystemDesignTab — 8 Meta system design patterns + Meta Engineering Blog Feed
 // Design: clean structured approach cards with expandable sections
 import { useState } from "react";
-import CTCITrackerBanner from "@/components/CTCITrackerBanner";
 import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff } from "lucide-react";
 
 interface DesignPattern {
@@ -592,11 +591,6 @@ export default function SystemDesignTab() {
 
   return (
     <div className="space-y-5">
-      <CTCITrackerBanner
-        description="System Design mastery builds on strong coding fundamentals. Track your algorithmic problem-solving alongside your system design study to ensure a well-rounded preparation."
-        ctaText="Pair your system design study with consistent problem tracking!"
-        tags={["🏗 Design + Code", "📈 Track both", "🔍 Find weak links", "🚀 Full-stack prep"]}
-      />
 
       {/* Header */}
       <div>

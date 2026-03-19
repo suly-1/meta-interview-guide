@@ -1,6 +1,5 @@
 // Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import CTCITrackerBanner from "@/components/CTCITrackerBanner";
 import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
@@ -953,11 +952,6 @@ export default function BehavioralTab() {
 
   return (
     <div className="space-y-10">
-      <CTCITrackerBanner
-        description="Behavioral interviews test your leadership principles and impact stories. Use the tracker to ensure your coding fundamentals are solid so you can focus your energy on crafting compelling STAR answers."
-        ctaText="Keep your coding fundamentals sharp while you prep your behavioral stories!"
-        tags={["💬 STAR stories", "📈 Track coding too", "🔍 Balance prep", "🏆 Full readiness"]}
-      />
       {/* Overview */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

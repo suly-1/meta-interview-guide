@@ -34,3 +34,12 @@
 - [ ] Wire MockInterviewSimulator as its own navigation tab
 - [ ] Pattern Dependency Unlock Flow visual indicators in CodingTab PatternRow
 - [ ] Per-pattern Stuck? hint ladder (AIHintPanel compact) inside each expanded PatternRow
+
+- [ ] CTCI Streak Tracker (consecutive daily-challenge completions, flame pill in CTCI header)
+- [ ] CTCI Daily Challenge banner (deterministic unsolved High-freq problem of day, amber highlight + Today badge)
+- [ ] CTCI Problem Notes panel (persistent per-row, exportable as Markdown cheat sheet)
+- [ ] Inline Code Editor (VS Code dark, Tab-indent, auto-save, line count) + AI Hint streaming
+- [ ] Keyboard Navigation Overlay (? key, 2-column modal, 4 shortcut groups)
+- [ ] Enhanced Pattern Mastery Heatmap (SVG mastery ring, time-invested fill bars, Easy/Medium/Hard breakdown)
+- [ ] Weekly Progress Email Digest UI (Send button in Overview, compiles session data, notifyOwner)
+- [ ] Add CTCI spreadsheet link to Practice Tracker tab header

@@ -6,7 +6,6 @@
  */
 
 import { useState, useMemo, useRef } from 'react';
-import CTCITrackerBanner from "@/components/CTCITrackerBanner";
 import { CTCI_PROBLEMS, CTCI_TOPICS, DIFFICULTY_COLORS } from '@/lib/ctciProblems';
 import { useCTCIProgress } from '@/hooks/useCTCIProgress';
 import { useCTCIStreak } from '@/hooks/useCTCIStreak';
@@ -82,12 +81,6 @@ export default function CTCITrackerTab() {
 
   return (
     <div className="space-y-6">
-      <CTCITrackerBanner
-        description="Log every problem you complete here — it\'s the fastest way to see which CTCI topics still have gaps before your interview."
-        ctaText="Open the tracker and log today\'s solved problems now!"
-        tags={["✅ Log solved problems", "📊 See topic gaps", "🔁 Review weak areas", "🏆 Build consistency"]}
-      />
-
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 text-white">
         <div className="flex items-start justify-between gap-4 flex-wrap">

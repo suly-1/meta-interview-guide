@@ -1,6 +1,5 @@
 // Design: Structured Clarity — AI-enabled round tab enriched with Coditioning article content
 import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, ExternalLink, Info, Zap, BookOpen, Users, Mic } from "lucide-react";
-import CTCITrackerBanner from "@/components/CTCITrackerBanner";
 import AIMockProblemBank from "@/components/AIMockProblemBank";
 
 const LENSES = [
@@ -134,13 +133,6 @@ const FAQ = [
 export default function AIRoundTab() {
   return (
     <div className="space-y-10">
-      <CTCITrackerBanner
-        description="The AI Round tests your ability to scope and design ML/AI systems. Use the tracker to ensure you\'ve covered the algorithmic foundations that underpin every AI problem."
-        ctaText="Cross-reference your AI prep with your coding problem coverage!"
-        tags={["🤖 AI Round prep", "📈 Track foundations", "🔍 Find algorithm gaps", "🚀 Go deeper"]}
-      />
-
-
       {/* Overview */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

@@ -1,6 +1,5 @@
 // Design: Structured Clarity — timeline tab with countdown, progress tracker, story notes, IC6 vs IC7 bar
 import { useState, useCallback } from "react";
-import CTCITrackerBanner from "@/components/CTCITrackerBanner";
 import { TIMELINE_WEEKS, STORY_BANK, PATTERNS } from "@/lib/guideData";
 import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check, PartyPopper } from "lucide-react";
 import WeeklyDigest from "@/components/WeeklyDigest";
@@ -307,13 +306,6 @@ export default function TimelineTab() {
 
   return (
     <div className="space-y-10">
-      <CTCITrackerBanner
-        description="Your 60-day timeline only works if you\'re actually logging problems. Open the tracker daily to record what you solved and stay on pace."
-        ctaText="Update your tracker to stay on schedule with your study timeline!"
-        tags={["📅 Daily logging", "⏱ Stay on pace", "📈 Measure progress", "🎯 Hit your target"]}
-      />
-
-
       {/* ── Weak-Spot Dashboard ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
