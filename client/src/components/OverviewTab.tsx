@@ -1443,6 +1443,8 @@ export default function OverviewTab() {
     <div className="space-y-6">
       <OnboardingChecklist />
       {daysLeft !== null && <UrgencyModeBanner daysLeft={daysLeft} />}
+      <StudySessionPlanner />
+      <FullMockDaySimulator />
       <LevelCards />
       <ReadinessDashboard />
       <HeatmapCalendar />
@@ -1453,9 +1455,7 @@ export default function OverviewTab() {
       <InterviewDayChecklist />
       <ResourcesSection />
       <ReadinessGoalSetter />
-      <StudySessionPlanner />
       <CTCIDivergenceReport />
-      <FullMockDaySimulator />
       <MostHintedBadge />
       <WeeklyDigest />
       <div className="flex justify-start">
