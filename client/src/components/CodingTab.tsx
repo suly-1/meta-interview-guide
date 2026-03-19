@@ -991,13 +991,54 @@ function CTCITracker() {
   const highFreqTotal = CTCI_QUESTIONS.filter(q => q.metaFreq === "High").length;
 
   return (
-    <div className="prep-card p-5">
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between group">
+    <div className="prep-card overflow-hidden" style={{ border: '2px solid transparent', background: 'linear-gradient(var(--background), var(--background)) padding-box, linear-gradient(90deg, #f59e0b, #8b5cf6, #3b82f6, #10b981, #f59e0b) border-box', backgroundSize: '200% 100%', animation: 'ctci-border-march 3s linear infinite' }}>
+      {/* Flashing banner */}
+      <div style={{ background: 'linear-gradient(90deg, #f59e0b22, #8b5cf622, #3b82f622, #10b98122, #f59e0b22)', animation: 'ctci-bg-pulse 1.5s ease-in-out infinite alternate' }} className="px-5 pt-4 pb-0">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate' }} className="text-xl">🔥</span>
+          <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.1s' }} className="text-xl">📚</span>
+          <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.2s' }} className="text-xl">⚡</span>
+          <span className="font-extrabold text-base" style={{ background: 'linear-gradient(90deg, #f59e0b, #8b5cf6, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', animation: 'ctci-gradient-shift 2s linear infinite', backgroundSize: '200% 100%' }}>
+            CRACK THE CODING INTERVIEW
+          </span>
+          <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.3s' }} className="text-xl">🎯</span>
+          <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.4s' }} className="text-xl">💎</span>
+          <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.5s' }} className="text-xl">🚀</span>
+        </div>
+        <div className="text-xs font-bold mb-1" style={{ color: '#a78bfa' }}>— Dinesh Varyani · MUST DO ‼️</div>
+      </div>
+
+      {/* Keyframes injected inline */}
+      <style>{`
+        @keyframes ctci-border-march {
+          0%   { background-position: 0% 0%, 0% 50%; }
+          100% { background-position: 0% 0%, 200% 50%; }
+        }
+        @keyframes ctci-bg-pulse {
+          from { opacity: 0.6; }
+          to   { opacity: 1; }
+        }
+        @keyframes ctci-bounce {
+          from { transform: translateY(0px) scale(1); }
+          to   { transform: translateY(-4px) scale(1.15); }
+        }
+        @keyframes ctci-gradient-shift {
+          0%   { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
+        }
+        @keyframes ctci-flash {
+          0%, 100% { box-shadow: 0 0 0 0 #f59e0b00; }
+          50%       { box-shadow: 0 0 18px 4px #f59e0b66; }
+        }
+      `}</style>
+
+      <div className="p-5 pt-3">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between group" style={{ animation: 'ctci-flash 2s ease-in-out infinite' }}>
         <div className="flex items-center gap-2">
           <BookOpen size={14} className="text-purple-400" />
           <div className="text-left">
-            <div className="text-sm font-bold text-foreground">Crack The Coding Interview — Dinesh Varyani</div>
-            <div className="text-xs text-muted-foreground">500 curated LeetCode problems · Meta Frequency tags · {solvedCount}/500 solved</div>
+            <div className="text-sm font-bold text-foreground">500 curated LeetCode problems · Meta Frequency tags</div>
+            <div className="text-xs text-muted-foreground">{solvedCount}/500 solved · Click to {open ? 'collapse' : 'expand'}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -1140,6 +1181,7 @@ function CTCITracker() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
