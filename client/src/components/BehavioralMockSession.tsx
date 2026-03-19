@@ -261,6 +261,7 @@ export function BehavioralMockSession() {
   const [answers, setAnswers] = useState<string[]>(["", "", ""]);
   const [scorecard, setScorecard] = useState<XFNScorecardResult | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [icMode, setIcMode] = useState<"IC6" | "IC7">("IC7"); // Difficulty selector
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Pick 3 random XFN questions once per session
@@ -277,6 +278,8 @@ export function BehavioralMockSession() {
   });
 
   const scoreMutation = trpc.ai.xfnMockScorecard.useMutation();
+  const icModeRef = useRef<"IC6" | "IC7">(icMode);
+  useEffect(() => { icModeRef.current = icMode; }, [icMode]);
 
   const currentQ = questions[round];
   const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
@@ -327,6 +330,7 @@ export function BehavioralMockSession() {
             question: q.q,
             answer: answers[i],
           })),
+          icMode: icModeRef.current,
         });
         setScorecard(result);
         const entry: HistoryEntry = {
@@ -354,6 +358,7 @@ export function BehavioralMockSession() {
     setScorecard(null);
     setShowHint(false);
     setStarPhase(0);
+    // Keep icMode as-is so user doesn't need to re-select
   };
 
   const historyCount = loadHistory().length;
@@ -361,7 +366,7 @@ export function BehavioralMockSession() {
   // ── Entry card ──────────────────────────────────────────────────────────────
   if (view === "entry") {
     return (
-      <div className="prep-card p-5">
+      <div className="prep-card p-5 space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border border-teal-500/30 flex items-center justify-center text-xl shrink-0">
@@ -375,7 +380,7 @@ export function BehavioralMockSession() {
                 {historyCount > 0 && <span className="badge badge-gray">{historyCount} past</span>}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                3 XFN questions × 12 min each — STAR phase hints, timer, and AI evaluation (IC7 exclusive round)
+                3 XFN questions × 12 min each — STAR phase hints, timer, and AI evaluation
               </div>
             </div>
           </div>
@@ -388,6 +393,40 @@ export function BehavioralMockSession() {
             <button onClick={() => setView("idle")} className="px-4 py-2 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/30 text-teal-400 text-sm font-semibold transition-all">
               Start Mock
             </button>
+          </div>
+        </div>
+
+        {/* IC Level Difficulty Selector */}
+        <div className="p-3 rounded-xl border border-border bg-secondary/40">
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">AI Rubric Level</div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIcMode("IC6")}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-bold border transition-all ${
+                icMode === "IC6"
+                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                  : "bg-secondary border-border text-muted-foreground hover:border-blue-500/30 hover:text-blue-400"
+              }`}
+            >
+              <div className="text-sm mb-0.5">🎯 IC6</div>
+              <div className="text-[10px] font-normal opacity-80">Project-level XFN impact</div>
+            </button>
+            <button
+              onClick={() => setIcMode("IC7")}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-bold border transition-all ${
+                icMode === "IC7"
+                  ? "bg-violet-500/20 border-violet-500/40 text-violet-300"
+                  : "bg-secondary border-border text-muted-foreground hover:border-violet-500/30 hover:text-violet-400"
+              }`}
+            >
+              <div className="text-sm mb-0.5">🚀 IC7</div>
+              <div className="text-[10px] font-normal opacity-80">Org-level strategic influence</div>
+            </button>
+          </div>
+          <div className="mt-2 text-[10px] text-muted-foreground">
+            {icMode === "IC6"
+              ? "IC6 rubric: effective project-level XFN collaboration, clear communication, resolves team-level conflicts"
+              : "IC7 rubric: long-term strategic partnerships, proactive org alignment, drives cross-org initiatives, multiplies team impact"}
           </div>
         </div>
       </div>
@@ -407,9 +446,14 @@ export function BehavioralMockSession() {
           <Brain size={14} className="text-teal-400" />
           <span className="text-sm font-bold text-foreground">XFN Behavioral Mock Session</span>
           <span className="badge badge-teal">3 questions · ~36 min</span>
+          <span className={`badge ${
+            icMode === "IC7" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30" : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+          } text-[10px] px-2 py-0.5 rounded-full font-bold`}>{icMode} Mode</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Simulates Meta's IC7 XFN Partnership interview round. Answer 3 XFN questions using the STAR framework with a 12-minute timer each. STAR phase reminders keep you on track. Finish all 3 to receive an AI scorecard.
+          Simulates Meta's XFN Partnership interview round at <strong className={icMode === "IC7" ? "text-violet-400" : "text-blue-400"}>{icMode}</strong> level.
+          Answer 3 XFN questions using the STAR framework with a 12-minute timer each.
+          {icMode === "IC7" ? " AI rubric evaluates for org-level strategic influence and long-term partnership patterns." : " AI rubric evaluates for effective project-level collaboration and conflict resolution."}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -442,6 +486,9 @@ export function BehavioralMockSession() {
           <Brain size={14} className="text-emerald-400" />
           <span className="text-sm font-bold text-foreground">XFN Mock Complete</span>
           <span className="badge badge-green">Session done</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
+            icMode === "IC7" ? "bg-violet-500/20 text-violet-400 border-violet-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+          }`}>{icMode} Rubric</span>
         </div>
 
         {scoreMutation.isPending && (
@@ -563,6 +610,9 @@ export function BehavioralMockSession() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="badge badge-teal">Question {round + 1} of 3</span>
             <span className="badge badge-teal">XFN Partnership</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
+              icMode === "IC7" ? "bg-violet-500/20 text-violet-400 border-violet-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+            }`}>{icMode}</span>
           </div>
 
           <div className="p-3 rounded-lg bg-teal-500/10 border border-teal-500/20">

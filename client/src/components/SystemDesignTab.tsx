@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, ExternalLink, Brain, Database, Server, Shield, 
 import { useFlashCardSRDue } from "@/hooks/useLocalStorage";
 import { SystemDesignMockSession } from "@/components/SystemDesignMockSession";
 import { CapacityCalculator, DesignPatternLibrary, FlashCardCSVImport } from "@/components/SystemDesignExtras";
+import { SystemDesignDiagramTemplates } from "@/components/SystemDesignDiagramTemplates";
 
 const FRAMEWORK_STEPS = [
   { step: "1. Requirements", time: "5 min", items: ["Functional: what the system must do", "Non-functional: scale, latency, availability, consistency", "Ask: DAU, QPS, data volume, read/write ratio", "Clarify: global vs regional, mobile vs web"] },
@@ -871,6 +872,8 @@ export default function SystemDesignTab() {
         </div>
       </div>
 
+      {/* System Design Diagram Templates */}
+      <SystemDesignDiagramTemplates />
       {/* Capacity Estimation Calculator */}
       <CapacityCalculator />
 

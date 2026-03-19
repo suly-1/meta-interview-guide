@@ -280,6 +280,7 @@ Return a structured JSON scorecard.`,
             answer: z.string().max(3000),
           })
         ).min(1).max(3),
+        icMode: z.enum(["IC6", "IC7"]).default("IC7"),
       })
     )
     .mutation(async ({ input }) => {
@@ -287,19 +288,19 @@ Return a structured JSON scorecard.`,
         .map((r, i) => `=== Question ${i + 1} ===\n${r.question}\n\nCandidate Answer:\n${r.answer || "(no answer provided)"}`)
         .join("\n\n");
 
+      const icRubric = input.icMode === "IC7"
+        ? `IC7 (Senior Staff) rubric — evaluate for: (1) Long-term strategic XFN partnerships spanning multiple teams or orgs, (2) Proactive org-level alignment before problems arise, (3) Driving cross-org initiatives with measurable org-wide impact, (4) Multiplying team effectiveness through influence without authority, (5) Navigating ambiguity at org scale. IC7 answers must show strategic thinking beyond tactical execution. Penalize answers that only show project-level impact without org-level influence or strategic foresight.`
+        : `IC6 (Staff) rubric — evaluate for: (1) Effective project-level XFN collaboration across 2-3 teams, (2) Clear communication and conflict resolution at team level, (3) Driving alignment on shared project goals, (4) Stakeholder management within a project scope, (5) Delivering results through cross-functional work. IC6 answers should show strong execution and collaboration skills. Give credit for clear STAR structure with concrete, measurable outcomes.`;
+
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
-            content: `You are a senior Meta engineering manager conducting an XFN Partnership interview round for an IC6/IC7 candidate.
-Evaluate the candidate's answers to 3 XFN behavioral questions and return a structured JSON scorecard.
-Focus on: collaboration quality, conflict resolution, alignment strategies, stakeholder management, and IC-level signal.
-IC6 should show effective project-level XFN collaboration; IC7 should show long-term strategic partnerships, proactive alignment, and org-level influence.
-Be rigorous but constructive.`,
+            content: `You are a senior Meta engineering manager conducting an XFN Partnership interview round for a ${input.icMode} candidate.\nEvaluate the candidate's answers to 3 XFN behavioral questions and return a structured JSON scorecard.\nFocus on: collaboration quality, conflict resolution, alignment strategies, stakeholder management, and IC-level signal.\n\n${icRubric}\n\nBe rigorous but constructive. The icLevel field in your response should reflect what IC level the performance actually signals (IC5, IC6, or IC7), not necessarily the target level.`,
           },
           {
             role: "user",
-            content: `Here is the candidate's full XFN mock session:\n\n${transcript}\n\nProvide a structured scorecard JSON.`,
+            content: `Here is the candidate's full XFN mock session (evaluated at ${input.icMode} level):\n\n${transcript}\n\nProvide a structured scorecard JSON.`,
           },
         ],
         response_format: {
