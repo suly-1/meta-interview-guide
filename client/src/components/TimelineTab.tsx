@@ -26,6 +26,9 @@ import CustomStudyPlan from "@/components/CustomStudyPlan";
 import RecruiterPDF from "@/components/RecruiterPDF";
 import StudyBuddySync from "@/components/StudyBuddySync";
 import BlindSpotDetector from "@/components/BlindSpotDetector";
+import ActivityCalendar60 from "@/components/ActivityCalendar60";
+import PrepTimeline4Week from "@/components/PrepTimeline4Week";
+import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 
 const TAG_COLORS: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700",
@@ -549,6 +552,45 @@ export default function TimelineTab() {
             })}
           </div>
         </div>
+      </section>
+
+      {/* ── 60-Day Activity Calendar ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            60-Day Activity Calendar
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            GitHub-style heatmap of your daily practice activity across drills, CTCI solves, and behavioral sessions
+          </p>
+        </div>
+        <ActivityCalendar60 />
+      </section>
+
+      {/* ── 4-Week Prep Checklist ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            4-Week Prep Checklist
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            A week-by-week action plan with checkable tasks — coding, CTCI problems, behavioral, and Meta-specific prep
+          </p>
+        </div>
+        <PrepTimeline4Week />
+      </section>
+
+      {/* ── Pattern Dependency Graph ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Pattern Dependency Graph
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Understand which patterns are prerequisites for others — learn in the right order to avoid foundational gaps
+          </p>
+        </div>
+        <PatternDependencyGraph />
       </section>
 
       {/* ── Interview Day Checklist ── */}

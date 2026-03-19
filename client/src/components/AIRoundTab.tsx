@@ -142,13 +142,62 @@ export default function AIRoundTab() {
           <p className="text-sm text-gray-500 mt-1">Meta's newest interview format — introduced October 2025</p>
         </div>
 
-        {/* Source credit */}
-        <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg mb-5 text-xs text-gray-500">
-          <Info size={13} className="text-gray-400 flex-shrink-0" />
-          <span>Content enriched with insights from the </span>
-          <a href="https://www.coditioning.com/blog/13/meta-ai-enabled-coding-interview-guide" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
-            Coditioning Meta AI-Enabled Coding Interview Guide <ExternalLink size={11} />
-          </a>
+        {/* Source credit + Practice links */}
+        <div className="space-y-3 mb-5">
+          <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-500 flex-wrap">
+            <Info size={13} className="text-gray-400 flex-shrink-0" />
+            <span>Content enriched with insights from:</span>
+            <a href="https://www.coditioning.com/blog/13/meta-ai-enabled-coding-interview-guide" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
+              Coditioning Guide <ExternalLink size={11} />
+            </a>
+            <span className="text-gray-300">·</span>
+            <a href="https://www.hellointerview.com/blog/meta-ai-enabled-coding" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
+              HelloInterview Guide <ExternalLink size={11} />
+            </a>
+            <span className="text-gray-300">·</span>
+            <a href="https://www.hellointerview.com/learn/ai-coding/overview/introduction" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
+              HelloInterview AI Coding Overview <ExternalLink size={11} />
+            </a>
+          </div>
+
+          {/* Practice Environment CTAs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-200 rounded-xl">
+              <div className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center flex-shrink-0">
+                <Zap size={16} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-violet-900">AI Coding Practice</p>
+                <p className="text-xs text-violet-700 mt-0.5">Simulate the Meta CoderPad format with real AI assistance.</p>
+                <a
+                  href="https://www.hellointerview.com/practice/ai-coding"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-1.5 text-xs font-bold text-violet-600 hover:text-violet-800 transition-colors"
+                >
+                  hellointerview.com/practice/ai-coding <ExternalLink size={10} />
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
+                <BookOpen size={16} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-blue-900">Complete AI Coding Guide</p>
+                <p className="text-xs text-blue-700 mt-0.5">Comprehensive overview of AI-enabled coding interviews across all companies.</p>
+                <a
+                  href="https://www.hellointerview.com/learn/ai-coding/overview/introduction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  hellointerview.com/learn/ai-coding <ExternalLink size={10} />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Key callout */}
