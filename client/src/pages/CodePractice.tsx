@@ -15,7 +15,8 @@ import {
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
   Terminal, AlertCircle, Loader2, StickyNote, History, Trophy,
   ChevronDown, ChevronUp, Flame, BookOpen, Zap, Plus, Trash2,
-  BarChart2, FlaskConical, GitCommit, TrendingUp, Award
+  BarChart2, FlaskConical, GitCommit, TrendingUp, Award,
+  Lock, Download, Copy, Shuffle, Timer, EyeOff
 } from "lucide-react";
 
 // ─── Language config ───────────────────────────────────────────────────────
@@ -519,6 +520,15 @@ export default function CodePractice() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [viewingSubmission, setViewingSubmission] = useState<Submission | null>(null);
 
+  // Speed Run mode
+  const [speedRunActive, setSpeedRunActive] = useState(false);
+  const [speedRunSecsLeft, setSpeedRunSecsLeft] = useState(20 * 60);
+  const [speedRunScore, setSpeedRunScore] = useState<{ solved: boolean; timeSec: number; score: number } | null>(null);
+  const speedRunRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Copied state for export button
+  const [copied, setCopied] = useState(false);
+
   const problem = useMemo(() => CTCI_PROBLEMS.find(p => p.id === selectedId)!, [selectedId]);
   const prog = progress[selectedId] || { solved: false, starred: false, notes: "" };
   const lang = LANGUAGES.find(l => l.id === langId)!;
@@ -553,6 +563,18 @@ export default function CodePractice() {
   useEffect(() => {
     localStorage.setItem(LANG_KEY, String(langId));
   }, [langId]);
+
+  // Progression lock thresholds
+  const progressionStats = useMemo(() => {
+    const easyTotal = CTCI_PROBLEMS.filter(p => p.difficulty === "Easy").length;
+    const medTotal = CTCI_PROBLEMS.filter(p => p.difficulty === "Medium").length;
+    const easySolved = CTCI_PROBLEMS.filter(p => p.difficulty === "Easy" && progress[p.id]?.solved).length;
+    const medSolved = CTCI_PROBLEMS.filter(p => p.difficulty === "Medium" && progress[p.id]?.solved).length;
+    const easyPct = easyTotal > 0 ? easySolved / easyTotal : 0;
+    const medPct = medTotal > 0 ? medSolved / medTotal : 0;
+    const hardUnlocked = easyPct >= 0.60 && medPct >= 0.40;
+    return { easySolved, easyTotal, medSolved, medTotal, easyPct, medPct, hardUnlocked };
+  }, [progress]);
 
   // Filtered problem list
   const filtered = useMemo(() => {
@@ -670,6 +692,68 @@ export default function CodePractice() {
     localStorage.removeItem(CODE_KEY(selectedId, langId));
   }, [langId, problem, selectedId]);
 
+  // Code export
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${problem.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.${lang.ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [code, problem.name, lang.ext]);
+
+  const handleCopyCode = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* fallback: select all */ }
+  }, [code]);
+
+  // Speed Run
+  const startSpeedRun = useCallback(() => {
+    // Pick a random unsolved problem
+    const unsolved = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
+    const pool = unsolved.length > 0 ? unsolved : CTCI_PROBLEMS;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    setSelectedId(pick.id);
+    setSpeedRunActive(true);
+    setSpeedRunSecsLeft(20 * 60);
+    setSpeedRunScore(null);
+    setTimerRunning(false);
+    timerSecsRef.current = 0;
+  }, [progress]);
+
+  const stopSpeedRun = useCallback((solved: boolean) => {
+    if (speedRunRef.current) clearInterval(speedRunRef.current);
+    const timeSec = 20 * 60 - speedRunSecsLeft;
+    const timeBonus = solved ? Math.max(0, Math.round((1 - timeSec / (20 * 60)) * 50)) : 0;
+    const score = solved ? 50 + timeBonus : 0;
+    setSpeedRunScore({ solved, timeSec, score });
+    setSpeedRunActive(false);
+  }, [speedRunSecsLeft]);
+
+  // Speed Run countdown
+  useEffect(() => {
+    if (speedRunActive) {
+      speedRunRef.current = setInterval(() => {
+        setSpeedRunSecsLeft(s => {
+          if (s <= 1) {
+            clearInterval(speedRunRef.current!);
+            setSpeedRunActive(false);
+            setSpeedRunScore({ solved: false, timeSec: 20 * 60, score: 0 });
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000);
+    } else {
+      if (speedRunRef.current) clearInterval(speedRunRef.current);
+    }
+    return () => { if (speedRunRef.current) clearInterval(speedRunRef.current); };
+  }, [speedRunActive]);
+
   const handleMarkSolved = useCallback(() => {
     toggleSolved(selectedId);
     if (!prog.solved) {
@@ -681,8 +765,10 @@ export default function CodePractice() {
       const updated = [...session, entry];
       setSession(updated);
       saveSession(updated);
+      // If Speed Run is active, score it
+      if (speedRunActive) stopSpeedRun(true);
     }
-  }, [selectedId, prog.solved, problem, langId, session]);
+  }, [selectedId, prog.solved, problem, langId, session, speedRunActive, stopSpeedRun]);
 
   const todaySession = useMemo(() => {
     const today = new Date().toDateString();
@@ -757,27 +843,46 @@ export default function CodePractice() {
               ))}
             </div>
 
+            {/* Progression lock notice for Hard problems */}
+            {!progressionStats.hardUnlocked && (
+              <div className="mx-2 mb-1 px-2 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-[10px] text-red-700 dark:text-red-400">
+                <div className="flex items-center gap-1 font-bold mb-0.5"><Lock size={9} /> Hard locked</div>
+                <div className="text-[9px] text-red-600/80 dark:text-red-400/80">
+                  Easy: {Math.round(progressionStats.easyPct * 100)}% / 60% needed
+                  &nbsp;·&nbsp;Med: {Math.round(progressionStats.medPct * 100)}% / 40% needed
+                </div>
+              </div>
+            )}
+
             {/* Problem list */}
             <div className="flex-1 overflow-y-auto">
               {filtered.map(p => {
                 const pr = progress[p.id];
                 const isSelected = p.id === selectedId;
                 const diff = DIFFICULTY_COLORS[p.difficulty];
+                const isLocked = p.difficulty === "Hard" && !progressionStats.hardUnlocked;
                 return (
                   <button
                     key={p.id}
-                    onClick={() => { setSelectedId(p.id); setMainView("editor"); }}
-                    className={`w-full text-left px-3 py-2 border-b border-border/50 transition-colors flex items-start gap-2 group ${isSelected ? "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-500" : "hover:bg-muted/50"}`}
+                    onClick={() => { if (!isLocked) { setSelectedId(p.id); setMainView("editor"); } }}
+                    disabled={isLocked}
+                    title={isLocked ? `Unlock Hard: solve ≥60% Easy (${Math.round(progressionStats.easyPct*100)}%) and ≥40% Medium (${Math.round(progressionStats.medPct*100)}%)` : undefined}
+                    className={`w-full text-left px-3 py-2 border-b border-border/50 transition-colors flex items-start gap-2 group ${
+                      isLocked ? "opacity-40 cursor-not-allowed bg-muted/20" :
+                      isSelected ? "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-500" : "hover:bg-muted/50"
+                    }`}
                   >
                     <div className="flex-shrink-0 mt-0.5">
-                      {pr?.solved
+                      {isLocked
+                        ? <Lock size={12} className="text-red-400" />
+                        : pr?.solved
                         ? <CheckCircle2 size={12} className="text-emerald-500 fill-current" />
                         : <Circle size={12} className="text-muted-foreground" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1">
-                        <span className={`text-xs font-medium truncate ${isSelected ? "text-blue-700 dark:text-blue-300" : "text-foreground"}`}>{p.name}</span>
-                        {pr?.starred && <Star size={9} className="text-yellow-500 fill-current flex-shrink-0" />}
+                        <span className={`text-xs font-medium truncate ${isLocked ? "text-muted-foreground" : isSelected ? "text-blue-700 dark:text-blue-300" : "text-foreground"}`}>{p.name}</span>
+                        {pr?.starred && !isLocked && <Star size={9} className="text-yellow-500 fill-current flex-shrink-0" />}
                       </div>
                       <div className="flex items-center gap-1 mt-0.5">
                         <span className={`text-[9px] font-semibold px-1.5 py-0 rounded-full ${diff.bg} ${diff.text}`}>{p.difficulty}</span>
@@ -811,10 +916,19 @@ export default function CodePractice() {
             <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card flex-shrink-0 flex-wrap">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${diffColors[problem.difficulty]}`}>{problem.difficulty}</span>
-                <span className="text-sm font-semibold text-foreground truncate">{problem.name}</span>
-                <a href={problem.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-500 flex-shrink-0" title="Open on LeetCode">
-                  <ExternalLink size={13} />
-                </a>
+                {speedRunActive ? (
+                  <span className="flex items-center gap-1.5 text-sm font-semibold text-orange-600 dark:text-orange-400">
+                    <EyeOff size={14} />
+                    <span className="italic text-muted-foreground">Hidden — Speed Run active</span>
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-sm font-semibold text-foreground truncate">{problem.name}</span>
+                    <a href={problem.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-500 flex-shrink-0" title="Open on LeetCode">
+                      <ExternalLink size={13} />
+                    </a>
+                  </>
+                )}
               </div>
 
               <select
@@ -829,6 +943,24 @@ export default function CodePractice() {
 
               <button onClick={handleReset} title="Reset to boilerplate" className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted">
                 <RotateCcw size={14} />
+              </button>
+              <button onClick={handleDownload} title="Download code" className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted">
+                <Download size={14} />
+              </button>
+              <button onClick={handleCopyCode} title={copied ? "Copied!" : "Copy code"} className={`transition-colors p-1.5 rounded-lg hover:bg-muted ${copied ? "text-emerald-500" : "text-muted-foreground hover:text-foreground"}`}>
+                <Copy size={14} />
+              </button>
+              <button
+                onClick={speedRunActive ? () => stopSpeedRun(false) : startSpeedRun}
+                title={speedRunActive ? "Stop Speed Run" : "Start Speed Run (20 min, random problem)"}
+                className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
+                  speedRunActive
+                    ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
+                    : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Timer size={13} />
+                {speedRunActive ? `${Math.floor(speedRunSecsLeft/60)}:${String(speedRunSecsLeft%60).padStart(2,"0")}` : "Speed Run"}
               </button>
               <button
                 onClick={() => toggleStarred(selectedId)}
@@ -852,6 +984,31 @@ export default function CodePractice() {
                 Run
               </button>
             </div>
+
+            {/* Speed Run score panel */}
+            {speedRunScore && (
+              <div className={`px-4 py-3 border-b flex items-center gap-4 flex-shrink-0 ${
+                speedRunScore.solved
+                  ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
+                  : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+              }`}>
+                <span className="text-2xl">{speedRunScore.solved ? "🏆" : "⏰"}</span>
+                <div className="flex-1">
+                  <div className={`text-sm font-bold ${speedRunScore.solved ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"}`}>
+                    {speedRunScore.solved ? "Speed Run Complete!" : "Time's Up!"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {speedRunScore.solved
+                      ? `Solved in ${Math.floor(speedRunScore.timeSec/60)}m ${speedRunScore.timeSec%60}s · Score: ${speedRunScore.score}/100`
+                      : `Problem: ${problem.name} · Score: 0/100`}
+                  </div>
+                </div>
+                <div className={`text-3xl font-black ${speedRunScore.solved ? "text-emerald-600" : "text-red-500"}`}>{speedRunScore.score}</div>
+                <button onClick={() => setSpeedRunScore(null)} className="text-muted-foreground hover:text-foreground p-1 rounded">
+                  <X size={14} />
+                </button>
+              </div>
+            )}
 
             {/* Topic tags */}
             <div className="px-4 py-1.5 border-b border-border bg-muted/20 flex items-center gap-1.5 flex-wrap flex-shrink-0">

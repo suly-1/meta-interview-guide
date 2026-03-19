@@ -52,3 +52,6 @@
 - [x] Custom test case editor in Code Practice (input/expected output pairs, pass/fail summary)
 - [x] Per-problem submission history in Code Practice (code snapshot, output, timestamp, language)
 - [x] Personal stats dashboard tab (solve counts, avg time per difficulty, most-used language, weekly chart)
+- [x] Difficulty progression lock (grey out Hard until ≥60% Easy + ≥40% Medium solved)
+- [x] Code export (download file + copy to clipboard) in editor toolbar
+- [x] Speed Run timed challenge mode (hidden problem name, 20-min countdown, correctness + time scoring)
