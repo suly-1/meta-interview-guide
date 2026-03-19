@@ -495,7 +495,157 @@ function SurpriseMe({ ratings, onRate, onClose }: {
   );
 }
 
-//// ── Answer Scorer ────────────────────────────────────────────────────────────────
+// ── XFN Surprise Me ─────────────────────────────────────────────────────────────────
+const XFN_QUESTIONS = BEHAVIORAL_QUESTIONS.filter(q => q.area === 'XFN Partnership');
+
+function XFNSurpriseMe({ ratings, onRate, onClose }: {
+  ratings: Record<string, number>;
+  onRate: (id: string, v: number) => void;
+  onClose: () => void;
+}) {
+  const pickQuestion = useCallback(() => {
+    const unrated = XFN_QUESTIONS.filter(q => !(ratings[q.id] ?? 0));
+    const pool = unrated.length > 0 ? unrated : XFN_QUESTIONS;
+    return pool[Math.floor(Math.random() * pool.length)];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [q, setQ] = useState(pickQuestion);
+  const [timeLeft, setTimeLeft] = useState(STAR_DURATION);
+  const [running, setRunning] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [done, setDone] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
+
+  const startTimer = useCallback(() => {
+    stopTimer();
+    setRunning(true);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) { clearInterval(timerRef.current!); setRunning(false); setDone(true); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+  }, [stopTimer]);
+
+  useEffect(() => () => stopTimer(), [stopTimer]);
+
+  const next = () => {
+    stopTimer();
+    setQ(pickQuestion());
+    setTimeLeft(STAR_DURATION);
+    setRunning(false);
+    setRevealed(false);
+    setDone(false);
+  };
+
+  const pct = ((STAR_DURATION - timeLeft) / STAR_DURATION) * 100;
+  const r = 38;
+  const circ = 2 * Math.PI * r;
+  const mm = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const ss = String(timeLeft % 60).padStart(2, '0');
+  const urgent = timeLeft <= 30;
+  const warning = timeLeft <= 60;
+
+  return (
+    <div className="prep-card p-5" style={{ border: '1px solid rgba(20,184,166,0.3)', background: 'rgba(20,184,166,0.05)' }}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-teal-400">🤝</span>
+          <span className="text-sm font-bold text-foreground">Surprise Me (XFN)</span>
+          <span className="badge badge-teal">XFN Partnership</span>
+          <span className="text-xs text-muted-foreground">{XFN_QUESTIONS.length} questions</span>
+        </div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X size={14} /></button>
+      </div>
+
+      <div className="flex gap-5 items-start">
+        {/* Circular timer */}
+        <div className="relative w-20 h-20 shrink-0">
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+            <circle cx="50" cy="50" r={r} fill="none" stroke="oklch(0.28 0.012 264)" strokeWidth="8" />
+            <circle cx="50" cy="50" r={r} fill="none"
+              stroke={urgent ? 'oklch(0.65 0.22 25)' : warning ? 'oklch(0.78 0.17 75)' : 'oklch(0.6 0.18 185)'}
+              strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={circ} strokeDashoffset={circ * (1 - pct / 100)}
+              style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }} />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className={`font-mono text-base font-bold ${urgent ? 'text-red-400' : warning ? 'text-amber-400' : 'text-teal-400'}`}>
+              {mm}:{ss}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-3">
+          <p className="text-sm font-medium text-foreground leading-relaxed">{q.q}</p>
+
+          {/* XFN-specific STAR context */}
+          <div className="flex gap-1.5 flex-wrap">
+            {['S — Situation', 'T — Task', 'A — Action', 'R — Result'].map((label, i) => {
+              const colors = ['text-blue-400', 'text-amber-400', 'text-violet-400', 'text-emerald-400'];
+              return <span key={label} className={`text-xs font-semibold ${colors[i]}`}>{label}</span>;
+            })}
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {!running && !done && timeLeft === STAR_DURATION && (
+              <button onClick={startTimer}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/30 text-teal-400 text-xs font-semibold transition-all">
+                <Timer size={11} /> Start Timer
+              </button>
+            )}
+            {running && (
+              <button onClick={stopTimer}
+                className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all">
+                Pause
+              </button>
+            )}
+            <button onClick={() => setRevealed(rv => !rv)}
+              className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all">
+              {revealed ? 'Hide' : 'Show'} Probes
+            </button>
+            <button onClick={next}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-xs font-semibold transition-all">
+              <SkipForward size={11} /> Skip
+            </button>
+          </div>
+
+          {revealed && (
+            <div className="p-3 rounded-lg bg-teal-500/10 border border-teal-500/20 text-xs text-teal-300">
+              <span className="font-bold text-teal-400">Hint: </span>{q.hint}
+            </div>
+          )}
+
+          {(done || revealed) && (
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">Rate your answer:</span>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map(s => (
+                  <button key={s}
+                    className={`star-btn ${(ratings[q.id] ?? 0) >= s ? 'active' : ''}`}
+                    onClick={() => { onRate(q.id, s); next(); }}>
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {done && (
+            <div className="text-xs font-semibold text-amber-400">⏱ Time's up! Rate your answer above to continue.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+//// ── Answer Scorer ─────────────────────────────────────────────────────────────────
 function ScoreBar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div>
@@ -791,10 +941,32 @@ function TechRetroPlanner({ prePopulate }: { prePopulate?: { scope: string; outc
   const [coachProjectId, setCoachProjectId] = useState<string | null>(null);
   const [coachQuestions, setCoachQuestions] = useState<string[]>([]);
   const coachMutation = trpc.ai.techRetroCoach.useMutation();
+  const scoreMutation = trpc.collab.scoreAnswer.useMutation();
+
+  type QuestionScore = { specificity: number; impactClarity: number; icLevel: string; coachingNote: string; strengths: string; improvements: string };
+  const [coachAnswers, setCoachAnswers] = useState<Record<number, string>>({});
+  const [coachScores, setCoachScores] = useState<Record<number, QuestionScore>>({});
+  const [scoringIdx, setScoringIdx] = useState<number | null>(null);
+
+  const scoreCoachAnswer = async (questionIdx: number, question: string) => {
+    const answer = coachAnswers[questionIdx];
+    if (!answer?.trim()) { toast.error('Please write an answer first.'); return; }
+    setScoringIdx(questionIdx);
+    try {
+      const result = await scoreMutation.mutateAsync({ question, answer });
+      setCoachScores(s => ({ ...s, [questionIdx]: result }));
+    } catch {
+      toast.error('Scoring failed. Please try again.');
+    } finally {
+      setScoringIdx(null);
+    }
+  };
 
   const runAICoach = async (p: TechRetroProject) => {
     setCoachProjectId(p.id);
     setCoachQuestions([]);
+    setCoachAnswers({});
+    setCoachScores({});
     try {
       const result = await coachMutation.mutateAsync({
         name: p.name, scope: p.scope, tradeoffs: p.tradeoffs,
@@ -987,18 +1159,81 @@ function TechRetroPlanner({ prePopulate }: { prePopulate?: { scope: string; outc
                       <div className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{value}</div>
                     </div>
                   ))}
-                  {/* AI Coach results */}
+                  {/* AI Coach results with Answer Evaluator */}
                   {coachProjectId === p.id && coachQuestions.length > 0 && (
-                    <div className="mt-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                      <div className="text-xs font-bold text-emerald-400 mb-2">🤖 AI Coach — 3 Follow-up Questions an Interviewer Might Ask:</div>
-                      <ol className="space-y-2">
-                        {coachQuestions.map((q, i) => (
-                          <li key={i} className="flex gap-2">
-                            <span className="text-emerald-400 font-bold text-xs shrink-0">{i + 1}.</span>
-                            <span className="text-xs text-foreground leading-relaxed">{q}</span>
-                          </li>
-                        ))}
-                      </ol>
+                    <div className="mt-2 space-y-3">
+                      <div className="text-xs font-bold text-emerald-400">🤖 AI Coach — Practice answering these 3 follow-up questions:</div>
+                      {coachQuestions.map((cq, i) => {
+                        const score = coachScores[i];
+                        return (
+                          <div key={i} className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                            <div className="flex gap-2">
+                              <span className="text-emerald-400 font-black text-xs shrink-0 mt-0.5">Q{i + 1}.</span>
+                              <span className="text-xs text-foreground leading-relaxed font-medium">{cq}</span>
+                            </div>
+                            <textarea
+                              value={coachAnswers[i] ?? ''}
+                              onChange={e => setCoachAnswers(a => ({ ...a, [i]: e.target.value }))}
+                              placeholder="Write your STAR answer here…"
+                              rows={3}
+                              className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-emerald-500/50 resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+                            />
+                            <button
+                              onClick={() => scoreCoachAnswer(i, cq)}
+                              disabled={scoringIdx === i}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition-all disabled:opacity-60">
+                              {scoringIdx === i ? '⏳ Scoring…' : '📊 Score My Answer'}
+                            </button>
+                            {score && (
+                              <div className="mt-2 space-y-2 p-3 rounded-lg bg-background/60 border border-border">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-bold text-foreground">AI Score</span>
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                                    score.icLevel === 'IC7' ? 'bg-violet-500/20 text-violet-400 border-violet-500/30' :
+                                    score.icLevel === 'IC6' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                    'bg-secondary text-muted-foreground border-border'
+                                  }`}>{score.icLevel}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                      <span className="text-muted-foreground">Specificity</span>
+                                      <span className="font-bold text-blue-400">{score.specificity}/5</span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                                      <div className="h-full rounded-full bg-blue-400 transition-all duration-700" style={{ width: `${(score.specificity / 5) * 100}%` }} />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                      <span className="text-muted-foreground">Impact Clarity</span>
+                                      <span className="font-bold text-emerald-400">{score.impactClarity}/5</span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                                      <div className="h-full rounded-full bg-emerald-400 transition-all duration-700" style={{ width: `${(score.impactClarity / 5) * 100}%` }} />
+                                    </div>
+                                  </div>
+                                </div>
+                                {score.coachingNote && (
+                                  <div className="text-xs text-muted-foreground leading-relaxed border-t border-border pt-2">
+                                    <span className="font-bold text-foreground">Coach: </span>{score.coachingNote}
+                                  </div>
+                                )}
+                                {score.strengths && (
+                                  <div className="text-xs text-emerald-400 leading-relaxed">
+                                    <span className="font-bold">✅ Strengths: </span>{score.strengths}
+                                  </div>
+                                )}
+                                {score.improvements && (
+                                  <div className="text-xs text-amber-400 leading-relaxed">
+                                    <span className="font-bold">💡 Improve: </span>{score.improvements}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   <div className="text-xs text-muted-foreground pt-1">Saved {new Date(p.createdAt).toLocaleDateString()}</div>
@@ -1172,6 +1407,7 @@ export default function BehavioralTab() {
   const [showMock, setShowMock] = useState(false);
   const [showPractice, setShowPractice] = useState(false);
   const [showSurprise, setShowSurprise] = useState(false);
+  const [showXFNSurprise, setShowXFNSurprise] = useState(false);
   const [xfnPrePopulate, setXfnPrePopulate] = useState<{ scope: string; outcome: string } | null>(null);
 
   const handleRate = (id: string, v: number) => {
@@ -1196,6 +1432,12 @@ export default function BehavioralTab() {
 
   return (
     <div className="space-y-5">
+
+      {/* XFN Story Builder */}
+      <XFNStoryBuilder onPopulatePlanner={(scope, outcome) => setXfnPrePopulate({ scope, outcome })} />
+
+      {/* Technical Retrospective Project Planner */}
+      <TechRetroPlanner prePopulate={xfnPrePopulate} />
 
       {/* ===== IC7 EXCLUSIVE: TECHNICAL RETROSPECTIVE + XFN PARTNERSHIP ===== */}
       <div className="relative overflow-hidden rounded-xl" style={{
@@ -1359,12 +1601,6 @@ export default function BehavioralTab() {
         </div>
       </div>
 
-      {/* XFN Story Builder */}
-      <XFNStoryBuilder onPopulatePlanner={(scope, outcome) => setXfnPrePopulate({ scope, outcome })} />
-
-      {/* Technical Retrospective Project Planner */}
-      <TechRetroPlanner prePopulate={xfnPrePopulate} />
-
       {/* AI Answer Scorer */}
       <AnswerScorer />
 
@@ -1421,15 +1657,22 @@ export default function BehavioralTab() {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-all ${showMock ? "bg-blue-500/20 border-blue-500/40 text-blue-400" : "bg-secondary border-border text-muted-foreground hover:text-foreground"}`}>
           <Brain size={13} /> Full Mock Session
         </button>
-        <button onClick={() => { setShowSurprise(s => !s); setShowPractice(false); setShowMock(false); }}
+        <button onClick={() => { setShowSurprise(s => !s); setShowPractice(false); setShowMock(false); setShowXFNSurprise(false); }}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
             showSurprise ? "bg-pink-500/20 border-pink-500/40 text-pink-400" : "bg-secondary border-border text-muted-foreground hover:text-foreground"
           }`}>
           <Shuffle size={13} /> Surprise Me
         </button>
+        <button onClick={() => { setShowXFNSurprise(s => !s); setShowPractice(false); setShowMock(false); setShowSurprise(false); }}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
+            showXFNSurprise ? "bg-teal-500/20 border-teal-500/40 text-teal-400" : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+          }`}>
+          🤝 Surprise Me (XFN)
+        </button>
       </div>
 
       {showSurprise && <SurpriseMe ratings={ratings} onRate={handleRate} onClose={() => setShowSurprise(false)} />}
+      {showXFNSurprise && <XFNSurpriseMe ratings={ratings} onRate={handleRate} onClose={() => setShowXFNSurprise(false)} />}
       {showPractice && <PracticeMode ratings={ratings} onRate={handleRate} />}
       {showMock && <FullMockSession onComplete={handleMockComplete} />}
 

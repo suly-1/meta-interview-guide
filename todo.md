@@ -140,3 +140,11 @@
 - [x] XFN Story Builder — 3 STAR templates, saves to localStorage, auto-populates Tech Retro Planner scope & outcome
 - [x] Flash Card Custom Deck — add/edit/delete user Q&A cards, merged into drill mode & SR system
 - [x] Tech Retro AI Coach — 🤖 AI Coach button on each saved project, calls LLM to generate 3 probing follow-up questions
+
+## New Features — Round 20
+- [x] XFN Question Randomizer — "Surprise Me (XFN)" button picks a random XFN question and starts a 3-min timer (Practice Mode style), teal timer ring
+- [x] AI Coach Answer Evaluator — answer textarea + 📊 Score My Answer button per question, shows Specificity/Impact bars, IC level badge, coaching note, strengths, improvements
+
+## New Features — Round 21
+- [x] Move Technical Retrospective Project Planner (AI Studio Planner) to the top of the Behavioral tab
+- [x] AI Coach Answer Evaluator — completed as part of Round 20
