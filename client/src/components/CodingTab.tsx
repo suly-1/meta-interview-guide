@@ -5,7 +5,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Download, Flame, Clock, ChevronDown, ChevronUp, Star, Zap, BarChart2, BookOpen, Filter, Timer, Trophy, X, SkipForward, ChevronRight } from "lucide-react";
 import { PATTERNS } from "@/lib/data";
-import { usePatternRatings, usePatternNotes, useSpacedRepetition, useCodingHistory, usePatternTime } from "@/hooks/useLocalStorage";
+import { usePatternRatings, usePatternNotes, useSpacedRepetition, useCodingHistory, usePatternTime, useCTCIStreak } from "@/hooks/useLocalStorage";
+import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 
@@ -1061,6 +1062,15 @@ function CTCITracker() {
   const [editorCode, setEditorCode] = useState<Record<number, string>>(() => {
     try { return JSON.parse(localStorage.getItem("ctci_code") ?? "{}"); } catch { return {}; }
   });
+  const [ctciStreak, setCTCIStreak] = useCTCIStreak();
+  const [hintOpen, setHintOpen] = useState<number | null>(null);
+  const [hints, setHints] = useState<Record<number, string>>({});
+  const hintMutation = trpc.ctci.getHint.useMutation({
+    onSuccess: (data, variables) => {
+      setHints(h => ({ ...h, [variables.problemNum]: data.hint }));
+    },
+    onError: () => toast.error("Failed to get hint. Try again."),
+  });
 
   const dailyChallengeNum = useMemo(() => getDailyChallenge(solved), [solved]);
 
@@ -1072,10 +1082,36 @@ function CTCITracker() {
     });
   };
 
+  const today = new Date().toISOString().split("T")[0];
+
   const toggle = (num: number) => {
     setSolved(s => {
       const next = { ...s, [num]: !s[num] };
       localStorage.setItem("ctci_solved", JSON.stringify(next));
+      // Update CTCI streak when solving the daily challenge
+      if (next[num] && num === dailyChallengeNum) {
+        setCTCIStreak(prev => {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split("T")[0];
+          const newStreak = prev.lastSolvedDate === yesterdayStr || prev.lastSolvedDate === today
+            ? (prev.lastSolvedDate === today ? prev.currentStreak : prev.currentStreak + 1)
+            : 1;
+          return {
+            currentStreak: newStreak,
+            lastSolvedDate: today,
+            longestStreak: Math.max(newStreak, prev.longestStreak),
+            totalSolved: prev.totalSolved + 1,
+          };
+        });
+      } else if (!next[num] && num === dailyChallengeNum && ctciStreak.lastSolvedDate === today) {
+        // Unsolving today's challenge decrements streak
+        setCTCIStreak(prev => ({
+          ...prev,
+          currentStreak: Math.max(0, prev.currentStreak - 1),
+          totalSolved: Math.max(0, prev.totalSolved - 1),
+        }));
+      }
       return next;
     });
   };
@@ -1116,7 +1152,22 @@ function CTCITracker() {
           <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.4s' }} className="text-xl">💎</span>
           <span style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate 0.5s' }} className="text-xl">🚀</span>
         </div>
-        <div className="text-xs font-bold mb-1" style={{ color: '#a78bfa' }}>— Dinesh Varyani · MUST DO ‼️</div>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="text-xs font-bold" style={{ color: '#a78bfa' }}>— Dinesh Varyani · MUST DO ‼️</div>
+          {ctciStreak.currentStreak > 0 && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/40">
+              <span className="text-base" style={{ animation: 'ctci-bounce 0.8s ease-in-out infinite alternate' }}>🔥</span>
+              <span className="text-xs font-extrabold text-orange-400">{ctciStreak.currentStreak}</span>
+              <span className="text-xs text-orange-300/80">day streak</span>
+              {ctciStreak.longestStreak > ctciStreak.currentStreak && (
+                <span className="text-xs text-muted-foreground ml-1">· best {ctciStreak.longestStreak}</span>
+              )}
+            </div>
+          )}
+          {ctciStreak.totalSolved > 0 && (
+            <span className="text-xs text-muted-foreground">{ctciStreak.totalSolved} daily solved</span>
+          )}
+        </div>
       </div>
 
       {/* Keyframes injected inline */}
@@ -1328,8 +1379,56 @@ function CTCITracker() {
                     />
                     <div className="flex items-center justify-between px-3 py-1 bg-[#007acc] text-white">
                       <span className="text-xs">💾 Auto-saved to localStorage</span>
-                      {hasCode && <span className="text-xs opacity-80">{editorCode[q.num]?.split('\n').length ?? 0} lines</span>}
+                      <div className="flex items-center gap-2">
+                        {hasCode && <span className="text-xs opacity-80">{editorCode[q.num]?.split('\n').length ?? 0} lines</span>}
+                        <button
+                          onClick={() => {
+                            setHintOpen(hintOpen === q.num ? null : q.num);
+                            if (hintOpen !== q.num && !hints[q.num]) {
+                              hintMutation.mutate({
+                                problemName: q.name,
+                                problemNum: q.num,
+                                difficulty: q.difficulty,
+                                topics: q.topics,
+                                currentCode: editorCode[q.num],
+                              });
+                            }
+                          }}
+                          className="flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-white/20 hover:bg-white/30 transition-colors font-medium"
+                        >
+                          {hintMutation.isPending && hintOpen === q.num ? '⏳ Thinking…' : '💡 Get Hint'}
+                        </button>
+                      </div>
                     </div>
+                    {hintOpen === q.num && (
+                      <div className="px-3 py-2.5 bg-[#252526] border-t border-[#3e3e42]">
+                        {hintMutation.isPending && !hints[q.num] ? (
+                          <div className="flex items-center gap-2 text-xs text-[#9cdcfe]">
+                            <span className="animate-spin">⏳</span> Getting hint from AI…
+                          </div>
+                        ) : hints[q.num] ? (
+                          <div>
+                            <div className="text-xs font-bold text-[#dcdcaa] mb-1">💡 Hint</div>
+                            <div className="text-xs text-[#d4d4d4] leading-relaxed">{hints[q.num]}</div>
+                            <button
+                              onClick={() => {
+                                setHints(h => ({ ...h, [q.num]: "" }));
+                                hintMutation.mutate({
+                                  problemName: q.name,
+                                  problemNum: q.num,
+                                  difficulty: q.difficulty,
+                                  topics: q.topics,
+                                  currentCode: editorCode[q.num],
+                                });
+                              }}
+                              className="mt-2 text-xs text-[#858585] hover:text-[#cccccc] transition-colors"
+                            >↺ New hint</button>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-[#858585]">Click "Get Hint" to ask the AI for a nudge.</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -93,3 +93,8 @@
 - [x] Keyboard Navigation Overlay (? key help modal with all shortcuts)
 - [x] Monaco In-Browser Code Editor on CTCI problem rows
 - [x] Pattern Mastery Heatmap in Coding tab (enhanced: mastery ring, time-invested overlay, category breakdown, tooltips)
+
+## New Features — Round 10
+- [x] Weekly Progress Email Digest UI (Send Weekly Digest button in Overview tab)
+- [x] CTCI Streak Tracker (consecutive daily challenge completions, flame counter in CTCI banner)
+- [x] AI Hint System (Get Hint button in inline code editor, LLM-powered, no spoilers)

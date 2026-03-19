@@ -149,3 +149,19 @@ export function useReadinessTrend() {
 export function usePatternTime() {
   return useLocalStorage<Record<string, number>>("meta_pattern_time_v1", {});
 }
+// ── CTCI Daily Challenge streak ────────────────────────────────────────────
+export interface CTCIStreakData {
+  currentStreak: number;
+  lastSolvedDate: string | null; // ISO date YYYY-MM-DD
+  longestStreak: number;
+  totalSolved: number;
+}
+
+export function useCTCIStreak() {
+  return useLocalStorage<CTCIStreakData>("meta_ctci_streak_v1", {
+    currentStreak: 0,
+    lastSolvedDate: null,
+    longestStreak: 0,
+    totalSolved: 0,
+  });
+}

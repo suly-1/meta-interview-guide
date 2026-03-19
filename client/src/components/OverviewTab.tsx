@@ -3,11 +3,12 @@
 // weak-spot dashboard, interview countdown, STAR story bank, recruiter card
 // with peer comparison, progress export, interview day checklist
 import { useState } from "react";
-import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
+import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend } from "@/hooks/useLocalStorage";
+import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
+import { trpc } from "@/lib/trpc";
 
 function getDaysUntil(dateStr: string): number {
   const target = new Date(dateStr);
@@ -658,6 +659,118 @@ function ResourcesSection() {
 }
 
 // ── Main OverviewTab ───────────────────────────────────────────────────────
+// ── Weekly Progress Digest ─────────────────────────────────────────────────
+function WeeklyDigest() {
+  const [patternRatings] = usePatternRatings();
+  const [bqRatings] = useBehavioralRatings();
+  const [mockHistory] = useMockHistory();
+  const [trend] = useReadinessTrend();
+  const streak = useStreak();
+  const [ctciStreak] = useCTCIStreak();
+
+  const notifyMutation = trpc.system.notifyOwner.useMutation({
+    onSuccess: (data) => {
+      if (data.success) toast.success("Weekly digest sent! Check your Manus notifications.");
+      else toast.error("Digest queued but delivery failed. Try again later.");
+    },
+    onError: () => toast.error("Could not send digest. Make sure you are logged in as the app owner."),
+  });
+
+  const sendDigest = () => {
+    const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4);
+    const weakPatterns = PATTERNS.filter(p => { const r = patternRatings[p.id] ?? 0; return r > 0 && r <= 2; });
+    const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4);
+    const overallPct = Math.round(
+      ((masteredPatterns.length / PATTERNS.length) * 0.6 + (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) * 100
+    );
+
+    // Compute 7-day readiness delta from trend snapshots
+    const sortedTrend = [...trend].sort((a, b) => a.date.localeCompare(b.date));
+    const recentTrend = sortedTrend.slice(-7);
+    const trendDelta = recentTrend.length >= 2
+      ? overallPct - recentTrend[0].pct
+      : 0;
+
+    // Mock sessions this week
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const weekMocks = mockHistory.filter(m => new Date(m.date) >= oneWeekAgo);
+    const weekAvgMock = weekMocks.length
+      ? (weekMocks.reduce((s, m) => s + m.avgScore, 0) / weekMocks.length).toFixed(1)
+      : "—";
+
+    const ctciSolvedCount = (() => {
+      try { return Object.values(JSON.parse(localStorage.getItem("ctci_solved") ?? "{}")).filter(Boolean).length; } catch { return 0; }
+    })() as number;
+
+    const title = `📊 Meta Prep Weekly Digest — ${new Date().toLocaleDateString()}`;
+    const content = [
+      `**Overall Readiness: ${overallPct}%** (${trendDelta >= 0 ? "+" : ""}${trendDelta}% this week)`,
+      "",
+      `📅 **Streak:** ${streak.currentStreak} days (best: ${streak.longestStreak})`,
+      `🔥 **CTCI Daily Streak:** ${ctciStreak.currentStreak} days · ${ctciStreak.totalSolved} daily challenges solved`,
+      `💻 **CTCI Total Solved:** ${ctciSolvedCount}/500`,
+      "",
+      `✅ **Patterns Mastered:** ${masteredPatterns.length}/${PATTERNS.length}`,
+      masteredPatterns.length > 0
+        ? masteredPatterns.slice(-5).map(p => `  - ★${patternRatings[p.id]} ${p.name}`).join("\n")
+        : "  (none yet)",
+      "",
+      `⚠️ **Weak Patterns (★1-2):** ${weakPatterns.length}`,
+      weakPatterns.slice(0, 5).map(p => `  - ★${patternRatings[p.id]} ${p.name}`).join("\n"),
+      "",
+      `🗣️ **Behavioral Stories Ready:** ${readyStories.length}/${BEHAVIORAL_QUESTIONS.length}`,
+      "",
+      `🎭 **Mock Sessions This Week:** ${weekMocks.length} (avg ★${weekAvgMock})`,
+      weekMocks.slice(-3).map(m => `  - ${new Date(m.date).toLocaleDateString()} avg ★${m.avgScore.toFixed(1)}`).join("\n"),
+    ].filter(l => l !== undefined).join("\n");
+
+    notifyMutation.mutate({ title, content });
+  };
+
+  const overallPct = Math.round(
+    (PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length / PATTERNS.length * 0.6 +
+     BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length / BEHAVIORAL_QUESTIONS.length * 0.4) * 100
+  );
+
+  return (
+    <div className="prep-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="section-title mb-0 pb-0 border-0">Weekly Progress Digest</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Send a formatted summary to your Manus notifications</div>
+        </div>
+        <button
+          onClick={sendDigest}
+          disabled={notifyMutation.isPending}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold transition-all"
+        >
+          <Send size={13} />
+          {notifyMutation.isPending ? "Sending…" : "Send Weekly Digest"}
+        </button>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-3 rounded-lg bg-secondary text-center">
+          <div className="text-lg font-extrabold text-blue-400">{overallPct}%</div>
+          <div className="text-xs text-muted-foreground">Readiness</div>
+        </div>
+        <div className="p-3 rounded-lg bg-secondary text-center">
+          <div className="text-lg font-extrabold text-orange-400">{streak.currentStreak}d</div>
+          <div className="text-xs text-muted-foreground">Study Streak</div>
+        </div>
+        <div className="p-3 rounded-lg bg-secondary text-center">
+          <div className="text-lg font-extrabold text-purple-400">{ctciStreak.currentStreak}d</div>
+          <div className="text-xs text-muted-foreground">CTCI Streak</div>
+        </div>
+        <div className="p-3 rounded-lg bg-secondary text-center">
+          <div className="text-lg font-extrabold text-emerald-400">{mockHistory.length}</div>
+          <div className="text-xs text-muted-foreground">Mock Sessions</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OverviewTab() {
   return (
     <div className="space-y-6">
@@ -669,6 +782,7 @@ export default function OverviewTab() {
       <StarStoryBank />
       <InterviewDayChecklist />
       <ResourcesSection />
+      <WeeklyDigest />
       <div className="flex justify-start">
         <ProgressExport />
       </div>
