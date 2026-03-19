@@ -13,6 +13,7 @@ import {
   Play, Square, ChevronRight, ExternalLink, CheckCircle2, XCircle,
   Brain, MessageSquare, Code2, Trophy, RotateCcw, Loader2, AlertCircle,
   Star, TrendingUp, TrendingDown, Target, Clock, ChevronDown, ChevronUp, ScrollText,
+  ArrowUp, ArrowDown, Minus,
 } from "lucide-react";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { BEHAVIORAL_FOCUS_AREAS, IC7_BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
@@ -39,6 +40,30 @@ interface SessionState {
   codingNotes: string;
   behavioralQuestions: BehavioralQuestion[];
   behavioralAnswers: string[];
+}
+
+// ─── Mock session history ───────────────────────────────────────────────────
+
+const MOCK_HISTORY_KEY = "meta-mock-interview-history";
+
+interface MockSessionRecord {
+  id: string;
+  ts: number;
+  targetLevel: ICLevel;
+  icLevelVerdict: string;
+  codingScore: number;
+  behavioralScore: number;
+}
+
+function loadMockHistory(): MockSessionRecord[] {
+  try { return JSON.parse(localStorage.getItem(MOCK_HISTORY_KEY) ?? "[]"); }
+  catch { return []; }
+}
+
+function saveMockSession(record: MockSessionRecord) {
+  const history = loadMockHistory();
+  history.unshift(record);
+  localStorage.setItem(MOCK_HISTORY_KEY, JSON.stringify(history.slice(0, 50)));
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -233,6 +258,7 @@ export default function MockInterviewSimulator() {
   const [behavioralIdx, setBehavioralIdx] = useState(0); // 0 = behavioral1, 1 = behavioral2
 
   const debrief = trpc.mockInterview.debrief.useMutation();
+  const [previousSession, setPreviousSession] = useState<MockSessionRecord | null>(null);
 
   // ── Setup → Coding (or Behavioral for IC7_PRINCIPAL) ──
   const startSession = useCallback(() => {
@@ -259,6 +285,9 @@ export default function MockInterviewSimulator() {
       setBehavioralIdx(1);
       setPhase("behavioral2");
     } else {
+      // Load the most recent previous session for comparison
+      const history = loadMockHistory();
+      setPreviousSession(history.length > 0 ? history[0] : null);
       setPhase("debrief");
       // Trigger LLM debrief
       const bqs = session.behavioralQuestions;
@@ -282,6 +311,21 @@ export default function MockInterviewSimulator() {
       });
     }
   }, [session, debrief]);
+
+  // Save completed session to history when debrief data arrives
+  useEffect(() => {
+    if (debrief.data) {
+      saveMockSession({
+        id: `mock-${Date.now()}`,
+        ts: Date.now(),
+        targetLevel: session.targetLevel,
+        icLevelVerdict: debrief.data.icLevelVerdict,
+        codingScore: debrief.data.codingScore,
+        behavioralScore: debrief.data.behavioralScore,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debrief.data]);
 
   const resetSimulator = () => {
     setPhase("setup");
@@ -425,6 +469,7 @@ export default function MockInterviewSimulator() {
             result={debrief.data}
             session={session}
             onReset={resetSimulator}
+            previousSession={previousSession}
           />
         )}
       </div>
@@ -655,10 +700,10 @@ function BehavioralPhase({
   );
 }
 
-// ─── DebriefPhase ─────────────────────────────────────────────────────────────
+// ─── DebriefPhase ─────────────────────────────────────────────────────────────────
 
 function DebriefPhase({
-  isLoading, error, result, session, onReset,
+  isLoading, error, result, session, onReset, previousSession,
 }: {
   isLoading: boolean;
   error?: string;
@@ -670,6 +715,7 @@ function DebriefPhase({
   };
   session: SessionState;
   onReset: () => void;
+  previousSession?: MockSessionRecord | null;
 }) {
   if (isLoading) {
     return (
@@ -716,6 +762,55 @@ function DebriefPhase({
           </p>
         </div>
       </div>
+
+      {/* Session comparison delta card */}
+      {previousSession && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp size={13} className="text-slate-500" />
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">vs. Previous Session</span>
+            <span className="ml-auto text-[11px] text-slate-400">
+              {new Date(previousSession.ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "Coding", current: result.codingScore, prev: previousSession.codingScore, color: "blue" },
+              { label: "Behavioral", current: result.behavioralScore, prev: previousSession.behavioralScore, color: "amber" },
+            ].map(({ label, current, prev, color }) => {
+              const delta = current - prev;
+              const isUp = delta > 0;
+              const isDown = delta < 0;
+              return (
+                <div key={label} className={`rounded-lg p-3 border ${
+                  color === 'blue' ? 'bg-blue-50 border-blue-100' : 'bg-amber-50 border-amber-100'
+                }`}>
+                  <p className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${
+                    color === 'blue' ? 'text-blue-600' : 'text-amber-600'
+                  }`}>{label}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-extrabold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {current}
+                    </span>
+                    <div className={`flex items-center gap-0.5 text-xs font-bold ${
+                      isUp ? 'text-emerald-600' : isDown ? 'text-red-500' : 'text-gray-400'
+                    }`}>
+                      {isUp ? <ArrowUp size={11} /> : isDown ? <ArrowDown size={11} /> : <Minus size={11} />}
+                      {isUp ? '+' : ''}{delta}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-0.5">prev: {prev}</p>
+                </div>
+              );
+            })}
+          </div>
+          {previousSession.icLevelVerdict !== result.icLevelVerdict && (
+            <p className="text-[11px] text-slate-500 mt-2">
+              Verdict changed: <span className="font-semibold">{previousSession.icLevelVerdict}</span> → <span className="font-semibold">{result.icLevelVerdict}</span>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Summary */}
       <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">

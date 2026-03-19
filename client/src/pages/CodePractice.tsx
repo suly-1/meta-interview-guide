@@ -15,13 +15,14 @@ import { getWeakestPatterns } from "@/hooks/useDrillRatings";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { useXPContext } from "@/contexts/XPContext";
 import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
+import CodeDiffViewer from "@/components/CodeDiffViewer";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
   Terminal, AlertCircle, Loader2, StickyNote, History, Trophy,
   ChevronDown, ChevronUp, Flame, BookOpen, Zap, Plus, Trash2,
   BarChart2, FlaskConical, GitCommit, TrendingUp, Award,
-  Lock, Download, Copy, Shuffle, Timer, EyeOff, Mail, Database, Cpu
+  Lock, Download, Copy, Shuffle, Timer, EyeOff, Mail, Database, Cpu, GitCompare
 } from "lucide-react";
 
 // ─── Language config ───────────────────────────────────────────────────────
@@ -1061,6 +1062,71 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
 
       {/* SR Due-Date Heatmap */}
       <SRDueDateHeatmap />
+
+      {/* Time-of-day performance chart */}
+      {(() => {
+        const hourBuckets: Record<number, number[]> = {};
+        for (let h = 0; h < 24; h++) hourBuckets[h] = [];
+        session.forEach(e => {
+          const hour = new Date(e.solvedAt).getHours();
+          if (e.timeSec > 0) hourBuckets[hour].push(e.timeSec);
+        });
+        // Build 4-hour blocks for readability
+        const blocks = [
+          { label: "12–4 AM", hours: [0,1,2,3], color: "bg-slate-400" },
+          { label: "4–8 AM",  hours: [4,5,6,7], color: "bg-blue-400" },
+          { label: "8–12 PM", hours: [8,9,10,11], color: "bg-emerald-500" },
+          { label: "12–4 PM", hours: [12,13,14,15], color: "bg-amber-500" },
+          { label: "4–8 PM",  hours: [16,17,18,19], color: "bg-orange-500" },
+          { label: "8–12 AM", hours: [20,21,22,23], color: "bg-violet-500" },
+        ].map(b => {
+          const times: number[] = b.hours.flatMap(h => hourBuckets[h]);
+          const avgSec = times.length ? Math.round(times.reduce((a, c) => a + c, 0) / times.length) : null;
+          const count = times.length;
+          return { ...b, avgSec, count };
+        });
+        const validBlocks = blocks.filter(b => b.avgSec !== null);
+        if (validBlocks.length < 2) return null;
+        const minAvg = Math.min(...validBlocks.map(b => b.avgSec!));
+        const bestBlock = blocks.find(b => b.avgSec === minAvg);
+        const maxAvg = Math.max(...validBlocks.map(b => b.avgSec!), 1);
+        return (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock size={13} className="text-amber-500" />
+              <span className="text-xs font-semibold text-foreground">Time-of-Day Performance</span>
+              {bestBlock && (
+                <span className="ml-auto text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                  Peak: {bestBlock.label}
+                </span>
+              )}
+            </div>
+            <div className="flex items-end gap-2 h-20">
+              {blocks.map(b => {
+                const pct = b.avgSec ? (1 - (b.avgSec - minAvg) / (maxAvg - minAvg + 1)) * 0.85 + 0.15 : 0;
+                const isBest = b.avgSec === minAvg && b.avgSec !== null;
+                return (
+                  <div key={b.label} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className={`w-full rounded-t-md transition-all ${b.count > 0 ? b.color : "bg-muted/30"} ${isBest ? "ring-2 ring-emerald-400 ring-offset-1" : ""}`}
+                      style={{ height: b.count > 0 ? `${Math.round(pct * 60)}px` : "4px" }}
+                      title={b.avgSec ? `Avg ${Math.floor(b.avgSec/60)}:${String(b.avgSec%60).padStart(2,"0")} over ${b.count} solves` : "No data"}
+                    />
+                    <span className="text-[9px] text-muted-foreground text-center leading-tight">{b.label}</span>
+                    {b.count > 0 && (
+                      <span className="text-[9px] font-mono text-muted-foreground">
+                        {Math.floor(b.avgSec!/60)}:{String(b.avgSec!%60).padStart(2,"0")}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Average solve time per 4-hour window. Shorter bars = faster solves. Highlighted = your peak performance window.</p>
+          </div>
+        );
+      })()}
+
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -1148,6 +1214,7 @@ export default function CodePractice() {
   // Submission history
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [viewingSubmission, setViewingSubmission] = useState<Submission | null>(null);
+  const [compareSubmission, setCompareSubmission] = useState<Submission | null>(null); // for diff viewer
 
   // Speed Run mode
   const [speedRunActive, setSpeedRunActive] = useState(false);
@@ -2398,13 +2465,26 @@ export default function CodePractice() {
                         <span className="text-muted-foreground ml-auto">{submissions.length} runs for this problem</span>
                       </div>
 
-                      {viewingSubmission && (
+                      {/* Diff viewer — shown when two submissions are selected for comparison */}
+                      {compareSubmission && viewingSubmission && (
+                        <CodeDiffViewer
+                          baseSubmission={compareSubmission as any}
+                          compareSubmission={viewingSubmission as any}
+                          onClose={() => { setCompareSubmission(null); setViewingSubmission(null); }}
+                        />
+                      )}
+
+                      {/* Single submission detail view */}
+                      {viewingSubmission && !compareSubmission && (
                         <div className="border border-border rounded-lg p-2 bg-background space-y-2">
                           <div className="flex items-center gap-2">
                             <StatusBadge statusId={viewingSubmission.statusId} desc={viewingSubmission.statusDescription} />
                             <span className="text-[10px] text-muted-foreground">{LANGUAGES.find(l => l.id === viewingSubmission.langId)?.name}</span>
                             {viewingSubmission.time && <span className="text-[10px] text-muted-foreground">⏱ {viewingSubmission.time}s</span>}
-                            <button onClick={() => { setCode(viewingSubmission.code); setViewingSubmission(null); }} className="ml-auto text-xs text-blue-600 hover:underline font-semibold">Restore</button>
+                            <button
+                              onClick={() => { setCode(viewingSubmission.code); setViewingSubmission(null); }}
+                              className="ml-auto text-xs text-blue-600 hover:underline font-semibold"
+                            >Restore</button>
                             <button onClick={() => setViewingSubmission(null)} className="text-muted-foreground hover:text-foreground"><X size={12} /></button>
                           </div>
                           <pre className="bg-gray-900 text-gray-200 rounded p-2 text-xs overflow-x-auto whitespace-pre-wrap max-h-24 font-mono">{viewingSubmission.code}</pre>
@@ -2419,22 +2499,34 @@ export default function CodePractice() {
                         </div>
                       )}
 
-                      {!viewingSubmission && submissions.map((sub, i) => {
+                      {/* Submission list — shows diff button when 2+ submissions exist */}
+                      {!viewingSubmission && !compareSubmission && submissions.map((sub, i) => {
                         const langName = LANGUAGES.find(l => l.id === sub.langId)?.name ?? "?";
                         const statusColor = sub.statusId === 3 ? "text-emerald-600" : sub.statusId === 6 ? "text-red-500" : "text-amber-500";
                         const statusIcon = sub.statusId === 3 ? "✅" : sub.statusId === 6 ? "❌" : "⚠️";
                         return (
-                          <button
-                            key={sub.id}
-                            onClick={() => setViewingSubmission(sub)}
-                            className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted/30 hover:bg-muted transition-colors"
-                          >
-                            <span className={`font-bold text-[10px] ${statusColor}`}>{statusIcon} {sub.statusDescription}</span>
-                            <span className="text-muted-foreground text-[10px]">{langName}</span>
-                            {sub.time && <span className="text-muted-foreground text-[10px]">⏱ {sub.time}s</span>}
-                            <span className="text-muted-foreground text-[10px] ml-auto">{new Date(sub.timestamp).toLocaleTimeString()}</span>
-                            {i === 0 && <span className="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0 rounded-full font-semibold">latest</span>}
-                          </button>
+                          <div key={sub.id} className="flex items-center gap-1">
+                            <button
+                              onClick={() => setViewingSubmission(sub)}
+                              className="flex-1 text-left flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted/30 hover:bg-muted transition-colors"
+                            >
+                              <span className={`font-bold text-[10px] ${statusColor}`}>{statusIcon} {sub.statusDescription}</span>
+                              <span className="text-muted-foreground text-[10px]">{langName}</span>
+                              {sub.time && <span className="text-muted-foreground text-[10px]">⏱ {sub.time}s</span>}
+                              <span className="text-muted-foreground text-[10px] ml-auto">{new Date(sub.timestamp).toLocaleTimeString()}</span>
+                              {i === 0 && <span className="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0 rounded-full font-semibold">latest</span>}
+                            </button>
+                            {/* Diff button — compare this submission against the latest */}
+                            {i > 0 && submissions[0] && (
+                              <button
+                                title="Compare with latest submission"
+                                onClick={() => { setCompareSubmission(sub); setViewingSubmission(submissions[0]); }}
+                                className="shrink-0 p-1.5 rounded-lg border border-border bg-muted/30 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 text-muted-foreground transition-colors"
+                              >
+                                <GitCompare size={11} />
+                              </button>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
