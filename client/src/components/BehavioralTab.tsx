@@ -2,12 +2,13 @@
 // Features: search, practice mode (3-min timer), full mock session (4 questions),
 // IC6/IC7 comparison table, mock history log, meta values, STAR framework
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Brain, Play, RotateCcw, ChevronDown, ChevronUp, Trash2, Shuffle, Timer, X, SkipForward } from "lucide-react";
+import { Search, Brain, Play, RotateCcw, ChevronDown, ChevronUp, Trash2, Shuffle, Timer, X, SkipForward, Zap } from "lucide-react";
 import VoiceToStar from "@/components/VoiceToStar";
 import { BEHAVIORAL_QUESTIONS, IC_COMPARISON, META_VALUES } from "@/lib/data";
 import { useBehavioralRatings, useMockHistory, type MockSession } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
+import { trpc } from "@/lib/trpc";
 
 const AREAS = ["All", "Conflict & Influence", "Ownership & Ambiguity", "Scale & Impact", "Failure & Learning"];
 const AREA_COLORS: Record<string, string> = {
@@ -493,7 +494,164 @@ function SurpriseMe({ ratings, onRate, onClose }: {
   );
 }
 
-// ── Main BehavioralTab ─────────────────────────────────────────────────────
+//// ── Answer Scorer ────────────────────────────────────────────────────────────────
+function ScoreBar({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={`font-bold ${color}`}>{value}/5</span>
+      </div>
+      <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+        <div className={`h-full rounded-full transition-all duration-700 ${color.replace('text-', 'bg-')}`}
+          style={{ width: `${(value / 5) * 100}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function AnswerScorer() {
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [icTarget, setIcTarget] = useState<"IC5" | "IC6" | "IC7">("IC6");
+  const [result, setResult] = useState<{
+    specificity: number; impact: number; icLevelFit: number; overall: number;
+    strengths: string[]; improvements: string[];
+  } | null>(null);
+
+  const scoreMutation = trpc.ctci.scoreAnswer.useMutation({
+    onSuccess: (data) => setResult(data),
+    onError: () => toast.error("Scoring failed. Try again."),
+  });
+
+  const handleScore = () => {
+    if (!question.trim() || !answer.trim()) {
+      toast.error("Please enter both a question and your answer.");
+      return;
+    }
+    setResult(null);
+    scoreMutation.mutate({ question: question.trim(), answer: answer.trim(), icTarget });
+  };
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between p-5 group"
+      >
+        <div className="flex items-center gap-2">
+          <Zap size={14} className="text-yellow-400" />
+          <span className="text-sm font-bold text-foreground">AI Answer Scorer</span>
+          <span className="badge badge-amber">LLM</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Paste a STAR answer → get rubric scores</span>
+          {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 space-y-4 border-t border-border pt-4">
+          {/* IC Target selector */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground shrink-0">Target level:</span>
+            {(["IC5", "IC6", "IC7"] as const).map(ic => (
+              <button
+                key={ic}
+                onClick={() => setIcTarget(ic)}
+                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                  icTarget === ic
+                    ? "bg-blue-600 border-blue-500 text-white"
+                    : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >{ic}</button>
+            ))}
+          </div>
+
+          {/* Question input */}
+          <div>
+            <label className="text-xs font-bold text-muted-foreground block mb-1">Behavioral Question</label>
+            <input
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              placeholder="e.g. Tell me about a time you influenced without authority"
+              className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50"
+            />
+          </div>
+
+          {/* Answer textarea */}
+          <div>
+            <label className="text-xs font-bold text-muted-foreground block mb-1">Your STAR Answer</label>
+            <textarea
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              placeholder="Situation: ...
+Task: ...
+Action: ...
+Result: ..."
+              rows={8}
+              className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 resize-none leading-relaxed"
+            />
+            <div className="text-xs text-muted-foreground mt-1">{answer.length}/2000 chars</div>
+          </div>
+
+          {/* Score button */}
+          <button
+            onClick={handleScore}
+            disabled={scoreMutation.isPending}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black text-sm font-bold transition-all"
+          >
+            <Zap size={13} />
+            {scoreMutation.isPending ? "Scoring with AI…" : "Score This Answer"}
+          </button>
+
+          {/* Results */}
+          {result && (
+            <div className="space-y-4 border-t border-border pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-foreground">Score Results — {icTarget} Rubric</span>
+                <div className="flex items-center gap-1">
+                  {[1,2,3,4,5].map(s => (
+                    <span key={s} className={s <= result.overall ? "text-amber-400" : "text-muted-foreground/30"}>★</span>
+                  ))}
+                  <span className="text-sm font-extrabold text-amber-400 ml-1">{result.overall}/5</span>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                <ScoreBar label="Specificity (concrete metrics, names, dates)" value={result.specificity} color="text-blue-400" />
+                <ScoreBar label="Impact (measurable business/technical outcome)" value={result.impact} color="text-emerald-400" />
+                <ScoreBar label={`IC-Level Fit (${icTarget} scope & ownership)`} value={result.icLevelFit} color="text-purple-400" />
+              </div>
+              {result.strengths.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold text-emerald-400 mb-1">✅ Strengths</div>
+                  <ul className="space-y-1">
+                    {result.strengths.map((s, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex gap-2"><span className="text-emerald-400 shrink-0">•</span>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {result.improvements.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold text-amber-400 mb-1">💡 Improvements</div>
+                  <ul className="space-y-1">
+                    {result.improvements.map((s, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex gap-2"><span className="text-amber-400 shrink-0">•</span>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main BehavioralTab ─────────────────────────────────────────────────
 export default function BehavioralTab() {
   const [ratings, setRatings] = useBehavioralRatings();
   const [history, setHistory] = useMockHistory();
@@ -520,6 +678,9 @@ export default function BehavioralTab() {
 
   return (
     <div className="space-y-5">
+      {/* AI Answer Scorer */}
+      <AnswerScorer />
+
       {/* Meta Values */}
       <div className="prep-card p-5">
         <div className="section-title">

@@ -165,3 +165,13 @@ export function useCTCIStreak() {
     totalSolved: 0,
   });
 }
+
+// ── Readiness Goal Setter ──────────────────────────────────────────────────
+export interface ReadinessGoal {
+  targetPct: number;   // 0-100
+  targetDate: string;  // YYYY-MM-DD
+}
+
+export function useReadinessGoal() {
+  return useLocalStorage<ReadinessGoal | null>("meta_readiness_goal_v1", null);
+}

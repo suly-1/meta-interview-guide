@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak } from "@/hooks/useLocalStorage";
+import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
 import { trpc } from "@/lib/trpc";
@@ -659,6 +659,143 @@ function ResourcesSection() {
 }
 
 // ── Main OverviewTab ───────────────────────────────────────────────────────
+// ── Readiness Goal Setter ──────────────────────────────────────────────
+function ReadinessGoalSetter() {
+  const [patternRatings] = usePatternRatings();
+  const [bqRatings] = useBehavioralRatings();
+  const [goal, setGoal] = useReadinessGoal();
+  const [editing, setEditing] = useState(!goal);
+  const [inputPct, setInputPct] = useState(goal?.targetPct ?? 80);
+  const [inputDate, setInputDate] = useState(goal?.targetDate ?? "");
+
+  const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length;
+  const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length;
+  const currentPct = Math.round(
+    (masteredPatterns / PATTERNS.length * 0.6 + readyStories / BEHAVIORAL_QUESTIONS.length * 0.4) * 100
+  );
+
+  const saveGoal = () => {
+    if (!inputDate) { toast.error("Please set a target date."); return; }
+    if (inputPct < 1 || inputPct > 100) { toast.error("Target must be between 1 and 100."); return; }
+    setGoal({ targetPct: inputPct, targetDate: inputDate });
+    setEditing(false);
+    toast.success("Goal saved!");
+  };
+
+  const daysLeft = goal ? Math.max(0, Math.ceil(
+    (new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  )) : 0;
+
+  // Daily tasks needed
+  const pctGap = goal ? Math.max(0, goal.targetPct - currentPct) : 0;
+  const totalPatterns = PATTERNS.length;
+  const totalStories = BEHAVIORAL_QUESTIONS.length;
+  const patternsNeeded = Math.max(0, Math.ceil((goal?.targetPct ?? 0) / 100 * totalPatterns / 0.6) - masteredPatterns);
+  const storiesNeeded = Math.max(0, Math.ceil((goal?.targetPct ?? 0) / 100 * totalStories / 0.4) - readyStories);
+  const patternsPerDay = daysLeft > 0 ? (patternsNeeded / daysLeft).toFixed(1) : "0";
+  const storiesPerDay = daysLeft > 0 ? (storiesNeeded / daysLeft).toFixed(1) : "0";
+  const onTrack = pctGap <= 0;
+
+  return (
+    <div className="prep-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Target size={14} className="text-blue-400" />
+          <span className="text-sm font-bold text-foreground">Readiness Goal</span>
+          {goal && !editing && (
+            <span className={`badge ${onTrack ? 'badge-green' : 'badge-amber'}`}>
+              {onTrack ? '✅ On Track' : `⚠️ ${daysLeft}d left`}
+            </span>
+          )}
+        </div>
+        {goal && !editing && (
+          <button onClick={() => setEditing(true)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Edit</button>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-muted-foreground block mb-1">Target Readiness %</label>
+              <input
+                type="number" min={1} max={100}
+                value={inputPct}
+                onChange={e => setInputPct(Number(e.target.value))}
+                className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-blue-500/50"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-muted-foreground block mb-1">Target Date</label>
+              <input
+                type="date"
+                value={inputDate}
+                onChange={e => setInputDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-blue-500/50"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={saveGoal}
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all">
+              Save Goal
+            </button>
+            {goal && <button onClick={() => setEditing(false)}
+              className="px-4 py-2 rounded-lg bg-secondary text-sm text-muted-foreground hover:text-foreground transition-all">
+              Cancel
+            </button>}
+          </div>
+        </div>
+      ) : goal ? (
+        <div className="space-y-4">
+          {/* Progress bar */}
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-muted-foreground">Current: <span className="font-bold text-foreground">{currentPct}%</span></span>
+              <span className="text-muted-foreground">Goal: <span className="font-bold text-blue-400">{goal.targetPct}%</span> by {new Date(goal.targetDate).toLocaleDateString()}</span>
+            </div>
+            <div className="h-2 rounded-full bg-secondary overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${onTrack ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                style={{ width: `${Math.min(100, (currentPct / goal.targetPct) * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Daily task card */}
+          {!onTrack && daysLeft > 0 && (
+            <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
+              <div className="text-xs font-bold text-amber-400 mb-2">📅 Daily Task Card — {daysLeft} days to goal</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-2.5 rounded-lg bg-secondary">
+                  <div className="text-lg font-extrabold text-blue-400">{patternsPerDay}</div>
+                  <div className="text-xs text-muted-foreground">patterns/day</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{patternsNeeded} remaining</div>
+                </div>
+                <div className="text-center p-2.5 rounded-lg bg-secondary">
+                  <div className="text-lg font-extrabold text-purple-400">{storiesPerDay}</div>
+                  <div className="text-xs text-muted-foreground">stories/day</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{storiesNeeded} remaining</div>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground mt-2 text-center">
+                Gap: {pctGap}% · {patternsNeeded} patterns + {storiesNeeded} stories to reach {goal.targetPct}%
+              </div>
+            </div>
+          )}
+
+          {onTrack && (
+            <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-center">
+              <div className="text-sm font-bold text-emerald-400">🎉 Goal reached! You're at {currentPct}% — above your {goal.targetPct}% target.</div>
+              <div className="text-xs text-muted-foreground mt-1">Consider raising your goal to keep pushing.</div>
+            </div>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 // ── Weekly Progress Digest ─────────────────────────────────────────────────
 function WeeklyDigest() {
   const [patternRatings] = usePatternRatings();
@@ -782,6 +919,7 @@ export default function OverviewTab() {
       <StarStoryBank />
       <InterviewDayChecklist />
       <ResourcesSection />
+      <ReadinessGoalSetter />
       <WeeklyDigest />
       <div className="flex justify-start">
         <ProgressExport />

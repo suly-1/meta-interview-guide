@@ -1065,6 +1065,10 @@ function CTCITracker() {
   const [ctciStreak, setCTCIStreak] = useCTCIStreak();
   const [hintOpen, setHintOpen] = useState<number | null>(null);
   const [hints, setHints] = useState<Record<number, string>>({});
+  const [notesOpen, setNotesOpen] = useState<number | null>(null);
+  const [notes, setNotes] = useState<Record<number, string>>(() => {
+    try { return JSON.parse(localStorage.getItem("ctci_notes") ?? "{}"); } catch { return {}; }
+  });
   const hintMutation = trpc.ctci.getHint.useMutation({
     onSuccess: (data, variables) => {
       setHints(h => ({ ...h, [variables.problemNum]: data.hint }));
@@ -1080,6 +1084,36 @@ function CTCITracker() {
       localStorage.setItem("ctci_code", JSON.stringify(next));
       return next;
     });
+  };
+
+  const saveNote = (num: number, text: string) => {
+    setNotes(n => {
+      const next = { ...n, [num]: text };
+      localStorage.setItem("ctci_notes", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const exportNotesMarkdown = () => {
+    const problemsWithNotes = CTCI_QUESTIONS.filter(q => notes[q.num]?.trim());
+    if (problemsWithNotes.length === 0) { toast.error("No notes to export yet."); return; }
+    const lines = [
+      "# CTCI Problem Notes — Meta Prep Cheat Sheet",
+      `Generated: ${new Date().toLocaleString()}`,
+      "",
+      ...problemsWithNotes.map(q => [
+        `## ${q.num}. ${q.name}`,
+        `**Difficulty:** ${q.difficulty} | **Topics:** ${q.topics.join(", ")} | **Meta Freq:** ${q.metaFreq}`,
+        "",
+        notes[q.num].trim(),
+        "",
+        "---",
+        "",
+      ].join("\n")),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "ctci_notes.md"; a.click();
+    toast.success(`Exported ${problemsWithNotes.length} problem notes!`);
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -1345,8 +1379,46 @@ function CTCITracker() {
                     >
                       {hasCode ? '📝' : '➕'} Code
                     </button>
+                    <button
+                      onClick={() => setNotesOpen(notesOpen === q.num ? null : q.num)}
+                      title="Open notes"
+                      className={`text-xs px-1.5 py-0.5 rounded border transition-all ${
+                        notes[q.num]?.trim() ? 'border-amber-500/40 text-amber-400 bg-amber-500/10' :
+                        notesOpen === q.num ? 'border-amber-500/40 text-amber-400 bg-amber-500/10' :
+                        'border-border text-muted-foreground hover:text-foreground hover:bg-accent'
+                      }`}
+                    >
+                      📌 Notes
+                    </button>
                   </div>
                 </div>
+                {/* Notes panel */}
+                {notesOpen === q.num && (
+                  <div className="border-t border-amber-500/20 bg-amber-500/5 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-amber-400">📌 Notes — {q.name}</span>
+                      <span className="text-xs text-muted-foreground">Complexity, approach, edge cases</span>
+                    </div>
+                    <textarea
+                      value={notes[q.num] ?? ""}
+                      onChange={e => saveNote(q.num, e.target.value)}
+                      placeholder={`Time: O(?)  Space: O(?)
+
+Approach:
+- 
+
+Edge cases:
+- 
+
+Key insight:
+`}
+                      spellCheck={false}
+                      className="w-full font-mono text-xs text-foreground bg-background border border-amber-500/20 rounded-lg p-2.5 focus:outline-none focus:border-amber-500/50 resize-none leading-relaxed placeholder:text-muted-foreground/50"
+                      rows={8}
+                    />
+                    <div className="text-xs text-muted-foreground mt-1">💾 Auto-saved · {notes[q.num]?.length ?? 0} chars</div>
+                  </div>
+                )}
                 {/* Inline code editor */}
                 {editorOpen === q.num && (
                   <div className="border-t border-border bg-[#1e1e1e] p-0">
@@ -1458,11 +1530,19 @@ function CTCITracker() {
             </div>
           )}
 
-          <div className="text-xs text-muted-foreground">
-            🔥 High = frequently reported in Meta coding rounds (community data) ·{" "}
-            <a href="https://docs.google.com/spreadsheets/d/1pnI8HmSMPcfwrCCu7wYETCXaKDig4VucZDpcjVRuYrE/edit" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">Full Spreadsheet</a>
-            {" · "}
-            <a href="https://www.youtube.com/user/hubberspot" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">YouTube</a>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="text-xs text-muted-foreground">
+              🔥 High = frequently reported in Meta coding rounds (community data) ·{" "}
+              <a href="https://docs.google.com/spreadsheets/d/1pnI8HmSMPcfwrCCu7wYETCXaKDig4VucZDpcjVRuYrE/edit" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">Full Spreadsheet</a>
+              {" · "}
+              <a href="https://www.youtube.com/user/hubberspot" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">YouTube</a>
+            </div>
+            <button
+              onClick={exportNotesMarkdown}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold transition-all"
+            >
+              <Download size={11} /> Export Notes (.md)
+            </button>
           </div>
         </div>
       )}

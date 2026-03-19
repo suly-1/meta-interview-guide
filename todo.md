@@ -98,3 +98,8 @@
 - [x] Weekly Progress Email Digest UI (Send Weekly Digest button in Overview tab)
 - [x] CTCI Streak Tracker (consecutive daily challenge completions, flame counter in CTCI banner)
 - [x] AI Hint System (Get Hint button in inline code editor, LLM-powered, no spoilers)
+
+## New Features — Round 11
+- [x] CTCI Problem Notes (persistent notes panel per problem, Markdown cheat sheet export)
+- [x] Behavioral Answer Scorer UI (STAR answer text area + LLM rubric: Specificity, Impact, IC-level)
+- [x] Readiness Goal Setter (target % + date, daily task card with patterns/stories needed per day)
