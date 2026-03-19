@@ -17,6 +17,7 @@ import MockInterviewSimulator from "@/components/MockInterviewSimulator";
 import CodePractice from "@/pages/CodePractice";
 import { useStreak } from "@/hooks/useStreak";
 import XPLevelBar from "@/components/XPLevelBar";
+import NavCountdownChip from "@/components/NavCountdownChip";
 import { useXPContext } from "@/contexts/XPContext";
 
 const TABS = [
@@ -112,6 +113,8 @@ export default function Home() {
             <div className="flex-shrink-0 hidden sm:block">
               <XPLevelBar totalXP={totalXP} events={events} />
             </div>
+            {/* Interview countdown chip */}
+            <NavCountdownChip />
             {/* Streak badge */}
             <div className="flex-shrink-0 pr-1">
               <motion.div

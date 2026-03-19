@@ -644,6 +644,67 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
                 <Copy size={10} /> CSV
               </button>
             </div>
+            {/* Score-over-time sparkline chart */}
+            {(() => {
+              if (sprintHistory.length < 2) return null;
+              const sorted = [...sprintHistory].sort((a, b) => a.date - b.date);
+              const topics = Array.from(new Set(sorted.map(e => e.topic)));
+              const palette = ["#6366f1","#10b981","#f59e0b","#ef4444","#3b82f6","#8b5cf6","#ec4899","#14b8a6"];
+              const topicColors: Record<string, string> = {};
+              topics.forEach((t, i) => { topicColors[t] = palette[i % palette.length]; });
+              const W = 280, H = 72, PAD = 10;
+              const allScores = sorted.map(e => e.totalScore);
+              const minS = Math.min(...allScores);
+              const maxS = Math.max(...allScores);
+              const scoreRange = maxS - minS || 1;
+              const n = sorted.length;
+              const cx = (i: number) => PAD + (i / Math.max(n - 1, 1)) * (W - PAD * 2);
+              const cy = (s: number) => H - PAD - ((s - minS) / scoreRange) * (H - PAD * 2);
+              const topicLines: Record<string, {x:number;y:number;score:number;date:number}[]> = {};
+              sorted.forEach((e, i) => {
+                if (!topicLines[e.topic]) topicLines[e.topic] = [];
+                topicLines[e.topic].push({ x: cx(i), y: cy(e.totalScore), score: e.totalScore, date: e.date });
+              });
+              return (
+                <div className="mb-4">
+                  <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Score Over Time</div>
+                  <div className="bg-violet-50 dark:bg-violet-900/20 rounded-lg p-2">
+                    <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
+                      {[0, 0.5, 1].map(frac => (
+                        <line key={frac} x1={PAD} y1={PAD + frac * (H - PAD * 2)} x2={W - PAD} y2={PAD + frac * (H - PAD * 2)}
+                          stroke="currentColor" strokeOpacity="0.1" strokeWidth="1" />
+                      ))}
+                      {Object.entries(topicLines).map(([topic, pts]) => {
+                        const color = topicColors[topic];
+                        const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+                        return (
+                          <g key={topic}>
+                            <path d={d} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />
+                            {pts.map((p, i) => (
+                              <circle key={i} cx={p.x} cy={p.y} r="2.5" fill={color} stroke="white" strokeWidth="1.2">
+                                <title>{topic}: {p.score}pts — {new Date(p.date).toLocaleDateString()}</title>
+                              </circle>
+                            ))}
+                          </g>
+                        );
+                      })}
+                      <text x={PAD - 2} y={PAD + 3} textAnchor="end" fontSize="7" fill="currentColor" opacity="0.5">{maxS}</text>
+                      <text x={PAD - 2} y={H - PAD + 3} textAnchor="end" fontSize="7" fill="currentColor" opacity="0.5">{minS}</text>
+                    </svg>
+                    {topics.length > 1 && (
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {topics.map(t => (
+                          <span key={t} className="flex items-center gap-1 text-[9px] font-semibold text-muted-foreground">
+                            <span className="inline-block w-3 h-0.5 rounded-full" style={{ background: topicColors[t] }} />
+                            {t.length > 16 ? t.slice(0, 16) + '…' : t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             {/* Personal Best summary */}
             <div className="mb-3">
               <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Personal Best by Topic</div>

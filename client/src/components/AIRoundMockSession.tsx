@@ -519,6 +519,11 @@ export default function AIRoundMockSession() {
   // Debrief
   const debrief = trpc.aiRound.debrief.useMutation();
   const [debriefResult, setDebriefResult] = useState<typeof debrief.data | null>(null);
+  // Drill Deeper
+  const drillDeeper = trpc.aiRound.drillDeeper.useMutation();
+  const [drillResult, setDrillResult] = useState<{ challenges: Array<{ title: string; dimension: string; prompt: string; hint: string; modelAnswer: string }> } | null>(null);
+  const [drillRevealIdx, setDrillRevealIdx] = useState<number[]>([]);
+  const [drillAnswerIdx, setDrillAnswerIdx] = useState<number[]>([]);
 
   // Timer effect
   useEffect(() => {
@@ -1020,6 +1025,109 @@ export default function AIRoundMockSession() {
               </div>
             )}
 
+            {/* Drill Deeper */}
+            {debriefResult && selectedProblem && (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-indigo-800 flex items-center gap-1.5">
+                    <Target size={13} /> Drill Deeper
+                  </p>
+                  {!drillResult && (
+                    <button
+                      onClick={async () => {
+                        const result = debriefResult as Record<string, unknown>;
+                        const weakDims: string[] = [];
+                        if ((result.problemSolvingScore as number) < 60) weakDims.push("Problem Solving");
+                        if ((result.codeDevelopmentScore as number) < 60) weakDims.push("Code Development");
+                        if ((result.verificationScore as number) < 60) weakDims.push("Verification & Debugging");
+                        if ((result.communicationScore as number) < 60) weakDims.push("Technical Communication");
+                        if ((result.aiToolUsageScore as number) < 60) weakDims.push("AI Tool Usage");
+                        if (weakDims.length === 0) weakDims.push("Problem Solving");
+                        const res = await drillDeeper.mutateAsync({
+                          targetLevel,
+                          problemTitle: selectedProblem.title,
+                          problemDomain: selectedProblem.domain,
+                          verdict: result.icLevelVerdict as string,
+                          weakDimensions: weakDims,
+                          phaseAnswers,
+                        });
+                        setDrillResult(res);
+                        setDrillRevealIdx([]);
+                        setDrillAnswerIdx([]);
+                      }}
+                      disabled={drillDeeper.isPending}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-lg text-xs font-bold transition-colors"
+                    >
+                      {drillDeeper.isPending ? (
+                        <><Zap size={12} className="animate-spin" /> Generating…</>
+                      ) : (
+                        <><Target size={12} /> Generate Targeted Challenges</>
+                      )}
+                    </button>
+                  )}
+                  {drillResult && (
+                    <button
+                      onClick={() => { setDrillResult(null); setDrillRevealIdx([]); setDrillAnswerIdx([]); }}
+                      className="text-xs text-indigo-500 hover:underline"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                {!drillResult && !drillDeeper.isPending && (
+                  <p className="text-xs text-indigo-700 opacity-80">
+                    Generate 4 AI-tailored follow-up challenges targeting your weakest dimensions from this session.
+                  </p>
+                )}
+                {drillDeeper.isPending && (
+                  <div className="flex items-center gap-2 text-xs text-indigo-600 py-2">
+                    <Zap size={12} className="animate-spin" /> Analysing your session and crafting targeted challenges…
+                  </div>
+                )}
+                {drillResult && (
+                  <div className="space-y-3">
+                    {drillResult.challenges.map((c, i) => (
+                      <div key={i} className="bg-white border border-indigo-200 rounded-xl p-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <span className="text-xs font-bold text-indigo-800">{c.title}</span>
+                            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600 border border-indigo-200 font-semibold">{c.dimension}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-indigo-400">#{i + 1}</span>
+                        </div>
+                        <p className="text-xs text-gray-700 mb-2">{c.prompt}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {!drillRevealIdx.includes(i) ? (
+                            <button
+                              onClick={() => setDrillRevealIdx(v => [...v, i])}
+                              className="text-[10px] font-semibold text-amber-600 hover:text-amber-800 flex items-center gap-1 border border-amber-200 rounded px-2 py-0.5 bg-amber-50"
+                            >
+                              <Lightbulb size={10} /> Show Hint
+                            </button>
+                          ) : (
+                            <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                              💡 {c.hint}
+                            </p>
+                          )}
+                          {!drillAnswerIdx.includes(i) ? (
+                            <button
+                              onClick={() => setDrillAnswerIdx(v => [...v, i])}
+                              className="text-[10px] font-semibold text-emerald-600 hover:text-emerald-800 flex items-center gap-1 border border-emerald-200 rounded px-2 py-0.5 bg-emerald-50"
+                            >
+                              <CheckCircle2 size={10} /> Model Answer
+                            </button>
+                          ) : (
+                            <p className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+                              ✓ {c.modelAnswer}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {/* Session transcript */}
             <details className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               <summary className="px-4 py-3 text-xs font-bold text-gray-700 cursor-pointer hover:bg-gray-50 flex items-center gap-2">

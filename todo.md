@@ -123,9 +123,9 @@
 - [ ] Mock session comparison (Compare to last attempt toggle showing score deltas vs previous session)
 
 ## Batch-23 Implementation Tracking
-- [ ] Sprint history line chart (score-over-time per topic)
+- [x] Sprint history line chart (score-over-time per topic)
 - [ ] Code diff viewer (side-by-side diff between submissions)
-- [ ] AI Round Drill Deeper UI (button in debrief)
+- [x] AI Round Drill Deeper UI (button in debrief)
 - [ ] AI Round difficulty tiers (Foundational/Intermediate/Advanced tags)
 - [ ] Mock session comparison (score deltas vs previous session)
 - [ ] SR due-date heatmap (GitHub-style 30-day calendar)
@@ -133,7 +133,7 @@
 - [ ] Time-of-day performance chart
 - [x] Achievement badge wall
 - [x] Daily XP system
-- [ ] Interview countdown in sticky nav
+- [x] Interview countdown in sticky nav
 - [ ] System Design pattern comparison table
 - [ ] Keyboard shortcut overlay (? key)
 - [ ] Font size/density toggle
