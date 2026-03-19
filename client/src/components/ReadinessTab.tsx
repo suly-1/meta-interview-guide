@@ -4,8 +4,9 @@
  * 2. Recruiter-Ready Summary (printable one-page PDF)
  */
 import { useRef, useMemo } from "react";
-import { Printer, BarChart2, FileDown } from "lucide-react";
+import { Printer, BarChart2, FileDown, ShieldCheck } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
+import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import { PATTERNS, BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { computeReadiness } from "@/hooks/useReadinessScore";
@@ -309,6 +310,24 @@ export default function ReadinessTab() {
           </div>
         </div>
         <OverallReadinessDashboard />
+      </section>
+
+      {/* ── IC7 Signal Self-Assessment ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <ShieldCheck size={20} className="text-indigo-600" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                IC7 Signal Self-Assessment
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Check off each of the 8 IC7 key signals you can back with a real story. Gaps are flagged as preparation priorities.
+              </p>
+            </div>
+          </div>
+        </div>
+        <IC7SignalChecklist />
       </section>
 
       {/* ── Recruiter-Ready Summary ── */}

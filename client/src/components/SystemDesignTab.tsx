@@ -1,7 +1,7 @@
 // SystemDesignTab — 8 Meta system design patterns + Meta Engineering Blog Feed
 // Design: clean structured approach cards with expandable sections
 import { useState } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2 } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff } from "lucide-react";
 
 interface DesignPattern {
   id: string;
@@ -350,6 +350,9 @@ const TAG_COLORS: Record<string, string> = {
 function PatternCard({ p }: { p: DesignPattern }) {
   const [expanded, setExpanded] = useState(false);
   const [section, setSection] = useState<string>("requirements");
+  const [teachMode, setTeachMode] = useState(false);
+  const [userSketch, setUserSketch] = useState("");
+  const [revealed, setRevealed] = useState(false);
 
   const sections = [
     { id: "requirements", label: "Requirements" },
@@ -391,7 +394,67 @@ function PatternCard({ p }: { p: DesignPattern }) {
 
       {expanded && (
         <div className="border-t bg-white" style={{ borderColor: p.borderColor }}>
-          {/* Section tabs */}
+          {/* Teach It Back toggle */}
+          <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <Brain size={13} className="text-purple-500" />
+              <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wide">Teach It Back Mode</span>
+            </div>
+            <button
+              onClick={() => { setTeachMode((t) => !t); setRevealed(false); setUserSketch(""); }}
+              className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full border transition-all ${
+                teachMode
+                  ? "bg-purple-100 text-purple-700 border-purple-300"
+                  : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200"
+              }`}
+            >
+              {teachMode ? <EyeOff size={11} /> : <Eye size={11} />}
+              {teachMode ? "Exit Teach Mode" : "Activate"}
+            </button>
+          </div>
+
+          {/* Teach It Back panel */}
+          {teachMode && (
+            <div className="px-4 py-4 bg-purple-50/40 border-b border-purple-100 space-y-3">
+              <div className="flex items-start gap-2">
+                <Brain size={14} className="text-purple-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm font-semibold text-purple-800">
+                  Sketch your approach to <span className="italic">{p.title}</span> from memory before revealing the reference.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Your Architecture Sketch</p>
+                <p className="text-xs text-gray-500">Cover: requirements you'd clarify, key components, data model decisions, API design, and 2–3 scale bottlenecks.</p>
+                <textarea
+                  value={userSketch}
+                  onChange={(e) => setUserSketch(e.target.value)}
+                  placeholder={`e.g. For ${p.title}:\n\nRequirements: ...\nCore components: ...\nData model: ...\nAPI: ...\nScale bottlenecks: ...`}
+                  rows={6}
+                  className="w-full text-sm text-gray-800 bg-white border border-purple-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-gray-300"
+                />
+              </div>
+              {!revealed ? (
+                <button
+                  onClick={() => setRevealed(true)}
+                  disabled={userSketch.trim().length < 20}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-lg text-sm font-bold transition-all"
+                >
+                  <Eye size={14} />
+                  Reveal Reference Answer
+                  {userSketch.trim().length < 20 && <span className="text-[10px] font-normal">(write at least 20 chars first)</span>}
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 text-emerald-600">
+                  <Brain size={14} />
+                  <span className="text-xs font-bold">Reference revealed below — compare your sketch to the structured approach</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Section tabs — hidden in teach mode until revealed */}
+          {(!teachMode || revealed) && (
+          <>
           <div className="flex overflow-x-auto border-b border-gray-100 px-1 pt-1">
             {sections.map((s) => (
               <button
@@ -504,6 +567,8 @@ function PatternCard({ p }: { p: DesignPattern }) {
               </div>
             )}
           </div>
+          </>
+          )}
         </div>
       )}
     </div>
