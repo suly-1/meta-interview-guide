@@ -115,7 +115,7 @@ export default function SystemDesignTab() {
               <div className="text-xs text-slate-300 font-medium">🎯 IC6/IC7 Targeted · ML + Backend + Full Stack · All 3 Tracks · Updated 2026</div>
             </div>
             <a
-              href="https://8080-igkd8u4g5i0kc97kxohwo-63977cfb.us1.manus.computer/"
+              href="https://d2xsxph8kpxj0f.cloudfront.net/310519663323723940/cRTBYDQNffnDPa87zbUz9b/meta-system-design-guide-2026_57e76a36.html"
               target="_blank"
               rel="noopener noreferrer"
               className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-black"
@@ -894,8 +894,10 @@ const FLASH_CARDS = [
   { q: "What is the difference between a message queue and a stream?", a: "Message Queue (RabbitMQ, SQS): each message consumed by one consumer, deleted after processing. Good for task distribution, work queues. Stream (Kafka, Kinesis): messages retained for a period, multiple consumers can read independently at their own offset. Good for event sourcing, audit logs, analytics, replay. Kafka is both.", tag: "Fundamentals" },
 ];
 
+interface CustomCard { id: string; q: string; a: string; tag: string; }
+
 function SystemDesignFlashCards() {
-  const [mode, setMode] = useState<"browse" | "drill">("browse");
+  const [mode, setMode] = useState<"browse" | "drill" | "manage">("browse");
   const [cardIdx, setCardIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [filterTag, setFilterTag] = useState("All");
@@ -906,12 +908,40 @@ function SystemDesignFlashCards() {
   const [sessionDone, setSessionDone] = useState(false);
   const [srDue, setSrDue] = useFlashCardSRDue();
 
-  const tags = ["All", ...Array.from(new Set(FLASH_CARDS.map(c => c.tag)))];
-  const deck = filterTag === "All" ? FLASH_CARDS : FLASH_CARDS.filter(c => c.tag === filterTag);
+  // Custom cards
+  const [customCards, setCustomCards] = useState<CustomCard[]>(() => {
+    try { return JSON.parse(localStorage.getItem("sd_custom_cards_v1") ?? "[]"); } catch { return []; }
+  });
+  const [newCard, setNewCard] = useState({ q: '', a: '', tag: 'Custom' });
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+
+  const saveCustomCards = (cards: CustomCard[]) => {
+    setCustomCards(cards);
+    localStorage.setItem("sd_custom_cards_v1", JSON.stringify(cards));
+  };
+
+  const addCustomCard = () => {
+    if (!newCard.q.trim() || !newCard.a.trim()) return;
+    const card: CustomCard = { id: `custom_${Date.now()}`, ...newCard };
+    saveCustomCards([...customCards, card]);
+    setNewCard({ q: '', a: '', tag: 'Custom' });
+  };
+
+  const deleteCustomCard = (id: string) => saveCustomCards(customCards.filter(c => c.id !== id));
+
+  const updateCustomCard = (id: string, updates: Partial<CustomCard>) => {
+    saveCustomCards(customCards.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  // Merge built-in + custom cards for display
+  const ALL_CARDS = [...FLASH_CARDS, ...customCards.map(c => ({ q: c.q, a: c.a, tag: c.tag }))];
+
+  const tags = ["All", ...Array.from(new Set(ALL_CARDS.map(c => c.tag)))];
+  const deck = filterTag === "All" ? ALL_CARDS : ALL_CARDS.filter(c => c.tag === filterTag);
   // In drill mode, show cards that are NOT mastered OR are due for SR review today
   const today = new Date().toISOString().split('T')[0];
   const drillDeck = deck.filter(c => {
-    const globalIdx = FLASH_CARDS.indexOf(c);
+    const globalIdx = ALL_CARDS.indexOf(c);
     const isKnown = knownCards.has(globalIdx);
     const isDue = srDue[String(globalIdx)] && srDue[String(globalIdx)] <= today;
     return !isKnown || isDue;
@@ -933,7 +963,7 @@ function SystemDesignFlashCards() {
   };
 
   const markKnown = () => {
-    const globalIdx = FLASH_CARDS.indexOf(deck[cardIdx]);
+    const globalIdx = ALL_CARDS.indexOf(deck[cardIdx]);
     const next = new Set(knownCards);
     next.add(globalIdx);
     setKnownCards(next);
@@ -945,7 +975,7 @@ function SystemDesignFlashCards() {
   };
 
   const markReview = () => {
-    const globalIdx = FLASH_CARDS.indexOf(deck[cardIdx]);
+    const globalIdx = ALL_CARDS.indexOf(deck[cardIdx]);
     // Remove from known (needs more practice) and schedule SR review
     const next = new Set(knownCards);
     next.delete(globalIdx);
@@ -1008,7 +1038,7 @@ function SystemDesignFlashCards() {
           <div>
             <div className="text-sm font-bold text-foreground">System Design Flash Cards</div>
             <div className="text-xs text-muted-foreground">
-              {FLASH_CARDS.length} cards · {knownCards.size} mastered
+              {ALL_CARDS.length} cards ({FLASH_CARDS.length} built-in{customCards.length > 0 ? ` + ${customCards.length} custom` : ''}) · {knownCards.size} mastered
               {Object.values(srDue).filter(d => d <= today).length > 0 && (
                 <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold">
                   ⏰ {Object.values(srDue).filter(d => d <= today).length} due today
@@ -1018,6 +1048,12 @@ function SystemDesignFlashCards() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setMode(m => m === 'manage' ? 'browse' : 'manage')}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+              mode === 'manage' ? 'bg-blue-500/20 border-blue-500/40 text-blue-400' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+            }`}>
+            ➕ My Cards
+          </button>
           <button onClick={startDrill}
             className="px-3 py-1.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 text-xs font-bold transition-all">
             ⚡ Drill Mode
@@ -1037,6 +1073,81 @@ function SystemDesignFlashCards() {
             }`}>{t}</button>
         ))}
       </div>
+
+      {/* Manage Custom Cards panel */}
+      {mode === 'manage' && (
+        <div className="p-4 border-b border-border space-y-4 bg-blue-500/5">
+          <div className="text-xs font-bold text-blue-400">Add your own flash card</div>
+          <div className="space-y-2">
+            <textarea
+              value={newCard.q}
+              onChange={e => setNewCard(c => ({ ...c, q: e.target.value }))}
+              placeholder="Question (e.g. How does Kafka guarantee ordering within a partition?)"
+              rows={2}
+              className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-blue-500/50 resize-none placeholder:text-muted-foreground/50"
+            />
+            <textarea
+              value={newCard.a}
+              onChange={e => setNewCard(c => ({ ...c, a: e.target.value }))}
+              placeholder="Answer (e.g. Kafka guarantees ordering within a single partition by assigning sequential offsets…)"
+              rows={3}
+              className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-blue-500/50 resize-none placeholder:text-muted-foreground/50"
+            />
+            <div className="flex items-center gap-2">
+              <input
+                value={newCard.tag}
+                onChange={e => setNewCard(c => ({ ...c, tag: e.target.value }))}
+                placeholder="Tag (e.g. Kafka, Custom)"
+                className="flex-1 text-xs text-foreground bg-background border border-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500/50 placeholder:text-muted-foreground/50"
+              />
+              <button onClick={addCustomCard}
+                disabled={!newCard.q.trim() || !newCard.a.trim()}
+                className="px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                Add Card
+              </button>
+            </div>
+          </div>
+
+          {customCards.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-muted-foreground">Your cards ({customCards.length})</div>
+              {customCards.map(c => (
+                <div key={c.id} className="p-3 rounded-lg bg-secondary border border-border">
+                  {editingCardId === c.id ? (
+                    <div className="space-y-2">
+                      <textarea defaultValue={c.q} id={`eq-${c.id}`} rows={2}
+                        className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2 focus:outline-none resize-none" />
+                      <textarea defaultValue={c.a} id={`ea-${c.id}`} rows={3}
+                        className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2 focus:outline-none resize-none" />
+                      <div className="flex gap-2">
+                        <button onClick={() => {
+                          const q = (document.getElementById(`eq-${c.id}`) as HTMLTextAreaElement)?.value ?? c.q;
+                          const a = (document.getElementById(`ea-${c.id}`) as HTMLTextAreaElement)?.value ?? c.a;
+                          updateCustomCard(c.id, { q, a });
+                          setEditingCardId(null);
+                        }} className="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold">Save</button>
+                        <button onClick={() => setEditingCardId(null)} className="px-2.5 py-1 rounded-lg bg-secondary border border-border text-muted-foreground text-xs">Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-foreground truncate">{c.q}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{c.a}</div>
+                        <span className="text-[10px] text-blue-400 mt-1 inline-block">{c.tag}</span>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <button onClick={() => setEditingCardId(c.id)} className="text-muted-foreground hover:text-foreground text-xs px-1">✏️</button>
+                        <button onClick={() => deleteCustomCard(c.id)} className="text-muted-foreground hover:text-red-400 text-xs px-1">🗑️</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Card area */}
       <div className="p-5">
@@ -1107,7 +1218,7 @@ function SystemDesignFlashCards() {
                   </button>
                   <div className="text-[10px] text-center text-muted-foreground">
                     ⏰ Scheduled for SR review in {(() => {
-                      const globalIdx = FLASH_CARDS.indexOf(deck[cardIdx]);
+                      const globalIdx = ALL_CARDS.indexOf(deck[cardIdx]);
                       const existing = srDue[String(globalIdx)];
                       const daysSince = existing ? Math.round((Date.now() - new Date(existing).getTime()) / 86400000) : 0;
                       return daysSince < 1 ? 1 : daysSince < 3 ? 3 : daysSince < 7 ? 7 : 14;

@@ -624,17 +624,188 @@ function StoryStrengthTracker({ ratings, storyHistory }: {
   );
 }
 
+// ── XFN Story Builder ─────────────────────────────────────────────────────────────────
+const XFN_TEMPLATES = [
+  {
+    id: 'xfn_alignment',
+    title: 'Alignment Breakdown',
+    scenario: 'PM wanted to ship Feature X immediately; I needed 2 more weeks for reliability hardening',
+    situation: 'Our team was mid-sprint when PM escalated a request to ship Feature X by end of quarter. I believed the backend was not ready — we had 3 unresolved race conditions and no load-test data.',
+    task: 'I needed to either align with PM on a safe ship date or find a way to de-risk the feature fast enough to meet their deadline without compromising reliability.',
+    action: 'I set up a 30-min sync with PM and Data Science lead. I brought a one-pager with: (1) the specific risks and their blast radius, (2) a 2-week hardening plan with daily milestones, (3) a phased rollout option (1% → 10% → 100%) that let us ship on their date with a kill-switch. We agreed on the phased plan.',
+    result: 'Shipped on PM\'s date at 1% traffic. Caught a memory leak at 5% that would have been a P0 at full traffic. Full rollout 10 days later. PM credited the phased approach in the team retro.',
+  },
+  {
+    id: 'xfn_underperforming',
+    title: 'Underperforming XFN Partner',
+    scenario: 'Key Design partner was consistently missing review deadlines, blocking my team\'s sprint',
+    situation: 'My team\'s sprint velocity dropped 30% over 6 weeks because design specs were arriving 3–5 days late, causing engineers to context-switch or sit idle.',
+    task: 'I needed to unblock my team without damaging the relationship with Design, and without escalating prematurely.',
+    action: 'I had a 1:1 with the Design lead to understand their constraints — they were under-staffed and had no visibility into our sprint timelines. I proposed a shared Figma board with a 5-day design-freeze rule and a weekly 15-min sync. I also offered to have one of my engineers do rough wireframes for lower-priority tickets to reduce their load.',
+    result: 'Design latency dropped from 4.2 days avg to 0.8 days within 2 sprints. Team velocity recovered. Design lead later cited this as a model for XFN collaboration in their org.',
+  },
+  {
+    id: 'xfn_competing_goals',
+    title: 'Competing Goals Across Functions',
+    scenario: 'Legal wanted to block a feature; Growth wanted to ship it; I had to broker alignment',
+    situation: 'Growth team had a high-impact A/B test ready to launch. Legal flagged a potential GDPR compliance issue 2 days before launch. Both teams came to me as the tech lead to resolve it.',
+    task: 'I needed to find a path that satisfied Legal\'s compliance requirements without killing the experiment or delaying it by weeks.',
+    action: 'I facilitated a 3-way meeting with Growth PM, Legal counsel, and our Privacy engineer. I prepared a technical options doc: (1) full block, (2) geo-fence the test to non-EU users, (3) add explicit consent flow. Legal approved option 2 as compliant. I owned the geo-fencing implementation personally to keep the timeline.',
+    result: 'Launched on schedule in non-EU markets (80% of target audience). Experiment hit statistical significance in 12 days. EU launch followed 3 weeks later after consent flow was added.',
+  },
+];
+
+interface XFNStoryBuilderProps {
+  onPopulatePlanner?: (scope: string, outcome: string) => void;
+}
+
+function XFNStoryBuilder({ onPopulatePlanner }: XFNStoryBuilderProps) {
+  const [open, setOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<typeof XFN_TEMPLATES[0] | null>(null);
+  const [story, setStory] = useState({ situation: '', task: '', action: '', result: '' });
+  const [saved, setSaved] = useState<Record<string, typeof story>>(() => {
+    try { return JSON.parse(localStorage.getItem('meta_xfn_stories_v1') ?? '{}'); } catch { return {}; }
+  });
+
+  const loadTemplate = (t: typeof XFN_TEMPLATES[0]) => {
+    setSelectedTemplate(t);
+    setStory({ situation: t.situation, task: t.task, action: t.action, result: t.result });
+  };
+
+  const saveStory = () => {
+    if (!selectedTemplate) return;
+    const updated = { ...saved, [selectedTemplate.id]: story };
+    setSaved(updated);
+    localStorage.setItem('meta_xfn_stories_v1', JSON.stringify(updated));
+    toast.success('XFN story saved!');
+  };
+
+  const populatePlanner = () => {
+    if (!selectedTemplate || !onPopulatePlanner) return;
+    onPopulatePlanner(
+      `XFN scenario: ${selectedTemplate.scenario}\n\nSituation: ${story.situation}`,
+      story.result
+    );
+    toast.success('Populated Tech Retro Planner with scope & outcome!');
+  };
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-teal-400 text-lg">🤝</span>
+          <div>
+            <div className="text-sm font-bold text-foreground">XFN Story Builder</div>
+            <div className="text-xs text-muted-foreground">3 STAR templates for XFN scenarios · auto-populates Tech Retro Planner</div>
+          </div>
+        </div>
+        <button onClick={() => setOpen(o => !o)}
+          className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+            open ? 'bg-teal-500/20 border-teal-500/40 text-teal-400' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+          }`}>
+          {open ? '✕ Close' : 'Build Story'}
+        </button>
+      </div>
+
+      {open && (
+        <div className="p-4 space-y-4">
+          {/* Template picker */}
+          <div>
+            <div className="text-xs font-bold text-teal-400 mb-2">Choose a scenario template:</div>
+            <div className="grid gap-2">
+              {XFN_TEMPLATES.map(t => (
+                <button key={t.id} onClick={() => loadTemplate(t)}
+                  className={`text-left p-3 rounded-lg border transition-all ${
+                    selectedTemplate?.id === t.id
+                      ? 'bg-teal-500/15 border-teal-500/40 text-teal-300'
+                      : 'bg-secondary border-border text-muted-foreground hover:text-foreground hover:border-teal-500/30'
+                  }`}>
+                  <div className="text-xs font-bold mb-0.5">{t.title}</div>
+                  <div className="text-[11px] opacity-75 italic">“{t.scenario}”</div>
+                  {saved[t.id] && <span className="text-[10px] text-emerald-400 mt-1 block">✓ Saved</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* STAR editor */}
+          {selectedTemplate && (
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-teal-400">Edit your STAR story:</div>
+              {([
+                ['situation', 'S — Situation', 'text-blue-400'],
+                ['task', 'T — Task', 'text-amber-400'],
+                ['action', 'A — Action', 'text-violet-400'],
+                ['result', 'R — Result', 'text-emerald-400'],
+              ] as [keyof typeof story, string, string][]).map(([k, label, color]) => (
+                <div key={k}>
+                  <label className={`text-xs font-bold block mb-1 ${color}`}>{label}</label>
+                  <textarea
+                    value={story[k]}
+                    onChange={e => setStory(s => ({ ...s, [k]: e.target.value }))}
+                    rows={3}
+                    className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-teal-500/50 resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+                  />
+                </div>
+              ))}
+              <div className="flex gap-2 flex-wrap">
+                <button onClick={saveStory}
+                  className="px-3 py-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/30 text-teal-400 text-xs font-bold transition-all">
+                  💾 Save Story
+                </button>
+                {onPopulatePlanner && (
+                  <button onClick={populatePlanner}
+                    className="px-3 py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-400 text-xs font-bold transition-all">
+                    💼 → Populate Tech Retro Planner
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Technical Retrospective Project Planner ────────────────────────────────────────────
 const EMPTY_PROJECT: Omit<TechRetroProject, 'id' | 'createdAt'> = {
   name: '', scope: '', tradeoffs: '', biggestBug: '', outcome: '', lessonsLearned: '',
 };
 
-function TechRetroPlanner() {
+function TechRetroPlanner({ prePopulate }: { prePopulate?: { scope: string; outcome: string } | null }) {
   const [projects, setProjects] = useTechRetroProjects();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Omit<TechRetroProject, 'id' | 'createdAt'>>(EMPTY_PROJECT);
   const [editId, setEditId] = useState<string | null>(null);
+
+  // Auto-open and pre-fill when XFN Story Builder populates
+  useEffect(() => {
+    if (prePopulate) {
+      setForm(f => ({ ...f, scope: prePopulate.scope, outcome: prePopulate.outcome }));
+      setEditId(null);
+      setOpen(true);
+    }
+  }, [prePopulate]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [coachProjectId, setCoachProjectId] = useState<string | null>(null);
+  const [coachQuestions, setCoachQuestions] = useState<string[]>([]);
+  const coachMutation = trpc.ai.techRetroCoach.useMutation();
+
+  const runAICoach = async (p: TechRetroProject) => {
+    setCoachProjectId(p.id);
+    setCoachQuestions([]);
+    try {
+      const result = await coachMutation.mutateAsync({
+        name: p.name, scope: p.scope, tradeoffs: p.tradeoffs,
+        biggestBug: p.biggestBug, outcome: p.outcome, lessonsLearned: p.lessonsLearned,
+      });
+      setCoachQuestions(result.questions);
+    } catch {
+      toast.error('AI Coach failed. Please try again.');
+      setCoachProjectId(null);
+    }
+  };
 
   const set = (k: keyof typeof EMPTY_PROJECT, v: string) => setForm(f => ({ ...f, [k]: v }));
 
@@ -785,6 +956,11 @@ function TechRetroPlanner() {
                   <div className="text-xs text-muted-foreground truncate">{p.scope || 'No scope defined'}</div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={e => { e.stopPropagation(); runAICoach(p); }}
+                    disabled={coachMutation.isPending && coachProjectId === p.id}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-xs font-semibold transition-all disabled:opacity-60">
+                    {coachMutation.isPending && coachProjectId === p.id ? '⏳ Thinking…' : '🤖 AI Coach'}
+                  </button>
                   <button onClick={e => { e.stopPropagation(); exportExcalidraw(p); }}
                     className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-xs font-semibold transition-all">
                     🎨 Export
@@ -811,6 +987,20 @@ function TechRetroPlanner() {
                       <div className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{value}</div>
                     </div>
                   ))}
+                  {/* AI Coach results */}
+                  {coachProjectId === p.id && coachQuestions.length > 0 && (
+                    <div className="mt-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <div className="text-xs font-bold text-emerald-400 mb-2">🤖 AI Coach — 3 Follow-up Questions an Interviewer Might Ask:</div>
+                      <ol className="space-y-2">
+                        {coachQuestions.map((q, i) => (
+                          <li key={i} className="flex gap-2">
+                            <span className="text-emerald-400 font-bold text-xs shrink-0">{i + 1}.</span>
+                            <span className="text-xs text-foreground leading-relaxed">{q}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
                   <div className="text-xs text-muted-foreground pt-1">Saved {new Date(p.createdAt).toLocaleDateString()}</div>
                 </div>
               )}
@@ -982,6 +1172,7 @@ export default function BehavioralTab() {
   const [showMock, setShowMock] = useState(false);
   const [showPractice, setShowPractice] = useState(false);
   const [showSurprise, setShowSurprise] = useState(false);
+  const [xfnPrePopulate, setXfnPrePopulate] = useState<{ scope: string; outcome: string } | null>(null);
 
   const handleRate = (id: string, v: number) => {
     setRatings(r => ({ ...r, [id]: v }));
@@ -1168,8 +1359,11 @@ export default function BehavioralTab() {
         </div>
       </div>
 
+      {/* XFN Story Builder */}
+      <XFNStoryBuilder onPopulatePlanner={(scope, outcome) => setXfnPrePopulate({ scope, outcome })} />
+
       {/* Technical Retrospective Project Planner */}
-      <TechRetroPlanner />
+      <TechRetroPlanner prePopulate={xfnPrePopulate} />
 
       {/* AI Answer Scorer */}
       <AnswerScorer />
