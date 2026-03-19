@@ -19,7 +19,7 @@ import {
   Terminal, AlertCircle, Loader2, StickyNote, History, Trophy,
   ChevronDown, ChevronUp, Flame, BookOpen, Zap, Plus, Trash2,
   BarChart2, FlaskConical, GitCommit, TrendingUp, Award,
-  Lock, Download, Copy, Shuffle, Timer, EyeOff
+  Lock, Download, Copy, Shuffle, Timer, EyeOff, Mail
 } from "lucide-react";
 
 // ─── Language config ───────────────────────────────────────────────────────
@@ -413,6 +413,25 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
           </div>
         ))}
       </div>
+      {/* Well-calibrated badge */}
+      {(() => {
+        if (assessments.length < 5) return null;
+        const ratingNum = (r: string) => r === "Easy" ? 1 : r === "Medium" ? 2 : r === "Hard" ? 3 : 4;
+        const diverged = assessments.filter(a => ratingNum(a.selfRating) !== ratingNum(a.officialDifficulty)).length;
+        const pct = diverged / assessments.length;
+        if (pct >= 0.2) return null;
+        return (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20">
+            <span className="text-base">🎯</span>
+            <div>
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Well-calibrated</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-500 ml-1.5">
+                Only {Math.round(pct * 100)}% of your {assessments.length} ratings diverge from official difficulty — your self-assessment is highly accurate.
+              </span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Weekly chart */}
       <div className="bg-card border border-border rounded-xl p-4">
@@ -598,7 +617,31 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
             <div className="flex items-center gap-2 mb-3">
               <Zap size={13} className="text-violet-500" />
               <span className="text-xs font-semibold text-foreground">Topic Sprint History</span>
-              <span className="text-xs text-muted-foreground ml-auto">{sprintHistory.length} sprints</span>
+              <span className="text-xs text-muted-foreground">{sprintHistory.length} sprints</span>
+              <button
+                onClick={() => {
+                  const rows = [
+                    ["Date", "Topic", "Total Score", "Problems (name:score)"].join(","),
+                    ...sprintHistory.map(e => [
+                      new Date(e.date).toLocaleDateString(),
+                      `"${e.topic}"`,
+                      e.totalScore,
+                      `"${(e.problemNames || []).map((name, i) => `${name}:${e.scores[i] ?? 0}`).join(" | ")}"`
+                    ].join(",")),
+                  ];
+                  navigator.clipboard.writeText(rows.join("\n")).catch(() => {
+                    const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url; a.download = "sprint-history.csv"; a.click();
+                    URL.revokeObjectURL(url);
+                  });
+                }}
+                className="ml-auto text-[10px] font-semibold text-muted-foreground hover:text-violet-600 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-violet-50 dark:hover:bg-violet-900/20"
+                title="Export sprint history as CSV"
+              >
+                <Copy size={10} /> CSV
+              </button>
             </div>
             {/* Personal Best summary */}
             <div className="mb-3">
@@ -826,6 +869,59 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
           </div>
         );
       })()}
+
+      {/* Weekly Email Digest */}
+      <div className="bg-card border border-border rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Mail size={13} className="text-blue-500" />
+          <span className="text-xs font-semibold text-foreground">Weekly Summary</span>
+          <span className="text-xs text-muted-foreground">Send a progress report to yourself</span>
+        </div>
+        <button
+          onClick={() => {
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const topWeakTopics = sprintHistory.length > 0
+              ? (() => {
+                  const topicScores: Record<string, number[]> = {};
+                  sprintHistory.forEach(e => {
+                    if (!topicScores[e.topic]) topicScores[e.topic] = [];
+                    topicScores[e.topic].push(e.totalScore);
+                  });
+                  return Object.entries(topicScores)
+                    .map(([t, scores]) => ({ topic: t, avg: scores.reduce((a, b) => a + b, 0) / scores.length }))
+                    .sort((a, b) => a.avg - b.avg)
+                    .slice(0, 3)
+                    .map(t => `  - ${t.topic} (avg ${t.avg.toFixed(0)} pts)`)
+                    .join('\n');
+                })()
+              : '  (no sprint data yet)';
+            const recentSprints = sprintHistory.slice(0, 5)
+              .map(e => `  - ${e.topic}: ${e.totalScore} pts (${new Date(e.date).toLocaleDateString()})`)
+              .join('\n') || '  (none yet)';
+            const body = [
+              `Meta Interview Prep — Weekly Summary`,
+              `Generated: ${today}`,
+              ``,
+              `=== PROGRESS ===`,
+              `Total Solved: ${totalSolved}`,
+              `Starred: ${totalStarred}`,
+              `Speed Run Streak: ${srStreak.streak} days (best: ${srStreak.longestStreak})`,
+              ``,
+              `=== TOP WEAK TOPICS (by sprint score) ===`,
+              topWeakTopics,
+              ``,
+              `=== RECENT SPRINTS ===`,
+              recentSprints,
+              ``,
+              `Keep grinding! 💪`,
+            ].join('\n');
+            window.location.href = `mailto:?subject=${encodeURIComponent('Meta Prep Weekly Summary — ' + today)}&body=${encodeURIComponent(body)}`;
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors"
+        >
+          <Mail size={12} /> Send Weekly Summary
+        </button>
+      </div>
 
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">

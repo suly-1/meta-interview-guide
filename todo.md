@@ -78,3 +78,10 @@
 - [x] Speed Run streak stats row in Stats view (current streak, longest streak, last active date)
 - [x] ICS block colour metadata (CATEGORIES per block type for Google Calendar / Outlook colour coding)
 - [x] Difficulty Estimator CSV export (Copy as CSV button in Difficulty Perception card)
+- [x] Mock Interview Simulator: update duration text to 60-min (30 coding + 10×2 behavioral)
+- [x] Mock Interview Simulator: rename IC6 tab to "Staff Engineer"
+- [x] Mock Interview Simulator: rename IC7 tab to "Principal/Senior Staff"
+- [x] Mock Interview Simulator: replace Principal/Senior Staff mock with 60-min behavioral-only interview using IC7 questions
+- [x] Weekly email digest (mailto: button with streak stats, weak topics, recent Sprint scores)
+- [x] Well-calibrated badge in Stats summary (awarded when <20% of assessments diverge)
+- [x] Sprint history CSV export (topic, score, date, per-problem scores)

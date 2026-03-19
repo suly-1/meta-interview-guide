@@ -15,7 +15,7 @@ import {
   Star, TrendingUp, TrendingDown, Target, Clock,
 } from "lucide-react";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
-import { BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
+import { BEHAVIORAL_FOCUS_AREAS, IC7_BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
 import { useCTCIProgress } from "@/hooks/useCTCIProgress";
 import { getWeakestPatterns } from "@/hooks/useDrillRatings";
 import { PATTERN_TO_CTCI_TOPICS, problemMatchesTopics } from "@/lib/ctciTopicMap";
@@ -24,7 +24,7 @@ import { trpc } from "@/lib/trpc";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Phase = "setup" | "coding" | "behavioral1" | "behavioral2" | "debrief";
-type ICLevel = "IC6" | "IC7";
+type ICLevel = "IC6" | "IC7" | "IC7_PRINCIPAL";
 
 interface BehavioralQuestion {
   question: string;
@@ -50,7 +50,7 @@ function formatTime(sec: number): string {
 }
 
 const PHASE_DURATIONS: Record<Exclude<Phase, "setup" | "debrief">, number> = {
-  coding: 25 * 60,
+  coding: 30 * 60,
   behavioral1: 10 * 60,
   behavioral2: 10 * 60,
 };
@@ -85,8 +85,9 @@ function pickCodingProblem(progress: Record<number, { solved?: boolean }>): type
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function pickBehavioralQuestions(): BehavioralQuestion[] {
-  const allAreas = BEHAVIORAL_FOCUS_AREAS.filter(a => a.questions && a.questions.length > 0);
+function pickBehavioralQuestions(level: ICLevel = "IC6"): BehavioralQuestion[] {
+  const pool = level === "IC7_PRINCIPAL" ? IC7_BEHAVIORAL_FOCUS_AREAS : BEHAVIORAL_FOCUS_AREAS;
+  const allAreas = pool.filter(a => a.questions && a.questions.length > 0);
   // Shuffle and pick 2 from different focus areas
   const shuffled = [...allAreas].sort(() => Math.random() - 0.5);
   const picked: BehavioralQuestion[] = [];
@@ -100,11 +101,12 @@ function pickBehavioralQuestions(): BehavioralQuestion[] {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function PhaseProgress({ phase }: { phase: Phase }) {
-  const currentIdx = PHASE_ORDER.indexOf(phase);
+function PhaseProgress({ phase, isPrincipal }: { phase: Phase; isPrincipal?: boolean }) {
+  const order = isPrincipal ? (["setup", "behavioral1", "behavioral2", "debrief"] as Phase[]) : PHASE_ORDER;
+  const currentIdx = order.indexOf(phase);
   return (
     <div className="flex items-center gap-1 mb-6">
-      {PHASE_ORDER.map((p, i) => {
+      {order.map((p, i) => {
         const done = i < currentIdx;
         const active = i === currentIdx;
         return (
@@ -117,7 +119,7 @@ function PhaseProgress({ phase }: { phase: Phase }) {
             <span className={`text-[11px] font-medium hidden sm:inline ${active ? "text-blue-700" : done ? "text-emerald-600" : "text-gray-400"}`}>
               {PHASE_LABELS[p]}
             </span>
-            {i < PHASE_ORDER.length - 1 && (
+            {i < order.length - 1 && (
               <div className={`w-6 h-0.5 rounded-full mx-0.5 ${i < currentIdx ? "bg-emerald-400" : "bg-gray-200"}`} />
             )}
           </div>
@@ -232,14 +234,16 @@ export default function MockInterviewSimulator() {
 
   const debrief = trpc.mockInterview.debrief.useMutation();
 
-  // ── Setup → Coding ──
+  // ── Setup → Coding (or Behavioral for IC7_PRINCIPAL) ──
   const startSession = useCallback(() => {
-    const codingProblem = pickCodingProblem(progress);
-    const behavioralQuestions = pickBehavioralQuestions();
+    const isPrincipal = session.targetLevel === "IC7_PRINCIPAL";
+    const codingProblem = isPrincipal ? null : pickCodingProblem(progress);
+    const behavioralQuestions = pickBehavioralQuestions(session.targetLevel);
     setSession(s => ({ ...s, codingProblem, behavioralQuestions, behavioralAnswers: ["", ""] }));
     setCodingElapsed(0);
-    setPhase("coding");
-  }, [progress]);
+    // IC7_PRINCIPAL skips coding and goes straight to behavioral
+    setPhase(isPrincipal ? "behavioral1" : "coding");
+  }, [progress, session.targetLevel]);
 
   // ── Coding done ──
   const finishCoding = useCallback((solved: boolean, elapsed: number) => {
@@ -259,15 +263,18 @@ export default function MockInterviewSimulator() {
       // Trigger LLM debrief
       const bqs = session.behavioralQuestions;
       const bas = session.behavioralAnswers;
+      const isPrincipal = session.targetLevel === "IC7_PRINCIPAL";
       debrief.mutate({
-        targetLevel: session.targetLevel,
-        coding: {
-          problemName: session.codingProblem?.name ?? "Unknown",
-          difficulty: session.codingProblem?.difficulty ?? "Medium",
-          solved: session.codingSolved ?? false,
-          durationSec: session.codingDurationSec,
-          notes: session.codingNotes,
-        },
+        targetLevel: "IC7", // both IC7 and IC7_PRINCIPAL use IC7 bar
+        coding: isPrincipal
+          ? { problemName: "N/A (Behavioral-only session)", difficulty: "N/A", solved: false, durationSec: 0, notes: "" }
+          : {
+              problemName: session.codingProblem?.name ?? "Unknown",
+              difficulty: session.codingProblem?.difficulty ?? "Medium",
+              solved: session.codingSolved ?? false,
+              durationSec: session.codingDurationSec,
+              notes: session.codingNotes,
+            },
         behavioral: [
           { question: bqs[0]?.question ?? "", answer: bas[0] || "(No answer provided)" },
           { question: bqs[1]?.question ?? "", answer: bas[1] || "(No answer provided)" },
@@ -302,7 +309,7 @@ export default function MockInterviewSimulator() {
             Mock Interview Simulator
           </span>
           <span className="text-[11px] bg-indigo-700 text-indigo-200 px-2 py-0.5 rounded-full font-medium">
-            45 min loop
+            60 min loop
           </span>
         </div>
         {phase !== "setup" && (
@@ -313,18 +320,18 @@ export default function MockInterviewSimulator() {
       </div>
 
       <div className="p-5">
-        <PhaseProgress phase={phase} />
+        <PhaseProgress phase={phase} isPrincipal={session.targetLevel === "IC7_PRINCIPAL"} />
 
         {/* ── SETUP ── */}
         {phase === "setup" && (
           <div className="space-y-5">
             <div>
               <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                This simulator runs a full Meta-style interview loop: <strong>25 min coding</strong> + <strong>10 min behavioral</strong> × 2, then generates an <strong>LLM-powered IC-level debrief</strong>. Problems are chosen from your weakest patterns.
+                The total interview is <strong>60 minutes</strong>: <strong>30 minutes for coding</strong>, <strong>10 min behavioral × 2</strong>, followed by an <strong>LLM-powered IC-level debrief</strong>. Problems are chosen from your weakest patterns.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
                 {[
-                  { icon: <Code2 size={15} className="text-blue-600" />, label: "Coding Round", desc: "25 min · 1 LeetCode problem", bg: "bg-blue-50 border-blue-200" },
+                  { icon: <Code2 size={15} className="text-blue-600" />, label: "Coding Round", desc: "30 min · 1 LeetCode problem", bg: "bg-blue-50 border-blue-200" },
                   { icon: <MessageSquare size={15} className="text-amber-600" />, label: "Behavioral × 2", desc: "10 min each · STAR format", bg: "bg-amber-50 border-amber-200" },
                   { icon: <Brain size={15} className="text-violet-600" />, label: "AI Debrief", desc: "IC-level verdict + feedback", bg: "bg-violet-50 border-violet-200" },
                 ].map(item => (
@@ -342,24 +349,36 @@ export default function MockInterviewSimulator() {
             {/* IC Level picker */}
             <div>
               <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Target Level</p>
-              <div className="flex gap-2">
-                {(["IC6", "IC7"] as ICLevel[]).map(level => (
+              <div className="flex gap-2 flex-wrap">
+                {([
+                  { level: "IC6" as ICLevel, label: "IC6", sub: "Staff Engineer" },
+                  { level: "IC7" as ICLevel, label: "IC7", sub: "Principal/Senior Staff" },
+                  { level: "IC7_PRINCIPAL" as ICLevel, label: "IC7+", sub: "Senior Staff/Principal\n(Behavioral only)" },
+                ] as { level: ICLevel; label: string; sub: string }[]).map(({ level, label, sub }) => (
                   <button
                     key={level}
                     onClick={() => setSession(s => ({ ...s, targetLevel: level }))}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
+                    className={`px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all text-left ${
                       session.targetLevel === level
                         ? "bg-blue-600 text-white border-blue-600"
                         : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
                     }`}
                   >
-                    {level}
-                    <span className="block text-[10px] font-normal opacity-70">
-                      {level === "IC6" ? "Senior Engineer" : "Staff Engineer"}
+                    {label}
+                    <span className="block text-[10px] font-normal opacity-70 whitespace-pre-line">
+                      {sub}
                     </span>
                   </button>
                 ))}
               </div>
+              {session.targetLevel === "IC7_PRINCIPAL" && (
+                <div className="mt-2 flex gap-2 p-3 bg-purple-50 border border-purple-200 rounded-xl">
+                  <div className="w-1 rounded-full bg-purple-400 flex-shrink-0" />
+                  <p className="text-xs text-purple-800 leading-relaxed">
+                    <strong>60-minute behavioral-only interview</strong> — no coding round. Questions are drawn from IC7 Cross-Functional Partnership and Retrospective Partnership Preparation material. The AI debrief evaluates org-level scope, upward influence, and outcome ownership.
+                  </p>
+                </div>
+              )}
             </div>
 
             <button
@@ -424,7 +443,7 @@ function CodingPhase({
   onFinish: (solved: boolean, elapsed: number) => void;
   onElapsedChange: (e: number) => void;
 }) {
-  const DURATION = 25 * 60;
+  const DURATION = 30 * 60;
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -459,7 +478,7 @@ function CodingPhase({
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-1">
         <Code2 size={15} className="text-blue-600" />
-        <span className="text-sm font-bold text-blue-700">Coding Round — 25 minutes</span>
+        <span className="text-sm font-bold text-blue-700">Coding Round — 30 minutes</span>
       </div>
 
       {/* Problem card */}
@@ -691,7 +710,9 @@ function DebriefPhase({
             {result.icLevelVerdict}
           </p>
           <p className={`text-xs ${verdictStyle.text} opacity-80`}>
-            {session.targetLevel} ({session.targetLevel === "IC7" ? "Staff Engineer" : "Senior Engineer"}) bar
+            {session.targetLevel === "IC7_PRINCIPAL"
+              ? "IC7 Principal/Senior Staff — Behavioral-only bar"
+              : `${session.targetLevel} (${session.targetLevel === "IC7" ? "Principal/Senior Staff" : "Staff Engineer"}) bar`}
           </p>
         </div>
       </div>
@@ -711,7 +732,9 @@ function DebriefPhase({
           <ScoreBar score={result.codingScore} label="Score" />
           <p className="text-xs text-gray-600 mt-2 leading-relaxed">{result.codingFeedback}</p>
           <p className="text-[11px] text-gray-400 mt-1">
-            Problem: {session.codingProblem?.name} · {session.codingSolved ? "✓ Solved" : "✗ Not solved"} · {formatTime(session.codingDurationSec)}
+            {session.targetLevel === "IC7_PRINCIPAL"
+              ? "Behavioral-only session — no coding round"
+              : `Problem: ${session.codingProblem?.name} · ${session.codingSolved ? "✓ Solved" : "✗ Not solved"} · ${formatTime(session.codingDurationSec)}`}
           </p>
         </div>
         <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">

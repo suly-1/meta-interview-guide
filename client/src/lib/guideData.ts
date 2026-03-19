@@ -622,6 +622,134 @@ export const TIMELINE_WEEKS = [
   },
 ];
 
+// ─── IC7 Behavioral Focus Areas (Principal / Senior Staff mock) ────────────
+// These questions target the IC7 bar: org-wide scope, retrospective ownership,
+// cross-functional partnership, and upward influence.
+export const IC7_BEHAVIORAL_FOCUS_AREAS = [
+  {
+    id: "ic7-xfn-partnership",
+    title: "Cross-Functional Partnership",
+    subtitle: "IC7 / Principal",
+    questions: [
+      {
+        question: "Tell me about a time you drove alignment across multiple organizations or business units on a technically ambiguous initiative.",
+        probes: [
+          "How many orgs were involved and what were their competing priorities?",
+          "How did you build a shared vision when there was no obvious right answer?",
+          "What was the business-level outcome and how did you measure it?",
+          "What would have happened without your involvement?",
+        ],
+      },
+      {
+        question: "Describe a time you identified a strategic gap in your organization and independently defined what the team should be working on.",
+        probes: [
+          "How did you identify the gap — was it data-driven, customer-driven, or intuition?",
+          "How did you build the case and get leadership buy-in?",
+          "What resistance did you encounter and how did you handle it?",
+          "What was the long-term impact on the org?",
+        ],
+      },
+      {
+        question: "Tell me about a time you had to influence a director or VP on a technical or product strategy decision.",
+        probes: [
+          "What was the decision and why did leadership need to be involved?",
+          "How did you frame the problem and your recommendation?",
+          "What was the outcome and how did you handle disagreement?",
+          "What did you learn about influencing upward?",
+        ],
+      },
+      {
+        question: "Walk me through a time you created leverage for other senior engineers — enabling them to have more impact than they would have had alone.",
+        probes: [
+          "What was the context and who were the engineers you were enabling?",
+          "What specifically did you do to create that leverage?",
+          "How did you avoid becoming a single point of failure?",
+          "What was the measurable outcome for the team?",
+        ],
+      },
+      {
+        question: "Describe a time you shaped the technical strategy for a broad area of services or technology beyond your immediate team.",
+        probes: [
+          "What was the scope of the strategy and how did you develop it?",
+          "How did you get other teams to adopt it?",
+          "What trade-offs did you make and why?",
+          "How did you measure whether the strategy was working?",
+        ],
+      },
+      {
+        question: "Tell me about a time you drove adoption of a platform, framework, or process across multiple teams.",
+        probes: [
+          "What was the platform or process and why was adoption important?",
+          "What was the initial resistance and how did you address it?",
+          "How did you ensure sustained adoption rather than a one-time rollout?",
+          "What was the org-wide impact?",
+        ],
+      },
+    ],
+  },
+  {
+    id: "ic7-retrospective-partnership",
+    title: "Retrospective Partnership & Ownership",
+    subtitle: "IC7 / Principal",
+    questions: [
+      {
+        question: "Tell me about a time you told the hard truth — for example, recommending deprecating a system or killing a project when the ROI wasn't there.",
+        probes: [
+          "What was the situation and what data led you to that conclusion?",
+          "How did you communicate the recommendation to stakeholders who had invested in it?",
+          "What was the reaction and how did you manage it?",
+          "What was the final outcome and what did you learn?",
+        ],
+      },
+      {
+        question: "Describe a significant project failure or postmortem you owned at the org level. What did you change as a result?",
+        probes: [
+          "What was the failure and what was the business impact?",
+          "How did you lead the retrospective and ensure psychological safety?",
+          "What systemic changes did you drive — not just for your team but for the org?",
+          "How do you think about failure as an IC7?",
+        ],
+      },
+      {
+        question: "Tell me about a time you owned an outcome that didn't meet expectations, even though the execution was technically sound.",
+        probes: [
+          "What was the gap between execution quality and outcome?",
+          "How did you diagnose the root cause — was it strategy, adoption, measurement?",
+          "What did you do differently as a result?",
+          "How do you think about the difference between output and outcome at the IC7 level?",
+        ],
+      },
+      {
+        question: "Give me an example of a time you changed the direction of a multi-quarter initiative mid-stream based on new information.",
+        probes: [
+          "What was the original direction and what new information changed it?",
+          "How did you make the case for pivoting to leadership and the team?",
+          "What was the cost of the pivot and how did you manage it?",
+          "What was the outcome and what did you learn about adaptability at scale?",
+        ],
+      },
+      {
+        question: "Describe a time you proactively identified a risk that, if unaddressed, would have had org-level consequences.",
+        probes: [
+          "How did you identify the risk — was it technical, organizational, or strategic?",
+          "How did you escalate and build urgency without causing panic?",
+          "What was the mitigation and how did you track it to resolution?",
+          "What would have happened if you hadn't caught it?",
+        ],
+      },
+      {
+        question: "Tell me about a time you had to balance short-term execution pressure with long-term architectural or strategic health.",
+        probes: [
+          "What was the tension and what were the competing pressures?",
+          "How did you make the trade-off decision and communicate it?",
+          "How did you ensure the long-term concern wasn't permanently deferred?",
+          "What was the outcome and how do you think about this trade-off at the IC7 level?",
+        ],
+      },
+    ],
+  },
+];
+
 export const STORY_BANK = [
   { type: "High-Impact Technical Project", focusAreas: "XFN Collaboration, Communication", values: "Build Awesome Things, Focus on Long-Term Impact" },
   { type: "Cross-Functional Alignment Win", focusAreas: "XFN Collaboration, Conflict Resolution", values: "Move Fast, Meta/Metamates/Me" },
