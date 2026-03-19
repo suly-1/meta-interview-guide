@@ -4,7 +4,8 @@
  * 2. Recruiter-Ready Summary (printable one-page PDF)
  */
 import { useRef, useMemo, useState, useEffect } from "react";
-import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap, Target, ChevronRight, Dumbbell, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useDensity } from "@/contexts/DensityContext";
+import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap, Target, ChevronRight, Dumbbell, CheckCircle2, AlertTriangle, Bell } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
@@ -26,35 +27,53 @@ function loadJSON<T>(key: string, fallback: T): T {
 
 function RecruiterSummaryPrint() {
   const printRef = useRef<HTMLDivElement>(null);
+  const { density } = useDensity();
 
   const handlePrint = () => {
     const content = printRef.current;
     if (!content) return;
     const win = window.open("", "_blank", "width=820,height=1160");
     if (!win) return;
+
+    // Scale font sizes based on active density setting
+    const scale = density === "compact" ? 0.875 : density === "spacious" ? 1.125 : 1;
+    const baseFontPx = Math.round(12 * scale);
+    const h1Px = Math.round(24 * scale);
+    const h2Px = Math.round(11 * scale);
+    const scoreNumPx = Math.round(52 * scale);
+    const tagFontPx = Math.round(10 * scale);
+    const rowFontPx = Math.round(11 * scale);
+    const footerFontPx = Math.round(10 * scale);
+    const bodyPadding = Math.round(36 * scale);
+    const cardPadding = Math.round(12 * scale);
+    const gridGap = Math.round(16 * scale);
+    const gridGap3 = Math.round(12 * scale);
+    const densityLabel = density === "compact" ? "Compact" : density === "spacious" ? "Spacious" : "Standard";
+
     win.document.write(`<!DOCTYPE html><html><head>
       <title>Interview Readiness Summary</title>
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
       <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Space Grotesk',sans-serif;font-size:12px;color:#1f2937;background:white;padding:36px}
-        h1{font-size:24px;font-weight:800;color:#111827}
-        h2{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
-        .score-num{font-size:52px;font-weight:800;line-height:1}
-        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-        .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-        .card{border:1px solid #e5e7eb;border-radius:8px;padding:12px}
-        .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;margin:2px}
+        body{font-family:'Space Grotesk',sans-serif;font-size:${baseFontPx}px;color:#1f2937;background:white;padding:${bodyPadding}px}
+        h1{font-size:${h1Px}px;font-weight:800;color:#111827}
+        h2{font-size:${h2Px}px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+        .score-num{font-size:${scoreNumPx}px;font-weight:800;line-height:1}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:${gridGap}px}
+        .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:${gridGap3}px}
+        .card{border:1px solid #e5e7eb;border-radius:8px;padding:${cardPadding}px}
+        .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:${tagFontPx}px;font-weight:700;margin:2px}
         .green{background:#d1fae5;color:#065f46}
         .amber{background:#fef3c7;color:#92400e}
         .red{background:#fee2e2;color:#991b1b}
         .bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:4px}
         .bar-fill{height:100%;border-radius:3px}
-        .row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:6px}
-        .footer{margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;color:#9ca3af;font-size:10px}
+        .row{display:flex;justify-content:space-between;align-items:center;font-size:${rowFontPx}px;margin-bottom:6px}
+        .footer{margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;color:#9ca3af;font-size:${footerFontPx}px}
+        .density-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;background:#f3f4f6;color:#6b7280;margin-left:8px;vertical-align:middle}
         @media print{body{padding:20px}}
       </style>
-    </head><body>${content.innerHTML}</body></html>`);
+    </head><body>${content.innerHTML}<div class="density-badge">${densityLabel} layout</div></body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 500);
   };
@@ -292,6 +311,181 @@ function RecruiterSummaryPrint() {
         <div className="footer">
           Generated by Meta IC6/IC7 Interview Guide · {today} · All data from localStorage
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Sprint Scheduler ───────────────────────────────────────────────────────
+const SPRINT_SCHED_KEY = "meta-guide-sprint-schedule";
+
+interface SprintScheduleSettings {
+  enabled: boolean;
+  time: string;       // "HH:MM" 24h
+  lastFiredDate: string; // "YYYY-MM-DD"
+}
+
+function getDefaultSprintSchedule(): SprintScheduleSettings {
+  try {
+    const s = localStorage.getItem(SPRINT_SCHED_KEY);
+    if (s) return JSON.parse(s);
+  } catch {}
+  return { enabled: false, time: "08:00", lastFiredDate: "" };
+}
+
+function saveSprintSchedule(s: SprintScheduleSettings) {
+  localStorage.setItem(SPRINT_SCHED_KEY, JSON.stringify(s));
+}
+
+function requestNotifPermission(): Promise<NotificationPermission> {
+  if (!("Notification" in window)) return Promise.resolve("denied");
+  if (Notification.permission === "granted") return Promise.resolve("granted");
+  return Notification.requestPermission();
+}
+
+function fireSprintNotification() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  new Notification("💪 Time for your Weakness Sprint!", {
+    body: "Your 20-minute focused drill on your weakest patterns is ready. Open the guide to start.",
+    icon: "/favicon.ico",
+    tag: "meta-guide-sprint",
+    requireInteraction: false,
+  });
+}
+
+function SprintScheduler() {
+  const [settings, setSettings] = useState<SprintScheduleSettings>(getDefaultSprintSchedule);
+  const [permission, setPermission] = useState<NotificationPermission>(
+    "Notification" in window ? Notification.permission : "denied"
+  );
+  const [testFired, setTestFired] = useState(false);
+  const supported = "Notification" in window;
+
+  useEffect(() => { saveSprintSchedule(settings); }, [settings]);
+
+  // Minute-poll to fire at the right time
+  useEffect(() => {
+    if (!settings.enabled || permission !== "granted") return;
+    const check = () => {
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, "0");
+      const mm = now.getMinutes().toString().padStart(2, "0");
+      const today = now.toISOString().split("T")[0];
+      if (`${hh}:${mm}` === settings.time && settings.lastFiredDate !== today) {
+        fireSprintNotification();
+        setSettings(prev => { const next = { ...prev, lastFiredDate: today }; saveSprintSchedule(next); return next; });
+      }
+    };
+    check();
+    const id = setInterval(check, 60_000);
+    return () => clearInterval(id);
+  }, [settings.enabled, settings.time, permission, settings.lastFiredDate]);
+
+  const handleEnable = async () => {
+    const perm = await requestNotifPermission();
+    setPermission(perm);
+    if (perm === "granted") setSettings(prev => ({ ...prev, enabled: true }));
+  };
+
+  const handleDisable = () => setSettings(prev => ({ ...prev, enabled: false }));
+
+  const handleTimeChange = (time: string) =>
+    setSettings(prev => ({ ...prev, time, lastFiredDate: "" }));
+
+  const handleTest = () => {
+    fireSprintNotification();
+    setTestFired(true);
+    setTimeout(() => setTestFired(false), 3000);
+  };
+
+  if (!supported) {
+    return (
+      <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+        <span className="text-xs text-gray-500">Browser notifications are not supported in this browser.</span>
+      </div>
+    );
+  }
+
+  const isActive = settings.enabled && permission === "granted";
+
+  return (
+    <div className={`rounded-2xl border overflow-hidden transition-all ${
+      isActive ? "border-rose-300 bg-rose-50 dark:bg-rose-900/20 dark:border-rose-800" : "border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700"
+    }`}>
+      <div className="px-5 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              isActive ? "bg-rose-500" : "bg-gray-200 dark:bg-gray-700"
+            }`}>
+              <Bell size={18} className={isActive ? "text-white" : "text-gray-500 dark:text-gray-400"} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Schedule Daily Sprint
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {isActive
+                  ? `Active — fires daily at ${settings.time}`
+                  : "Get a browser notification reminding you to run your weakness sprint"}
+              </p>
+            </div>
+          </div>
+          {/* Toggle */}
+          {permission === "granted" ? (
+            <button
+              onClick={isActive ? handleDisable : handleEnable}
+              className={`flex-shrink-0 relative w-12 h-6 rounded-full transition-colors ${
+                isActive ? "bg-rose-500" : "bg-gray-300 dark:bg-gray-600"
+              }`}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                isActive ? "translate-x-6" : "translate-x-0.5"
+              }`} />
+            </button>
+          ) : (
+            <button
+              onClick={handleEnable}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-colors"
+            >
+              <Bell size={12} /> Enable
+            </button>
+          )}
+        </div>
+
+        {/* Permission denied */}
+        {permission === "denied" && (
+          <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+            <AlertTriangle size={13} className="text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-red-600">
+              Notifications are blocked. Click the lock icon in your browser's address bar → Site settings → Notifications → Allow.
+            </p>
+          </div>
+        )}
+
+        {/* Time picker */}
+        {isActive && (
+          <div className="mt-4 flex items-center gap-3 flex-wrap">
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Reminder time</label>
+            <input
+              type="time"
+              value={settings.time}
+              onChange={e => handleTimeChange(e.target.value)}
+              className="border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white dark:bg-gray-800"
+            />
+            <button
+              onClick={handleTest}
+              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                testFired
+                  ? "bg-green-100 border-green-300 text-green-700"
+                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400"
+              }`}
+            >
+              {testFired ? <CheckCircle2 size={12} /> : <Bell size={12} />}
+              {testFired ? "Sent!" : "Test notification"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -648,6 +842,24 @@ export default function ReadinessTab() {
           </div>
         </div>
         <FixMyWeaknesses />
+      </section>
+
+      {/* ── Schedule Daily Sprint ── */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Bell size={20} className="text-rose-500" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Schedule Daily Sprint
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Set a daily browser notification to remind you to run your weakness sprint at a chosen time.
+              </p>
+            </div>
+          </div>
+        </div>
+        <SprintScheduler />
       </section>
 
       {/* ── Overall Readiness Dashboard ── */}

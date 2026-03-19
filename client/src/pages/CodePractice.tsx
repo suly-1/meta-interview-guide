@@ -368,7 +368,7 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
 }
 
 // ─── Personal Stats Dashboard ──────────────────────────────────────────────
-function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments, onClearAssessments, srStreak }: {
+function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments, onClearAssessments, srStreak, tournamentHistory }: {
   session: SessionEntry[];
   progress: Record<number, { solved: boolean; starred: boolean; notes: string }>;
   leaderboard: SpeedRunEntry[];
@@ -376,9 +376,11 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
   assessments: DifficultyAssessment[];
   onClearAssessments: () => void;
   srStreak: { streak: number; lastDate: string | null; longestStreak: number };
+  tournamentHistory: TournamentRecord[];
 }) {
   const totalSolved = useMemo(() => Object.values(progress).filter(p => p.solved).length, [progress]);
   const totalStarred = useMemo(() => Object.values(progress).filter(p => p.starred).length, [progress]);
+  const [tournamentSort, setTournamentSort] = useState<"score" | "date">("score");
 
   // Avg time per difficulty
   const avgByDiff = useMemo(() => {
@@ -642,6 +644,114 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
           </div>
         </div>
       )}
+
+      {/* Tournament Leaderboard */}
+      {tournamentHistory.length > 0 && (() => {
+        const sorted = [...tournamentHistory].sort((a, b) =>
+          tournamentSort === "score" ? b.totalScore - a.totalScore : b.date - a.date
+        );
+        const allTimeHigh = Math.max(...tournamentHistory.map(r => r.totalScore));
+        const avgScore = Math.round(tournamentHistory.reduce((s, r) => s + r.totalScore, 0) / tournamentHistory.length);
+        const bestSolveRate = Math.max(...tournamentHistory.map(r => r.rounds.filter(rnd => rnd.solved).length));
+        return (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy size={13} className="text-yellow-500" />
+              <span className="text-xs font-semibold text-foreground">Tournament Leaderboard</span>
+              <span className="text-xs text-muted-foreground">{tournamentHistory.length} played</span>
+              {/* Sort toggle */}
+              <div className="ml-auto flex items-center gap-1 bg-muted rounded-lg p-0.5">
+                {(["score", "date"] as const).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setTournamentSort(s)}
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md transition-all capitalize ${
+                      tournamentSort === s
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >{s === "score" ? "By Score" : "By Date"}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Summary stats */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800 p-2.5 text-center">
+                <div className="text-[10px] font-semibold text-yellow-600 dark:text-yellow-400 mb-0.5 uppercase tracking-wide">All-Time High</div>
+                <div className="text-xl font-black text-yellow-600 dark:text-yellow-400 font-mono">{allTimeHigh}</div>
+                <div className="text-[10px] text-muted-foreground">pts</div>
+              </div>
+              <div className="rounded-lg border border-border bg-muted/30 p-2.5 text-center">
+                <div className="text-[10px] font-semibold text-muted-foreground mb-0.5 uppercase tracking-wide">Avg Score</div>
+                <div className="text-xl font-black text-foreground font-mono">{avgScore}</div>
+                <div className="text-[10px] text-muted-foreground">pts</div>
+              </div>
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800 p-2.5 text-center">
+                <div className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 mb-0.5 uppercase tracking-wide">Best Solve</div>
+                <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">{bestSolveRate}/5</div>
+                <div className="text-[10px] text-muted-foreground">problems</div>
+              </div>
+            </div>
+
+            {/* Top-10 table */}
+            <div className="space-y-1.5 max-h-72 overflow-y-auto">
+              {sorted.slice(0, 10).map((rec, i) => {
+                const isATH = rec.totalScore === allTimeHigh;
+                const diffColor: Record<string, string> = { Easy: "text-emerald-600", Medium: "text-amber-600", Hard: "text-red-600", All: "text-blue-600" };
+                return (
+                  <div
+                    key={rec.id}
+                    className={`rounded-lg px-3 py-2 border transition-all ${
+                      isATH && tournamentSort === "score" && i === 0
+                        ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700"
+                        : "bg-muted/30 border-transparent"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {/* Rank */}
+                      <span className={`text-[10px] font-black w-5 text-center flex-shrink-0 ${
+                        i === 0 && tournamentSort === "score" ? "text-yellow-500" :
+                        i === 1 && tournamentSort === "score" ? "text-gray-400" :
+                        i === 2 && tournamentSort === "score" ? "text-amber-700" :
+                        "text-muted-foreground"
+                      }`}>
+                        {tournamentSort === "score" ? (i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`) : `#${i + 1}`}
+                      </span>
+                      {/* Solved count */}
+                      <div className="flex gap-0.5 flex-shrink-0">
+                        {rec.rounds.map((r, j) => (
+                          <span key={j} className={`w-2 h-2 rounded-full ${
+                            r.solved ? "bg-emerald-500" : "bg-red-300"
+                          }`} title={`${r.problemName}: ${r.score}pts`} />
+                        ))}
+                      </div>
+                      {/* Difficulty badge */}
+                      <span className={`text-[9px] font-bold flex-shrink-0 ${diffColor[rec.difficulty] ?? "text-muted-foreground"}`}>
+                        {rec.difficulty}
+                      </span>
+                      {/* Solved fraction */}
+                      <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                        {rec.rounds.filter(r => r.solved).length}/5
+                      </span>
+                      {/* Date */}
+                      <span className="text-[10px] text-muted-foreground ml-auto flex-shrink-0">
+                        {new Date(rec.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                      {/* Score */}
+                      <span className={`text-xs font-black flex-shrink-0 ${
+                        isATH && tournamentSort === "score" && i === 0 ? "text-yellow-600 dark:text-yellow-400" : "text-foreground"
+                      }`}>
+                        {rec.totalScore} pts
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Sprint History + Personal Best */}
       {sprintHistory.length > 0 && (() => {
@@ -2134,7 +2244,7 @@ export default function CodePractice() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {mainView === "stats" ? (
-          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} onClearAssessments={() => { saveAssessments([]); setAssessments([]); }} srStreak={srStreak} />
+          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} onClearAssessments={() => { saveAssessments([]); setAssessments([]); }} srStreak={srStreak} tournamentHistory={loadTournamentHistory()} />
         ) : (
           <>
             {/* Toolbar */}

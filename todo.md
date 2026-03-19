@@ -146,3 +146,8 @@
 - [x] Speed Run tournament bracket mode (5 problems, 45 min, bracket progression UI in Code Practice)
 - [x] Weak-pattern drill auto-queue (Fix My Weaknesses button in Readiness tab)
 - [x] Font size/density toggle (compact/comfortable/spacious in sticky nav)
+
+## Current Batch (Leaderboard + Sprint Scheduler + Density Print)
+- [x] Tournament leaderboard in Stats view (top-10 all-time, sortable by score/date)
+- [x] Scheduled daily weakness sprint toggle (Notification API, user-chosen time)
+- [x] Density-aware print styles for Recruiter-Ready Summary PDF
