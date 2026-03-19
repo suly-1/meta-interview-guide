@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 
-const STORAGE_KEY = "meta-guide-disclaimer-acknowledged";
+const STORAGE_KEY = "meta-guide-disclaimer-acknowledged-v2";
 
 interface DisclaimerGateProps {
   children: React.ReactNode;
@@ -71,12 +71,13 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
         justifyContent: "center",
         padding: "16px",
         fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+        overflowY: "auto",
       }}
     >
       {/* Background pattern */}
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
           inset: 0,
           backgroundImage:
             "radial-gradient(circle at 20% 20%, rgba(29,78,216,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(29,78,216,0.1) 0%, transparent 50%)",
@@ -90,14 +91,15 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(255,255,255,0.1)",
           borderRadius: "16px",
-          maxWidth: "680px",
+          maxWidth: "700px",
           width: "100%",
           padding: "40px",
           backdropFilter: "blur(12px)",
           boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
+          margin: "auto",
         }}
       >
-        {/* Meta logo area */}
+        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <div
             style={{
@@ -113,7 +115,7 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
           >
             <span style={{ fontSize: "18px" }}>🔒</span>
             <span style={{ color: "#93c5fd", fontSize: "13px", fontWeight: 700, letterSpacing: "0.05em" }}>
-              CONFIDENTIAL DOCUMENT
+              INDEPENDENT STUDY RESOURCE
             </span>
           </div>
           <h1
@@ -148,7 +150,7 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
           <span style={{ fontSize: "20px", flexShrink: 0, marginTop: "1px" }}>⚠️</span>
           <div>
             <p style={{ color: "#fbbf24", fontWeight: 700, fontSize: "14px", margin: "0 0 2px" }}>
-              Important Disclaimer
+              Disclaimer
             </p>
             <p style={{ color: "#fcd34d", fontSize: "12px", margin: 0, lineHeight: 1.4, fontStyle: "italic" }}>
               Please read carefully before proceeding
@@ -164,43 +166,47 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
             borderRadius: "10px",
             padding: "20px",
             marginBottom: "20px",
+            maxHeight: "340px",
+            overflowY: "auto",
           }}
         >
-          <p style={{ color: "#cbd5e1", fontSize: "13px", lineHeight: 1.7, margin: "0 0 14px" }}>
-            This guide is an <strong style={{ color: "#e2e8f0" }}>independent study resource</strong> created to help engineers prepare for software engineering interviews at senior levels (IC6/IC7). It is{" "}
-            <strong style={{ color: "#fbbf24" }}>not affiliated with, endorsed by, sponsored by, or connected to Meta Platforms, Inc.</strong>{" "}in any way.
+          {/* Independence */}
+          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
+            Independence &amp; Non-Affiliation
           </p>
-          <ul style={{ margin: 0, padding: "0 0 0 4px", listStyle: "none" }}>
-            {[
-              "All company names, product names, and trademarks mentioned are the property of their respective owners. References to Meta, its interview process, or its engineering levels are based on publicly available information and community reports only, and do not represent official guidance from Meta.",
-              "Interview formats, evaluation criteria, and level expectations change frequently. The information in this guide may be outdated, incomplete, or inaccurate. Always verify current details directly with your recruiter or hiring manager.",
-              "This guide is provided \"as is\" without warranty of any kind. The author(s) accept no liability for decisions made based on its content. Use it as one input among many — not as a definitive source of truth.",
-            ].map((item, i) => (
-              <li
-                key={i}
-                style={{
-                  color: "#94a3b8",
-                  fontSize: "12px",
-                  lineHeight: 1.6,
-                  marginBottom: i < 2 ? "10px" : 0,
-                  paddingLeft: "16px",
-                  position: "relative",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    left: "0",
-                    color: "#60a5fa",
-                    fontWeight: 700,
-                  }}
-                >
-                  •
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
+          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
+            This is an <strong style={{ color: "#e2e8f0" }}>independent study resource</strong> for software engineering interview preparation. It is{" "}
+            <strong style={{ color: "#fbbf24" }}>not affiliated with, endorsed by, or connected to Meta Platforms, Inc.</strong>{" "}in any way. All trademarks are property of their respective owners, used here for identification only under nominative fair use.
+          </p>
+
+          {/* Accuracy */}
+          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
+            Accuracy &amp; Currency of Information
+          </p>
+          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
+            All content is based on publicly available information and may be <strong style={{ color: "#fbbf24" }}>outdated, incomplete, or inaccurate</strong>. This is not professional or career advice. Always verify details with your recruiter or hiring manager.
+          </p>
+
+          {/* Warranty & Liability */}
+          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
+            No Warranty &amp; Limitation of Liability
+          </p>
+          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
+            This guide is provided <strong style={{ color: "#e2e8f0" }}>"AS IS"</strong> without warranty of any kind, express or implied. The author(s) shall not be liable for any damages — direct, indirect, incidental, or consequential — arising from your use of or reliance on this guide. <strong style={{ color: "#fbbf24" }}>No outcome is guaranteed.</strong>
+          </p>
+
+          {/* Assumption of Risk */}
+          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
+            Assumption of Risk &amp; Indemnification
+          </p>
+          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
+            By using this guide, you assume all risk, agree you are solely responsible for any decisions made based on its content, and agree to <strong style={{ color: "#e2e8f0" }}>indemnify and hold harmless</strong> the author(s) from any claims arising from your use.
+          </p>
+
+          {/* Severability */}
+          <p style={{ color: "#94a3b8", fontSize: "11px", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
+            If any provision of this disclaimer is unenforceable, the remainder shall remain in effect.
+          </p>
         </div>
 
         {/* Acknowledgement checkbox */}
@@ -231,10 +237,8 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
               cursor: "pointer",
             }}
           />
-          <span style={{ color: "#e2e8f0", fontSize: "13px", lineHeight: 1.5 }}>
-            I have read and understood this disclaimer. I acknowledge that this guide is an independent
-            resource, not affiliated with Meta Platforms, Inc., and that I will verify current interview
-            details with my recruiter.
+          <span style={{ color: "#e2e8f0", fontSize: "13px", lineHeight: 1.6 }}>
+            <strong style={{ color: checked ? "#93c5fd" : "#e2e8f0" }}>☑️ I acknowledge</strong> this guide is independent, not affiliated with Meta, provided without warranty, and that I assume all risk of use.
           </span>
         </label>
 
@@ -260,7 +264,7 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
             boxShadow: checked ? "0 4px 20px rgba(29,78,216,0.4)" : "none",
           }}
         >
-          {checked ? "✓ I Acknowledge — Enter Guide" : "Please check the box above to continue"}
+          {checked ? "✓ I Acknowledge — Enter Guide" : "Check the box above to continue"}
         </button>
 
         {!checked && (

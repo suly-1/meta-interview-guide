@@ -14,6 +14,18 @@ import { useConfetti } from "@/hooks/useConfetti";
 import ProgressBar from "@/components/ProgressBar";
 import PatternHeatmap from "@/components/PatternHeatmap";
 import { motion, AnimatePresence } from "framer-motion";
+import ReadinessScoreCard from "@/components/ReadinessScoreCard";
+import RecommendedToday from "@/components/RecommendedToday";
+import DailyProblem from "@/components/DailyProblem";
+import WeeklyReportCard from "@/components/WeeklyReportCard";
+import SolveVelocityChart from "@/components/SolveVelocityChart";
+import StreakCalendar from "@/components/StreakCalendar";
+import TopicRadarChart from "@/components/TopicRadarChart";
+import TimedMockSession from "@/components/TimedMockSession";
+import CustomStudyPlan from "@/components/CustomStudyPlan";
+import RecruiterPDF from "@/components/RecruiterPDF";
+import StudyBuddySync from "@/components/StudyBuddySync";
+import BlindSpotDetector from "@/components/BlindSpotDetector";
 
 const TAG_COLORS: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700",

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Code2, MessageSquare, Cpu, Calendar, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STORAGE_KEY = "meta-guide-disclaimer-acknowledged";
+const STORAGE_KEY = "meta-guide-disclaimer-acknowledged-v2";
 
 function DisclaimerBanner() {
   // Read acknowledgement from localStorage on first render
@@ -97,53 +97,35 @@ function DisclaimerBanner() {
               className="overflow-hidden"
             >
               <div className="pt-3 pb-1 border-t border-amber-700/40 mt-3">
+                {/* Independence & Non-Affiliation */}
+                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">Independence &amp; Non-Affiliation</p>
                 <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
-                  This guide is provided as{" "}
-                  <strong className="text-amber-100">supplementary preparation material only</strong>{" "}
-                  and is intended to offer additional support as you prepare for your upcoming interviews. It does not replace any official communication or preparation resources.
+                  This is an <strong className="text-amber-100">independent study resource</strong> for software engineering interview preparation. It is{" "}
+                  <strong className="text-amber-100">not affiliated with, endorsed by, or connected to Meta Platforms, Inc.</strong>{" "}in any way. All trademarks are property of their respective owners, used here for identification only under nominative fair use.
                 </p>
 
-                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-2">
-                  Please note:
+                {/* Accuracy */}
+                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">Accuracy &amp; Currency of Information</p>
+                <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
+                  All content is based on publicly available information and may be <strong className="text-amber-100">outdated, incomplete, or inaccurate</strong>. This is not professional or career advice. Always verify details with your recruiter or hiring manager.
                 </p>
 
-                <ul className="space-y-2 mb-4">
-                  {[
-                    "Your official interview preparation materials will be sent to you directly via email — please follow those guidelines closely.",
-                    null, // metacareers link — rendered separately
-                    "If there is any discrepancy between this guide and the official materials, always defer to the official resources.",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-amber-200/80 leading-relaxed">
-                      <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5" />
-                      {i === 1 ? (
-                        <span>
-                          For the most up-to-date and comprehensive guidance on Meta's interview process, please visit{" "}
-                          <a
-                            href="https://metacareers.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-amber-300 underline underline-offset-2 hover:text-amber-100 inline-flex items-center gap-0.5"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            metacareers.com
-                            <ExternalLink size={11} className="inline ml-0.5" />
-                          </a>
-                          .
-                        </span>
-                      ) : (
-                        item
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                {/* Warranty & Liability */}
+                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">No Warranty &amp; Limitation of Liability</p>
+                <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
+                  This guide is provided <strong className="text-amber-100">&ldquo;AS IS&rdquo;</strong> without warranty of any kind, express or implied. The author(s) shall not be liable for any damages — direct, indirect, incidental, or consequential — arising from your use of or reliance on this guide. <strong className="text-amber-100">No outcome is guaranteed.</strong>
+                </p>
 
-                {/* Confidentiality notice */}
-                <div className="flex gap-2.5 p-3 bg-amber-900/50 border border-amber-700/50 rounded-lg mb-4">
-                  <span className="text-amber-400 flex-shrink-0 text-sm">🔒</span>
-                  <p className="text-xs text-amber-300/90 leading-relaxed">
-                    <strong className="text-amber-200">Confidential:</strong> This document is shared in confidence to support your preparation. Please do not distribute, copy, or share its contents externally.
-                  </p>
-                </div>
+                {/* Assumption of Risk */}
+                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">Assumption of Risk &amp; Indemnification</p>
+                <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
+                  By using this guide, you assume all risk, agree you are solely responsible for any decisions made based on its content, and agree to <strong className="text-amber-100">indemnify and hold harmless</strong> the author(s) from any claims arising from your use.
+                </p>
+
+                {/* Severability */}
+                <p className="text-amber-400/70 text-xs leading-relaxed italic mb-4">
+                  If any provision of this disclaimer is unenforceable, the remainder shall remain in effect.
+                </p>
 
                 {/* Acknowledgement checkbox */}
                 <div className="flex items-center justify-between gap-4 pt-3 border-t border-amber-700/30">
@@ -180,7 +162,7 @@ function DisclaimerBanner() {
                     >
                       {acknowledged
                         ? "Acknowledged — click to undo"
-                        : "I have read and understood this disclaimer"}
+                        : "☑️ I acknowledge this guide is independent, not affiliated with Meta, provided without warranty, and that I assume all risk of use."}
                     </span>
                   </button>
 
