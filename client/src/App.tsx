@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import DisclaimerGate from "./components/DisclaimerGate";
+import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -30,6 +31,7 @@ function App() {
           {/* DisclaimerGate blocks ALL content until the user explicitly acknowledges the disclaimer */}
           <DisclaimerGate>
             <Router />
+            <PatternUnlockCelebration />
           </DisclaimerGate>
         </TooltipProvider>
       </ThemeProvider>

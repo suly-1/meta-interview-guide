@@ -96,3 +96,48 @@
 - [x] AI Round mock history in Stats (mirror SD history card: scenario, verdict, avg score, date)
 - [x] IC7+ behavioral-only debrief prompt tuning (skip coding, evaluate XFN influence, retrospective ownership, org-wide impact)
 - [x] Mock Interview session replay (collapsible transcript panel in behavioral debrief: question + typed answer pairs)
+
+## Batch-23 Features
+- [ ] Sprint history line chart (score-over-time per topic in Sprint History Stats section)
+- [ ] Speed Run tournament mode (bracket-style weekly challenge, 8 problems, cumulative score)
+- [ ] Code diff viewer (side-by-side diff between current and previous submission in history panel)
+- [ ] Pattern unlock celebration (confetti burst + toast when pattern reaches 100% mastery)
+- [ ] STAR answer word-count enforcer (live word counter with green/amber/red indicator in behavioral answer textarea)
+- [ ] Behavioral flashcard deck (flip-card mode: one question at a time, type answer, flip to see probes + model outline)
+- [ ] Mock Interview warm-up mode (5-min pre-session: 1 easy behavioral + 1 simple coding problem)
+- [ ] System Design follow-up drill bank (30+ curated follow-up probing questions per pattern, self-quiz mode)
+- [ ] AI Round scenario difficulty tiers (Foundational/Intermediate/Advanced tags + difficulty filter in mock session picker)
+- [ ] System Design pattern comparison table (side-by-side matrix: read/write-heavy, consistency model, Meta example)
+- [ ] SR due-date heatmap (GitHub-style heatmap in Stats showing SR reviews due per day for next 30 days)
+- [ ] Weak-pattern drill auto-queue (Fix my weaknesses button: auto-queues 5-problem Sprint on bottom 3 patterns)
+- [ ] Time-of-day performance chart (bar chart in Stats of avg score by hour-of-day)
+- [ ] Achievement badge wall (dedicated Achievements section in Stats with earned/locked badges)
+- [ ] Daily XP system (XP for every action, level bar in sidebar)
+- [ ] Interview countdown clock (Days until interview widget in sidebar, adjusts Study Planner recommendations)
+- [ ] Meta engineering blog reader (in-app curated feed of 20 relevant Meta Engineering Blog posts)
+- [ ] IC6 vs IC7 answer comparison (toggle in Behavioral tab showing IC6-level vs IC7-level sample answers)
+- [ ] Coding pattern cheat sheet PDF (one-click export: 14 patterns, key DS, time complexity, canonical problem)
+- [ ] Keyboard shortcut help overlay (? key opens two-column modal with all shortcuts)
+- [ ] Font size / density toggle (compact/comfortable/spacious density toggle in settings)
+- [ ] AI Round follow-up drill (Drill Deeper button in AI Round debrief generating 2-3 probing follow-up questions)
+- [ ] Mock session comparison (Compare to last attempt toggle showing score deltas vs previous session)
+
+## Batch-23 Implementation Tracking
+- [ ] Sprint history line chart (score-over-time per topic)
+- [ ] Code diff viewer (side-by-side diff between submissions)
+- [ ] AI Round Drill Deeper UI (button in debrief)
+- [ ] AI Round difficulty tiers (Foundational/Intermediate/Advanced tags)
+- [ ] Mock session comparison (score deltas vs previous session)
+- [ ] SR due-date heatmap (GitHub-style 30-day calendar)
+- [ ] Weak-pattern drill auto-queue (Fix My Weaknesses button)
+- [ ] Time-of-day performance chart
+- [ ] Achievement badge wall
+- [ ] Daily XP system
+- [ ] Interview countdown in sticky nav
+- [ ] System Design pattern comparison table
+- [ ] Keyboard shortcut overlay (? key)
+- [ ] Font size/density toggle
+- [ ] Coding pattern cheat sheet PDF
+- [ ] Speed Run tournament mode
+- [ ] Mock warm-up mode (5-min pre-session)
+- [ ] IC6 vs IC7 answer comparison in BehavioralTab

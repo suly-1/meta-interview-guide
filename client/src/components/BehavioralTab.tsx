@@ -6,6 +6,7 @@ import { usePracticeRatings } from "@/hooks/usePracticeRatings";
 import { useStreak } from "@/hooks/useStreak";
 import { motion, AnimatePresence } from "framer-motion";
 import STARGapAnalyzer from "@/components/STARGapAnalyzer";
+import BehavioralFlashcardDeck from "@/components/BehavioralFlashcardDeck";
 import InterviewerPersonaSimulator from "@/components/InterviewerPersonaSimulator";
 import IC7AnswerUpgrader from "@/components/IC7AnswerUpgrader";
 import BehavioralAnswerScorer from "@/components/BehavioralAnswerScorer";
@@ -980,6 +981,19 @@ export default function BehavioralTab() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Flashcard Flip Deck */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Flashcard Flip Deck
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            One question at a time — type your answer, track word count, then flip to see probes and IC6 vs IC7 sample answers
+          </p>
+        </div>
+        <BehavioralFlashcardDeck />
       </section>
 
       {/* Practice Mode */}

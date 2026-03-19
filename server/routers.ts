@@ -765,6 +765,72 @@ Return ONLY valid JSON matching the schema exactly.`,
           };
         }
       }),
+    drillDeeper: publicProcedure
+      .input(
+        z.object({
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          problemTitle: z.string(),
+          problemDomain: z.string(),
+          verdict: z.string(),
+          weakDimensions: z.array(z.string()),
+          phaseAnswers: z.array(z.string()),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const systemPrompt = `You are a senior Meta interviewer running a targeted drill-deeper session after an AI-Enabled Coding Round debrief for ${levelLabel}. The candidate received a "${input.verdict}" verdict on "${input.problemTitle}" (domain: ${input.problemDomain}). Their weakest dimensions were: ${input.weakDimensions.join(", ")}. Generate 4 targeted follow-up challenges that directly address those weaknesses. Return structured JSON.`;
+        const userContent = input.phaseAnswers.map((a, i) => `Phase ${i + 1}: ${a || "(no answer)"}`).join("\n");
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userContent },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "drill_deeper_challenges",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  challenges: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        dimension: { type: "string" },
+                        prompt: { type: "string" },
+                        hint: { type: "string" },
+                        modelAnswer: { type: "string" },
+                      },
+                      required: ["title", "dimension", "prompt", "hint", "modelAnswer"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["challenges"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as { challenges: Array<{ title: string; dimension: string; prompt: string; hint: string; modelAnswer: string }> };
+        } catch {
+          return {
+            challenges: [
+              { title: "Optimize for Space", dimension: "Code Development", prompt: "Rewrite your solution using O(1) extra space.", hint: "Consider in-place modification.", modelAnswer: "Use two pointers or index manipulation to avoid extra allocations." },
+              { title: "Add Error Handling", dimension: "Verification & Debugging", prompt: "What edge cases does your current solution miss? Add proper guards.", hint: "Think about null inputs, empty arrays, integer overflow.", modelAnswer: "Guard against null/empty inputs at the top of the function, check for overflow with long arithmetic." },
+              { title: "Explain Trade-offs", dimension: "Technical Communication", prompt: "Compare your approach to two alternatives. When would each be preferred?", hint: "Think about time vs. space trade-offs and input characteristics.", modelAnswer: "Discuss the hash map approach (O(n) time, O(n) space) vs. sort-based (O(n log n) time, O(1) space) vs. brute force." },
+              { title: "Scale to 10x Input", dimension: "Problem Solving", prompt: "How would your solution change if the input was 10x larger (e.g., 10M elements)?", hint: "Consider streaming, chunking, or distributed approaches.", modelAnswer: "For 10M elements, consider external merge sort or streaming algorithms that process data in chunks." },
+            ],
+          };
+        }
+      }),
   }),
 });
 
