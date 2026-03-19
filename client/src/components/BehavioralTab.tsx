@@ -430,31 +430,61 @@ function PracticeMode() {
 }
 
 // ── IC6 vs IC7 Comparison Data ─────────────────────────────────────────────
-const IC_COMPARISON = [
+// ── IC6 vs IC7 Axis Comparison Data (from PE Bar Setting Framework) ──────────
+const IC_AXIS_COMPARISON = [
   {
-    area: "XFN Collaboration & Scope",
+    axis: "🔨 Project Impact",
     color: "blue",
-    ic6: "Leads a project with 2–3 XFN partners. Owns the technical scope within your team. Aligns stakeholders at the team level.",
-    ic7: "Leads org-wide or multi-team initiatives. Defines scope across multiple teams. Aligns VP-level stakeholders and drives roadmap decisions.",
+    rows: [
+      { ic6: "Solves technical problems that few others can", ic7: "Identifies and solves the hardest technical problems across the org" },
+      { ic6: "Implements the hardest parts of the system/feature", ic7: "Sees problems and opportunities that others miss and drives them to resolution" },
+      { ic6: "Builds and ships high-quality work following best practices", ic7: "Picks projects with a goal of making things substantially better — expert across systems" },
+      { ic6: "Credible co-owner across XFN; can independently drive product decisions", ic7: "Makes teams and systems work better with AI to increase impact" },
+    ],
   },
   {
-    area: "Conflict Resolution",
-    color: "amber",
-    ic6: "Resolves conflicts within your immediate team or with one adjacent team. Finds compromise and keeps the project moving.",
-    ic7: "Resolves conflicts across org boundaries. Mediates between senior leaders. Shapes team culture to prevent systemic conflict.",
-  },
-  {
-    area: "Problem Solving",
+    axis: "⚙️ Engineering Excellence",
     color: "emerald",
-    ic6: "Identifies and solves complex technical problems independently. Makes sound decisions with incomplete data. Learns from failures.",
-    ic7: "Solves ambiguous, org-level technical problems. Sets the technical direction for multiple teams. Decisions have multi-quarter impact.",
+    rows: [
+      { ic6: "Influences engineering culture in broader team", ic7: "Has detailed understanding of bottlenecks of larger org and company" },
+      { ic6: "Advocates for higher product quality and engineering efficiency", ic7: "Pursues opportunities that make larger org more efficient, including eliminating categories of work" },
+      { ic6: "—", ic7: "Simplifies the world by applying past experiences; systems can be reasoned about formally" },
+      { ic6: "—", ic7: "Influence drives strategy and implementation of engineering craft beyond individual teams" },
+      { ic6: "—", ic7: "Independently balances engineering craft with other business requirements" },
+    ],
   },
   {
-    area: "Communication",
-    color: "indigo",
-    ic6: "Communicates clearly to your team and immediate stakeholders. Writes good design docs. Mentors 1–2 junior engineers.",
-    ic7: "Communicates vision to the entire org. Produces docs that shape engineering culture. Grows and develops senior engineers.",
+    axis: "🧭 Direction",
+    color: "amber",
+    rows: [
+      { ic6: "Helps set direction and goals for the team", ic7: "Has detailed understanding of goals/strategy of larger org and company; drives team's goals and technical direction" },
+      { ic6: "Leads/coordinates rollouts and major initiatives", ic7: "Keeps close eye on industry, competition, and AI evolution; assesses threats and opportunities" },
+      { ic6: "Strong communication within engineering", ic7: "Knows how a lot of Meta works — organizationally and technically — uses this to get things done few others can" },
+      { ic6: "Communicates effectively across disciplines", ic7: "Drives ideas from inception to delivery; ensures good ideas are prioritized and challenges overcome" },
+      { ic6: "—", ic7: "Owns outcomes end-to-end across technical and non-technical dimensions" },
+    ],
   },
+  {
+    axis: "👥 People",
+    color: "indigo",
+    rows: [
+      { ic6: "Good at recruiting pitches; mentors new team members", ic7: "Awesome at mentoring, guidance, and conflict resolution across the larger org" },
+      { ic6: "Sought out as a strong mentor for engineers", ic7: "Close partner with managers; helps improve team performance" },
+      { ic6: "—", ic7: "Provides feedback about other teams and org overall" },
+      { ic6: "—", ic7: "Helps with leadership recruiting — senior engineers and managers" },
+    ],
+  },
+];
+
+const IC7_KEY_SIGNALS = [
+  "Direct line from business need to their work — IC7s connect what they do to company-level business value",
+  "1–3 deep, large contributions affecting a broad area of services, technology, and people",
+  "Builds strategies that help others achieve more impact than they would otherwise — the key is bringing change to what would otherwise happen",
+  "Flexible roles — can code deeply, flip to leading, build a POC, depending on need",
+  "Owns outcomes, not just the path — e.g., a great service that doesn't get adopted is not success for an IC7",
+  "Grows IC5/6 leaders around them — creates space for other leaders, avoids being an SPOF",
+  "Tells the hard truth — e.g., deprecating something or killing a project when ROI isn't there",
+  "Influence is upward (business direction, directors) not just lateral",
 ];
 
 const IC_COLOR_MAP: Record<string, { header: string; ic6: string; ic7: string; badge: string }> = {
@@ -909,55 +939,108 @@ export default function BehavioralTab() {
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            IC6 vs IC7 Evaluation Bar
+            IC6 vs IC7 — Scope &amp; Evaluation Bar
           </h2>
-          <p className="text-sm text-gray-500 mt-1">How the behavioral bar differs by level — know which standard you are being held to</p>
+          <p className="text-sm text-gray-500 mt-1">From the PE Bar Setting Framework and IC7 intake forms — know which standard you are being held to</p>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 font-bold text-gray-700 w-1/4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus Area</th>
-                <th className="text-left px-4 py-3 font-bold text-blue-700 w-[37.5%]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    IC6 — Senior Engineer
-                  </span>
-                </th>
-                <th className="text-left px-4 py-3 font-bold text-purple-700 w-[37.5%]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-purple-500" />
-                    IC7 — Staff Engineer
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {IC_COMPARISON.map((row, i) => {
-                const c = IC_COLOR_MAP[row.color];
-                return (
-                  <tr key={row.area} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
-                    <td className="px-4 py-4 align-top">
-                      <span className={`inline-block text-xs font-bold px-2 py-1 rounded-full ${c.header} border`}>
-                        {row.area}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <p className="text-sm text-gray-700 leading-relaxed">{row.ic6}</p>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <p className="text-sm text-gray-800 font-medium leading-relaxed">{row.ic7}</p>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+
+        {/* Foundational difference */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+              <h3 className="font-bold text-blue-900 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC6 — Senior Engineer</h3>
+            </div>
+            <p className="text-xs text-blue-800 leading-relaxed mb-2"><strong>Template:</strong> Established senior engineer within the org</p>
+            <p className="text-xs text-blue-700 leading-relaxed"><strong>Operating Level:</strong> Team / broader team</p>
+            <p className="text-xs text-blue-700 leading-relaxed mt-1"><strong>Archetype:</strong> Strong individual executor and team-level leader</p>
+          </div>
+          <div className="rounded-xl border border-purple-200 bg-purple-50 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+              <h3 className="font-bold text-purple-900 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC7 — Staff Engineer</h3>
+            </div>
+            <p className="text-xs text-purple-800 leading-relaxed mb-2"><strong>Template:</strong> No easily made template — advancement comes from identifying and delivering an initiative with large impact and value to the org</p>
+            <p className="text-xs text-purple-700 leading-relaxed"><strong>Operating Level:</strong> Org-wide and cross-org</p>
+            <p className="text-xs text-purple-700 leading-relaxed mt-1"><strong>Archetype:</strong> Deep specialist or broad XFN coordinator</p>
+          </div>
         </div>
-        <p className="text-xs text-gray-400 mt-3 italic">IC7 answers require demonstrably larger scope, cross-org influence, and measurable org-level impact. If targeting IC7, every STAR story should reflect this scale.</p>
+
+        {/* Axis-by-axis comparison */}
+        <div className="space-y-5 mb-6">
+          {IC_AXIS_COMPARISON.map((axis) => {
+            const colorMap: Record<string, { header: string }> = {
+              blue:    { header: "bg-blue-600" },
+              emerald: { header: "bg-emerald-600" },
+              amber:   { header: "bg-amber-500" },
+              indigo:  { header: "bg-indigo-600" },
+            };
+            const c = colorMap[axis.color] ?? { header: "bg-gray-600" };
+            return (
+              <div key={axis.axis} className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className={`${c.header} px-4 py-2.5`}>
+                  <span className="text-sm font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{axis.axis}</span>
+                </div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="text-left px-4 py-2 text-xs font-bold text-blue-700 w-1/2">
+                        <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" />IC6 — Senior Engineer</span>
+                      </th>
+                      <th className="text-left px-4 py-2 text-xs font-bold text-purple-700 w-1/2">
+                        <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-purple-500" />IC7 — Staff Engineer</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {axis.rows.map((row, i) => (
+                      <tr key={i} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                        <td className="px-4 py-3 align-top">
+                          <p className={`text-xs leading-relaxed ${row.ic6 === "—" ? "text-gray-300 italic" : "text-gray-700"}`}>{row.ic6}</p>
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <p className={`text-xs leading-relaxed font-medium ${row.ic7 === "—" ? "text-gray-300 italic" : "text-gray-800"}`}>{row.ic7}</p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* IC7 Key Signals */}
+        <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-5">
+          <h3 className="font-bold text-purple-900 text-sm mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Key Signals That Distinguish IC7 from IC6
+          </h3>
+          <p className="text-xs text-purple-700 mb-3 italic">From the PE Bar Setting Framework and IC7 intake forms</p>
+          <ul className="space-y-2">
+            {IC7_KEY_SIGNALS.map((signal, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-xs text-purple-800 leading-relaxed">
+                <span className="w-5 h-5 rounded-full bg-purple-200 text-purple-700 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                {signal}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* TL;DR */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p className="text-xs font-bold text-blue-800 mb-1">TL;DR — IC6</p>
+            <p className="text-xs text-blue-700 leading-relaxed">Proven senior engineer who solves hard problems, leads major initiatives on their team, and mentors others.</p>
+          </div>
+          <div className="rounded-xl border border-purple-200 bg-purple-50 p-4">
+            <p className="text-xs font-bold text-purple-800 mb-1">TL;DR — IC7</p>
+            <p className="text-xs text-purple-700 leading-relaxed">No template — demonstrates org-wide or cross-org impact, shapes technical strategy, independently identifies what the org should be working on, owns end-to-end outcomes, and grows other senior leaders.</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-400 mt-3 italic">The step from IC6 → IC7 is fundamentally about scope of influence and ownership: from team-level execution to org-level strategy and outcomes.</p>
       </section>
 
-      {/* 4 Focus Areas */}
+            {/* 4 Focus Areas */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
