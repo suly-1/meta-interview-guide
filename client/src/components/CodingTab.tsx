@@ -10,6 +10,7 @@ import { useDrillRatings } from "@/hooks/useDrillRatings";
 import PatternQuickReference from "@/components/PatternQuickReference";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 import { useProgress } from "@/hooks/useProgress";
+import PatternStuckHintLadder from "@/components/PatternStuckHintLadder";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -143,6 +144,11 @@ function PatternRow({
                   ))}
                 </div>
               </div>
+              {/* Stuck? Hint Ladder */}
+              <div className="md:col-span-2 lg:col-span-3">
+                <PatternStuckHintLadder patternName={p.name} keyIdea={p.keyIdea} />
+              </div>
+
               {/* Pattern Notes */}
               <div className="bg-white rounded-xl border border-purple-100 p-4 md:col-span-2 lg:col-span-3">
                 <div className="flex items-center justify-between mb-2">

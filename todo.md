@@ -44,3 +44,6 @@
 - [ ] Enhanced Pattern Mastery Heatmap (SVG mastery ring, time-invested fill bars, Easy/Medium/Hard breakdown)
 - [ ] Weekly Progress Email Digest UI (Send button in Overview, compiles session data, notifyOwner)
 - [ ] Add CTCI spreadsheet link to Practice Tracker tab header
+- [x] Wire MockInterviewSimulator as its own navigation tab
+- [x] CTCI Daily Challenge amber banner in Practice Tracker tab
+- [x] Per-pattern Stuck? 3-step hint ladder inside expanded PatternRow

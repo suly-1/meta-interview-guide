@@ -250,6 +250,37 @@ Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
         }
       }),
   }),
+
+  /**
+   * patternHint.get — 3-step hint ladder for coding patterns (gentle → medium → full walkthrough).
+   */
+  patternHint: router({
+    get: publicProcedure
+      .input(
+        z.object({
+          patternName: z.string().min(1),
+          keyIdea: z.string(),
+          hintLevel: z.enum(["gentle", "medium", "full"]).default("gentle"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelInstructions: Record<string, string> = {
+          gentle: "Give a very gentle nudge — mention only the high-level algorithmic family or data structure this pattern belongs to. Do NOT describe the approach or key insight.",
+          medium: "Give a medium hint — describe the core insight of this pattern at a high level. Mention what problem shape it solves and why. Do NOT write code.",
+          full: "Give a full walkthrough — explain the pattern step by step in plain English: when to recognise it, the key invariant, and the general algorithm. Do NOT write actual code.",
+        };
+        const systemPrompt = `You are a senior software engineer coaching a Meta IC6/IC7 candidate.\nYou are explaining the \"${input.patternName}\" coding pattern.\nCore idea: ${input.keyIdea}\n${levelInstructions[input.hintLevel]}\nKeep your response concise (3-5 sentences). Do not write code.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `I'm stuck on the ${input.patternName} pattern. ${input.hintLevel === 'gentle' ? 'Give me a gentle nudge.' : input.hintLevel === 'medium' ? 'Give me a medium hint.' : 'Walk me through it fully.'}` },
+          ],
+        });
+        const hint = response.choices?.[0]?.message?.content ?? "Unable to generate a hint. Please try again.";
+        return { hint } as const;
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

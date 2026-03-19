@@ -67,6 +67,16 @@ export default function CTCITrackerTab() {
   };
   const hasActiveFilters = search || diffFilter !== 'All' || topicFilter !== 'All' || statusFilter !== 'All';
 
+  // Daily Challenge — deterministic unsolved problem of the day
+  const dailyChallenge = useMemo(() => {
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+    const unsolved = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
+    if (unsolved.length === 0) return null;
+    return unsolved[dayOfYear % unsolved.length];
+  }, [progress]);
+  const dailyDate = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+
   const handleToggleSolved = (id: number) => {
     const wasSolved = progress[id]?.solved;
     toggleSolved(id);
@@ -183,6 +193,52 @@ export default function CTCITrackerTab() {
           </div>
         ))}
       </div>
+
+      {/* Daily Challenge Banner */}
+      {dailyChallenge && (
+        <div className="relative overflow-hidden rounded-2xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 p-4 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="text-3xl select-none flex-shrink-0 animate-bounce">🌟</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-600">
+                  🌟 Problem of the Day
+                </span>
+                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">{dailyDate}</span>
+              </div>
+              <a
+                href={dailyChallenge.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-base font-bold text-gray-900 dark:text-gray-100 hover:text-amber-700 dark:hover:text-amber-300 transition-colors leading-snug flex items-center gap-1.5 group"
+              >
+                {dailyChallenge.id}. {dailyChallenge.name}
+                <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+              </a>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                  dailyChallenge.difficulty === 'Easy' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' :
+                  dailyChallenge.difficulty === 'Hard' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
+                  'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+                }`}>{dailyChallenge.difficulty}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{dailyChallenge.topic.split(',').slice(0, 3).join(', ')}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => handleToggleSolved(dailyChallenge.id)}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                progress[dailyChallenge.id]?.solved
+                  ? 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-600'
+                  : 'bg-white dark:bg-gray-800 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30'
+              }`}
+            >
+              {progress[dailyChallenge.id]?.solved
+                ? <><CheckCircle2 className="w-4 h-4" /> Done!</>
+                : <><Circle className="w-4 h-4" /> Mark Solved</>}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search + Filters */}
       <div className="bg-card border border-border rounded-xl p-4 space-y-3">
