@@ -170,38 +170,62 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
     debrief: publicProcedure
       .input(
         z.object({
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["IC6", "IC7", "IC7_PRINCIPAL"]).default("IC6"),
           coding: z.object({
             problemName: z.string(),
             difficulty: z.string(),
             solved: z.boolean(),
             durationSec: z.number(),
             notes: z.string().optional(),
-          }),
+          }).optional(),
           behavioral: z.array(
             z.object({
               question: z.string(),
               answer: z.string(),
             })
-          ).min(1).max(3),
+          ).min(1).max(6),
         })
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
-        const codingResult = input.coding.solved
-          ? `Solved in ${Math.round(input.coding.durationSec / 60)} min`
-          : `Did not solve within ${Math.round(input.coding.durationSec / 60)} min`;
+        const isPrincipal = input.targetLevel === "IC7_PRINCIPAL";
+        const levelLabel = isPrincipal
+          ? "Principal/Senior Staff Engineer (IC7+)"
+          : input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
         const behavioralSection = input.behavioral
           .map((b, i) => `Q${i + 1}: ${b.question}\nA${i + 1}: ${b.answer}`)
           .join("\n\n");
-        const systemPrompt = `You are a Meta engineering interview panel evaluating a candidate for ${levelLabel}.
+
+        // IC7_PRINCIPAL: behavioral-only 60-min session — skip coding entirely
+        let systemPrompt: string;
+        let userMessage: string;
+        if (isPrincipal) {
+          systemPrompt = `You are a senior Meta engineering panel evaluating a candidate for ${levelLabel}.
+This is a 60-minute behavioral-only interview focused on cross-functional leadership, org-wide impact, and retrospective ownership.
+Do NOT evaluate coding ability — this session has no coding component.
+Evaluate the candidate against the IC7+ bar at Meta:
+- Cross-functional influence: Does the candidate drive alignment across multiple teams, orgs, or functions?
+- Retrospective ownership: Do they demonstrate deep ownership of outcomes, including failures, with systemic improvements?
+- Org-wide impact: Are their examples scoped to org-level or company-level impact, not just team-level?
+- Communication & persuasion: Can they influence without authority, navigate ambiguity, and align senior stakeholders?
+- Strategic thinking: Do they demonstrate long-horizon thinking, trade-off reasoning, and prioritisation at scale?
+Be direct and calibrated. IC7+ requires clear evidence of staff-level leadership, not just strong IC execution.
+Score behavioral from 1 (poor) to 5 (exceptional). Set codingScore to 0 and codingFeedback to "N/A — behavioral-only session".`;
+          userMessage = `=== BEHAVIORAL INTERVIEW (60 min, IC7+ Principal/Senior Staff) ===\n${behavioralSection}`;
+        } else {
+          const codingResult = input.coding
+            ? (input.coding.solved
+              ? `Solved in ${Math.round(input.coding.durationSec / 60)} min`
+              : `Did not solve within ${Math.round(input.coding.durationSec / 60)} min`)
+            : "Not attempted";
+          systemPrompt = `You are a Meta engineering interview panel evaluating a candidate for ${levelLabel}.
 You have just completed a mock interview loop with one coding round and ${input.behavioral.length} behavioral questions.
 Evaluate the candidate holistically and return a structured JSON debrief.
 Be direct, specific, and calibrated to the ${input.targetLevel} bar at Meta.
 Do not be overly generous — IC7 requires demonstrable staff-level scope and impact.
 Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
-        const userMessage = `=== CODING ROUND ===\nProblem: ${input.coding.problemName} (${input.coding.difficulty})\nResult: ${codingResult}${input.coding.notes ? `\nCandidate notes: ${input.coding.notes}` : ""}\n\n=== BEHAVIORAL ROUNDS ===\n${behavioralSection}`;
+          userMessage = `=== CODING ROUND ===\nProblem: ${input.coding?.problemName ?? "Unknown"} (${input.coding?.difficulty ?? "Unknown"})\nResult: ${codingResult}${input.coding?.notes ? `\nCandidate notes: ${input.coding.notes}` : ""}\n\n=== BEHAVIORAL ROUNDS ===\n${behavioralSection}`;
+        }
         const response = await invokeLLM({
           messages: [
             { role: "system", content: systemPrompt },

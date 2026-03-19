@@ -12,7 +12,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Play, Square, ChevronRight, ExternalLink, CheckCircle2, XCircle,
   Brain, MessageSquare, Code2, Trophy, RotateCcw, Loader2, AlertCircle,
-  Star, TrendingUp, TrendingDown, Target, Clock,
+  Star, TrendingUp, TrendingDown, Target, Clock, ChevronDown, ChevronUp, ScrollText,
 } from "lucide-react";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { BEHAVIORAL_FOCUS_AREAS, IC7_BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
@@ -803,12 +803,57 @@ function DebriefPhase({
         </div>
       )}
 
+      {/* Session Transcript */}
+      <SessionTranscript session={session} />
+
       <button
         onClick={onReset}
         className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-colors"
       >
         <RotateCcw size={14} /> Start New Session
       </button>
+    </div>
+  );
+}
+
+// ─── SessionTranscript ────────────────────────────────────────────────────────
+
+function SessionTranscript({ session }: { session: SessionState }) {
+  const [open, setOpen] = useState(false);
+  const hasBehavioral = session.behavioralQuestions.length > 0 && session.behavioralAnswers.some(a => a.trim().length > 0);
+  if (!hasBehavioral) return null;
+
+  return (
+    <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-2 px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+      >
+        <ScrollText size={13} className="text-gray-500 shrink-0" />
+        <span className="text-xs font-semibold text-gray-700 flex-1">Session Transcript</span>
+        <span className="text-[10px] text-gray-400 mr-1">{session.behavioralQuestions.length} behavioral Q&amp;As</span>
+        {open ? <ChevronUp size={13} className="text-gray-400" /> : <ChevronDown size={13} className="text-gray-400" />}
+      </button>
+      {open && (
+        <div className="divide-y divide-gray-100">
+          {session.behavioralQuestions.map((bq, i) => (
+            <div key={i} className="px-4 py-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold flex items-center justify-center mt-0.5">Q</span>
+                <p className="text-xs font-semibold text-gray-800 leading-relaxed">{bq.question}</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center mt-0.5">A</span>
+                {session.behavioralAnswers[i]?.trim() ? (
+                  <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{session.behavioralAnswers[i]}</p>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">No answer recorded</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

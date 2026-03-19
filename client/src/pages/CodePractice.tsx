@@ -19,7 +19,7 @@ import {
   Terminal, AlertCircle, Loader2, StickyNote, History, Trophy,
   ChevronDown, ChevronUp, Flame, BookOpen, Zap, Plus, Trash2,
   BarChart2, FlaskConical, GitCommit, TrendingUp, Award,
-  Lock, Download, Copy, Shuffle, Timer, EyeOff, Mail, Database
+  Lock, Download, Copy, Shuffle, Timer, EyeOff, Mail, Database, Cpu
 } from "lucide-react";
 
 // ─── Language config ───────────────────────────────────────────────────────
@@ -950,6 +950,43 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
                     <span className="font-medium text-foreground truncate flex-1">{e.problemTitle}</span>
                     <span className="text-[10px] text-muted-foreground shrink-0">{e.targetLevel}</span>
                     <span className="text-[10px] font-mono font-bold text-indigo-600 shrink-0">{avgScore}/5</span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{new Date(e.date).toLocaleDateString()}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* AI Round Mock History */}
+      {(() => {
+        let aiHistory: Array<{ id: string; problemTitle: string; domain: string; targetLevel: string; verdict: string; problemSolvingScore: number; codeDevelopmentScore: number; verificationScore: number; communicationScore: number; aiToolUsageScore: number; date: string }> = [];
+        try { aiHistory = JSON.parse(localStorage.getItem("ai_mock_session_history") || "[]"); } catch { /* empty */ }
+        if (aiHistory.length === 0) return null;
+        const VERDICT_COLORS: Record<string, string> = {
+          "Strong Hire": "text-emerald-700 bg-emerald-100",
+          "Hire": "text-blue-700 bg-blue-100",
+          "Borderline": "text-amber-700 bg-amber-100",
+          "No Hire": "text-red-700 bg-red-100",
+        };
+        return (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Cpu size={13} className="text-teal-500" />
+              <span className="text-xs font-semibold text-foreground">AI-Enabled Round Mock History</span>
+              <span className="text-xs text-muted-foreground">{aiHistory.length} sessions</span>
+            </div>
+            <div className="space-y-2 max-h-52 overflow-y-auto">
+              {aiHistory.slice().reverse().slice(0, 15).map((e) => {
+                const avgScore = Math.round((e.problemSolvingScore + e.codeDevelopmentScore + e.verificationScore + e.communicationScore + e.aiToolUsageScore) / 5 * 10) / 10;
+                return (
+                  <div key={e.id} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold ${VERDICT_COLORS[e.verdict] || "text-gray-600 bg-gray-100"}`}>{e.verdict}</span>
+                    <span className="font-medium text-foreground truncate flex-1">{e.problemTitle}</span>
+                    <span className="text-[10px] text-teal-600 font-semibold shrink-0">{e.domain}</span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{e.targetLevel}</span>
+                    <span className="text-[10px] font-mono font-bold text-teal-600 shrink-0">{avgScore}/5</span>
                     <span className="text-[10px] text-muted-foreground shrink-0">{new Date(e.date).toLocaleDateString()}</span>
                   </div>
                 );
