@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2, Layers, ClipboardList } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2, Layers, ClipboardList, Terminal } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
@@ -14,12 +14,14 @@ import CTCITrackerTab from "@/components/CTCITrackerTab";
 import ReadinessTab from "@/components/ReadinessTab";
 import SystemDesignTab from "@/components/SystemDesignTab";
 import MockInterviewSimulator from "@/components/MockInterviewSimulator";
+import CodePractice from "@/pages/CodePractice";
 import { useStreak } from "@/hooks/useStreak";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
   { id: "coding",     label: "Coding Interview",     icon: <Code2 size={15} />,          color: "blue"    },
   { id: "mock",       label: "Mock Interview",       icon: <ClipboardList size={15} />,  color: "indigo"  },
+  { id: "practice",   label: "Code Practice",         icon: <Terminal size={15} />,       color: "green"   },
   { id: "ai-round",   label: "AI-Enabled Round",     icon: <Cpu size={15} />,            color: "teal"    },
   { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />,  color: "amber"   },
   { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,       color: "emerald" },
@@ -169,6 +171,7 @@ export default function Home() {
               {activeTab === "ctci"       && <CTCITrackerTab />}
               {activeTab === "readiness"  && <ReadinessTab />}
               {activeTab === "sysdesign"  && <SystemDesignTab />}
+              {activeTab === "practice"   && <CodePractice />}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -195,6 +198,8 @@ export default function Home() {
               violet:  "text-violet-600",
               rose:    "text-rose-600",
               slate:   "text-slate-600",
+              green:   "text-green-600",
+              indigo:  "text-indigo-600",
             };
             return (
               <button
@@ -212,7 +217,9 @@ export default function Home() {
                     tab.color === "teal"   ? "bg-teal-600"    :
                     tab.color === "amber"  ? "bg-amber-600"   :
                     tab.color === "violet" ? "bg-violet-600"  :
-                    tab.color === "rose"   ? "bg-rose-600"    : "bg-emerald-600"
+                    tab.color === "rose"   ? "bg-rose-600"    :
+                    tab.color === "green"  ? "bg-green-600"   :
+                    tab.color === "indigo" ? "bg-indigo-600"  : "bg-emerald-600"
                   }`} />
                 )}
                 <span className={isActive ? "" : "opacity-60"}>{tab.icon}</span>
@@ -223,7 +230,8 @@ export default function Home() {
                    tab.id === "behavioral" ? "Behavioral" :
                    tab.id === "ctci"       ? "Tracker"    :
                    tab.id === "readiness"  ? "Readiness"  :
-                   tab.id === "sysdesign"  ? "Sys Design" : "Timeline"}
+                   tab.id === "sysdesign"  ? "Sys Design" :
+                   tab.id === "practice"   ? "Practice"   : "Timeline"}
                 </span>
               </button>
             );

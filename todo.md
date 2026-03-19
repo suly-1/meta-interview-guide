@@ -47,3 +47,5 @@
 - [x] Wire MockInterviewSimulator as its own navigation tab
 - [x] CTCI Daily Challenge amber banner in Practice Tracker tab
 - [x] Per-pattern Stuck? 3-step hint ladder inside expanded PatternRow
+- [x] In-app coding practice environment (Monaco editor, language selector, code execution via Judge0, AI hints, timer, solve tracking)
+- [x] Code Practice tab (Monaco editor, Judge0 execution, AI hints, timer, session history, solve tracking)

@@ -252,6 +252,48 @@ Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
   }),
 
   /**
+   * codeExec.run — executes source code via Judge0 CE public API.
+   */
+  codeExec: router({
+    run: publicProcedure
+      .input(
+        z.object({
+          sourceCode: z.string().min(1),
+          languageId: z.number().int().positive(),
+          stdin: z.string().optional().default(""),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const response = await fetch("https://ce.judge0.com/submissions?wait=true", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source_code: input.sourceCode,
+            language_id: input.languageId,
+            stdin: input.stdin,
+            cpu_time_limit: 5,
+            wall_time_limit: 10,
+          }),
+        });
+        if (!response.ok) throw new Error(`Judge0 error: ${response.status}`);
+        const data = await response.json() as {
+          stdout?: string; stderr?: string; compile_output?: string;
+          status?: { id: number; description: string };
+          time?: string; memory?: number; message?: string;
+        };
+        return {
+          stdout: data.stdout ?? "",
+          stderr: data.stderr ?? "",
+          compileOutput: data.compile_output ?? "",
+          statusId: data.status?.id ?? 0,
+          statusDescription: data.status?.description ?? "Unknown",
+          time: data.time ?? null,
+          memory: data.memory ?? null,
+        };
+      }),
+  }),
+
+  /**
    * patternHint.get — 3-step hint ladder for coding patterns (gentle → medium → full walkthrough).
    */
   patternHint: router({
