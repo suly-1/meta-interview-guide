@@ -665,6 +665,91 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         );
       })()}
 
+      {/* Difficulty Calibration Trend Chart */}
+      {assessments.length >= 2 && (() => {
+        // Group by official difficulty tier and compute avg self-rating (numeric)
+        const ratingNum = (r: string) => r === "Easy" ? 1 : r === "Medium" ? 2 : r === "Hard" ? 3 : 4;
+        const tiers = ["Easy", "Medium", "Hard"] as const;
+        const tierData = tiers.map(tier => {
+          const bucket = assessments.filter(a => a.officialDifficulty === tier);
+          const avgSelf = bucket.length ? bucket.reduce((s, a) => s + ratingNum(a.selfRating), 0) / bucket.length : null;
+          const official = ratingNum(tier);
+          return { tier, official, avgSelf, count: bucket.length };
+        }).filter(d => d.count > 0);
+
+        if (tierData.length === 0) return null;
+
+        // Scale: 1=Easy … 4=Very Hard → map to 0–100% bar height
+        const maxRating = 4;
+        const barH = (v: number) => Math.round((v / maxRating) * 100);
+
+        const tierColors: Record<string, { official: string; self: string }> = {
+          Easy:   { official: "bg-emerald-400", self: "bg-emerald-600" },
+          Medium: { official: "bg-amber-400",   self: "bg-amber-600"   },
+          Hard:   { official: "bg-red-400",     self: "bg-red-600"     },
+        };
+
+        return (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart2 size={13} className="text-indigo-500" />
+              <span className="text-xs font-semibold text-foreground">Difficulty Calibration</span>
+              <span className="text-xs text-muted-foreground ml-auto">{assessments.length} rated</span>
+            </div>
+            {/* Legend */}
+            <div className="flex items-center gap-3 mb-3">
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span className="w-3 h-2 rounded-sm bg-gray-300 dark:bg-gray-600 inline-block" /> Official
+              </span>
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span className="w-3 h-2 rounded-sm bg-indigo-500 inline-block" /> Your avg perception
+              </span>
+            </div>
+            {/* Bar chart */}
+            <div className="flex items-end gap-4 h-28">
+              {tierData.map(d => {
+                const colors = tierColors[d.tier];
+                const officialH = barH(d.official);
+                const selfH = d.avgSelf !== null ? barH(d.avgSelf) : 0;
+                const delta = d.avgSelf !== null ? d.avgSelf - d.official : 0;
+                const deltaLabel = delta > 0.15 ? `+${delta.toFixed(1)} harder` : delta < -0.15 ? `${delta.toFixed(1)} easier` : "on target";
+                const deltaColor = delta > 0.15 ? "text-red-500" : delta < -0.15 ? "text-emerald-600" : "text-muted-foreground";
+                return (
+                  <div key={d.tier} className="flex-1 flex flex-col items-center gap-1">
+                    {/* Delta label */}
+                    <span className={`text-[9px] font-bold ${deltaColor}`}>{deltaLabel}</span>
+                    {/* Bars side by side */}
+                    <div className="flex items-end gap-1 w-full" style={{ height: "72px" }}>
+                      {/* Official */}
+                      <div
+                        className={`flex-1 rounded-t-md ${colors.official} opacity-50`}
+                        style={{ height: `${officialH}%` }}
+                        title={`Official: ${d.tier}`}
+                      />
+                      {/* Self avg */}
+                      {d.avgSelf !== null && (
+                        <div
+                          className="flex-1 rounded-t-md bg-indigo-500"
+                          style={{ height: `${selfH}%` }}
+                          title={`Your avg: ${d.avgSelf.toFixed(2)}`}
+                        />
+                      )}
+                    </div>
+                    {/* Tier label */}
+                    <span className="text-[10px] font-semibold text-foreground">{d.tier}</span>
+                    <span className="text-[9px] text-muted-foreground">{d.count} rated</span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Interpretation note */}
+            <div className="mt-2 text-[10px] text-muted-foreground">
+              Taller indigo bar = you find that tier harder than its label suggests. Shorter = easier.
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -799,6 +884,7 @@ export default function CodePractice() {
   // Study Session Planner
   const [studyPlannerOpen, setStudyPlannerOpen] = useState(false);
   const [studyPlanDuration, setStudyPlanDuration] = useState<30 | 60 | 90>(60);
+  const [planCopied, setPlanCopied] = useState(false);
   const [studyPlan, setStudyPlan] = useState<{
     headline: string;
     focusAreas: string[];
@@ -995,17 +1081,42 @@ export default function CodePractice() {
     } catch { /* fallback: select all */ }
   }, [code]);
 
-  // Speed Run
-  const startSpeedRun = useCallback(() => {
-    // Pick a random unsolved problem, filtered by difficulty if set
-    let pool = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
-    if (pool.length === 0) pool = CTCI_PROBLEMS;
-    if (speedRunDifficulty !== "All") {
-      const filtered = pool.filter(p => p.difficulty === speedRunDifficulty);
-      if (filtered.length > 0) pool = filtered;
+  // Speed Run — 24-hour problem lock (prevents repeats in non-rematch runs)
+  const SR_LOCK_KEY = "cp_sr_recent_ids";
+  const loadRecentSpeedRunIds = (): { id: number; ts: number }[] => {
+    try { return JSON.parse(localStorage.getItem(SR_LOCK_KEY) ?? "[]"); } catch { return []; }
+  };
+  const saveRecentSpeedRunIds = (entries: { id: number; ts: number }[]) => {
+    localStorage.setItem(SR_LOCK_KEY, JSON.stringify(entries));
+  };
+
+  const startSpeedRun = useCallback((rematchId?: number) => {
+    const now = Date.now();
+    const recent = loadRecentSpeedRunIds().filter(e => now - e.ts < 24 * 60 * 60 * 1000);
+
+    if (rematchId !== undefined) {
+      // Rematch: use exact same problem, add it to recent list
+      const updated = [{ id: rematchId, ts: now }, ...recent.filter(e => e.id !== rematchId)].slice(0, 50);
+      saveRecentSpeedRunIds(updated);
+      setSelectedId(rematchId);
+    } else {
+      // New run: exclude recently seen problems
+      const lockedIds = new Set(recent.map(e => e.id));
+      let pool = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved && !lockedIds.has(p.id));
+      // Fallback 1: ignore lock if pool is too small
+      if (pool.length < 3) pool = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
+      // Fallback 2: include solved if nothing left
+      if (pool.length === 0) pool = CTCI_PROBLEMS;
+      if (speedRunDifficulty !== "All") {
+        const filtered = pool.filter(p => p.difficulty === speedRunDifficulty);
+        if (filtered.length > 0) pool = filtered;
+      }
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      const updated = [{ id: pick.id, ts: now }, ...recent.filter(e => e.id !== pick.id)].slice(0, 50);
+      saveRecentSpeedRunIds(updated);
+      setSelectedId(pick.id);
     }
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    setSelectedId(pick.id);
+
     setSpeedRunActive(true);
     setSpeedRunSecsLeft(20 * 60);
     setSpeedRunScore(null);
@@ -1539,7 +1650,7 @@ export default function CodePractice() {
                   </div>
                 )}
                 <button
-                  onClick={speedRunActive ? () => stopSpeedRun(false) : startSpeedRun}
+                  onClick={speedRunActive ? () => stopSpeedRun(false) : () => startSpeedRun()}
                   title={speedRunActive ? "Stop Speed Run" : `Start Speed Run (20 min${speedRunDifficulty !== "All" ? `, ${speedRunDifficulty} only` : ""})`}
                   className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
                     speedRunActive
@@ -1627,15 +1738,10 @@ export default function CodePractice() {
                     onClick={() => {
                       const rematchId = selectedId;
                       setSpeedRunScore(null);
-                      setSelectedId(rematchId);
-                      setSpeedRunActive(true);
-                      setSpeedRunSecsLeft(20 * 60);
-                      setTimerRunning(false);
-                      timerSecsRef.current = 0;
-                      setHintsUsedThisRun(0);
+                      startSpeedRun(rematchId);
                     }}
                     className="ml-auto flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                    title="Rematch: restart Speed Run on the same problem"
+                    title="Rematch: restart Speed Run on the same problem (does not count toward 24h lock)"
                   >
                     <RotateCcw size={10} /> Rematch
                   </button>
@@ -2114,19 +2220,53 @@ export default function CodePractice() {
                   <div className="text-xs text-foreground">{studyPlan.coachingNote}</div>
                 </div>
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="space-y-2">
+                  {/* Copy as Markdown */}
                   <button
-                    onClick={() => setStudyPlan(null)}
-                    className="flex-1 py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                    onClick={() => {
+                      if (!studyPlan) return;
+                      const typeIcons: Record<string, string> = {
+                        coding: "💻", behavioral: "💬", sr_review: "🔄", system_design: "🏗️", break: "☕",
+                      };
+                      const lines: string[] = [
+                        `# ${studyPlan.headline}`,
+                        ``,
+                        `**Focus areas:** ${studyPlan.focusAreas.join(" · ")}`,
+                        ``,
+                        `## Session Blocks`,
+                        ``,
+                      ];
+                      studyPlan.blocks.forEach(block => {
+                        const icon = typeIcons[block.type] ?? "📌";
+                        lines.push(`### ${icon} ${block.title} (${block.durationMinutes} min) — *${block.priority} priority*`);
+                        block.tasks.forEach(t => lines.push(`- ${t}`));
+                        lines.push(``);
+                      });
+                      lines.push(`---`);
+                      lines.push(`> 🌱 **Coach's note:** ${studyPlan.coachingNote}`);
+                      navigator.clipboard.writeText(lines.join("\n")).then(() => {
+                        setPlanCopied(true);
+                        setTimeout(() => setPlanCopied(false), 2000);
+                      });
+                    }}
+                    className="w-full py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors flex items-center justify-center gap-1.5"
                   >
-                    ↺ Regenerate
+                    {planCopied ? <><CheckCircle2 size={12} className="text-emerald-500" /> Copied!</> : <><Copy size={12} /> Copy as Markdown</>}
                   </button>
-                  <button
-                    onClick={() => { setStudyPlannerOpen(false); setStudyPlan(null); }}
-                    className="flex-1 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
-                  >
-                    Start Session →
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setStudyPlan(null)}
+                      className="flex-1 py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                    >
+                      ↺ Regenerate
+                    </button>
+                    <button
+                      onClick={() => { setStudyPlannerOpen(false); setStudyPlan(null); }}
+                      className="flex-1 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                    >
+                      Start Session →
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

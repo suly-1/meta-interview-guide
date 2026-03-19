@@ -69,3 +69,6 @@
 - [x] Sprint personal best per topic (highest single-sprint score per topic in Sprint History)
 - [x] Speed Run Rematch button (one-click restart on same problem after Speed Run ends)
 - [x] Daily goal banner (progress bar in sidebar, configurable daily target)
+- [x] Difficulty Estimator trend chart (avg self-rating vs official rating per difficulty tier in Stats)
+- [x] Study plan Markdown export (Copy as Markdown button in generated study plan)
+- [x] Speed Run 24-hour problem lock after Rematch (prevent same problem in next different Speed Run)
