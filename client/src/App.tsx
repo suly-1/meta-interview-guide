@@ -6,12 +6,14 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import CollabRoom from "@/pages/CollabRoom";
+import AdminDisclaimerReport from "@/pages/AdminDisclaimerReport";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/room/:roomId" component={CollabRoom} />
+      <Route path="/admin/disclaimer" component={AdminDisclaimerReport} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

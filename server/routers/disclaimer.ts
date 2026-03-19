@@ -1,7 +1,7 @@
-import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
+import { protectedProcedure, publicProcedure, adminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export const disclaimerRouter = router({
   /**
@@ -37,5 +37,37 @@ export const disclaimerRouter = router({
       acknowledged: ts !== null,
       acknowledgedAt: ts,
     };
+  }),
+
+  /**
+   * Admin-only: return all users with their disclaimer acknowledgment status.
+   * Sorted by acknowledgedAt desc (acknowledged first), then by createdAt asc.
+   */
+  adminReport: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    const rows = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        createdAt: users.createdAt,
+        lastSignedIn: users.lastSignedIn,
+        disclaimerAcknowledgedAt: users.disclaimerAcknowledgedAt,
+      })
+      .from(users)
+      .orderBy(asc(users.createdAt));
+
+    return rows.map(r => ({
+      id: r.id,
+      name: r.name ?? "—",
+      email: r.email ?? "—",
+      role: r.role,
+      createdAt: r.createdAt,
+      lastSignedIn: r.lastSignedIn,
+      acknowledged: r.disclaimerAcknowledgedAt !== null,
+      acknowledgedAt: r.disclaimerAcknowledgedAt ?? null,
+    }));
   }),
 });

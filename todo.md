@@ -299,3 +299,8 @@
 - [x] tRPC query: disclaimer.status — returns acknowledged_at for the current user
 - [x] Wire frontend: call mutation on "I Understand" click for logged-in users
 - [x] Show "Acknowledged on [date]" status in Overview tab for logged-in users
+
+## New Features — Round 44
+- [x] Admin-only tRPC query: disclaimer.adminReport — returns all users with name, email, acknowledgedAt, role
+- [x] Admin audit table UI — sortable table showing acknowledged/not-acknowledged users
+- [x] Route /admin/disclaimer — protected, only visible to admin role users

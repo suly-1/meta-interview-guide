@@ -13,23 +13,35 @@ import HeatmapCalendar from "@/components/HeatmapCalendar";
 import { FullMockDaySimulator } from "@/components/FullMockDaySimulator";
 import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/components/OverviewExtras";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
 function DisclaimerStatusBadge() {
   const { data } = trpc.disclaimer.status.useQuery();
+  const { user } = useAuth();
 
   if (!data?.acknowledged || !data.acknowledgedAt) return null;
 
   const date = new Date(data.acknowledgedAt).toLocaleString();
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400">
-      <span className="text-emerald-400">✓</span>
-      <span>
-        <span className="font-semibold">Disclaimer acknowledged</span>
-        {" — "}
-        <span className="text-muted-foreground">Server record saved on {date}</span>
+    <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400">
+      <span className="flex items-center gap-2">
+        <span className="text-emerald-400">✓</span>
+        <span>
+          <span className="font-semibold">Disclaimer acknowledged</span>
+          {" — "}
+          <span className="text-muted-foreground">Server record saved on {date}</span>
+        </span>
       </span>
+      {user?.role === "admin" && (
+        <a
+          href="/admin/disclaimer"
+          className="text-xs text-violet-400 hover:text-violet-300 underline underline-offset-2 whitespace-nowrap"
+        >
+          View audit report →
+        </a>
+      )}
     </div>
   );
 }
