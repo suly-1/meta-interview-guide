@@ -14,7 +14,7 @@ import OnboardingModal from "@/components/OnboardingModal";
 import NotificationBanner from "@/components/NotificationBanner";
 import GlobalSearch from "@/components/GlobalSearch";
 import { AlertTriangle, X, Maximize2, Minimize2, Keyboard, HelpCircle } from "lucide-react";
-import DisclaimerGate, { useDisclaimerAcknowledged } from "@/components/DisclaimerGate";
+import DisclaimerGate, { useDisclaimerGate } from "@/components/DisclaimerGate";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -35,7 +35,7 @@ function triggerConfetti() {
 }
 
 export default function Home() {
-  const [acknowledged, confirmDisclaimer] = useDisclaimerAcknowledged();
+  const { gateOpen, dbLoading, confirm: confirmDisclaimer } = useDisclaimerGate();
   // Deep-link URL routing: ?tab=coding&section=mock
   const VALID_TABS = ["overview", "coding", "behavioral", "design", "collab"];
   const getTabFromUrl = () => {
@@ -145,8 +145,9 @@ export default function Home() {
   }, [handleKeyDown]);
 
   // Show full-screen disclaimer gate until explicitly acknowledged
-  if (!acknowledged) {
-    return <DisclaimerGate onConfirm={confirmDisclaimer} />;
+  // For logged-in users, the DB record is the authoritative source.
+  if (gateOpen) {
+    return <DisclaimerGate onConfirm={confirmDisclaimer} loading={dbLoading} />;
   }
 
   return (

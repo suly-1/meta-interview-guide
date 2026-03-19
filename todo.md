@@ -304,3 +304,6 @@
 - [x] Admin-only tRPC query: disclaimer.adminReport — returns all users with name, email, acknowledgedAt, role
 - [x] Admin audit table UI — sortable table showing acknowledged/not-acknowledged users
 - [x] Route /admin/disclaimer — protected, only visible to admin role users
+
+## New Features — Round 45
+- [x] Block app access until disclaimer acknowledged — for logged-in users verify DB record, not just localStorage
