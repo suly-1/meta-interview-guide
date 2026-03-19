@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
@@ -11,6 +11,7 @@ import AIRoundTab from "@/components/AIRoundTab";
 import BehavioralTab from "@/components/BehavioralTab";
 import TimelineTab from "@/components/TimelineTab";
 import CTCITrackerTab from "@/components/CTCITrackerTab";
+import ReadinessTab from "@/components/ReadinessTab";
 import { useStreak } from "@/hooks/useStreak";
 
 const TABS = [
@@ -19,6 +20,7 @@ const TABS = [
   { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />, color: "amber"   },
   { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,      color: "emerald" },
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,    color: "violet"  },
+  { id: "readiness",  label: "Readiness",            icon: <BarChart2 size={15} />,     color: "rose"    },
 ];
 
 const ACTIVE_COLORS: Record<string, string> = {
@@ -27,6 +29,7 @@ const ACTIVE_COLORS: Record<string, string> = {
   amber:   "text-amber-600 border-amber-600",
   emerald: "text-emerald-600 border-emerald-600",
   violet:  "text-violet-600 border-violet-600",
+  rose:    "text-rose-600 border-rose-600",
 };
 
 export default function Home() {
@@ -157,6 +160,7 @@ export default function Home() {
               {activeTab === "behavioral" && <BehavioralTab />}
               {activeTab === "timeline"   && <TimelineTab />}
               {activeTab === "ctci"       && <CTCITrackerTab />}
+              {activeTab === "readiness"  && <ReadinessTab />}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -181,6 +185,7 @@ export default function Home() {
               amber:   "text-amber-600",
               emerald: "text-emerald-600",
               violet:  "text-violet-600",
+              rose:    "text-rose-600",
             };
             return (
               <button
@@ -197,7 +202,8 @@ export default function Home() {
                     tab.color === "blue"    ? "bg-blue-600"    :
                     tab.color === "teal"   ? "bg-teal-600"    :
                     tab.color === "amber"  ? "bg-amber-600"   :
-                    tab.color === "violet" ? "bg-violet-600"  : "bg-emerald-600"
+                    tab.color === "violet" ? "bg-violet-600"  :
+                    tab.color === "rose"   ? "bg-rose-600"    : "bg-emerald-600"
                   }`} />
                 )}
                 <span className={isActive ? "" : "opacity-60"}>{tab.icon}</span>
