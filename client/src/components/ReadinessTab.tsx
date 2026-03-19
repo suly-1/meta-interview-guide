@@ -4,6 +4,7 @@
  * 2. Recruiter-Ready Summary (printable one-page PDF)
  */
 import { useRef, useMemo } from "react";
+import CTCITrackerBanner from "@/components/CTCITrackerBanner";
 import { Printer, BarChart2, FileDown, ShieldCheck } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
@@ -295,6 +296,12 @@ function RecruiterSummaryPrint() {
 export default function ReadinessTab() {
   return (
     <div className="space-y-10">
+      <CTCITrackerBanner
+        description="Your readiness score only reflects what you\'ve practiced. The more problems you log in the tracker, the more accurate your readiness picture becomes."
+        ctaText="Log your solved problems to get an accurate readiness score!"
+        tags={["📊 Accurate readiness", "✅ Log completions", "🔍 Identify gaps", "🏆 Boost your score"]}
+      />
+
       {/* ── Readiness Goal Setter ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

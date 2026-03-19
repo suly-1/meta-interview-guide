@@ -4,8 +4,9 @@ import InterviewTimer from "@/components/InterviewTimer";
 import QuickDrill from "@/components/QuickDrill";
 import PatternHeatmap from "@/components/PatternHeatmap";
 import SessionLog from "@/components/SessionLog";
-import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X, StickyNote, Trash2, Search } from "lucide-react";
-import { PATTERNS } from "@/lib/guideData";
+import { ChevronRight, ExternalLink, Star, Zap, BookOpen, Clock, CheckCircle2, Circle, SlidersHorizontal, X, StickyNote, Trash2, Search, Lock } from "lucide-react";
+import { PATTERNS, PATTERN_PREREQUISITES } from "@/lib/guideData";
+import { useDrillRatings } from "@/hooks/useDrillRatings";
 import PatternQuickReference from "@/components/PatternQuickReference";
 import { useProgress } from "@/hooks/useProgress";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
@@ -33,6 +34,7 @@ type FilterMastery = "all" | "todo" | "done";
 
 function PatternRow({
   p, onExpand, expanded, done, onToggleDone, note, onNoteChange, onNoteClear,
+  isLocked, prereqNames,
 }: {
   p: typeof PATTERNS[0];
   onExpand: () => void;
@@ -42,12 +44,18 @@ function PatternRow({
   note: string;
   onNoteChange: (text: string) => void;
   onNoteClear: () => void;
+  isLocked: boolean;
+  prereqNames: string[];
 }) {
   return (
     <>
       <tr
-        className={`border-b border-gray-100 transition-colors cursor-pointer group ${done ? "bg-emerald-50/40 hover:bg-emerald-50/60" : "hover:bg-blue-50/40"}`}
-        onClick={onExpand}
+        className={`border-b border-gray-100 transition-colors cursor-pointer group ${
+          isLocked ? "opacity-60 bg-gray-50 hover:bg-gray-100" :
+          done ? "bg-emerald-50/40 hover:bg-emerald-50/60" : "hover:bg-blue-50/40"
+        }`}
+        onClick={isLocked ? undefined : onExpand}
+        title={isLocked ? `Unlock by rating ${prereqNames.join(" and ")} ≥3 in Quick Drill` : undefined}
       >
         <td className="py-3 px-4">
           <div className="flex items-center gap-2">
@@ -172,6 +180,8 @@ function PatternRow({
 export default function CodingTab() {
   const [expandedPattern, setExpandedPattern] = useState<string | null>(null);
   const patterns = useProgress("patterns", PATTERNS.length);
+  const drillRatings = useDrillRatings();
+  const ratingMap = Object.fromEntries(drillRatings.map(r => [r.patternId, r.latest ?? 0]));
 
   // Filter state
   const [diffFilter,    setDiffFilter]    = useState<FilterDiff>("all");
@@ -346,18 +356,7 @@ export default function CodingTab() {
         <SessionLog />
       </section>
 
-      {/* Pattern Mastery Heatmap */}
-      <section>
-        <div className="border-b border-gray-200 pb-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Pattern Mastery Heatmap
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">All 14 patterns color-coded by your Quick Drill ratings — red means needs work, green means strong</p>
-        </div>
-        <PatternHeatmap />
-      </section>
-
-      {/* 7-Step Approach */}
+       {/* 7-Step Approach */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -531,19 +530,28 @@ export default function CodingTab() {
                       </td>
                     </tr>
                   ) : (
-                    filtered.map((p) => (
-                      <PatternRow
-                        key={p.id}
-                        p={p}
-                        expanded={expandedPattern === p.id}
-                        onExpand={() => toggle(p.id)}
-                        done={patterns.checked.has(p.id)}
-                        onToggleDone={(e) => { e.stopPropagation(); patterns.toggle(p.id); }}
-                        note={getNote(p.id)}
-                        onNoteChange={(text) => setNote(p.id, text)}
-                        onNoteClear={() => clearNote(p.id)}
-                      />
-                    ))
+                    filtered.map((p) => {
+                      const prereqIds = PATTERN_PREREQUISITES[p.id] ?? [];
+                      const isLocked = prereqIds.some(pid => (ratingMap[pid] ?? 0) < 3);
+                      const prereqNames = prereqIds
+                        .filter(pid => (ratingMap[pid] ?? 0) < 3)
+                        .map(pid => PATTERNS.find(pat => pat.id === pid)?.name ?? pid);
+                      return (
+                        <PatternRow
+                          key={p.id}
+                          p={p}
+                          expanded={expandedPattern === p.id}
+                          onExpand={() => toggle(p.id)}
+                          done={patterns.checked.has(p.id)}
+                          onToggleDone={(e) => { e.stopPropagation(); patterns.toggle(p.id); }}
+                          note={getNote(p.id)}
+                          onNoteChange={(text) => setNote(p.id, text)}
+                          onNoteClear={() => clearNote(p.id)}
+                          isLocked={isLocked}
+                          prereqNames={prereqNames}
+                        />
+                      );
+                    })
                   )}
                 </AnimatePresence>
               </tbody>
@@ -553,6 +561,18 @@ export default function CodingTab() {
         <p className="text-xs text-gray-400 mt-2">Click any row to expand details. Mark patterns as mastered to track your progress — synced with the Study Timeline tab.</p>
       </section>
 
+      {/* Pattern Mastery Heatmap */}
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🟥 Pattern Mastery Heatmap
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            All {PATTERNS.length} patterns color-coded by Quick Drill ratings — click any card to see drill history, rating trend, and prerequisite chain
+          </p>
+        </div>
+        <PatternHeatmap />
+      </section>
       {/* Resources */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

@@ -26,6 +26,11 @@
 - [x] Behavioral Answer Scorer UI (LLM rubric, 5 dimensions)
 - [x] Readiness Goal Setter with daily task calculation
 
+- [x] Add CTCI Progression Tracker banner to all tabs with tab-specific messaging
+- [x] Enhance Pattern Mastery Heatmap (attempt counts, last-practiced date, unlock status, tooltips, drill-down) and move to middle of Coding tab
+- [x] Remove CTCI banner from Coding tab only
+
 ## In Progress
-- [ ] Mock Interview Simulator (45-min timed session: 1 coding + 2 behavioral, LLM debrief)
-- [ ] Pattern Dependency Unlock Flow (grey out advanced patterns until prerequisites rated ≥3)
+- [ ] Wire MockInterviewSimulator as its own navigation tab
+- [ ] Pattern Dependency Unlock Flow visual indicators in CodingTab PatternRow
+- [ ] Per-pattern Stuck? hint ladder (AIHintPanel compact) inside each expanded PatternRow

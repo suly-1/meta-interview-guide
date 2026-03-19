@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2, Layers } from "lucide-react";
+import { Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon, ListChecks, BarChart2, Layers, ClipboardList } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
@@ -13,16 +13,18 @@ import TimelineTab from "@/components/TimelineTab";
 import CTCITrackerTab from "@/components/CTCITrackerTab";
 import ReadinessTab from "@/components/ReadinessTab";
 import SystemDesignTab from "@/components/SystemDesignTab";
+import MockInterviewSimulator from "@/components/MockInterviewSimulator";
 import { useStreak } from "@/hooks/useStreak";
 
 const TABS = [
-  { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,    color: "violet"  },
-  { id: "coding",      label: "Coding Interview",    icon: <Code2 size={15} />,         color: "blue"    },
-  { id: "ai-round",   label: "AI-Enabled Round",     icon: <Cpu size={15} />,           color: "teal"    },
-  { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />, color: "amber"   },
-  { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,      color: "emerald" },
-  { id: "readiness",  label: "Readiness",            icon: <BarChart2 size={15} />,     color: "rose"    },
-  { id: "sysdesign",  label: "System Design",         icon: <Layers size={15} />,        color: "slate"   },
+  { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
+  { id: "coding",     label: "Coding Interview",     icon: <Code2 size={15} />,          color: "blue"    },
+  { id: "mock",       label: "Mock Interview",       icon: <ClipboardList size={15} />,  color: "indigo"  },
+  { id: "ai-round",   label: "AI-Enabled Round",     icon: <Cpu size={15} />,            color: "teal"    },
+  { id: "behavioral", label: "Behavioral Interview", icon: <MessageSquare size={15} />,  color: "amber"   },
+  { id: "timeline",   label: "Study Timeline",       icon: <Calendar size={15} />,       color: "emerald" },
+  { id: "readiness",  label: "Readiness",            icon: <BarChart2 size={15} />,      color: "rose"    },
+  { id: "sysdesign",  label: "System Design",        icon: <Layers size={15} />,         color: "slate"   },
 ];
 
 const ACTIVE_COLORS: Record<string, string> = {
@@ -33,6 +35,7 @@ const ACTIVE_COLORS: Record<string, string> = {
   violet:  "text-violet-600 border-violet-600",
   rose:    "text-rose-600 border-rose-600",
   slate:   "text-slate-600 border-slate-600",
+  indigo:  "text-indigo-600 border-indigo-600",
 };
 
 export default function Home() {
@@ -159,6 +162,7 @@ export default function Home() {
               </div>
 
               {activeTab === "coding"      && <CodingTab />}
+              {activeTab === "mock"        && <MockInterviewSimulator />}
               {activeTab === "ai-round"   && <AIRoundTab />}
               {activeTab === "behavioral" && <BehavioralTab />}
               {activeTab === "timeline"   && <TimelineTab />}
@@ -213,12 +217,13 @@ export default function Home() {
                 )}
                 <span className={isActive ? "" : "opacity-60"}>{tab.icon}</span>
                 <span className="leading-none text-center">
-                  {tab.id === "coding"    ? "Coding"     :
-                   tab.id === "ai-round"  ? "AI Round"   :
-                   tab.id === "behavioral"? "Behavioral" :
-                   tab.id === "ctci"      ? "Tracker"    :
-                   tab.id === "readiness" ? "Readiness"  :
-                   tab.id === "sysdesign" ? "Sys Design" : "Timeline"}
+                  {tab.id === "coding"     ? "Coding"     :
+                   tab.id === "mock"       ? "Mock"       :
+                   tab.id === "ai-round"   ? "AI Round"   :
+                   tab.id === "behavioral" ? "Behavioral" :
+                   tab.id === "ctci"       ? "Tracker"    :
+                   tab.id === "readiness"  ? "Readiness"  :
+                   tab.id === "sysdesign"  ? "Sys Design" : "Timeline"}
                 </span>
               </button>
             );
