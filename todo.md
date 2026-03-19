@@ -200,6 +200,11 @@
 - [x] Global Search — ⌘K command palette searching across 200+ items (patterns, CTCI, behavioral questions, system design topics, flash cards)
 - [x] Onboarding Checklist — 5-step guided checklist for new users (set date, rate patterns, add story, flash drill, run mock); dismissible
 
+## New Features — Round 35
+- [x] Alt+1–4 keyboard shortcuts for Quick Actions primary buttons with ⌥N badge labels (wired in Home.tsx handleKeyDown)
+- [x] Streak milestone toasts at 7, 14, 30, 60, 100 days (fires once per milestone per day, stored in localStorage)
+- [x] Start SD Mock third button in System Design Quick Actions bar (scrolls to SystemDesignMockSession)
+
 ## New Features — Round 34
 - [x] Quick Actions sticky row on SystemDesignTab (Open Diagram Template, Start Capacity Calc)
 - [x] Streak tooltip on Overview Quick Actions bar (longest streak + last active date on hover)

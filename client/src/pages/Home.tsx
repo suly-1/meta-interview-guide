@@ -73,6 +73,27 @@ export default function Home() {
     if (e.key === "f" || e.key === "F") setFocusMode(m => !m);
     if (e.key === "?") setShowKeyHelp(m => !m);
     if (e.key === "Escape") { setFocusMode(false); setShowKeyHelp(false); }
+    // Alt+1–4: trigger primary Quick Action for the current tab
+    if (e.altKey && e.key === "1") {
+      e.preventDefault();
+      const el = document.getElementById("study-session-planner");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "2") {
+      e.preventDefault();
+      const el = document.getElementById("coding-mock-session");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "3") {
+      e.preventDefault();
+      const el = document.getElementById("behavioral-voice-star");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "4") {
+      e.preventDefault();
+      const el = document.getElementById("sysdesign-diagram-templates");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }, []);
 
   useEffect(() => {

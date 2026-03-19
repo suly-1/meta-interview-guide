@@ -1474,6 +1474,7 @@ export default function BehavioralTab() {
           >
             <Brain size={12} />
             Record STAR Answer
+            <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-emerald-900/40 text-emerald-400 border border-emerald-700/40">⌥3</kbd>
           </button>
           <button
             onClick={() => {

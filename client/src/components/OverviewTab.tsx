@@ -2,7 +2,7 @@
 // Features: IC6/IC7 comparison cards, readiness dashboard, pattern heatmap,
 // weak-spot dashboard, interview countdown, STAR story bank, recruiter card
 // with peer comparison, progress export, interview day checklist
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send, Trophy } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
 import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates } from "@/hooks/useLocalStorage";
@@ -1485,9 +1485,34 @@ function CTCIDivergenceReport() {
   );
 }
 
+const STREAK_MILESTONES: Record<number, string> = {
+  7: "You're in the top 20% of prep consistency!",
+  14: "Two weeks straight — elite-level discipline!",
+  30: "30-day streak! You're in the top 5% of candidates.",
+  60: "60 days of daily prep. IC7 mindset unlocked. 🏆",
+  100: "100-day streak. You're legendary. 🎖️",
+};
+
 function QuickActionsRow() {
   const streak = useStreak();
   const today = new Date().toISOString().split("T")[0];
+
+  // Streak milestone toasts — fire once per milestone per day
+  const [lastMilestoneDay, setLastMilestoneDay] = useState<string | null>(() => {
+    try { return localStorage.getItem("streak_milestone_day"); } catch { return null; }
+  });
+  useEffect(() => {
+    const milestone = STREAK_MILESTONES[streak.currentStreak];
+    if (milestone && lastMilestoneDay !== today) {
+      toast(`🔥 ${streak.currentStreak}-day streak! ${milestone}`, {
+        duration: 6000,
+        style: { background: "oklch(0.25 0.02 60)", border: "1px solid oklch(0.6 0.18 60)", color: "oklch(0.9 0.1 60)" },
+      });
+      localStorage.setItem("streak_milestone_day", today);
+      setLastMilestoneDay(today);
+    }
+  }, [streak.currentStreak, today, lastMilestoneDay, setLastMilestoneDay]);
+
   // Check if a plan was already generated today
   const hasTodayPlan = (() => {
     try {
@@ -1526,6 +1551,7 @@ function QuickActionsRow() {
         >
           <Brain size={12} />
           {hasTodayPlan ? "Resume Today's Plan" : "Plan Today's Session"}
+          <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-emerald-900/40 text-emerald-400 border border-emerald-700/40">⌥1</kbd>
         </button>
         {hasTodayPlan && (
           <button

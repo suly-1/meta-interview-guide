@@ -928,6 +928,7 @@ export default function CodingTab() {
           >
             <Code2 size={12} />
             Start Coding Mock
+            <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-blue-900/40 text-blue-400 border border-blue-700/40">⌥2</kbd>
           </button>
           <button
             onClick={() => {

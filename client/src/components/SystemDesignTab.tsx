@@ -91,6 +91,17 @@ export default function SystemDesignTab() {
           >
             <GitBranch size={12} />
             Open Diagram Template
+            <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-violet-900/40 text-violet-400 border border-violet-700/40">⌥4</kbd>
+          </button>
+          <button
+            onClick={() => {
+              const el = document.getElementById("sysdesign-mock-session");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 text-xs font-semibold transition-all"
+          >
+            <Brain size={12} />
+            Start SD Mock
           </button>
           <button
             onClick={() => {
@@ -914,7 +925,9 @@ export default function SystemDesignTab() {
       <FlashCardCSVImport onImport={() => {}} />
 
       {/* System Design Mock Session */}
-      <SystemDesignMockSession />
+      <div id="sysdesign-mock-session">
+        <SystemDesignMockSession />
+      </div>
 
       {/* System Design Flash Cards Drill Mode */}
       <SystemDesignFlashCards />
