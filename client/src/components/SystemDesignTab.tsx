@@ -1,7 +1,8 @@
 // SystemDesignTab — 8 Meta system design patterns + Meta Engineering Blog Feed
 // Design: clean structured approach cards with expandable sections
 import { useState } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target } from "lucide-react";
+import SystemDesignMockSession from "./SystemDesignMockSession";
 
 interface DesignPattern {
   id: string;
@@ -576,7 +577,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -603,7 +604,7 @@ export default function SystemDesignTab() {
       </div>
 
       {/* View toggle */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => setActiveView("patterns")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
@@ -624,6 +625,16 @@ export default function SystemDesignTab() {
         >
           <BookOpen size={12} /> Meta Engineering Blog (12)
         </button>
+        <button
+          onClick={() => setActiveView("mock")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+            activeView === "mock"
+              ? "bg-indigo-600 text-white border-indigo-600"
+              : "bg-white text-gray-600 border-gray-200 hover:border-indigo-400"
+          }`}
+        >
+          <Target size={12} /> Mock Session
+        </button>
       </div>
 
       {/* Design Patterns */}
@@ -640,6 +651,11 @@ export default function SystemDesignTab() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Mock Session */}
+      {activeView === "mock" && (
+        <SystemDesignMockSession />
       )}
 
       {/* Blog Feed */}

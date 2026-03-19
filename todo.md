@@ -85,3 +85,7 @@
 - [x] Weekly email digest (mailto: button with streak stats, weak topics, recent Sprint scores)
 - [x] Well-calibrated badge in Stats summary (awarded when <20% of assessments diverge)
 - [x] Sprint history CSV export (topic, score, date, per-problem scores)
+- [ ] IC7+ debrief prompt tuning (behavioral-only prompt: skip coding score, evaluate XFN influence, retrospective ownership, org-wide impact)
+- [ ] Sprint history line chart (score-over-time per topic in Sprint History Stats section)
+- [ ] Mock Interview session replay (collapsible transcript panel in debrief: question + typed answer pairs)
+- [x] System Design Mock Session (45-min timed mock in System Design tab, problem picker, answer panel, LLM IC-level debrief using all 8 patterns + key signals)

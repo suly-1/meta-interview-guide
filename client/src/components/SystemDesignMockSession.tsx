@@ -1,0 +1,626 @@
+// SystemDesignMockSession — 45-min timed mock with 5-section answer panels + LLM IC-level debrief
+import { useState, useEffect, useRef, useCallback } from "react";
+import { trpc } from "@/lib/trpc";
+import {
+  Clock, Play, Square, ChevronDown, ChevronUp, RotateCcw,
+  CheckCircle2, AlertCircle, Loader2, Zap, Trophy, Target,
+  Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain,
+} from "lucide-react";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface DesignProblem {
+  id: string;
+  title: string;
+  difficulty: "Medium" | "Hard" | "Very Hard";
+  tagline: string;
+  icon: React.ReactNode;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  hints: {
+    requirements: string[];
+    dataModel: string[];
+    api: string[];
+    scale: string[];
+    metaTips: string[];
+  };
+}
+
+type ICLevel = "IC6" | "IC7";
+type SessionPhase = "setup" | "active" | "debrief";
+type SectionKey = "requirements" | "dataModel" | "api" | "scaleBottlenecks" | "metaTips";
+
+interface SectionAnswers {
+  requirements: string;
+  dataModel: string;
+  api: string;
+  scaleBottlenecks: string;
+  metaTips: string;
+}
+
+// ─── Problem bank (mirrors SystemDesignTab DESIGN_PATTERNS) ──────────────────
+const PROBLEMS: DesignProblem[] = [
+  {
+    id: "news-feed",
+    title: "News Feed (Facebook Feed)",
+    difficulty: "Hard",
+    tagline: "Fan-out on write vs. fan-out on read",
+    icon: <Globe size={15} />,
+    color: "#1e3a8a", bgColor: "#eff6ff", borderColor: "#bfdbfe",
+    hints: {
+      requirements: ["500M DAU, 100M posts/day", "Feed load < 200ms p99", "Pagination / infinite scroll", "Near-real-time updates"],
+      dataModel: ["User, Post, FeedItem, Follow entities", "Separate post store (Cassandra) from feed store (Redis sorted set)", "Pre-compute feed for users with <10K followers"],
+      api: ["GET /feed?user_id&cursor&limit", "POST /posts", "POST /posts/{id}/like"],
+      scale: ["Celebrity fan-out: lazy fan-out + pull hybrid", "Feed ranking: pre-rank on write, re-rank on read", "Media: CDN + object store"],
+      metaTips: ["Ask fan-out on write vs. read trade-off", "Mention TAO for social graph", "Cursor-based pagination, not offset"],
+    },
+  },
+  {
+    id: "messaging",
+    title: "Messaging System (Messenger)",
+    difficulty: "Very Hard",
+    tagline: "Real-time delivery, ordering, and at-least-once guarantees",
+    icon: <MessageSquare size={15} />,
+    color: "#065f46", bgColor: "#ecfdf5", borderColor: "#a7f3d0",
+    hints: {
+      requirements: ["1B DAU, 100B messages/day", "Delivery < 100ms p99", "At-least-once, ordered delivery", "Read receipts + presence"],
+      dataModel: ["Message, Thread, UserPresence, Inbox entities", "client_msg_id for idempotency", "Thread-level sequence numbers"],
+      api: ["WebSocket /ws?user_id", "POST /messages {thread_id, content, client_msg_id}", "GET /threads/{id}/messages?before={seq_no}"],
+      scale: ["Connection fan-out: Kafka pub/sub + server routing", "Group messages: async delivery queue", "Offline: APNs/FCM with retry"],
+      metaTips: ["Distinguish sent/delivered/read receipts", "MQTT for mobile vs WebSocket for web", "Separate fan-out service from message store"],
+    },
+  },
+  {
+    id: "rate-limiter",
+    title: "Distributed Rate Limiter",
+    difficulty: "Medium",
+    tagline: "Token bucket vs. sliding window log at distributed scale",
+    icon: <Server size={15} />,
+    color: "#92400e", bgColor: "#fffbeb", borderColor: "#fde68a",
+    hints: {
+      requirements: ["< 5ms overhead per request", "1M RPS", "Multiple rule types", "Admin API for live updates"],
+      dataModel: ["RateLimitRule, Counter, TokenBucket entities", "Redis INCR + EXPIRE for atomic counter", "Local cache + async sync to Redis"],
+      api: ["checkLimit(user_id, rule_id) → {allowed, remaining, retry_after_ms}", "POST /admin/rules", "GET /admin/rules/{key_type}"],
+      scale: ["Redis Cluster for sharding", "Lua scripts for atomicity", "Pub/sub for rule propagation"],
+      metaTips: ["Ask acceptable error rate first", "Mention boundary burst problem with fixed windows", "Cell-based vs. global rate limiting"],
+    },
+  },
+  {
+    id: "typeahead",
+    title: "Search Typeahead / Autocomplete",
+    difficulty: "Medium",
+    tagline: "Trie vs. inverted index, prefix matching at scale",
+    icon: <Search size={15} />,
+    color: "#4338ca", bgColor: "#eef2ff", borderColor: "#c7d2fe",
+    hints: {
+      requirements: ["10B queries/day, 100K QPS peak", "< 100ms p99", "Suggestions update within 1 hour", "Personalized + typo tolerance"],
+      dataModel: ["TrieNode, SearchLog, SuggestionScore, UserRecentSearch entities", "In-memory trie per server", "Pre-compute top-K offline (Spark hourly)"],
+      api: ["GET /suggest?q={prefix}&user_id&limit", "POST /search/log", "GET /suggest/trending"],
+      scale: ["Shard trie by first 2 chars", "Streaming (Flink) for trending with 5-min lag", "Levenshtein too expensive — use n-gram index"],
+      metaTips: ["Distinguish suggestions vs. results (different systems)", "Trie classic but inverted index scales better", "Social graph signals as ranking feature"],
+    },
+  },
+  {
+    id: "notification",
+    title: "Notification Service",
+    difficulty: "Medium",
+    tagline: "Multi-channel delivery, deduplication, and user preferences",
+    icon: <Bell size={15} />,
+    color: "#7c3aed", bgColor: "#f5f3ff", borderColor: "#ddd6fe",
+    hints: {
+      requirements: ["1B notifications/day", "Delivery within 5 seconds", "At-least-once", "Multi-channel: push, email, in-app"],
+      dataModel: ["Notification, UserPreference, DeviceToken, NotificationTemplate entities", "Idempotency key for dedup", "Separate queues per channel"],
+      api: ["POST /notifications/send", "PUT /users/{id}/preferences", "GET /users/{id}/notifications"],
+      scale: ["Kafka per channel for fan-out", "APNs/FCM rate limits — batch sends", "Exponential backoff for retries"],
+      metaTips: ["Dedup window: idempotency key + 24h TTL", "Graceful degradation if push provider down", "Mention Meta's Iris notification system"],
+    },
+  },
+  {
+    id: "analytics",
+    title: "Real-Time Analytics Dashboard",
+    difficulty: "Hard",
+    tagline: "Lambda vs. Kappa architecture, approximate counting",
+    icon: <BarChart2 size={15} />,
+    color: "#0f766e", bgColor: "#f0fdfa", borderColor: "#99f6e4",
+    hints: {
+      requirements: ["Billions of events/day", "Dashboard refresh < 5s", "Historical + real-time views", "Drill-down by dimensions"],
+      dataModel: ["Event, AggregatedMetric, Dashboard, Alert entities", "Time-series partitioning", "Pre-aggregate at multiple granularities"],
+      api: ["POST /events (batch ingest)", "GET /metrics?start&end&granularity&dimensions", "POST /alerts"],
+      scale: ["Kafka for ingest, Flink for stream processing", "HyperLogLog for cardinality (DAU)", "Druid or ClickHouse for OLAP queries"],
+      metaTips: ["Lambda: batch + speed layers. Kappa: stream only (simpler)", "Approximate counting acceptable for most metrics", "Mention Scuba (Meta's internal analytics)"],
+    },
+  },
+  {
+    id: "cdn",
+    title: "Content Delivery Network (CDN)",
+    difficulty: "Hard",
+    tagline: "Edge caching, cache invalidation, and origin offload",
+    icon: <Database size={15} />,
+    color: "#b45309", bgColor: "#fefce8", borderColor: "#fde68a",
+    hints: {
+      requirements: ["Serve static + dynamic content globally", "Cache hit rate > 90%", "< 50ms latency from edge", "Instant cache invalidation"],
+      dataModel: ["CacheEntry, OriginServer, EdgeNode, PurgeRequest entities", "TTL + ETag for validation", "Consistent hashing for edge selection"],
+      api: ["GET /{path} (edge serves or fetches from origin)", "POST /purge {urls[]}", "GET /analytics/cache-hit-rate"],
+      scale: ["Anycast routing to nearest edge", "Push vs. pull caching strategies", "Thundering herd: request coalescing at edge"],
+      metaTips: ["Distinguish static (images) vs. dynamic (personalized) content", "Surrogate keys for bulk invalidation", "Mention Meta's CDN (Proxygen + Katran)"],
+    },
+  },
+  {
+    id: "ml-feature-store",
+    title: "ML Feature Store",
+    difficulty: "Very Hard",
+    tagline: "Online vs. offline feature serving, training-serving skew",
+    icon: <Brain size={15} />,
+    color: "#6d28d9", bgColor: "#f5f3ff", borderColor: "#ddd6fe",
+    hints: {
+      requirements: ["< 10ms online feature serving", "Batch feature computation for training", "Feature versioning + lineage", "Avoid training-serving skew"],
+      dataModel: ["Feature, FeatureGroup, FeatureVersion, TrainingDataset entities", "Dual store: Redis (online) + Hive/S3 (offline)", "Point-in-time correct joins for training"],
+      api: ["GET /features/{entity_id}?features=[] (online)", "POST /features/batch-compute (offline)", "GET /features/{name}/lineage"],
+      scale: ["Redis cluster for online serving", "Spark for offline batch computation", "Kafka for real-time feature updates"],
+      metaTips: ["Training-serving skew is the #1 ML reliability issue", "Point-in-time joins prevent data leakage", "Mention Meta's FBLearner Feature Store"],
+    },
+  },
+];
+
+const SECTION_CONFIG: { key: SectionKey; label: string; placeholder: string; hint: keyof DesignProblem["hints"] }[] = [
+  {
+    key: "requirements",
+    label: "1. Requirements",
+    placeholder: "Functional requirements (what the system does):\n- ...\n\nNon-functional requirements (scale, latency, availability):\n- ...",
+    hint: "requirements",
+  },
+  {
+    key: "dataModel",
+    label: "2. Data Model",
+    placeholder: "Key entities and their fields:\n- Entity(field1, field2, ...)\n\nKey data model decisions:\n- ...",
+    hint: "dataModel",
+  },
+  {
+    key: "api",
+    label: "3. API Design",
+    placeholder: "Core API endpoints:\n- METHOD /path {request} → {response}\n\nProtocol choices (REST, WebSocket, gRPC):\n- ...",
+    hint: "api",
+  },
+  {
+    key: "scaleBottlenecks",
+    label: "4. Scale & Bottlenecks",
+    placeholder: "Identify bottlenecks and how you'd solve them:\n- Bottleneck: ...\n  Solution: ...\n\nCapacity estimates:\n- ...",
+    hint: "scale",
+  },
+  {
+    key: "metaTips",
+    label: "5. Meta-Specific Depth",
+    placeholder: "Meta-specific considerations:\n- Reference relevant Meta systems (TAO, Memcache, Scuba, etc.)\n- Trade-offs specific to Meta's scale\n- Follow-up topics you'd discuss with the interviewer",
+    hint: "metaTips",
+  },
+];
+
+const VERDICT_COLORS: Record<string, string> = {
+  "Strong Hire": "bg-emerald-100 text-emerald-800 border-emerald-300",
+  "Hire": "bg-blue-100 text-blue-800 border-blue-300",
+  "Borderline": "bg-amber-100 text-amber-800 border-amber-300",
+  "No Hire": "bg-red-100 text-red-800 border-red-300",
+};
+
+function ScoreBar({ score, label, feedback }: { score: number; label: string; feedback: string }) {
+  const [open, setOpen] = useState(false);
+  const pct = Math.round((score / 5) * 100);
+  const color = score >= 4 ? "bg-emerald-500" : score >= 3 ? "bg-blue-500" : score >= 2 ? "bg-amber-500" : "bg-red-500";
+  return (
+    <div className="space-y-1">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-3 group"
+      >
+        <span className="text-xs font-semibold text-foreground w-40 text-left shrink-0">{label}</span>
+        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+          <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
+        </div>
+        <span className={`text-xs font-bold w-8 text-right ${score >= 4 ? "text-emerald-600" : score >= 3 ? "text-blue-600" : score >= 2 ? "text-amber-600" : "text-red-600"}`}>
+          {score}/5
+        </span>
+        {open ? <ChevronUp size={12} className="text-muted-foreground shrink-0" /> : <ChevronDown size={12} className="text-muted-foreground shrink-0" />}
+      </button>
+      {open && feedback && (
+        <div className="ml-40 text-xs text-muted-foreground leading-relaxed bg-muted/40 rounded-lg p-2.5 border border-border">
+          {feedback}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+export default function SystemDesignMockSession() {
+  const [phase, setPhase] = useState<SessionPhase>("setup");
+  const [selectedProblem, setSelectedProblem] = useState<DesignProblem>(PROBLEMS[0]);
+  const [targetLevel, setTargetLevel] = useState<ICLevel>("IC6");
+  const [secsLeft, setSecsLeft] = useState(45 * 60);
+  const [secsElapsed, setSecsElapsed] = useState(0);
+  const [answers, setAnswers] = useState<SectionAnswers>({
+    requirements: "", dataModel: "", api: "", scaleBottlenecks: "", metaTips: "",
+  });
+  const [activeSection, setActiveSection] = useState<SectionKey>("requirements");
+  const [showHints, setShowHints] = useState<Record<SectionKey, boolean>>({
+    requirements: false, dataModel: false, api: false, scaleBottlenecks: false, metaTips: false,
+  });
+  const [randomMode, setRandomMode] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const debrief = trpc.systemDesign.debrief.useMutation();
+
+  const startSession = useCallback(() => {
+    const problem = randomMode
+      ? PROBLEMS[Math.floor(Math.random() * PROBLEMS.length)]
+      : selectedProblem;
+    setSelectedProblem(problem);
+    setSecsLeft(45 * 60);
+    setSecsElapsed(0);
+    setAnswers({ requirements: "", dataModel: "", api: "", scaleBottlenecks: "", metaTips: "" });
+    setActiveSection("requirements");
+    setShowHints({ requirements: false, dataModel: false, api: false, scaleBottlenecks: false, metaTips: false });
+    setPhase("active");
+  }, [randomMode, selectedProblem]);
+
+  const endSession = useCallback(async () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setPhase("debrief");
+    await debrief.mutateAsync({
+      targetLevel,
+      problem: {
+        id: selectedProblem.id,
+        title: selectedProblem.title,
+        difficulty: selectedProblem.difficulty,
+        tagline: selectedProblem.tagline,
+      },
+      durationSec: secsElapsed,
+      sections: {
+        requirements: answers.requirements,
+        dataModel: answers.dataModel,
+        api: answers.api,
+        scaleBottlenecks: answers.scaleBottlenecks,
+        metaTips: answers.metaTips,
+      },
+    });
+  }, [debrief, targetLevel, selectedProblem, secsElapsed, answers]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (phase !== "active") return;
+    intervalRef.current = setInterval(() => {
+      setSecsLeft(s => {
+        if (s <= 1) {
+          clearInterval(intervalRef.current!);
+          endSession();
+          return 0;
+        }
+        return s - 1;
+      });
+      setSecsElapsed(e => e + 1);
+    }, 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [phase, endSession]);
+
+  const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const timerPct = secsLeft / (45 * 60);
+  const timerColor = timerPct > 0.5 ? "text-emerald-600" : timerPct > 0.25 ? "text-amber-600" : "text-red-600";
+
+  const result = debrief.data;
+
+  // ── Setup phase ─────────────────────────────────────────────────────────────
+  if (phase === "setup") {
+    return (
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Target size={15} className="text-indigo-600" />
+            <span className="text-sm font-extrabold text-indigo-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              System Design Mock Session
+            </span>
+            <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-200 text-indigo-800">45 min</span>
+          </div>
+          <p className="text-xs text-indigo-700 leading-relaxed">
+            Simulate a real Meta system design interview. You'll have 45 minutes to work through 5 structured sections: Requirements, Data Model, API, Scale & Bottlenecks, and Meta-Specific Depth. An LLM panel will then score each dimension and generate an IC-level debrief.
+          </p>
+        </div>
+
+        {/* IC Level */}
+        <div>
+          <p className="text-xs font-bold text-foreground mb-2">Target Level</p>
+          <div className="flex gap-2">
+            {(["IC6", "IC7"] as ICLevel[]).map(lvl => (
+              <button
+                key={lvl}
+                onClick={() => setTargetLevel(lvl)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                  targetLevel === lvl
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-card text-muted-foreground border-border hover:border-indigo-400"
+                }`}
+              >
+                {lvl === "IC6" ? "IC6 — Staff Engineer" : "IC7 — Principal/Senior Staff"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Problem selection */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-foreground">Problem</p>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={randomMode}
+                onChange={e => setRandomMode(e.target.checked)}
+                className="w-3.5 h-3.5 accent-indigo-600"
+              />
+              <span className="text-xs text-muted-foreground">🎲 Random</span>
+            </label>
+          </div>
+          {!randomMode && (
+            <div className="grid grid-cols-1 gap-2">
+              {PROBLEMS.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => setSelectedProblem(p)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all ${
+                    selectedProblem.id === p.id
+                      ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                      : "border-border bg-card hover:border-indigo-300"
+                  }`}
+                >
+                  <span style={{ color: p.color }}>{p.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold text-foreground truncate">{p.title}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{p.tagline}</div>
+                  </div>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${
+                    p.difficulty === "Very Hard" ? "bg-red-50 text-red-700 border-red-200" :
+                    p.difficulty === "Hard" ? "bg-orange-50 text-orange-700 border-orange-200" :
+                    "bg-amber-50 text-amber-700 border-amber-200"
+                  }`}>
+                    {p.difficulty}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+          {randomMode && (
+            <div className="rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 p-4 text-center text-xs text-indigo-600 font-semibold">
+              A random problem will be revealed when you start the session.
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={startSession}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors"
+        >
+          <Play size={14} /> Start 45-Minute Mock
+        </button>
+      </div>
+    );
+  }
+
+  // ── Active session phase ─────────────────────────────────────────────────────
+  if (phase === "active") {
+    return (
+      <div className="space-y-4">
+        {/* Timer bar */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border pb-3 pt-1">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <Clock size={13} className={timerColor} />
+              <span className={`text-lg font-mono font-extrabold tabular-nums ${timerColor}`}>
+                {formatTime(secsLeft)}
+              </span>
+            </div>
+            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${timerPct > 0.5 ? "bg-emerald-500" : timerPct > 0.25 ? "bg-amber-500" : "bg-red-500"}`}
+                style={{ width: `${timerPct * 100}%` }}
+              />
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: selectedProblem.bgColor, color: selectedProblem.color, border: `1px solid ${selectedProblem.borderColor}` }}>
+                {selectedProblem.difficulty}
+              </span>
+              <button
+                onClick={endSession}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors"
+              >
+                <Square size={10} /> End & Debrief
+              </button>
+            </div>
+          </div>
+          <p className="text-xs font-extrabold text-foreground mt-1.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {selectedProblem.title}
+          </p>
+          <p className="text-[10px] text-muted-foreground">{selectedProblem.tagline}</p>
+        </div>
+
+        {/* Section tabs */}
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+          {SECTION_CONFIG.map(s => {
+            const filled = answers[s.key].trim().length > 0;
+            return (
+              <button
+                key={s.key}
+                onClick={() => setActiveSection(s.key)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border whitespace-nowrap transition-all shrink-0 ${
+                  activeSection === s.key
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-card text-muted-foreground border-border hover:border-indigo-300"
+                }`}
+              >
+                {filled && <CheckCircle2 size={10} className={activeSection === s.key ? "text-indigo-200" : "text-emerald-500"} />}
+                {s.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active section */}
+        {SECTION_CONFIG.map(s => s.key === activeSection && (
+          <div key={s.key} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground">{s.label}</span>
+              <button
+                onClick={() => setShowHints(h => ({ ...h, [s.key]: !h[s.key] }))}
+                className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+              >
+                <Zap size={10} />
+                {showHints[s.key] ? "Hide hints" : "Show hints"}
+              </button>
+            </div>
+            {showHints[s.key] && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-1">
+                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1.5">Hints (use sparingly)</p>
+                {selectedProblem.hints[s.hint].map((h, i) => (
+                  <div key={i} className="flex items-start gap-1.5 text-[11px] text-amber-800">
+                    <span className="shrink-0 mt-0.5">•</span>{h}
+                  </div>
+                ))}
+              </div>
+            )}
+            <textarea
+              value={answers[s.key]}
+              onChange={e => setAnswers(a => ({ ...a, [s.key]: e.target.value }))}
+              placeholder={s.placeholder}
+              rows={12}
+              className="w-full rounded-xl border border-border bg-card text-xs text-foreground p-3 font-mono leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder:text-muted-foreground/50"
+            />
+            <div className="text-[10px] text-muted-foreground text-right">
+              {answers[s.key].length} chars
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Debrief phase ────────────────────────────────────────────────────────────
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">Mock Session Complete</p>
+          <p className="text-sm font-extrabold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {selectedProblem.title}
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            {targetLevel} · {formatTime(secsElapsed)} elapsed
+          </p>
+        </div>
+        <button
+          onClick={() => setPhase("setup")}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+        >
+          <RotateCcw size={12} /> New Session
+        </button>
+      </div>
+
+      {/* Loading */}
+      {debrief.isPending && (
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
+          <Loader2 size={28} className="animate-spin text-indigo-500" />
+          <p className="text-sm font-semibold text-muted-foreground">Generating IC-level debrief…</p>
+          <p className="text-xs text-muted-foreground">Evaluating 5 dimensions against the {targetLevel} bar</p>
+        </div>
+      )}
+
+      {/* Error */}
+      {debrief.isError && (
+        <div className="flex items-center gap-2 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-xs">
+          <AlertCircle size={14} />
+          Failed to generate debrief. Please try again.
+        </div>
+      )}
+
+      {/* Debrief result */}
+      {result && (
+        <div className="space-y-4">
+          {/* Verdict */}
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border font-bold ${VERDICT_COLORS[result.icLevelVerdict]}`}>
+            <Trophy size={16} />
+            <span className="text-sm">{result.icLevelVerdict}</span>
+            <span className="text-xs font-normal ml-auto opacity-70">{targetLevel} bar</span>
+          </div>
+
+          {/* Overall summary */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">Overall Assessment</p>
+            <p className="text-xs text-foreground leading-relaxed">{result.overallSummary}</p>
+          </div>
+
+          {/* Dimension scores */}
+          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Dimension Scores (click to expand)</p>
+            <ScoreBar score={result.requirementsScore} label="Requirements" feedback={result.requirementsFeedback} />
+            <ScoreBar score={result.dataModelScore} label="Data Model" feedback={result.dataModelFeedback} />
+            <ScoreBar score={result.apiScore} label="API Design" feedback={result.apiFeedback} />
+            <ScoreBar score={result.scaleScore} label="Scale & Bottlenecks" feedback={result.scaleFeedback} />
+            <ScoreBar score={result.metaDepthScore} label="Meta-Specific Depth" feedback={result.metaDepthFeedback} />
+          </div>
+
+          {/* Strengths + Improvements */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10 p-4">
+              <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide mb-2">Top Strengths</p>
+              <ul className="space-y-1.5">
+                {result.topStrengths.map((s, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle2 size={11} className="shrink-0 mt-0.5 text-emerald-600" />{s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/10 p-4">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-2">Top Improvements</p>
+              <ul className="space-y-1.5">
+                {result.topImprovements.map((s, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800 dark:text-amber-300">
+                    <AlertCircle size={11} className="shrink-0 mt-0.5 text-amber-600" />{s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Next steps */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">Next Steps</p>
+            <ul className="space-y-1.5">
+              {result.nextSteps.map((s, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-xs text-foreground">
+                  <Zap size={11} className="shrink-0 mt-0.5 text-indigo-500" />{s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Session transcript */}
+          <details className="rounded-xl border border-border bg-card overflow-hidden">
+            <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer text-xs font-bold text-muted-foreground hover:text-foreground select-none">
+              <ChevronDown size={13} className="transition-transform [[open]>&]:rotate-180" />
+              Session Transcript
+            </summary>
+            <div className="px-4 pb-4 space-y-4 border-t border-border pt-3">
+              {SECTION_CONFIG.map(s => (
+                <div key={s.key}>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">{s.label}</p>
+                  <pre className="text-xs text-foreground whitespace-pre-wrap font-mono bg-muted/40 rounded-lg p-3 border border-border leading-relaxed">
+                    {answers[s.key] || "(not addressed)"}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
+    </div>
+  );
+}

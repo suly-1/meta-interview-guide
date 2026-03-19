@@ -440,6 +440,120 @@ Time allocations must sum to ${input.durationMinutes} minutes.`;
         }
       }),
   }),
+  /**
+   * systemDesign.debrief — LLM-powered IC-level debrief for a system design mock session.
+   * Evaluates requirements, data model, API, scale, and Meta-specific depth.
+   */
+  systemDesign: router({
+    debrief: publicProcedure
+      .input(
+        z.object({
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          problem: z.object({
+            id: z.string(),
+            title: z.string(),
+            difficulty: z.string(),
+            tagline: z.string(),
+          }),
+          durationSec: z.number(),
+          sections: z.object({
+            requirements: z.string(),
+            dataModel: z.string(),
+            api: z.string(),
+            scaleBottlenecks: z.string(),
+            metaTips: z.string(),
+          }),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const minutesSpent = Math.round(input.durationSec / 60);
+        const systemPrompt = `You are a Meta engineering interview panel evaluating a candidate for ${levelLabel} on a System Design interview.
+The candidate was given 45 minutes to design: "${input.problem.title}" (${input.problem.difficulty}).
+They spent ${minutesSpent} minutes.
+
+Evaluate each of the 5 dimensions below on a 1-5 scale and provide specific, actionable feedback.
+Be calibrated to the ${input.targetLevel} bar at Meta. IC7 requires demonstrable staff-level scope, trade-off depth, and Meta-scale thinking.
+Do not be overly generous. Return a structured JSON debrief.`;
+        const userMessage = [
+          `=== PROBLEM ===${"\n"}${input.problem.title} — ${input.problem.tagline}`,
+          `=== REQUIREMENTS ===${"\n"}${input.sections.requirements || "(not addressed)"}`,
+          `=== DATA MODEL ===${"\n"}${input.sections.dataModel || "(not addressed)"}`,
+          `=== API DESIGN ===${"\n"}${input.sections.api || "(not addressed)"}`,
+          `=== SCALE & BOTTLENECKS ===${"\n"}${input.sections.scaleBottlenecks || "(not addressed)"}`,
+          `=== META-SPECIFIC DEPTH ===${"\n"}${input.sections.metaTips || "(not addressed)"}`,
+        ].join("\n\n");
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "system_design_debrief",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  icLevelVerdict: { type: "string", enum: ["Strong Hire", "Hire", "Borderline", "No Hire"] },
+                  overallSummary: { type: "string" },
+                  requirementsScore: { type: "integer" },
+                  requirementsFeedback: { type: "string" },
+                  dataModelScore: { type: "integer" },
+                  dataModelFeedback: { type: "string" },
+                  apiScore: { type: "integer" },
+                  apiFeedback: { type: "string" },
+                  scaleScore: { type: "integer" },
+                  scaleFeedback: { type: "string" },
+                  metaDepthScore: { type: "integer" },
+                  metaDepthFeedback: { type: "string" },
+                  topStrengths: { type: "array", items: { type: "string" } },
+                  topImprovements: { type: "array", items: { type: "string" } },
+                  nextSteps: { type: "array", items: { type: "string" } },
+                },
+                required: [
+                  "icLevelVerdict", "overallSummary",
+                  "requirementsScore", "requirementsFeedback",
+                  "dataModelScore", "dataModelFeedback",
+                  "apiScore", "apiFeedback",
+                  "scaleScore", "scaleFeedback",
+                  "metaDepthScore", "metaDepthFeedback",
+                  "topStrengths", "topImprovements", "nextSteps",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            icLevelVerdict: "Strong Hire" | "Hire" | "Borderline" | "No Hire";
+            overallSummary: string;
+            requirementsScore: number; requirementsFeedback: string;
+            dataModelScore: number; dataModelFeedback: string;
+            apiScore: number; apiFeedback: string;
+            scaleScore: number; scaleFeedback: string;
+            metaDepthScore: number; metaDepthFeedback: string;
+            topStrengths: string[]; topImprovements: string[]; nextSteps: string[];
+          };
+        } catch {
+          return {
+            icLevelVerdict: "Borderline" as const,
+            overallSummary: "Unable to parse debrief. Please try again.",
+            requirementsScore: 3, requirementsFeedback: "",
+            dataModelScore: 3, dataModelFeedback: "",
+            apiScore: 3, apiFeedback: "",
+            scaleScore: 3, scaleFeedback: "",
+            metaDepthScore: 3, metaDepthFeedback: "",
+            topStrengths: [], topImprovements: [], nextSteps: [],
+          };
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
