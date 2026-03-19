@@ -10,6 +10,9 @@ import Editor from "@monaco-editor/react";
 import { trpc } from "@/lib/trpc";
 import { CTCI_PROBLEMS, DIFFICULTY_COLORS } from "@/lib/ctciProblems";
 import { useCTCIProgress } from "@/hooks/useCTCIProgress";
+import { useSpacedRepetition } from "@/hooks/useSpacedRepetition";
+import { getWeakestPatterns } from "@/hooks/useDrillRatings";
+import { useReadinessScore } from "@/hooks/useReadinessScore";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
@@ -200,6 +203,31 @@ interface SpeedRunEntry {
 
 const LEADERBOARD_KEY = "cp_speedrun_leaderboard";
 const SPRINT_HISTORY_KEY = "cp_sprint_history";
+const DAILY_GOAL_KEY = "cp_daily_goal";
+const DIFF_ASSESSMENTS_KEY = "cp_diff_assessments";
+
+// Daily goal
+function loadDailyGoal(): number {
+  try { return parseInt(localStorage.getItem(DAILY_GOAL_KEY) ?? "5", 10) || 5; } catch { return 5; }
+}
+function saveDailyGoal(n: number) {
+  localStorage.setItem(DAILY_GOAL_KEY, String(n));
+}
+
+// Difficulty self-assessments
+interface DifficultyAssessment {
+  problemId: number;
+  problemName: string;
+  officialDifficulty: string;
+  selfRating: "Easy" | "Medium" | "Hard" | "Very Hard";
+  date: number;
+}
+function loadAssessments(): DifficultyAssessment[] {
+  try { return JSON.parse(localStorage.getItem(DIFF_ASSESSMENTS_KEY) ?? "[]"); } catch { return []; }
+}
+function saveAssessments(entries: DifficultyAssessment[]) {
+  localStorage.setItem(DIFF_ASSESSMENTS_KEY, JSON.stringify(entries.slice(0, 200)));
+}
 function loadLeaderboard(): SpeedRunEntry[] {
   try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) ?? "[]"); } catch { return []; }
 }
@@ -300,11 +328,12 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
 }
 
 // ─── Personal Stats Dashboard ──────────────────────────────────────────────
-function StatsDashboard({ session, progress, leaderboard, sprintHistory }: {
+function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessments }: {
   session: SessionEntry[];
   progress: Record<number, { solved: boolean; starred: boolean; notes: string }>;
   leaderboard: SpeedRunEntry[];
   sprintHistory: SprintHistoryEntry[];
+  assessments: DifficultyAssessment[];
 }) {
   const totalSolved = useMemo(() => Object.values(progress).filter(p => p.solved).length, [progress]);
   const totalStarred = useMemo(() => Object.values(progress).filter(p => p.starred).length, [progress]);
@@ -518,43 +547,123 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory }: {
         </div>
       )}
 
-      {/* Sprint History */}
-      {sprintHistory.length > 0 && (
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap size={13} className="text-violet-500" />
-            <span className="text-xs font-semibold text-foreground">Topic Sprint History</span>
-            <span className="text-xs text-muted-foreground ml-auto">{sprintHistory.length} sprints</span>
-          </div>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {sprintHistory.slice(0, 15).map((entry, i) => (
-              <div key={entry.id} className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg px-3 py-2">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-muted-foreground w-4 text-center">{i + 1}</span>
-                    <span className="text-xs font-semibold text-violet-700 dark:text-violet-300">⚡ {entry.topic}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-violet-600 dark:text-violet-400">{entry.totalScore} pts</span>
-                    <span className="text-[10px] text-muted-foreground">{new Date(entry.date).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {entry.scores.map((s, j) => (
-                    <span key={j} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                      s >= 60 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                      s >= 30 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
-                      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                    }`} title={entry.problemNames[j]}>
-                      P{j + 1}: {s}pts
-                    </span>
-                  ))}
-                </div>
+      {/* Sprint History + Personal Best */}
+      {sprintHistory.length > 0 && (() => {
+        // Compute personal best per topic
+        const pbByTopic: Record<string, number> = {};
+        sprintHistory.forEach(e => {
+          if (pbByTopic[e.topic] === undefined || e.totalScore > pbByTopic[e.topic]) {
+            pbByTopic[e.topic] = e.totalScore;
+          }
+        });
+        return (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap size={13} className="text-violet-500" />
+              <span className="text-xs font-semibold text-foreground">Topic Sprint History</span>
+              <span className="text-xs text-muted-foreground ml-auto">{sprintHistory.length} sprints</span>
+            </div>
+            {/* Personal Best summary */}
+            <div className="mb-3">
+              <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Personal Best by Topic</div>
+              <div className="flex flex-wrap gap-1.5">
+                {Object.entries(pbByTopic).sort((a, b) => b[1] - a[1]).map(([topic, pb]) => (
+                  <span key={topic} className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-700">
+                    ⚡ {topic.length > 14 ? topic.slice(0, 14) + '…' : topic}
+                    <span className="font-bold text-violet-600 dark:text-violet-400">{pb}pts</span>
+                  </span>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {sprintHistory.slice(0, 15).map((entry, i) => {
+                const isPB = entry.totalScore === pbByTopic[entry.topic];
+                return (
+                  <div key={entry.id} className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg px-3 py-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-muted-foreground w-4 text-center">{i + 1}</span>
+                        <span className="text-xs font-semibold text-violet-700 dark:text-violet-300">⚡ {entry.topic}</span>
+                        {isPB && <span className="text-[9px] font-bold px-1.5 py-0 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400" title="Personal Best for this topic">🏆 PB</span>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-violet-600 dark:text-violet-400">{entry.totalScore} pts</span>
+                        <span className="text-[10px] text-muted-foreground">{new Date(entry.date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {entry.scores.map((s, j) => (
+                        <span key={j} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                          s >= 60 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                          s >= 30 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                          "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`} title={entry.problemNames[j]}>
+                          P{j + 1}: {s}pts
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+      {/* Difficulty Perception Divergence */}
+      {(() => {
+        if (assessments.length === 0) return null;
+        // Map self-rating to numeric
+        const ratingNum = (r: string) => r === "Easy" ? 1 : r === "Medium" ? 2 : r === "Hard" ? 3 : 4;
+        const divergences = assessments.map(a => ({
+          ...a,
+          delta: ratingNum(a.selfRating) - ratingNum(a.officialDifficulty),
+        }));
+        const harderthanExpected = divergences.filter(d => d.delta > 0).sort((a, b) => b.delta - a.delta).slice(0, 5);
+        const easierThanExpected = divergences.filter(d => d.delta < 0).sort((a, b) => a.delta - b.delta).slice(0, 5);
+        return (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp size={13} className="text-indigo-500" />
+              <span className="text-xs font-semibold text-foreground">Difficulty Perception</span>
+              <span className="text-xs text-muted-foreground ml-auto">{assessments.length} rated</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {harderthanExpected.length > 0 && (
+                <div>
+                  <div className="text-[10px] font-semibold text-red-600 dark:text-red-400 mb-1.5 uppercase tracking-wide">💥 Harder than expected</div>
+                  <div className="space-y-1">
+                    {harderthanExpected.map(a => (
+                      <div key={a.problemId} className="flex items-center gap-1.5 text-[10px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                        <span className="text-foreground truncate flex-1" title={a.problemName}>{a.problemName.length > 18 ? a.problemName.slice(0, 18) + '…' : a.problemName}</span>
+                        <span className="text-red-500 font-bold flex-shrink-0">{a.officialDifficulty} → {a.selfRating}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {easierThanExpected.length > 0 && (
+                <div>
+                  <div className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 mb-1.5 uppercase tracking-wide">✨ Easier than expected</div>
+                  <div className="space-y-1">
+                    {easierThanExpected.map(a => (
+                      <div key={a.problemId} className="flex items-center gap-1.5 text-[10px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                        <span className="text-foreground truncate flex-1" title={a.problemName}>{a.problemName.length > 18 ? a.problemName.slice(0, 18) + '…' : a.problemName}</span>
+                        <span className="text-emerald-600 font-bold flex-shrink-0">{a.officialDifficulty} → {a.selfRating}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            {harderthanExpected.length === 0 && easierThanExpected.length === 0 && (
+              <div className="text-xs text-muted-foreground">Your perception matches official ratings exactly. Impressive calibration!</div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
@@ -677,9 +786,34 @@ export default function CodePractice() {
   // Hint penalty counter (resets per problem)
   const [hintsUsedThisRun, setHintsUsedThisRun] = useState(0);
 
+  // Daily goal
+  const [dailyGoal, setDailyGoal] = useState<number>(() => loadDailyGoal());
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInputVal, setGoalInputVal] = useState("");
+
+  // Difficulty estimator
+  const [assessments, setAssessments] = useState<DifficultyAssessment[]>(() => loadAssessments());
+  const [diffEstimatorOpen, setDiffEstimatorOpen] = useState(false);
+  const [pendingAssessmentProblem, setPendingAssessmentProblem] = useState<{ id: number; name: string; difficulty: string } | null>(null);
+
+  // Study Session Planner
+  const [studyPlannerOpen, setStudyPlannerOpen] = useState(false);
+  const [studyPlanDuration, setStudyPlanDuration] = useState<30 | 60 | 90>(60);
+  const [studyPlan, setStudyPlan] = useState<{
+    headline: string;
+    focusAreas: string[];
+    blocks: Array<{ type: string; title: string; durationMinutes: number; tasks: string[]; priority: string }>;
+    coachingNote: string;
+  } | null>(null);
+
   const problem = useMemo(() => CTCI_PROBLEMS.find(p => p.id === selectedId)!, [selectedId]);
   const prog = progress[selectedId] || { solved: false, starred: false, notes: "" };
   const lang = LANGUAGES.find(l => l.id === langId)!;
+
+  // Study planner data sources
+  const { dueToday: srDueToday } = useSpacedRepetition();
+  const { total: readinessScore } = useReadinessScore();
+  const studyPlanMutation = trpc.studyPlanner.generate.useMutation();
 
   // Load code from localStorage when problem/lang changes
   useEffect(() => {
@@ -1030,6 +1164,9 @@ export default function CodePractice() {
       saveSession(updated);
       // If Speed Run is active, score it
       if (speedRunActive) stopSpeedRun(true);
+      // Trigger difficulty self-assessment
+      setPendingAssessmentProblem({ id: selectedId, name: problem.name, difficulty: problem.difficulty });
+      setDiffEstimatorOpen(true);
     }
   }, [selectedId, prog.solved, problem, langId, session, speedRunActive, stopSpeedRun]);
 
@@ -1111,6 +1248,61 @@ export default function CodePractice() {
               </button>
             </div>
 
+            {/* Daily goal banner */}
+            <div className="px-2 pb-1">
+              <div className="bg-muted/40 border border-border rounded-lg px-2.5 py-1.5">
+                {editingGoal ? (
+                  <form
+                    className="flex items-center gap-1.5"
+                    onSubmit={e => {
+                      e.preventDefault();
+                      const n = Math.max(1, Math.min(50, parseInt(goalInputVal, 10) || dailyGoal));
+                      setDailyGoal(n);
+                      saveDailyGoal(n);
+                      setEditingGoal(false);
+                    }}
+                  >
+                    <span className="text-[10px] text-muted-foreground">Goal:</span>
+                    <input
+                      autoFocus
+                      type="number" min={1} max={50}
+                      value={goalInputVal}
+                      onChange={e => setGoalInputVal(e.target.value)}
+                      className="w-10 text-[10px] bg-background border border-border rounded px-1 py-0.5 text-foreground text-center"
+                    />
+                    <span className="text-[10px] text-muted-foreground">problems</span>
+                    <button type="submit" className="text-[10px] text-blue-600 font-semibold hover:underline">Save</button>
+                    <button type="button" onClick={() => setEditingGoal(false)} className="text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-semibold text-foreground">
+                        {todaySession.length >= dailyGoal ? "🎉" : "🎯"} Today: {todaySession.length} / {dailyGoal}
+                      </span>
+                      <button
+                        onClick={() => { setGoalInputVal(String(dailyGoal)); setEditingGoal(true); }}
+                        className="text-[10px] text-muted-foreground hover:text-foreground"
+                        title="Edit daily goal"
+                      >✎</button>
+                    </div>
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          todaySession.length >= dailyGoal
+                            ? "bg-emerald-500"
+                            : todaySession.length >= Math.ceil(dailyGoal * 0.5)
+                            ? "bg-amber-500"
+                            : "bg-blue-500"
+                        }`}
+                        style={{ width: `${Math.min(100, (todaySession.length / dailyGoal) * 100)}%` }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
             {/* Topic Sprint button */}
             <div className="px-2 pt-1 pb-1">
               {sprint.done ? (
@@ -1175,6 +1367,16 @@ export default function CodePractice() {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Study Session Planner button */}
+            <div className="px-2 pt-0 pb-1">
+              <button
+                onClick={() => setStudyPlannerOpen(true)}
+                className="w-full text-[10px] font-semibold py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1"
+              >
+                <BookOpen size={10} /> Plan Today's Session
+              </button>
             </div>
 
             {/* Search */}
@@ -1272,7 +1474,7 @@ export default function CodePractice() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {mainView === "stats" ? (
-          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} />
+          <StatsDashboard session={session} progress={progress} leaderboard={leaderboard} sprintHistory={sprintHistory} assessments={assessments} />
         ) : (
           <>
             {/* Toolbar */}
@@ -1397,7 +1599,7 @@ export default function CodePractice() {
                     <X size={14} />
                   </button>
                 </div>
-                {/* Score breakdown */}
+                {/* Score breakdown + Rematch */}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] text-muted-foreground font-medium">Score breakdown:</span>
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
@@ -1421,6 +1623,22 @@ export default function CodePractice() {
                   }`}>
                     {speedRunScore.score} pts
                   </span>
+                  <button
+                    onClick={() => {
+                      const rematchId = selectedId;
+                      setSpeedRunScore(null);
+                      setSelectedId(rematchId);
+                      setSpeedRunActive(true);
+                      setSpeedRunSecsLeft(20 * 60);
+                      setTimerRunning(false);
+                      timerSecsRef.current = 0;
+                      setHintsUsedThisRun(0);
+                    }}
+                    className="ml-auto flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                    title="Rematch: restart Speed Run on the same problem"
+                  >
+                    <RotateCcw size={10} /> Rematch
+                  </button>
                 </div>
               </div>
             )}
@@ -1754,6 +1972,229 @@ export default function CodePractice() {
           </>
         )}
       </div>
+
+      {/* ── Study Session Planner Modal ── */}
+      {studyPlannerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-border flex-shrink-0">
+              <BookOpen size={16} className="text-indigo-500" />
+              <div className="flex-1">
+                <div className="text-sm font-bold text-foreground">Plan Today's Session</div>
+                <div className="text-xs text-muted-foreground">AI-powered personalised study plan</div>
+              </div>
+              <button onClick={() => { setStudyPlannerOpen(false); setStudyPlan(null); }} className="text-muted-foreground hover:text-foreground">
+                <X size={16} />
+              </button>
+            </div>
+
+            {!studyPlan ? (
+              <div className="p-5 space-y-4">
+                {/* Duration picker */}
+                <div>
+                  <div className="text-xs font-semibold text-foreground mb-2">Session length</div>
+                  <div className="flex gap-2">
+                    {([30, 60, 90] as const).map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setStudyPlanDuration(d)}
+                        className={`flex-1 py-2 rounded-xl border-2 text-sm font-bold transition-all ${
+                          studyPlanDuration === d
+                            ? "bg-indigo-600 text-white border-indigo-600"
+                            : "bg-background border-border text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {d} min
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Snapshot preview */}
+                <div className="bg-muted/40 border border-border rounded-xl p-3 space-y-1.5 text-xs">
+                  <div className="font-semibold text-foreground mb-1">Your snapshot</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-28">Readiness:</span>
+                    <span className="font-bold text-foreground">{Math.round(readinessScore)}/100</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-28">SR due today:</span>
+                    <span className="font-bold text-foreground">{srDueToday.length} patterns</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-28">Unsolved CTCI:</span>
+                    <span className="font-bold text-foreground">{Object.values(progress).filter(p => !p.solved).length} problems</span>
+                  </div>
+                  {assessments.filter(a => a.selfRating === "Hard" && a.officialDifficulty !== "Hard" || a.selfRating === "Very Hard").length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground w-28">Hard topics:</span>
+                      <span className="font-bold text-red-600">{assessments.filter(a => a.selfRating === "Hard" || a.selfRating === "Very Hard").map(a => a.problemName.split(" ")[0]).slice(0, 3).join(", ")}</span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={async () => {
+                    const weakPatterns = getWeakestPatterns(8).map(p => ({ name: p.patternName, avg: p.avg ?? 0 }));
+                    const unsolvedProblems = CTCI_PROBLEMS
+                      .filter(p => !progress[p.id]?.solved)
+                      .slice(0, 15)
+                      .map(p => ({ name: p.name, difficulty: p.difficulty, topic: p.topic.split(",")[0].trim() }));
+                    const hardTopics = assessments
+                      .filter(a => a.selfRating === "Hard" || a.selfRating === "Very Hard")
+                      .map(a => a.officialDifficulty + " " + a.problemName.split(" ")[0])
+                      .slice(0, 5);
+                    const result = await studyPlanMutation.mutateAsync({
+                      durationMinutes: studyPlanDuration,
+                      srDuePatterns: srDueToday.map(id => ({ id, name: id })).slice(0, 20),
+                      weakPatterns,
+                      unsolvedProblems,
+                      hardTopics,
+                      readinessScore: Math.round(readinessScore),
+                    });
+                    setStudyPlan(result);
+                  }}
+                  disabled={studyPlanMutation.isPending}
+                  className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+                >
+                  {studyPlanMutation.isPending ? <><Loader2 size={14} className="animate-spin" /> Generating plan…</> : <><BookOpen size={14} /> Generate {studyPlanDuration}-min Plan</>}
+                </button>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {/* Plan headline */}
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-3">
+                  <div className="text-sm font-bold text-indigo-700 dark:text-indigo-300 mb-1">{studyPlan.headline}</div>
+                  <div className="flex flex-wrap gap-1">
+                    {studyPlan.focusAreas.map(f => (
+                      <span key={f} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{f}</span>
+                    ))}
+                  </div>
+                </div>
+                {/* Blocks */}
+                <div className="space-y-2">
+                  {studyPlan.blocks.map((block, i) => {
+                    const typeColors: Record<string, string> = {
+                      coding: "border-blue-300 bg-blue-50 dark:bg-blue-900/20",
+                      behavioral: "border-amber-300 bg-amber-50 dark:bg-amber-900/20",
+                      sr_review: "border-violet-300 bg-violet-50 dark:bg-violet-900/20",
+                      system_design: "border-teal-300 bg-teal-50 dark:bg-teal-900/20",
+                      break: "border-gray-200 bg-gray-50 dark:bg-gray-800/30",
+                    };
+                    const typeIcons: Record<string, string> = {
+                      coding: "💻", behavioral: "💬", sr_review: "🔄", system_design: "🏗️", break: "☕",
+                    };
+                    const priorityBadge: Record<string, string> = {
+                      high: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                      medium: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+                      low: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+                    };
+                    return (
+                      <div key={i} className={`border rounded-xl p-3 ${typeColors[block.type] ?? "border-border bg-card"}`}>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-base">{typeIcons[block.type] ?? "📌"}</span>
+                          <span className="text-xs font-bold text-foreground flex-1">{block.title}</span>
+                          <span className="text-[10px] font-bold text-muted-foreground">{block.durationMinutes}m</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0 rounded-full ${priorityBadge[block.priority] ?? ""}`}>{block.priority}</span>
+                        </div>
+                        <ul className="space-y-0.5">
+                          {block.tasks.map((task, j) => (
+                            <li key={j} className="flex items-start gap-1.5 text-[11px] text-foreground">
+                              <span className="text-muted-foreground mt-0.5 flex-shrink-0">•</span>
+                              {task}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Coaching note */}
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-3">
+                  <div className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mb-0.5 uppercase tracking-wide">🌱 Coach's note</div>
+                  <div className="text-xs text-foreground">{studyPlan.coachingNote}</div>
+                </div>
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setStudyPlan(null)}
+                    className="flex-1 py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                    ↺ Regenerate
+                  </button>
+                  <button
+                    onClick={() => { setStudyPlannerOpen(false); setStudyPlan(null); }}
+                    className="flex-1 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                  >
+                    Start Session →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Difficulty Estimator Modal ── */}
+      {diffEstimatorOpen && pendingAssessmentProblem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xl">🤔</span>
+              <div>
+                <div className="text-sm font-bold text-foreground">How hard was it really?</div>
+                <div className="text-xs text-muted-foreground truncate max-w-[220px]">{pendingAssessmentProblem.name}</div>
+              </div>
+              <button onClick={() => setDiffEstimatorOpen(false)} className="ml-auto text-muted-foreground hover:text-foreground">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="text-xs text-muted-foreground mb-3">
+              Official rating: <span className={`font-bold ${
+                pendingAssessmentProblem.difficulty === "Easy" ? "text-emerald-600" :
+                pendingAssessmentProblem.difficulty === "Medium" ? "text-amber-600" : "text-red-600"
+              }`}>{pendingAssessmentProblem.difficulty}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {(["Easy", "Medium", "Hard", "Very Hard"] as const).map(rating => {
+                const colors: Record<string, string> = {
+                  Easy: "bg-emerald-100 text-emerald-700 border-emerald-300 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400",
+                  Medium: "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400",
+                  Hard: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400",
+                  "Very Hard": "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400",
+                };
+                return (
+                  <button
+                    key={rating}
+                    onClick={() => {
+                      const entry: DifficultyAssessment = {
+                        problemId: pendingAssessmentProblem.id,
+                        problemName: pendingAssessmentProblem.name,
+                        officialDifficulty: pendingAssessmentProblem.difficulty,
+                        selfRating: rating,
+                        date: Date.now(),
+                      };
+                      const updated = [entry, ...loadAssessments().filter(a => a.problemId !== pendingAssessmentProblem.id)];
+                      saveAssessments(updated);
+                      setAssessments(updated);
+                      setDiffEstimatorOpen(false);
+                      setPendingAssessmentProblem(null);
+                    }}
+                    className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${colors[rating]}`}
+                  >
+                    {rating}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => { setDiffEstimatorOpen(false); setPendingAssessmentProblem(null); }}
+              className="mt-3 w-full text-xs text-muted-foreground hover:text-foreground text-center"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

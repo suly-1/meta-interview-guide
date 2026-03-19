@@ -323,6 +323,123 @@ Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
         return { hint } as const;
       }),
   }),
+  /**
+   * studyPlanner.generate — LLM-powered personalised study session plan.
+   * Accepts a snapshot of the candidate's current progress and returns a
+   * structured 30/60/90-min plan with specific patterns, CTCI problems, and
+   * behavioral stories to cover.
+   */
+  studyPlanner: router({
+    generate: publicProcedure
+      .input(
+        z.object({
+          durationMinutes: z.union([z.literal(30), z.literal(60), z.literal(90)]),
+          // SR due patterns (id + name)
+          srDuePatterns: z.array(z.object({ id: z.string(), name: z.string() })).max(20),
+          // Weak patterns by drill rating
+          weakPatterns: z.array(z.object({ name: z.string(), avg: z.number() })).max(10),
+          // Unsolved CTCI problems (sample)
+          unsolvedProblems: z.array(z.object({ name: z.string(), difficulty: z.string(), topic: z.string() })).max(15),
+          // Topics where self-rating diverges most from official (harder than expected)
+          hardTopics: z.array(z.string()).max(5),
+          // Current readiness score (0-100)
+          readinessScore: z.number().min(0).max(100),
+          // Days until interview (optional)
+          daysUntilInterview: z.number().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const durationLabel = `${input.durationMinutes}-minute`;
+        const srSection = input.srDuePatterns.length > 0
+          ? `SR Due Today (${input.srDuePatterns.length}): ${input.srDuePatterns.map(p => p.name).join(", ")}`
+          : "No SR patterns due today";
+        const weakSection = input.weakPatterns.length > 0
+          ? `Weak Patterns (low drill ratings): ${input.weakPatterns.map(p => `${p.name} (avg ${p.avg.toFixed(1)}/5)`).join(", ")}`
+          : "No weak patterns identified";
+        const hardSection = input.hardTopics.length > 0
+          ? `Topics felt harder than expected: ${input.hardTopics.join(", ")}`
+          : "";
+        const unsolvedSection = input.unsolvedProblems.length > 0
+          ? `Sample unsolved CTCI problems: ${input.unsolvedProblems.map(p => `${p.name} (${p.difficulty}, ${p.topic})`).join("; ")}`
+          : "All CTCI problems solved";
+        const systemPrompt = `You are an expert Meta IC6/IC7 interview coach building a personalised ${durationLabel} study session plan.
+Candidate snapshot:
+- Readiness score: ${input.readinessScore}/100${input.daysUntilInterview ? `\n- Days until interview: ${input.daysUntilInterview}` : ""}
+- ${srSection}
+- ${weakSection}${hardSection ? `\n- ${hardSection}` : ""}
+- ${unsolvedSection}
+
+Build a concrete, prioritised study plan for a ${durationLabel} session.
+Return JSON matching the schema exactly. Each block must have a specific, actionable task — not vague advice.
+For coding blocks, name specific problems or patterns. For behavioral blocks, name specific themes or STAR stories.
+Time allocations must sum to ${input.durationMinutes} minutes.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Generate my ${durationLabel} study plan.` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "study_plan",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  headline: { type: "string", description: "One-line summary of the session focus" },
+                  focusAreas: { type: "array", items: { type: "string" }, description: "2-4 key focus areas for this session" },
+                  blocks: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        type: { type: "string", enum: ["coding", "behavioral", "sr_review", "system_design", "break"] },
+                        title: { type: "string" },
+                        durationMinutes: { type: "integer" },
+                        tasks: { type: "array", items: { type: "string" } },
+                        priority: { type: "string", enum: ["high", "medium", "low"] },
+                      },
+                      required: ["type", "title", "durationMinutes", "tasks", "priority"],
+                      additionalProperties: false,
+                    },
+                  },
+                  coachingNote: { type: "string", description: "1-2 sentence motivational or strategic coaching note" },
+                },
+                required: ["headline", "focusAreas", "blocks", "coachingNote"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            headline: string;
+            focusAreas: string[];
+            blocks: Array<{
+              type: "coding" | "behavioral" | "sr_review" | "system_design" | "break";
+              title: string;
+              durationMinutes: number;
+              tasks: string[];
+              priority: "high" | "medium" | "low";
+            }>;
+            coachingNote: string;
+          };
+        } catch {
+          return {
+            headline: "Balanced Practice Session",
+            focusAreas: ["Coding patterns", "Behavioral stories"],
+            blocks: [
+              { type: "coding" as const, title: "Coding Practice", durationMinutes: Math.floor(input.durationMinutes * 0.6), tasks: ["Solve 1-2 CTCI problems"], priority: "high" as const },
+              { type: "behavioral" as const, title: "Behavioral Review", durationMinutes: Math.floor(input.durationMinutes * 0.4), tasks: ["Review STAR stories"], priority: "medium" as const },
+            ],
+            coachingNote: "Consistent daily practice is the key to interview success.",
+          };
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

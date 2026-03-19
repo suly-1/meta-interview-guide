@@ -64,3 +64,8 @@
 - [x] Sprint streak badge (flame badge in sidebar when 3+ sprints completed today)
 - [x] Weak-topic auto-suggest (pre-select lowest avg-score topic in Sprint dropdown)
 - [x] Speed Run score breakdown panel (base score + time bonus - hint penalty breakdown)
+- [x] CTCI Difficulty Estimator (self-assessment modal after solve, divergence analytics in Stats)
+- [x] Study Session Planner (LLM-powered 30/60/90-min plan from SR dates, hints, readiness pace)
+- [x] Sprint personal best per topic (highest single-sprint score per topic in Sprint History)
+- [x] Speed Run Rematch button (one-click restart on same problem after Speed Run ends)
+- [x] Daily goal banner (progress bar in sidebar, configurable daily target)
