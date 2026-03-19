@@ -2,6 +2,17 @@
 // Dark charcoal base, Space Grotesk headings, Inter body
 // Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
 
+// Pattern prerequisite map: patternId → prerequisite patternIds (must be rated ≥3 to unlock)
+export const PATTERN_PREREQS: Record<string, string[]> = {
+  "fast-slow":       ["two-pointers"],
+  "dfs-backtrack":   ["bfs"],
+  "dynamic-prog":    ["dfs-backtrack"],
+  "monotonic-stack": ["binary-search"],
+  "trie":            ["dfs-backtrack"],
+  "union-find":      ["bfs"],
+  "graph-advanced":  ["bfs", "dfs-backtrack"],
+};
+
 export const PATTERNS = [
   { id: "sliding-window",  name: "Sliding Window",          diff: "Medium", freq: 5, desc: "Fixed or variable-size window sliding over array/string. Optimal for subarray/substring problems.", examples: ["Max Subarray","Longest Substring No Repeat","Min Window Substring"], keyIdea: "Expand right, shrink left when condition violated" },
   { id: "two-pointers",    name: "Two Pointers",            diff: "Easy",   freq: 5, desc: "Two indices moving toward each other or in same direction. Eliminates nested loops.", examples: ["Two Sum II","Container With Most Water","3Sum"], keyIdea: "Sort first, then converge or co-move pointers" },

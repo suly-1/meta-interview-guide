@@ -4,11 +4,12 @@
 // mock interview timer (25/35/45 min), session history, sprint mode
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, Download, Flame, Clock, ChevronDown, ChevronUp, Star, Zap, BarChart2, BookOpen, Filter, Timer, Trophy, X, SkipForward, ChevronRight } from "lucide-react";
-import { PATTERNS } from "@/lib/data";
+import { PATTERNS, PATTERN_PREREQS } from "@/lib/data";
 import { usePatternRatings, usePatternNotes, useSpacedRepetition, useCodingHistory, usePatternTime, useCTCIStreak } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
+import MockInterviewSimulator from "@/components/MockInterviewSimulator";
 
 const DIFF_ORDER: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
 const DIFF_COLOR: Record<string, string> = { Easy: "badge-green", Medium: "badge-amber", Hard: "badge-red" };
@@ -586,6 +587,11 @@ export default function CodingTab() {
   const [showDrillMode, setShowDrillMode] = useState(false);
   const [showSprintMode, setShowSprintMode] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(true);
+  // Stuck? hint ladder: patternId → { level, hint, loading }
+  const [stuckHints, setStuckHints] = useState<Record<string, { level: "gentle"|"medium"|"full"; hint: string; loading: boolean }>>({});
+  const patternHintMutation = trpc.ctci.patternHint.useMutation({
+    onError: () => toast.error("Could not generate hint. Try again."),
+  });
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -601,6 +607,23 @@ export default function CodingTab() {
   const handleSessionEnd = (duration: number) => {
     setSessions(s => [...s, { id: Date.now().toString(), date: today, duration, type: `${duration}min` as "35min" }]);
     toast.success(`${duration}-min session logged!`);
+  };
+
+  const getPatternHint = async (p: typeof PATTERNS[0], level: "gentle"|"medium"|"full") => {
+    setStuckHints(h => ({ ...h, [p.id]: { level, hint: "", loading: true } }));
+    try {
+      const res = await patternHintMutation.mutateAsync({
+        patternName: p.name,
+        patternDesc: p.desc,
+        patternKeyIdea: p.keyIdea,
+        examples: p.examples,
+        hintLevel: level,
+        userRating: ratings[p.id] ?? 0,
+      });
+      setStuckHints(h => ({ ...h, [p.id]: { level, hint: res.hint, loading: false } }));
+    } catch {
+      setStuckHints(h => ({ ...h, [p.id]: { level, hint: "Could not generate hint.", loading: false } }));
+    }
   };
 
   const exportAnkiCSV = () => {
@@ -630,8 +653,14 @@ export default function CodingTab() {
 
   return (
     <div className="space-y-5">
+      {/* CTCI 500 Question Tracker — top of page */}
+      <CTCITracker />
+
       {/* Heatmap */}
       {showHeatmap && <PatternHeatmap ratings={ratings} />}
+
+      {/* Mock Interview Simulator */}
+      <MockInterviewSimulator />
 
       {/* Controls bar */}
       <div className="flex flex-wrap gap-2 items-center">
@@ -773,8 +802,13 @@ export default function CodingTab() {
             const mins = Math.floor(secs / 60);
             const maxSecs = Math.max(...PATTERNS.map(x => patternTime[x.id] ?? 0), 1);
             const timePct = Math.min(100, Math.round((secs / maxSecs) * 100));
+            // Dependency unlock: check if all prerequisites are rated ≥3
+            const prereqs = PATTERN_PREREQS[p.id] ?? [];
+            const unmetPrereqs = prereqs.filter(pid => (ratings[pid] ?? 0) < 3);
+            const isLocked = unmetPrereqs.length > 0;
+            const prereqNames = unmetPrereqs.map(pid => PATTERNS.find(x => x.id === pid)?.name ?? pid);
             return (
-              <div key={p.id} className={`p-4 transition-all ${r >= 4 ? "bg-emerald-500/3" : r > 0 && r <= 2 ? "bg-red-500/3" : ""}`}>
+              <div key={p.id} className={`p-4 transition-all ${isLocked ? "opacity-50" : ""} ${r >= 4 ? "bg-emerald-500/3" : r > 0 && r <= 2 ? "bg-red-500/3" : ""}`}>
                 <div className="flex flex-wrap items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -784,6 +818,11 @@ export default function CodingTab() {
                       {isDue && <span className="badge badge-amber">Due today</span>}
                       {r >= 4 && <span className="badge badge-green">Mastered</span>}
                       {r > 0 && r <= 2 && <span className="badge badge-red">Weak</span>}
+                      {isLocked && (
+                        <span className="badge badge-gray" title={`Unlock by mastering: ${prereqNames.join(", ")}`}>
+                          🔒 Locked — master {prereqNames.join(" & ")} first
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground mb-1.5">{p.keyIdea}</p>
                     <div className="flex flex-wrap gap-1 mb-2">
@@ -809,6 +848,12 @@ export default function CodingTab() {
                       className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
                       <BookOpen size={11} /> Notes {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                     </button>
+                    {/* Stuck? hint ladder */}
+                    <button
+                      onClick={() => stuckHints[p.id] ? setStuckHints(h => { const n = {...h}; delete n[p.id]; return n; }) : getPatternHint(p, "gentle")}
+                      className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors">
+                      <Zap size={11} /> {stuckHints[p.id] ? "Hide hints" : "Stuck?"}
+                    </button>
                   </div>
                 </div>
                 {isExpanded && (
@@ -820,6 +865,33 @@ export default function CodingTab() {
                       rows={3}
                       className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 resize-none"
                     />
+                  </div>
+                )}
+                {/* Stuck? 3-step hint ladder */}
+                {stuckHints[p.id] && (
+                  <div className="mt-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-3">
+                    {/* Level selector */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-400">Hint Level:</span>
+                      {(["gentle", "medium", "full"] as const).map(lvl => (
+                        <button key={lvl} onClick={() => getPatternHint(p, lvl)}
+                          className={`px-2 py-0.5 rounded text-xs font-semibold transition-all ${
+                            stuckHints[p.id]?.level === lvl
+                              ? "bg-amber-500 text-black"
+                              : "bg-secondary text-muted-foreground hover:text-foreground"
+                          }`}>
+                          {lvl === "gentle" ? "1️⃣ Gentle" : lvl === "medium" ? "2️⃣ Medium" : "3️⃣ Full"}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Hint content */}
+                    {stuckHints[p.id]?.loading ? (
+                      <div className="flex items-center gap-2 text-xs text-amber-400">
+                        <Zap size={11} className="animate-pulse" /> Generating hint…
+                      </div>
+                    ) : stuckHints[p.id]?.hint ? (
+                      <div className="text-xs text-foreground leading-relaxed">{stuckHints[p.id].hint}</div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -836,9 +908,6 @@ export default function CodingTab() {
 
       {/* Pattern Dependency Graph */}
       <PatternDependencyGraph />
-
-      {/* CTCI 500 Question Tracker */}
-      <CTCITracker />
     </div>
   );
 }

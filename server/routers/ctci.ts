@@ -3,6 +3,118 @@ import { publicProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 
 export const ctciRouter = router({
+  generateDebrief: publicProcedure
+    .input(
+      z.object({
+        codingProblem: z.string(),
+        codingNotes: z.string().optional(),
+        codingTimeUsed: z.number(), // seconds
+        bq1Question: z.string(),
+        bq1Answer: z.string().optional(),
+        bq2Question: z.string(),
+        bq2Answer: z.string().optional(),
+        icTarget: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+        totalTimeUsed: z.number(), // seconds
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { codingProblem, codingNotes, codingTimeUsed, bq1Question, bq1Answer, bq2Question, bq2Answer, icTarget, totalTimeUsed } = input;
+
+      const systemPrompt = `You are a senior Meta engineering interviewer writing a post-interview debrief.
+Assess the candidate's performance in a 45-minute mock interview for ${icTarget} level.
+Be direct, specific, and constructive. Use Meta's hiring bar language.
+
+Respond ONLY with valid JSON:
+{
+  "overallVerdict": "Strong Hire" | "Hire" | "Borderline" | "No Hire",
+  "overallScore": <1-5>,
+  "codingAssessment": "<2-3 sentences on coding performance>",
+  "codingScore": <1-5>,
+  "behavioralAssessment": "<2-3 sentences on behavioral performance>",
+  "behavioralScore": <1-5>,
+  "icLevelAssessment": "<1-2 sentences on whether they demonstrated ${icTarget} scope>",
+  "topStrengths": ["<strength 1>", "<strength 2>"],
+  "criticalGaps": ["<gap 1>", "<gap 2>"],
+  "nextSteps": ["<action 1>", "<action 2>", "<action 3>"]
+}`;
+
+      const codingMins = Math.floor(codingTimeUsed / 60);
+      const totalMins = Math.floor(totalTimeUsed / 60);
+
+      const userMsg = `MOCK INTERVIEW DEBRIEF REQUEST
+Target Level: ${icTarget}
+Total time used: ${totalMins} min
+
+--- CODING SECTION (time: ${codingMins} min) ---
+Problem: ${codingProblem}
+Candidate notes/approach: ${codingNotes?.trim() || "(no notes provided)"}
+
+--- BEHAVIORAL SECTION ---
+Q1: ${bq1Question}
+A1: ${bq1Answer?.trim() || "(no answer provided)"}
+
+Q2: ${bq2Question}
+A2: ${bq2Answer?.trim() || "(no answer provided)"}
+
+Generate the debrief JSON.`;
+
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMsg },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "mock_debrief",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                overallVerdict: { type: "string" },
+                overallScore: { type: "integer" },
+                codingAssessment: { type: "string" },
+                codingScore: { type: "integer" },
+                behavioralAssessment: { type: "string" },
+                behavioralScore: { type: "integer" },
+                icLevelAssessment: { type: "string" },
+                topStrengths: { type: "array", items: { type: "string" } },
+                criticalGaps: { type: "array", items: { type: "string" } },
+                nextSteps: { type: "array", items: { type: "string" } },
+              },
+              required: ["overallVerdict","overallScore","codingAssessment","codingScore","behavioralAssessment","behavioralScore","icLevelAssessment","topStrengths","criticalGaps","nextSteps"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+
+      const raw = response.choices?.[0]?.message?.content ?? "{}";
+      try {
+        const p = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        return {
+          overallVerdict: p.overallVerdict ?? "Borderline",
+          overallScore: Math.min(5, Math.max(1, p.overallScore ?? 3)),
+          codingAssessment: p.codingAssessment ?? "",
+          codingScore: Math.min(5, Math.max(1, p.codingScore ?? 3)),
+          behavioralAssessment: p.behavioralAssessment ?? "",
+          behavioralScore: Math.min(5, Math.max(1, p.behavioralScore ?? 3)),
+          icLevelAssessment: p.icLevelAssessment ?? "",
+          topStrengths: p.topStrengths ?? [],
+          criticalGaps: p.criticalGaps ?? [],
+          nextSteps: p.nextSteps ?? [],
+        };
+      } catch {
+        return {
+          overallVerdict: "Borderline", overallScore: 3,
+          codingAssessment: "Could not generate assessment.", codingScore: 3,
+          behavioralAssessment: "Could not generate assessment.", behavioralScore: 3,
+          icLevelAssessment: "Could not generate assessment.",
+          topStrengths: [], criticalGaps: [], nextSteps: ["Retry the debrief."],
+        };
+      }
+    }),
+
   scoreAnswer: publicProcedure
     .input(
       z.object({
@@ -77,6 +189,48 @@ ${answer.slice(0, 2000)}`;
       } catch {
         return { specificity: 3, impact: 3, icLevelFit: 3, overall: 3, strengths: [], improvements: ["Could not parse AI response."] };
       }
+    }),
+
+  patternHint: publicProcedure
+    .input(
+      z.object({
+        patternName: z.string().min(1),
+        patternDesc: z.string(),
+        patternKeyIdea: z.string(),
+        examples: z.array(z.string()),
+        hintLevel: z.enum(["gentle", "medium", "full"]),
+        userRating: z.number().int().min(0).max(5),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { patternName, patternDesc, patternKeyIdea, examples, hintLevel, userRating } = input;
+
+      const levelInstructions = {
+        gentle: `Give a GENTLE hint (1-2 sentences). Only point toward the category/intuition. Do NOT name the algorithm or data structure directly. Ask a guiding question.`,
+        medium: `Give a MEDIUM hint (2-3 sentences). Name the data structure or algorithm pattern. Explain WHY it applies here. Give one concrete step to start. Do NOT write code.`,
+        full: `Give a FULL WALKTHROUGH (4-6 sentences). Explain the complete approach step by step: data structure choice, algorithm, key insight, time/space complexity. You may use pseudocode but NOT a full solution.`,
+      };
+
+      const systemPrompt = `You are a Meta coding interview coach helping a candidate understand algorithmic patterns.
+${levelInstructions[hintLevel]}
+Be encouraging. Tailor to someone who rated their mastery ${userRating}/5.`;
+
+      const userMsg = `Pattern: ${patternName}
+Description: ${patternDesc}
+Key Idea: ${patternKeyIdea}
+Example problems: ${examples.join(", ")}
+
+I'm stuck. Give me a ${hintLevel} hint.`;
+
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMsg },
+        ],
+      });
+
+      const hint = response.choices?.[0]?.message?.content ?? "Think about what data structure gives you the key property you need here.";
+      return { hint: typeof hint === "string" ? hint : JSON.stringify(hint) };
     }),
 
   getHint: publicProcedure

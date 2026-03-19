@@ -103,3 +103,11 @@
 - [x] CTCI Problem Notes (persistent notes panel per problem, Markdown cheat sheet export)
 - [x] Behavioral Answer Scorer UI (STAR answer text area + LLM rubric: Specificity, Impact, IC-level)
 - [x] Readiness Goal Setter (target % + date, daily task card with patterns/stories needed per day)
+
+## New Features — Round 12
+- [x] Move CTCI section to top of Coding tab (no content/style changes)
+- [x] Mock Interview Simulator (45-min session, 1 coding + 2 behavioral, LLM debrief)
+- [x] Pattern Dependency Unlock Flow (grey out advanced patterns until prerequisites rated ≥3)
+
+## New Features — Round 13
+- [x] Per-pattern "Stuck?" 3-step hint ladder (gentle → medium → full walkthrough, LLM-powered)
