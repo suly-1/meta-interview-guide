@@ -151,3 +151,8 @@
 - [x] Tournament leaderboard in Stats view (top-10 all-time, sortable by score/date)
 - [x] Scheduled daily weakness sprint toggle (Notification API, user-chosen time)
 - [x] Density-aware print styles for Recruiter-Ready Summary PDF
+
+## Current Batch (Bracket Comparison + Snooze + Print Preview)
+- [x] Tournament bracket vs personal-best delta comparison card (after each tournament)
+- [x] Sprint notification snooze action (Notification API actions + Service Worker)
+- [x] Print preview modal with density label before opening print window

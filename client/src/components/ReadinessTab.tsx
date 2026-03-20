@@ -5,7 +5,7 @@
  */
 import { useRef, useMemo, useState, useEffect } from "react";
 import { useDensity } from "@/contexts/DensityContext";
-import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap, Target, ChevronRight, Dumbbell, CheckCircle2, AlertTriangle, Bell } from "lucide-react";
+import { Printer, BarChart2, FileDown, ShieldCheck, Trophy, Zap, Target, ChevronRight, Dumbbell, CheckCircle2, AlertTriangle, Bell, X } from "lucide-react";
 import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
@@ -28,6 +28,7 @@ function loadJSON<T>(key: string, fallback: T): T {
 function RecruiterSummaryPrint() {
   const printRef = useRef<HTMLDivElement>(null);
   const { density } = useDensity();
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const handlePrint = () => {
     const content = printRef.current;
@@ -122,12 +123,85 @@ function RecruiterSummaryPrint() {
           <p className="text-xs text-gray-500 mt-0.5">One-page printable prep summary — ideal for the night before your interview</p>
         </div>
         <button
-          onClick={handlePrint}
+          onClick={() => setShowPreviewModal(true)}
           className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold transition-colors shadow-sm"
         >
           <Printer size={14} /> Print / Save PDF
         </button>
       </div>
+
+      {/* Print Preview Modal */}
+      {showPreviewModal && (() => {
+        const densityMeta: Record<string, { label: string; note: string; scale: string; icon: string }> = {
+          compact:     { label: "Compact",     note: "Smaller font & tighter padding — fits more content on one page",    scale: "×0.875", icon: "📌" },
+          comfortable: { label: "Comfortable", note: "Standard font size and spacing — balanced readability",              scale: "×1.000", icon: "✅" },
+          spacious:    { label: "Spacious",    note: "Larger font & more padding — easier to read at a glance or on screen", scale: "×1.125", icon: "🔍" },
+        };
+        const meta = densityMeta[density] ?? densityMeta.comfortable;
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.5)" }}
+            onClick={e => { if (e.target === e.currentTarget) setShowPreviewModal(false); }}
+          >
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md">
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-2">
+                  <Printer size={16} className="text-slate-600 dark:text-slate-400" />
+                  <span className="font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Print Preview</span>
+                </div>
+                <button onClick={() => setShowPreviewModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Density info */}
+              <div className="px-5 py-4 space-y-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Your PDF will be generated using the current density setting:</p>
+
+                <div className="rounded-xl border-2 border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/20 p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">{meta.icon}</span>
+                    <div>
+                      <div className="font-bold text-gray-900 dark:text-gray-100">{meta.label} mode</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Font scale: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">{meta.scale}</code></div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{meta.note}</p>
+                </div>
+
+                {/* Density switcher hint */}
+                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                  <Target size={13} className="text-blue-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-700 dark:text-blue-400">
+                    To change the font size, use the <strong>S / M / L</strong> toggle in the sticky navigation bar at the top of the page, then come back here to print.
+                  </p>
+                </div>
+
+                {/* Page size note */}
+                <div className="text-xs text-gray-400 dark:text-gray-500">
+                  A4 / Letter · Portrait · Print to PDF via your browser's print dialog
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 px-5 pb-5">
+                <button
+                  onClick={() => setShowPreviewModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >Cancel</button>
+                <button
+                  onClick={() => { setShowPreviewModal(false); handlePrint(); }}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                >
+                  <Printer size={14} /> Print Now
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Live preview card */}
       <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
@@ -343,14 +417,42 @@ function requestNotifPermission(): Promise<NotificationPermission> {
   return Notification.requestPermission();
 }
 
-function fireSprintNotification() {
+async function getSwRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return null;
+  try {
+    // Register (or reuse) the sprint service worker
+    const reg = await navigator.serviceWorker.register("/sprint-sw.js", { scope: "/" });
+    // Wait for it to be active
+    await navigator.serviceWorker.ready;
+    return reg;
+  } catch {
+    return null;
+  }
+}
+
+async function fireSprintNotification() {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
-  new Notification("💪 Time for your Weakness Sprint!", {
-    body: "Your 20-minute focused drill on your weakest patterns is ready. Open the guide to start.",
-    icon: "/favicon.ico",
-    tag: "meta-guide-sprint",
-    requireInteraction: false,
-  });
+  const reg = await getSwRegistration();
+  if (reg) {
+    // Use SW notification so the actions (snooze) work
+    await reg.showNotification("💪 Time for your Weakness Sprint!", {
+      body: "Your 20-minute focused drill on your weakest patterns is ready. Open the guide to start.",
+      icon: "/favicon.ico",
+      tag: "meta-guide-sprint",
+      requireInteraction: false,
+      actions: [
+        { action: "snooze", title: "Snooze 30 min" },
+      ],
+    } as NotificationOptions);
+  } else {
+    // Fallback: plain Notification without actions
+    new Notification("💪 Time for your Weakness Sprint!", {
+      body: "Your 20-minute focused drill on your weakest patterns is ready. Open the guide to start.",
+      icon: "/favicon.ico",
+      tag: "meta-guide-sprint",
+      requireInteraction: false,
+    });
+  }
 }
 
 function SprintScheduler() {
@@ -359,7 +461,15 @@ function SprintScheduler() {
     "Notification" in window ? Notification.permission : "denied"
   );
   const [testFired, setTestFired] = useState(false);
+  const [swReady, setSwReady] = useState(false);
   const supported = "Notification" in window;
+
+  // Register SW eagerly once permission is granted so snooze actions work
+  useEffect(() => {
+    if (permission === "granted") {
+      getSwRegistration().then(reg => setSwReady(!!reg));
+    }
+  }, [permission]);
 
   useEffect(() => { saveSprintSchedule(settings); }, [settings]);
 
@@ -465,25 +575,38 @@ function SprintScheduler() {
 
         {/* Time picker */}
         {isActive && (
-          <div className="mt-4 flex items-center gap-3 flex-wrap">
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Reminder time</label>
-            <input
-              type="time"
-              value={settings.time}
-              onChange={e => handleTimeChange(e.target.value)}
-              className="border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white dark:bg-gray-800"
-            />
-            <button
-              onClick={handleTest}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
-                testFired
-                  ? "bg-green-100 border-green-300 text-green-700"
-                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400"
-              }`}
-            >
-              {testFired ? <CheckCircle2 size={12} /> : <Bell size={12} />}
-              {testFired ? "Sent!" : "Test notification"}
-            </button>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Reminder time</label>
+              <input
+                type="time"
+                value={settings.time}
+                onChange={e => handleTimeChange(e.target.value)}
+                className="border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white dark:bg-gray-800"
+              />
+              <button
+                onClick={handleTest}
+                className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                  testFired
+                    ? "bg-green-100 border-green-300 text-green-700"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400"
+                }`}
+              >
+                {testFired ? <CheckCircle2 size={12} /> : <Bell size={12} />}
+                {testFired ? "Sent!" : "Test notification"}
+              </button>
+            </div>
+            {/* Snooze capability badge */}
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${
+              swReady
+                ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+                : "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500"
+            }`}>
+              {swReady ? <CheckCircle2 size={12} /> : <Bell size={12} />}
+              {swReady
+                ? <span><strong>Snooze action enabled</strong> — the notification will include a "Snooze 30 min" button</span>
+                : <span>Snooze action requires a browser that supports Service Workers (Chrome, Edge, Firefox)</span>}
+            </div>
           </div>
         )}
       </div>

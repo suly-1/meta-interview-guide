@@ -2511,6 +2511,93 @@ export default function CodePractice() {
                     </div>
                   ))}
                 </div>
+                {/* Personal Best Delta Comparison */}
+                {(() => {
+                  const history = loadTournamentHistory();
+                  // personal best is the highest score BEFORE this run (history[0] is the just-saved run)
+                  const prevBest = history.slice(1).reduce<TournamentRecord | null>((best, r) =>
+                    best === null || r.totalScore > best.totalScore ? r : best, null);
+                  if (!prevBest) return null;
+                  const thisScore = tournament.rounds.reduce((a, b) => a + b.score, 0);
+                  const thisSolves = tournament.rounds.filter(r => r.solved).length;
+                  const pbSolves = prevBest.rounds.filter(r => r.solved).length;
+                  const scoreDelta = thisScore - prevBest.totalScore;
+                  const solvesDelta = thisSolves - pbSolves;
+                  const isNewPB = scoreDelta > 0;
+                  return (
+                    <div className={`rounded-lg border p-2 mb-2 ${
+                      isNewPB
+                        ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700"
+                        : "bg-muted/40 border-border"
+                    }`}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wide text-muted-foreground">vs Personal Best</span>
+                        {isNewPB && <span className="text-[9px] font-black bg-emerald-500 text-white px-1.5 py-0 rounded-full">NEW PB!</span>}
+                      </div>
+                      <div className="grid grid-cols-3 gap-1">
+                        {/* Score delta */}
+                        <div className="text-center">
+                          <div className="text-[9px] text-muted-foreground mb-0.5">Score</div>
+                          <div className={`text-sm font-black ${
+                            scoreDelta > 0 ? "text-emerald-600" : scoreDelta < 0 ? "text-red-500" : "text-muted-foreground"
+                          }`}>
+                            {scoreDelta > 0 ? "+" : ""}{scoreDelta}
+                          </div>
+                          <div className="text-[9px] text-muted-foreground">PB: {prevBest.totalScore}</div>
+                        </div>
+                        {/* Solves delta */}
+                        <div className="text-center">
+                          <div className="text-[9px] text-muted-foreground mb-0.5">Solved</div>
+                          <div className={`text-sm font-black ${
+                            solvesDelta > 0 ? "text-emerald-600" : solvesDelta < 0 ? "text-red-500" : "text-muted-foreground"
+                          }`}>
+                            {solvesDelta > 0 ? "+" : ""}{solvesDelta}
+                          </div>
+                          <div className="text-[9px] text-muted-foreground">PB: {pbSolves}/5</div>
+                        </div>
+                        {/* Per-round time comparison */}
+                        <div className="text-center">
+                          <div className="text-[9px] text-muted-foreground mb-0.5">Avg Time</div>
+                          {(() => {
+                            const thisSolvedRounds = tournament.rounds.filter(r => r.solved);
+                            const pbSolvedRounds = prevBest.rounds.filter(r => r.solved);
+                            const thisAvg = thisSolvedRounds.length ? Math.round(thisSolvedRounds.reduce((a, b) => a + b.timeSec, 0) / thisSolvedRounds.length) : null;
+                            const pbAvg = pbSolvedRounds.length ? Math.round(pbSolvedRounds.reduce((a, b) => a + b.timeSec, 0) / pbSolvedRounds.length) : null;
+                            const timeDelta = thisAvg !== null && pbAvg !== null ? thisAvg - pbAvg : null;
+                            const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+                            return (
+                              <>
+                                <div className={`text-sm font-black ${
+                                  timeDelta === null ? "text-muted-foreground" :
+                                  timeDelta < 0 ? "text-emerald-600" : timeDelta > 0 ? "text-red-500" : "text-muted-foreground"
+                                }`}>
+                                  {timeDelta === null ? "—" : timeDelta < 0 ? `-${fmt(-timeDelta)}` : timeDelta > 0 ? `+${fmt(timeDelta)}` : "=same"}
+                                </div>
+                                <div className="text-[9px] text-muted-foreground">{pbAvg !== null ? `PB: ${fmt(pbAvg)}` : "PB: —"}</div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                      {/* Per-round bracket comparison dots */}
+                      <div className="mt-1.5 flex gap-1">
+                        {tournament.rounds.map((r, i) => {
+                          const pbRound = prevBest.rounds[i];
+                          const better = r.score > (pbRound?.score ?? 0);
+                          const same = r.score === (pbRound?.score ?? 0);
+                          return (
+                            <div key={i} className="flex-1 text-center" title={`R${i+1}: ${r.score}pts vs PB ${pbRound?.score ?? 0}pts`}>
+                              <div className={`text-[9px] font-bold ${
+                                better ? "text-emerald-600" : same ? "text-muted-foreground" : "text-red-500"
+                              }`}>{better ? "▲" : same ? "=" : "▼"}</div>
+                              <div className="text-[8px] text-muted-foreground">{r.score}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
                 <button
                   onClick={() => { setTournament(t => ({ ...t, done: false })); setTournamentOpen(true); }}
                   className="w-full text-xs font-semibold py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
