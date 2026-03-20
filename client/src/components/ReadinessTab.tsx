@@ -20,9 +20,177 @@ import { PATTERN_TO_CTCI_TOPICS, problemMatchesTopics } from "@/lib/ctciTopicMap
 
 const DRILL_KEY = "meta-guide-drill-ratings";
 const CTCI_KEY  = "ctci_progress_v1";
+const IC_SIGNAL_HISTORY_KEY = "sd_ic_signal_history_v1";
+
+interface ICSignalEntry {
+  date: number;
+  problemTitle: string;
+  targetLevel: string;
+  counts: { IC4: number; IC5: number; IC6: number; IC7: number };
+  total: number;
+}
 
 function loadJSON<T>(key: string, fallback: T): T {
   try { return JSON.parse(localStorage.getItem(key) ?? "") ?? fallback; } catch { return fallback; }
+}
+
+function ICSignalTrendChart() {
+  const history: ICSignalEntry[] = loadJSON<ICSignalEntry[]>(IC_SIGNAL_HISTORY_KEY, []);
+
+  if (history.length === 0) {
+    return (
+      <section>
+        <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center gap-3">
+            <BarChart2 size={20} className="text-purple-600" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                IC Signal Detector Trend
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Track how your IC4/IC5/IC6/IC7 signal distribution evolves across mock sessions.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-dashed border-purple-200 bg-purple-50 p-8 text-center">
+          <BarChart2 size={28} className="text-purple-300 mx-auto mb-3" />
+          <p className="text-sm font-bold text-purple-700">No signal data yet</p>
+          <p className="text-xs text-purple-500 mt-1 max-w-sm mx-auto">
+            Run the IC-Level Signal Detector in a System Design Mock debrief to start tracking your signal quality over time.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  const levelColors = {
+    IC4: { bar: "bg-red-400", text: "text-red-700", badge: "bg-red-100 text-red-700 border-red-200" },
+    IC5: { bar: "bg-amber-400", text: "text-amber-700", badge: "bg-amber-100 text-amber-700 border-amber-200" },
+    IC6: { bar: "bg-blue-400", text: "text-blue-700", badge: "bg-blue-100 text-blue-700 border-blue-200" },
+    IC7: { bar: "bg-emerald-400", text: "text-emerald-700", badge: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  };
+
+  // Compute IC6+IC7 percentage trend
+  const trendData = history.map(e => ({
+    label: new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    problem: e.problemTitle,
+    ic67pct: e.total > 0 ? Math.round(((e.counts.IC6 + e.counts.IC7) / e.total) * 100) : 0,
+    counts: e.counts,
+    total: e.total,
+  }));
+
+  const latest = trendData[trendData.length - 1];
+  const first = trendData[0];
+  const trendDelta = latest.ic67pct - first.ic67pct;
+
+  // SVG line chart
+  const chartW = 400; const chartH = 80;
+  const pad = { l: 30, r: 10, t: 10, b: 20 };
+  const innerW = chartW - pad.l - pad.r;
+  const innerH = chartH - pad.t - pad.b;
+  const maxPct = 100;
+  const xStep = trendData.length > 1 ? innerW / (trendData.length - 1) : innerW;
+  const toX = (i: number) => pad.l + i * xStep;
+  const toY = (v: number) => pad.t + innerH - (v / maxPct) * innerH;
+  const pathD = trendData.map((d, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(d.ic67pct).toFixed(1)}`).join(" ");
+  const areaD = pathD + ` L${toX(trendData.length - 1).toFixed(1)},${(pad.t + innerH).toFixed(1)} L${pad.l},${(pad.t + innerH).toFixed(1)} Z`;
+
+  return (
+    <section>
+      <div className="border-b border-gray-200 pb-4 mb-6">
+        <div className="flex items-center gap-3">
+          <BarChart2 size={20} className="text-purple-600" />
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              IC Signal Detector Trend
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Your IC4/IC5/IC6/IC7 signal distribution across {history.length} mock session{history.length !== 1 ? "s" : ""}.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {/* Summary row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => {
+            const latestCount = latest.counts[lvl];
+            const latestPct = latest.total > 0 ? Math.round((latestCount / latest.total) * 100) : 0;
+            return (
+              <div key={lvl} className={`rounded-xl border p-3 text-center ${levelColors[lvl].badge}`}>
+                <p className="text-lg font-extrabold">{latestPct}%</p>
+                <p className="text-[10px] font-bold uppercase tracking-wide mt-0.5">{lvl} (latest)</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* IC6+IC7 trend line */}
+        <div className="rounded-xl border border-purple-200 bg-white p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-purple-700">IC6+ Signal % over time</p>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+              trendDelta > 0 ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
+              trendDelta < 0 ? "bg-red-100 text-red-700 border-red-200" :
+              "bg-gray-100 text-gray-600 border-gray-200"
+            }`}>
+              {trendDelta > 0 ? `+${trendDelta}%` : trendDelta < 0 ? `${trendDelta}%` : "No change"} vs first session
+            </span>
+          </div>
+          <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ height: 80 }}>
+            {/* Grid lines */}
+            {[0, 25, 50, 75, 100].map(v => (
+              <g key={v}>
+                <line x1={pad.l} y1={toY(v)} x2={chartW - pad.r} y2={toY(v)} stroke="#f3f4f6" strokeWidth={1} />
+                <text x={pad.l - 4} y={toY(v) + 3} textAnchor="end" fontSize={7} fill="#9ca3af">{v}%</text>
+              </g>
+            ))}
+            {/* Area fill */}
+            <path d={areaD} fill="rgba(147,51,234,0.08)" />
+            {/* Line */}
+            <path d={pathD} fill="none" stroke="#9333ea" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            {/* Dots + labels */}
+            {trendData.map((d, i) => (
+              <g key={i}>
+                <circle cx={toX(i)} cy={toY(d.ic67pct)} r={3} fill="#9333ea" />
+                <text x={toX(i)} y={pad.t + innerH + 14} textAnchor="middle" fontSize={7} fill="#6b7280">{d.label}</text>
+              </g>
+            ))}
+          </svg>
+        </div>
+
+        {/* Per-session history table */}
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+          <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Session History</p>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {[...history].reverse().map((e, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
+                <span className="text-[10px] text-gray-400 w-16 shrink-0">{new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                <span className="text-xs font-semibold text-gray-700 flex-1 min-w-0 truncate">{e.problemTitle}</span>
+                <span className="text-[10px] font-bold text-gray-500 shrink-0">{e.targetLevel}</span>
+                <div className="flex gap-1 shrink-0">
+                  {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => (
+                    e.counts[lvl] > 0 ? (
+                      <span key={lvl} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${levelColors[lvl].badge}`}>
+                        {lvl}:{e.counts[lvl]}
+                      </span>
+                    ) : null
+                  ))}
+                </div>
+                <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
+                  <div className="h-full bg-purple-400 rounded-full" style={{ width: `${e.total > 0 ? ((e.counts.IC6 + e.counts.IC7) / e.total) * 100 : 0}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function RecruiterSummaryPrint() {
@@ -1020,6 +1188,9 @@ export default function ReadinessTab() {
         </div>
         <IC7SignalChecklist />
       </section>
+
+      {/* ── IC Signal Detector Trend ── */}
+      <ICSignalTrendChart />
 
       {/* ── Recruiter-Ready Summary ── */}
       <section>

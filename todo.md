@@ -230,3 +230,8 @@
 - [x] D2: Deep-Dive Question Bank per Component (IC5/IC6/IC7 level questions per component)
 - [x] D3: Meta Engineering Blog Integration (15 papers with interview-relevance annotations, whatToExtract, keyInsight)
 - [x] Wire all new tools into SystemDesignTab navigation
+
+## Current Batch (BoE Calculator + Skeptic Intensity + IC Signal Trend)
+- [x] BoE Calculator with Decision Mapping: DAU/RPS/storage inputs → architectural implications panel
+- [x] Skeptic Intensity tiers: Mild (1 challenge/section) vs Aggressive (2 challenges + typed response required)
+- [x] IC Signal Detector trend chart: persist per-session distribution in localStorage, line chart in Stats view

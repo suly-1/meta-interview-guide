@@ -12,6 +12,7 @@ import SDComponentStressTest from "./SDComponentStressTest";
 import SDTradeoffLibrary from "./SDTradeoffLibrary";
 import SDDeepDiveBank from "./SDDeepDiveBank";
 import SDMetaBlogReader from "./SDMetaBlogReader";
+import SDBoECalculator from "./SDBoECalculator";
 import { Calculator, Zap as ZapIcon } from "lucide-react";
 
 interface DesignPattern {
@@ -587,7 +588,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math" | "stresstest" | "tradeofflibrary" | "deepdive" | "metablog">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math" | "boe" | "stresstest" | "tradeofflibrary" | "deepdive" | "metablog">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -699,6 +700,16 @@ export default function SystemDesignTab() {
             <Calculator size={11} /> Math Trainer
           </button>
           <button
+            onClick={() => setActiveView("boe")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "boe"
+                ? "bg-cyan-600 text-white border-cyan-600"
+                : "bg-white text-cyan-700 border-cyan-200 hover:border-cyan-400"
+            }`}
+          >
+            <Calculator size={11} /> BoE Calculator
+          </button>
+          <button
             onClick={() => setActiveView("stresstest")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
               activeView === "stresstest"
@@ -785,6 +796,9 @@ export default function SystemDesignTab() {
 
       {/* Back-of-Envelope Math Trainer */}
       {activeView === "math" && <SDMathTrainer />}
+
+      {/* BoE Calculator with Decision Mapping */}
+      {activeView === "boe" && <SDBoECalculator />}
 
       {/* Component Stress-Test Quiz */}
       {activeView === "stresstest" && <SDComponentStressTest />}

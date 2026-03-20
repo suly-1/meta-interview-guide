@@ -31,6 +31,25 @@ function saveMockHistory(entries: MockHistoryEntry[]) {
   localStorage.setItem(MOCK_HISTORY_KEY, JSON.stringify(entries.slice(-30)));
 }
 
+// ─── IC Signal History ────────────────────────────────────────────────────────
+interface ICSignalHistoryEntry {
+  date: number;
+  problemTitle: string;
+  targetLevel: string;
+  counts: { IC4: number; IC5: number; IC6: number; IC7: number };
+  total: number;
+}
+
+const IC_SIGNAL_HISTORY_KEY = "sd_ic_signal_history_v1";
+
+function loadICSignalHistory(): ICSignalHistoryEntry[] {
+  try { return JSON.parse(localStorage.getItem(IC_SIGNAL_HISTORY_KEY) || "[]"); } catch { return []; }
+}
+
+function saveICSignalHistory(entries: ICSignalHistoryEntry[]) {
+  localStorage.setItem(IC_SIGNAL_HISTORY_KEY, JSON.stringify(entries.slice(-20)));
+}
+
 // ─── Radar chart (SVG, no external dep) ──────────────────────────────────────
 function RadarChart({ scores }: { scores: { label: string; value: number }[] }) {
   const N = scores.length;
@@ -309,10 +328,13 @@ export default function SystemDesignMockSession() {
   });
   const [randomMode, setRandomMode] = useState(false);
   const [skepticMode, setSkepticMode] = useState(false);
-  const [skepticChallenges, setSkepticChallenges] = useState<{ section: string; challenge: string; dismissed: boolean }[]>([]);
+  const [skepticIntensity, setSkepticIntensity] = useState<"mild" | "aggressive">("mild");
+  const [skepticResponse, setSkepticResponse] = useState("");
+  const [skepticChallenges, setSkepticChallenges] = useState<{ section: string; challenge: string; dismissed: boolean; response?: string }[]>([]);
   const [activeSkepticIdx, setActiveSkepticIdx] = useState<number | null>(null);
   const [mockHistory, setMockHistory] = useState<MockHistoryEntry[]>(() => loadMockHistory());
   const [showHistory, setShowHistory] = useState(false);
+  const [icSignalHistory, setICSignalHistory] = useState<ICSignalHistoryEntry[]>(() => loadICSignalHistory());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Skeptic challenges: generic fallback + problem-specific overrides
@@ -607,17 +629,21 @@ export default function SystemDesignMockSession() {
     if (skepticMode && answers[activeSection].trim().length > 30) {
       const pool = getSkepticChallenges(newSection);
       if (pool.length > 0) {
-        const challenge = pool[Math.floor(Math.random() * pool.length)];
-        const newEntry = { section: newSection, challenge, dismissed: false };
+        // Aggressive: fire 2 challenges; Mild: fire 1
+        const count = skepticIntensity === "aggressive" ? 2 : 1;
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, Math.min(count, shuffled.length));
         setSkepticChallenges(prev => {
-          const updated = [...prev, newEntry];
-          setActiveSkepticIdx(updated.length - 1);
+          const newEntries = selected.map(challenge => ({ section: newSection, challenge, dismissed: false, response: "" }));
+          const updated = [...prev, ...newEntries];
+          setActiveSkepticIdx(updated.length - newEntries.length);
           return updated;
         });
+        setSkepticResponse("");
       }
     }
     setActiveSection(newSection);
-  }, [skepticMode, activeSection, answers, getSkepticChallenges]);
+  }, [skepticMode, skepticIntensity, activeSection, answers, getSkepticChallenges]);
 
   const endSession = useCallback(async () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -782,8 +808,8 @@ export default function SystemDesignMockSession() {
         </div>
 
         {/* Skeptic Mode toggle */}
-        <div className="rounded-xl border border-orange-200 bg-orange-50 p-3.5 flex items-start gap-3">
-          <label className="flex items-center gap-2 cursor-pointer flex-1">
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-3.5 space-y-2.5">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={skepticMode}
@@ -799,6 +825,38 @@ export default function SystemDesignMockSession() {
               </p>
             </div>
           </label>
+          {skepticMode && (
+            <div className="pl-6 space-y-1.5">
+              <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wide">Intensity</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSkepticIntensity("mild")}
+                  className={`flex-1 text-xs font-bold py-1.5 rounded-lg border transition-all ${
+                    skepticIntensity === "mild"
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "bg-white text-orange-700 border-orange-200 hover:border-orange-400"
+                  }`}
+                >
+                  Mild — 1 challenge/section
+                </button>
+                <button
+                  onClick={() => setSkepticIntensity("aggressive")}
+                  className={`flex-1 text-xs font-bold py-1.5 rounded-lg border transition-all ${
+                    skepticIntensity === "aggressive"
+                      ? "bg-red-600 text-white border-red-600"
+                      : "bg-white text-red-700 border-red-200 hover:border-red-400"
+                  }`}
+                >
+                  Aggressive — 2 challenges + typed response
+                </button>
+              </div>
+              {skepticIntensity === "aggressive" && (
+                <p className="text-[10px] text-red-700 leading-relaxed">
+                  In Aggressive mode, you must type at least 20 characters before dismissing each challenge.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <button
@@ -871,22 +929,55 @@ export default function SystemDesignMockSession() {
 
         {/* Skeptic challenge banner */}
         {skepticMode && activeSkepticIdx !== null && skepticChallenges[activeSkepticIdx] && !skepticChallenges[activeSkepticIdx].dismissed && (
-          <div className="rounded-xl border-2 border-orange-400 bg-orange-50 p-3.5 flex items-start gap-3 animate-pulse-once">
-            <Swords size={14} className="text-orange-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wide mb-1">Skeptic Challenge — Defend your answer</p>
-              <p className="text-xs text-orange-900 font-semibold leading-relaxed">{skepticChallenges[activeSkepticIdx].challenge}</p>
+          <div className={`rounded-xl border-2 ${skepticIntensity === "aggressive" ? "border-red-500 bg-red-50" : "border-orange-400 bg-orange-50"} p-3.5 space-y-2.5`}>
+            <div className="flex items-start gap-3">
+              <Swords size={14} className={`${skepticIntensity === "aggressive" ? "text-red-600" : "text-orange-600"} flex-shrink-0 mt-0.5`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <p className={`text-[10px] font-bold uppercase tracking-wide ${skepticIntensity === "aggressive" ? "text-red-700" : "text-orange-700"}`}>
+                    Skeptic Challenge {skepticIntensity === "aggressive" ? "(Aggressive)" : "(Mild)"} — Defend your answer
+                  </p>
+                  {skepticChallenges.filter(c => !c.dismissed).length > 1 && (
+                    <span className="text-[10px] text-gray-500">
+                      {skepticChallenges.filter(c => !c.dismissed).length} pending
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-900 font-semibold leading-relaxed">{skepticChallenges[activeSkepticIdx].challenge}</p>
+              </div>
             </div>
-            <button
-              onClick={() => {
-                setSkepticChallenges(prev => prev.map((c, i) => i === activeSkepticIdx ? { ...c, dismissed: true } : c));
-                setActiveSkepticIdx(null);
-              }}
-              className="flex-shrink-0 text-orange-500 hover:text-orange-700 transition-colors"
-              title="Dismiss (I've addressed this)"
-            >
-              <X size={14} />
-            </button>
+            {skepticIntensity === "aggressive" && (
+              <div className="space-y-1.5">
+                <textarea
+                  value={skepticResponse}
+                  onChange={e => setSkepticResponse(e.target.value)}
+                  placeholder="Type your response before dismissing..."
+                  rows={2}
+                  className="w-full text-xs border border-red-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
+                />
+                <p className="text-[10px] text-red-600">{skepticResponse.trim().length < 20 ? `${20 - skepticResponse.trim().length} more characters required to dismiss` : "✓ Response sufficient — you may dismiss"}</p>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  if (skepticIntensity === "aggressive" && skepticResponse.trim().length < 20) return;
+                  const savedResponse = skepticResponse;
+                  setSkepticChallenges(prev => prev.map((c, i) => i === activeSkepticIdx ? { ...c, dismissed: true, response: savedResponse } : c));
+                  setSkepticResponse("");
+                  const nextIdx = skepticChallenges.findIndex((c, i) => i > activeSkepticIdx! && !c.dismissed);
+                  setActiveSkepticIdx(nextIdx >= 0 ? nextIdx : null);
+                }}
+                disabled={skepticIntensity === "aggressive" && skepticResponse.trim().length < 20}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  skepticIntensity === "aggressive" && skepticResponse.trim().length < 20
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-orange-600 hover:bg-orange-700 text-white"
+                }`}
+              >
+                <X size={11} /> Dismiss — I've addressed this
+              </button>
+            </div>
           </div>
         )}
 
@@ -1102,6 +1193,25 @@ export default function SystemDesignMockSession() {
                         scaleBottlenecks: answers.scaleBottlenecks,
                         metaTips: answers.metaTips,
                       },
+                    }, {
+                      onSuccess: (data) => {
+                        const counts = { IC4: 0, IC5: 0, IC6: 0, IC7: 0 };
+                        data.classifications.forEach((c: { level: string }) => {
+                          if (c.level in counts) counts[c.level as keyof typeof counts]++;
+                        });
+                        const entry: ICSignalHistoryEntry = {
+                          date: Date.now(),
+                          problemTitle: selectedProblem.title,
+                          targetLevel,
+                          counts,
+                          total: data.classifications.length,
+                        };
+                        setICSignalHistory(prev => {
+                          const updated = [...prev, entry];
+                          saveICSignalHistory(updated);
+                          return updated;
+                        });
+                      }
                     });
                   }}
                   disabled={signalDetector.isPending}
