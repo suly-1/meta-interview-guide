@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Router, Switch } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { XPProvider } from "./contexts/XPContext";
@@ -9,14 +10,14 @@ import { DensityProvider } from "./contexts/DensityContext";
 import Home from "./pages/Home";
 import DisclaimerGate from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
-function Router() {
-  // make sure to consider if you need authentication for certain routes
+
+function AppRouter() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
-      <Route component={NotFound} />
+      <Route component={Home} />
     </Switch>
   );
 }
@@ -34,7 +35,10 @@ function App() {
             <Toaster />
             {/* DisclaimerGate blocks ALL content until the user explicitly acknowledges the disclaimer */}
             <DisclaimerGate>
-              <Router />
+              {/* Use hash-based routing so the standalone HTML file works without a server */}
+              <Router hook={useHashLocation}>
+                <AppRouter />
+              </Router>
               <PatternUnlockCelebration />
             </DisclaimerGate>
           </TooltipProvider>
