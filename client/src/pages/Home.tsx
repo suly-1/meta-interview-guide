@@ -1,7 +1,7 @@
 // Design: Bold Engineering Dashboard
 // Dark charcoal base, Space Grotesk headings, Inter body
 // Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   usePatternRatings,
   useBehavioralRatings,
@@ -18,7 +18,6 @@ import NotificationBanner from "@/components/NotificationBanner";
 import GlobalSearch from "@/components/GlobalSearch";
 import {
   AlertTriangle,
-  Loader2,
   X,
   Maximize2,
   Minimize2,
@@ -28,23 +27,15 @@ import {
 } from "lucide-react";
 import DisclaimerGate, { useDisclaimerGate } from "@/components/DisclaimerGate";
 
-// Lazy-loaded tabs — each tab becomes its own JS chunk so the initial bundle
-// only includes the Overview tab and shared infrastructure.
-const OverviewTab = lazy(() => import("@/components/OverviewTab"));
-const CodingTab = lazy(() => import("@/components/CodingTab"));
-const BehavioralTab = lazy(() => import("@/components/BehavioralTab"));
-const SystemDesignTab = lazy(() => import("@/components/SystemDesignTab"));
-const CodePracticeTab = lazy(() => import("@/components/CodePracticeTab"));
-
-/** Minimal inline spinner shown while a lazy tab chunk is loading */
-function TabSkeleton() {
-  return (
-    <div className="flex items-center justify-center py-24 text-muted-foreground gap-2">
-      <Loader2 size={20} className="animate-spin" />
-      <span className="text-sm">Loading tab…</span>
-    </div>
-  );
-}
+// Static imports — dynamic (lazy) imports are incompatible with the standalone
+// CDN build because chunk URLs become absolute CDN paths that cannot be resolved
+// at runtime. Keep static imports here; bundle splitting is handled by manualChunks
+// in vite.config.ts which still produces separate vendor chunks for caching.
+import OverviewTab from "@/components/OverviewTab";
+import CodingTab from "@/components/CodingTab";
+import BehavioralTab from "@/components/BehavioralTab";
+import SystemDesignTab from "@/components/SystemDesignTab";
+import CodePracticeTab from "@/components/CodePracticeTab";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -337,14 +328,12 @@ export default function Home() {
         )}
       {/* Main content */}
       <main className={`container ${focusMode ? "py-4" : "py-6"}`}>
-        <Suspense fallback={<TabSkeleton />}>
-          {activeTab === "overview" && <OverviewTab />}
-          {activeTab === "coding" && <CodingTab />}
-          {activeTab === "behavioral" && <BehavioralTab />}
-          {activeTab === "design" && <SystemDesignTab />}
-          {activeTab === "collab" && <CollabLobby />}
-          {activeTab === "practice" && <CodePracticeTab />}
-        </Suspense>
+        {activeTab === "overview" && <OverviewTab />}
+        {activeTab === "coding" && <CodingTab />}
+        {activeTab === "behavioral" && <BehavioralTab />}
+        {activeTab === "design" && <SystemDesignTab />}
+        {activeTab === "collab" && <CollabLobby />}
+        {activeTab === "practice" && <CodePracticeTab />}
       </main>
 
       {/* Footer — hidden in focus mode */}

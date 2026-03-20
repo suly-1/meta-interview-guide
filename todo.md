@@ -467,3 +467,8 @@
 - [x] Split large app.js bundle with React.lazy + Suspense for heavy tabs
 - [x] Add pnpm test:watch and husky + lint-staged pre-commit hooks
 - [x] Run pnpm build:standalone
+
+## Bug Fix — Standalone Build
+
+- [x] Revert React.lazy tab imports to static imports (dynamic imports break standalone CDN build)
+- [x] Run pnpm build:standalone
