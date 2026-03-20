@@ -10,8 +10,23 @@
  */
 import { useMemo, useState } from "react";
 import { PATTERNS, PATTERN_PREREQUISITES } from "@/lib/guideData";
-import { Zap, Lock, ChevronDown, ChevronUp, Calendar, BarChart2, X } from "lucide-react";
+import { Zap, Lock, ChevronDown, ChevronUp, Calendar, BarChart2, X, AlertTriangle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+
+const DECAY_DAYS = 7;          // days of inactivity before "Rusty" kicks in
+const DECAY_RATE = 1 / 7;      // fraction of avg lost per extra day idle (visual only)
+
+/** Returns the visual (decayed) avg for display — does NOT modify stored data */
+function decayedAvg(avg: number | null, lastTs: number | null): { displayAvg: number | null; isRusty: boolean; daysSince: number | null } {
+  if (avg === null) return { displayAvg: null, isRusty: false, daysSince: null };
+  if (!lastTs) return { displayAvg: avg, isRusty: false, daysSince: null };
+  const daysSince = (Date.now() - lastTs) / (1000 * 60 * 60 * 24);
+  const isRusty = daysSince >= DECAY_DAYS;
+  if (!isRusty) return { displayAvg: avg, isRusty: false, daysSince };
+  const decayFraction = Math.min(1, (daysSince - DECAY_DAYS) * DECAY_RATE);
+  const displayAvg = Math.max(0, avg * (1 - decayFraction));
+  return { displayAvg, isRusty, daysSince };
+}
 
 const DRILL_KEY = "meta-guide-drill-ratings";
 
@@ -248,13 +263,16 @@ export default function PatternHeatmap() {
         .filter(pid => (allRatings[pid] ?? 0) < 3)
         .map(pid => PATTERNS.find(pat => pat.id === pid)?.name ?? pid);
 
-      return { ...p, avg, latest, lastTs, mastery, attempts: entries.length, entries, isLocked, prereqNames };
+      const { displayAvg, isRusty, daysSince } = decayedAvg(avg, lastTs);
+      const displayMastery = getMastery(displayAvg);
+      return { ...p, avg, displayAvg, latest, lastTs, mastery, displayMastery, attempts: entries.length, entries, isLocked, prereqNames, isRusty, daysSince };
     });
   }, []);
 
   const masteredCount = patternData.filter(p => p.mastery === "solid" || p.mastery === "strong").length;
   const drilledCount  = patternData.filter(p => p.mastery !== "unrated").length;
   const lockedCount   = patternData.filter(p => p.isLocked).length;
+  const rustyCount    = patternData.filter(p => p.isRusty).length;
 
   const selected = selectedId ? patternData.find(p => p.id === selectedId) : null;
 
@@ -279,6 +297,13 @@ export default function PatternHeatmap() {
             <span className="text-gray-500">locked (prerequisites not met)</span>
           </div>
         )}
+        {rustyCount > 0 && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+            <AlertTriangle size={12} className="text-amber-500" />
+            <span className="font-bold text-amber-700">{rustyCount}</span>
+            <span className="text-amber-600">pattern{rustyCount !== 1 ? "s" : ""} rusty (7+ days idle)</span>
+          </div>
+        )}
         {drilledCount === 0 && (
           <p className="text-xs text-gray-400 italic">Complete Quick Drill sessions to fill in the heatmap</p>
         )}
@@ -287,7 +312,8 @@ export default function PatternHeatmap() {
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
         {patternData.map((p) => {
-          const s = MASTERY_STYLES[p.mastery];
+          // Use displayMastery (decay-adjusted) for visual styling
+          const s = MASTERY_STYLES[p.displayMastery];
           const isSelected = selectedId === p.id;
           return (
             <button
@@ -295,9 +321,18 @@ export default function PatternHeatmap() {
               onClick={() => setSelectedId(isSelected ? null : p.id)}
               className={`relative flex flex-col gap-1.5 p-3 rounded-xl border-2 text-left transition-all hover:shadow-md focus:outline-none ${s.bg} ${s.border} ${
                 isSelected ? `ring-2 ${s.ring} shadow-md` : ""
-              } ${p.isLocked ? "opacity-60" : ""}`}
-              title={`${p.name} — ${s.label}${p.avg !== null ? ` (${p.avg.toFixed(1)} avg, ${p.attempts} session${p.attempts !== 1 ? "s" : ""})` : ""}${p.isLocked ? " — LOCKED" : ""}`}
+              } ${p.isLocked ? "opacity-60" : ""} ${p.isRusty ? "ring-1 ring-amber-300" : ""}`}
+              title={`${p.name} — ${s.label}${p.avg !== null ? ` (${p.avg.toFixed(1)} stored avg → ${p.displayAvg?.toFixed(1) ?? "0.0"} displayed, ${p.attempts} session${p.attempts !== 1 ? "s" : ""})` : ""}${p.isRusty ? ` — RUSTY (${Math.round(p.daysSince ?? 0)} days idle)` : ""}${p.isLocked ? " — LOCKED" : ""}`}
             >
+              {/* Rusty badge */}
+              {p.isRusty && (
+                <div className="absolute -top-1.5 -right-1.5 z-10">
+                  <span className="flex items-center gap-0.5 bg-amber-400 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm">
+                    <AlertTriangle size={7} /> Rusty
+                  </span>
+                </div>
+              )}
+
               {/* Top row: mastery dot + lock/frequency */}
               <div className="flex items-center justify-between">
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
@@ -314,11 +349,24 @@ export default function PatternHeatmap() {
 
               {/* Rating / attempts */}
               <p className={`text-[10px] font-semibold ${s.text} opacity-80`}>
-                {p.avg !== null ? `${p.avg.toFixed(1)}★ · ${p.attempts}×` : "Not drilled"}
+                {p.avg !== null ? `${p.displayAvg?.toFixed(1) ?? p.avg.toFixed(1)}★ · ${p.attempts}×` : "Not drilled"}
               </p>
 
+              {/* Decay bar: visual only — shows stored avg vs displayed avg */}
+              {p.isRusty && p.avg !== null && p.displayAvg !== null && (
+                <div className="mt-0.5 space-y-0.5">
+                  <div className="relative h-1.5 rounded-full bg-amber-100 overflow-hidden">
+                    {/* Stored avg (ghost) */}
+                    <div className="absolute inset-y-0 left-0 rounded-full bg-amber-200" style={{ width: `${(p.avg / 5) * 100}%` }} />
+                    {/* Decayed avg */}
+                    <div className="absolute inset-y-0 left-0 rounded-full bg-amber-400 transition-all" style={{ width: `${(p.displayAvg / 5) * 100}%` }} />
+                  </div>
+                  <p className="text-[8px] text-amber-600 font-semibold">{Math.round(p.daysSince ?? 0)}d idle — drill to restore</p>
+                </div>
+              )}
+
               {/* Last practiced */}
-              {p.lastTs && (
+              {p.lastTs && !p.isRusty && (
                 <div className="flex items-center gap-0.5 mt-0.5">
                   <Calendar size={8} className="text-gray-400 flex-shrink-0" />
                   <p className="text-[9px] text-gray-400 truncate">

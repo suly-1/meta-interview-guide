@@ -1,8 +1,9 @@
 // Design: Structured Clarity — dark navy hero, Meta blue accent, Space Grotesk headings
 // Disclaimer: collapsible banner with acknowledgement checkbox persisted to localStorage
-import { useState, useEffect } from "react";
-import { Code2, MessageSquare, Cpu, Calendar, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Code2, MessageSquare, Cpu, Calendar, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square, CalendarDays, X, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 
 const STORAGE_KEY = "meta-guide-disclaimer-acknowledged-v2";
 
@@ -260,8 +261,139 @@ export default function Hero() {
               </span>
             ))}
           </div>
+
+          {/* Interview Countdown Clock */}
+          <HeroCountdown />
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Hero Countdown Clock ─────────────────────────────────────────────────────
+function HeroCountdown() {
+  const { dateStr, setDateStr, daysLeft } = useInterviewCountdown();
+  const [editing, setEditing] = useState(false);
+  const [inputVal, setInputVal] = useState(dateStr);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setInputVal(dateStr); }, [dateStr]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const handleSave = () => {
+    setDateStr(inputVal);
+    setEditing(false);
+  };
+
+  const handleClear = () => {
+    setDateStr("");
+    setInputVal("");
+    setEditing(false);
+  };
+
+  const urgencyConfig = (() => {
+    if (daysLeft === null) return null;
+    if (daysLeft <= 0)  return { label: "Interview day!",  bg: "rgba(239,68,68,0.25)",   border: "rgba(239,68,68,0.6)",   text: "#fca5a5",  glow: "rgba(239,68,68,0.4)" };
+    if (daysLeft <= 3)  return { label: `D-${daysLeft}`,   bg: "rgba(239,68,68,0.2)",    border: "rgba(239,68,68,0.5)",   text: "#fca5a5",  glow: "rgba(239,68,68,0.35)" };
+    if (daysLeft <= 7)  return { label: `D-${daysLeft}`,   bg: "rgba(245,158,11,0.2)",   border: "rgba(245,158,11,0.5)",  text: "#fcd34d",  glow: "rgba(245,158,11,0.3)" };
+    if (daysLeft <= 14) return { label: `D-${daysLeft}`,   bg: "rgba(59,130,246,0.2)",   border: "rgba(59,130,246,0.5)",  text: "#93c5fd",  glow: "rgba(59,130,246,0.3)" };
+    return              { label: `D-${daysLeft}`,          bg: "rgba(16,185,129,0.15)",  border: "rgba(16,185,129,0.45)", text: "#6ee7b7",  glow: "rgba(16,185,129,0.25)" };
+  })();
+
+  const urgencyNote = (() => {
+    if (daysLeft === null) return null;
+    if (daysLeft <= 0)  return "Today is the day — you've got this!";
+    if (daysLeft <= 3)  return "Final stretch — review your weakest patterns and STAR stories.";
+    if (daysLeft <= 7)  return "One week out — focus on mock interviews and behavioral polish.";
+    if (daysLeft <= 14) return "Two weeks — good time for full system design walkthroughs.";
+    if (daysLeft <= 28) return "Solid runway — keep your daily streak going.";
+    return "Plenty of time — build strong fundamentals now.";
+  })();
+
+  return (
+    <div className="mt-8">
+      {!dateStr && !editing ? (
+        // Empty state — invite user to set a date
+        <button
+          onClick={() => setEditing(true)}
+          className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 border border-white/20 hover:border-white/40 px-4 py-2 rounded-full transition-all"
+        >
+          <CalendarDays size={14} />
+          Set your interview date for a countdown
+        </button>
+      ) : editing ? (
+        // Date input
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 bg-white/10 border border-white/30 rounded-xl px-3 py-2">
+            <CalendarDays size={14} className="text-white/60" />
+            <input
+              ref={inputRef}
+              type="date"
+              value={inputVal}
+              onChange={e => setInputVal(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }}
+              className="bg-transparent text-white text-sm font-medium outline-none [color-scheme:dark] min-w-[130px]"
+            />
+          </div>
+          <button
+            onClick={handleSave}
+            className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold rounded-xl transition-colors"
+          >Save</button>
+          <button
+            onClick={() => setEditing(false)}
+            className="p-2 text-white/50 hover:text-white/80 transition-colors"
+          ><X size={14} /></button>
+        </div>
+      ) : urgencyConfig ? (
+        // Active countdown display
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-wrap items-center gap-3"
+        >
+          {/* D-minus badge */}
+          <div
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border"
+            style={{
+              background: urgencyConfig.bg,
+              borderColor: urgencyConfig.border,
+              boxShadow: `0 0 16px ${urgencyConfig.glow}`,
+            }}
+          >
+            <CalendarDays size={16} style={{ color: urgencyConfig.text }} />
+            <div>
+              <div
+                className="text-2xl font-black leading-none tracking-tight"
+                style={{ color: urgencyConfig.text, fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                {urgencyConfig.label}
+              </div>
+              <div className="text-[10px] font-semibold mt-0.5" style={{ color: urgencyConfig.text, opacity: 0.75 }}>
+                {new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+              </div>
+            </div>
+          </div>
+
+          {/* Urgency note */}
+          {urgencyNote && (
+            <p className="text-sm text-white/60 max-w-xs leading-snug">{urgencyNote}</p>
+          )}
+
+          {/* Edit / clear */}
+          <div className="flex items-center gap-1 ml-auto">
+            <button
+              onClick={() => setEditing(true)}
+              title="Change interview date"
+              className="p-1.5 text-white/30 hover:text-white/70 rounded-lg transition-colors"
+            ><Pencil size={12} /></button>
+            <button
+              onClick={handleClear}
+              title="Clear interview date"
+              className="p-1.5 text-white/30 hover:text-white/70 rounded-lg transition-colors"
+            ><X size={12} /></button>
+          </div>
+        </motion.div>
+      ) : null}
     </div>
   );
 }

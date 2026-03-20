@@ -19,6 +19,7 @@ import CodePractice from "@/pages/CodePractice";
 import { useStreak } from "@/hooks/useStreak";
 import XPLevelBar from "@/components/XPLevelBar";
 import NavCountdownChip from "@/components/NavCountdownChip";
+import SoundtrackPlayer from "@/components/SoundtrackPlayer";
 import { useXPContext } from "@/contexts/XPContext";
 import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
 import { HelpCircle } from "lucide-react";
@@ -124,6 +125,7 @@ export default function Home() {
                   );
                 })}
               </div>
+              <SoundtrackPlayer />
               <button
                 onClick={() => toggleTheme?.()}
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}

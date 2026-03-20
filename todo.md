@@ -156,3 +156,13 @@
 - [x] Tournament bracket vs personal-best delta comparison card (after each tournament)
 - [x] Sprint notification snooze action (Notification API actions + Service Worker)
 - [x] Print preview modal with density label before opening print window
+
+## Current Batch (Tournament Streak + Snooze Cap + Print Miniature)
+- [ ] Tournament streak counter badge in Code Practice toolbar
+- [ ] Snooze count cap setting in sprint scheduler (max snoozes/day, SW enforcement)
+- [ ] Live print miniature (scaled snapshot of print HTML) in print preview modal
+
+## Current Batch (Ambient Motivation)
+- [x] XP Decay Warning — Rusty badge + draining mastery bar on patterns idle 7+ days
+- [x] Study Soundtrack Mode — Web Audio API lo-fi/white noise/rain toggle in toolbar
+- [x] Interview Countdown Clock — D-minus counter in hero section with date setter
