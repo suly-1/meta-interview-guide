@@ -807,6 +807,74 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         );
       })()}
 
+      {/* Follow-up Review Queue */}
+      {(() => {
+        const FOLLOWUP_QUEUE_KEY = "meta-mock-followup-queue";
+        interface FollowUpItem { id: string; ts: number; sessionDate: string; question: string; targetArea: string; coachingNote: string; reviewed: boolean; }
+        const [fuItems, setFuItems] = useState<FollowUpItem[]>(() => {
+          try { return JSON.parse(localStorage.getItem(FOLLOWUP_QUEUE_KEY) ?? "[]"); } catch { return []; }
+        });
+        if (fuItems.length === 0) return null;
+        const toggleReviewed = (id: string) => {
+          const updated = fuItems.map(q => q.id === id ? { ...q, reviewed: !q.reviewed } : q);
+          setFuItems(updated);
+          localStorage.setItem(FOLLOWUP_QUEUE_KEY, JSON.stringify(updated));
+        };
+        const copyMarkdown = () => {
+          const md = fuItems.map((q, i) =>
+            `## ${i + 1}. ${q.question}\n**Area:** ${q.targetArea}  \n**Coach:** ${q.coachingNote}  \n**Session:** ${q.sessionDate}  \n**Reviewed:** ${q.reviewed ? "✓" : "No"}\n`
+          ).join("\n");
+          navigator.clipboard.writeText(md).catch(() => {});
+        };
+        const unreviewedCount = fuItems.filter(q => !q.reviewed).length;
+        return (
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50 dark:bg-indigo-900/10 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Follow-up Review Queue</p>
+                <p className="text-[11px] text-indigo-500 mt-0.5">{unreviewedCount} unreviewed · {fuItems.length} total</p>
+              </div>
+              <button
+                onClick={copyMarkdown}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors"
+                title="Copy all as Markdown"
+              >
+                📋 Copy as Markdown
+              </button>
+            </div>
+            <div className="space-y-2">
+              {fuItems.map((q) => (
+                <div key={q.id} className={`rounded-lg border p-3 transition-all ${
+                  q.reviewed
+                    ? "bg-white/50 dark:bg-white/5 border-indigo-100 opacity-60"
+                    : "bg-white dark:bg-indigo-900/20 border-indigo-200"
+                }`}>
+                  <div className="flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      checked={q.reviewed}
+                      onChange={() => toggleReviewed(q.id)}
+                      className="mt-0.5 accent-indigo-600 shrink-0"
+                      title="Mark as reviewed"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-semibold leading-relaxed ${
+                        q.reviewed ? "line-through text-muted-foreground" : "text-indigo-900 dark:text-indigo-100"
+                      }`}>{q.question}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[9px] font-bold text-indigo-500 bg-indigo-100 dark:bg-indigo-900/40 px-1.5 py-0.5 rounded">{q.targetArea}</span>
+                        <span className="text-[9px] text-muted-foreground">{q.sessionDate}</span>
+                      </div>
+                      <p className="text-[11px] text-indigo-600 dark:text-indigo-300 mt-1 leading-relaxed"><span className="font-bold">Coach: </span>{q.coachingNote}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Sprint History + Personal Best */}
       {sprintHistory.length > 0 && (() => {
         // Compute personal best per topic

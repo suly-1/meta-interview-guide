@@ -52,10 +52,14 @@ function usePressureSimulator({
   enabled,
   running,
   mode,
+  minSec,
+  maxSec,
 }: {
   enabled: boolean;
   running: boolean;
   mode: "coding" | "behavioral";
+  minSec?: number;
+  maxSec?: number;
 }) {
   const [interjection, setInterjection] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,8 +67,9 @@ function usePressureSimulator({
 
   const scheduleNext = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    // Random interval: 90–240 seconds
-    const delay = (90 + Math.floor(Math.random() * 150)) * 1000;
+    const lo = minSec ?? 90;
+    const hi = maxSec ?? 240;
+    const delay = (lo + Math.floor(Math.random() * (hi - lo))) * 1000;
     timerRef.current = setTimeout(() => {
       const pool = mode === "coding" ? CODING_INTERJECTIONS : BEHAVIORAL_INTERJECTIONS;
       // Pick a question not recently used
@@ -661,13 +666,34 @@ function CodingPhase({
   const [pressureEnabled, setPressureEnabled] = useState(() =>
     localStorage.getItem("meta-guide-pressure-sim") !== "off"
   );
-  const { interjection, dismiss } = usePressureSimulator({ enabled: pressureEnabled, running, mode: "coding" });
+  type PressureIntensity = "low" | "medium" | "high";
+  const INTENSITY_RANGES: Record<PressureIntensity, { minSec: number; maxSec: number; label: string }> = {
+    low:    { minSec: 480, maxSec: 720, label: "Low" },
+    medium: { minSec: 240, maxSec: 360, label: "Med" },
+    high:   { minSec: 120, maxSec: 180, label: "High" },
+  };
+  const [pressureIntensity, setPressureIntensity] = useState<PressureIntensity>(
+    () => (localStorage.getItem("meta-guide-pressure-intensity") as PressureIntensity) ?? "medium"
+  );
+  const { interjection, dismiss } = usePressureSimulator({
+    enabled: pressureEnabled,
+    running,
+    mode: "coding",
+    minSec: INTENSITY_RANGES[pressureIntensity].minSec,
+    maxSec: INTENSITY_RANGES[pressureIntensity].maxSec,
+  });
   const [silenceEnabled, setSilenceEnabled] = useState(() =>
     localStorage.getItem("meta-guide-silence-detect") === "on"
+  );
+  const SILENCE_THRESHOLDS = [30, 45, 60] as const;
+  type SilenceThreshold = typeof SILENCE_THRESHOLDS[number];
+  const [silenceThreshold, setSilenceThreshold] = useState<SilenceThreshold>(
+    () => (Number(localStorage.getItem("meta-guide-silence-threshold") ?? "45")) as SilenceThreshold
   );
   const { prompt: silencePrompt, dismiss: dismissSilence, supported: silenceSupported } = useSilenceDetector({
     enabled: silenceEnabled,
     running,
+    thresholdSec: silenceThreshold,
   });
 
   const toggleSilence = () => {
@@ -717,29 +743,61 @@ function CodingPhase({
         <span className="text-sm font-bold text-blue-700">Coding Round — 30 minutes</span>
         <div className="ml-auto flex items-center gap-1.5">
           {silenceSupported && (
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={toggleSilence}
+                title={silenceEnabled ? "Silence Detector ON — click to disable" : "Enable Silence Detector"}
+                className={`flex items-center gap-1 px-2 py-1 rounded-l-full text-[11px] font-bold border-y border-l transition-all ${
+                  silenceEnabled
+                    ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                    : "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200"
+                }`}
+              >
+                👂 {silenceEnabled ? "ON" : "Silence"}
+              </button>
+              {silenceEnabled && SILENCE_THRESHOLDS.map(t => (
+                <button
+                  key={t}
+                  onClick={() => { setSilenceThreshold(t); localStorage.setItem("meta-guide-silence-threshold", String(t)); }}
+                  className={`px-2 py-1 text-[10px] font-bold border-y border-r last:rounded-r-full transition-all ${
+                    silenceThreshold === t
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100"
+                  }`}
+                >
+                  {t}s
+                </button>
+              ))}
+              {!silenceEnabled && <span className="px-2 py-1 text-[10px] font-bold border-y border-r rounded-r-full bg-gray-100 text-gray-300 border-gray-200">Off</span>}
+            </div>
+          )}
+          <div className="flex items-center gap-0.5">
             <button
-              onClick={toggleSilence}
-              title={silenceEnabled ? "Silence Detector ON — click to disable" : "Enable Silence Detector (45s)"}
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold border transition-all ${
-                silenceEnabled
-                  ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+              onClick={togglePressure}
+              title={pressureEnabled ? "Pressure Simulator ON — click to disable" : "Enable Pressure Simulator"}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-l-full text-[11px] font-bold border-y border-l transition-all ${
+                pressureEnabled
+                  ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                   : "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200"
               }`}
             >
-              👂 {silenceEnabled ? "Silence ON" : "Silence"}
+              🎤 {pressureEnabled ? "ON" : "OFF"}
             </button>
-          )}
-          <button
-            onClick={togglePressure}
-            title={pressureEnabled ? "Pressure Simulator ON — click to disable" : "Enable Pressure Simulator"}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-              pressureEnabled
-                ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-                : "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200"
-            }`}
-          >
-            🎤 {pressureEnabled ? "Pressure ON" : "Pressure OFF"}
-          </button>
+            {pressureEnabled && (["low", "medium", "high"] as PressureIntensity[]).map(lvl => (
+              <button
+                key={lvl}
+                onClick={() => { setPressureIntensity(lvl); localStorage.setItem("meta-guide-pressure-intensity", lvl); }}
+                className={`px-2 py-1 text-[10px] font-bold border-y border-r last:rounded-r-full transition-all ${
+                  pressureIntensity === lvl
+                    ? "bg-red-500 text-white border-red-500"
+                    : "bg-red-50 text-red-400 border-red-200 hover:bg-red-100"
+                }`}
+              >
+                {INTENSITY_RANGES[lvl].label}
+              </button>
+            ))}
+            {!pressureEnabled && <span className="px-2 py-1 text-[10px] font-bold border-y border-r rounded-r-full bg-gray-100 text-gray-300 border-gray-200">Pressure</span>}
+          </div>
         </div>
       </div>
 
@@ -869,7 +927,14 @@ function BehavioralPhase({
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const pressureEnabled = localStorage.getItem("meta-guide-pressure-sim") !== "off";
-  const { interjection, dismiss } = usePressureSimulator({ enabled: pressureEnabled, running, mode: "behavioral" });
+  const BEHAVIORAL_INTENSITY_RANGES = {
+    low:    { minSec: 480, maxSec: 720 },
+    medium: { minSec: 240, maxSec: 360 },
+    high:   { minSec: 120, maxSec: 180 },
+  } as const;
+  const bIntensity = (localStorage.getItem("meta-guide-pressure-intensity") ?? "medium") as keyof typeof BEHAVIORAL_INTENSITY_RANGES;
+  const bRange = BEHAVIORAL_INTENSITY_RANGES[bIntensity] ?? BEHAVIORAL_INTENSITY_RANGES.medium;
+  const { interjection, dismiss } = usePressureSimulator({ enabled: pressureEnabled, running, mode: "behavioral", minSec: bRange.minSec, maxSec: bRange.maxSec });
 
   useEffect(() => {
     if (!running) return;

@@ -196,3 +196,8 @@
 - [x] Pressure Simulator — random interviewer interjections at unpredictable intervals during mock
 - [x] Silence Detector — Web Speech API 45s silence prompt during mock
 - [x] Follow-up Question Bank — LLM-generated personalized follow-ups after debrief, saved to review queue
+
+## Current Batch (Follow-up Queue + Pressure Intensity + Silence Calibration)
+- [x] Follow-up Review Queue panel in Stats view (mark reviewed checkbox, Copy as Markdown export)
+- [x] Pressure Simulator intensity levels (Low/Medium/High frequency selector in mock phases)
+- [x] Silence Detector threshold calibration (30s/45s/60s settings popover)
