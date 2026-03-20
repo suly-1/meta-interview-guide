@@ -166,3 +166,13 @@
 - [x] XP Decay Warning — Rusty badge + draining mastery bar on patterns idle 7+ days
 - [x] Study Soundtrack Mode — Web Audio API lo-fi/white noise/rain toggle in toolbar
 - [x] Interview Countdown Clock — D-minus counter in hero section with date setter
+
+## Current Batch (Pomodoro + Rust Buster + Milestone Notifications)
+- [ ] Pomodoro 25/5 timer in SoundtrackPlayer (auto-pause on break, session counter)
+- [ ] Rust Buster banner in Coding tab (3+ rusty patterns → dismissible sprint prompt)
+- [ ] Countdown milestone notifications via sprint SW (D-14, D-7, D-3, D-1)
+
+## Current Batch (Study Variety Mechanics)
+- [x] Reverse Engineering Drill — identify pattern/complexity/edge case from a solution in 3 min
+- [x] Explain It Back — post-solve explanation box saved alongside solve history
+- [x] Topic Roulette — spin-wheel animation picks random tab + problem

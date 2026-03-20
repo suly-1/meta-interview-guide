@@ -292,6 +292,21 @@ function saveSprintHistory(entries: SprintHistoryEntry[]) {
   localStorage.setItem(SPRINT_HISTORY_KEY, JSON.stringify(entries.slice(0, 100)));
 }
 
+// Explain It Back
+const EXPLAIN_KEY = "cp_explain_it_back";
+interface ExplainEntry {
+  problemId: number;
+  problemName: string;
+  explanation: string;
+  date: number;
+}
+function loadExplanations(): ExplainEntry[] {
+  try { return JSON.parse(localStorage.getItem(EXPLAIN_KEY) ?? "[]"); } catch { return []; }
+}
+function saveExplanations(entries: ExplainEntry[]) {
+  localStorage.setItem(EXPLAIN_KEY, JSON.stringify(entries.slice(0, 200)));
+}
+
 // Topic Sprint types
 interface TopicSprintState {
   active: boolean;
@@ -1414,6 +1429,10 @@ export default function CodePractice() {
   const [assessments, setAssessments] = useState<DifficultyAssessment[]>(() => loadAssessments());
   const [diffEstimatorOpen, setDiffEstimatorOpen] = useState(false);
   const [pendingAssessmentProblem, setPendingAssessmentProblem] = useState<{ id: number; name: string; difficulty: string } | null>(null);
+  const [explainOpen, setExplainOpen] = useState(false);
+  const [explainProblem, setExplainProblem] = useState<{ id: number; name: string } | null>(null);
+  const [explainText, setExplainText] = useState("");
+  const [explanations, setExplanations] = useState<ExplainEntry[]>(() => loadExplanations());
 
   // Study Session Planner
   const [studyPlannerOpen, setStudyPlannerOpen] = useState(false);
@@ -1937,6 +1956,9 @@ export default function CodePractice() {
       // Trigger difficulty self-assessment
       setPendingAssessmentProblem({ id: selectedId, name: problem.name, difficulty: problem.difficulty });
       setDiffEstimatorOpen(true);
+      // Queue Explain It Back (opens after DiffEstimator is dismissed)
+      setExplainProblem({ id: selectedId, name: problem.name });
+      setExplainText("");
     }
   }, [selectedId, prog.solved, problem, langId, session, speedRunActive, stopSpeedRun]);
 
@@ -3356,6 +3378,8 @@ export default function CodePractice() {
                       setAssessments(updated);
                       setDiffEstimatorOpen(false);
                       setPendingAssessmentProblem(null);
+                      // Open Explain It Back next
+                      if (explainProblem) setExplainOpen(true);
                     }}
                     className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${colors[rating]}`}
                   >
@@ -3365,11 +3389,84 @@ export default function CodePractice() {
               })}
             </div>
             <button
-              onClick={() => { setDiffEstimatorOpen(false); setPendingAssessmentProblem(null); }}
+              onClick={() => {
+                setDiffEstimatorOpen(false);
+                setPendingAssessmentProblem(null);
+                // Open Explain It Back next
+                if (explainProblem) setExplainOpen(true);
+              }}
               className="mt-3 w-full text-xs text-muted-foreground hover:text-foreground text-center"
             >
               Skip
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Explain It Back Modal ── */}
+      {explainOpen && explainProblem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">🗣️</span>
+              <div>
+                <div className="text-sm font-bold text-foreground">Explain It Back</div>
+                <div className="text-xs text-muted-foreground truncate max-w-[260px]">{explainProblem.name}</div>
+              </div>
+              <button onClick={() => { setExplainOpen(false); setExplainProblem(null); }} className="ml-auto text-muted-foreground hover:text-foreground">
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Explain your approach in 1–2 sentences as if talking to an interviewer. Saved for pre-interview review.
+            </p>
+            {/* Previous explanation if exists */}
+            {(() => {
+              const prev = explanations.find(e => e.problemId === explainProblem.id);
+              return prev ? (
+                <div className="mb-3 p-2.5 bg-muted/40 rounded-xl border border-border">
+                  <div className="text-[10px] text-muted-foreground mb-1">Previous explanation ({new Date(prev.date).toLocaleDateString()}):</div>
+                  <div className="text-xs text-foreground italic">&ldquo;{prev.explanation}&rdquo;</div>
+                </div>
+              ) : null;
+            })()}
+            <textarea
+              value={explainText}
+              onChange={e => setExplainText(e.target.value)}
+              placeholder="e.g. I used a hash map to store seen values for O(1) lookup, then iterated once to find the complement…"
+              rows={3}
+              autoFocus
+              className="w-full text-sm bg-background border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-1 focus:ring-violet-400 mb-3"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (!explainText.trim()) return;
+                  const entry: ExplainEntry = {
+                    problemId: explainProblem.id,
+                    problemName: explainProblem.name,
+                    explanation: explainText.trim(),
+                    date: Date.now(),
+                  };
+                  const updated = [entry, ...loadExplanations().filter(e => e.problemId !== explainProblem.id)];
+                  saveExplanations(updated);
+                  setExplanations(updated);
+                  setExplainOpen(false);
+                  setExplainProblem(null);
+                  setExplainText("");
+                }}
+                disabled={!explainText.trim()}
+                className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-sm font-bold rounded-xl transition-colors"
+              >
+                Save Explanation
+              </button>
+              <button
+                onClick={() => { setExplainOpen(false); setExplainProblem(null); setExplainText(""); }}
+                className="px-4 py-2.5 border border-border rounded-xl text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Skip
+              </button>
+            </div>
           </div>
         </div>
       )}

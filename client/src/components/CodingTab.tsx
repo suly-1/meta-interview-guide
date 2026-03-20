@@ -11,6 +11,7 @@ import PatternQuickReference from "@/components/PatternQuickReference";
 import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 import { useProgress } from "@/hooks/useProgress";
 import PatternStuckHintLadder from "@/components/PatternStuckHintLadder";
+import ReverseEngineeringDrill from "@/components/ReverseEngineeringDrill";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -519,6 +520,22 @@ export default function CodingTab() {
         </div>
         <PatternHeatmap />
       </section>
+
+      {/* Reverse Engineering Drill */}
+      <section>
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🔍 Reverse Engineering Drill
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Read a working solution and identify the pattern, time complexity, and a key edge case — all within 3 minutes.
+          </p>
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <ReverseEngineeringDrill />
+        </div>
+      </section>
+
       {/* Resources */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">

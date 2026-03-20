@@ -20,9 +20,10 @@ import { useStreak } from "@/hooks/useStreak";
 import XPLevelBar from "@/components/XPLevelBar";
 import NavCountdownChip from "@/components/NavCountdownChip";
 import SoundtrackPlayer from "@/components/SoundtrackPlayer";
+import TopicRoulette from "@/components/TopicRoulette";
 import { useXPContext } from "@/contexts/XPContext";
 import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Dices } from "lucide-react";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
@@ -56,6 +57,7 @@ export default function Home() {
   const { density, setDensity } = useDensity();
   const isDark = theme === "dark";
   const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
+  const [rouletteOpen, setRouletteOpen] = useState(false);
 
   // Keyboard shortcuts (1-5 now for 5 tabs)
   useKeyboardShortcuts({
@@ -125,6 +127,13 @@ export default function Home() {
                   );
                 })}
               </div>
+              <button
+                onClick={() => setRouletteOpen(true)}
+                title="Topic Roulette — spin for a random challenge"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                <Dices size={15} />
+              </button>
               <SoundtrackPlayer />
               <button
                 onClick={() => toggleTheme?.()}
@@ -222,6 +231,29 @@ export default function Home() {
 
       <OnboardingModal />
       <KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
+
+      {/* Topic Roulette Modal */}
+      {rouletteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setRouletteOpen(false)}>
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-base font-bold text-foreground flex items-center gap-2"><Dices size={16} className="text-violet-500" /> Topic Roulette</div>
+                <div className="text-xs text-muted-foreground">Spin for a random challenge across all tabs</div>
+              </div>
+              <button onClick={() => setRouletteOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="text-lg leading-none">&times;</span>
+              </button>
+            </div>
+            <TopicRoulette
+              onSelect={(tabId, _problem, _seg) => {
+                handleTabChange(tabId);
+                setRouletteOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
