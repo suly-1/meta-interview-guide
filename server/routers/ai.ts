@@ -384,6 +384,8 @@ Return a structured JSON scorecard. The icLevel field should reflect what IC lev
         sysDesignQuestion: z.string(),
         xfnScore: z.number(),
         xfnIcLevel: z.string(),
+        behavioralScore: z.number().optional(),
+        behavioralIcLevel: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -391,6 +393,7 @@ Return a structured JSON scorecard. The icLevel field should reflect what IC lev
         `Coding Round: ${input.codingPattern} — Overall ${input.codingScore.toFixed(1)}/5 (${input.codingIcLevel})`,
         `System Design Round: ${input.sysDesignQuestion} — Overall ${input.sysDesignScore.toFixed(1)}/5 (${input.sysDesignIcLevel})`,
         `XFN Behavioral Round: Overall ${input.xfnScore.toFixed(1)}/5 (${input.xfnIcLevel})`,
+        ...(input.behavioralScore !== undefined ? [`Behavioral STAR Round: Overall ${input.behavioralScore.toFixed(1)}/5 (${input.behavioralIcLevel ?? 'IC6'})`] : []),
       ].join('\n');
 
       const response = await invokeLLM({
@@ -398,8 +401,8 @@ Return a structured JSON scorecard. The icLevel field should reflect what IC lev
           {
             role: 'system',
             content: `You are a Meta engineering hiring committee member reviewing a candidate's full interview day results.
-You have scores from 3 rounds: Coding, System Design, and XFN Behavioral.
-Provide an overall IC-level verdict, a hiring recommendation, and specific coaching for each round.
+You have scores from 3-4 rounds: Coding, System Design, XFN Behavioral, and optionally a Behavioral STAR round.
+Provide an overall IC-level verdict, a hiring recommendation, specific coaching for each round, and a 2-week remediation plan.
 Be direct and honest — this is what a real debrief would look like.`,
           },
           {
@@ -421,6 +424,14 @@ Be direct and honest — this is what a real debrief would look like.`,
                 codingCoaching: { type: 'string', description: '1-2 sentence coaching for the coding round' },
                 sysDesignCoaching: { type: 'string', description: '1-2 sentence coaching for the system design round' },
                 xfnCoaching: { type: 'string', description: '1-2 sentence coaching for the XFN behavioral round' },
+                behavioralCoaching: { type: 'string', description: '1-2 sentence coaching for the behavioral STAR round' },
+                remediationPlan: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  minItems: 7,
+                  maxItems: 14,
+                  description: 'Day-by-day 2-week remediation plan items, each a specific actionable task',
+                },
                 topStrengths: {
                   type: 'array',
                   items: { type: 'string' },
@@ -435,7 +446,7 @@ Be direct and honest — this is what a real debrief would look like.`,
                 },
                 summary: { type: 'string', description: '3-4 sentence overall debrief note' },
               },
-              required: ['overallScore', 'icLevelVerdict', 'hiringRecommendation', 'codingCoaching', 'sysDesignCoaching', 'xfnCoaching', 'topStrengths', 'topImprovements', 'summary'],
+              required: ['overallScore', 'icLevelVerdict', 'hiringRecommendation', 'codingCoaching', 'sysDesignCoaching', 'xfnCoaching', 'behavioralCoaching', 'remediationPlan', 'topStrengths', 'topImprovements', 'summary'],
               additionalProperties: false,
             },
           },
@@ -452,6 +463,8 @@ Be direct and honest — this is what a real debrief would look like.`,
         codingCoaching: string;
         sysDesignCoaching: string;
         xfnCoaching: string;
+        behavioralCoaching: string;
+        remediationPlan: string[];
         topStrengths: string[];
         topImprovements: string[];
         summary: string;

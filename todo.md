@@ -383,3 +383,8 @@
 - [x] Failure Pattern Self-Assessment (8-question checklist, top-3 risks callout)
 - [x] Interviewer Perspective Simulator (LLM design summary reviewer)
 - [x] Failure Reason Drill Links (wire each failure to relevant tool)
+
+## New Features (Batch 7)
+
+- [x] Full Mock Interview Scorecard (4-round timed session, LLM composite IC6/IC7 promotion decision)
+- [x] Personalized Weak-Spot Study Plan Generator (7-day plan from actual AI scores)
