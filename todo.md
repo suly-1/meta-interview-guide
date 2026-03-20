@@ -241,3 +241,23 @@
 - [x] Aggressive Skeptic response scoring: LLM scores typed challenge responses (1-5), "Challenge Defense Quality" score in debrief
 - [x] IC Signal Trend goal line: target IC6+ % input in Readiness Goal Setter, dashed line on trend chart
 - [x] Run pnpm build: production build verified clean (0 TypeScript errors, 0 build errors)
+
+## New Features Batch — Progress, Search, Dark Mode, Bookmarks, Mobile
+
+- [ ] Progress Dashboard panel — unified view of all saved progress (XP, streak, problems solved, readiness score, pattern mastery %)
+- [ ] Dark/light mode toggle button in the sticky nav bar
+- [ ] Custom notes for behavioral questions (extend per-question notes to BehavioralTab)
+- [ ] Custom notes for system design topics (extend per-topic notes to SystemDesignTab)
+- [ ] Bookmark/favorite sections — save favorite tabs/topics to localStorage with quick-access panel
+- [ ] Global search across all tabs and content (search bar in nav, results grouped by tab)
+- [ ] Mobile layout improvements — better responsive nav, readable cards on small screens
+- [ ] Deploy to GitHub Pages after all features complete (pnpm deploy:github-pages)
+
+## New Features Batch — Progress, Search, Bookmarks, Mobile
+
+- [x] Progress Dashboard panel showing all saved progress at a glance
+- [x] Bookmark/favorite sections feature (useBookmarks hook + BookmarksPanel)
+- [x] Global search across all tabs with Ctrl+K shortcut (GlobalSearch component)
+- [x] Mobile layout improvements (hide density toggle, soundtrack, keyboard shortcut on mobile)
+- [x] Dark/light mode toggle already in nav (confirmed working)
+- [x] localStorage persistence already covers all major state (confirmed)

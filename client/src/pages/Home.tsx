@@ -23,8 +23,11 @@ import SoundtrackPlayer from "@/components/SoundtrackPlayer";
 import TopicRoulette from "@/components/TopicRoulette";
 import { useXPContext } from "@/contexts/XPContext";
 import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
-import { HelpCircle, Dices, Sword } from "lucide-react";
+import { HelpCircle, Dices, Sword, TrendingUp, Bookmark, Search } from "lucide-react";
 import GauntletMode, { type GauntletState, hasGauntletBadge } from "@/components/GauntletMode";
+import ProgressDashboard from "@/components/ProgressDashboard";
+import BookmarksPanel from "@/components/BookmarksPanel";
+import GlobalSearch from "@/components/GlobalSearch";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
@@ -59,6 +62,9 @@ export default function Home() {
   const isDark = theme === "dark";
   const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
   const [rouletteOpen, setRouletteOpen] = useState(false);
+  const [progressOpen, setProgressOpen] = useState(false);
+  const [bookmarksOpen, setBookmarksOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // ── Gauntlet Mode state ──────────────────────────────────────────────────
   const GAUNTLET_CHALLENGES = ["ctci","coding","ai-round","behavioral","timeline","readiness","sysdesign"];
@@ -165,9 +171,9 @@ export default function Home() {
             </div>
 
             {/* Dark mode toggle */}
-            <div className="flex-shrink-0 pl-2 border-l border-gray-100 flex items-center gap-1">
-              {/* Density toggle */}
-              <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-0.5 gap-0.5" title="Font size / density">
+            <div className="flex-shrink-0 pl-2 border-l border-gray-100 flex items-center gap-0.5 sm:gap-1">
+              {/* Density toggle — hidden on mobile */}
+              <div className="hidden sm:flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-0.5 gap-0.5" title="Font size / density">
                 {(["compact", "comfortable", "spacious"] as Density[]).map(d => {
                   const labels: Record<Density, string> = { compact: "S", comfortable: "M", spacious: "L" };
                   const titles: Record<Density, string> = { compact: "Compact", comfortable: "Comfortable", spacious: "Spacious" };
@@ -188,6 +194,7 @@ export default function Home() {
               <button
                 onClick={() => setGauntletOpen(true)}
                 title={gauntlet.active ? "Gauntlet in progress" : "Gauntlet Mode — 7-tab unbroken run"}
+                // hidden on mobile unless gauntlet is active
                 className={`flex items-center justify-center w-8 h-8 rounded-full transition-all ${
                   gauntlet.active
                     ? "text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
@@ -203,7 +210,28 @@ export default function Home() {
               >
                 <Dices size={15} />
               </button>
-              <SoundtrackPlayer />
+              <span className="hidden sm:contents"><SoundtrackPlayer /></span>
+              <button
+                onClick={() => setSearchOpen(true)}
+                title="Search (Ctrl+K) — search across all tabs"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                <Search size={15} />
+              </button>
+              <button
+                onClick={() => setBookmarksOpen(true)}
+                title="Bookmarks — view saved sections"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                <Bookmark size={15} />
+              </button>
+              <button
+                onClick={() => setProgressOpen(true)}
+                title="Progress Dashboard — view all saved progress"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                <TrendingUp size={15} />
+              </button>
               <button
                 onClick={() => toggleTheme?.()}
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}
@@ -214,7 +242,7 @@ export default function Home() {
               <button
                 onClick={() => setShortcutOpen(true)}
                 title="Keyboard shortcuts (?)"
-                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               >
                 <HelpCircle size={15} />
               </button>
@@ -347,6 +375,22 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Progress Dashboard */}
+      <ProgressDashboard open={progressOpen} onClose={() => setProgressOpen(false)} />
+
+      {/* Bookmarks Panel */}
+      <BookmarksPanel open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} onNavigate={(tabId) => handleTabChange(tabId)} />
+
+      {/* Global Search */}
+      <GlobalSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onNavigate={(tabId) => {
+          if (tabId === "__open_search__") { setSearchOpen(true); return; }
+          handleTabChange(tabId);
+        }}
+      />
 
       {/* Footer */}
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
