@@ -181,3 +181,8 @@
 - [x] Pattern Mastery Tree — SVG skill tree, nodes unlock at 4+/5 drill rating ×3, Pattern Master badge
 - [x] Topic Boss Fight — weekly hard boss per topic, crown icon on clear, weekly reset
 - [x] Combo Multiplier — back-to-back solve streak ×1→×2→×3 applied to Speed Run and Tournament scores
+
+## Current Batch (Gamified Challenge Modes)
+- [x] Blitz Round — 10 problems, 2 min each, no hints/skips, leaderboard if all 10 attempted
+- [x] Chaos Mode — random problems with hidden pattern label, revealed after solve/skip
+- [x] Gauntlet Mode — 7-tab sequential run with mini-challenges, one-failure-ends, Gauntlet Cleared badge

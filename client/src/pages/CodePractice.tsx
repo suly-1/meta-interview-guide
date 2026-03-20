@@ -206,6 +206,45 @@ interface SpeedRunEntry {
 
 const LEADERBOARD_KEY = "cp_speedrun_leaderboard";
 const TOURNAMENT_KEY = "cp_tournament_history";
+const BLITZ_KEY = "cp_blitz_history";
+const CHAOS_KEY = "cp_chaos_history";
+
+// Blitz Round types (10 problems, 2 min each, no hints/skips)
+interface BlitzRound {
+  problemId: number;
+  problemName: string;
+  difficulty: string;
+  solved: boolean;
+  timeSec: number; // time used (max 120)
+}
+interface BlitzRecord {
+  id: string;
+  date: number;
+  rounds: BlitzRound[];
+  solvedCount: number;
+  totalSec: number;
+}
+function loadBlitzHistory(): BlitzRecord[] {
+  try { return JSON.parse(localStorage.getItem(BLITZ_KEY) ?? "[]"); } catch { return []; }
+}
+function saveBlitzHistory(entries: BlitzRecord[]) {
+  localStorage.setItem(BLITZ_KEY, JSON.stringify(entries.slice(0, 20)));
+}
+
+// Chaos Mode types (random problems, pattern hidden)
+interface ChaosRecord {
+  id: string;
+  date: number;
+  solvedCount: number;
+  totalProblems: number;
+  totalSec: number;
+}
+function loadChaosHistory(): ChaosRecord[] {
+  try { return JSON.parse(localStorage.getItem(CHAOS_KEY) ?? "[]"); } catch { return []; }
+}
+function saveChaosHistory(entries: ChaosRecord[]) {
+  localStorage.setItem(CHAOS_KEY, JSON.stringify(entries.slice(0, 20)));
+}
 
 // Tournament bracket types
 interface TournamentRound {
@@ -1401,6 +1440,39 @@ export default function CodePractice() {
   const tournamentRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [tournamentOpen, setTournamentOpen] = useState(false);
 
+  // Blitz Round state (10 problems, 2 min each, no hints/skips)
+  interface BlitzState {
+    active: boolean;
+    queue: number[];
+    currentIdx: number;
+    secsLeft: number; // 120 per problem
+    rounds: BlitzRound[];
+    done: boolean;
+    startTime: number;
+  }
+  const [blitz, setBlitz] = useState<BlitzState>({
+    active: false, queue: [], currentIdx: 0, secsLeft: 120, rounds: [], done: false, startTime: 0,
+  });
+  const blitzRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [blitzHistory, setBlitzHistory] = useState<BlitzRecord[]>(() => loadBlitzHistory());
+
+  // Chaos Mode state (random problems, pattern hidden)
+  interface ChaosState {
+    active: boolean;
+    queue: number[];
+    currentIdx: number;
+    secsLeft: number; // 5 min per problem
+    solvedCount: number;
+    revealedPattern: boolean;
+    startTime: number;
+    done: boolean;
+  }
+  const [chaos, setChaos] = useState<ChaosState>({
+    active: false, queue: [], currentIdx: 0, secsLeft: 300, solvedCount: 0, revealedPattern: false, startTime: 0, done: false,
+  });
+  const chaosRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [chaosHistory, setChaosHistory] = useState<ChaosRecord[]>(() => loadChaosHistory());
+
   // Sprint history
   const [sprintHistory, setSprintHistory] = useState<SprintHistoryEntry[]>(() => loadSprintHistory());
 
@@ -1866,6 +1938,154 @@ export default function CodePractice() {
     return () => { if (sprintRef.current) clearInterval(sprintRef.current); };
   }, [sprint.active]);
 
+  // ─── Blitz Round handlers ──────────────────────────────────────────────────
+  const startBlitz = useCallback(() => {
+    let pool = [...CTCI_PROBLEMS];
+    const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 10);
+    const queue = shuffled.map(p => p.id);
+    setSelectedId(queue[0]);
+    setHintsUsedThisRun(0);
+    setCombo(0);
+    setBlitz({ active: true, queue, currentIdx: 0, secsLeft: 120, rounds: [], done: false, startTime: Date.now() });
+  }, []);
+
+  const advanceBlitz = useCallback((solved: boolean) => {
+    setBlitz(prev => {
+      const timeSec = 120 - prev.secsLeft;
+      const currentProblem = CTCI_PROBLEMS.find(p => p.id === prev.queue[prev.currentIdx])!;
+      const round: BlitzRound = {
+        problemId: prev.queue[prev.currentIdx],
+        problemName: currentProblem?.name ?? `#${prev.queue[prev.currentIdx]}`,
+        difficulty: currentProblem?.difficulty ?? "?",
+        solved, timeSec,
+      };
+      const rounds = [...prev.rounds, round];
+      const nextIdx = prev.currentIdx + 1;
+      if (nextIdx >= prev.queue.length) {
+        if (blitzRef.current) clearInterval(blitzRef.current);
+        const totalSec = Math.round((Date.now() - prev.startTime) / 1000);
+        const solvedCount = rounds.filter(r => r.solved).length;
+        const record: BlitzRecord = { id: `${Date.now()}`, date: Date.now(), rounds, solvedCount, totalSec };
+        const updated = [record, ...loadBlitzHistory()];
+        saveBlitzHistory(updated);
+        setBlitzHistory(updated);
+        return { ...prev, active: false, rounds, done: true };
+      }
+      setSelectedId(prev.queue[nextIdx]);
+      setHintsUsedThisRun(0);
+      return { ...prev, currentIdx: nextIdx, secsLeft: 120, rounds };
+    });
+  }, []);
+
+  const stopBlitz = useCallback(() => {
+    if (blitzRef.current) clearInterval(blitzRef.current);
+    setBlitz(prev => ({ ...prev, active: false, done: false }));
+    setHintsUsedThisRun(0);
+  }, []);
+
+  // Blitz countdown (2 min per problem, hard stop)
+  useEffect(() => {
+    if (blitz.active) {
+      blitzRef.current = setInterval(() => {
+        setBlitz(prev => {
+          if (prev.secsLeft <= 1) {
+            // Time's up for this problem — auto-advance as unsolved
+            const currentProblem = CTCI_PROBLEMS.find(p => p.id === prev.queue[prev.currentIdx]);
+            const round: BlitzRound = {
+              problemId: prev.queue[prev.currentIdx],
+              problemName: currentProblem?.name ?? `#${prev.queue[prev.currentIdx]}`,
+              difficulty: currentProblem?.difficulty ?? "?",
+              solved: false, timeSec: 120,
+            };
+            const rounds = [...prev.rounds, round];
+            const nextIdx = prev.currentIdx + 1;
+            if (nextIdx >= prev.queue.length) {
+              clearInterval(blitzRef.current!);
+              const totalSec = Math.round((Date.now() - prev.startTime) / 1000);
+              const solvedCount = rounds.filter(r => r.solved).length;
+              const record: BlitzRecord = { id: `${Date.now()}`, date: Date.now(), rounds, solvedCount, totalSec };
+              const updated = [record, ...loadBlitzHistory()];
+              saveBlitzHistory(updated);
+              setBlitzHistory(updated);
+              return { ...prev, active: false, rounds, done: true, secsLeft: 0 };
+            }
+            setSelectedId(prev.queue[nextIdx]);
+            setHintsUsedThisRun(0);
+            return { ...prev, currentIdx: nextIdx, secsLeft: 120, rounds };
+          }
+          return { ...prev, secsLeft: prev.secsLeft - 1 };
+        });
+      }, 1000);
+    } else {
+      if (blitzRef.current) clearInterval(blitzRef.current);
+    }
+    return () => { if (blitzRef.current) clearInterval(blitzRef.current); };
+  }, [blitz.active]);
+
+  // ─── Chaos Mode handlers ──────────────────────────────────────────────────
+  const startChaos = useCallback(() => {
+    const shuffled = [...CTCI_PROBLEMS].sort(() => Math.random() - 0.5).slice(0, 15);
+    const queue = shuffled.map(p => p.id);
+    setSelectedId(queue[0]);
+    setHintsUsedThisRun(0);
+    setCombo(0);
+    setChaos({ active: true, queue, currentIdx: 0, secsLeft: 300, solvedCount: 0, revealedPattern: false, startTime: Date.now(), done: false });
+  }, []);
+
+  const advanceChaos = useCallback((solved: boolean) => {
+    setChaos(prev => {
+      const nextIdx = prev.currentIdx + 1;
+      const newSolvedCount = prev.solvedCount + (solved ? 1 : 0);
+      if (nextIdx >= prev.queue.length) {
+        if (chaosRef.current) clearInterval(chaosRef.current);
+        const totalSec = Math.round((Date.now() - prev.startTime) / 1000);
+        const record: ChaosRecord = { id: `${Date.now()}`, date: Date.now(), solvedCount: newSolvedCount, totalProblems: prev.queue.length, totalSec };
+        const updated = [record, ...loadChaosHistory()];
+        saveChaosHistory(updated);
+        setChaosHistory(updated);
+        return { ...prev, active: false, done: true, solvedCount: newSolvedCount };
+      }
+      setSelectedId(prev.queue[nextIdx]);
+      setHintsUsedThisRun(0);
+      return { ...prev, currentIdx: nextIdx, secsLeft: 300, revealedPattern: false, solvedCount: newSolvedCount };
+    });
+  }, []);
+
+  const stopChaos = useCallback(() => {
+    if (chaosRef.current) clearInterval(chaosRef.current);
+    setChaos(prev => ({ ...prev, active: false, done: false }));
+    setHintsUsedThisRun(0);
+  }, []);
+
+  // Chaos countdown (5 min per problem)
+  useEffect(() => {
+    if (chaos.active) {
+      chaosRef.current = setInterval(() => {
+        setChaos(prev => {
+          if (prev.secsLeft <= 1) {
+            const nextIdx = prev.currentIdx + 1;
+            if (nextIdx >= prev.queue.length) {
+              clearInterval(chaosRef.current!);
+              const totalSec = Math.round((Date.now() - prev.startTime) / 1000);
+              const record: ChaosRecord = { id: `${Date.now()}`, date: Date.now(), solvedCount: prev.solvedCount, totalProblems: prev.queue.length, totalSec };
+              const updated = [record, ...loadChaosHistory()];
+              saveChaosHistory(updated);
+              setChaosHistory(updated);
+              return { ...prev, active: false, done: true, secsLeft: 0 };
+            }
+            setSelectedId(prev.queue[nextIdx]);
+            setHintsUsedThisRun(0);
+            return { ...prev, currentIdx: nextIdx, secsLeft: 300, revealedPattern: false };
+          }
+          return { ...prev, secsLeft: prev.secsLeft - 1 };
+        });
+      }, 1000);
+    } else {
+      if (chaosRef.current) clearInterval(chaosRef.current);
+    }
+    return () => { if (chaosRef.current) clearInterval(chaosRef.current); };
+  }, [chaos.active]);
+
   // ─── Tournament handlers ──────────────────────────────────────────────────
   const startTournament = useCallback((difficulty: "All" | "Easy" | "Medium" | "Hard") => {
     let pool = CTCI_PROBLEMS.filter(p => !progress[p.id]?.solved);
@@ -1967,6 +2187,10 @@ export default function CodePractice() {
       if (speedRunActive) stopSpeedRun(true);
       // If Tournament is active, advance it
       if (tournament.active) advanceTournament(true);
+      // If Blitz is active, advance it
+      if (blitz.active) advanceBlitz(true);
+      // If Chaos is active, advance it
+      if (chaos.active) advanceChaos(true);
       // Trigger difficulty self-assessment
       setPendingAssessmentProblem({ id: selectedId, name: problem.name, difficulty: problem.difficulty });
       setDiffEstimatorOpen(true);
@@ -2393,8 +2617,38 @@ export default function CodePractice() {
                   ? `${Math.floor(tournament.secsLeft/60)}:${String(tournament.secsLeft%60).padStart(2,"0")} · ${tournament.currentIdx+1}/5`
                   : "Tournament"}
               </button>
+              {/* Blitz Round button */}
+              <button
+                onClick={() => { if (blitz.active) stopBlitz(); else startBlitz(); }}
+                title={blitz.active ? "Stop Blitz Round" : "Start Blitz Round (10 problems, 2 min each, no hints)"}
+                className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
+                  blitz.active
+                    ? "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 animate-pulse"
+                    : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Zap size={13} />
+                {blitz.active
+                  ? `${blitz.secsLeft}s · ${blitz.currentIdx+1}/10`
+                  : "Blitz"}
+              </button>
+              {/* Chaos Mode button */}
+              <button
+                onClick={() => { if (chaos.active) stopChaos(); else startChaos(); }}
+                title={chaos.active ? "Stop Chaos Mode" : "Start Chaos Mode (random problems, pattern hidden)"}
+                className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
+                  chaos.active
+                    ? "bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 animate-pulse"
+                    : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Shuffle size={13} />
+                {chaos.active
+                  ? `${Math.floor(chaos.secsLeft/60)}:${String(chaos.secsLeft%60).padStart(2,"0")} · ${chaos.currentIdx+1}/${chaos.queue.length}`
+                  : "Chaos"}
+              </button>
               {/* Combo Multiplier badge */}
-              {(speedRunActive || tournament.active) && combo > 0 && (
+              {(speedRunActive || tournament.active || blitz.active) && combo > 0 && (
                 <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-black border transition-all ${
                   combo >= 3
                     ? "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 animate-pulse"
@@ -2656,6 +2910,110 @@ export default function CodePractice() {
                   onClick={() => { setTournament(t => ({ ...t, done: false })); setTournamentOpen(true); }}
                   className="w-full text-xs font-semibold py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
                 >Play Again</button>
+              </div>
+            )}
+
+            {/* Blitz Round active banner */}
+            {blitz.active && (
+              <div className="px-4 py-2 border-b flex-shrink-0 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-3">
+                  <Zap size={14} className="text-red-600 dark:text-red-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-red-700 dark:text-red-400">⚡ Blitz Round — Problem {blitz.currentIdx + 1} of 10</span>
+                      <span className={`text-[10px] font-mono font-bold ${
+                        blitz.secsLeft <= 30 ? "text-red-600 animate-pulse" : "text-red-500 dark:text-red-400"
+                      }`}>{blitz.secsLeft}s</span>
+                    </div>
+                    <div className="flex items-center gap-0.5 mt-1">
+                      {blitz.queue.map((_, i) => {
+                        const round = blitz.rounds[i];
+                        const isCurrent = i === blitz.currentIdx;
+                        const isPast = i < blitz.currentIdx;
+                        return (
+                          <div key={i} className={`flex-1 h-1.5 rounded-full transition-all ${
+                            isPast ? (round?.solved ? "bg-emerald-500" : "bg-red-400") :
+                            isCurrent ? "bg-red-500 animate-pulse" : "bg-red-200 dark:bg-red-800"
+                          }`} />
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <button onClick={() => advanceBlitz(false)} className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-300 hover:bg-red-300 transition-colors flex-shrink-0">Time's up →</button>
+                </div>
+              </div>
+            )}
+
+            {/* Blitz Round done panel */}
+            {blitz.done && (
+              <div className="px-4 py-3 border-b flex-shrink-0 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">⚡</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-red-700 dark:text-red-400">Blitz Complete!</div>
+                    <div className="text-xs text-muted-foreground">{blitz.rounds.filter(r => r.solved).length}/10 solved in {Math.floor((Date.now() - blitz.startTime) / 60000)}m</div>
+                  </div>
+                  <div className="text-3xl font-black text-red-600 dark:text-red-400">{blitz.rounds.filter(r => r.solved).length}<span className="text-sm">/10</span></div>
+                  <button onClick={() => setBlitz(b => ({ ...b, done: false }))} className="text-muted-foreground hover:text-foreground p-1 rounded"><X size={14} /></button>
+                </div>
+                <div className="flex gap-0.5 mb-2">
+                  {blitz.rounds.map((r, i) => (
+                    <div key={i} className={`flex-1 rounded py-1 text-center text-[9px] font-bold ${
+                      r.solved ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                    }`} title={`${r.problemName}: ${r.solved ? r.timeSec + "s" : "unsolved"}`}>
+                      {r.solved ? r.timeSec + "s" : "✗"}
+                    </div>
+                  ))}
+                </div>
+                {blitz.rounds.length === 10 && (
+                  <div className="text-[10px] text-muted-foreground mb-2 text-center">Leaderboard entry recorded ✓</div>
+                )}
+                <button onClick={() => { setBlitz(b => ({ ...b, done: false })); startBlitz(); }} className="w-full text-xs font-semibold py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors">Play Again</button>
+              </div>
+            )}
+
+            {/* Chaos Mode active banner */}
+            {chaos.active && (
+              <div className="px-4 py-2 border-b flex-shrink-0 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-3">
+                  <Shuffle size={14} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-purple-700 dark:text-purple-400">🌀 Chaos Mode — Problem {chaos.currentIdx + 1} of {chaos.queue.length}</span>
+                      <span className="text-[10px] font-mono text-purple-500 dark:text-purple-400">{Math.floor(chaos.secsLeft/60)}:{String(chaos.secsLeft%60).padStart(2,"0")} left</span>
+                      <span className="text-[10px] bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 px-1.5 rounded-full font-semibold">Pattern hidden</span>
+                    </div>
+                    <div className="mt-1">
+                      {chaos.revealedPattern ? (
+                        <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">
+                          Pattern: {CTCI_PROBLEMS.find(p => p.id === chaos.queue[chaos.currentIdx])?.topic ?? "?"}
+                        </span>
+                      ) : (
+                        <button onClick={() => setChaos(c => ({ ...c, revealedPattern: true }))} className="text-[10px] text-purple-500 underline hover:no-underline">Reveal pattern (costs 1 solve)</button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-bold text-purple-700 dark:text-purple-400">{chaos.solvedCount} solved</span>
+                    <button onClick={() => advanceChaos(false)} className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-300 hover:bg-purple-300 transition-colors">Skip →</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chaos Mode done panel */}
+            {chaos.done && (
+              <div className="px-4 py-3 border-b flex-shrink-0 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">🌀</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-purple-700 dark:text-purple-400">Chaos Mode Complete!</div>
+                    <div className="text-xs text-muted-foreground">{chaos.solvedCount}/{chaos.queue.length} solved without pattern hints</div>
+                  </div>
+                  <div className="text-3xl font-black text-purple-600 dark:text-purple-400">{chaos.solvedCount}<span className="text-sm">/{chaos.queue.length}</span></div>
+                  <button onClick={() => setChaos(c => ({ ...c, done: false }))} className="text-muted-foreground hover:text-foreground p-1 rounded"><X size={14} /></button>
+                </div>
+                <button onClick={() => { setChaos(c => ({ ...c, done: false })); startChaos(); }} className="w-full text-xs font-semibold py-1.5 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors">Play Again</button>
               </div>
             )}
 

@@ -23,7 +23,8 @@ import SoundtrackPlayer from "@/components/SoundtrackPlayer";
 import TopicRoulette from "@/components/TopicRoulette";
 import { useXPContext } from "@/contexts/XPContext";
 import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
-import { HelpCircle, Dices } from "lucide-react";
+import { HelpCircle, Dices, Sword } from "lucide-react";
+import GauntletMode, { type GauntletState, hasGauntletBadge } from "@/components/GauntletMode";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
@@ -58,6 +59,63 @@ export default function Home() {
   const isDark = theme === "dark";
   const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
   const [rouletteOpen, setRouletteOpen] = useState(false);
+
+  // ── Gauntlet Mode state ──────────────────────────────────────────────────
+  const GAUNTLET_CHALLENGES = ["ctci","coding","ai-round","behavioral","timeline","readiness","sysdesign"];
+  const CHALLENGE_LABELS: Record<string,string> = {
+    ctci: "Practice Tracker", coding: "Coding Interview", "ai-round": "AI-Enabled Round",
+    behavioral: "Behavioral Interview", timeline: "Study Timeline",
+    readiness: "Readiness", sysdesign: "System Design",
+  };
+  const CHALLENGE_EMOJIS: Record<string,string> = {
+    ctci: "📋", coding: "💻", "ai-round": "🤖", behavioral: "🗣️",
+    timeline: "📅", readiness: "📊", sysdesign: "🏗️",
+  };
+  const GAUNTLET_HISTORY_KEY = "gauntlet_history";
+  const GAUNTLET_BADGE_KEY = "gauntlet_cleared_badge";
+
+  const emptyGauntlet = (): GauntletState => ({
+    active: false, currentIdx: 0, rounds: [], done: false, failed: false, startTime: 0, totalSec: 0,
+  });
+  const [gauntlet, setGauntlet] = useState<GauntletState>(emptyGauntlet);
+  const [gauntletOpen, setGauntletOpen] = useState(false);
+
+  const startGauntlet = () => {
+    setGauntlet({ active: true, currentIdx: 0, rounds: [], done: false, failed: false, startTime: Date.now(), totalSec: 0 });
+    setGauntletOpen(true);
+  };
+
+  const advanceGauntlet = (completed: boolean) => {
+    setGauntlet(g => {
+      const elapsed = Math.round((Date.now() - g.startTime) / 1000);
+      const newRound = {
+        tabId: GAUNTLET_CHALLENGES[g.currentIdx] as any,
+        tabLabel: CHALLENGE_LABELS[GAUNTLET_CHALLENGES[g.currentIdx]],
+        emoji: CHALLENGE_EMOJIS[GAUNTLET_CHALLENGES[g.currentIdx]],
+        completed, failed: !completed, timeSec: elapsed,
+      };
+      const newRounds = [...g.rounds, newRound];
+      if (!completed) {
+        // Run failed
+        const rec = { id: Date.now().toString(), date: Date.now(), cleared: false, failedAt: newRound.tabLabel, totalSec: elapsed };
+        const hist = JSON.parse(localStorage.getItem(GAUNTLET_HISTORY_KEY) ?? "[]");
+        localStorage.setItem(GAUNTLET_HISTORY_KEY, JSON.stringify([rec, ...hist].slice(0, 20)));
+        return { ...g, active: false, failed: true, rounds: newRounds, totalSec: elapsed };
+      }
+      const nextIdx = g.currentIdx + 1;
+      if (nextIdx >= GAUNTLET_CHALLENGES.length) {
+        // All cleared!
+        localStorage.setItem(GAUNTLET_BADGE_KEY, "true");
+        const rec = { id: Date.now().toString(), date: Date.now(), cleared: true, totalSec: elapsed };
+        const hist = JSON.parse(localStorage.getItem(GAUNTLET_HISTORY_KEY) ?? "[]");
+        localStorage.setItem(GAUNTLET_HISTORY_KEY, JSON.stringify([rec, ...hist].slice(0, 20)));
+        return { ...g, active: false, done: true, rounds: newRounds, totalSec: elapsed };
+      }
+      return { ...g, currentIdx: nextIdx, rounds: newRounds };
+    });
+  };
+
+  const stopGauntlet = () => setGauntlet(emptyGauntlet());
 
   // Keyboard shortcuts (1-5 now for 5 tabs)
   useKeyboardShortcuts({
@@ -127,6 +185,17 @@ export default function Home() {
                   );
                 })}
               </div>
+              <button
+                onClick={() => setGauntletOpen(true)}
+                title={gauntlet.active ? "Gauntlet in progress" : "Gauntlet Mode — 7-tab unbroken run"}
+                className={`flex items-center justify-center w-8 h-8 rounded-full transition-all ${
+                  gauntlet.active
+                    ? "text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
+                    : "text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                <Sword size={15} />
+              </button>
               <button
                 onClick={() => setRouletteOpen(true)}
                 title="Topic Roulette — spin for a random challenge"
@@ -231,6 +300,30 @@ export default function Home() {
 
       <OnboardingModal />
       <KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
+
+      {/* Gauntlet Mode Modal */}
+      {gauntletOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setGauntletOpen(false)}>
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-base font-bold text-foreground flex items-center gap-2"><Sword size={16} className="text-orange-500" /> Gauntlet Mode</div>
+                <div className="text-xs text-muted-foreground">7-tab unbroken challenge run</div>
+              </div>
+              <button onClick={() => setGauntletOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="text-lg leading-none">&times;</span>
+              </button>
+            </div>
+            <GauntletMode
+              gauntlet={gauntlet}
+              onStart={startGauntlet}
+              onAdvance={advanceGauntlet}
+              onStop={() => { stopGauntlet(); setGauntletOpen(false); }}
+              onNavigateTab={(tabId) => { handleTabChange(tabId); setGauntletOpen(false); }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Topic Roulette Modal */}
       {rouletteOpen && (
