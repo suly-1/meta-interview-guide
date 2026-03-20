@@ -176,3 +176,8 @@
 - [x] Reverse Engineering Drill — identify pattern/complexity/edge case from a solution in 3 min
 - [x] Explain It Back — post-solve explanation box saved alongside solve history
 - [x] Topic Roulette — spin-wheel animation picks random tab + problem
+
+## Current Batch (Progression & Mastery Systems)
+- [x] Pattern Mastery Tree — SVG skill tree, nodes unlock at 4+/5 drill rating ×3, Pattern Master badge
+- [x] Topic Boss Fight — weekly hard boss per topic, crown icon on clear, weekly reset
+- [x] Combo Multiplier — back-to-back solve streak ×1→×2→×3 applied to Speed Run and Tournament scores

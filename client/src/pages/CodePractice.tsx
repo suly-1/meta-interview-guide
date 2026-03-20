@@ -1420,6 +1420,10 @@ export default function CodePractice() {
   // Hint penalty counter (resets per problem)
   const [hintsUsedThisRun, setHintsUsedThisRun] = useState(0);
 
+  // Combo multiplier: back-to-back solves without hints/skips
+  const [combo, setCombo] = useState(0); // 0=no combo, 1=×1, 2=×2, 3=×3 (capped)
+  const comboMultiplier = Math.min(3, Math.max(1, combo));
+
   // Daily goal
   const [dailyGoal, setDailyGoal] = useState<number>(() => loadDailyGoal());
   const [editingGoal, setEditingGoal] = useState(false);
@@ -1603,7 +1607,9 @@ export default function CodePractice() {
   const handleGetHint = useCallback(async () => {
     setHintText("");
     // Track hint usage for Speed Run penalty
-    if (speedRunActive || sprint.active) setHintsUsedThisRun(h => h + 1);
+    if (speedRunActive || sprint.active || tournament.active) setHintsUsedThisRun(h => h + 1);
+    // Break combo on hint use
+    if (speedRunActive || tournament.active) setCombo(0);
     try {
       const result = await hintMutation.mutateAsync({ problemName: problem.name, currentCode: code, hintLevel });
       const hintStr = typeof result.hint === "string" ? result.hint : String(result.hint);
@@ -1718,7 +1724,11 @@ export default function CodePractice() {
     const hintPenalty = hintsUsedThisRun * 10;
     const baseScore = solved ? 50 : 0;
     const rawScore = baseScore + timeBonus;
-    const score = Math.max(0, rawScore - hintPenalty);
+    const mult = solved && hintsUsedThisRun === 0 ? comboMultiplier : 1;
+    const score = Math.max(0, Math.round((rawScore - hintPenalty) * mult));
+    // Advance or break combo
+    if (solved && hintsUsedThisRun === 0) setCombo(c => Math.min(3, c + 1));
+    else setCombo(0);
     setSpeedRunScore({ solved, timeSec, score, baseScore, timeBonus, hintPenalty, hintsUsed: hintsUsedThisRun });
     setSpeedRunActive(false);
     recordSRStreakDay();
@@ -1877,11 +1887,15 @@ export default function CodePractice() {
   }, [progress]);
 
   const advanceTournament = useCallback((solved: boolean) => {
+    // Advance or break combo for tournament
+    if (solved && hintsUsedThisRun === 0) setCombo(c => Math.min(3, c + 1));
+    else setCombo(0);
     setTournament(prev => {
       const timeSec = timerSecsRef.current;
       const timeBonus = solved ? Math.max(0, Math.round((1 - timeSec / (9 * 60)) * 40)) : 0;
       const hintPenalty = hintsUsedThisRun * 10;
-      const score = Math.max(0, (solved ? 60 + timeBonus : 0) - hintPenalty);
+      const mult = solved && hintsUsedThisRun === 0 ? comboMultiplier : 1;
+      const score = Math.max(0, Math.round(((solved ? 60 + timeBonus : 0) - hintPenalty) * mult));
       const currentProblem = CTCI_PROBLEMS.find(p => p.id === prev.queue[prev.currentIdx])!;
       const round: TournamentRound = {
         problemId: prev.queue[prev.currentIdx],
@@ -2379,6 +2393,19 @@ export default function CodePractice() {
                   ? `${Math.floor(tournament.secsLeft/60)}:${String(tournament.secsLeft%60).padStart(2,"0")} · ${tournament.currentIdx+1}/5`
                   : "Tournament"}
               </button>
+              {/* Combo Multiplier badge */}
+              {(speedRunActive || tournament.active) && combo > 0 && (
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-black border transition-all ${
+                  combo >= 3
+                    ? "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 animate-pulse"
+                    : combo >= 2
+                    ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400"
+                    : "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400"
+                }`} title={`Combo ×${comboMultiplier} — keep solving without hints to grow it!`}>
+                  <span>🔥</span>
+                  <span>×{comboMultiplier}</span>
+                </div>
+              )}
               <button
                 onClick={() => toggleStarred(selectedId)}
                 className={`transition-colors p-1.5 rounded-lg hover:bg-muted ${prog.starred ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-400"}`}
@@ -2441,6 +2468,11 @@ export default function CodePractice() {
                   {speedRunScore.hintPenalty > 0 && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                       −{speedRunScore.hintPenalty} hints ({speedRunScore.hintsUsed}×💡)
+                    </span>
+                  )}
+                  {speedRunScore.solved && speedRunScore.hintsUsed === 0 && combo > 1 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      🔥 ×{comboMultiplier} combo!
                     </span>
                   )}
                   <span className="text-[10px] text-muted-foreground">=</span>

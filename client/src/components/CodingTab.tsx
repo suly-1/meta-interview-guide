@@ -12,6 +12,8 @@ import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 import { useProgress } from "@/hooks/useProgress";
 import PatternStuckHintLadder from "@/components/PatternStuckHintLadder";
 import ReverseEngineeringDrill from "@/components/ReverseEngineeringDrill";
+import PatternMasteryTree from "@/components/PatternMasteryTree";
+import TopicBossFight from "@/components/TopicBossFight";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -588,6 +590,30 @@ export default function CodingTab() {
           <p className="text-sm text-gray-500">Click any node to view the pattern card. Drag to reposition. Scroll to zoom. Green glow = mastered (★4+)</p>
         </div>
         <PatternDependencyGraph />
+      </section>
+
+      {/* Pattern Mastery Tree */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-amber-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Pattern Mastery Tree
+          </h2>
+          <p className="text-sm text-gray-500">Unlock nodes by rating each pattern 4+/5 in Quick Drill three times. Complete all 14 to earn the Pattern Master badge.</p>
+        </div>
+        <PatternMasteryTree />
+      </section>
+
+      {/* Topic Boss Fight */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-red-500" />
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Topic Boss Fight
+          </h2>
+          <p className="text-sm text-gray-500">Defeat each boss by solving all 3 hard problems. Resets every Monday. Crown = cleared this week.</p>
+        </div>
+        <TopicBossFight />
       </section>
     </div>
   );
