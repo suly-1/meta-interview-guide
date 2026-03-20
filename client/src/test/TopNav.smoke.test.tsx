@@ -34,8 +34,18 @@ vi.mock("@/lib/data", () => ({
     { id: "p2", name: "Sliding Window", difficulty: "Medium", tags: [] },
   ],
   BEHAVIORAL_QUESTIONS: [
-    { id: "b1", q: "Tell me about a time you led a project.", category: "Leadership", tags: [] },
-    { id: "b2", q: "Describe a conflict you resolved.", category: "Conflict", tags: [] },
+    {
+      id: "b1",
+      q: "Tell me about a time you led a project.",
+      category: "Leadership",
+      tags: [],
+    },
+    {
+      id: "b2",
+      q: "Describe a conflict you resolved.",
+      category: "Conflict",
+      tags: [],
+    },
   ],
   SYSTEM_DESIGN_QUESTIONS: [],
 }));
@@ -125,8 +135,6 @@ describe("SectionErrorBoundary smoke test", () => {
   });
 
   it("renders an error card when a child throws", () => {
-
-    // Suppress the expected React error boundary console.error in this test
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     function Bomb() {
@@ -140,9 +148,46 @@ describe("SectionErrorBoundary smoke test", () => {
     );
 
     // Should show the error card, not propagate to global ErrorBoundary
-    expect(container.textContent).toContain("AI Mock Session encountered an error");
-    expect(container.textContent).toContain("Simulated AI component crash");
+    expect(container.textContent).toContain(
+      "AI Mock Session encountered an error"
+    );
+    // Error message is hidden behind "Show details" — only the label is shown initially
+    expect(container.textContent).not.toContain("Simulated AI component crash");
 
+    spy.mockRestore();
+  });
+
+  it("shows Try Again button on first failure", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    function Bomb() {
+      throw new Error("boom");
+    }
+
+    const { getByText } = render(
+      <SectionErrorBoundary label="AI Section">
+        <Bomb />
+      </SectionErrorBoundary>
+    );
+
+    expect(getByText(/Try Again/)).toBeTruthy();
+    spy.mockRestore();
+  });
+
+  it("shows Show details toggle button", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    function Bomb() {
+      throw new Error("boom");
+    }
+
+    const { getByText } = render(
+      <SectionErrorBoundary label="AI Section">
+        <Bomb />
+      </SectionErrorBoundary>
+    );
+
+    expect(getByText(/Show details/)).toBeTruthy();
     spy.mockRestore();
   });
 });

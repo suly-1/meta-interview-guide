@@ -56,7 +56,7 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
   const logPath = path.join(LOG_DIR, `${source}.log`);
 
   // Format entries with timestamps
-  const lines = entries.map((entry) => {
+  const lines = entries.map(entry => {
     const ts = new Date().toISOString();
     return `[${ts}] ${JSON.stringify(entry)}`;
   });
@@ -132,7 +132,7 @@ function vitePluginManusDebugCollector(): Plugin {
         }
 
         let body = "";
-        req.on("data", (chunk) => {
+        req.on("data", chunk => {
           body += chunk.toString();
         });
 
@@ -150,7 +150,13 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+];
 
 export default defineConfig({
   plugins,
@@ -167,6 +173,51 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Raise the warning threshold — we now split via manualChunks
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          // Monaco editor — very large, isolate completely
+          if (
+            id.includes("node_modules/@monaco-editor") ||
+            id.includes("node_modules/monaco-editor")
+          ) {
+            return "vendor-monaco";
+          }
+          // html2canvas — used only in System Design heatmap export
+          if (id.includes("node_modules/html2canvas")) {
+            return "vendor-html2canvas";
+          }
+          // jsPDF — used only in Design Doc Generator
+          if (id.includes("node_modules/jspdf")) {
+            return "vendor-jspdf";
+          }
+          // D3 + Recharts — data visualisation, used in Overview/Coding tabs
+          if (
+            id.includes("node_modules/d3") ||
+            id.includes("node_modules/recharts")
+          ) {
+            return "vendor-charts";
+          }
+          // React core — always needed, stable chunk for long-term caching
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/")
+          ) {
+            return "vendor-react";
+          }
+          // Lucide icons — large icon set, separate chunk
+          if (id.includes("node_modules/lucide-react")) {
+            return "vendor-lucide";
+          }
+          // Remaining node_modules go into a shared vendor chunk
+          if (id.includes("node_modules/")) {
+            return "vendor";
+          }
+        },
+      },
+    },
   },
   server: {
     host: true,
