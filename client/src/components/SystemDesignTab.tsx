@@ -660,7 +660,7 @@ export default function SystemDesignTab() {
                 : "bg-white text-red-600 border-red-200 hover:border-red-400"
             }`}
           >
-            <AlertTriangle size={11} /> Why 90% Fail
+            <AlertTriangle size={11} /> Why High Fail ratio
           </button>
           <button
             onClick={() => setActiveView("requirements")}

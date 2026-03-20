@@ -314,7 +314,7 @@ export default function SDFailureModeDiagnostic() {
           <AlertTriangle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-extrabold text-red-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Why 90% of Candidates Fail Meta System Design
+              Why Candidates Fail Meta System Design
             </p>
             <p className="text-xs text-red-700 mt-1 leading-relaxed">
               Based on analysis of candidate reports, interviewer feedback, and coaching data. The 10% pass rate is not a knowledge problem — it is a <strong>preparation-to-evaluation gap</strong>. Candidates study architecture patterns; interviewers score reasoning process.
