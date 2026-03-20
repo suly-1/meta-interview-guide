@@ -10,6 +10,7 @@ const LS_KEY = "meta_readiness_goal_v1";
 interface Goal {
   targetScore: number;
   targetDate: string; // ISO date string YYYY-MM-DD
+  targetIC6PlusPct?: number; // target % of IC6+ signals in SD mock debrief
 }
 
 function getDaysUntil(dateStr: string): number {
@@ -99,6 +100,7 @@ export default function ReadinessGoalSetter() {
   const [goal, setGoal] = useState<Goal | null>(null);
   const [editing, setEditing] = useState(false);
   const [draftScore, setDraftScore] = useState(80);
+  const [draftIC6PlusPct, setDraftIC6PlusPct] = useState(60);
   const [draftDate, setDraftDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 30);
@@ -125,7 +127,7 @@ export default function ReadinessGoalSetter() {
   }, []);
 
   const handleSave = () => {
-    const newGoal: Goal = { targetScore: draftScore, targetDate: draftDate };
+    const newGoal: Goal = { targetScore: draftScore, targetDate: draftDate, targetIC6PlusPct: draftIC6PlusPct };
     setGoal(newGoal);
     localStorage.setItem(LS_KEY, JSON.stringify(newGoal));
     setEditing(false);
@@ -206,6 +208,28 @@ export default function ReadinessGoalSetter() {
               <span>Target: {draftScore}%</span>
               <span>Max: 100%</span>
             </div>
+          </div>
+
+          {/* IC6+ target */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+              Target IC6+ Signal %: <span className="text-blue-600 dark:text-blue-400 font-black">{draftIC6PlusPct}%</span>
+            </label>
+            <input
+              type="range"
+              min={10}
+              max={100}
+              step={5}
+              value={draftIC6PlusPct}
+              onChange={e => setDraftIC6PlusPct(Number(e.target.value))}
+              className="w-full accent-blue-500"
+            />
+            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+              <span>10% (IC4 heavy)</span>
+              <span className="font-bold text-blue-600">{draftIC6PlusPct}% target</span>
+              <span>100% (all IC6+)</span>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1">This goal line appears on the IC Signal Trend chart in the System Design section.</p>
           </div>
 
           {/* Target date */}

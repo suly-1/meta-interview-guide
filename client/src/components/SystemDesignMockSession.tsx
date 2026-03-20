@@ -607,6 +607,12 @@ export default function SystemDesignMockSession() {
   const debrief = trpc.systemDesign.debrief.useMutation();
   const followUp = trpc.systemDesign.followUp.useMutation();
   const signalDetector = trpc.signalDetector.classify.useMutation();
+  const skepticScoring = trpc.skepticScoring.score.useMutation();
+  const [skepticScoringResult, setSkepticScoringResult] = useState<{
+    overallScore: number;
+    overallFeedback: string;
+    perChallenge: { challengeIndex: number; directnessScore: number; depthScore: number; confidenceScore: number; avgScore: number; coachingNote: string }[];
+  } | null>(null);
   const [showSignalDetector, setShowSignalDetector] = useState(false);
 
   const startSession = useCallback(() => {
@@ -1303,13 +1309,61 @@ export default function SystemDesignMockSession() {
           {/* Skeptic challenge debrief */}
           {skepticMode && skepticChallenges.length > 0 && (
             <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 space-y-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Swords size={13} className="text-orange-600" />
                 <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wide">Skeptic Challenges Fired This Session</p>
-                <span className="ml-auto text-[10px] font-bold text-orange-600 bg-orange-100 border border-orange-200 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-orange-600 bg-orange-100 border border-orange-200 px-2 py-0.5 rounded-full">
                   {skepticChallenges.filter(c => c.dismissed).length}/{skepticChallenges.length} dismissed
                 </span>
+                {skepticIntensity === "aggressive" && skepticChallenges.some(c => c.response && c.response.trim().length > 10) && !skepticScoringResult && (
+                  <button
+                    onClick={() => {
+                      const challengesWithResponse = skepticChallenges
+                        .filter(c => c.response && c.response.trim().length > 10)
+                        .map(c => ({ section: c.section, challenge: c.challenge, response: c.response! }));
+                      skepticScoring.mutate(
+                        { problem: selectedProblem.title, challenges: challengesWithResponse },
+                        { onSuccess: (data) => setSkepticScoringResult(data) }
+                      );
+                    }}
+                    disabled={skepticScoring.isPending}
+                    className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 transition-all"
+                  >
+                    {skepticScoring.isPending ? <Loader2 size={10} className="animate-spin" /> : <Swords size={10} />}
+                    Score My Defenses
+                  </button>
+                )}
               </div>
+
+              {/* Per-challenge scoring result */}
+              {skepticScoringResult && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Trophy size={12} className="text-amber-600" />
+                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">Challenge Defense Quality</p>
+                    <span className={`ml-auto text-sm font-extrabold ${
+                      skepticScoringResult.overallScore >= 4 ? "text-emerald-600" :
+                      skepticScoringResult.overallScore >= 3 ? "text-amber-600" : "text-red-600"
+                    }`}>{skepticScoringResult.overallScore}/5</span>
+                  </div>
+                  <p className="text-xs text-amber-900 leading-relaxed">{skepticScoringResult.overallFeedback}</p>
+                  {skepticScoringResult.perChallenge.map((pc, i) => (
+                    <div key={i} className="rounded-lg border border-amber-200 bg-white p-2.5 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[9px] font-bold text-gray-500 uppercase">Challenge {pc.challengeIndex + 1}</span>
+                        <span className="text-[9px] font-bold text-blue-600">Direct: {pc.directnessScore}/5</span>
+                        <span className="text-[9px] font-bold text-purple-600">Depth: {pc.depthScore}/5</span>
+                        <span className="text-[9px] font-bold text-emerald-600">Confidence: {pc.confidenceScore}/5</span>
+                        <span className={`ml-auto text-[10px] font-extrabold ${
+                          pc.avgScore >= 4 ? "text-emerald-600" : pc.avgScore >= 3 ? "text-amber-600" : "text-red-600"
+                        }`}>Avg: {pc.avgScore.toFixed(1)}/5</span>
+                      </div>
+                      <p className="text-[10px] text-gray-600 leading-relaxed">{pc.coachingNote}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="space-y-2">
                 {skepticChallenges.map((c, i) => (
                   <div key={i} className={`rounded-lg border p-2.5 ${c.dismissed ? "border-emerald-200 bg-emerald-50" : "border-orange-200 bg-white"}` }>
@@ -1320,6 +1374,9 @@ export default function SystemDesignMockSession() {
                         : <span className="text-[9px] font-bold text-orange-500 ml-auto">Not addressed</span>}
                     </div>
                     <p className="text-xs text-gray-800 leading-relaxed">{c.challenge}</p>
+                    {c.response && c.response.trim().length > 0 && (
+                      <p className="text-[10px] text-gray-500 mt-1 italic leading-relaxed">Your response: "{c.response.slice(0, 120)}{c.response.length > 120 ? "..." : ""}"</p>
+                    )}
                   </div>
                 ))}
               </div>

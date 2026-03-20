@@ -2,7 +2,26 @@
 // Candidates enter scale parameters; the tool derives QPS, storage, bandwidth, and
 // maps each result to concrete architectural implications with Meta-specific context.
 import { useState, useMemo } from "react";
-import { Calculator, ChevronDown, ChevronRight, Zap, Database, Globe, Server, AlertTriangle, CheckCircle } from "lucide-react";
+import { Calculator, ChevronDown, ChevronRight, Zap, Database, Globe, Server, AlertTriangle, CheckCircle, BookmarkPlus, Trash2, ClipboardList } from "lucide-react";
+
+const BOE_NOTES_KEY = "sd_boe_notes_v1";
+
+interface BoENote {
+  id: string;
+  date: number;
+  label: string;
+  inputs: ScaleInputs;
+  derived: Derived;
+  implications: { metric: string; value: string; level: string; implication: string }[];
+}
+
+function loadBoENotes(): BoENote[] {
+  try { return JSON.parse(localStorage.getItem(BOE_NOTES_KEY) || "[]"); } catch { return []; }
+}
+
+function saveBoENotes(notes: BoENote[]) {
+  localStorage.setItem(BOE_NOTES_KEY, JSON.stringify(notes.slice(-20)));
+}
 
 interface ScaleInputs {
   dau: number;           // Daily Active Users (millions)
@@ -211,6 +230,9 @@ export default function SDBoECalculator() {
   const [inputs, setInputs] = useState<ScaleInputs>(PRESETS[0].inputs);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(0);
   const [activePreset, setActivePreset] = useState(0);
+  const [notes, setNotes] = useState<BoENote[]>(() => loadBoENotes());
+  const [showNotes, setShowNotes] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const derived = useMemo(() => derive(inputs), [inputs]);
   const implications = useMemo(() => getImplications(derived, inputs), [derived, inputs]);
@@ -224,6 +246,33 @@ export default function SDBoECalculator() {
   function update(key: keyof ScaleInputs, value: number) {
     setActivePreset(-1);
     setInputs(prev => ({ ...prev, [key]: value }));
+  }
+
+  function saveToNotes() {
+    const preset = PRESETS[activePreset];
+    const note: BoENote = {
+      id: Date.now().toString(),
+      date: Date.now(),
+      label: preset ? preset.label : `Custom (${inputs.dau}M DAU)`,
+      inputs: { ...inputs },
+      derived: { ...derived },
+      implications: implications.map(i => ({ metric: i.metric, value: i.value, level: i.level, implication: i.implication })),
+    };
+    setNotes(prev => {
+      const updated = [...prev, note];
+      saveBoENotes(updated);
+      return updated;
+    });
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 1500);
+  }
+
+  function deleteNote(id: string) {
+    setNotes(prev => {
+      const updated = prev.filter(n => n.id !== id);
+      saveBoENotes(updated);
+      return updated;
+    });
   }
 
   return (
@@ -324,6 +373,76 @@ export default function SDBoECalculator() {
           </div>
         </div>
       </div>
+
+      {/* Save to Notes button */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={saveToNotes}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+            savedFlash
+              ? "bg-emerald-600 text-white border-emerald-600"
+              : "bg-white text-blue-700 border-blue-200 hover:border-blue-400 hover:bg-blue-50"
+          }`}
+        >
+          <BookmarkPlus size={11} />
+          {savedFlash ? "Saved!" : "Save to Notes"}
+        </button>
+        {notes.length > 0 && (
+          <button
+            onClick={() => setShowNotes(s => !s)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-200 bg-white text-gray-600 hover:border-gray-400 transition-all"
+          >
+            <ClipboardList size={11} />
+            {showNotes ? "Hide" : "Show"} Notes ({notes.length})
+          </button>
+        )}
+      </div>
+
+      {/* Notes Log */}
+      {showNotes && notes.length > 0 && (
+        <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+          <div className="px-4 py-2.5 bg-white border-b border-gray-200 flex items-center justify-between">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Saved BoE Calculations ({notes.length})</p>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {[...notes].reverse().map(note => (
+              <details key={note.id} className="group">
+                <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none hover:bg-white transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-gray-800 truncate">{note.label}</p>
+                    <p className="text-[10px] text-gray-400">{new Date(note.date).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-[10px] font-bold text-gray-500">{note.inputs.dau}M DAU</span>
+                    <span className="text-[10px] text-gray-400">Pk Write: {fmt(note.derived.peakWriteQPS)}/s</span>
+                    <span className="text-[10px] text-gray-400">Storage: {note.derived.totalStorageTB >= 1000 ? `${(note.derived.totalStorageTB/1000).toFixed(1)}PB` : `${note.derived.totalStorageTB.toFixed(0)}TB`}</span>
+                    <button
+                      onClick={e => { e.preventDefault(); deleteNote(note.id); }}
+                      className="text-gray-300 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                </summary>
+                <div className="px-4 pb-3 pt-1 space-y-1.5">
+                  {note.implications.map((imp, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${
+                        imp.level === "green" ? "bg-emerald-100 text-emerald-700" :
+                        imp.level === "amber" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                      }`}>{imp.value}</span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold text-gray-700">{imp.metric}</p>
+                        <p className="text-[10px] text-gray-500 leading-relaxed">{imp.implication}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Architectural Implications */}
       <div className="space-y-2">

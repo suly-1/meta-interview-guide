@@ -235,3 +235,9 @@
 - [x] BoE Calculator with Decision Mapping: DAU/RPS/storage inputs → architectural implications panel
 - [x] Skeptic Intensity tiers: Mild (1 challenge/section) vs Aggressive (2 challenges + typed response required)
 - [x] IC Signal Detector trend chart: persist per-session distribution in localStorage, line chart in Stats view
+
+## Current Batch (BoE Notes + Skeptic Scoring + Signal Goal Line + Build)
+- [x] BoE Calculator "Save to Notes": append calculation to persistent localStorage log, show log panel below calculator
+- [x] Aggressive Skeptic response scoring: LLM scores typed challenge responses (1-5), "Challenge Defense Quality" score in debrief
+- [x] IC Signal Trend goal line: target IC6+ % input in Readiness Goal Setter, dashed line on trend chart
+- [x] Run pnpm build: production build verified clean (0 TypeScript errors, 0 build errors)

@@ -36,6 +36,15 @@ function loadJSON<T>(key: string, fallback: T): T {
 
 function ICSignalTrendChart() {
   const history: ICSignalEntry[] = loadJSON<ICSignalEntry[]>(IC_SIGNAL_HISTORY_KEY, []);
+  // Read the IC6+ goal from ReadinessGoalSetter localStorage
+  const ic6PlusGoal: number | null = (() => {
+    try {
+      const saved = localStorage.getItem("meta_readiness_goal_v1");
+      if (!saved) return null;
+      const parsed = JSON.parse(saved) as { targetIC6PlusPct?: number };
+      return typeof parsed.targetIC6PlusPct === "number" ? parsed.targetIC6PlusPct : null;
+    } catch { return null; }
+  })();
 
   if (history.length === 0) {
     return (
@@ -147,6 +156,17 @@ function ICSignalTrendChart() {
                 <text x={pad.l - 4} y={toY(v) + 3} textAnchor="end" fontSize={7} fill="#9ca3af">{v}%</text>
               </g>
             ))}
+            {/* Goal line (dashed) */}
+            {ic6PlusGoal !== null && (
+              <g>
+                <line
+                  x1={pad.l} y1={toY(ic6PlusGoal)}
+                  x2={chartW - pad.r} y2={toY(ic6PlusGoal)}
+                  stroke="#2563eb" strokeWidth={1.5} strokeDasharray="4 3" opacity={0.8}
+                />
+                <text x={chartW - pad.r + 2} y={toY(ic6PlusGoal) + 3} fontSize={7} fill="#2563eb" fontWeight="bold">Goal: {ic6PlusGoal}%</text>
+              </g>
+            )}
             {/* Area fill */}
             <path d={areaD} fill="rgba(147,51,234,0.08)" />
             {/* Line */}

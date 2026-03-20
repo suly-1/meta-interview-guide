@@ -1388,5 +1388,68 @@ Return ONLY valid JSON.`;
         };
       }),
   }),
+
+  skepticScoring: router({
+    score: publicProcedure
+      .input(z.object({
+        problem: z.string(),
+        challenges: z.array(z.object({
+          section: z.string(),
+          challenge: z.string(),
+          response: z.string(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const challengeSummary = input.challenges
+          .map((c, i) => `Challenge ${i+1} (${c.section}): "${c.challenge}"\nCandidate response: "${c.response}"`)
+          .join("\n\n");
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: `You are a Meta Staff Engineer evaluating how well a candidate defended their system design decisions against skeptical challenges for the problem: ${input.problem}. Score each response on three dimensions (1-5): Directness (did they directly address the challenge?), Technical Depth (did they cite specific trade-offs, numbers, or Meta-scale context?), Confidence (did they hold their position or cave without justification?). Provide an overall Challenge Defense Quality score (1-5) and a brief coaching note for each response.` },
+            { role: "user", content: `Problem: ${input.problem}\n\nSkeptic Challenge Responses:\n${challengeSummary}\n\nScore each response and provide an overall Challenge Defense Quality score.` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "skeptic_scoring",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  overallScore: { type: "integer" },
+                  overallFeedback: { type: "string" },
+                  perChallenge: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        challengeIndex: { type: "integer" },
+                        directnessScore: { type: "integer" },
+                        depthScore: { type: "integer" },
+                        confidenceScore: { type: "integer" },
+                        avgScore: { type: "number" },
+                        coachingNote: { type: "string" },
+                      },
+                      required: ["challengeIndex","directnessScore","depthScore","confidenceScore","avgScore","coachingNote"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["overallScore","overallFeedback","perChallenge"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices[0].message.content ?? "{}";
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        return JSON.parse(text) as {
+          overallScore: number;
+          overallFeedback: string;
+          perChallenge: { challengeIndex: number; directnessScore: number; depthScore: number; confidenceScore: number; avgScore: number; coachingNote: string }[];
+        };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;
