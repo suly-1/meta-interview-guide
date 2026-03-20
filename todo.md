@@ -218,3 +218,8 @@
 - [x] Back-of-Envelope Math Trainer: 4th score booster tool, 6 scale scenarios, LLM checks QPS/storage/bandwidth arithmetic
 - [x] Skeptic Persona toggle in System Design Mock: "Why not X instead?" challenges after each section
 - [x] Rename "Pass-Rate Uplift:" label to "Score Boosters:" in SystemDesignTab nav row
+
+## Current Batch (IC Signal Detector + Math Progress + Skeptic Expansion)
+- [x] IC-Level Signal Detector: LLM classifies each paragraph of mock answer as IC4/5/6/7, color-coded transcript in debrief
+- [x] Math Trainer progress tracking: persist best scores per scenario in localStorage, show "Best: X/5" chip on scenario buttons
+- [x] Skeptic challenge bank expansion: 3 problem-specific challenges per section per problem (8 problems × 5 sections × 3 = 120 targeted challenges)

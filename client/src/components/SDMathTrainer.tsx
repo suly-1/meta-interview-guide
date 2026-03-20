@@ -1,7 +1,7 @@
 // SDMathTrainer — Back-of-Envelope Math Trainer
 // Candidates compute QPS, storage, and bandwidth for Meta-scale scenarios.
 // LLM checks arithmetic and flags order-of-magnitude errors.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Calculator, ChevronDown, ChevronRight, CheckCircle2, XCircle, Loader2, RefreshCw, BookOpen, Zap } from "lucide-react";
 
@@ -181,6 +181,8 @@ function DimensionResult({
   );
 }
 
+const MATH_STORAGE_KEY = "sd_math_trainer_best_scores";
+
 export default function SDMathTrainer() {
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [qps, setQps] = useState("");
@@ -194,10 +196,30 @@ export default function SDMathTrainer() {
     bandwidthScore: number; bandwidthFeedback: string; bandwidthModelAnswer: string;
     overallFeedback: string; passesBar: boolean; keyFormula: string;
   }>(null);
+  // localStorage: best avg score per scenario id
+  const [bestScores, setBestScores] = useState<Record<string, number>>(() => {
+    try {
+      const raw = localStorage.getItem(MATH_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
 
   const scenario = SCENARIOS[scenarioIdx];
   const scoreMutation = trpc.mathTrainer.score.useMutation({
-    onSuccess: (data) => setResult(data),
+    onSuccess: (data) => {
+      setResult(data);
+      // Persist best score for this scenario
+      const avg = Math.round((data.qpsScore + data.storageScore + data.bandwidthScore) / 3 * 10) / 10;
+      setBestScores(prev => {
+        const existing = prev[scenario.id] ?? 0;
+        if (avg > existing) {
+          const updated = { ...prev, [scenario.id]: avg };
+          try { localStorage.setItem(MATH_STORAGE_KEY, JSON.stringify(updated)); } catch {}
+          return updated;
+        }
+        return prev;
+      });
+    },
   });
 
   const handleSubmit = () => {
@@ -247,13 +269,20 @@ export default function SDMathTrainer() {
           <button
             key={s.id}
             onClick={() => { setScenarioIdx(i); setQps(""); setStorage(""); setBandwidth(""); setResult(null); setShowHints(false); setShowReference(false); }}
-            className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
+            className={`flex flex-col items-start text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
               i === scenarioIdx
                 ? "bg-gray-900 text-white border-gray-900"
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
             }`}
           >
-            {s.title}
+            <span>{s.title}</span>
+            {bestScores[s.id] !== undefined && (
+              <span className={`text-[9px] font-semibold mt-0.5 ${
+                i === scenarioIdx ? "text-gray-300" : "text-blue-500"
+              }`}>
+                Best: {bestScores[s.id]}/5
+              </span>
+            )}
           </button>
         ))}
       </div>

@@ -1203,8 +1203,119 @@ Return JSON with these exact fields:
             keyFormula: "QPS = DAU × actions_per_day / 86400",
           };
         }
+       }),
+  }),
+
+  /**
+   * signalDetector.classify — LLM classifies each paragraph of a candidate's
+   * System Design mock answer as IC4/IC5/IC6/IC7, explaining what signal level
+   * each paragraph demonstrates and what would elevate it.
+   */
+  signalDetector: router({
+    classify: publicProcedure
+      .input(
+        z.object({
+          targetLevel: z.string(),
+          problemTitle: z.string(),
+          sections: z.object({
+            requirements: z.string(),
+            dataModel: z.string(),
+            api: z.string(),
+            scaleBottlenecks: z.string(),
+            metaTips: z.string(),
+          }),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+
+        // Split each section into paragraphs and classify
+        const allParagraphs: { section: string; text: string }[] = [];
+        const sectionLabels: Record<string, string> = {
+          requirements: "Requirements",
+          dataModel: "Data Model",
+          api: "API Design",
+          scaleBottlenecks: "Scale & Bottlenecks",
+          metaTips: "Meta-Specific Depth",
+        };
+        for (const [key, label] of Object.entries(sectionLabels)) {
+          const text = input.sections[key as keyof typeof input.sections];
+          if (!text.trim()) continue;
+          const paragraphs = text.split(/\n{2,}/).map(p => p.trim()).filter(p => p.length > 20);
+          for (const para of paragraphs) {
+            allParagraphs.push({ section: label, text: para });
+          }
+        }
+
+        if (allParagraphs.length === 0) {
+          return { classifications: [] as { section: string; text: string; level: string; reasoning: string; elevationTip: string }[] };
+        }
+
+        const paragraphList = allParagraphs
+          .map((p, i) => `[${i}] (${p.section}) ${p.text}`)
+          .join("\n\n");
+
+        const prompt = `You are a Meta staff engineer scoring a ${input.targetLevel} system design interview for the problem: "${input.problemTitle}".
+
+For each numbered paragraph below, classify the IC signal level it demonstrates:
+- IC4: Basic awareness, generic statements, no depth ("We need a database", "Use caching")
+- IC5: Correct but surface-level (names the right technology, gives one reason)
+- IC6: Concrete trade-off reasoning, quantified claims, considers failure modes
+- IC7: Exceptional depth — references Meta internals, multi-dimensional trade-offs, proactively addresses edge cases
+
+Paragraphs to classify:
+${paragraphList}
+
+Return a JSON array with one object per paragraph index:
+[
+  {
+    "index": 0,
+    "level": "IC5",
+    "reasoning": "Names the right approach but doesn't explain why or quantify the benefit",
+    "elevationTip": "Add: 'because at 500M DAU, offset pagination causes full table scans — cursor pagination keeps O(1) per page'"
+  },
+  ...
+]`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are a Meta staff engineer scoring system design interview answers. Be precise and specific. Return only valid JSON array." },
+            { role: "user", content: prompt },
+          ],
+        });
+
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+
+        try {
+          // Extract JSON array from response
+          const jsonMatch = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
+          const parsed: { index: number; level: string; reasoning: string; elevationTip: string }[] = jsonMatch
+            ? JSON.parse(jsonMatch[0])
+            : JSON.parse(text);
+
+          const classifications = parsed.map(item => ({
+            section: allParagraphs[item.index]?.section ?? "Unknown",
+            text: allParagraphs[item.index]?.text ?? "",
+            level: item.level,
+            reasoning: item.reasoning,
+            elevationTip: item.elevationTip,
+          }));
+
+          return { classifications };
+        } catch {
+          // Fallback: return all paragraphs as IC5 with generic feedback
+          return {
+            classifications: allParagraphs.map(p => ({
+              section: p.section,
+              text: p.text,
+              level: "IC5",
+              reasoning: "Unable to classify — please try again.",
+              elevationTip: "Add specific trade-off reasoning and quantified claims.",
+            })),
+          };
+        }
       }),
   }),
 });
-
 export type AppRouter = typeof appRouter;

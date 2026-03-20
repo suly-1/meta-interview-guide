@@ -315,37 +315,277 @@ export default function SystemDesignMockSession() {
   const [showHistory, setShowHistory] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Skeptic challenges per section — fired when candidate switches section
-  const SKEPTIC_CHALLENGES: Record<string, string[]> = {
+  // Skeptic challenges: generic fallback + problem-specific overrides
+  const SKEPTIC_CHALLENGES_GENERIC: Record<string, string[]> = {
     requirements: [
       "Why not just build this as a simple monolith first? Justify the distributed complexity.",
       "Your non-functional requirements seem generic. What's the actual SLA Meta's PM would demand?",
       "You haven't quantified the scale. How many requests per second are we actually talking?",
+      "What's the consistency model? Strong, eventual, or causal — and why does it matter for this product?",
+      "You listed functional requirements but skipped the failure modes. What happens when this system is partially down?",
     ],
     dataModel: [
       "Why SQL and not Cassandra? Walk me through the trade-off at 500M DAU.",
       "Your schema looks normalized — at Meta's scale, would you denormalize for read performance?",
       "How do you handle schema migrations without downtime at this scale?",
+      "What's your indexing strategy? Which queries are you optimizing for and which are you sacrificing?",
+      "How do you handle soft deletes vs. hard deletes — and what are the audit trail implications?",
     ],
     api: [
       "Why REST and not gRPC? What's the latency difference at Meta's internal service mesh?",
       "Your pagination approach — why cursor-based over offset? What breaks with offset at scale?",
       "How would you version this API without breaking existing clients?",
+      "What's your idempotency strategy? If a client retries this request, what happens?",
+      "How does your API handle partial failures — what does the client do when only some data is available?",
     ],
     scaleBottlenecks: [
       "You identified the bottleneck but not the solution. How specifically would you solve the hot-shard problem?",
       "Your capacity estimate is off by an order of magnitude. Let's redo the math together.",
       "What happens when your cache layer goes down? Walk me through the failure cascade.",
+      "How do you handle thundering herd when the cache is cold after a deployment?",
+      "What's your data partitioning key? What happens if one shard gets 10× the traffic of others?",
     ],
     metaTips: [
       "You mentioned TAO — but do you know how TAO handles consistency? Explain the read-your-writes guarantee.",
       "Why is this approach better than what Meta actually ships? What would you change about their real implementation?",
       "If the PM says we need to cut scope for V1, what's the first thing you'd drop and why?",
+      "How does this design differ from what you'd build at a 10-person startup vs. Meta's scale?",
+      "What's the operational complexity of this design? How many on-call engineers does it require?",
     ],
+  };
+
+  // Problem-specific skeptic challenges (3 per section per problem)
+  const SKEPTIC_CHALLENGES_SPECIFIC: Record<string, Record<string, string[]>> = {
+    "news-feed": {
+      requirements: [
+        "You said 'near real-time' — what does that mean in milliseconds? What's the p99 latency SLA for feed load?",
+        "How do you handle the celebrity problem in requirements? A user with 100M followers is a fundamentally different case.",
+        "What's the consistency requirement between the post count shown on a profile vs. the actual feed? Does it matter?",
+      ],
+      dataModel: [
+        "You chose Cassandra — but how do you handle the fan-out write amplification for users with 10M+ followers?",
+        "Your FeedItem table — is it materialized per user or computed on read? Justify the trade-off.",
+        "How do you model the social graph? TAO vs. a relational follow table — what breaks at 1B edges?",
+      ],
+      api: [
+        "Your GET /feed endpoint — what's the max payload size? How do you handle clients with slow connections?",
+        "How does your API handle the case where a user's feed has 0 new posts? Do you still hit the backend?",
+        "What's your strategy for real-time updates — long polling, SSE, or WebSocket? Justify the choice.",
+      ],
+      scaleBottlenecks: [
+        "Fan-out on write for a celebrity with 50M followers — how many write operations does one post trigger?",
+        "Your Redis feed cache — what's the eviction policy? What happens when a user hasn't logged in for 30 days?",
+        "How do you handle the thundering herd when a viral post gets 1M likes in 60 seconds?",
+      ],
+      metaTips: [
+        "Meta uses a hybrid fan-out strategy. Where exactly is the cutoff between push and pull, and why?",
+        "TAO is Meta's social graph store. How does it handle the read-your-writes consistency for follow actions?",
+        "Meta's EdgeRank/ranking model runs on the feed. Where in your architecture does ranking happen?",
+      ],
+    },
+    "messaging": {
+      requirements: [
+        "At-least-once delivery — what's the deduplication mechanism on the receiver side?",
+        "You said 'ordered delivery' — ordered within a thread or globally? What's the consistency model?",
+        "How do you handle group messages with 1000 members? Is that the same system as 1:1 messages?",
+      ],
+      dataModel: [
+        "Your message table — how do you generate globally ordered sequence numbers without a single-point bottleneck?",
+        "How do you handle message deletion — soft delete or hard delete? What about 'delete for everyone'?",
+        "client_msg_id for idempotency — what's the TTL on that dedup window? What if a client retries after 7 days?",
+      ],
+      api: [
+        "WebSocket for real-time — how do you handle reconnection? What messages might a client miss during a 30s disconnect?",
+        "Your message send API — what's the response when delivery is confirmed vs. just accepted?",
+        "How do you handle the case where the recipient's device is offline for 30 days?",
+      ],
+      scaleBottlenecks: [
+        "Connection fan-out — how do you route a message from server A to a user connected to server B?",
+        "1B DAU × 40 messages/day = 40B messages/day. What's your Kafka partition strategy?",
+        "Read receipts at scale — how do you avoid a write storm when a message is read by 500 group members?",
+      ],
+      metaTips: [
+        "Meta Messenger uses MQTT for mobile. Why MQTT over WebSocket for battery-constrained devices?",
+        "How does Messenger handle end-to-end encryption at the infrastructure level — what changes in your design?",
+        "Meta separates the message store from the delivery service. How does that split affect your design?",
+      ],
+    },
+    "rate-limiter": {
+      requirements: [
+        "< 5ms overhead — is that the p99 or p50? What's acceptable at p99.9 for a rate limiter?",
+        "Multiple rule types — give me 3 concrete rule types and how they differ in implementation.",
+        "What's the acceptable false-positive rate? If you block 0.1% of legitimate requests, is that acceptable?",
+      ],
+      dataModel: [
+        "Redis INCR + EXPIRE — what happens if Redis is down? Do you fail open or fail closed?",
+        "Your counter key — how do you handle clock skew between servers in a distributed environment?",
+        "Token bucket vs. sliding window log — which did you choose and what's the memory trade-off?",
+      ],
+      api: [
+        "Your checkLimit function returns retry_after_ms — how does the client use that? What's the backoff strategy?",
+        "Admin API for live rule updates — how do you propagate a rule change to 1000 servers in < 1 second?",
+        "How do you handle the case where the rate limiter itself becomes the bottleneck at 1M RPS?",
+      ],
+      scaleBottlenecks: [
+        "Redis Cluster for sharding — what's your consistent hashing strategy for rate limit keys?",
+        "Lua scripts for atomicity — what's the performance overhead vs. a pipeline approach?",
+        "Local cache + async sync — what's the maximum burst a user can achieve by hitting different servers?",
+      ],
+      metaTips: [
+        "Meta uses cell-based rate limiting. What's the advantage over a global counter?",
+        "How do you handle rate limiting for internal service-to-service calls vs. external API calls?",
+        "What's the difference between rate limiting and circuit breaking — when would you use each?",
+      ],
+    },
+    "typeahead": {
+      requirements: [
+        "< 100ms p99 — is that end-to-end including network, or just server-side processing?",
+        "Suggestions update within 1 hour — what's the data pipeline that makes that happen?",
+        "Personalized suggestions — how do you balance personalization with privacy at Meta's scale?",
+      ],
+      dataModel: [
+        "In-memory trie per server — how do you keep 1000 servers in sync when the trie updates hourly?",
+        "Your trie sharding by first 2 chars — what happens with languages that don't use Latin characters?",
+        "Pre-compute top-K offline — how do you handle trending queries that spike in the last 5 minutes?",
+      ],
+      api: [
+        "GET /suggest?q={prefix} — what's the max prefix length you'll process? What about single-character queries?",
+        "How do you handle typo tolerance without Levenshtein distance? What's your actual approach?",
+        "How do you prevent your suggestion API from being used to enumerate user data?",
+      ],
+      scaleBottlenecks: [
+        "10B queries/day = ~115K QPS average. How do you handle 10× spikes during breaking news events?",
+        "Streaming with Flink for trending — what's the latency from a query being made to it appearing as a suggestion?",
+        "How do you handle cache invalidation when a trending topic suddenly becomes inappropriate?",
+      ],
+      metaTips: [
+        "Meta uses an inverted index, not a trie, for production search. What are the trade-offs?",
+        "Social graph signals as ranking features — how do you incorporate 'your friends searched for X' without a privacy violation?",
+        "How does your design handle multilingual queries — Arabic, Chinese, and English simultaneously?",
+      ],
+    },
+    "notification": {
+      requirements: [
+        "Delivery within 5 seconds — is that wall-clock time or processing time? What's the SLA for APNs/FCM latency?",
+        "At-least-once — what's the deduplication window? If I get the same notification twice within 10 minutes, is that acceptable?",
+        "Multi-channel — how do you decide which channel to use? What if the user has both push and email enabled?",
+      ],
+      dataModel: [
+        "Idempotency key for dedup — what's the key structure? How do you handle the same event triggering notifications for 1M users?",
+        "Separate queues per channel — how do you handle priority? A security alert should beat a social notification.",
+        "UserPreference table — how do you handle preference changes that should apply to in-flight notifications?",
+      ],
+      api: [
+        "POST /notifications/send — is this synchronous or async? What does the caller get back?",
+        "How do you handle notification templating — who owns the template, the caller or the notification service?",
+        "How do you handle notification batching — grouping 50 likes into '50 people liked your post'?",
+      ],
+      scaleBottlenecks: [
+        "APNs/FCM rate limits — what's your strategy when you hit Apple's rate limit during a viral event?",
+        "1B notifications/day = ~11.5K/second. How do you handle a spike to 100K/second during a major event?",
+        "Exponential backoff for retries — how do you prevent a retry storm when APNs comes back after a 1-hour outage?",
+      ],
+      metaTips: [
+        "Meta's Iris notification system — how does it handle cross-product notification deduplication?",
+        "How do you handle notification fatigue — users who receive 100+ notifications/day and start ignoring them?",
+        "What's your strategy for notification analytics — how do you know if a notification was actually read?",
+      ],
+    },
+    "analytics": {
+      requirements: [
+        "Dashboard refresh < 5s — is that for pre-aggregated data or raw query results? What's the SLA for ad-hoc queries?",
+        "Drill-down by dimensions — how many dimensions? What's the cardinality of each dimension?",
+        "Historical + real-time — what's the latency boundary? When does 'real-time' become 'historical'?",
+      ],
+      dataModel: [
+        "Time-series partitioning — what's your partition key? How do you handle queries that span multiple partitions?",
+        "Pre-aggregate at multiple granularities — how do you handle late-arriving events that should update past aggregates?",
+        "HyperLogLog for cardinality — what's the error rate? Is 2% error acceptable for DAU metrics?",
+      ],
+      api: [
+        "GET /metrics?start&end&granularity — how do you handle a query for 2 years of hourly data? What's the response size?",
+        "POST /events batch ingest — what's the max batch size? How do you handle partial batch failures?",
+        "How do you handle backfill — re-processing historical events when a metric definition changes?",
+      ],
+      scaleBottlenecks: [
+        "Kafka for ingest — what's your topic partitioning strategy? How do you avoid hot partitions for popular events?",
+        "Flink for stream processing — how do you handle Flink job failures without losing events?",
+        "Druid vs. ClickHouse — you chose one, but what's the specific query pattern that drove that decision?",
+      ],
+      metaTips: [
+        "Meta's Scuba is an in-memory analytics store. What's the trade-off vs. a disk-based system like Druid?",
+        "Lambda architecture has two code paths to maintain. What's the operational cost, and when is Kappa worth it?",
+        "How do you handle GDPR deletion requests — deleting a user's events from a pre-aggregated time-series?",
+      ],
+    },
+    "cdn": {
+      requirements: [
+        "Cache hit rate > 90% — how do you measure that? What's the impact of a 5% drop in hit rate on origin load?",
+        "Instant cache invalidation — what does 'instant' mean? 1 second? 100ms? How do you propagate to 1000 edge nodes?",
+        "< 50ms latency from edge — how do you guarantee that for users in regions with poor connectivity?",
+      ],
+      dataModel: [
+        "TTL + ETag for validation — what's your default TTL strategy? Who sets the TTL — the origin or the CDN?",
+        "Consistent hashing for edge selection — what's your virtual node count, and how do you handle edge node failures?",
+        "How do you handle personalized content that can't be cached — what's the bypass mechanism?",
+      ],
+      api: [
+        "POST /purge {urls[]} — how do you purge 10M URLs after a major content update? What's the propagation time?",
+        "How does your CDN handle range requests for video streaming — byte-range caching?",
+        "What's your strategy for cache warming after a new edge node comes online?",
+      ],
+      scaleBottlenecks: [
+        "Thundering herd at the edge — how do you handle 10K requests for the same uncached object simultaneously?",
+        "Anycast routing — what happens when the nearest edge node is overloaded? How do you failover?",
+        "Push vs. pull caching — for a new viral video, which strategy minimizes origin load?",
+      ],
+      metaTips: [
+        "Meta uses Proxygen as its HTTP server and Katran for load balancing. How does that affect your CDN design?",
+        "How do you handle HTTPS certificate management at the edge — wildcard certs vs. per-domain?",
+        "What's the difference between a CDN and an edge computing platform? Where does your design sit?",
+      ],
+    },
+    "ml-feature-store": {
+      requirements: [
+        "< 10ms online feature serving — is that the p99? What's acceptable at p99.9 for a model inference call?",
+        "Training-serving skew — can you give me a concrete example of how skew happens and how your design prevents it?",
+        "Feature versioning — how do you handle a model that needs feature v2 while another model still needs feature v1?",
+      ],
+      dataModel: [
+        "Dual store Redis + Hive — how do you keep them in sync? What's the acceptable lag between offline and online stores?",
+        "Point-in-time correct joins — explain exactly how you prevent data leakage in training data generation.",
+        "Feature lineage — how do you trace which raw data sources contributed to a specific feature value?",
+      ],
+      api: [
+        "GET /features/{entity_id}?features=[] — how do you handle a request for 500 features for a single entity?",
+        "What's your strategy for feature backfill — computing historical feature values for a new feature definition?",
+        "How do you handle feature access control — not all models should have access to all features?",
+      ],
+      scaleBottlenecks: [
+        "Redis cluster for online serving — what's your eviction policy? What happens when a feature is accessed for the first time?",
+        "Spark for offline batch — how do you handle a feature computation job that takes 6 hours and needs to run hourly?",
+        "Kafka for real-time feature updates — how do you handle out-of-order events in your feature computation?",
+      ],
+      metaTips: [
+        "Meta's FBLearner Feature Store — how does it handle the dual-store consistency problem?",
+        "Training-serving skew is the #1 ML reliability issue at Meta. What monitoring would you add to detect it?",
+        "How does your feature store handle privacy — features derived from sensitive user data that can't be stored?",
+      ],
+    },
+  };
+
+  // Merge: problem-specific challenges take priority, fall back to generic
+  const getSkepticChallenges = (section: string): string[] => {
+    const specific = SKEPTIC_CHALLENGES_SPECIFIC[selectedProblem.id]?.[section];
+    const generic = SKEPTIC_CHALLENGES_GENERIC[section] ?? [];
+    // Return problem-specific first (3), then fill with generic if needed
+    return specific ? [...specific, ...generic.slice(0, 2)] : generic;
   };
 
   const debrief = trpc.systemDesign.debrief.useMutation();
   const followUp = trpc.systemDesign.followUp.useMutation();
+  const signalDetector = trpc.signalDetector.classify.useMutation();
+  const [showSignalDetector, setShowSignalDetector] = useState(false);
 
   const startSession = useCallback(() => {
     const problem = randomMode
@@ -365,7 +605,7 @@ export default function SystemDesignMockSession() {
   // Fire a skeptic challenge when switching sections (if skepticMode is on)
   const handleSectionSwitch = useCallback((newSection: SectionKey) => {
     if (skepticMode && answers[activeSection].trim().length > 30) {
-      const pool = SKEPTIC_CHALLENGES[newSection] ?? [];
+      const pool = getSkepticChallenges(newSection);
       if (pool.length > 0) {
         const challenge = pool[Math.floor(Math.random() * pool.length)];
         const newEntry = { section: newSection, challenge, dismissed: false };
@@ -377,7 +617,7 @@ export default function SystemDesignMockSession() {
       }
     }
     setActiveSection(newSection);
-  }, [skepticMode, activeSection, answers, SKEPTIC_CHALLENGES]);
+  }, [skepticMode, activeSection, answers, getSkepticChallenges]);
 
   const endSession = useCallback(async () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -839,6 +1079,115 @@ export default function SystemDesignMockSession() {
               </div>
             )}
             {followUp.isError && <p className="text-xs text-red-500">Failed to generate questions. Please try again.</p>}
+          </div>
+
+          {/* IC-Level Signal Detector */}
+          <div className="rounded-xl border border-purple-200 bg-purple-50 dark:bg-purple-900/10 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Brain size={13} className="text-purple-600" />
+                <p className="text-[10px] font-bold text-purple-700 uppercase tracking-wide">IC-Level Signal Detector</p>
+              </div>
+              {!signalDetector.data && (
+                <button
+                  onClick={() => {
+                    setShowSignalDetector(true);
+                    signalDetector.mutate({
+                      targetLevel,
+                      problemTitle: selectedProblem.title,
+                      sections: {
+                        requirements: answers.requirements,
+                        dataModel: answers.dataModel,
+                        api: answers.api,
+                        scaleBottlenecks: answers.scaleBottlenecks,
+                        metaTips: answers.metaTips,
+                      },
+                    });
+                  }}
+                  disabled={signalDetector.isPending}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-bold hover:bg-purple-700 disabled:opacity-60 transition-colors"
+                >
+                  {signalDetector.isPending ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
+                  {signalDetector.isPending ? "Classifying…" : "Detect IC Signals"}
+                </button>
+              )}
+              {signalDetector.data && (
+                <button
+                  onClick={() => setShowSignalDetector(s => !s)}
+                  className="text-[10px] font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                >
+                  {showSignalDetector ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                  {showSignalDetector ? "Collapse" : "Expand"}
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-purple-700 leading-relaxed">
+              Classifies every paragraph of your answer as <strong>IC4 / IC5 / IC6 / IC7</strong> and shows exactly what would elevate each statement to the next level.
+            </p>
+            {signalDetector.isPending && (
+              <div className="flex items-center gap-2 py-2">
+                <Loader2 size={14} className="animate-spin text-purple-500" />
+                <p className="text-xs text-purple-600">Analyzing signal level of each paragraph…</p>
+              </div>
+            )}
+            {signalDetector.isError && (
+              <p className="text-xs text-red-500">Failed to classify signals. Please try again.</p>
+            )}
+            {signalDetector.data && showSignalDetector && (() => {
+              const { classifications } = signalDetector.data;
+              const levelColors: Record<string, { bg: string; border: string; text: string; badge: string }> = {
+                IC4: { bg: "bg-red-50", border: "border-red-200", text: "text-red-900", badge: "bg-red-100 text-red-700 border-red-300" },
+                IC5: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-900", badge: "bg-amber-100 text-amber-700 border-amber-300" },
+                IC6: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-900", badge: "bg-blue-100 text-blue-700 border-blue-300" },
+                IC7: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-900", badge: "bg-emerald-100 text-emerald-700 border-emerald-300" },
+              };
+              // Summary counts
+              const counts: Record<string, number> = { IC4: 0, IC5: 0, IC6: 0, IC7: 0 };
+              classifications.forEach(c => { counts[c.level] = (counts[c.level] ?? 0) + 1; });
+              const total = classifications.length;
+              return (
+                <div className="space-y-3">
+                  {/* Summary bar */}
+                  <div className="rounded-lg border border-purple-200 bg-white p-3 space-y-2">
+                    <p className="text-[10px] font-bold text-purple-700 uppercase tracking-wide mb-2">Signal Distribution ({total} paragraphs)</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => (
+                        <div key={lvl} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold ${levelColors[lvl]?.badge}`}>
+                          {lvl}: {counts[lvl] ?? 0}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
+                      {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => {
+                        const pct = total > 0 ? ((counts[lvl] ?? 0) / total) * 100 : 0;
+                        const barColors: Record<string, string> = { IC4: "bg-red-400", IC5: "bg-amber-400", IC6: "bg-blue-400", IC7: "bg-emerald-400" };
+                        return pct > 0 ? <div key={lvl} className={`${barColors[lvl]} h-full transition-all`} style={{ width: `${pct}%` }} /> : null;
+                      })}
+                    </div>
+                  </div>
+                  {/* Per-paragraph cards */}
+                  {classifications.map((c, i) => {
+                    const colors = levelColors[c.level] ?? levelColors["IC5"];
+                    return (
+                      <details key={i} className={`rounded-lg border ${colors.border} ${colors.bg} overflow-hidden`}>
+                        <summary className={`flex items-start gap-2 px-3 py-2.5 cursor-pointer select-none ${colors.text}`}>
+                          <span className={`shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border mt-0.5 ${colors.badge}`}>{c.level}</span>
+                          <span className="text-[10px] font-semibold text-gray-500 shrink-0 mt-0.5">{c.section}</span>
+                          <span className="flex-1 text-[11px] leading-relaxed line-clamp-2">{c.text}</span>
+                        </summary>
+                        <div className="px-3 pb-3 pt-1 border-t border-current/10 space-y-2">
+                          <p className="text-[11px] leading-relaxed"><span className="font-bold">Signal: </span>{c.reasoning}</p>
+                          <div className="rounded-md bg-white/60 border border-current/10 px-2.5 py-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wide mb-1 opacity-70">To elevate to next level:</p>
+                            <p className="text-[11px] leading-relaxed italic">{c.elevationTip}</p>
+                          </div>
+                        </div>
+                      </details>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Skeptic challenge debrief */}
