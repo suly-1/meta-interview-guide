@@ -6,6 +6,7 @@ import {
   Clock, Play, Square, ChevronDown, ChevronUp, RotateCcw,
   CheckCircle2, AlertCircle, Loader2, Zap, Trophy, Target,
   Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain,
+  Swords, X,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -307,9 +308,41 @@ export default function SystemDesignMockSession() {
     requirements: false, dataModel: false, api: false, scaleBottlenecks: false, metaTips: false,
   });
   const [randomMode, setRandomMode] = useState(false);
+  const [skepticMode, setSkepticMode] = useState(false);
+  const [skepticChallenges, setSkepticChallenges] = useState<{ section: string; challenge: string; dismissed: boolean }[]>([]);
+  const [activeSkepticIdx, setActiveSkepticIdx] = useState<number | null>(null);
   const [mockHistory, setMockHistory] = useState<MockHistoryEntry[]>(() => loadMockHistory());
   const [showHistory, setShowHistory] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Skeptic challenges per section — fired when candidate switches section
+  const SKEPTIC_CHALLENGES: Record<string, string[]> = {
+    requirements: [
+      "Why not just build this as a simple monolith first? Justify the distributed complexity.",
+      "Your non-functional requirements seem generic. What's the actual SLA Meta's PM would demand?",
+      "You haven't quantified the scale. How many requests per second are we actually talking?",
+    ],
+    dataModel: [
+      "Why SQL and not Cassandra? Walk me through the trade-off at 500M DAU.",
+      "Your schema looks normalized — at Meta's scale, would you denormalize for read performance?",
+      "How do you handle schema migrations without downtime at this scale?",
+    ],
+    api: [
+      "Why REST and not gRPC? What's the latency difference at Meta's internal service mesh?",
+      "Your pagination approach — why cursor-based over offset? What breaks with offset at scale?",
+      "How would you version this API without breaking existing clients?",
+    ],
+    scaleBottlenecks: [
+      "You identified the bottleneck but not the solution. How specifically would you solve the hot-shard problem?",
+      "Your capacity estimate is off by an order of magnitude. Let's redo the math together.",
+      "What happens when your cache layer goes down? Walk me through the failure cascade.",
+    ],
+    metaTips: [
+      "You mentioned TAO — but do you know how TAO handles consistency? Explain the read-your-writes guarantee.",
+      "Why is this approach better than what Meta actually ships? What would you change about their real implementation?",
+      "If the PM says we need to cut scope for V1, what's the first thing you'd drop and why?",
+    ],
+  };
 
   const debrief = trpc.systemDesign.debrief.useMutation();
   const followUp = trpc.systemDesign.followUp.useMutation();
@@ -324,8 +357,27 @@ export default function SystemDesignMockSession() {
     setAnswers({ requirements: "", dataModel: "", api: "", scaleBottlenecks: "", metaTips: "" });
     setActiveSection("requirements");
     setShowHints({ requirements: false, dataModel: false, api: false, scaleBottlenecks: false, metaTips: false });
+    setSkepticChallenges([]);
+    setActiveSkepticIdx(null);
     setPhase("active");
   }, [randomMode, selectedProblem]);
+
+  // Fire a skeptic challenge when switching sections (if skepticMode is on)
+  const handleSectionSwitch = useCallback((newSection: SectionKey) => {
+    if (skepticMode && answers[activeSection].trim().length > 30) {
+      const pool = SKEPTIC_CHALLENGES[newSection] ?? [];
+      if (pool.length > 0) {
+        const challenge = pool[Math.floor(Math.random() * pool.length)];
+        const newEntry = { section: newSection, challenge, dismissed: false };
+        setSkepticChallenges(prev => {
+          const updated = [...prev, newEntry];
+          setActiveSkepticIdx(updated.length - 1);
+          return updated;
+        });
+      }
+    }
+    setActiveSection(newSection);
+  }, [skepticMode, activeSection, answers, SKEPTIC_CHALLENGES]);
 
   const endSession = useCallback(async () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -489,6 +541,26 @@ export default function SystemDesignMockSession() {
           )}
         </div>
 
+        {/* Skeptic Mode toggle */}
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-3.5 flex items-start gap-3">
+          <label className="flex items-center gap-2 cursor-pointer flex-1">
+            <input
+              type="checkbox"
+              checked={skepticMode}
+              onChange={e => setSkepticMode(e.target.checked)}
+              className="w-4 h-4 accent-orange-600"
+            />
+            <div>
+              <span className="text-xs font-bold text-orange-900 flex items-center gap-1.5">
+                <Swords size={12} className="text-orange-600" /> Skeptic Persona Mode
+              </span>
+              <p className="text-[11px] text-orange-700 mt-0.5 leading-relaxed">
+                When you switch sections, an interviewer challenge fires: "Why not X instead?" You must defend your choices under pressure.
+              </p>
+            </div>
+          </label>
+        </div>
+
         <button
           onClick={startSession}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors"
@@ -543,7 +615,7 @@ export default function SystemDesignMockSession() {
             return (
               <button
                 key={s.key}
-                onClick={() => setActiveSection(s.key)}
+                onClick={() => handleSectionSwitch(s.key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border whitespace-nowrap transition-all shrink-0 ${
                   activeSection === s.key
                     ? "bg-indigo-600 text-white border-indigo-600"
@@ -556,6 +628,27 @@ export default function SystemDesignMockSession() {
             );
           })}
         </div>
+
+        {/* Skeptic challenge banner */}
+        {skepticMode && activeSkepticIdx !== null && skepticChallenges[activeSkepticIdx] && !skepticChallenges[activeSkepticIdx].dismissed && (
+          <div className="rounded-xl border-2 border-orange-400 bg-orange-50 p-3.5 flex items-start gap-3 animate-pulse-once">
+            <Swords size={14} className="text-orange-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wide mb-1">Skeptic Challenge — Defend your answer</p>
+              <p className="text-xs text-orange-900 font-semibold leading-relaxed">{skepticChallenges[activeSkepticIdx].challenge}</p>
+            </div>
+            <button
+              onClick={() => {
+                setSkepticChallenges(prev => prev.map((c, i) => i === activeSkepticIdx ? { ...c, dismissed: true } : c));
+                setActiveSkepticIdx(null);
+              }}
+              className="flex-shrink-0 text-orange-500 hover:text-orange-700 transition-colors"
+              title="Dismiss (I've addressed this)"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
 
         {/* Active section */}
         {SECTION_CONFIG.map(s => s.key === activeSection && (
@@ -747,6 +840,32 @@ export default function SystemDesignMockSession() {
             )}
             {followUp.isError && <p className="text-xs text-red-500">Failed to generate questions. Please try again.</p>}
           </div>
+
+          {/* Skeptic challenge debrief */}
+          {skepticMode && skepticChallenges.length > 0 && (
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Swords size={13} className="text-orange-600" />
+                <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wide">Skeptic Challenges Fired This Session</p>
+                <span className="ml-auto text-[10px] font-bold text-orange-600 bg-orange-100 border border-orange-200 px-2 py-0.5 rounded-full">
+                  {skepticChallenges.filter(c => c.dismissed).length}/{skepticChallenges.length} dismissed
+                </span>
+              </div>
+              <div className="space-y-2">
+                {skepticChallenges.map((c, i) => (
+                  <div key={i} className={`rounded-lg border p-2.5 ${c.dismissed ? "border-emerald-200 bg-emerald-50" : "border-orange-200 bg-white"}` }>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wide text-gray-500">{c.section}</span>
+                      {c.dismissed
+                        ? <span className="text-[9px] font-bold text-emerald-600 ml-auto">✓ Dismissed</span>
+                        : <span className="text-[9px] font-bold text-orange-500 ml-auto">Not addressed</span>}
+                    </div>
+                    <p className="text-xs text-gray-800 leading-relaxed">{c.challenge}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Session transcript */}
           <details className="rounded-xl border border-border bg-card overflow-hidden">

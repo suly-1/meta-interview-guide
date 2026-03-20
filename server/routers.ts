@@ -1105,6 +1105,106 @@ Return ONLY valid JSON.`;
         }
       }),
   }),
+
+  /**
+   * mathTrainer.score — LLM checks a candidate's back-of-envelope calculations
+   * for QPS, storage, and bandwidth, flagging order-of-magnitude errors.
+   */
+  mathTrainer: router({
+    score: publicProcedure
+      .input(
+        z.object({
+          scenarioTitle: z.string(),
+          scenarioContext: z.string(),
+          qpsAnswer: z.string(),
+          storageAnswer: z.string(),
+          bandwidthAnswer: z.string(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const prompt = `You are a Meta staff engineer evaluating a candidate's back-of-envelope estimation for a system design interview.
+
+Scenario: ${input.scenarioTitle}
+Context: ${input.scenarioContext}
+
+Candidate's answers:
+- QPS (Queries Per Second): ${input.qpsAnswer}
+- Storage (per year): ${input.storageAnswer}
+- Bandwidth (ingress/egress): ${input.bandwidthAnswer}
+
+Evaluate each answer on a 1-5 scale. Check:
+1. Is the order of magnitude correct (within 10x)?
+2. Did they show their reasoning/formula?
+3. Are the units correct?
+4. Did they account for Meta-scale factors (replication, CDN, peak vs avg)?
+
+Return JSON with these exact fields:
+- qpsScore (1-5), qpsFeedback (string), qpsModelAnswer (string)
+- storageScore (1-5), storageFeedback (string), storageModelAnswer (string)
+- bandwidthScore (1-5), bandwidthFeedback (string), bandwidthModelAnswer (string)
+- overallFeedback (string, 1-2 sentences on biggest gap)
+- passesBar (boolean, true if all scores >= 3)
+- keyFormula (string, the most important formula they should memorize for this scenario)`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are a Meta staff engineer evaluating back-of-envelope estimation skills. Be precise about order-of-magnitude errors. Return only valid JSON." },
+            { role: "user", content: prompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "math_trainer_score",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  qpsScore: { type: "integer" },
+                  qpsFeedback: { type: "string" },
+                  qpsModelAnswer: { type: "string" },
+                  storageScore: { type: "integer" },
+                  storageFeedback: { type: "string" },
+                  storageModelAnswer: { type: "string" },
+                  bandwidthScore: { type: "integer" },
+                  bandwidthFeedback: { type: "string" },
+                  bandwidthModelAnswer: { type: "string" },
+                  overallFeedback: { type: "string" },
+                  passesBar: { type: "boolean" },
+                  keyFormula: { type: "string" },
+                },
+                required: [
+                  "qpsScore", "qpsFeedback", "qpsModelAnswer",
+                  "storageScore", "storageFeedback", "storageModelAnswer",
+                  "bandwidthScore", "bandwidthFeedback", "bandwidthModelAnswer",
+                  "overallFeedback", "passesBar", "keyFormula",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            qpsScore: number; qpsFeedback: string; qpsModelAnswer: string;
+            storageScore: number; storageFeedback: string; storageModelAnswer: string;
+            bandwidthScore: number; bandwidthFeedback: string; bandwidthModelAnswer: string;
+            overallFeedback: string; passesBar: boolean; keyFormula: string;
+          };
+        } catch {
+          return {
+            qpsScore: 3, qpsFeedback: "Unable to parse response.", qpsModelAnswer: "Please try again.",
+            storageScore: 3, storageFeedback: "", storageModelAnswer: "",
+            bandwidthScore: 3, bandwidthFeedback: "", bandwidthModelAnswer: "",
+            overallFeedback: "Please try again.",
+            passesBar: false,
+            keyFormula: "QPS = DAU × actions_per_day / 86400",
+          };
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

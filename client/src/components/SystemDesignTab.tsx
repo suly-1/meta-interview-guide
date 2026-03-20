@@ -7,6 +7,8 @@ import SystemDesignComparisonTable from "./SystemDesignComparisonTable";
 import SDFailureModeDiagnostic from "./SDFailureModeDiagnostic";
 import SDRequirementsTrainer from "./SDRequirementsTrainer";
 import SDTradeoffDrill from "./SDTradeoffDrill";
+import SDMathTrainer from "./SDMathTrainer";
+import { Calculator } from "lucide-react";
 
 interface DesignPattern {
   id: string;
@@ -581,7 +583,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -649,9 +651,9 @@ export default function SystemDesignTab() {
         >
           <Table2 size={12} /> Compare Patterns
         </button>
-        {/* Pass-rate uplift tools */}
-        <div className="w-full flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">Pass-Rate Uplift:</span>
+        {/* Score Booster tools */}
+        <div className="w-full flex items-center gap-1.5 mt-1 flex-wrap">
+          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Score Boosters:</span>
           <button
             onClick={() => setActiveView("diagnostic")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
@@ -681,6 +683,16 @@ export default function SystemDesignTab() {
             }`}
           >
             <BarChart2 size={11} /> Trade-off Drill
+          </button>
+          <button
+            onClick={() => setActiveView("math")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "math"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-blue-700 border-blue-200 hover:border-blue-400"
+            }`}
+          >
+            <Calculator size={11} /> Math Trainer
           </button>
         </div>
       </div>
@@ -726,6 +738,9 @@ export default function SystemDesignTab() {
 
       {/* Trade-off Articulation Drill */}
       {activeView === "tradeoffs" && <SDTradeoffDrill />}
+
+      {/* Back-of-Envelope Math Trainer */}
+      {activeView === "math" && <SDMathTrainer />}
 
       {/* Blog Feed */}
       {activeView === "blog" && (

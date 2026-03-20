@@ -213,3 +213,8 @@
 - [x] SD Tab: Requirements Clarification Trainer (drill the 30%-weight signal)
 - [x] SD Tab: Trade-off Articulation Drill (10 binary decisions with LLM scoring)
 - [x] SD Tab: Wire all 3 new views into tab navigation
+
+## Current Batch (Math Trainer + Skeptic Persona + Label Rename)
+- [x] Back-of-Envelope Math Trainer: 4th score booster tool, 6 scale scenarios, LLM checks QPS/storage/bandwidth arithmetic
+- [x] Skeptic Persona toggle in System Design Mock: "Why not X instead?" challenges after each section
+- [x] Rename "Pass-Rate Uplift:" label to "Score Boosters:" in SystemDesignTab nav row
