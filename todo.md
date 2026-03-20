@@ -223,3 +223,10 @@
 - [x] IC-Level Signal Detector: LLM classifies each paragraph of mock answer as IC4/5/6/7, color-coded transcript in debrief
 - [x] Math Trainer progress tracking: persist best scores per scenario in localStorage, show "Best: X/5" chip on scenario buttons
 - [x] Skeptic challenge bank expansion: 3 problem-specific challenges per section per problem (8 problems × 5 sections × 3 = 120 targeted challenges)
+
+## Full Research Roadmap Batch (Sprint 3 + 4 + Enhancements)
+- [x] B4: Component Stress-Test Quiz (8 components × 5 stress scenarios, LLM scores cascade reasoning)
+- [x] D1: Meta-Specific Trade-off Library (50+ decisions with Meta-scale context and "what interviewer listens for")
+- [x] D2: Deep-Dive Question Bank per Component (IC5/IC6/IC7 level questions per component)
+- [x] D3: Meta Engineering Blog Integration (15 papers with interview-relevance annotations, whatToExtract, keyInsight)
+- [x] Wire all new tools into SystemDesignTab navigation

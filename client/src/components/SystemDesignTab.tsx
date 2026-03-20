@@ -1,14 +1,18 @@
 // SystemDesignTab — 8 Meta system design patterns + Meta Engineering Blog Feed
 // Design: clean structured approach cards with expandable sections
 import { useState } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target, Table2, AlertTriangle, Layers } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target, Table2, AlertTriangle, Layers, Rss } from "lucide-react";
 import SystemDesignMockSession from "./SystemDesignMockSession";
 import SystemDesignComparisonTable from "./SystemDesignComparisonTable";
 import SDFailureModeDiagnostic from "./SDFailureModeDiagnostic";
 import SDRequirementsTrainer from "./SDRequirementsTrainer";
 import SDTradeoffDrill from "./SDTradeoffDrill";
 import SDMathTrainer from "./SDMathTrainer";
-import { Calculator } from "lucide-react";
+import SDComponentStressTest from "./SDComponentStressTest";
+import SDTradeoffLibrary from "./SDTradeoffLibrary";
+import SDDeepDiveBank from "./SDDeepDiveBank";
+import SDMetaBlogReader from "./SDMetaBlogReader";
+import { Calculator, Zap as ZapIcon } from "lucide-react";
 
 interface DesignPattern {
   id: string;
@@ -583,7 +587,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math" | "stresstest" | "tradeofflibrary" | "deepdive" | "metablog">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -694,6 +698,46 @@ export default function SystemDesignTab() {
           >
             <Calculator size={11} /> Math Trainer
           </button>
+          <button
+            onClick={() => setActiveView("stresstest")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "stresstest"
+                ? "bg-orange-600 text-white border-orange-600"
+                : "bg-white text-orange-700 border-orange-200 hover:border-orange-400"
+            }`}
+          >
+            <ZapIcon size={11} /> Stress Test
+          </button>
+          <button
+            onClick={() => setActiveView("tradeofflibrary")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "tradeofflibrary"
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-white text-indigo-700 border-indigo-200 hover:border-indigo-400"
+            }`}
+          >
+            <BookOpen size={11} /> Trade-off Library
+          </button>
+          <button
+            onClick={() => setActiveView("deepdive")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "deepdive"
+                ? "bg-purple-600 text-white border-purple-600"
+                : "bg-white text-purple-700 border-purple-200 hover:border-purple-400"
+            }`}
+          >
+            <Layers size={11} /> Deep-Dive Bank
+          </button>
+          <button
+            onClick={() => setActiveView("metablog")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "metablog"
+                ? "bg-teal-600 text-white border-teal-600"
+                : "bg-white text-teal-700 border-teal-200 hover:border-teal-400"
+            }`}
+          >
+            <Rss size={11} /> Meta Papers
+          </button>
         </div>
       </div>
 
@@ -741,6 +785,18 @@ export default function SystemDesignTab() {
 
       {/* Back-of-Envelope Math Trainer */}
       {activeView === "math" && <SDMathTrainer />}
+
+      {/* Component Stress-Test Quiz */}
+      {activeView === "stresstest" && <SDComponentStressTest />}
+
+      {/* Trade-off Library */}
+      {activeView === "tradeofflibrary" && <SDTradeoffLibrary />}
+
+      {/* Deep-Dive Question Bank */}
+      {activeView === "deepdive" && <SDDeepDiveBank />}
+
+      {/* Meta Engineering Blog — Interview-Annotated */}
+      {activeView === "metablog" && <SDMetaBlogReader />}
 
       {/* Blog Feed */}
       {activeView === "blog" && (

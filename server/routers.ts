@@ -1317,5 +1317,76 @@ Return a JSON array with one object per paragraph index:
         }
       }),
   }),
+
+  /**
+   * stressTest.score — LLM scores a candidate's failure cascade reasoning for a component stress scenario.
+   * Targets Root Cause 4: treating components as opaque black boxes.
+   */
+  stressTest: router({
+    score: publicProcedure
+      .input(
+        z.object({
+          component: z.string(),
+          scenario: z.string(),
+          candidateAnswer: z.string().min(10),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const systemPrompt = `You are a senior Meta system design interviewer evaluating a candidate's ability to reason through component failure cascades.
+Component: ${input.component}
+Scenario: ${input.scenario}
+
+Evaluate the candidate's answer on 3 dimensions (each 1-5):
+1. Failure Mode Identification (1-5): Did they correctly identify what fails first and the cascade?
+2. Mitigation Proposal (1-5): Did they propose concrete, actionable mitigations?
+3. Impact Quantification (1-5): Did they quantify the impact (latency, error rate, data loss, etc.)?
+
+Also provide:
+- failureModeFeedback: specific feedback on their failure mode reasoning
+- mitigationFeedback: specific feedback on their mitigation proposals
+- quantificationFeedback: specific feedback on their quantification
+- overallFeedback: the single most important thing they should add/improve
+- passesBar: boolean — does this answer pass the IC6 bar for Technical Depth?
+
+Return ONLY valid JSON.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Candidate's answer:\n${input.candidateAnswer}` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "stress_test_score",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  failureModeScore: { type: "integer" },
+                  failureModeFeedback: { type: "string" },
+                  mitigationScore: { type: "integer" },
+                  mitigationFeedback: { type: "string" },
+                  quantificationScore: { type: "integer" },
+                  quantificationFeedback: { type: "string" },
+                  overallFeedback: { type: "string" },
+                  passesBar: { type: "boolean" },
+                },
+                required: ["failureModeScore","failureModeFeedback","mitigationScore","mitigationFeedback","quantificationScore","quantificationFeedback","overallFeedback","passesBar"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices[0].message.content ?? "{}";
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        return JSON.parse(text) as {
+          failureModeScore: number; failureModeFeedback: string;
+          mitigationScore: number; mitigationFeedback: string;
+          quantificationScore: number; quantificationFeedback: string;
+          overallFeedback: string; passesBar: boolean;
+        };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;
