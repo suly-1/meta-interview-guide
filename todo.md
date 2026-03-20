@@ -201,3 +201,15 @@
 - [x] Follow-up Review Queue panel in Stats view (mark reviewed checkbox, Copy as Markdown export)
 - [x] Pressure Simulator intensity levels (Low/Medium/High frequency selector in mock phases)
 - [x] Silence Detector threshold calibration (30s/45s/60s settings popover)
+
+## Current Batch (Spaced Repetition + Pressure Log + Silence Stats)
+- [ ] Follow-up spaced repetition: "Due today" filter in Review Queue (questions not reviewed in 3+ days)
+- [ ] Pressure Simulator session log: track interjection count + dismissal speed per session, show Responsiveness score in debrief
+- [ ] Silence Detector stats: show "Longest silence this session" metric in debrief panel
+
+## System Design Pass-Rate Uplift (10% → 60%)
+- [x] Server: tRPC procedures for requirementsTrainer.score, tradeoffDrill.score
+- [x] SD Tab: "Why 90% Fail" — Failure Mode Diagnostic + Level Calibrator sub-view
+- [x] SD Tab: Requirements Clarification Trainer (drill the 30%-weight signal)
+- [x] SD Tab: Trade-off Articulation Drill (10 binary decisions with LLM scoring)
+- [x] SD Tab: Wire all 3 new views into tab navigation

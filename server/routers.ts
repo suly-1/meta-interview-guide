@@ -906,6 +906,205 @@ Return ONLY valid JSON matching the schema exactly.`,
         }
       }),
   }),
+
+  /**
+   * requirementsTrainer.score — LLM-scores a candidate's requirements clarification questions
+   * against a given system design problem. Returns per-dimension scores and coaching feedback.
+   * This targets the #1 failure mode: jumping to architecture before defining the problem.
+   */
+  requirementsTrainer: router({
+    score: publicProcedure
+      .input(
+        z.object({
+          problemTitle: z.string(),
+          problemTagline: z.string(),
+          candidateQuestions: z.string().min(5, "Please write at least one clarifying question"),
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const systemPrompt = `You are a senior Meta system design interviewer evaluating a candidate's requirements clarification for ${levelLabel}.
+The problem is: "${input.problemTitle}" — ${input.problemTagline}.
+
+At Meta, requirements clarification accounts for ~30% of the system design score. Evaluate the candidate's clarifying questions on 4 dimensions:
+1. Functional Coverage (1-5): Did they identify the core user actions and features? Did they distinguish must-have from nice-to-have?
+2. Scale & NFR Probing (1-5): Did they ask about DAU, QPS, latency SLOs, availability, consistency requirements?
+3. Constraint Discovery (1-5): Did they ask about budget, team size, timeline, existing infrastructure, or Meta-specific context?
+4. Scope Narrowing (1-5): Did they propose a focused scope to make the problem tractable in 45 minutes?
+
+Also identify:
+- The single most important question they MISSED that a ${input.targetLevel} candidate should always ask
+- Whether they asked about the right things in the right order (broad → narrow)
+- An IC-level verdict: IC4 (too shallow), IC5 (adequate), IC6 (strong), IC7 (exceptional)
+
+Return ONLY valid JSON.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Candidate's clarifying questions:\n${input.candidateQuestions}` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "requirements_trainer_score",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  functionalCoverageScore: { type: "integer" },
+                  functionalCoverageFeedback: { type: "string" },
+                  scaleNFRScore: { type: "integer" },
+                  scaleNFRFeedback: { type: "string" },
+                  constraintDiscoveryScore: { type: "integer" },
+                  constraintDiscoveryFeedback: { type: "string" },
+                  scopeNarrowingScore: { type: "integer" },
+                  scopeNarrowingFeedback: { type: "string" },
+                  biggestMissedQuestion: { type: "string" },
+                  orderingFeedback: { type: "string" },
+                  icLevelVerdict: { type: "string", enum: ["IC4", "IC5", "IC6", "IC7"] },
+                  overallCoaching: { type: "string" },
+                },
+                required: [
+                  "functionalCoverageScore", "functionalCoverageFeedback",
+                  "scaleNFRScore", "scaleNFRFeedback",
+                  "constraintDiscoveryScore", "constraintDiscoveryFeedback",
+                  "scopeNarrowingScore", "scopeNarrowingFeedback",
+                  "biggestMissedQuestion", "orderingFeedback",
+                  "icLevelVerdict", "overallCoaching",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            functionalCoverageScore: number; functionalCoverageFeedback: string;
+            scaleNFRScore: number; scaleNFRFeedback: string;
+            constraintDiscoveryScore: number; constraintDiscoveryFeedback: string;
+            scopeNarrowingScore: number; scopeNarrowingFeedback: string;
+            biggestMissedQuestion: string; orderingFeedback: string;
+            icLevelVerdict: "IC4" | "IC5" | "IC6" | "IC7"; overallCoaching: string;
+          };
+        } catch {
+          return {
+            functionalCoverageScore: 3, functionalCoverageFeedback: "Unable to parse response.",
+            scaleNFRScore: 3, scaleNFRFeedback: "",
+            constraintDiscoveryScore: 3, constraintDiscoveryFeedback: "",
+            scopeNarrowingScore: 3, scopeNarrowingFeedback: "",
+            biggestMissedQuestion: "What is the expected read-to-write ratio?",
+            orderingFeedback: "Start with functional requirements, then scale, then constraints.",
+            icLevelVerdict: "IC5" as const, overallCoaching: "Please try again.",
+          };
+        }
+      }),
+  }),
+
+  /**
+   * tradeoffDrill.score — LLM-scores a candidate's trade-off justification for a binary
+   * architecture decision. Targets the #2 failure mode: asserting choices without explaining trade-offs.
+   */
+  tradeoffDrill: router({
+    score: publicProcedure
+      .input(
+        z.object({
+          decision: z.string(),
+          optionA: z.string(),
+          optionB: z.string(),
+          candidateChoice: z.enum(["A", "B"]),
+          candidateJustification: z.string().min(10, "Please write a justification"),
+          context: z.string(),
+          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const systemPrompt = `You are a senior Meta system design interviewer evaluating a candidate's trade-off articulation for ${levelLabel}.
+
+The decision: "${input.decision}"
+Option A: ${input.optionA}
+Option B: ${input.optionB}
+Context: ${input.context}
+
+The candidate chose Option ${input.candidateChoice} and justified it below.
+
+At Meta, trade-off articulation accounts for ~25-30% of the system design score. Evaluate on 4 dimensions:
+1. Correctness (1-5): Is their choice reasonable for the given context?
+2. Depth of Reasoning (1-5): Did they explain WHY — not just WHAT? Did they cite specific trade-offs (latency, consistency, complexity, cost)?
+3. Counter-argument Awareness (1-5): Did they acknowledge the downsides of their choice and when the other option would be better?
+4. Meta-Scale Calibration (1-5): Did they reason about Meta-scale implications (billions of users, global distribution, cost at scale)?
+
+Also provide:
+- The model answer: what a strong ${input.targetLevel} candidate would say
+- The single biggest gap in their reasoning
+- Whether they would pass this dimension at ${input.targetLevel}
+
+Return ONLY valid JSON.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Candidate chose Option ${input.candidateChoice} and justified:\n${input.candidateJustification}` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "tradeoff_drill_score",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  correctnessScore: { type: "integer" },
+                  correctnessFeedback: { type: "string" },
+                  depthScore: { type: "integer" },
+                  depthFeedback: { type: "string" },
+                  counterArgScore: { type: "integer" },
+                  counterArgFeedback: { type: "string" },
+                  metaScaleScore: { type: "integer" },
+                  metaScaleFeedback: { type: "string" },
+                  modelAnswer: { type: "string" },
+                  biggestGap: { type: "string" },
+                  passesBar: { type: "boolean" },
+                },
+                required: [
+                  "correctnessScore", "correctnessFeedback",
+                  "depthScore", "depthFeedback",
+                  "counterArgScore", "counterArgFeedback",
+                  "metaScaleScore", "metaScaleFeedback",
+                  "modelAnswer", "biggestGap", "passesBar",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            correctnessScore: number; correctnessFeedback: string;
+            depthScore: number; depthFeedback: string;
+            counterArgScore: number; counterArgFeedback: string;
+            metaScaleScore: number; metaScaleFeedback: string;
+            modelAnswer: string; biggestGap: string; passesBar: boolean;
+          };
+        } catch {
+          return {
+            correctnessScore: 3, correctnessFeedback: "Unable to parse response.",
+            depthScore: 3, depthFeedback: "",
+            counterArgScore: 3, counterArgFeedback: "",
+            metaScaleScore: 3, metaScaleFeedback: "",
+            modelAnswer: "Please try again.",
+            biggestGap: "Explain the specific trade-offs more concretely.",
+            passesBar: false,
+          };
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,10 +1,12 @@
 // SystemDesignTab — 8 Meta system design patterns + Meta Engineering Blog Feed
 // Design: clean structured approach cards with expandable sections
 import { useState } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target, Table2, AlertTriangle, Layers } from "lucide-react";
 import SystemDesignMockSession from "./SystemDesignMockSession";
 import SystemDesignComparisonTable from "./SystemDesignComparisonTable";
-import { Table2 } from "lucide-react";
+import SDFailureModeDiagnostic from "./SDFailureModeDiagnostic";
+import SDRequirementsTrainer from "./SDRequirementsTrainer";
+import SDTradeoffDrill from "./SDTradeoffDrill";
 
 interface DesignPattern {
   id: string;
@@ -579,7 +581,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -601,7 +603,7 @@ export default function SystemDesignTab() {
           System Design Primer
         </h2>
         <p className="text-xs text-gray-500 mt-0.5">
-          8 Meta-specific system design patterns with structured approach cards + 12 curated Meta engineering blog posts
+          8 design patterns · 12 Meta blog posts · Mock session · Pass-rate uplift tools (10% → 60%)
         </p>
       </div>
 
@@ -647,6 +649,40 @@ export default function SystemDesignTab() {
         >
           <Table2 size={12} /> Compare Patterns
         </button>
+        {/* Pass-rate uplift tools */}
+        <div className="w-full flex items-center gap-1.5 mt-1">
+          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">Pass-Rate Uplift:</span>
+          <button
+            onClick={() => setActiveView("diagnostic")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "diagnostic"
+                ? "bg-red-600 text-white border-red-600"
+                : "bg-white text-red-600 border-red-200 hover:border-red-400"
+            }`}
+          >
+            <AlertTriangle size={11} /> Why 90% Fail
+          </button>
+          <button
+            onClick={() => setActiveView("requirements")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "requirements"
+                ? "bg-emerald-600 text-white border-emerald-600"
+                : "bg-white text-emerald-700 border-emerald-200 hover:border-emerald-400"
+            }`}
+          >
+            <Layers size={11} /> Requirements Trainer
+          </button>
+          <button
+            onClick={() => setActiveView("tradeoffs")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "tradeoffs"
+                ? "bg-violet-600 text-white border-violet-600"
+                : "bg-white text-violet-700 border-violet-200 hover:border-violet-400"
+            }`}
+          >
+            <BarChart2 size={11} /> Trade-off Drill
+          </button>
+        </div>
       </div>
 
       {/* Design Patterns */}
@@ -681,6 +717,15 @@ export default function SystemDesignTab() {
           <SystemDesignComparisonTable />
         </div>
       )}
+
+      {/* Failure Mode Diagnostic */}
+      {activeView === "diagnostic" && <SDFailureModeDiagnostic />}
+
+      {/* Requirements Clarification Trainer */}
+      {activeView === "requirements" && <SDRequirementsTrainer />}
+
+      {/* Trade-off Articulation Drill */}
+      {activeView === "tradeoffs" && <SDTradeoffDrill />}
 
       {/* Blog Feed */}
       {activeView === "blog" && (
