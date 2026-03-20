@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send, Trophy, HelpCircle } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, TEN_WEEK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates } from "@/hooks/useLocalStorage";
+import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates, useAIReviewHistory } from "@/hooks/useLocalStorage";
 import { CTCI_QUESTIONS } from "@/lib/ctciData";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -1673,6 +1673,58 @@ function CTCIDivergenceReport() {
   );
 }
 
+// ── Daily Drill Reminder ────────────────────────────────────────────────────
+function DailyDrillButton() {
+  const [history] = useAIReviewHistory();
+  const [patternRatings] = usePatternRatings();
+
+  // Aggregate average score per topic from AI review history
+  const topicScores: Record<string, { total: number; count: number }> = {};
+  history.forEach(r => {
+    if (!topicScores[r.topic]) topicScores[r.topic] = { total: 0, count: 0 };
+    topicScores[r.topic].total += r.score;
+    topicScores[r.topic].count += 1;
+  });
+
+  // Also factor in pattern ratings (1-5 scale) for patterns with no AI reviews
+  PATTERNS.forEach(p => {
+    const rating = patternRatings[p.id] ?? 0;
+    if (!topicScores[p.name]) {
+      topicScores[p.name] = { total: rating, count: 1 };
+    }
+  });
+
+  // Get 3 weakest topics (lowest avg score, min 1 review or rating)
+  const sorted = Object.entries(topicScores)
+    .map(([topic, { total, count }]) => ({ topic, avg: total / count }))
+    .sort((a, b) => a.avg - b.avg)
+    .slice(0, 3);
+
+  if (sorted.length === 0) return null;
+
+  const handleClick = () => {
+    const topicList = sorted.map((t, i) => `${i + 1}. ${t.topic} (avg ${t.avg.toFixed(1)}/5)`).join("\n");
+    toast.custom(() => (
+      <div style={{ background: "oklch(0.18 0.025 264)", border: "1px solid oklch(0.38 0.08 264)", color: "oklch(0.92 0.04 264)", borderRadius: "0.75rem", padding: "0.875rem 1rem", minWidth: "280px", maxWidth: "360px", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "oklch(0.75 0.18 264)" }}>🎯 3 Topics to Drill Today</div>
+        <div style={{ fontSize: "0.75rem", opacity: 0.85, whiteSpace: "pre-line" }}>{topicList}</div>
+        <div style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "0.25rem" }}>Head to the Code Practice tab → filter by these topics</div>
+      </div>
+    ), { duration: 8000 });
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-300 text-xs font-semibold transition-all"
+      title={`Weakest topics: ${sorted.map(t => t.topic).join(", ")}`}
+    >
+      <Target size={12} />
+      3 Drills Due Today
+    </button>
+  );
+}
+
 const STREAK_MILESTONES: Record<number, string> = {
   7: "You're in the top 20% of prep consistency!",
   14: "Two weeks straight — elite-level discipline!",
@@ -1772,6 +1824,7 @@ function QuickActionsRow() {
           <Trophy size={12} />
           Start Full Mock Day
         </button>
+        <DailyDrillButton />
       </div>
       {streak.currentStreak > 0 && (
         <Tooltip>

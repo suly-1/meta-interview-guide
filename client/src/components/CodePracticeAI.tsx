@@ -111,27 +111,45 @@ export function SessionHistoryPanel({ problem }: { problem: Problem }) {
                 </button>
               </div>
 
-              {/* Score trend sparkline */}
-              {problemHistory.length >= 2 && (
-                <div className="rounded-lg bg-background border border-border p-3">
-                  <div className="text-[10px] font-semibold text-muted-foreground mb-2">SCORE PROGRESSION</div>
-                  <div className="flex items-end gap-1 h-10">
-                    {[...problemHistory].reverse().slice(-10).map((r, i) => {
-                      const pct = (r.score / 5) * 100;
-                      const col = r.score >= 4 ? "bg-emerald-500" : r.score >= 3 ? "bg-blue-500" : r.score >= 2 ? "bg-amber-500" : "bg-red-500";
-                      return (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-0.5" title={`Attempt ${i + 1}: ${r.score.toFixed(1)}/5`}>
-                          <div className={`w-full rounded-sm ${col} transition-all`} style={{ height: `${pct}%`, minHeight: 2 }} />
-                        </div>
-                      );
-                    })}
+              {/* Score Trend Chart — SVG line chart with dots and score labels */}
+              {problemHistory.length >= 2 && (() => {
+                const pts = [...problemHistory].reverse().slice(-10);
+                const W = 280, H = 60, PAD = 12;
+                const xs = pts.map((_, i) => PAD + (pts.length === 1 ? 0 : (i / (pts.length - 1)) * (W - PAD * 2)));
+                const ys = pts.map(r => PAD + (1 - r.score / 5) * (H - PAD * 2));
+                const polyline = xs.map((x, i) => `${x},${ys[i]}`).join(" ");
+                const trend = pts[pts.length - 1].score - pts[0].score;
+                const trendColor = trend > 0.2 ? "text-emerald-400" : trend < -0.2 ? "text-red-400" : "text-muted-foreground";
+                const trendLabel = trend > 0.2 ? `↑ +${trend.toFixed(1)}` : trend < -0.2 ? `↓ ${trend.toFixed(1)}` : "→ stable";
+                return (
+                  <div className="rounded-lg bg-background border border-border p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Score Trend</span>
+                      <span className={`text-[10px] font-bold ${trendColor}`}>{trendLabel}</span>
+                    </div>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 60 }}>
+                      {[1,2,3,4,5].map(v => {
+                        const y = PAD + (1 - v / 5) * (H - PAD * 2);
+                        return <line key={v} x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="currentColor" strokeOpacity={0.07} strokeWidth={0.5} className="text-foreground" />;
+                      })}
+                      <polyline points={polyline} fill="none" stroke="#3b82f6" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
+                      {pts.map((r, i) => {
+                        const col = r.score >= 4 ? "#10b981" : r.score >= 3 ? "#3b82f6" : r.score >= 2 ? "#f59e0b" : "#ef4444";
+                        return (
+                          <g key={i}>
+                            <circle cx={xs[i]} cy={ys[i]} r={3} fill={col} />
+                            <text x={xs[i]} y={ys[i] - 5} textAnchor="middle" fontSize={7} fill={col} fontWeight="bold">{r.score.toFixed(1)}</text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                    <div className="flex justify-between mt-0.5">
+                      <span className="text-[9px] text-muted-foreground">Attempt 1</span>
+                      <span className="text-[9px] text-muted-foreground">Attempt {pts.length}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-[9px] text-muted-foreground">Oldest</span>
-                    <span className="text-[9px] text-muted-foreground">Latest</span>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Review cards */}
               <div className="space-y-2 max-h-64 overflow-y-auto">

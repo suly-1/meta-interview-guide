@@ -56,6 +56,8 @@ export function VoiceAnswerMode({ questionText, icMode = "IC6" }: VoiceAnswerMod
     strengths: string[]; gaps: string[]; coaching: string; starStructure: string;
   } | null>(null);
 
+  const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -107,6 +109,9 @@ export function VoiceAnswerMode({ questionText, icMode = "IC6" }: VoiceAnswerMod
           return;
         }
 
+        // Store local blob URL for replay before uploading
+        const localUrl = URL.createObjectURL(blob);
+        setAudioBlobUrl(localUrl);
         setState("uploading");
 
         // Convert to base64
@@ -145,8 +150,10 @@ export function VoiceAnswerMode({ questionText, icMode = "IC6" }: VoiceAnswerMod
     setTranscript(null);
     setScore(null);
     setDuration(0);
+    if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
+    setAudioBlobUrl(null);
     chunksRef.current = [];
-  }, []);
+  }, [audioBlobUrl]);
 
   const formatDuration = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
@@ -239,6 +246,22 @@ export function VoiceAnswerMode({ questionText, icMode = "IC6" }: VoiceAnswerMod
 
           {state === "done" && score && transcript && (
             <div className="space-y-3">
+              {/* Voice Replay Player */}
+              {audioBlobUrl && (
+                <div className="rounded-lg bg-background border border-border p-3">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Replay Your Answer</div>
+                  <audio
+                    ref={audioRef}
+                    src={audioBlobUrl}
+                    controls
+                    className="w-full"
+                    style={{ colorScheme: "dark", height: 32 }}
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                    Listen for filler words, pacing issues, and missing STAR components before reviewing your score below.
+                  </p>
+                </div>
+              )}
               {/* Transcript */}
               <div className="rounded-lg bg-background border border-border p-3">
                 <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Transcript</div>

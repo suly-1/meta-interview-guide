@@ -371,3 +371,9 @@
 - [ ] Session History — localStorage AI review score progression per problem
 - [x] Weak Pattern Heatmap — topic score aggregation heatmap in Overview tab
 - [ ] Voice Answer Mode — mic recording, Whisper transcription, AI STAR scoring in Behavioral tab
+
+## New Features (Batch 7)
+
+- [x] Score Trend Chart — sparkline in Session History panel showing score progression
+- [x] Daily Drill Reminder — 3 weak patterns due today in Overview Quick Actions row
+- [x] Voice Answer Replay — audio playback alongside transcript in VoiceAnswerMode
