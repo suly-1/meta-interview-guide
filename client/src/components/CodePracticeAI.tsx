@@ -11,10 +11,11 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useAIReviewHistory, type AIReviewRecord } from "@/hooks/useLocalStorage";
 import {
   Brain, Lightbulb, MessageSquare, Gauge, Target, Zap,
   ChevronDown, ChevronUp, Loader2, CheckCircle, XCircle,
-  AlertTriangle, Star, TrendingUp, ArrowRight
+  AlertTriangle, Star, TrendingUp, ArrowRight, History, Trash2
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -61,11 +62,142 @@ function ICBadge({ level }: { level: string }) {
   );
 }
 
-// ── 1. AI Solution Reviewer ───────────────────────────────────────────────────
+// ── Session History Panel ───────────────────────────────────────────────────────────
+export function SessionHistoryPanel({ problem }: { problem: Problem }) {
+  const [history, setHistory] = useAIReviewHistory();
+  const [open, setOpen] = useState(false);
+
+  const problemHistory = history
+    .filter(r => r.problemId === problem.id)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const clearHistory = () => {
+    setHistory(h => h.filter(r => r.problemId !== problem.id));
+    toast.success("History cleared for this problem.");
+  };
+
+  const scoreColor = (s: number) => s >= 4 ? "text-emerald-400" : s >= 3 ? "text-blue-400" : s >= 2 ? "text-amber-400" : "text-red-400";
+  const icColors: Record<string, string> = {
+    IC5: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+    IC6: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    IC7: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  };
+
+  return (
+    <div className="rounded-xl border border-slate-500/20 bg-slate-950/20 overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-500/5 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <History size={14} className="text-slate-400" />
+          <span className="text-sm font-semibold text-foreground">Session History</span>
+          <span className="text-xs text-muted-foreground">{problemHistory.length} review{problemHistory.length !== 1 ? "s" : ""} for this problem</span>
+        </div>
+        {open ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-3 border-t border-slate-500/10">
+          {problemHistory.length === 0 ? (
+            <p className="text-xs text-muted-foreground pt-3">No reviews yet for this problem. Use the AI Solution Reviewer above to get started.</p>
+          ) : (
+            <>
+              <div className="flex items-center justify-between pt-3">
+                <span className="text-xs text-muted-foreground">Latest {Math.min(problemHistory.length, 10)} attempts</span>
+                <button onClick={clearHistory} className="flex items-center gap-1 text-xs text-red-400/70 hover:text-red-400 transition-colors">
+                  <Trash2 size={10} />
+                  Clear
+                </button>
+              </div>
+
+              {/* Score trend sparkline */}
+              {problemHistory.length >= 2 && (
+                <div className="rounded-lg bg-background border border-border p-3">
+                  <div className="text-[10px] font-semibold text-muted-foreground mb-2">SCORE PROGRESSION</div>
+                  <div className="flex items-end gap-1 h-10">
+                    {[...problemHistory].reverse().slice(-10).map((r, i) => {
+                      const pct = (r.score / 5) * 100;
+                      const col = r.score >= 4 ? "bg-emerald-500" : r.score >= 3 ? "bg-blue-500" : r.score >= 2 ? "bg-amber-500" : "bg-red-500";
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-0.5" title={`Attempt ${i + 1}: ${r.score.toFixed(1)}/5`}>
+                          <div className={`w-full rounded-sm ${col} transition-all`} style={{ height: `${pct}%`, minHeight: 2 }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[9px] text-muted-foreground">Oldest</span>
+                    <span className="text-[9px] text-muted-foreground">Latest</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Review cards */}
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {problemHistory.slice(0, 10).map((r) => (
+                  <div key={r.id} className="rounded-lg bg-background border border-border p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-black ${scoreColor(r.score)}`}>{r.score.toFixed(1)}</span>
+                        <span className="text-[10px] text-muted-foreground">/5.0</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${icColors[r.icLevel] ?? icColors.IC6}`}>{r.icLevel}</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1">
+                      {[
+                        { label: "Correct", val: r.correctness, color: "bg-emerald-500" },
+                        { label: "Complex", val: r.complexity, color: "bg-blue-500" },
+                        { label: "Edges", val: r.edgeCases, color: "bg-amber-500" },
+                        { label: "Quality", val: r.codeQuality, color: "bg-purple-500" },
+                      ].map(({ label, val, color }) => (
+                        <div key={label} className="text-center">
+                          <div className="text-[9px] text-muted-foreground">{label}</div>
+                          <div className="h-1 rounded-full bg-secondary mt-0.5 overflow-hidden">
+                            <div className={`h-full ${color}`} style={{ width: `${(val / 5) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground italic truncate">"{r.verdict}"</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── 1. AI Solution Reviewer ───────────────────────────────────────────────────────────
 export function AISolutionReviewer({ problem, code, language }: CodePracticeAIProps) {
   const [icMode, setIcMode] = useState<"IC6" | "IC7">("IC6");
   const [open, setOpen] = useState(false);
+  const [, setHistory] = useAIReviewHistory();
   const reviewMutation = trpc.ai.reviewSolution.useMutation({
+    onSuccess: (data) => {
+      // Persist to session history
+      const record: AIReviewRecord = {
+        id: `${problem.id}-${Date.now()}`,
+        problemId: problem.id,
+        problemTitle: problem.title,
+        topic: problem.topic,
+        difficulty: problem.difficulty,
+        date: new Date().toISOString(),
+        score: data.score,
+        icLevel: data.icLevel,
+        verdict: data.verdict,
+        correctness: data.correctness,
+        complexity: data.complexity,
+        edgeCases: data.edgeCases,
+        codeQuality: data.codeQuality,
+        coaching: data.coaching,
+      };
+      setHistory(h => [record, ...h].slice(0, 200)); // keep last 200
+    },
     onError: () => toast.error("Review failed. Please try again."),
   });
 
@@ -84,7 +216,6 @@ export function AISolutionReviewer({ problem, code, language }: CodePracticeAIPr
     });
     setOpen(true);
   };
-
   const r = reviewMutation.data;
   const scoreColor = r ? (r.score >= 4 ? "text-emerald-400" : r.score >= 3 ? "text-blue-400" : r.score >= 2 ? "text-amber-400" : "text-red-400") : "text-foreground";
 
@@ -646,7 +777,7 @@ export function IC7OptimizationChallenge({ problem, code, language }: CodePracti
   );
 }
 
-// ── Main AI Panel (all 6 features) ────────────────────────────────────────────
+// ── Main AI Panel (all 6 features + Session History) ───────────────────────────────────
 export function CodePracticeAIPanel({ problem, code, language }: CodePracticeAIProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -657,6 +788,7 @@ export function CodePracticeAIPanel({ problem, code, language }: CodePracticeAIP
         </span>
         <span className="text-[10px] text-muted-foreground">Powered by Meta-trained rubrics</span>
       </div>
+      <SessionHistoryPanel problem={problem} />
       <PatternRecognitionTrainer problem={problem} code={code} language={language} />
       <ProgressiveHintSystem problem={problem} code={code} language={language} />
       <AISolutionReviewer problem={problem} code={code} language={language} />

@@ -15,6 +15,7 @@ import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/c
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { DayOfModePanel, LastMileCheatSheet, ConfidenceCalibrationQuiz } from "@/components/DayOfMode";
+import { WeakPatternHeatmap } from "@/components/WeakPatternHeatmap";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
 function DisclaimerStatusBadge() {
@@ -1814,6 +1815,7 @@ export default function OverviewTab() {
       <LevelCards />
       <ReadinessDashboard />
       <HeatmapCalendar />
+      <WeakPatternHeatmap />
       <DailyStudyChecklist />
       <InterviewCountdown />
       <PrepTimeline />

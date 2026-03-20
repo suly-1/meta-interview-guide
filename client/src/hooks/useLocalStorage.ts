@@ -298,3 +298,24 @@ export type SoundtrackTrack = "off" | "lofi" | "focus" | "nature";
 export function useSoundtrack() {
   return useLocalStorage<SoundtrackTrack>("meta_soundtrack_v1", "off");
 }
+
+// ── AI Review History (Code Practice tab) ─────────────────────────────────
+export interface AIReviewRecord {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  topic: string;
+  difficulty: string;
+  date: string; // ISO
+  score: number; // 0-5
+  icLevel: string; // IC5/IC6/IC7
+  verdict: string;
+  correctness: number;
+  complexity: number;
+  edgeCases: number;
+  codeQuality: number;
+  coaching: string;
+}
+export function useAIReviewHistory() {
+  return useLocalStorage<AIReviewRecord[]>("meta_ai_review_history_v1", []);
+}

@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Brain, Play, RotateCcw, ChevronDown, ChevronUp, Trash2, Shuffle, Timer, X, SkipForward, Zap, HelpCircle } from "lucide-react";
 import VoiceToStar from "@/components/VoiceToStar";
+import { VoiceAnswerMode } from "@/components/VoiceAnswerMode";
 import { BEHAVIORAL_QUESTIONS, IC_COMPARISON, META_VALUES } from "@/lib/data";
 import { useBehavioralRatings, useMockHistory, useStoryStrengthHistory, useTechRetroProjects, type MockSession, type StoryRatingEntry, type TechRetroProject } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
@@ -2240,6 +2241,8 @@ export default function BehavioralTab() {
                       rows={5}
                       className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-500/50 resize-none leading-relaxed"
                     />
+                  {/* Voice Answer Mode — record and score STAR answer inline */}
+                  <VoiceAnswerMode questionText={q.q} icMode={(q as any).tier === 'IC7' ? 'IC7' : 'IC6'} />
                     {/* Version History Panel */}
                     {showVersions === q.id && (starVersions[q.id]?.length ?? 0) > 0 && (
                       <div className="rounded-lg border border-border overflow-hidden">

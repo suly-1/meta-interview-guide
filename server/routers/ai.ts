@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { transcribeAudio } from "../_core/voiceTranscription";
 
 export const aiRouter = router({
   // Tech Retro AI Coach: given project details, return 3 follow-up interview questions
@@ -746,5 +748,43 @@ Be direct and honest — this is what a real debrief would look like.`,
       if (!rawContent) throw new Error("No response from AI");
       const parsed = typeof rawContent === "string" ? JSON.parse(rawContent) : rawContent;
       return parsed as { challenge: string; probeQuestion: string; hint: string | null; ic7Insight: string };
+    }),
+
+  // ── Voice Answer: transcribe audio and score STAR answer ─────────────────
+  transcribeAndScoreVoice: publicProcedure
+    .input(z.object({
+      audioUrl: z.string(),
+      questionText: z.string(),
+      icMode: z.enum(["IC6", "IC7"]).default("IC6"),
+    }))
+    .mutation(async ({ input }) => {
+      // Step 1: Transcribe audio via Whisper
+      const transcription = await transcribeAudio({
+        audioUrl: input.audioUrl,
+        language: "en",
+        prompt: "Transcribe a behavioral interview answer using the STAR method (Situation, Task, Action, Result).",
+      });
+      if ("error" in transcription) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: transcription.error });
+      }
+      const transcript = transcription.text;
+
+      // Step 2: Score the STAR answer with LLM
+      const scoreResponse = await invokeLLM({
+        messages: [
+          { role: "system", content: `You are a senior Meta ${input.icMode} interviewer evaluating a behavioral answer. Score strictly against the ${input.icMode} rubric. Return JSON only.` },
+          { role: "user", content: `Question: "${input.questionText}"\n\nCandidate's spoken answer (transcribed):\n"${transcript}"\n\nEvaluate against the ${input.icMode} rubric and return JSON: { "situation": number (0-5), "task": number (0-5), "action": number (0-5), "result": number (0-5), "overallScore": number (0-5, one decimal), "icLevel": string (IC5/IC6/IC7), "verdict": string (one-line assessment), "strengths": [string] (2-3 specific strengths), "gaps": [string] (2-3 specific gaps), "coaching": string (most important improvement for next attempt), "starStructure": string (brief note on STAR format usage) }` },
+        ],
+        response_format: { type: "json_schema", json_schema: { name: "voice_star_score", strict: true, schema: { type: "object", properties: { situation: { type: "number" }, task: { type: "number" }, action: { type: "number" }, result: { type: "number" }, overallScore: { type: "number" }, icLevel: { type: "string" }, verdict: { type: "string" }, strengths: { type: "array", items: { type: "string" } }, gaps: { type: "array", items: { type: "string" } }, coaching: { type: "string" }, starStructure: { type: "string" } }, required: ["situation", "task", "action", "result", "overallScore", "icLevel", "verdict", "strengths", "gaps", "coaching", "starStructure"], additionalProperties: false } } },
+      });
+      const rawScore = scoreResponse?.choices?.[0]?.message?.content;
+      if (!rawScore) throw new Error("No score from AI");
+      const score = typeof rawScore === "string" ? JSON.parse(rawScore) : rawScore;
+      return { transcript, ...score } as {
+        transcript: string;
+        situation: number; task: number; action: number; result: number;
+        overallScore: number; icLevel: string; verdict: string;
+        strengths: string[]; gaps: string[]; coaching: string; starStructure: string;
+      };
     }),
 });

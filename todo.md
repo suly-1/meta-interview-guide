@@ -365,3 +365,9 @@
 - [x] Complexity Analyzer (actual vs optimal time/space with gap explanation)
 - [x] Pattern Recognition Trainer (hide label, score candidate's pattern guess)
 - [x] IC7 Optimization Challenge (auto-challenge after IC6-level solution)
+
+## New Features (Batch 6)
+
+- [ ] Session History — localStorage AI review score progression per problem
+- [x] Weak Pattern Heatmap — topic score aggregation heatmap in Overview tab
+- [ ] Voice Answer Mode — mic recording, Whisper transcription, AI STAR scoring in Behavioral tab
