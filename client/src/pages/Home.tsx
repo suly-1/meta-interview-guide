@@ -28,6 +28,8 @@ import GauntletMode, { type GauntletState, hasGauntletBadge } from "@/components
 import ProgressDashboard from "@/components/ProgressDashboard";
 import BookmarksPanel from "@/components/BookmarksPanel";
 import GlobalSearch from "@/components/GlobalSearch";
+import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/FocusMode";
+import MilestoneNotifications from "@/components/MilestoneNotifications";
 
 const TABS = [
   { id: "ctci",       label: "Practice Tracker",     icon: <ListChecks size={15} />,     color: "violet"  },
@@ -141,9 +143,11 @@ export default function Home() {
     setActiveTab(id);
   };
 
+  const { isFocused } = useFocusMode();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Hero />
+      {!isFocused && <Hero />}
 
       {/* Sticky Nav */}
       <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
@@ -239,6 +243,7 @@ export default function Home() {
               >
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
               </button>
+              <FocusModeToggle />
               <button
                 onClick={() => setShortcutOpen(true)}
                 title="Keyboard shortcuts (?)"

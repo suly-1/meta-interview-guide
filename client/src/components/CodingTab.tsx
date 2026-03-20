@@ -16,6 +16,13 @@ import PatternMasteryTree from "@/components/PatternMasteryTree";
 import TopicBossFight from "@/components/TopicBossFight";
 import { usePatternNotes } from "@/hooks/usePatternNotes";
 import { motion, AnimatePresence } from "framer-motion";
+import SprintMode from "@/components/SprintMode";
+import ComplexityEstimator from "@/components/ComplexityEstimator";
+import InterviewScorecard from "@/components/InterviewScorecard";
+import ApproachAnalyzer from "@/components/ApproachAnalyzer";
+import StreakBadges from "@/components/StreakBadges";
+import WeaknessHeatmap from "@/components/WeaknessHeatmap";
+import SpacedRepetitionQueue from "@/components/SpacedRepetitionQueue";
 
 const DIFF_COLORS: Record<string, string> = {
   green: "bg-emerald-100 text-emerald-700",
@@ -614,6 +621,90 @@ export default function CodingTab() {
           <p className="text-sm text-gray-500">Defeat each boss by solving all 3 hard problems. Resets every Monday. Crown = cleared this week.</p>
         </div>
         <TopicBossFight />
+      </section>
+
+      {/* Sprint Mode */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-yellow-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            ⚡ Sprint Mode
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">8 problems · 30 seconds each · Identify the pattern before time runs out</p>
+        </div>
+        <SprintMode />
+      </section>
+
+      {/* Approach Analyzer + Voice Recorder */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-teal-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🎙️ Approach Analyzer
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Type or speak your approach — scored on 4 IC dimensions: pattern, complexity, edge cases, trade-offs</p>
+        </div>
+        <ApproachAnalyzer />
+      </section>
+
+      {/* Interview Scorecard */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-indigo-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            📋 Interview Scorecard
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">7-criterion self-assessment after each practice session — get a Strong Hire / Hire / No Hire verdict</p>
+        </div>
+        <InterviewScorecard />
+      </section>
+
+      {/* Complexity Estimator */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-cyan-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🧮 Complexity Estimator
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Guess time and space complexity before the reveal — builds the habit of stating complexity first</p>
+        </div>
+        <ComplexityEstimator />
+      </section>
+
+      {/* Weakness Heatmap */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-rose-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🔥 Weakness Heatmap
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">All patterns sorted by mastery score — focus your next session on the weakest areas</p>
+        </div>
+        <WeaknessHeatmap />
+      </section>
+
+      {/* Streak & Badges */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-amber-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🏆 Streak &amp; Achievements
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Daily streak tracker and 8 achievement badges — earned automatically from your progress</p>
+        </div>
+        <StreakBadges />
+      </section>
+
+      {/* Spaced Repetition Queue */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-violet-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            🧠 Spaced Repetition Queue
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">SM-2 algorithm schedules problem reviews based on recall quality — add problems and review daily</p>
+        </div>
+        <SpacedRepetitionQueue />
       </section>
     </div>
   );

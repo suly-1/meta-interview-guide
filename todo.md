@@ -261,3 +261,38 @@
 - [x] Mobile layout improvements (hide density toggle, soundtrack, keyboard shortcut on mobile)
 - [x] Dark/light mode toggle already in nav (confirmed working)
 - [x] localStorage persistence already covers all major state (confirmed)
+
+## Countdown Milestone Notifications
+
+- [ ] Service worker milestone scheduler (D-14, D-7, D-3, D-1 notifications)
+- [ ] Weak-area detection from readiness/pattern data for notification content
+- [ ] Notification settings UI in nav (enable/disable milestones, test notification)
+- [ ] Milestone notification messages with personalized weak-area focus tips
+- [ ] Deploy to GitHub Pages after feature complete
+
+## New Features Batch — Coding Practice + Notifications
+
+- [ ] Sprint Mode (8 problems, 30s each, pattern identification, scored results)
+- [ ] Pattern Dependency Graph (SVG, green=mastered, locked=dimmed)
+- [ ] AI Approach Analyzer (4 dimensions: pattern recognition, complexity, edge cases, trade-offs)
+- [ ] Voice Approach Recorder (Web Speech API transcription → feeds Approach Analyzer)
+- [ ] Scorecard / Rubric (7-criterion checklist, Strong Hire/Hire/Lean Hire/No Hire verdict)
+- [ ] Complexity Estimator (dropdown before reveal, brute force vs optimal comparison)
+- [ ] Streak & Achievement Badges (6 badges: First Session, 3-Day Streak, Perfect Score, 10 Sessions, All Tests Pass, Hard Problem)
+- [ ] Weakness Heatmap (per-pattern bar chart, sorted weakest-first)
+- [ ] Spaced Repetition Queue (score-based scheduling: <2.5→1d, 2.5-4→3d, ≥4→7d, due alerts)
+- [ ] Focus Mode (hides non-essential UI, Escape to exit)
+- [ ] Countdown Milestone Notifications (D-14, D-7, D-3, D-1 with weak-area content)
+
+## New Features Batch (11 Features)
+- [x] Interview countdown milestone notifications (D-14, D-7, D-3, D-1 browser push notifications)
+- [x] Sprint Mode (8 problems, 30 seconds each, pattern identification)
+- [x] Pattern Dependency Graph (visual SVG showing pattern relationships)
+- [x] AI Approach Analyzer (scores verbal approach on 4 dimensions)
+- [x] Voice Approach Recorder (Web Speech API transcription integrated into Approach Analyzer)
+- [x] Scorecard/Rubric (7-criterion self-scoring checklist with Strong Hire/Hire/No Hire verdict)
+- [x] Complexity Estimator (select time/space complexity before reveal)
+- [x] Streak & Achievement Badges (daily streak, 8 achievement types)
+- [x] Weakness Heatmap (per-pattern bar chart sorted weakest-first)
+- [x] Spaced Repetition Queue (SM-2 algorithm schedules problems based on recall quality)
+- [x] Focus Mode (hides Hero section and non-essential UI, toggle in nav)

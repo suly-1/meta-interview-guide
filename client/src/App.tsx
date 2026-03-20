@@ -10,6 +10,7 @@ import { DensityProvider } from "./contexts/DensityContext";
 import Home from "./pages/Home";
 import DisclaimerGate from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
+import { FocusModeProvider } from "./components/FocusMode";
 
 function AppRouter() {
   return (
@@ -31,6 +32,7 @@ function App() {
         switchable
       >
         <XPProvider>
+          <FocusModeProvider>
           <TooltipProvider>
             <Toaster />
             {/* DisclaimerGate blocks ALL content until the user explicitly acknowledges the disclaimer */}
@@ -42,6 +44,7 @@ function App() {
               <PatternUnlockCelebration />
             </DisclaimerGate>
           </TooltipProvider>
+          </FocusModeProvider>
         </XPProvider>
       </ThemeProvider>
       </DensityProvider>
