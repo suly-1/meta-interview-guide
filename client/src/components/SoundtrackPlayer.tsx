@@ -2,12 +2,23 @@
  * SoundtrackPlayer — Ambient study sounds via Web Audio API (no external files).
  * Three modes: Lo-Fi (layered tones + gentle noise), White Noise, Rain.
  * Persists last-used mode to localStorage. Renders as a compact toolbar button.
+ *
+ * Also includes an integrated Pomodoro Timer (25/5 work/break cycles):
+ * - Auto-pauses music during break phases
+ * - Resumes music when work phase starts
+ * - Session counter persisted in localStorage
+ * - Browser notification at phase transitions (if permission granted)
  */
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Music2, Wind, CloudRain, VolumeX } from "lucide-react";
+import { Music2, Wind, CloudRain, VolumeX, Timer, Play, Pause, RotateCcw, Coffee } from "lucide-react";
 
 const STORAGE_KEY = "meta-guide-soundtrack-mode";
+const POMODORO_SESSIONS_KEY = "meta-guide-pomodoro-sessions";
 type SoundMode = "off" | "lofi" | "whitenoise" | "rain";
+type PomodoroPhase = "work" | "break" | "idle";
+
+const WORK_DURATION = 25 * 60; // 25 minutes in seconds
+const BREAK_DURATION = 5 * 60; // 5 minutes in seconds
 
 interface AudioNodes {
   ctx: AudioContext;
@@ -17,11 +28,8 @@ interface AudioNodes {
 }
 
 // ─── Lo-Fi Generator ─────────────────────────────────────────────────────────
-// Layered: soft noise floor + two detuned sine tones that slowly drift
 function createLoFi(ctx: AudioContext, master: GainNode): AudioNode[] {
   const nodes: AudioNode[] = [];
-
-  // Soft noise floor
   const bufferSize = ctx.sampleRate * 2;
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = noiseBuffer.getChannelData(0);
@@ -37,7 +45,6 @@ function createLoFi(ctx: AudioContext, master: GainNode): AudioNode[] {
   noiseSource.start();
   nodes.push(noiseSource);
 
-  // Two detuned sine tones (A2 + slightly detuned)
   const freqs = [110, 110.5];
   freqs.forEach((freq, i) => {
     const osc = ctx.createOscillator();
@@ -45,7 +52,6 @@ function createLoFi(ctx: AudioContext, master: GainNode): AudioNode[] {
     osc.frequency.value = freq;
     const gain = ctx.createGain();
     gain.gain.value = 0.06;
-    // Slow LFO tremolo
     const lfo = ctx.createOscillator();
     lfo.frequency.value = 0.15 + i * 0.07;
     const lfoGain = ctx.createGain();
@@ -59,7 +65,6 @@ function createLoFi(ctx: AudioContext, master: GainNode): AudioNode[] {
     nodes.push(osc, lfo);
   });
 
-  // Sub-bass pulse (very soft)
   const sub = ctx.createOscillator();
   sub.type = "sine";
   sub.frequency.value = 55;
@@ -69,7 +74,6 @@ function createLoFi(ctx: AudioContext, master: GainNode): AudioNode[] {
   subGain.connect(master);
   sub.start();
   nodes.push(sub);
-
   return nodes;
 }
 
@@ -93,11 +97,8 @@ function createWhiteNoise(ctx: AudioContext, master: GainNode): AudioNode[] {
 }
 
 // ─── Rain Generator ───────────────────────────────────────────────────────────
-// Filtered noise shaped to sound like rain: high-freq hiss + low rumble
 function createRain(ctx: AudioContext, master: GainNode): AudioNode[] {
   const nodes: AudioNode[] = [];
-
-  // High-frequency rain hiss
   const bufSize = ctx.sampleRate * 3;
   const buf = ctx.createBuffer(2, bufSize, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) {
@@ -118,7 +119,6 @@ function createRain(ctx: AudioContext, master: GainNode): AudioNode[] {
   hiss.start();
   nodes.push(hiss);
 
-  // Low rumble
   const rumbleBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
   const rd = rumbleBuf.getChannelData(0);
   for (let i = 0; i < rumbleBuf.length; i++) rd[i] = (Math.random() * 2 - 1) * 0.15;
@@ -133,7 +133,6 @@ function createRain(ctx: AudioContext, master: GainNode): AudioNode[] {
   rumble.start();
   nodes.push(rumble);
 
-  // Occasional drip-like amplitude modulation
   const lfo = ctx.createOscillator();
   lfo.frequency.value = 3.5;
   const lfoGain = ctx.createGain();
@@ -142,11 +141,10 @@ function createRain(ctx: AudioContext, master: GainNode): AudioNode[] {
   lfoGain.connect(hissGain.gain);
   lfo.start();
   nodes.push(lfo);
-
   return nodes;
 }
 
-// ─── Main hook ────────────────────────────────────────────────────────────────
+// ─── Audio Engine Hook ────────────────────────────────────────────────────────
 function useAudioEngine() {
   const audioRef = useRef<AudioNodes | null>(null);
 
@@ -186,11 +184,112 @@ function useAudioEngine() {
   }, []);
 
   useEffect(() => () => stop(), [stop]);
-
   return { play, stop, setVolume };
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Pomodoro Hook ────────────────────────────────────────────────────────────
+function usePomodoro(onPhaseChange: (phase: PomodoroPhase) => void) {
+  const [phase, setPhase] = useState<PomodoroPhase>("idle");
+  const [timeLeft, setTimeLeft] = useState(WORK_DURATION);
+  const [running, setRunning] = useState(false);
+  const [sessions, setSessions] = useState<number>(() => {
+    try { return parseInt(localStorage.getItem(POMODORO_SESSIONS_KEY) || "0"); } catch { return 0; }
+  });
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const phaseRef = useRef<PomodoroPhase>("idle");
+
+  const notify = (title: string, body: string) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, { body, icon: "/favicon.ico", tag: "pomodoro" });
+    }
+  };
+
+  const clearTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const startWork = useCallback(() => {
+    clearTimer();
+    phaseRef.current = "work";
+    setPhase("work");
+    setTimeLeft(WORK_DURATION);
+    setRunning(true);
+    onPhaseChange("work");
+  }, [onPhaseChange]);
+
+  const startBreak = useCallback(() => {
+    clearTimer();
+    phaseRef.current = "break";
+    setPhase("break");
+    setTimeLeft(BREAK_DURATION);
+    setRunning(true);
+    onPhaseChange("break");
+    notify("Break time! ☕", "5-minute break. Step away from the screen.");
+  }, [onPhaseChange]);
+
+  const reset = useCallback(() => {
+    clearTimer();
+    phaseRef.current = "idle";
+    setPhase("idle");
+    setTimeLeft(WORK_DURATION);
+    setRunning(false);
+    onPhaseChange("idle");
+  }, [onPhaseChange]);
+
+  const togglePause = useCallback(() => {
+    setRunning(prev => !prev);
+  }, []);
+
+  // Tick
+  useEffect(() => {
+    if (!running) {
+      clearTimer();
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearTimer();
+          if (phaseRef.current === "work") {
+            // Work session complete
+            setSessions(s => {
+              const next = s + 1;
+              try { localStorage.setItem(POMODORO_SESSIONS_KEY, String(next)); } catch {}
+              return next;
+            });
+            notify("Work session complete! 🎉", "Time for a 5-minute break.");
+            // Auto-start break
+            setTimeout(() => startBreak(), 500);
+          } else if (phaseRef.current === "break") {
+            notify("Break over! 💪", "Ready for another 25-minute focus session?");
+            setTimeout(() => {
+              phaseRef.current = "idle";
+              setPhase("idle");
+              setRunning(false);
+              onPhaseChange("idle");
+            }, 500);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return clearTimer;
+  }, [running, startBreak, onPhaseChange]);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  };
+
+  return { phase, timeLeft, running, sessions, startWork, startBreak, reset, togglePause, formatTime };
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const MODES: { id: SoundMode; label: string; icon: React.ReactNode; title: string }[] = [
   { id: "lofi",       label: "Lo-Fi",  icon: <Music2 size={13} />,    title: "Lo-Fi ambient tones" },
   { id: "whitenoise", label: "Noise",  icon: <Wind size={13} />,      title: "White noise" },
@@ -206,6 +305,22 @@ export default function SoundtrackPlayer() {
   const { play, stop, setVolume } = useAudioEngine();
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  // Pomodoro: auto-pause/resume music based on phase
+  const handlePhaseChange = useCallback((phase: PomodoroPhase) => {
+    if (phase === "break") {
+      // Pause music during break
+      stop();
+    } else if (phase === "work") {
+      // Resume music when work starts (if a mode was selected)
+      setMode(prev => {
+        if (prev !== "off") play(prev, volume);
+        return prev;
+      });
+    }
+  }, [stop, play, volume]);
+
+  const pomodoro = usePomodoro(handlePhaseChange);
+
   // Persist mode
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, mode); } catch {}
@@ -215,7 +330,8 @@ export default function SoundtrackPlayer() {
   useEffect(() => {
     if (mode === "off") {
       stop();
-    } else {
+    } else if (pomodoro.phase !== "break") {
+      // Don't start audio during break phase
       play(mode, volume);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -244,81 +360,187 @@ export default function SoundtrackPlayer() {
 
   const isPlaying = mode !== "off";
   const activeMode = MODES.find(m => m.id === mode);
+  const { phase, timeLeft, running, sessions, startWork, reset, togglePause, formatTime } = pomodoro;
+
+  // Compact nav button label
+  const navLabel = () => {
+    if (phase === "work") return formatTime(timeLeft);
+    if (phase === "break") return `Break ${formatTime(timeLeft)}`;
+    if (isPlaying) return activeMode?.label;
+    return "Sound";
+  };
+
+  const navIcon = () => {
+    if (phase === "work") return <Timer size={13} className={running ? "text-orange-500" : ""} />;
+    if (phase === "break") return <Coffee size={13} className="text-emerald-500" />;
+    if (isPlaying) return activeMode?.icon;
+    return <VolumeX size={13} />;
+  };
 
   return (
     <div className="relative flex-shrink-0" ref={popoverRef}>
       {/* Trigger button */}
       <button
         onClick={() => setShowVolume(v => !v)}
-        title={isPlaying ? `Playing: ${activeMode?.title} — click to adjust` : "Study Soundtrack"}
+        title={
+          phase === "work" ? `Pomodoro: ${formatTime(timeLeft)} remaining` :
+          phase === "break" ? `Break: ${formatTime(timeLeft)} remaining` :
+          isPlaying ? `Playing: ${activeMode?.title} — click to adjust` : "Study Soundtrack & Pomodoro"
+        }
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-          isPlaying
+          phase === "work"
+            ? "bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300"
+            : phase === "break"
+            ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300"
+            : isPlaying
             ? "bg-violet-100 dark:bg-violet-900/30 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300"
             : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400"
         }`}
       >
-        {isPlaying ? activeMode?.icon : <VolumeX size={13} />}
-        <span className="hidden sm:inline">{isPlaying ? activeMode?.label : "Sound"}</span>
-        {isPlaying && (
-          <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse flex-shrink-0" />
+        {navIcon()}
+        <span className="hidden sm:inline">{navLabel()}</span>
+        {(phase !== "idle" || isPlaying) && (
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+            phase === "work" ? (running ? "bg-orange-500 animate-pulse" : "bg-orange-300") :
+            phase === "break" ? "bg-emerald-500 animate-pulse" :
+            "bg-violet-500 animate-pulse"
+          }`} />
         )}
       </button>
 
       {/* Popover */}
       {showVolume && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-3 space-y-3">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Study Soundtrack</p>
+        <div className="absolute right-0 top-full mt-2 z-50 w-60 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-3 space-y-3">
 
-          {/* Mode buttons */}
-          <div className="grid grid-cols-3 gap-1.5">
-            {MODES.map(m => (
-              <button
-                key={m.id}
-                onClick={() => handleModeClick(m.id)}
-                title={m.title}
-                className={`flex flex-col items-center gap-1 py-2 rounded-xl border text-xs font-semibold transition-all ${
-                  mode === m.id
-                    ? "bg-violet-100 dark:bg-violet-900/30 border-violet-400 dark:border-violet-600 text-violet-700 dark:text-violet-300"
-                    : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-400"
-                }`}
-              >
-                {m.icon}
-                {m.label}
-              </button>
-            ))}
+          {/* ── Pomodoro Section ── */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pomodoro Timer</p>
+              <span className="text-[10px] text-gray-400 font-semibold">{sessions} session{sessions !== 1 ? "s" : ""} today</span>
+            </div>
+
+            {/* Timer display */}
+            <div className={`rounded-xl p-3 text-center mb-2 ${
+              phase === "work" ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800" :
+              phase === "break" ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800" :
+              "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            }`}>
+              <p className={`text-2xl font-bold tabular-nums tracking-wider ${
+                phase === "work" ? "text-orange-600 dark:text-orange-400" :
+                phase === "break" ? "text-emerald-600 dark:text-emerald-400" :
+                "text-gray-500 dark:text-gray-400"
+              }`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {formatTime(timeLeft)}
+              </p>
+              <p className="text-[10px] text-gray-400 mt-0.5">
+                {phase === "work" ? (running ? "Focus session in progress" : "Paused") :
+                 phase === "break" ? "Break — music paused" :
+                 "25 min focus · 5 min break"}
+              </p>
+            </div>
+
+            {/* Progress bar */}
+            {phase !== "idle" && (
+              <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+                <div
+                  className={`h-full rounded-full transition-all ${phase === "work" ? "bg-orange-500" : "bg-emerald-500"}`}
+                  style={{
+                    width: `${((phase === "work" ? WORK_DURATION : BREAK_DURATION) - timeLeft) /
+                      (phase === "work" ? WORK_DURATION : BREAK_DURATION) * 100}%`
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Controls */}
+            <div className="flex gap-1.5">
+              {phase === "idle" ? (
+                <button
+                  onClick={startWork}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-colors"
+                >
+                  <Play size={12} /> Start Focus
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={togglePause}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-xl transition-colors ${
+                      running
+                        ? "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300"
+                        : "bg-orange-500 hover:bg-orange-600 text-white"
+                    }`}
+                  >
+                    {running ? <><Pause size={12} /> Pause</> : <><Play size={12} /> Resume</>}
+                  </button>
+                  <button
+                    onClick={reset}
+                    title="Reset timer"
+                    className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 rounded-xl transition-colors"
+                  >
+                    <RotateCcw size={12} />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Off button */}
-          {isPlaying && (
-            <button
-              onClick={() => { setMode("off"); setShowVolume(false); }}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              <VolumeX size={12} /> Stop
-            </button>
-          )}
+          <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Study Soundtrack</p>
 
-          {/* Volume slider */}
-          {isPlaying && (
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-gray-400 font-semibold">Volume</span>
-                <span className="text-[10px] text-gray-400">{Math.round(volume * 100)}%</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={volume}
-                onChange={e => handleVolumeChange(parseFloat(e.target.value))}
-                className="w-full accent-violet-500 cursor-pointer"
-              />
+            {/* Mode buttons */}
+            <div className="grid grid-cols-3 gap-1.5">
+              {MODES.map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => handleModeClick(m.id)}
+                  title={m.title}
+                  className={`flex flex-col items-center gap-1 py-2 rounded-xl border text-xs font-semibold transition-all ${
+                    mode === m.id
+                      ? "bg-violet-100 dark:bg-violet-900/30 border-violet-400 dark:border-violet-600 text-violet-700 dark:text-violet-300"
+                      : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-400"
+                  }`}
+                >
+                  {m.icon}
+                  {m.label}
+                </button>
+              ))}
             </div>
-          )}
+
+            {/* Off button */}
+            {isPlaying && (
+              <button
+                onClick={() => { setMode("off"); setShowVolume(false); }}
+                className="w-full mt-1.5 flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <VolumeX size={12} /> Stop Sound
+              </button>
+            )}
+
+            {/* Volume slider */}
+            {isPlaying && (
+              <div className="space-y-1 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-gray-400 font-semibold">Volume</span>
+                  <span className="text-[10px] text-gray-400">{Math.round(volume * 100)}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={1} step={0.05} value={volume}
+                  onChange={e => handleVolumeChange(parseFloat(e.target.value))}
+                  className="w-full accent-violet-500 cursor-pointer"
+                />
+              </div>
+            )}
+
+            {phase === "break" && isPlaying && (
+              <p className="text-[9px] text-emerald-600 dark:text-emerald-400 mt-1.5 text-center font-semibold">
+                Music auto-paused during break
+              </p>
+            )}
+          </div>
 
           <p className="text-[9px] text-gray-400 leading-relaxed">
-            All sounds generated locally via Web Audio API — no downloads or network requests.
+            Sounds via Web Audio API — no downloads. Notifications require browser permission.
           </p>
         </div>
       )}

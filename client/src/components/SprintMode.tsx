@@ -9,16 +9,28 @@ import { Zap, CheckCircle2, XCircle, RotateCcw, Trophy, Clock, ChevronRight } fr
 const SPRINT_COUNT = 8;
 const TIME_PER_PROBLEM = 30;
 
+export interface SprintModeProps {
+  /** If provided, problems are drawn only from these pattern names */
+  focusPatterns?: string[];
+  /** If true, the sprint starts immediately without showing the idle screen */
+  autoStart?: boolean;
+  /** Called when the sprint finishes */
+  onComplete?: () => void;
+}
+
 interface SprintProblem {
   problem: string;
   correctPattern: string;
   choices: string[];
 }
 
-function buildSprintProblems(): SprintProblem[] {
+function buildSprintProblems(focusPatterns?: string[]): SprintProblem[] {
   // Flatten all problems with their pattern
   const allProblems: { problem: string; patternName: string }[] = [];
-  PATTERNS.forEach(p => {
+  const sourcePatterns = focusPatterns && focusPatterns.length > 0
+    ? PATTERNS.filter(p => focusPatterns.includes(p.name))
+    : PATTERNS;
+  sourcePatterns.forEach(p => {
     p.problems.forEach(prob => {
       allProblems.push({ problem: prob, patternName: p.name });
     });
@@ -49,7 +61,7 @@ interface SprintResult {
 
 type Phase = "idle" | "running" | "done";
 
-export default function SprintMode() {
+export default function SprintMode({ focusPatterns, autoStart, onComplete }: SprintModeProps = {}) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [problems, setProblems] = useState<SprintProblem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -73,6 +85,7 @@ export default function SprintMode() {
       setResults(newResults);
       setPhase("done");
       stopTimer();
+      onComplete?.();
     } else {
       setResults(newResults);
       setCurrentIdx(nextIdx);
@@ -107,8 +120,16 @@ export default function SprintMode() {
     return () => stopTimer();
   }, [phase, currentIdx, answered, problems, stopTimer, advanceOrFinish]);
 
+  // Auto-start if requested
+  useEffect(() => {
+    if (autoStart && phase === "idle") {
+      handleStart();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart]);
+
   const handleStart = () => {
-    const probs = buildSprintProblems();
+    const probs = buildSprintProblems(focusPatterns);
     setProblems(probs);
     setCurrentIdx(0);
     setTimeLeft(TIME_PER_PROBLEM);

@@ -4,7 +4,8 @@
  */
 import { useState, useEffect } from "react";
 import { PATTERNS } from "@/lib/guideData";
-import { BarChart2, TrendingUp } from "lucide-react";
+import { BarChart2, TrendingUp, Zap, X } from "lucide-react";
+import SprintMode from "@/components/SprintMode";
 
 interface PatternScore {
   name: string;
@@ -46,6 +47,7 @@ const TEXT_COLORS = [
 export default function WeaknessHeatmap() {
   const [scores, setScores] = useState<PatternScore[]>(() => loadPatternScores());
   const [sortMode, setSortMode] = useState<"weakest" | "strongest">("weakest");
+  const [sprintOpen, setSprintOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setScores(loadPatternScores()), 3000);
@@ -139,13 +141,46 @@ export default function WeaknessHeatmap() {
         ))}
       </div>
 
-      {/* Recommendation */}
+      {/* Recommendation + Auto-Sprint button */}
       {weakPatterns > 0 && (
-        <div className="mt-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl p-3 flex items-start gap-2">
-          <TrendingUp size={14} className="text-rose-500 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-rose-700 dark:text-rose-300 leading-relaxed">
-            <span className="font-bold">Focus area:</span> {sorted.slice(0, 2).map(s => s.name).join(" and ")} — practice 2–3 problems in these patterns today to move the needle.
-          </p>
+        <div className="mt-4 space-y-3">
+          <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-3 flex items-start gap-2">
+            <TrendingUp size={14} className="text-rose-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-rose-700 dark:text-rose-300 leading-relaxed">
+              <span className="font-bold">Focus area:</span> {sorted.slice(0, 3).map(s => s.name).join(", ")} — practice 2–3 problems in these patterns today to move the needle.
+            </p>
+          </div>
+
+          {/* Fix My Weaknesses auto-sprint button */}
+          {!sprintOpen ? (
+            <button
+              onClick={() => setSprintOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold rounded-xl transition-colors shadow-sm"
+            >
+              <Zap size={15} />
+              Fix My Weaknesses — Sprint on {sorted.slice(0, 3).map(s => s.name.split(" ")[0]).join(", ")}
+            </button>
+          ) : (
+            <div className="border border-rose-200 dark:border-rose-800 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 bg-rose-50 dark:bg-rose-900/20 border-b border-rose-200 dark:border-rose-800">
+                <span className="text-xs font-bold text-rose-700 dark:text-rose-300 flex items-center gap-1.5">
+                  <Zap size={12} /> Weakness Sprint — {sorted.slice(0, 3).map(s => s.name).join(", ")}
+                </span>
+                <button
+                  onClick={() => setSprintOpen(false)}
+                  className="text-rose-400 hover:text-rose-600 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="p-4">
+                <SprintMode
+                  focusPatterns={sorted.slice(0, 3).map(s => s.name)}
+                  onComplete={() => setTimeout(() => setSprintOpen(false), 3000)}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

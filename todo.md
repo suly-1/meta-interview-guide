@@ -296,3 +296,8 @@
 - [x] Weakness Heatmap (per-pattern bar chart sorted weakest-first)
 - [x] Spaced Repetition Queue (SM-2 algorithm schedules problems based on recall quality)
 - [x] Focus Mode (hides Hero section and non-essential UI, toggle in nav)
+
+## New Features Batch (3 Follow-ups)
+- [x] Pomodoro Timer in nav — 25/5 work/break timer in SoundtrackPlayer popover, auto-pauses music on break, session counter
+- [x] Weak-Pattern Auto-Sprint — "Fix My Weaknesses" button in Weakness Heatmap launches Sprint Mode pre-loaded with 3 weakest patterns
+- [x] SRS Due-Date Calendar — GitHub-style heatmap in Timeline tab showing SRS reviews due per day for next 30 days
