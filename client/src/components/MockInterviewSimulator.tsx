@@ -22,6 +22,172 @@ import { getWeakestPatterns } from "@/hooks/useDrillRatings";
 import { PATTERN_TO_CTCI_TOPICS, problemMatchesTopics } from "@/lib/ctciTopicMap";
 import { trpc } from "@/lib/trpc";
 
+// ─── Pressure Simulator ──────────────────────────────────────────────────────
+
+const CODING_INTERJECTIONS = [
+  "Can you walk me through your approach so far?",
+  "What's the time complexity of your current solution?",
+  "Have you considered any edge cases yet?",
+  "What data structure are you using and why?",
+  "Can you explain your reasoning out loud?",
+  "What would happen if the input was empty?",
+  "Is there a more optimal approach you can think of?",
+  "What's your space complexity?",
+  "Can you trace through a small example?",
+  "How would you test this solution?",
+];
+
+const BEHAVIORAL_INTERJECTIONS = [
+  "Can you be more specific about your role in that situation?",
+  "What was the measurable impact of your actions?",
+  "How did your teammates react to your decision?",
+  "What would you do differently if you faced this again?",
+  "Can you quantify the outcome?",
+  "How did this align with the team's broader goals?",
+  "What trade-offs did you consider?",
+  "How did you handle disagreement from stakeholders?",
+];
+
+function usePressureSimulator({
+  enabled,
+  running,
+  mode,
+}: {
+  enabled: boolean;
+  running: boolean;
+  mode: "coding" | "behavioral";
+}) {
+  const [interjection, setInterjection] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const usedRef = useRef<Set<number>>(new Set());
+
+  const scheduleNext = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    // Random interval: 90–240 seconds
+    const delay = (90 + Math.floor(Math.random() * 150)) * 1000;
+    timerRef.current = setTimeout(() => {
+      const pool = mode === "coding" ? CODING_INTERJECTIONS : BEHAVIORAL_INTERJECTIONS;
+      // Pick a question not recently used
+      let idx: number;
+      let attempts = 0;
+      do {
+        idx = Math.floor(Math.random() * pool.length);
+        attempts++;
+      } while (usedRef.current.has(idx) && attempts < pool.length);
+      usedRef.current.add(idx);
+      if (usedRef.current.size >= Math.floor(pool.length * 0.7)) usedRef.current.clear();
+      setInterjection(pool[idx]);
+    }, delay);
+  }, [mode]);
+
+  useEffect(() => {
+    if (!enabled || !running) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      return;
+    }
+    scheduleNext();
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [enabled, running, scheduleNext]);
+
+  const dismiss = useCallback(() => {
+    setInterjection(null);
+    if (enabled && running) scheduleNext();
+  }, [enabled, running, scheduleNext]);
+
+  return { interjection, dismiss };
+}
+
+// ─── Silence Detector ──────────────────────────────────────────────────────
+
+const SILENCE_PROMPTS = [
+  "Remember to think out loud — walk me through your reasoning.",
+  "What are you thinking right now? Share your approach.",
+  "Don't go quiet — narrate your thought process.",
+  "It's been a while — what's your current plan?",
+  "Interviewers love hearing your reasoning, even if incomplete.",
+];
+
+function useSilenceDetector({
+  enabled,
+  running,
+  thresholdSec = 45,
+}: {
+  enabled: boolean;
+  running: boolean;
+  thresholdSec?: number;
+}) {
+  const [prompt, setPrompt] = useState<string | null>(null);
+  const [supported, setSupported] = useState(false);
+  const lastSpeechRef = useRef<number>(Date.now());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const usedPromptsRef = useRef<Set<number>>(new Set());
+
+  const pickPrompt = useCallback(() => {
+    let idx: number;
+    let attempts = 0;
+    do {
+      idx = Math.floor(Math.random() * SILENCE_PROMPTS.length);
+      attempts++;
+    } while (usedPromptsRef.current.has(idx) && attempts < SILENCE_PROMPTS.length);
+    usedPromptsRef.current.add(idx);
+    if (usedPromptsRef.current.size >= SILENCE_PROMPTS.length) usedPromptsRef.current.clear();
+    return SILENCE_PROMPTS[idx];
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognitionCtor: (new () => any) | undefined =
+      w.SpeechRecognition || w.webkitSpeechRecognition;
+    setSupported(!!SpeechRecognitionCtor);
+
+    if (!SpeechRecognitionCtor || !enabled || !running) return;
+
+    const recognition = new SpeechRecognitionCtor();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+    recognitionRef.current = recognition;
+
+    recognition.onresult = () => {
+      lastSpeechRef.current = Date.now();
+      setPrompt(null); // dismiss prompt when user speaks
+    };
+
+    recognition.onend = () => {
+      // Auto-restart to keep listening
+      if (enabled && running) {
+        try { recognition.start(); } catch { /* already started */ }
+      }
+    };
+
+    try { recognition.start(); } catch { /* ignore */ }
+
+    silenceTimerRef.current = setInterval(() => {
+      const silenceSec = (Date.now() - lastSpeechRef.current) / 1000;
+      if (silenceSec >= thresholdSec) {
+        lastSpeechRef.current = Date.now(); // reset so it doesn't fire every tick
+        setPrompt(pickPrompt());
+      }
+    }, 5000);
+
+    return () => {
+      if (silenceTimerRef.current) clearInterval(silenceTimerRef.current);
+      try { recognition.stop(); } catch { /* ignore */ }
+    };
+  }, [enabled, running, thresholdSec, pickPrompt]);
+
+  const dismiss = useCallback(() => {
+    lastSpeechRef.current = Date.now();
+    setPrompt(null);
+  }, []);
+
+  return { prompt, dismiss, supported };
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Phase = "setup" | "coding" | "behavioral1" | "behavioral2" | "debrief";
@@ -492,6 +658,31 @@ function CodingPhase({
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [pressureEnabled, setPressureEnabled] = useState(() =>
+    localStorage.getItem("meta-guide-pressure-sim") !== "off"
+  );
+  const { interjection, dismiss } = usePressureSimulator({ enabled: pressureEnabled, running, mode: "coding" });
+  const [silenceEnabled, setSilenceEnabled] = useState(() =>
+    localStorage.getItem("meta-guide-silence-detect") === "on"
+  );
+  const { prompt: silencePrompt, dismiss: dismissSilence, supported: silenceSupported } = useSilenceDetector({
+    enabled: silenceEnabled,
+    running,
+  });
+
+  const toggleSilence = () => {
+    setSilenceEnabled(v => {
+      localStorage.setItem("meta-guide-silence-detect", !v ? "on" : "off");
+      return !v;
+    });
+  };
+
+  const togglePressure = () => {
+    setPressureEnabled(v => {
+      localStorage.setItem("meta-guide-pressure-sim", !v ? "on" : "off");
+      return !v;
+    });
+  };
 
   useEffect(() => {
     onElapsedChange(elapsed);
@@ -524,7 +715,64 @@ function CodingPhase({
       <div className="flex items-center gap-2 mb-1">
         <Code2 size={15} className="text-blue-600" />
         <span className="text-sm font-bold text-blue-700">Coding Round — 30 minutes</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          {silenceSupported && (
+            <button
+              onClick={toggleSilence}
+              title={silenceEnabled ? "Silence Detector ON — click to disable" : "Enable Silence Detector (45s)"}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold border transition-all ${
+                silenceEnabled
+                  ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                  : "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200"
+              }`}
+            >
+              👂 {silenceEnabled ? "Silence ON" : "Silence"}
+            </button>
+          )}
+          <button
+            onClick={togglePressure}
+            title={pressureEnabled ? "Pressure Simulator ON — click to disable" : "Enable Pressure Simulator"}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
+              pressureEnabled
+                ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                : "bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200"
+            }`}
+          >
+            🎤 {pressureEnabled ? "Pressure ON" : "Pressure OFF"}
+          </button>
+        </div>
       </div>
+
+      {/* Silence Detector prompt banner */}
+      {silencePrompt && (
+        <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+          <span className="text-lg shrink-0">👂</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wide mb-0.5">Silence Detector</p>
+            <p className="text-sm font-semibold text-gray-800 leading-relaxed">{silencePrompt}</p>
+          </div>
+          <button onClick={dismissSilence} className="shrink-0 text-[11px] font-bold text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded-lg transition-colors">
+            Got it
+          </button>
+        </div>
+      )}
+
+      {/* Pressure Simulator interjection banner */}
+      {interjection && (
+        <div className="flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-xl animate-pulse">
+          <span className="text-lg shrink-0">🎤</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold text-orange-600 uppercase tracking-wide mb-0.5">Interviewer</p>
+            <p className="text-sm font-semibold text-gray-800 leading-relaxed">{interjection}</p>
+          </div>
+          <button
+            onClick={dismiss}
+            className="shrink-0 text-[11px] font-bold text-orange-500 hover:text-orange-700 bg-orange-100 hover:bg-orange-200 px-2 py-1 rounded-lg transition-colors"
+          >
+            Got it
+          </button>
+        </div>
+      )}
 
       {/* Problem card */}
       <div className="border border-gray-200 rounded-xl p-4">
@@ -620,6 +868,8 @@ function BehavioralPhase({
   const DURATION = 10 * 60;
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
+  const pressureEnabled = localStorage.getItem("meta-guide-pressure-sim") !== "off";
+  const { interjection, dismiss } = usePressureSimulator({ enabled: pressureEnabled, running, mode: "behavioral" });
 
   useEffect(() => {
     if (!running) return;
@@ -638,7 +888,26 @@ function BehavioralPhase({
       <div className="flex items-center gap-2 mb-1">
         <MessageSquare size={15} className="text-amber-600" />
         <span className="text-sm font-bold text-amber-700">{phaseLabel} — 10 minutes</span>
+        {pressureEnabled && (
+          <span className="ml-auto text-[10px] font-bold text-orange-500 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+            🎤 Pressure ON
+          </span>
+        )}
       </div>
+
+      {/* Pressure interjection banner */}
+      {interjection && (
+        <div className="flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-xl animate-pulse">
+          <span className="text-lg shrink-0">🎤</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold text-orange-600 uppercase tracking-wide mb-0.5">Interviewer</p>
+            <p className="text-sm font-semibold text-gray-800 leading-relaxed">{interjection}</p>
+          </div>
+          <button onClick={dismiss} className="shrink-0 text-[11px] font-bold text-orange-500 hover:text-orange-700 bg-orange-100 hover:bg-orange-200 px-2 py-1 rounded-lg transition-colors">
+            Got it
+          </button>
+        </div>
+      )}
 
       {question && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -700,6 +969,29 @@ function BehavioralPhase({
   );
 }
 
+// ─── Follow-up Question Bank ─────────────────────────────────────────────────
+
+const FOLLOWUP_QUEUE_KEY = "meta-mock-followup-queue";
+
+interface FollowUpItem {
+  id: string;
+  ts: number;
+  sessionDate: string;
+  question: string;
+  targetArea: string;
+  coachingNote: string;
+  reviewed: boolean;
+}
+
+function loadFollowUpQueue(): FollowUpItem[] {
+  try { return JSON.parse(localStorage.getItem(FOLLOWUP_QUEUE_KEY) ?? "[]"); }
+  catch { return []; }
+}
+
+function saveFollowUpQueue(items: FollowUpItem[]) {
+  localStorage.setItem(FOLLOWUP_QUEUE_KEY, JSON.stringify(items.slice(0, 100)));
+}
+
 // ─── DebriefPhase ─────────────────────────────────────────────────────────────────
 
 function DebriefPhase({
@@ -717,6 +1009,9 @@ function DebriefPhase({
   onReset: () => void;
   previousSession?: MockSessionRecord | null;
 }) {
+  const followUps = trpc.mockInterview.followUps.useMutation();
+  const [savedFollowUps, setSavedFollowUps] = useState(false);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -897,6 +1192,79 @@ function DebriefPhase({
           </ol>
         </div>
       )}
+
+      {/* Follow-up Question Bank */}
+      <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Follow-up Question Bank</p>
+            <p className="text-[11px] text-indigo-500 mt-0.5">3 targeted questions based on your weakest areas</p>
+          </div>
+          {!followUps.data && (
+            <button
+              onClick={() => followUps.mutate({
+                targetLevel: session.targetLevel,
+                behavioralFeedback: result.behavioralFeedback,
+                codingFeedback: result.codingFeedback,
+                topImprovements: result.topImprovements,
+                behavioralAnswers: session.behavioralQuestions.map((q, i) => ({
+                  question: q.question,
+                  answer: session.behavioralAnswers[i] ?? "",
+                })),
+              })}
+              disabled={followUps.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 disabled:opacity-60 transition-colors shrink-0"
+            >
+              {followUps.isPending ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
+              {followUps.isPending ? "Generating…" : "Generate 3 Questions"}
+            </button>
+          )}
+        </div>
+
+        {followUps.data && (
+          <div className="space-y-2">
+            {followUps.data.questions.map((q, i) => (
+              <details key={i} className="rounded-lg border border-indigo-200 bg-white overflow-hidden">
+                <summary className="flex items-start gap-2 px-3 py-2.5 cursor-pointer text-xs font-semibold text-indigo-900 select-none">
+                  <span className="shrink-0 w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] font-bold mt-0.5">{i + 1}</span>
+                  <span className="flex-1 leading-relaxed">{q.question}</span>
+                  <span className="text-[9px] font-bold text-indigo-500 shrink-0 mt-0.5 ml-1">{q.targetArea}</span>
+                </summary>
+                <div className="px-3 pb-3 pt-1 border-t border-indigo-100">
+                  <p className="text-[11px] text-indigo-700 leading-relaxed"><span className="font-bold">Coach: </span>{q.coachingNote}</p>
+                </div>
+              </details>
+            ))}
+            {!savedFollowUps && (
+              <button
+                onClick={() => {
+                  const queue = loadFollowUpQueue();
+                  const now = Date.now();
+                  const dateStr = new Date(now).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                  const newItems: FollowUpItem[] = followUps.data!.questions.map((q, i) => ({
+                    id: `${now}-${i}`,
+                    ts: now,
+                    sessionDate: dateStr,
+                    question: q.question,
+                    targetArea: q.targetArea,
+                    coachingNote: q.coachingNote,
+                    reviewed: false,
+                  }));
+                  saveFollowUpQueue([...newItems, ...queue]);
+                  setSavedFollowUps(true);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors"
+              >
+                ➕ Save to Review Queue
+              </button>
+            )}
+            {savedFollowUps && (
+              <p className="text-[11px] text-emerald-600 font-semibold text-center">✓ Saved to review queue</p>
+            )}
+          </div>
+        )}
+        {followUps.isError && <p className="text-xs text-red-500">Failed to generate questions. Please try again.</p>}
+      </div>
 
       {/* Session Transcript */}
       <SessionTranscript session={session} />

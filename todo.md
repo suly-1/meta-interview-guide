@@ -186,3 +186,13 @@
 - [x] Blitz Round — 10 problems, 2 min each, no hints/skips, leaderboard if all 10 attempted
 - [x] Chaos Mode — random problems with hidden pattern label, revealed after solve/skip
 - [x] Gauntlet Mode — 7-tab sequential run with mini-challenges, one-failure-ends, Gauntlet Cleared badge
+
+## Current Batch (Boss Leaderboard + Combo Toast + Mastery Export)
+- [ ] Boss Fight leaderboard in Stats view (fastest clear times per topic, personal-best table)
+- [ ] Combo milestone toast (animated toast at ×2 and ×3 first-time achievements)
+- [ ] Mastery Tree Markdown export (Copy as Markdown button with unlock checklist)
+
+## Current Batch (Mock Interview Realism)
+- [x] Pressure Simulator — random interviewer interjections at unpredictable intervals during mock
+- [x] Silence Detector — Web Speech API 45s silence prompt during mock
+- [x] Follow-up Question Bank — LLM-generated personalized follow-ups after debrief, saved to review queue

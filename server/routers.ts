@@ -167,6 +167,80 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
    * Receives coding result + behavioral answers and returns a structured debrief.
    */
   mockInterview: router({
+    /**
+     * mockInterview.followUps — generates 3 personalized follow-up questions based on the weakest part of the debrief.
+     */
+    followUps: publicProcedure
+      .input(
+        z.object({
+          targetLevel: z.enum(["IC6", "IC7", "IC7_PRINCIPAL"]).default("IC6"),
+          behavioralFeedback: z.string(),
+          codingFeedback: z.string().optional(),
+          topImprovements: z.array(z.string()),
+          behavioralAnswers: z.array(z.object({
+            question: z.string(),
+            answer: z.string(),
+          })).max(4),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7_PRINCIPAL"
+          ? "Principal/Senior Staff Engineer (IC7+)"
+          : input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const improvementsText = input.topImprovements.slice(0, 3).map((s, i) => `${i + 1}. ${s}`).join("\n");
+        const answersText = input.behavioralAnswers
+          .map((b, i) => `Q${i + 1}: ${b.question}\nA${i + 1}: ${b.answer.slice(0, 300)}${b.answer.length > 300 ? '...' : ''}`)
+          .join("\n\n");
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `You are a Meta interview coach. Based on a candidate's mock interview debrief, generate exactly 3 targeted follow-up questions that probe their weakest areas. Each question should:\n- Be specific to the candidate's actual answers (not generic)\n- Target the ${levelLabel} bar\n- Be phrased as a real interviewer would ask it\n- Include a brief coaching note (1 sentence) explaining WHY this question targets a weakness`,
+            },
+            {
+              role: "user",
+              content: `Behavioral feedback: ${input.behavioralFeedback}\n${input.codingFeedback ? `Coding feedback: ${input.codingFeedback}\n` : ""}\nTop areas to improve:\n${improvementsText}\n\nCandidate's behavioral answers:\n${answersText}`,
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "follow_up_questions",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  questions: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        question: { type: "string" },
+                        targetArea: { type: "string" },
+                        coachingNote: { type: "string" },
+                      },
+                      required: ["question", "targetArea", "coachingNote"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["questions"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          const parsed = JSON.parse(text) as { questions: { question: string; targetArea: string; coachingNote: string }[] };
+          return { questions: parsed.questions.slice(0, 3) };
+        } catch {
+          return { questions: [] };
+        }
+      }),
+
     debrief: publicProcedure
       .input(
         z.object({
