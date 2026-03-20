@@ -320,3 +320,13 @@
 - [ ] 8 Key Signals That Distinguish IC7 from IC6 in Behavioral tab
 - [ ] Share Prep State URL (encode interview date + checklist progress into shareable URL)
 - [ ] 10-Week Study Timeline option (alongside existing 4-week and 2-week plans)
+
+## New Features — Batch 3 (AI Mock Interviewer, Leaderboard, SR Scheduler)
+- [ ] AI Mock Interviewer — tRPC LLM procedure scoring STAR answers against IC7 signals rubric
+- [ ] Peer Comparison Leaderboard — DB schema, opt-in, anonymised leaderboard UI
+- [ ] Spaced Repetition Scheduler — daily "3 cards due today" prompt in Quick Actions row
+
+## New Features — Day-Of Preparation
+- [x] D-0 Interview Day Mode — 2-hour morning routine (warm-up, STAR reviews, design recap, breathing timer)
+- [x] Last-Mile Cheat Sheet Generator — 1-page PDF (top 3 STAR stories, 5 weakest patterns, SD template)
+- [x] Confidence Calibration Quiz — 10-question rapid-fire self-assessment with readiness score + focus recs

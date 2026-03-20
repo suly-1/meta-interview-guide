@@ -14,6 +14,7 @@ import { FullMockDaySimulator } from "@/components/FullMockDaySimulator";
 import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/components/OverviewExtras";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { DayOfModePanel, LastMileCheatSheet, ConfidenceCalibrationQuiz } from "@/components/DayOfMode";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
 function DisclaimerStatusBadge() {
@@ -1818,6 +1819,9 @@ export default function OverviewTab() {
       <PrepTimeline />
       <StarStoryBank />
       <InterviewDayChecklist />
+      <DayOfModePanel />
+      <LastMileCheatSheet />
+      <ConfidenceCalibrationQuiz />
       <ResourcesSection />
       <ReadinessGoalSetter />
       <CTCIDivergenceReport />
