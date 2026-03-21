@@ -10,7 +10,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "deploy:github-pages": "pnpm run build && gh workflow run deploy.yml --repo suly-1/meta-interview-guide 2>/dev/null || git push github HEAD:main"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

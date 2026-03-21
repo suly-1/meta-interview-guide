@@ -3,7 +3,11 @@
  * Reads directly from localStorage keys used across the app.
  */
 import { useMemo, useState } from "react";
-import { X, Download, Trash2, TrendingUp, BookOpen, Brain, Flame, Star, Trophy, Target, BarChart2, Clock, MessageSquare, Zap, Medal, Monitor, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  X, Download, Trash2, TrendingUp, BookOpen, Brain, Flame, Star, Trophy,
+  Target, BarChart2, Clock, MessageSquare, Zap, Medal, Monitor,
+  ChevronDown, ChevronUp, RefreshCw, AlertTriangle,
+} from "lucide-react";
 import { getLevelInfo, XP_LEVELS } from "@/hooks/useXP";
 
 // ── Screen Simulation Session History helpers ────────────────────────────────
@@ -16,21 +20,41 @@ interface ScreenSessionSummary {
   targetLevel: string;
   overallRating: string;
   recommendation: string;
-  questions: Array<{ problemName: string; difficulty: string; execResult: { passed: boolean; testCasesPassed?: number; testCasesTotal?: number } | null }>;
+  questions: Array<{
+    problemName: string;
+    difficulty: string;
+    execResult: { passed: boolean; testCasesPassed?: number; testCasesTotal?: number } | null;
+    problemId?: number;
+  }>;
 }
 
 function loadScreenSessions(): ScreenSessionSummary[] {
   try { return JSON.parse(localStorage.getItem(SCREEN_SESSIONS_KEY) ?? "[]"); } catch { return []; }
 }
 
+// ── Retry Weak Questions helpers ─────────────────────────────────────────────
+const RETRY_QUEUE_KEY = "meta-coding-screen-retry-queue";
+
+export function saveRetryQueue(problemIds: number[]) {
+  localStorage.setItem(RETRY_QUEUE_KEY, JSON.stringify(problemIds));
+}
+
+export function loadRetryQueue(): number[] {
+  try { return JSON.parse(localStorage.getItem(RETRY_QUEUE_KEY) ?? "[]"); } catch { return []; }
+}
+
+export function clearRetryQueue() {
+  localStorage.removeItem(RETRY_QUEUE_KEY);
+}
+
 // ── Weakness Sprint Leaderboard helpers ─────────────────────────────────────
 const WEAKNESS_SPRINT_KEY = "meta-guide-weakness-sprint-history";
 
 export interface WeaknessSprintRecord {
-  date: string;        // "YYYY-MM-DD"
-  patterns: string[];  // top-3 weak patterns targeted
-  score: number;       // 0-8 correct
-  total: number;       // always 8
+  date: string;
+  patterns: string[];
+  score: number;
+  total: number;
 }
 
 export function saveWeaknessSprintRecord(record: WeaknessSprintRecord) {
@@ -70,40 +94,28 @@ function getStreak(streakDates: string[]): number {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface ProgressSnapshot {
-  // XP & Level
   totalXP: number;
   levelName: string;
   levelEmoji: string;
   levelProgressPct: number;
   todayXP: number;
-  // CTCI
   ctciSolved: number;
   ctciStarred: number;
   ctciTotal: number;
-  // Streak
   streak: number;
-  // Patterns
   patternsRated: number;
   patternAvgRating: number | null;
-  // Behavioral
   behavioralRated: number;
   behavioralAvg: number | null;
-  // SD Mocks
   sdMockCount: number;
-  // AI Mocks
   aiMockCount: number;
-  // Readiness
   readinessTotal: number;
-  // Sprints
   sprintCount: number;
-  // Session log
   sessionCount: number;
-  // Last active
   lastActive: string | null;
 }
 
 function computeSnapshot(): ProgressSnapshot {
-  // XP
   const xpStore = loadJSON<{ totalXP: number; events: { ts: number; amount: number }[] }>(
     "meta-guide-xp-log", { totalXP: 0, events: [] }
   );
@@ -114,17 +126,14 @@ function computeSnapshot(): ProgressSnapshot {
     .filter(e => new Date(e.ts).toISOString().split("T")[0] === today)
     .reduce((s, e) => s + e.amount, 0);
 
-  // CTCI
   const ctciData = loadJSON<Record<number, { solved: boolean; starred: boolean }>>("ctci_progress_v1", {});
   const ctciSolved = Object.values(ctciData).filter(p => p.solved).length;
   const ctciStarred = Object.values(ctciData).filter(p => p.starred).length;
-  const ctciTotal = 500; // approximate
+  const ctciTotal = 500;
 
-  // Streak
   const streakDates = loadJSON<string[]>("meta-guide-streak-dates", []);
   const streak = getStreak(streakDates);
 
-  // Pattern drill ratings
   const drillData = loadJSON<Record<string, { rating: number }[]>>("meta-guide-drill-ratings", {});
   const patternEntries = Object.values(drillData).filter(arr => arr.length > 0);
   const patternsRated = patternEntries.length;
@@ -133,7 +142,6 @@ function computeSnapshot(): ProgressSnapshot {
     ? Math.round((allRatings.reduce((a, b) => a + b, 0) / allRatings.length) * 10) / 10
     : null;
 
-  // Behavioral ratings
   const behData = loadJSON<Record<string, { rating: number }[]>>("meta-guide-practice-ratings", {});
   const behEntries = Object.values(behData).filter(arr => arr.length > 0);
   const behavioralRated = behEntries.length;
@@ -142,15 +150,12 @@ function computeSnapshot(): ProgressSnapshot {
     ? Math.round((allBehRatings.reduce((a, b) => a + b, 0) / allBehRatings.length) * 10) / 10
     : null;
 
-  // SD Mocks
   const sdHistory = loadJSON<{ id: string }[]>("sd_mock_history_v1", []);
   const sdMockCount = sdHistory.length;
 
-  // AI Mocks
   const aiHistory = loadJSON<{ id: string }[]>("ai_mock_session_history", []);
   const aiMockCount = aiHistory.length;
 
-  // Readiness (composite)
   const drillAvgs = patternEntries.map(arr => arr.reduce((s, e) => s + e.rating, 0) / arr.length);
   const drillAvg = drillAvgs.length ? drillAvgs.reduce((a, b) => a + b, 0) / drillAvgs.length : null;
   const drillScore = drillAvg !== null ? Math.round((drillAvg / 5) * 100) : 0;
@@ -159,18 +164,13 @@ function computeSnapshot(): ProgressSnapshot {
   const streakScore = Math.min(100, Math.round((streak / 14) * 100));
   const readinessTotal = Math.round(drillScore * 0.4 + ctciScore * 0.3 + behavioralScore * 0.2 + streakScore * 0.1);
 
-  // Sprint count (from code practice stats)
   const sprintHistory = loadJSON<{ id: string }[]>("meta-guide-sprint-history", []);
   const sprintCount = sprintHistory.length;
 
-  // Session log
   const sessionLog = loadJSON<{ id: string }[]>("meta-guide-session-log", []);
   const sessionCount = sessionLog.length;
 
-  // Last active
-  const allTimestamps = [
-    ...xpStore.events.map(e => e.ts),
-  ].filter(Boolean);
+  const allTimestamps = [...xpStore.events.map(e => e.ts)].filter(Boolean);
   const lastActive = allTimestamps.length
     ? new Date(Math.max(...allTimestamps)).toLocaleDateString()
     : null;
@@ -249,7 +249,7 @@ function StatCard({ icon, label, value, sub, color }: {
   icon: React.ReactNode; label: string; value: string | number; sub?: string; color: string;
 }) {
   return (
-    <div className={`rounded-xl border p-4 flex items-start gap-3 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700`}>
+    <div className="rounded-xl border p-4 flex items-start gap-3 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700">
       <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${color}`}>
         {icon}
       </div>
@@ -282,16 +282,65 @@ function ProgressBar({ label, value, max, color }: { label: string; value: numbe
 interface Props {
   open: boolean;
   onClose: () => void;
+  onRetrySession?: (problemIds: number[]) => void;
 }
 
-export default function ProgressDashboard({ open, onClose }: Props) {
+export default function ProgressDashboard({ open, onClose, onRetrySession }: Props) {
   const snap = useMemo(() => computeSnapshot(), [open]);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [retryQueued, setRetryQueued] = useState(false);
 
   if (!open) return null;
 
   const levelInfo = getLevelInfo(snap.totalXP);
   const nextLevel = levelInfo.next;
+
+  // ── Retry Weak Questions logic ─────────────────────────────────────────
+  function getWeakQuestions(): { problemId: number; problemName: string; difficulty: string; failedCount: number }[] {
+    const sessions = loadScreenSessions();
+    if (sessions.length === 0) return [];
+
+    // Aggregate fail counts per problem
+    const failMap: Record<number, { problemName: string; difficulty: string; failCount: number; totalCount: number }> = {};
+    for (const session of sessions) {
+      for (const q of session.questions) {
+        const id = q.problemId ?? 0;
+        if (!id) continue;
+        if (!failMap[id]) failMap[id] = { problemName: q.problemName, difficulty: q.difficulty, failCount: 0, totalCount: 0 };
+        failMap[id].totalCount++;
+        if (!q.execResult || !q.execResult.passed) failMap[id].failCount++;
+      }
+    }
+
+    // Return problems with at least one failure, sorted by fail rate desc
+    return Object.entries(failMap)
+      .filter(([, v]) => v.failCount > 0)
+      .map(([id, v]) => ({
+        problemId: Number(id),
+        problemName: v.problemName,
+        difficulty: v.difficulty,
+        failedCount: v.failCount,
+      }))
+      .sort((a, b) => b.failedCount - a.failedCount)
+      .slice(0, 4); // top 4 weakest
+  }
+
+  const weakQuestions = getWeakQuestions();
+
+  function handleRetryWeak() {
+    const ids = weakQuestions.map(q => q.problemId);
+    saveRetryQueue(ids);
+    setRetryQueued(true);
+    setTimeout(() => {
+      onRetrySession?.(ids);
+    }, 600);
+  }
+
+  const DIFF_COLORS: Record<string, string> = {
+    Easy: "text-emerald-600 bg-emerald-50 border-emerald-200",
+    Medium: "text-amber-600 bg-amber-50 border-amber-200",
+    Hard: "text-red-600 bg-red-50 border-red-200",
+  };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
@@ -338,7 +387,6 @@ export default function ProgressDashboard({ open, onClose }: Props) {
                 style={{ width: `${snap.levelProgressPct}%` }}
               />
             </div>
-            {/* Level milestones */}
             <div className="flex justify-between mt-2">
               {XP_LEVELS.map((lvl, i) => (
                 <div key={i} className="flex flex-col items-center gap-0.5" title={`${lvl.name}: ${lvl.minXP} XP`}>
@@ -419,12 +467,63 @@ export default function ProgressDashboard({ open, onClose }: Props) {
             </div>
           </div>
 
+          {/* ── Retry Weak Questions ─────────────────────────────────────── */}
+          {weakQuestions.length > 0 && (
+            <div className="rounded-xl border-2 border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={15} className="text-rose-500" />
+                  <h3 className="text-sm font-bold text-rose-800 dark:text-rose-300">Retry Weak Questions</h3>
+                </div>
+                <span className="text-[10px] bg-rose-200 dark:bg-rose-800/50 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-full font-semibold">
+                  {weakQuestions.length} problem{weakQuestions.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              <p className="text-xs text-rose-700 dark:text-rose-400 mb-3">
+                These problems had the most failures across your past sessions. Retry them now with a fresh timer to improve your score.
+              </p>
+
+              <div className="space-y-1.5 mb-4">
+                {weakQuestions.map((q) => (
+                  <div key={q.problemId} className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 border border-rose-100 dark:border-rose-800/50">
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${DIFF_COLORS[q.difficulty]}`}>
+                      {q.difficulty}
+                    </span>
+                    <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 flex-1 truncate">{q.problemName}</span>
+                    <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold shrink-0">
+                      ✗ {q.failedCount}×
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={handleRetryWeak}
+                disabled={retryQueued}
+                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                  retryQueued
+                    ? "bg-emerald-500 text-white cursor-default"
+                    : "bg-rose-600 hover:bg-rose-700 text-white shadow-sm hover:shadow-md"
+                }`}
+              >
+                {retryQueued ? (
+                  <>✓ Queued — opening Coding Interview tab…</>
+                ) : (
+                  <><RefreshCw size={14} /> Retry These {weakQuestions.length} Questions Now</>
+                )}
+              </button>
+              <p className="text-[10px] text-rose-600/70 dark:text-rose-400/70 text-center mt-1.5">
+                Opens the Coding Screen Simulator pre-loaded with your weakest problems
+              </p>
+            </div>
+          )}
+
           {/* Weakness Sprint Leaderboard */}
           {(() => {
             const history = loadWeaknessSprintHistory();
             if (history.length === 0) return null;
 
-            // Group by pattern set to find personal bests
             const byPatternKey: Record<string, WeaknessSprintRecord[]> = {};
             history.forEach(r => {
               const key = r.patterns.slice().sort().join(" · ");
@@ -432,7 +531,6 @@ export default function ProgressDashboard({ open, onClose }: Props) {
               byPatternKey[key].push(r);
             });
 
-            // Build personal-best rows: best score per pattern combo
             const pbRows = Object.entries(byPatternKey).map(([key, records]) => {
               const best = records.reduce((a, b) => (b.score > a.score ? b : a));
               const attempts = records.length;
@@ -464,9 +562,7 @@ export default function ProgressDashboard({ open, onClose }: Props) {
                       <div key={row.key} className="flex items-center gap-3">
                         <span className="text-base w-5 flex-shrink-0">{medal || <span className="text-xs text-gray-400 font-bold">#{i + 1}</span>}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate" title={row.key}>
-                            {row.key}
-                          </p>
+                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate" title={row.key}>{row.key}</p>
                           <p className="text-[10px] text-gray-400">
                             Best: {row.best.score}/{row.best.total} · Avg: {row.avgScore.toFixed(1)}/8 · {row.attempts} attempt{row.attempts !== 1 ? "s" : ""} · {row.best.date}
                           </p>
@@ -486,12 +582,6 @@ export default function ProgressDashboard({ open, onClose }: Props) {
                     );
                   })}
                 </div>
-
-                {history.length > 0 && (
-                  <p className="text-[10px] text-gray-400 mt-3 text-center">
-                    Personal bests from "Fix My Weaknesses" sprints — run more to improve your scores
-                  </p>
-                )}
               </div>
             );
           })()}
@@ -513,7 +603,7 @@ export default function ProgressDashboard({ open, onClose }: Props) {
             );
             const displayed = showAll ? sorted : sorted.slice(0, 5);
 
-            const RATING_COLORS: Record<string, string> = {
+            const RATING_COLORS_LOCAL: Record<string, string> = {
               "Exceptional": "text-violet-600 bg-violet-50 dark:bg-violet-900/20",
               "Strong": "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20",
               "Solid": "text-blue-600 bg-blue-50 dark:bg-blue-900/20",
@@ -550,7 +640,7 @@ export default function ProgressDashboard({ open, onClose }: Props) {
                           <span className="text-xs font-mono text-muted-foreground">{new Date(s.date).toLocaleDateString()}</span>
                           <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{s.targetLevel}</span>
                           {s.overallRating && (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${RATING_COLORS[s.overallRating] ?? "text-gray-500"}`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${RATING_COLORS_LOCAL[s.overallRating] ?? "text-gray-500"}`}>
                               {s.overallRating}
                             </span>
                           )}
@@ -563,7 +653,7 @@ export default function ProgressDashboard({ open, onClose }: Props) {
                           </span>
                           <span className="text-[10px] text-muted-foreground">{mins}m {secs}s</span>
                         </div>
-                        <div className="mt-2 flex gap-3">
+                        <div className="mt-2 flex gap-3 flex-wrap">
                           {s.questions?.map((q, i) => (
                             <div key={i} className="flex items-center gap-1.5 text-[10px]">
                               <span className="font-semibold text-muted-foreground">Q{i + 1}:</span>
@@ -629,5 +719,3 @@ export default function ProgressDashboard({ open, onClose }: Props) {
     </div>
   );
 }
-
-

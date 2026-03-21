@@ -4,7 +4,7 @@
  * - Two coding questions selected in advance
  * - 30-minute countdown timer
  * - Monaco code editor per question with 6-language support
- * - Submit Solution button → Judge0 execution → pass/fail results
+ * - Submit Solution button -> Judge0 execution -> pass/fail results
  * - Structured note-taking by focus area (Problem Solving, Coding, Verification, Technical Communication)
  * - 6-point Meta scale per dimension: Insufficient / Moderate / Solid / Strong / Exceptional / Can't Assess
  * - AI debrief: validates self-ratings, incorporates Judge0 results for Coding + Verification scoring
@@ -12,6 +12,7 @@
  * - Session history persisted in localStorage
  */
 import { useState, useEffect, useRef, useCallback } from "react";
+import MockInterviewerChat from "@/components/MockInterviewerChat";
 import Editor from "@monaco-editor/react";
 import { trpc } from "@/lib/trpc";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import { Streamdown } from "streamdown";
 
-// ── Language config (mirrors CodePractice) ─────────────────────────────────
+// -- Language config (mirrors CodePractice) ---------------------------------
 
 const LANGUAGES = [
   { id: 100, name: "Python 3",   monaco: "python",     ext: "py"   },
@@ -40,7 +41,7 @@ const LANGUAGES = [
 type LangId = typeof LANGUAGES[number]["id"];
 
 const BOILERPLATE: Record<LangId, string> = {
-  100: `# Python 3 — {name} ({difficulty})
+  100: `# Python 3 ? {name} ({difficulty})
 # Topics: {topic}
 # LeetCode: {url}
 
@@ -51,11 +52,11 @@ class Solution:
         # Write your solution here
         pass
 
-# ── Test your solution ──
+# -- Test your solution --
 sol = Solution()
 # print(sol.solve())
 `,
-  102: `// JavaScript — {name} ({difficulty})
+  102: `// JavaScript ? {name} ({difficulty})
 // Topics: {topic}
 
 /**
@@ -67,7 +68,7 @@ var solve = function() {
 
 // console.log(solve());
 `,
-  91: `// Java — {name} ({difficulty})
+  91: `// Java ? {name} ({difficulty})
 // Topics: {topic}
 
 import java.util.*;
@@ -83,7 +84,7 @@ class Solution {
     }
 }
 `,
-  105: `// C++ — {name} ({difficulty})
+  105: `// C++ ? {name} ({difficulty})
 // Topics: {topic}
 
 #include <bits/stdc++.h>
@@ -102,7 +103,7 @@ int main() {
     return 0;
 }
 `,
-  95: `// Go — {name} ({difficulty})
+  95: `// Go ? {name} ({difficulty})
 // Topics: {topic}
 
 package main
@@ -118,7 +119,7 @@ func main() {
     fmt.Println("Done")
 }
 `,
-  83: `// Swift — {name} ({difficulty})
+  83: `// Swift ? {name} ({difficulty})
 // Topics: {topic}
 
 class Solution {
@@ -140,7 +141,7 @@ function getBoilerplate(langId: LangId, p: typeof CTCI_PROBLEMS[0]): string {
     .replace("{url}", p.url);
 }
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// -- Types ------------------------------------------------------------------
 
 type MetaRating = "Insufficient" | "Moderate" | "Solid" | "Strong" | "Exceptional" | "Can't Assess" | "";
 
@@ -204,7 +205,7 @@ interface ScreenSession {
   targetLevel: "E4" | "E5" | "E6" | "E6+";
 }
 
-// ── E6+ Behavioral Focus Areas ────────────────────────────────────────────
+// -- E6+ Behavioral Focus Areas --------------------------------------------
 
 const E6_BEHAVIORAL_AREAS = [
   {
@@ -223,7 +224,7 @@ const E6_BEHAVIORAL_AREAS = [
   },
 ];
 
-// ── Constants ──────────────────────────────────────────────────────────────
+// -- Constants --------------------------------------------------------------
 
 const SCREEN_DURATION = 30 * 60;
 const STORAGE_KEY = "meta-coding-screen-sessions-v2";
@@ -278,7 +279,7 @@ const DIFF_COLORS: Record<string, string> = {
   Hard: "text-red-600 bg-red-50 border-red-200",
 };
 
-// ── Sub-components ───────────────────────────────────────────────────────
+// -- Sub-components -------------------------------------------------------
 
 function RunHistoryPanel({ runs }: { runs: RunHistoryEntry[] }) {
   const [open, setOpen] = useState(false);
@@ -314,7 +315,7 @@ function RunHistoryPanel({ runs }: { runs: RunHistoryEntry[] }) {
   );
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// -- Helpers ----------------------------------------------------------------
 
 function makeFocusArea(): FocusAreaState {
   return { rating: "", cantAssessReason: "", notes: "" };
@@ -391,7 +392,7 @@ function proceedFromOverall(r: MetaRating): "Proceed" | "Do Not Proceed" | "" {
   return "Proceed";
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────
+// -- Sub-components ---------------------------------------------------------
 
 function RatingButton({ rating, selected, onClick }: { rating: MetaRating; selected: boolean; onClick: () => void }) {
   return (
@@ -462,7 +463,7 @@ function FocusAreaPanel({
                 type="text"
                 value={state.cantAssessReason}
                 onChange={e => onChange({ ...state, cantAssessReason: e.target.value })}
-                placeholder="e.g. didn't ask questions, limited observations…"
+                placeholder="e.g. didn't ask questions, limited observations?"
                 className="w-full text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-violet-400"
               />
             </div>
@@ -473,7 +474,7 @@ function FocusAreaPanel({
             <textarea
               value={state.notes}
               onChange={e => onChange({ ...state, notes: e.target.value })}
-              placeholder={`Notes on ${area.label.toLowerCase()} signals observed during Q${questionIdx + 1}…`}
+              placeholder={`Notes on ${area.label.toLowerCase()} signals observed during Q${questionIdx + 1}?`}
               rows={2}
               className="w-full text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-1 focus:ring-violet-400"
             />
@@ -482,7 +483,7 @@ function FocusAreaPanel({
       )}
     </div>
   );
-}// E6BehavioralPanel — self-contained local state panel for E6+ behavioral areas
+}// E6BehavioralPanel ? self-contained local state panel for E6+ behavioral areas
 function E6BehavioralPanel({
   area,
   questionIdx,
@@ -501,7 +502,7 @@ function E6BehavioralPanel({
   );
 }
 
-// ── Main Component ──────────────────────────────────────────────────────────────
+// -- Main Component --------------------------------------------------------------
 
 export default function MetaCodingScreenSimulator() {
   const [phase, setPhase] = useState<"setup" | "active" | "debrief" | "history">("setup");
@@ -509,7 +510,7 @@ export default function MetaCodingScreenSimulator() {
   const [durationMin, setDurationMin] = useState<30 | 35 | 40 | 45>(30);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
   const [activeQ, setActiveQ] = useState(0);
-  const [activePanel, setActivePanel] = useState<"editor" | "notes">("editor");
+  const [activePanel, setActivePanel] = useState<"editor" | "notes" | "chat">("editor");
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [aiDebrief, setAiDebrief] = useState("");
@@ -530,7 +531,7 @@ export default function MetaCodingScreenSimulator() {
     setQuestions(shuffled.slice(0, 2).map(makeQuestion));
   }, []);
 
-  // AI Pick — calibrated to weakest patterns
+  // AI Pick ? calibrated to weakest patterns
   const aiPickProblems = useCallback(async () => {
     setAiPickLoading(true);
     try {
@@ -556,19 +557,19 @@ export default function MetaCodingScreenSimulator() {
     const overall = overallFromQuestions(questions);
     const recommendation = proceedFromOverall(overall);
     const lines: string[] = [
-      `Meta Coding Screen Simulation — ${new Date().toLocaleDateString()}`,
-      `Target Level: ${targetLevel}  |  Recommendation: ${recommendation || "Pending"}  |  Overall: ${overall || "—"}`,
+      `Meta Coding Screen Simulation ? ${new Date().toLocaleDateString()}`,
+      `Target Level: ${targetLevel}  |  Recommendation: ${recommendation || "Pending"}  |  Overall: ${overall || "?"}`,
       "",
       ...questions.map((q, i) => {
         const ratings = FOCUS_AREAS.map(fa => {
           const s = q.focusAreas[fa.key];
-          return `  ${fa.label}: ${s.rating || "—"}${s.notes ? ` (${s.notes.slice(0, 80)})` : ""}`;
+          return `  ${fa.label}: ${s.rating || "?"}${s.notes ? ` (${s.notes.slice(0, 80)})` : ""}`;
         }).join("\n");
         const exec = q.execResult ? `  Code: ${q.execResult.statusDescription}` : "  Code: Not submitted";
         return `Q${i + 1}: ${q.problemName} (${q.difficulty})\n${exec}\n${ratings}`;
       }),
       "",
-      "── AI Coaching Notes ──",
+      "-- AI Coaching Notes --",
       aiDebrief.replace(/[#*`]/g, "").trim(),
     ];
     const text = lines.join("\n");
@@ -655,7 +656,7 @@ export default function MetaCodingScreenSimulator() {
           const expected = tc.expectedOutput.trim();
           const tcPassed = res.statusId === 3 && actual === expected;
           caseResults.push({ label: tc.label, passed: tcPassed, expected, actual });
-          // Stop on compile error — all subsequent cases will also fail
+          // Stop on compile error ? all subsequent cases will also fail
           if (res.compileOutput || res.statusId === 6) break;
         }
 
@@ -694,7 +695,7 @@ export default function MetaCodingScreenSimulator() {
           } : item
         ));
       } else {
-        // No test cases defined — run with empty stdin as before
+        // No test cases defined ? run with empty stdin as before
         const result = await runCode.mutateAsync({
           sourceCode,
           languageId: q.langId,
@@ -732,15 +733,15 @@ export default function MetaCodingScreenSimulator() {
     const overall = overallFromQuestions(questions);
     const recommendation = proceedFromOverall(overall);
 
-    // Build structured summary for AI — include execution results
+    // Build structured summary for AI ? include execution results
     const summary = questions.map((q, i) => {
       const fas = Object.entries(q.focusAreas).map(([k, v]) => {
         const label = FOCUS_AREAS.find(f => f.key === k)?.label ?? k;
-        return `  ${label}: ${v.rating || "Not rated"}${v.cantAssessReason ? ` (${v.cantAssessReason})` : ""}${v.notes ? ` — Notes: ${v.notes}` : ""}`;
+        return `  ${label}: ${v.rating || "Not rated"}${v.cantAssessReason ? ` (${v.cantAssessReason})` : ""}${v.notes ? ` ? Notes: ${v.notes}` : ""}`;
       }).join("\n");
       const langName = LANGUAGES.find(l => l.id === q.langId)?.name ?? "Unknown";
       const exec = q.execResult
-        ? `  Execution: ${q.execResult.statusDescription} (${q.execResult.passed ? "PASSED" : "FAILED"})${q.execResult.time ? ` in ${q.execResult.time}s` : ""}${q.execResult.stderr ? ` — Stderr: ${q.execResult.stderr.slice(0, 200)}` : ""}${q.execResult.compileOutput ? ` — Compile: ${q.execResult.compileOutput.slice(0, 200)}` : ""}`
+        ? `  Execution: ${q.execResult.statusDescription} (${q.execResult.passed ? "PASSED" : "FAILED"})${q.execResult.time ? ` in ${q.execResult.time}s` : ""}${q.execResult.stderr ? ` ? Stderr: ${q.execResult.stderr.slice(0, 200)}` : ""}${q.execResult.compileOutput ? ` ? Compile: ${q.execResult.compileOutput.slice(0, 200)}` : ""}`
         : "  Execution: Not submitted";
       return `Question ${i + 1}: ${q.problemName} (${q.difficulty})\n  Language: ${langName}\n${exec}\n${fas}`;
     }).join("\n\n");
@@ -799,7 +800,7 @@ export default function MetaCodingScreenSimulator() {
     setActivePanel("editor");
   };
 
-  // ── Setup ──────────────────────────────────────────────────────────────
+  // -- Setup --------------------------------------------------------------
 
   if (phase === "setup") {
     return (
@@ -820,8 +821,8 @@ export default function MetaCodingScreenSimulator() {
           {/* Interview structure explainer */}
           <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-600 rounded-xl p-4 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-base">⏰</span>
-              <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Real Interview Timing — Read This First</p>
+              <span className="text-base">?</span>
+              <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Real Interview Timing ? Read This First</p>
             </div>
             <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
               A real Meta coding screen is <strong>45 minutes total</strong>, but the first ~15 minutes are spent on:
@@ -829,7 +830,7 @@ export default function MetaCodingScreenSimulator() {
             <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-1 list-disc list-inside">
               <li>Interviewer introduction and rapport building (~5 min)</li>
               <li>Problem explanation and setup (~5 min)</li>
-              <li><strong>Your clarification questions</strong> — you must ask these! (~5 min)</li>
+              <li><strong>Your clarification questions</strong> ? you must ask these! (~5 min)</li>
             </ul>
             <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed mt-1">
               That leaves you <strong>~30 minutes to actually code and solve the problem</strong>. We strongly recommend practising at <strong>30 minutes</strong> to build the right muscle memory for the real screen.
@@ -840,9 +841,9 @@ export default function MetaCodingScreenSimulator() {
             <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">How it works</p>
             <ul className="text-xs text-indigo-700 dark:text-indigo-400 space-y-1 list-disc list-inside">
               <li>Two coding questions auto-selected (Medium + Hard)</li>
-              <li>Countdown timer — choose your practice duration below</li>
+              <li>Countdown timer ? choose your practice duration below</li>
               <li>Write code in the built-in editor (Python, JS, Java, C++, Go, Swift)</li>
-              <li><strong>Submit Solution</strong> → Judge0 executes your code and returns pass/fail</li>
+              <li><strong>Submit Solution</strong> {"->"} Judge0 executes your code and returns pass/fail</li>
               <li>Take structured notes per focus area as you code</li>
               <li>AI debrief uses your code execution results to score Coding &amp; Verification accurately</li>
             </ul>
@@ -852,7 +853,7 @@ export default function MetaCodingScreenSimulator() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <p className="text-xs font-semibold text-foreground">Practice Duration</p>
-              <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-300">⭐ 30 min recommended</span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-300">? 30 min recommended</span>
             </div>
             <div className="flex gap-2 flex-wrap">
               {([30, 35, 40, 45] as const).map(d => (
@@ -866,15 +867,15 @@ export default function MetaCodingScreenSimulator() {
                   }`}
                 >
                   {d} min
-                  {d === 30 && <span className="absolute -top-1.5 -right-1.5 text-[8px] bg-emerald-500 text-white rounded-full px-1 font-bold leading-4">✓</span>}
+                  {d === 30 && <span className="absolute -top-1.5 -right-1.5 text-[8px] bg-emerald-500 text-white rounded-full px-1 font-bold leading-4">?</span>}
                 </button>
               ))}
             </div>
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              {durationMin === 30 && "✅ Matches real coding time after intro — best for realistic practice"}
-              {durationMin === 35 && "Slightly more buffer — good for building confidence"}
-              {durationMin === 40 && "Extended practice — useful for learning new patterns"}
-              {durationMin === 45 && "Full interview length — includes intro time; not realistic for coding-only practice"}
+              {durationMin === 30 && "? Matches real coding time after intro ? best for realistic practice"}
+              {durationMin === 35 && "Slightly more buffer ? good for building confidence"}
+              {durationMin === 40 && "Extended practice ? useful for learning new patterns"}
+              {durationMin === 45 && "Full interview length ? includes intro time; not realistic for coding-only practice"}
             </p>
           </div>
 
@@ -907,7 +908,7 @@ export default function MetaCodingScreenSimulator() {
               onClick={() => { pickProblems(); setPhase("active"); setRunning(true); }}
               className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
             >
-              <Play size={14} /> Start — {durationMin} min ({targetLevel})
+              <Play size={14} /> Start ? {durationMin} min ({targetLevel})
             </button>
             <button
               onClick={async () => { await aiPickProblems(); setPhase("active"); setRunning(true); }}
@@ -927,15 +928,15 @@ export default function MetaCodingScreenSimulator() {
     );
   }
 
-  // ── History ────────────────────────────────────────────────────────────
+  // -- History ------------------------------------------------------------
 
   if (phase === "history") {
     if (selectedSession) {
       return (
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
           <div className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-indigo-900 to-indigo-700">
-            <button onClick={() => setSelectedSession(null)} className="text-indigo-200 hover:text-white text-xs">← Back</button>
-            <span className="text-sm font-bold text-white">{new Date(selectedSession.date).toLocaleDateString()} — {selectedSession.targetLevel}</span>
+            <button onClick={() => setSelectedSession(null)} className="text-indigo-200 hover:text-white text-xs">? Back</button>
+            <span className="text-sm font-bold text-white">{new Date(selectedSession.date).toLocaleDateString()} ? {selectedSession.targetLevel}</span>
             <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full ${selectedSession.recommendation === "Proceed" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
               {selectedSession.recommendation}
             </span>
@@ -948,7 +949,7 @@ export default function MetaCodingScreenSimulator() {
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${DIFF_COLORS[q.difficulty]}`}>{q.difficulty}</span>
                   {q.execResult && (
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${q.execResult.passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
-                      {q.execResult.passed ? "✓ Passed" : "✗ Failed"}
+                      {q.execResult.passed ? "? Passed" : "? Failed"}
                     </span>
                   )}
                 </div>
@@ -983,7 +984,7 @@ export default function MetaCodingScreenSimulator() {
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-indigo-900 to-indigo-700">
           <span className="text-sm font-bold text-white">Screen Session History</span>
-          <button onClick={() => setPhase("setup")} className="text-xs text-indigo-200 hover:text-white">← Back</button>
+          <button onClick={() => setPhase("setup")} className="text-xs text-indigo-200 hover:text-white">? Back</button>
         </div>
         <div className="p-4 space-y-2 max-h-[500px] overflow-y-auto">
           {sessions.length === 0 && (
@@ -994,13 +995,13 @@ export default function MetaCodingScreenSimulator() {
               className="w-full flex items-center gap-3 p-3 border border-border rounded-xl hover:bg-muted/40 transition-colors text-left"
             >
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold text-foreground">{new Date(s.date).toLocaleDateString()} — {s.targetLevel}</div>
+                <div className="text-xs font-semibold text-foreground">{new Date(s.date).toLocaleDateString()} ? {s.targetLevel}</div>
                 <div className="text-[10px] text-muted-foreground mt-0.5">
-                  {s.questions.map(q => q.problemName).join(" · ")} · {formatTime(s.durationSec)}
+                  {s.questions.map(q => q.problemName).join(" ? ")} ? {formatTime(s.durationSec)}
                 </div>
               </div>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${s.recommendation === "Proceed" ? "bg-emerald-100 text-emerald-700 border border-emerald-300" : "bg-red-100 text-red-700 border border-red-300"}`}>
-                {s.recommendation || "—"}
+                {s.recommendation || "?"}
               </span>
               {s.overallRating && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${RATING_COLORS[s.overallRating]}`}>
@@ -1022,7 +1023,7 @@ export default function MetaCodingScreenSimulator() {
     );
   }
 
-  // ── Active ─────────────────────────────────────────────────────────────
+  // -- Active -------------------------------------------------------------
 
   if (phase === "active") {
     const q = questions[activeQ];
@@ -1035,7 +1036,7 @@ export default function MetaCodingScreenSimulator() {
         <div className={`flex items-center justify-between px-4 py-3 ${urgent ? "bg-gradient-to-r from-red-800 to-red-600" : "bg-gradient-to-r from-indigo-900 to-indigo-700"}`}>
           <div className="flex items-center gap-2">
             <Code2 size={14} className="text-white/80" />
-            <span className="text-xs font-bold text-white">Meta Coding Screen — {targetLevel}</span>
+            <span className="text-xs font-bold text-white">Meta Coding Screen ? {targetLevel}</span>
           </div>
           <div className="flex items-center gap-3">
             <div className={`flex items-center gap-1.5 text-sm font-extrabold tabular-nums ${urgent ? "text-red-200 animate-pulse" : "text-white"}`}>
@@ -1059,7 +1060,7 @@ export default function MetaCodingScreenSimulator() {
             <button key={i} onClick={() => setActiveQ(i)}
               className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeQ === i ? "border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-background" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Q{i + 1}: {q2.problemName.length > 18 ? q2.problemName.slice(0, 18) + "…" : q2.problemName}
+              Q{i + 1}: {q2.problemName.length > 18 ? q2.problemName.slice(0, 18) + "?" : q2.problemName}
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${DIFF_COLORS[q2.difficulty]}`}>{q2.difficulty}</span>
               {q2.execResult && (
                 <span className={`w-2 h-2 rounded-full ${q2.execResult.passed ? "bg-emerald-500" : "bg-red-500"}`} title={q2.execResult.passed ? "Passed" : "Failed"} />
@@ -1079,6 +1080,11 @@ export default function MetaCodingScreenSimulator() {
             className={`flex-1 py-2 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${activePanel === "notes" ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500 bg-background" : "text-muted-foreground hover:text-foreground"}`}
           >
             <Brain size={11} /> Focus Area Notes
+          </button>
+          <button onClick={() => setActivePanel("chat")}
+            className={`flex-1 py-2 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${activePanel === "chat" ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500 bg-background" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <MessageSquare size={11} /> Interviewer
           </button>
         </div>
 
@@ -1112,12 +1118,12 @@ export default function MetaCodingScreenSimulator() {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors ml-auto"
               >
                 {q.executing ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />}
-                {q.executing ? "Running…" : "Submit Solution"}
+                {q.executing ? "Running?" : "Submit Solution"}
               </button>
             </div>
 
             {/* Monaco editor */}
-            <div className="h-64 border-b border-border">
+            <div className="h-96 border-b border-border">
               <Editor
                 height="100%"
                 language={lang.monaco}
@@ -1180,17 +1186,30 @@ export default function MetaCodingScreenSimulator() {
               </div>
             )}
 
-            {/* Previous Runs — collapsible history of last 3 submissions */}
+            {/* Previous Runs ? collapsible history of last 3 submissions */}
             {q.runHistory.length > 0 && (
               <RunHistoryPanel runs={q.runHistory} />
             )}
           </div>
         )}
 
+        {/* Chat panel */}
+        {activePanel === "chat" && (
+          <div className="h-[480px] flex flex-col">
+            <MockInterviewerChat
+              problemName={q.problemName}
+              difficulty={q.difficulty as "Easy" | "Medium" | "Hard"}
+              targetLevel={targetLevel}
+              currentCode={q.code[q.langId] || ""}
+              compact={false}
+            />
+          </div>
+        )}
+
         {/* Notes panel */}
         {activePanel === "notes" && (
           <div className="p-4 space-y-2 max-h-[500px] overflow-y-auto">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Focus Area Assessment — Q{activeQ + 1}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Focus Area Assessment ? Q{activeQ + 1}</p>
             {FOCUS_AREAS.map(fa => (
               <FocusAreaPanel
                 key={fa.key}
@@ -1240,7 +1259,7 @@ export default function MetaCodingScreenSimulator() {
     );
   }
 
-  // ── Debrief ────────────────────────────────────────────────────────────
+  // -- Debrief ------------------------------------------------------------
 
   const overall = overallFromQuestions(questions);
   const recommendation = proceedFromOverall(overall);
@@ -1251,7 +1270,7 @@ export default function MetaCodingScreenSimulator() {
         <div className="flex items-center gap-2">
           {recommendation === "Proceed" ? <CheckCircle2 size={16} className="text-white" /> : recommendation === "Do Not Proceed" ? <XCircle size={16} className="text-white" /> : <Trophy size={16} className="text-white" />}
           <span className="text-sm font-bold text-white">
-            {recommendation === "Proceed" ? "✓ Proceed to Full Loop" : recommendation === "Do Not Proceed" ? "✗ Do Not Proceed" : "Screen Complete"}
+            {recommendation === "Proceed" ? "? Proceed to Full Loop" : recommendation === "Do Not Proceed" ? "? Do Not Proceed" : "Screen Complete"}
           </span>
         </div>
         {overall && (
@@ -1270,7 +1289,7 @@ export default function MetaCodingScreenSimulator() {
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${DIFF_COLORS[q.difficulty]}`}>{q.difficulty}</span>
               {q.execResult && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto ${q.execResult.passed ? "bg-emerald-100 text-emerald-700 border border-emerald-300" : "bg-red-100 text-red-700 border border-red-300"}`}>
-                  {q.execResult.passed ? "✓ Code Passed" : "✗ Code Failed"} — {q.execResult.statusDescription}
+                  {q.execResult.passed ? "? Code Passed" : "? Code Failed"} ? {q.execResult.statusDescription}
                 </span>
               )}
             </div>
@@ -1283,7 +1302,7 @@ export default function MetaCodingScreenSimulator() {
                     <span className="text-[10px] text-muted-foreground flex-1 truncate">{fa.label}</span>
                     {state.rating
                       ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${RATING_COLORS[state.rating]}`}>{state.rating}</span>
-                      : <span className="text-[10px] text-muted-foreground">—</span>
+                      : <span className="text-[10px] text-muted-foreground">?</span>
                     }
                   </div>
                 );
@@ -1297,7 +1316,7 @@ export default function MetaCodingScreenSimulator() {
           <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-3">AI Debrief & Coaching Notes</p>
           {debriefLoading ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-4">
-              <Loader2 size={14} className="animate-spin" /> Analyzing execution results and generating debrief…
+              <Loader2 size={14} className="animate-spin" /> Analyzing execution results and generating debrief?
             </div>
           ) : (
             <div className="text-xs text-foreground prose prose-sm max-w-none">

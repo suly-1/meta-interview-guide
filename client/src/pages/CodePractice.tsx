@@ -17,6 +17,7 @@ import { useXPContext } from "@/contexts/XPContext";
 import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
 import CodeDiffViewer from "@/components/CodeDiffViewer";
 import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
+import MockInterviewerChat from "@/components/MockInterviewerChat";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
@@ -1463,7 +1464,7 @@ export default function CodePractice() {
     stdout: string; stderr: string; compileOutput: string;
     statusId: number; statusDescription: string; time: string | null; memory: number | null;
   } | null>(null);
-  const [outputTab, setOutputTab] = useState<"output" | "tests" | "notes" | "history" | "submissions">("output");
+  const [outputTab, setOutputTab] = useState<"output" | "tests" | "notes" | "history" | "submissions" | "chat">("output");
 
   // Notes
   const [notes, setNotes] = useState("");
@@ -3126,7 +3127,7 @@ export default function CodePractice() {
               </div>
 
               {/* Output panel */}
-              <div className="flex-shrink-0 border-t border-border bg-card" style={{ height: "240px" }}>
+              <div className="flex-shrink-0 border-t border-border bg-card" style={{ height: outputTab === "chat" ? "420px" : "280px" }}>
                 {/* Output tabs */}
                 <div className="flex items-center gap-0 border-b border-border px-2 bg-muted/30 overflow-x-auto">
                   {[
@@ -3135,6 +3136,7 @@ export default function CodePractice() {
                     { key: "notes",       label: "Notes",       icon: <StickyNote size={12} /> },
                     { key: "history",     label: "Session",     icon: <History size={12} /> },
                     { key: "submissions", label: `Runs${submissions.length > 0 ? ` (${submissions.length})` : ""}`, icon: <GitCommit size={12} /> },
+                    { key: "chat",        label: "Interviewer",  icon: <Cpu size={12} /> },
                   ].map(tab => (
                     <button
                       key={tab.key}
@@ -3435,6 +3437,19 @@ export default function CodePractice() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {/* Interviewer Chat tab */}
+                  {outputTab === "chat" && (
+                    <div className="h-full">
+                      <MockInterviewerChat
+                        problemName={problem.name}
+                        difficulty={problem.difficulty as "Easy" | "Medium" | "Hard"}
+                        targetLevel="E6"
+                        currentCode={code}
+                        compact={false}
+                      />
                     </div>
                   )}
                 </div>

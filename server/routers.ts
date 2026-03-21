@@ -1681,5 +1681,59 @@ ${input.summary}`;
       const text = typeof debrief === "string" ? debrief : JSON.stringify(debrief);
       return { debrief: text };
     }),
+
+  /**
+   * interviewerChat.ask — LLM-powered mock interviewer chat for the coding screen simulator.
+ * The AI plays the role of a Meta interviewer, asking clarifying questions and giving hints.
+ */
+  interviewerChat: router({
+    ask: publicProcedure
+      .input(
+        z.object({
+          problemName: z.string(),
+          difficulty: z.enum(["Easy", "Medium", "Hard"]),
+          targetLevel: z.enum(["E4", "E5", "E6", "E6+"]),
+          currentCode: z.string().optional(),
+          messages: z.array(
+            z.object({
+              role: z.enum(["user", "assistant"]),
+              content: z.string(),
+            })
+          ),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "E6+" ? "Staff Engineer (E6+)" :
+          input.targetLevel === "E6" ? "Senior Engineer (E6)" :
+          input.targetLevel === "E5" ? "Engineer (E5)" : "Engineer (E4)";
+        const systemPrompt = `You are an experienced Meta software engineer interviewing a candidate for the ${levelLabel} level.
+The candidate is working on the LeetCode problem: "${input.problemName}" (${input.difficulty}).
+
+Your role as the interviewer:
+- Ask clarifying questions to understand the candidate's approach before they code
+- Probe their understanding of time/space complexity
+- Ask about edge cases they've considered
+- If they're stuck, give a small nudge (not the full solution)
+- Challenge their approach with follow-up questions ("What if the input is very large?", "Can you do better than O(n^2)?")
+- Keep responses SHORT (1-3 sentences max) — you're in a real interview, not writing an essay
+- Be professional but direct, like a real Meta interviewer
+- Never give the full solution; only guide with questions and hints
+- If they share code, comment on it specifically
+
+Current candidate code (if any):
+${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code submitted yet)"}`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...input.messages,
+          ],
+        });
+        const reply = response.choices?.[0]?.message?.content ?? "I'm here — walk me through your approach.";
+        const text = typeof reply === "string" ? reply : JSON.stringify(reply);
+        return { reply: text };
+      }),
+  }),
 });
+
 export type AppRouter = typeof appRouter;
