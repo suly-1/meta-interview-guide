@@ -314,3 +314,17 @@
 - [x] Integrate rubric into InterviewScorecard — map existing 7-criterion checklist to Meta 4 dimensions
 - [x] Integrate rubric into CodingTab as standalone ⭐ Meta SWE Rubric section
 - [x] Integrate rubric into TimedMockSession — show Meta rubric self-assessment in debrief
+
+## Meta Coding Screen Interview Simulator
+- [ ] MetaCodingScreenSimulator component — two-question format, 45-min timer, structured note-taking by focus area
+- [ ] 6-point Meta scale per dimension (Insufficient/Moderate/Solid/Strong/Exceptional/Can't Assess) with "Can't Assess" reason field
+- [ ] Focus area note panels — Problem Solving, Coding, Verification & Debugging, Technical Communication
+- [ ] AI debrief tRPC procedure — scores all 4 dimensions, generates coaching notes, Proceed/Do Not Proceed recommendation
+- [ ] Integrate simulator into Code Practice tab as a new section
+- [ ] Session history — persist completed screen simulations in localStorage, show in Stats view
+
+## Submit Solution + Judge0 Automated Scoring
+- [ ] Add Monaco code editor to MetaCodingScreenSimulator per question
+- [ ] Add Submit Solution button that calls Judge0 via existing tRPC execute procedure
+- [ ] Feed pass/fail execution results into AI debrief for automated Coding + Verification scoring
+- [ ] Update metaScreenDebrief procedure to accept testResults field

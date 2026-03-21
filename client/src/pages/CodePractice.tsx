@@ -16,6 +16,7 @@ import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { useXPContext } from "@/contexts/XPContext";
 import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
 import CodeDiffViewer from "@/components/CodeDiffViewer";
+import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
   Search, X, ChevronLeft, ChevronRight, ExternalLink, RotateCcw,
@@ -1395,6 +1396,9 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
           </div>
         );
       })()}
+
+      {/* Meta Coding Screen Simulator */}
+      <MetaCodingScreenSimulator />
 
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">

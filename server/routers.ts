@@ -1591,5 +1591,95 @@ Base your assessment ONLY on the provided approach text and code. Be calibrated 
         }
       }),
   }),
+  /**
+   * metaScreenDebrief — AI-generated debrief for a completed Meta coding screen simulation.
+   * Receives structured focus-area notes + ratings and returns a Proceed/Do Not Proceed recommendation
+   * with per-dimension coaching notes calibrated to the target level.
+   */
+  metaScreenDebrief: publicProcedure
+    .input(
+      z.object({
+        summary: z.string().min(10),
+        targetLevel: z.enum(["E4", "E5", "E6", "E6+"]),
+        overallRating: z.string(),
+        recommendation: z.string(),
+        testResults: z.string().optional(), // JSON string of Judge0 execution results per question
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { invokeLLM } = await import("./_core/llm");
+      const levelLabel = {
+        E4: "SWE (E4)",
+        E5: "Senior SWE (E5)",
+        E6: "Staff SWE (E6)",
+        "E6+": "Senior Staff / Principal SWE (E6+)",
+      }[input.targetLevel];
+
+      // Parse execution results for richer AI scoring
+      let execSummary = "";
+      if (input.testResults) {
+        try {
+          const results = JSON.parse(input.testResults) as Array<{
+            questionIndex: number;
+            problemName: string;
+            difficulty: string;
+            language: string;
+            submitted: boolean;
+            passed: boolean;
+            statusDescription: string;
+            executionTime: string | null;
+            hasCompileError: boolean;
+            hasRuntimeError: boolean;
+          }>;
+          execSummary = "\n\n## Code Execution Results (Judge0)\n" + results.map(r =>
+            `Q${r.questionIndex} (${r.problemName}, ${r.difficulty}, ${r.language}): ` +
+            (r.submitted
+              ? `${r.passed ? "✓ PASSED" : "✗ FAILED"} — ${r.statusDescription}` +
+                (r.executionTime ? ` (${r.executionTime}s)` : "") +
+                (r.hasCompileError ? " [compile error]" : "") +
+                (r.hasRuntimeError ? " [runtime error]" : "")
+              : "Not submitted")
+          ).join("\n");
+        } catch { /* ignore parse errors */ }
+      }
+
+      const systemPrompt = `You are a senior Meta engineering interview coach who has conducted hundreds of coding screen interviews.
+You are reviewing a candidate's coding screen for the ${levelLabel} bar.
+
+You have access to:
+1. The candidate's self-rated focus area scores (Problem Solving, Coding, Verification, Communication)
+2. Their interviewer-style notes per dimension
+3. ACTUAL CODE EXECUTION RESULTS from Judge0 — use these to objectively score the Coding and Verification dimensions
+
+Your job is to:
+1. Validate or challenge the candidate's self-ratings, using execution results as ground truth for Coding and Verification
+2. If code passed: confirm or upgrade Coding/Verification ratings. If code failed: identify whether it was a logic error, compile error, or runtime error and adjust ratings accordingly
+3. Identify the single biggest strength and the single most critical gap
+4. Give 2-3 concrete, actionable coaching suggestions specific to the ${levelLabel} bar
+5. Confirm or revise the Proceed / Do Not Proceed recommendation
+6. Write a 2-3 sentence overall summary that a real interviewer would write in the debrief tool
+
+Be direct, specific, and calibrated to the ${levelLabel} bar. Do not be generic.
+Format your response in clear Markdown with sections: ## Overall Verdict, ## Execution Analysis, ## Dimension Analysis, ## Coaching Suggestions, ## Interviewer Summary.`;
+
+      const userMessage = `Target Level: ${levelLabel}
+Self-assessed Overall Rating: ${input.overallRating}
+Self-assessed Recommendation: ${input.recommendation}
+${execSummary}
+
+## Focus Area Notes & Self-Ratings
+${input.summary}`;
+
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
+      });
+
+      const debrief = response.choices?.[0]?.message?.content ?? "Unable to generate debrief. Please review your notes above.";
+      const text = typeof debrief === "string" ? debrief : JSON.stringify(debrief);
+      return { debrief: text };
+    }),
 });
 export type AppRouter = typeof appRouter;
