@@ -155,7 +155,20 @@ interface ExecutionResult {
   compileOutput: string;
   time: string | null;
   memory: number | null;
-  passed: boolean; // true if status 3 (Accepted) or stdout non-empty with no error
+  passed: boolean;
+  testCasesPassed?: number;
+  testCasesTotal?: number;
+  testCaseDetails?: Array<{ label: string; passed: boolean; expected: string; actual: string }>;
+}
+
+interface RunHistoryEntry {
+  timestamp: number;
+  language: string;
+  passed: boolean;
+  statusDescription: string;
+  time: string | null;
+  testCasesPassed?: number;
+  testCasesTotal?: number;
 }
 
 interface QuestionState {
@@ -174,6 +187,7 @@ interface QuestionState {
   langId: LangId;
   execResult: ExecutionResult | null;
   executing: boolean;
+  runHistory: RunHistoryEntry[]; // last 3 submissions
 }
 
 interface ScreenSession {
@@ -242,6 +256,42 @@ const DIFF_COLORS: Record<string, string> = {
   Hard: "text-red-600 bg-red-50 border-red-200",
 };
 
+// ── Sub-components ───────────────────────────────────────────────────────
+
+function RunHistoryPanel({ runs }: { runs: RunHistoryEntry[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-border">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors"
+      >
+        <History size={11} />
+        <span className="font-semibold">Previous Runs ({runs.length})</span>
+        {open ? <ChevronUp size={11} className="ml-auto" /> : <ChevronDown size={11} className="ml-auto" />}
+      </button>
+      {open && (
+        <div className="px-4 pb-3 space-y-1.5">
+          {runs.map((r, i) => (
+            <div key={i} className={`flex items-center gap-2 rounded p-1.5 text-[10px] ${r.passed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-50 dark:bg-red-900/20"}`}>
+              {r.passed ? <CheckCircle2 size={10} className="text-emerald-600 shrink-0" /> : <XCircle size={10} className="text-red-600 shrink-0" />}
+              <span className="font-mono text-muted-foreground shrink-0">{new Date(r.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+              <span className="font-semibold truncate flex-1">{r.statusDescription}</span>
+              <span className="text-muted-foreground shrink-0">{r.language}</span>
+              {r.time && <span className="text-muted-foreground shrink-0">{r.time}s</span>}
+              {r.testCasesTotal != null && (
+                <span className={`shrink-0 font-bold ${r.testCasesPassed === r.testCasesTotal ? "text-emerald-600" : "text-red-600"}`}>
+                  {r.testCasesPassed}/{r.testCasesTotal} TC
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function makeFocusArea(): FocusAreaState {
@@ -257,6 +307,7 @@ function makeQuestion(p: typeof CTCI_PROBLEMS[0]): QuestionState {
     difficulty: p.difficulty,
     url: p.url,
     topic: p.topic,
+    runHistory: [],
     focusAreas: {
       problemSolving: makeFocusArea(),
       coding: makeFocusArea(),
@@ -480,16 +531,91 @@ export default function MetaCodingScreenSimulator() {
     const q = questions[qIdx];
     if (!q) return;
     setQuestions(prev => prev.map((item, i) => i === qIdx ? { ...item, executing: true, execResult: null } : item));
+
+    const { getTestCasesForProblem } = await import("@/lib/ctciTestCases");
+    const testCases = getTestCasesForProblem(q.problemId);
+    const sourceCode = q.code[q.langId] || getBoilerplate(q.langId, { id: q.problemId, name: q.problemName, difficulty: q.difficulty as "Easy" | "Medium" | "Hard", url: q.url, topic: q.topic });
+    const langName = LANGUAGES.find(l => l.id === q.langId)?.name ?? "Unknown";
+
     try {
-      const result = await runCode.mutateAsync({
-        sourceCode: q.code[q.langId] || getBoilerplate(q.langId, { id: q.problemId, name: q.problemName, difficulty: q.difficulty as "Easy" | "Medium" | "Hard", url: q.url, topic: q.topic }),
-        languageId: q.langId,
-        stdin: "",
-      });
-      const passed = result.statusId === 3 || (result.statusId !== 6 && result.statusId !== 5 && !result.stderr && !result.compileOutput);
-      setQuestions(prev => prev.map((item, i) =>
-        i === qIdx ? { ...item, executing: false, execResult: { ...result, passed } } : item
-      ));
+      if (testCases.length > 0) {
+        // Run each test case sequentially and collect results
+        const caseResults: Array<{ label: string; passed: boolean; expected: string; actual: string }> = [];
+        let lastResult: Awaited<ReturnType<typeof runCode.mutateAsync>> | null = null;
+
+        for (const tc of testCases) {
+          const res = await runCode.mutateAsync({
+            sourceCode,
+            languageId: q.langId,
+            stdin: tc.stdin,
+          });
+          lastResult = res;
+          const actual = (res.stdout ?? "").trim();
+          const expected = tc.expectedOutput.trim();
+          const tcPassed = res.statusId === 3 && actual === expected;
+          caseResults.push({ label: tc.label, passed: tcPassed, expected, actual });
+          // Stop on compile error — all subsequent cases will also fail
+          if (res.compileOutput || res.statusId === 6) break;
+        }
+
+        const passedCount = caseResults.filter(r => r.passed).length;
+        const allPassed = passedCount === caseResults.length;
+        const execResult: ExecutionResult = {
+          statusId: lastResult?.statusId ?? 0,
+          statusDescription: allPassed ? "Accepted" : `${passedCount}/${caseResults.length} test cases passed`,
+          stdout: lastResult?.stdout ?? "",
+          stderr: lastResult?.stderr ?? "",
+          compileOutput: lastResult?.compileOutput ?? "",
+          time: lastResult?.time ?? null,
+          memory: lastResult?.memory ?? null,
+          passed: allPassed,
+          testCasesPassed: passedCount,
+          testCasesTotal: caseResults.length,
+          testCaseDetails: caseResults,
+        };
+
+        const historyEntry: RunHistoryEntry = {
+          timestamp: Date.now(),
+          language: langName,
+          passed: allPassed,
+          statusDescription: execResult.statusDescription,
+          time: execResult.time,
+          testCasesPassed: passedCount,
+          testCasesTotal: caseResults.length,
+        };
+
+        setQuestions(prev => prev.map((item, i) =>
+          i === qIdx ? {
+            ...item,
+            executing: false,
+            execResult,
+            runHistory: [historyEntry, ...item.runHistory].slice(0, 3),
+          } : item
+        ));
+      } else {
+        // No test cases defined — run with empty stdin as before
+        const result = await runCode.mutateAsync({
+          sourceCode,
+          languageId: q.langId,
+          stdin: "",
+        });
+        const passed = result.statusId === 3 || (result.statusId !== 6 && result.statusId !== 5 && !result.stderr && !result.compileOutput);
+        const historyEntry: RunHistoryEntry = {
+          timestamp: Date.now(),
+          language: langName,
+          passed,
+          statusDescription: result.statusDescription,
+          time: result.time,
+        };
+        setQuestions(prev => prev.map((item, i) =>
+          i === qIdx ? {
+            ...item,
+            executing: false,
+            execResult: { ...result, passed },
+            runHistory: [historyEntry, ...item.runHistory].slice(0, 3),
+          } : item
+        ));
+      }
     } catch {
       setQuestions(prev => prev.map((item, i) =>
         i === qIdx ? { ...item, executing: false, execResult: { statusId: 0, statusDescription: "Error", stdout: "", stderr: "Execution failed. Check your code.", compileOutput: "", time: null, memory: null, passed: false } } : item
@@ -860,7 +986,26 @@ export default function MetaCodingScreenSimulator() {
                   {q.execResult.time && <span className="text-muted-foreground ml-auto">{q.execResult.time}s</span>}
                   {q.execResult.memory && <span className="text-muted-foreground">{Math.round(q.execResult.memory / 1024)}KB</span>}
                 </div>
-                {q.execResult.stdout && (
+                {/* Per-test-case breakdown */}
+                {q.execResult.testCaseDetails && q.execResult.testCaseDetails.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {q.execResult.testCaseDetails.map((tc, i) => (
+                      <div key={i} className={`flex items-start gap-2 rounded p-1.5 ${tc.passed ? "bg-emerald-100/60 dark:bg-emerald-900/30" : "bg-red-100/60 dark:bg-red-900/30"}`}>
+                        {tc.passed ? <CheckCircle2 size={11} className="text-emerald-600 mt-0.5 shrink-0" /> : <XCircle size={11} className="text-red-600 mt-0.5 shrink-0" />}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[10px] truncate">{tc.label}</p>
+                          {!tc.passed && (
+                            <p className="text-[10px] text-muted-foreground">
+                              Expected: <code className="font-mono">{tc.expected.slice(0, 40)}</code>
+                              {" | "}Got: <code className="font-mono">{tc.actual.slice(0, 40) || "(empty)"}</code>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {q.execResult.stdout && !q.execResult.testCaseDetails?.length && (
                   <pre className="text-[10px] font-mono text-foreground bg-background/60 rounded p-2 mt-1 max-h-24 overflow-y-auto whitespace-pre-wrap">{q.execResult.stdout}</pre>
                 )}
                 {(q.execResult.stderr || q.execResult.compileOutput) && (
@@ -869,6 +1014,11 @@ export default function MetaCodingScreenSimulator() {
                   </pre>
                 )}
               </div>
+            )}
+
+            {/* Previous Runs — collapsible history of last 3 submissions */}
+            {q.runHistory.length > 0 && (
+              <RunHistoryPanel runs={q.runHistory} />
             )}
           </div>
         )}

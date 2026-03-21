@@ -24,6 +24,7 @@ import MetaRubricAssessment from "@/components/MetaRubricAssessment";
 import StreakBadges from "@/components/StreakBadges";
 import WeaknessHeatmap from "@/components/WeaknessHeatmap";
 import SpacedRepetitionQueue from "@/components/SpacedRepetitionQueue";
+import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
 
 const DIFF_COLORS: Record<string, string> = {
   green: "bg-emerald-100 text-emerald-700",
@@ -723,6 +724,20 @@ export default function CodingTab() {
           <p className="text-sm text-gray-500 dark:text-gray-400">SM-2 algorithm schedules problem reviews based on recall quality — add problems and review daily</p>
         </div>
         <SpacedRepetitionQueue />
+      </section>
+
+      {/* Meta Coding Screen Simulator */}
+      <section className="space-y-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-1 h-6 rounded-full bg-indigo-500 inline-block" />
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              🖥️ Meta Coding Screen Simulator
+            </h2>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Simulate a real Meta coding screen — two questions, 45-minute timer, Monaco editor, Judge0 execution with hidden test cases, and AI debrief scored on all 4 Meta focus areas</p>
+        </div>
+        <MetaCodingScreenSimulator />
       </section>
     </div>
   );

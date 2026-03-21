@@ -328,3 +328,22 @@
 - [x] Add Submit Solution button that calls Judge0 via existing tRPC execute procedure
 - [x] Feed pass/fail execution results into AI debrief for automated Coding + Verification scoring
 - [x] Update metaScreenDebrief procedure to accept testResults field
+
+## Simulator Enhancements Batch 2
+- [ ] Hidden test cases per CTCI problem — curated 3–5 test cases in shared constant, fed as stdin to Judge0
+- [ ] Execution history per question — collapsible "Previous Runs" section showing last 3 runs (timestamp, language, status, time)
+- [ ] Screen simulation session history — persist completed simulations in localStorage, sortable table in Progress Dashboard
+
+## Simulator in Both Tabs
+- [ ] Add MetaCodingScreenSimulator to CodingTab (Coding Interview tab)
+- [ ] Add screen simulation session history table to ProgressDashboard
+
+## Simulator in Both Tabs
+- [ ] Add MetaCodingScreenSimulator to CodingTab (Coding Interview tab)
+- [ ] Add screen simulation session history table to ProgressDashboard
+
+## Simulator in Both Tabs + Session History
+- [x] Add MetaCodingScreenSimulator to CodingTab (Coding Interview tab)
+- [x] Add screen simulation session history table to ProgressDashboard
+- [x] Hidden test cases wired into Judge0 per CTCI problem
+- [x] Collapsible Previous Runs section per question
