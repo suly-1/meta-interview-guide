@@ -324,7 +324,7 @@
 - [ ] Session history — persist completed screen simulations in localStorage, show in Stats view
 
 ## Submit Solution + Judge0 Automated Scoring
-- [ ] Add Monaco code editor to MetaCodingScreenSimulator per question
-- [ ] Add Submit Solution button that calls Judge0 via existing tRPC execute procedure
-- [ ] Feed pass/fail execution results into AI debrief for automated Coding + Verification scoring
-- [ ] Update metaScreenDebrief procedure to accept testResults field
+- [x] Add Monaco code editor to MetaCodingScreenSimulator per question
+- [x] Add Submit Solution button that calls Judge0 via existing tRPC execute procedure
+- [x] Feed pass/fail execution results into AI debrief for automated Coding + Verification scoring
+- [x] Update metaScreenDebrief procedure to accept testResults field
