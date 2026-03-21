@@ -3,8 +3,32 @@
  * Reads directly from localStorage keys used across the app.
  */
 import { useMemo, useState } from "react";
-import { X, Download, Trash2, TrendingUp, BookOpen, Brain, Flame, Star, Trophy, Target, BarChart2, Clock, MessageSquare } from "lucide-react";
+import { X, Download, Trash2, TrendingUp, BookOpen, Brain, Flame, Star, Trophy, Target, BarChart2, Clock, MessageSquare, Zap, Medal } from "lucide-react";
 import { getLevelInfo, XP_LEVELS } from "@/hooks/useXP";
+
+// ── Weakness Sprint Leaderboard helpers ─────────────────────────────────────
+const WEAKNESS_SPRINT_KEY = "meta-guide-weakness-sprint-history";
+
+export interface WeaknessSprintRecord {
+  date: string;        // "YYYY-MM-DD"
+  patterns: string[];  // top-3 weak patterns targeted
+  score: number;       // 0-8 correct
+  total: number;       // always 8
+}
+
+export function saveWeaknessSprintRecord(record: WeaknessSprintRecord) {
+  try {
+    const existing: WeaknessSprintRecord[] = JSON.parse(
+      localStorage.getItem(WEAKNESS_SPRINT_KEY) ?? "[]"
+    );
+    existing.push(record);
+    localStorage.setItem(WEAKNESS_SPRINT_KEY, JSON.stringify(existing.slice(-100)));
+  } catch {}
+}
+
+function loadWeaknessSprintHistory(): WeaknessSprintRecord[] {
+  try { return JSON.parse(localStorage.getItem(WEAKNESS_SPRINT_KEY) ?? "[]"); } catch { return []; }
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function loadJSON<T>(key: string, fallback: T): T {
@@ -377,6 +401,83 @@ export default function ProgressDashboard({ open, onClose }: Props) {
               ))}
             </div>
           </div>
+
+          {/* Weakness Sprint Leaderboard */}
+          {(() => {
+            const history = loadWeaknessSprintHistory();
+            if (history.length === 0) return null;
+
+            // Group by pattern set to find personal bests
+            const byPatternKey: Record<string, WeaknessSprintRecord[]> = {};
+            history.forEach(r => {
+              const key = r.patterns.slice().sort().join(" · ");
+              if (!byPatternKey[key]) byPatternKey[key] = [];
+              byPatternKey[key].push(r);
+            });
+
+            // Build personal-best rows: best score per pattern combo
+            const pbRows = Object.entries(byPatternKey).map(([key, records]) => {
+              const best = records.reduce((a, b) => (b.score > a.score ? b : a));
+              const attempts = records.length;
+              const avgScore = records.reduce((s, r) => s + r.score, 0) / records.length;
+              return { key, best, attempts, avgScore };
+            }).sort((a, b) => b.best.score - a.best.score);
+
+            const totalSprints = history.length;
+            const allTimeAvg = history.reduce((s, r) => s + r.score, 0) / history.length;
+
+            return (
+              <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <Medal size={14} className="text-rose-500" />
+                    Weakness Sprint Leaderboard
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span><span className="font-bold text-gray-700 dark:text-gray-300">{totalSprints}</span> sprint{totalSprints !== 1 ? "s" : ""}</span>
+                    <span><span className="font-bold text-gray-700 dark:text-gray-300">{allTimeAvg.toFixed(1)}/8</span> avg</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {pbRows.slice(0, 5).map((row, i) => {
+                    const pct = (row.best.score / row.best.total) * 100;
+                    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
+                    return (
+                      <div key={row.key} className="flex items-center gap-3">
+                        <span className="text-base w-5 flex-shrink-0">{medal || <span className="text-xs text-gray-400 font-bold">#{i + 1}</span>}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate" title={row.key}>
+                            {row.key}
+                          </p>
+                          <p className="text-[10px] text-gray-400">
+                            Best: {row.best.score}/{row.best.total} · Avg: {row.avgScore.toFixed(1)}/8 · {row.attempts} attempt{row.attempts !== 1 ? "s" : ""} · {row.best.date}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="w-16 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${pct >= 75 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-rose-500"}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-bold tabular-nums ${
+                            pct >= 75 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-rose-600"
+                          }`}>{row.best.score}/{row.best.total}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {history.length > 0 && (
+                  <p className="text-[10px] text-gray-400 mt-3 text-center">
+                    Personal bests from "Fix My Weaknesses" sprints — run more to improve your scores
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-1">

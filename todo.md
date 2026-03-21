@@ -301,3 +301,8 @@
 - [x] Pomodoro Timer in nav — 25/5 work/break timer in SoundtrackPlayer popover, auto-pauses music on break, session counter
 - [x] Weak-Pattern Auto-Sprint — "Fix My Weaknesses" button in Weakness Heatmap launches Sprint Mode pre-loaded with 3 weakest patterns
 - [x] SRS Due-Date Calendar — GitHub-style heatmap in Timeline tab showing SRS reviews due per day for next 30 days
+
+## New Features Batch (3 Follow-ups Round 2)
+- [x] Pomodoro session history — last 5 session timestamps + total focus minutes today in the Pomodoro popover
+- [x] SRS auto-scheduling into Study Planner — prepend due-today patterns as first block when AI generates 30/60/90-min plan
+- [x] Weakness Sprint leaderboard — save score + pattern names + date after each "Fix My Weaknesses" sprint; show personal-best table in Stats view

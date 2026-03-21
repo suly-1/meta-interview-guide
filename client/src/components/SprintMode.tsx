@@ -14,8 +14,8 @@ export interface SprintModeProps {
   focusPatterns?: string[];
   /** If true, the sprint starts immediately without showing the idle screen */
   autoStart?: boolean;
-  /** Called when the sprint finishes */
-  onComplete?: () => void;
+  /** Called when the sprint finishes — receives score and total */
+  onComplete?: (score?: number, total?: number) => void;
 }
 
 interface SprintProblem {
@@ -85,7 +85,8 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
       setResults(newResults);
       setPhase("done");
       stopTimer();
-      onComplete?.();
+      const finalScore = newResults.filter(r => r.correct).length;
+      onComplete?.(finalScore, newResults.length);
     } else {
       setResults(newResults);
       setCurrentIdx(nextIdx);

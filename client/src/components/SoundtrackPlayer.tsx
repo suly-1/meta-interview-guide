@@ -14,8 +14,22 @@ import { Music2, Wind, CloudRain, VolumeX, Timer, Play, Pause, RotateCcw, Coffee
 
 const STORAGE_KEY = "meta-guide-soundtrack-mode";
 const POMODORO_SESSIONS_KEY = "meta-guide-pomodoro-sessions";
+const POMODORO_HISTORY_KEY = "meta-guide-pomodoro-history";
 type SoundMode = "off" | "lofi" | "whitenoise" | "rain";
 type PomodoroPhase = "work" | "break" | "idle";
+
+interface PomodoroSession {
+  completedAt: number; // Unix ms
+  durationMin: number; // always 25 for a full work session
+}
+
+function loadHistory(): PomodoroSession[] {
+  try { return JSON.parse(localStorage.getItem(POMODORO_HISTORY_KEY) ?? "[]"); } catch { return []; }
+}
+
+function saveHistory(h: PomodoroSession[]) {
+  try { localStorage.setItem(POMODORO_HISTORY_KEY, JSON.stringify(h.slice(-50))); } catch {}
+}
 
 const WORK_DURATION = 25 * 60; // 25 minutes in seconds
 const BREAK_DURATION = 5 * 60; // 5 minutes in seconds
@@ -195,6 +209,7 @@ function usePomodoro(onPhaseChange: (phase: PomodoroPhase) => void) {
   const [sessions, setSessions] = useState<number>(() => {
     try { return parseInt(localStorage.getItem(POMODORO_SESSIONS_KEY) || "0"); } catch { return 0; }
   });
+  const [history, setHistory] = useState<PomodoroSession[]>(() => loadHistory());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseRef = useRef<PomodoroPhase>("idle");
 
@@ -260,6 +275,12 @@ function usePomodoro(onPhaseChange: (phase: PomodoroPhase) => void) {
               try { localStorage.setItem(POMODORO_SESSIONS_KEY, String(next)); } catch {}
               return next;
             });
+            setHistory(prev => {
+              const entry: PomodoroSession = { completedAt: Date.now(), durationMin: 25 };
+              const updated = [...prev, entry];
+              saveHistory(updated);
+              return updated;
+            });
             notify("Work session complete! 🎉", "Time for a 5-minute break.");
             // Auto-start break
             setTimeout(() => startBreak(), 500);
@@ -286,7 +307,7 @@ function usePomodoro(onPhaseChange: (phase: PomodoroPhase) => void) {
     return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  return { phase, timeLeft, running, sessions, startWork, startBreak, reset, togglePause, formatTime };
+  return { phase, timeLeft, running, sessions, history, startWork, startBreak, reset, togglePause, formatTime };
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -360,7 +381,7 @@ export default function SoundtrackPlayer() {
 
   const isPlaying = mode !== "off";
   const activeMode = MODES.find(m => m.id === mode);
-  const { phase, timeLeft, running, sessions, startWork, reset, togglePause, formatTime } = pomodoro;
+  const { phase, timeLeft, running, sessions, history, startWork, reset, togglePause, formatTime } = pomodoro;
 
   // Compact nav button label
   const navLabel = () => {
@@ -484,6 +505,38 @@ export default function SoundtrackPlayer() {
               )}
             </div>
           </div>
+
+          {/* ── Session History ── */}
+          {history.length > 0 && (() => {
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const todaySessions = history.filter(s => s.completedAt >= todayStart.getTime());
+            const totalFocusMin = todaySessions.reduce((sum, s) => sum + s.durationMin, 0);
+            const last5 = [...history].reverse().slice(0, 5);
+            return (
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Session History</p>
+                  <span className="text-[10px] text-orange-600 font-bold">{totalFocusMin} min focus today</span>
+                </div>
+                <div className="space-y-1">
+                  {last5.map((s, i) => {
+                    const d = new Date(s.completedAt);
+                    const isToday = d >= todayStart;
+                    const label = isToday
+                      ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                      : d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                    return (
+                      <div key={i} className="flex items-center justify-between">
+                        <span className={`text-[10px] ${isToday ? "text-orange-600 font-semibold" : "text-gray-400"}`}>{label}</span>
+                        <span className="text-[10px] text-gray-400">{s.durationMin} min</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Study Soundtrack</p>

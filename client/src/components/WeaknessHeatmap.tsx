@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { PATTERNS } from "@/lib/guideData";
 import { BarChart2, TrendingUp, Zap, X } from "lucide-react";
 import SprintMode from "@/components/SprintMode";
+import { saveWeaknessSprintRecord } from "@/components/ProgressDashboard";
 
 interface PatternScore {
   name: string;
@@ -176,7 +177,17 @@ export default function WeaknessHeatmap() {
               <div className="p-4">
                 <SprintMode
                   focusPatterns={sorted.slice(0, 3).map(s => s.name)}
-                  onComplete={() => setTimeout(() => setSprintOpen(false), 3000)}
+                  onComplete={(score?: number, total?: number) => {
+                    if (score !== undefined && total !== undefined) {
+                      saveWeaknessSprintRecord({
+                        date: new Date().toISOString().split("T")[0],
+                        patterns: sorted.slice(0, 3).map(s => s.name),
+                        score,
+                        total,
+                      });
+                    }
+                    setTimeout(() => setSprintOpen(false), 3000);
+                  }}
                 />
               </div>
             </div>

@@ -32,6 +32,7 @@ import PatternDependencyGraph from "@/components/PatternDependencyGraph";
 import DailyNotificationReminder from "@/components/DailyNotificationReminder";
 import MilestoneNotifications from "@/components/MilestoneNotifications";
 import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
+import AIStudySessionPlanner from "@/components/AIStudySessionPlanner";
 import CodingSessionDebriefLog from "@/components/CodingSessionDebriefLog";
 
 const TAG_COLORS: Record<string, string> = {
@@ -704,6 +705,20 @@ export default function TimelineTab() {
           Set your interview date and get D-14, D-7, D-3, and D-1 browser push notifications with targeted prep advice for each milestone.
         </p>
         <MilestoneNotifications />
+      </section>
+
+      {/* ── AI Study Session Planner ── */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-violet-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            ✨ AI Study Session Planner
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Generate a personalised 30, 60, or 90-minute study plan. SRS reviews due today are automatically prepended as the first block so they are never skipped.
+        </p>
+        <AIStudySessionPlanner />
       </section>
 
       {/* ── SRS Due-Date Calendar ── */}
