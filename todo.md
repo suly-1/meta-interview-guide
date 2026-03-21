@@ -347,3 +347,20 @@
 - [x] Add screen simulation session history table to ProgressDashboard
 - [x] Hidden test cases wired into Judge0 per CTCI problem
 - [x] Collapsible Previous Runs section per question
+
+## Simulator Round 3 Features
+- [ ] E6+ behavioral focus areas (XFN Collaboration + Scope & Conflict Resolution) when E6+ target level selected
+- [ ] AI question selection mode — LLM picks two problems calibrated to weakest patterns and target level
+- [ ] Shareable debrief link — "Copy Shareable Summary" button formats session as plain text
+
+## Simulator Hero Banner & Reorder
+- [x] Move MetaCodingScreenSimulator to top of CodingTab with colorful hero banner
+- [x] Add MUST DO callout with emojis and bold colors
+
+## Timer Fix
+- [x] Change Meta Coding Screen Simulator from 45 min to 30 min everywhere
+
+## Duration Selector + Interview Structure Note
+- [x] Add 30/35/40/45 min duration selector to MetaCodingScreenSimulator setup phase
+- [x] Add explanatory note: 45-min interview = 15 min intro/clarification + 30 min coding; recommend 30 min practice
+- [x] Start button shows selected duration

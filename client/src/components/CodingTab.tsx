@@ -246,6 +246,80 @@ export default function CodingTab() {
   return (
     <div className="space-y-10">
 
+      {/* ★ META CODING SCREEN SIMULATOR — MUST DO HERO BANNER ★ */}
+      <section>
+        {/* Gradient hero card */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 p-1 shadow-2xl">
+          {/* Animated shimmer overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse pointer-events-none" />
+          <div className="relative rounded-xl bg-gradient-to-br from-indigo-950/90 via-violet-950/90 to-fuchsia-950/90 p-6 md:p-8">
+            {/* MUST DO badge */}
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500 text-white text-xs font-black uppercase tracking-widest shadow-lg animate-bounce">
+                🚨 MUST DO
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-black uppercase tracking-widest shadow-lg">
+                ⭐ #1 PRIORITY
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-black uppercase tracking-widest shadow-lg">
+                🤖 AI SCORED
+              </span>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-2 leading-tight">
+              🖥️ Meta Coding Screen Simulator
+            </h2>
+            <p className="text-violet-200 text-base md:text-lg font-semibold mb-5">
+              The closest thing to the real Meta coding screen — without being in the room.
+            </p>
+
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {[
+                { emoji: "⏱️", text: "30-min timer" },
+                { emoji: "📝", text: "2 real questions" },
+                { emoji: "⚡", text: "Monaco editor" },
+                { emoji: "✅", text: "Hidden test cases" },
+                { emoji: "🧠", text: "AI debrief" },
+                { emoji: "🎯", text: "4 Meta focus areas" },
+                { emoji: "✨", text: "AI question pick" },
+                { emoji: "📄", text: "Copy debrief" },
+                { emoji: "📈", text: "Session history" },
+              ].map(f => (
+                <span key={f.text} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 text-white text-xs font-semibold border border-white/20">
+                  {f.emoji} {f.text}
+                </span>
+              ))}
+            </div>
+
+            {/* Why it matters callout */}
+            <div className="flex gap-3 p-4 rounded-xl bg-amber-400/20 border border-amber-400/40 mb-6">
+              <span className="text-2xl flex-shrink-0">💡</span>
+              <div>
+                <p className="text-amber-200 font-black text-sm uppercase tracking-wide mb-1">Why this matters for your Meta screen</p>
+                <p className="text-amber-100 text-sm leading-relaxed">
+                  Meta screens are scored on <strong className="text-white">Problem Solving, Coding, Verification &amp; Debugging, and Technical Communication</strong> — each rated Insufficient / Moderate / Solid / Strong / Exceptional. This simulator replicates that exact format. The AI debrief tells you your likely rating on all 4 dimensions and whether you would <strong className="text-white">Proceed</strong> or <strong className="text-white">Do Not Proceed</strong>.
+                </p>
+              </div>
+            </div>
+
+            {/* E6+ note */}
+            <div className="flex gap-3 p-3 rounded-xl bg-cyan-400/20 border border-cyan-400/40">
+              <span className="text-xl flex-shrink-0">👑</span>
+              <p className="text-cyan-100 text-sm leading-relaxed">
+                <strong className="text-white">E6+ candidates:</strong> Select the <strong className="text-white">E6+</strong> target level to unlock two additional senior focus areas — <strong className="text-white">XFN Collaboration</strong> and <strong className="text-white">Scope &amp; Conflict Resolution</strong> — which are assessed in senior screens to determine IC5 vs IC6 level fit.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Simulator component */}
+        <div className="mt-6">
+          <MetaCodingScreenSimulator />
+        </div>
+      </section>
+
       {/* Overview */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
@@ -255,7 +329,7 @@ export default function CodingTab() {
           <p className="text-sm text-gray-500 mt-1">What to expect, how you are evaluated, and what separates a pass from a fail</p>
         </div>
         <p className="text-gray-700 leading-relaxed mb-4">
-          Meta's coding rounds are 45-minute sessions conducted in CoderPad. For IC6 and IC7 candidates, the problem difficulty is typically LeetCode medium, but the bar for code quality, communication, and handling follow-up questions is significantly higher than for junior roles. Interviewers expect clean, production-quality code, proactive edge case handling, and the ability to discuss time and space complexity without prompting.
+          Meta's coding screen rounds are 30-minute sessions conducted in CoderPad. For IC6 and IC7 candidates, the problem difficulty is typically LeetCode medium, but the bar for code quality, communication, and handling follow-up questions is significantly higher than for junior roles. Interviewers expect clean, production-quality code, proactive edge case handling, and the ability to discuss time and space complexity without prompting.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -726,19 +800,6 @@ export default function CodingTab() {
         <SpacedRepetitionQueue />
       </section>
 
-      {/* Meta Coding Screen Simulator */}
-      <section className="space-y-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-1 h-6 rounded-full bg-indigo-500 inline-block" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-              🖥️ Meta Coding Screen Simulator
-            </h2>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Simulate a real Meta coding screen — two questions, 45-minute timer, Monaco editor, Judge0 execution with hidden test cases, and AI debrief scored on all 4 Meta focus areas</p>
-        </div>
-        <MetaCodingScreenSimulator />
-      </section>
     </div>
   );
 }

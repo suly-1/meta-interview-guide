@@ -2,7 +2,7 @@
  * MetaCodingScreenSimulator
  * Simulates a real Meta coding screen interview:
  * - Two coding questions selected in advance
- * - 45-minute countdown timer
+ * - 30-minute countdown timer
  * - Monaco code editor per question with 6-language support
  * - Submit Solution button → Judge0 execution → pass/fail results
  * - Structured note-taking by focus area (Problem Solving, Coding, Verification, Technical Communication)
@@ -15,11 +15,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { trpc } from "@/lib/trpc";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
+import { getWeakestPatterns } from "@/hooks/useDrillRatings";
+import { PATTERN_TO_CTCI_TOPICS, problemMatchesTopics } from "@/lib/ctciTopicMap";
 import {
   Play, Square, RotateCcw, ChevronDown, ChevronUp,
   CheckCircle2, XCircle, Clock, Brain, Code2, ShieldCheck,
   MessageSquare, AlertCircle, Loader2, Trophy, ExternalLink,
-  ChevronRight, History, Trash2, Send, Terminal
+  ChevronRight, History, Trash2, Send, Terminal, Sparkles, Copy, Check,
+  Users, Swords
 } from "lucide-react";
 import { Streamdown } from "streamdown";
 
@@ -201,9 +204,28 @@ interface ScreenSession {
   targetLevel: "E4" | "E5" | "E6" | "E6+";
 }
 
+// ── E6+ Behavioral Focus Areas ────────────────────────────────────────────
+
+const E6_BEHAVIORAL_AREAS = [
+  {
+    key: "xfn" as const,
+    label: "XFN Collaboration",
+    icon: <Users size={13} />,
+    color: "text-cyan-600",
+    description: "Cross-functional partnership, stakeholder alignment, influencing without authority",
+  },
+  {
+    key: "conflict" as const,
+    label: "Scope & Conflict Resolution",
+    icon: <Swords size={13} />,
+    color: "text-orange-600",
+    description: "Navigating ambiguity, resolving technical/team conflicts, setting scope boundaries",
+  },
+];
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const SCREEN_DURATION = 45 * 60;
+const SCREEN_DURATION = 30 * 60;
 const STORAGE_KEY = "meta-coding-screen-sessions-v2";
 
 const RATINGS: MetaRating[] = [
@@ -460,13 +482,31 @@ function FocusAreaPanel({
       )}
     </div>
   );
+}// E6BehavioralPanel — self-contained local state panel for E6+ behavioral areas
+function E6BehavioralPanel({
+  area,
+  questionIdx,
+}: {
+  area: typeof E6_BEHAVIORAL_AREAS[0];
+  questionIdx: number;
+}) {
+  const [state, setState] = useState<FocusAreaState>({ rating: "", cantAssessReason: "", notes: "" });
+  return (
+    <FocusAreaPanel
+      area={area as unknown as typeof FOCUS_AREAS[0]}
+      state={state}
+      onChange={setState}
+      questionIdx={questionIdx}
+    />
+  );
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────
+// ── Main Component ──────────────────────────────────────────────────────────────
 
 export default function MetaCodingScreenSimulator() {
   const [phase, setPhase] = useState<"setup" | "active" | "debrief" | "history">("setup");
   const [targetLevel, setTargetLevel] = useState<"E4" | "E5" | "E6" | "E6+">("E6");
+  const [durationMin, setDurationMin] = useState<30 | 35 | 40 | 45>(30);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
   const [activeQ, setActiveQ] = useState(0);
   const [activePanel, setActivePanel] = useState<"editor" | "notes">("editor");
@@ -476,23 +516,83 @@ export default function MetaCodingScreenSimulator() {
   const [debriefLoading, setDebriefLoading] = useState(false);
   const [sessions, setSessions] = useState<ScreenSession[]>(() => loadSessions());
   const [selectedSession, setSelectedSession] = useState<ScreenSession | null>(null);
+  const [aiPickLoading, setAiPickLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const generateDebrief = trpc.metaScreenDebrief.useMutation();
   const runCode = trpc.codeExec.run.useMutation();
 
+  // Random pick (Medium + Hard)
   const pickProblems = useCallback(() => {
     const pool = CTCI_PROBLEMS.filter(p => p.difficulty === "Medium" || p.difficulty === "Hard");
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
     setQuestions(shuffled.slice(0, 2).map(makeQuestion));
   }, []);
 
+  // AI Pick — calibrated to weakest patterns
+  const aiPickProblems = useCallback(async () => {
+    setAiPickLoading(true);
+    try {
+      const weakPatterns = getWeakestPatterns(3);
+      const weakTopics = weakPatterns.flatMap(p => PATTERN_TO_CTCI_TOPICS[p.patternId] ?? []);
+      // Q1: Medium from weakest topics
+      let pool1 = CTCI_PROBLEMS.filter(p => p.difficulty === "Medium" && problemMatchesTopics(p.topic, weakTopics));
+      if (!pool1.length) pool1 = CTCI_PROBLEMS.filter(p => p.difficulty === "Medium");
+      const q1 = pool1[Math.floor(Math.random() * pool1.length)];
+      // Q2: Hard from weakest topics (different problem)
+      let pool2 = CTCI_PROBLEMS.filter(p => p.difficulty === "Hard" && problemMatchesTopics(p.topic, weakTopics) && p.id !== q1.id);
+      if (!pool2.length) pool2 = CTCI_PROBLEMS.filter(p => p.difficulty === "Hard" && p.id !== q1.id);
+      if (!pool2.length) pool2 = CTCI_PROBLEMS.filter(p => p.id !== q1.id);
+      const q2 = pool2[Math.floor(Math.random() * pool2.length)];
+      setQuestions([makeQuestion(q1), makeQuestion(q2)]);
+    } finally {
+      setAiPickLoading(false);
+    }
+  }, []);
+
+  // Copy shareable debrief summary to clipboard
+  const copyDebrief = useCallback(() => {
+    const overall = overallFromQuestions(questions);
+    const recommendation = proceedFromOverall(overall);
+    const lines: string[] = [
+      `Meta Coding Screen Simulation — ${new Date().toLocaleDateString()}`,
+      `Target Level: ${targetLevel}  |  Recommendation: ${recommendation || "Pending"}  |  Overall: ${overall || "—"}`,
+      "",
+      ...questions.map((q, i) => {
+        const ratings = FOCUS_AREAS.map(fa => {
+          const s = q.focusAreas[fa.key];
+          return `  ${fa.label}: ${s.rating || "—"}${s.notes ? ` (${s.notes.slice(0, 80)})` : ""}`;
+        }).join("\n");
+        const exec = q.execResult ? `  Code: ${q.execResult.statusDescription}` : "  Code: Not submitted";
+        return `Q${i + 1}: ${q.problemName} (${q.difficulty})\n${exec}\n${ratings}`;
+      }),
+      "",
+      "── AI Coaching Notes ──",
+      aiDebrief.replace(/[#*`]/g, "").trim(),
+    ];
+    const text = lines.join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }).catch(() => {
+      const el = document.createElement("textarea");
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  }, [questions, targetLevel, aiDebrief]);
+
   // Timer
   useEffect(() => {
     if (running) {
       timerRef.current = setInterval(() => {
         setElapsed(e => {
-          if (e >= SCREEN_DURATION - 1) { setRunning(false); return SCREEN_DURATION; }
+          if (e >= durationMin * 60 - 1) { setRunning(false); return durationMin * 60; }
           return e + 1;
         });
       }, 1000);
@@ -502,9 +602,10 @@ export default function MetaCodingScreenSimulator() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [running]);
 
-  const timeLeft = SCREEN_DURATION - elapsed;
+  const screenDuration = durationMin * 60;
+  const timeLeft = screenDuration - elapsed;
   const urgent = timeLeft < 5 * 60;
-  const pct = (elapsed / SCREEN_DURATION) * 100;
+  const pct = (elapsed / screenDuration) * 100;
 
   const updateFocusArea = (qIdx: number, areaKey: keyof QuestionState["focusAreas"], updated: FocusAreaState) => {
     setQuestions(prev => prev.map((q, i) =>
@@ -716,16 +817,65 @@ export default function MetaCodingScreenSimulator() {
         </div>
 
         <div className="p-5 space-y-5">
+          {/* Interview structure explainer */}
+          <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-600 rounded-xl p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-base">⏰</span>
+              <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Real Interview Timing — Read This First</p>
+            </div>
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+              A real Meta coding screen is <strong>45 minutes total</strong>, but the first ~15 minutes are spent on:
+            </p>
+            <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-1 list-disc list-inside">
+              <li>Interviewer introduction and rapport building (~5 min)</li>
+              <li>Problem explanation and setup (~5 min)</li>
+              <li><strong>Your clarification questions</strong> — you must ask these! (~5 min)</li>
+            </ul>
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed mt-1">
+              That leaves you <strong>~30 minutes to actually code and solve the problem</strong>. We strongly recommend practising at <strong>30 minutes</strong> to build the right muscle memory for the real screen.
+            </p>
+          </div>
+
           <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4 space-y-2">
             <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">How it works</p>
             <ul className="text-xs text-indigo-700 dark:text-indigo-400 space-y-1 list-disc list-inside">
               <li>Two coding questions auto-selected (Medium + Hard)</li>
-              <li>45-minute countdown — same as a real Meta screen</li>
+              <li>Countdown timer — choose your practice duration below</li>
               <li>Write code in the built-in editor (Python, JS, Java, C++, Go, Swift)</li>
               <li><strong>Submit Solution</strong> → Judge0 executes your code and returns pass/fail</li>
               <li>Take structured notes per focus area as you code</li>
-              <li>AI debrief uses your code execution results to score Coding & Verification accurately</li>
+              <li>AI debrief uses your code execution results to score Coding &amp; Verification accurately</li>
             </ul>
+          </div>
+
+          {/* Duration selector */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-xs font-semibold text-foreground">Practice Duration</p>
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-300">⭐ 30 min recommended</span>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {([30, 35, 40, 45] as const).map(d => (
+                <button
+                  key={d}
+                  onClick={() => setDurationMin(d)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all relative ${
+                    durationMin === d
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-background border-border text-muted-foreground hover:border-indigo-400"
+                  }`}
+                >
+                  {d} min
+                  {d === 30 && <span className="absolute -top-1.5 -right-1.5 text-[8px] bg-emerald-500 text-white rounded-full px-1 font-bold leading-4">✓</span>}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">
+              {durationMin === 30 && "✅ Matches real coding time after intro — best for realistic practice"}
+              {durationMin === 35 && "Slightly more buffer — good for building confidence"}
+              {durationMin === 40 && "Extended practice — useful for learning new patterns"}
+              {durationMin === 45 && "Full interview length — includes intro time; not realistic for coding-only practice"}
+            </p>
           </div>
 
           <div>
@@ -752,12 +902,26 @@ export default function MetaCodingScreenSimulator() {
             )}
           </div>
 
-          <button
-            onClick={() => { pickProblems(); setPhase("active"); setRunning(true); }}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-          >
-            <Play size={14} /> Start Coding Screen ({targetLevel})
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { pickProblems(); setPhase("active"); setRunning(true); }}
+              className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+            >
+              <Play size={14} /> Start — {durationMin} min ({targetLevel})
+            </button>
+            <button
+              onClick={async () => { await aiPickProblems(); setPhase("active"); setRunning(true); }}
+              disabled={aiPickLoading}
+              title="AI picks 2 problems calibrated to your weakest patterns"
+              className="px-4 py-3 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+            >
+              {aiPickLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              AI Pick
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground text-center">
+            <strong>AI Pick</strong> selects problems calibrated to your 3 weakest patterns from the Weakness Heatmap.
+          </p>
         </div>
       </div>
     );
@@ -1036,6 +1200,27 @@ export default function MetaCodingScreenSimulator() {
                 questionIdx={activeQ}
               />
             ))}
+            {/* E6+ Behavioral Focus Areas */}
+            {(targetLevel === "E6" || targetLevel === "E6+") && (
+              <>
+                <div className="flex items-center gap-2 pt-2">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest whitespace-nowrap">E6+ Senior Focus Areas</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+                {E6_BEHAVIORAL_AREAS.map(fa => {
+                  // E6+ behavioral areas use a separate state bucket stored in a local map
+                  // We reuse FocusAreaPanel with a local state to avoid polluting QuestionState
+                  return (
+                    <E6BehavioralPanel
+                      key={fa.key}
+                      area={fa}
+                      questionIdx={activeQ}
+                    />
+                  );
+                })}
+              </>
+            )}
           </div>
         )}
 
@@ -1121,11 +1306,20 @@ export default function MetaCodingScreenSimulator() {
           )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button onClick={handleReset}
             className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
           >
             <RotateCcw size={13} /> New Screen
+          </button>
+          <button
+            onClick={copyDebrief}
+            disabled={!aiDebrief || debriefLoading}
+            className="px-4 py-2.5 border border-border rounded-xl text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors flex items-center gap-1.5"
+            title="Copy shareable debrief summary to clipboard"
+          >
+            {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+            {copied ? "Copied!" : "Copy Summary"}
           </button>
           <button onClick={() => setPhase("history")}
             className="px-4 py-2.5 border border-border rounded-xl text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
