@@ -1451,5 +1451,145 @@ Return ONLY valid JSON.`;
         };
       }),
   }),
+  /**
+   * metaRubric.score — LLM-powered Meta SWE rubric assessment.
+   * Scores the 4 official Meta focus areas: Problem Solving, Coding, Verification, Communication.
+   * Each dimension uses Meta's exact 6-point scale:
+   *   Insufficient | Moderate | Solid | Strong | Exceptional | Can't Assess
+   */
+  metaRubric: router({
+    score: publicProcedure
+      .input(
+        z.object({
+          problemName: z.string().min(1),
+          approachText: z.string().min(10, "Approach must be at least 10 characters"),
+          codeText: z.string().optional().default(""),
+          targetLevel: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : input.targetLevel === "IC6" ? "Senior Engineer (IC6)" : "Software Engineer (IC5)";
+        const RATINGS = ["Insufficient", "Moderate", "Solid", "Strong", "Exceptional", "Can't Assess"] as const;
+        const systemPrompt = `You are a Meta software engineering interviewer evaluating a candidate for ${levelLabel}.
+
+You must assess the candidate on Meta's official 4 focus areas using Meta's exact 6-point rating scale:
+- Insufficient: Does not meet the bar; significant gaps
+- Moderate: Below bar; some understanding but notable weaknesses
+- Solid: Meets the bar; competent with minor gaps
+- Strong: Above bar; clear strengths, minimal weaknesses
+- Exceptional: Significantly above bar; outstanding performance
+- Can't Assess: Not enough information to evaluate this dimension
+
+Focus Areas:
+1. Problem Solving: Ability to break down the problem, identify the right algorithm/data structure, handle constraints, and arrive at an optimal solution. Looks for: clarifying questions, recognizing patterns, handling edge cases, iterating from brute force to optimal.
+2. Coding: Quality of the actual code written or described. Looks for: clean readable code, correct syntax, appropriate data structures, handling of edge cases in code, no major bugs.
+3. Verification: Ability to test and validate the solution. Looks for: tracing through examples, identifying bugs, writing test cases, checking edge cases, complexity analysis.
+4. Communication: Clarity and structure of explanation throughout. Looks for: thinking out loud, explaining trade-offs, responding to hints, clear articulation of approach.
+
+For each dimension, provide:
+- rating: one of exactly ["Insufficient", "Moderate", "Solid", "Strong", "Exceptional", "Can't Assess"]
+- rationale: 2-3 sentences explaining the rating with specific evidence from the candidate's response
+- keyStrength: one specific strength (or null if Insufficient/Can't Assess)
+- keyGap: one specific gap to address (or null if Exceptional)
+
+Also provide:
+- overallVerdict: one of ["No Hire", "Lean No Hire", "Lean Hire", "Hire", "Strong Hire"]
+- summaryFeedback: 2-3 sentence overall coaching note
+
+Base your assessment ONLY on the provided approach text and code. Be calibrated to the ${levelLabel} bar.`;
+
+        const userMessage = `Problem: ${input.problemName}\n\nCandidate's Approach:\n${input.approachText}${input.codeText ? `\n\nCandidate's Code:\n${input.codeText}` : ""}`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "meta_rubric_score",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  problemSolving: {
+                    type: "object",
+                    properties: {
+                      rating: { type: "string" },
+                      rationale: { type: "string" },
+                      keyStrength: { type: ["string", "null"] },
+                      keyGap: { type: ["string", "null"] },
+                    },
+                    required: ["rating", "rationale", "keyStrength", "keyGap"],
+                    additionalProperties: false,
+                  },
+                  coding: {
+                    type: "object",
+                    properties: {
+                      rating: { type: "string" },
+                      rationale: { type: "string" },
+                      keyStrength: { type: ["string", "null"] },
+                      keyGap: { type: ["string", "null"] },
+                    },
+                    required: ["rating", "rationale", "keyStrength", "keyGap"],
+                    additionalProperties: false,
+                  },
+                  verification: {
+                    type: "object",
+                    properties: {
+                      rating: { type: "string" },
+                      rationale: { type: "string" },
+                      keyStrength: { type: ["string", "null"] },
+                      keyGap: { type: ["string", "null"] },
+                    },
+                    required: ["rating", "rationale", "keyStrength", "keyGap"],
+                    additionalProperties: false,
+                  },
+                  communication: {
+                    type: "object",
+                    properties: {
+                      rating: { type: "string" },
+                      rationale: { type: "string" },
+                      keyStrength: { type: ["string", "null"] },
+                      keyGap: { type: ["string", "null"] },
+                    },
+                    required: ["rating", "rationale", "keyStrength", "keyGap"],
+                    additionalProperties: false,
+                  },
+                  overallVerdict: { type: "string" },
+                  summaryFeedback: { type: "string" },
+                },
+                required: ["problemSolving", "coding", "verification", "communication", "overallVerdict", "summaryFeedback"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const raw = response.choices?.[0]?.message?.content;
+        const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+        try {
+          return JSON.parse(text) as {
+            problemSolving: { rating: string; rationale: string; keyStrength: string | null; keyGap: string | null };
+            coding: { rating: string; rationale: string; keyStrength: string | null; keyGap: string | null };
+            verification: { rating: string; rationale: string; keyStrength: string | null; keyGap: string | null };
+            communication: { rating: string; rationale: string; keyStrength: string | null; keyGap: string | null };
+            overallVerdict: string;
+            summaryFeedback: string;
+          };
+        } catch {
+          return {
+            problemSolving: { rating: "Can't Assess", rationale: "Unable to parse AI response.", keyStrength: null, keyGap: null },
+            coding: { rating: "Can't Assess", rationale: "Unable to parse AI response.", keyStrength: null, keyGap: null },
+            verification: { rating: "Can't Assess", rationale: "Unable to parse AI response.", keyStrength: null, keyGap: null },
+            communication: { rating: "Can't Assess", rationale: "Unable to parse AI response.", keyStrength: null, keyGap: null },
+            overallVerdict: "Can't Assess",
+            summaryFeedback: "Unable to generate feedback. Please try again.",
+          };
+        }
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

@@ -7,6 +7,7 @@
 import { useState, useRef, useCallback } from "react";
 import { PATTERNS } from "@/lib/guideData";
 import { Mic, MicOff, Send, RotateCcw, Sparkles, Volume2 } from "lucide-react";
+import MetaRubricAssessment from "@/components/MetaRubricAssessment";
 
 interface DimensionScore {
   name: string;
@@ -270,6 +271,15 @@ export default function ApproachAnalyzer() {
             >
               <RotateCcw size={13} /> New Problem
             </button>
+          </div>
+
+          {/* Meta SWE Rubric — shown after approach analysis */}
+          <div className="mt-2">
+            <MetaRubricAssessment
+              problemName={currentProblem}
+              approachText={approach}
+              targetLevel="IC6"
+            />
           </div>
         </div>
       )}

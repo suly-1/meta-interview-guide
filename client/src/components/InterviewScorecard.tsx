@@ -4,6 +4,7 @@
  */
 import { useState } from "react";
 import { CheckSquare, Square, RotateCcw, ClipboardList } from "lucide-react";
+import MetaRubricAssessment from "@/components/MetaRubricAssessment";
 
 const CRITERIA = [
   {
@@ -165,6 +166,18 @@ export default function InterviewScorecard() {
       >
         <RotateCcw size={14} /> Reset Scorecard
       </button>
+
+      {/* Meta SWE Rubric self-assessment — always visible below the scorecard */}
+      <div className="mt-4">
+        <MetaRubricAssessment
+          problemName="Your last coding session"
+          approachText={checked.size > 0
+            ? `Criteria met: ${Array.from(checked).join(", ")}. Score: ${score}/7.`
+            : "No criteria checked yet. Complete the scorecard above first, then use self-assess mode below."}
+          selfAssessMode
+          targetLevel="IC6"
+        />
+      </div>
     </div>
   );
 }

@@ -20,6 +20,7 @@ import SprintMode from "@/components/SprintMode";
 import ComplexityEstimator from "@/components/ComplexityEstimator";
 import InterviewScorecard from "@/components/InterviewScorecard";
 import ApproachAnalyzer from "@/components/ApproachAnalyzer";
+import MetaRubricAssessment from "@/components/MetaRubricAssessment";
 import StreakBadges from "@/components/StreakBadges";
 import WeaknessHeatmap from "@/components/WeaknessHeatmap";
 import SpacedRepetitionQueue from "@/components/SpacedRepetitionQueue";
@@ -657,6 +658,23 @@ export default function CodingTab() {
           <p className="text-sm text-gray-500 dark:text-gray-400">7-criterion self-assessment after each practice session — get a Strong Hire / Hire / No Hire verdict</p>
         </div>
         <InterviewScorecard />
+      </section>
+
+      {/* Meta SWE Focus Area Rubric */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-violet-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            ⭐ Meta SWE Rubric
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Official Meta focus areas — Problem Solving, Coding, Verification, Communication — rated on the 6-point Meta scale</p>
+        </div>
+        <MetaRubricAssessment
+          problemName="Your current practice problem"
+          approachText=""
+          selfAssessMode
+          targetLevel="IC6"
+        />
       </section>
 
       {/* Complexity Estimator */}

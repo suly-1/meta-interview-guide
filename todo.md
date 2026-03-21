@@ -306,3 +306,11 @@
 - [x] Pomodoro session history — last 5 session timestamps + total focus minutes today in the Pomodoro popover
 - [x] SRS auto-scheduling into Study Planner — prepend due-today patterns as first block when AI generates 30/60/90-min plan
 - [x] Weakness Sprint leaderboard — save score + pattern names + date after each "Fix My Weaknesses" sprint; show personal-best table in Stats view
+
+## Meta SWE Rubric Assessment (AI Feedback)
+- [x] MetaRubricAssessment component — 4-dimension rubric (Problem Solving, Coding, Verification, Communication) with Insufficient/Moderate/Solid/Strong/Exceptional/Can't Assess ratings
+- [x] AI rubric scoring tRPC procedure — LLM scores all 4 dimensions based on candidate's approach text + code
+- [x] Integrate rubric into ApproachAnalyzer — show Meta rubric panel after approach is submitted
+- [x] Integrate rubric into InterviewScorecard — map existing 7-criterion checklist to Meta 4 dimensions
+- [x] Integrate rubric into CodingTab as standalone ⭐ Meta SWE Rubric section
+- [x] Integrate rubric into TimedMockSession — show Meta rubric self-assessment in debrief
