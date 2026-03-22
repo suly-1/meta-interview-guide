@@ -1,5 +1,5 @@
 /**
- * useAchievements — Achievement Badge Wall for the Independence Study Guide
+ * useAchievements — Achievement Badge Wall for the Independent Study Guide
  *
  * Badges are computed from existing localStorage data — no new storage needed.
  * Categories: Coding, Behavioral, Mock Interviews, Streaks & Consistency, Milestones

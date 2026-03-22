@@ -127,7 +127,7 @@ export default function DisclaimerGate({ children }: DisclaimerGateProps) {
               lineHeight: 1.2,
             }}
           >
-            Independence Study Guide
+            Independent Study Guide
           </h1>
           <p style={{ color: "#94a3b8", fontSize: "14px", margin: 0 }}>
             Behavioral &amp; Coding Preparation — 2026

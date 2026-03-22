@@ -1,4 +1,4 @@
-// Independence Study Guide — All Content Data
+// Independent Study Guide — All Content Data
 
 export const PATTERNS = [
   {

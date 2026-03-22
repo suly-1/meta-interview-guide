@@ -29,7 +29,7 @@ export default function TermsOfUse() {
             className="text-3xl md:text-4xl font-extrabold mb-3"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Independence Study Guide
+            Independent Study Guide
             <br />
             <span className="text-white/40 text-2xl font-semibold">Terms of Use &amp; Community Guidelines</span>
           </h1>

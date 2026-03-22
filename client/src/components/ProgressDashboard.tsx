@@ -188,7 +188,7 @@ function computeSnapshot(): ProgressSnapshot {
 
 function exportProgress(snap: ProgressSnapshot) {
   const lines = [
-    `# Independence Study Guide — Progress Export`,
+    `# Independent Study Guide — Progress Export`,
     `Generated: ${new Date().toLocaleString()}`,
     ``,
     `## Overview`,

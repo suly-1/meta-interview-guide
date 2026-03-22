@@ -1,5 +1,5 @@
 /**
- * useXP — Daily XP System for the Independence Study Guide
+ * useXP — Daily XP System for the Independent Study Guide
  *
  * XP is earned from:
  *   - Solving a CTCI problem:          +10 XP
