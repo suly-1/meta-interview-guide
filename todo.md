@@ -376,3 +376,6 @@
 - [ ] #7 Add Terms of Use page accessible from footer
 - [ ] Expand IC level selector to 3 tiers: IC4 (Junior), IC5 (Senior), IC6/IC7 (Staff+)
 - [ ] Update BehavioralTab IC6 vs IC7 labels to use correct level names
+
+## Deployment Status Badge
+- [x] Live GitHub Actions deployment status badge in UI (green ✅ / yellow 🟡 / red ✗) visible in hero/footer

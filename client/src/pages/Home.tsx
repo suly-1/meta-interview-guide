@@ -18,6 +18,7 @@ import TimelineTab from "@/components/TimelineTab";
 import CTCITrackerTab from "@/components/CTCITrackerTab";
 import ReadinessTab from "@/components/ReadinessTab";
 import SystemDesignTab from "@/components/SystemDesignTab";
+import DeployStatusBadge from "@/components/DeployStatusBadge";
 import MockInterviewSimulator from "@/components/MockInterviewSimulator";
 import CodePractice from "@/pages/CodePractice";
 import { useStreak } from "@/hooks/useStreak";
@@ -581,7 +582,11 @@ export default function Home() {
         <p className="mt-2 text-white/40 text-xs max-w-xl mx-auto">
           This is a community guide for self-directed learners. If you're a recruiter or hiring manager thinking about sharing it — totally your call, but it's worth checking your company's guidelines on external resources first. This guide works best when candidates discover it on their own anyway.
         </p>
-        <p className="mt-3 flex items-center justify-center gap-4">
+        {/* Live deployment status badge */}
+        <div className="mt-3 flex justify-center">
+          <DeployStatusBadge />
+        </div>
+        <p className="mt-2 flex items-center justify-center gap-4">
           <button
             onClick={() => {
               try { localStorage.removeItem("meta-guide-banner-dismissed-v1"); } catch { /* ignore */ }

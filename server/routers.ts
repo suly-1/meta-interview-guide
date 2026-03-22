@@ -1734,6 +1734,57 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
         return { reply: text };
       }),
   }),
-});
 
+  /**
+   * deployStatus.get — fetches the latest GitHub Actions workflow run status for the repo.
+   * Returns status: 'success' | 'in_progress' | 'failure' | 'unknown'
+   */
+  deployStatus: router({
+    get: publicProcedure.query(async () => {
+      try {
+        const GITHUB_REPO = "suly-1/meta-interview-guide";
+        const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/actions/runs?per_page=1&branch=main`;
+        const response = await fetch(GITHUB_API, {
+          headers: {
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "meta-interview-guide",
+          },
+        });
+        if (!response.ok) {
+          return { status: "unknown" as const, message: "GitHub API unavailable", updatedAt: null };
+        }
+        const data = await response.json() as {
+          workflow_runs: Array<{
+            status: string;
+            conclusion: string | null;
+            updated_at: string;
+            html_url: string;
+            name: string;
+          }>;
+        };
+        const run = data.workflow_runs?.[0];
+        if (!run) {
+          return { status: "unknown" as const, message: "No workflow runs found", updatedAt: null };
+        }
+        let status: "success" | "in_progress" | "failure" | "unknown";
+        if (run.status === "in_progress" || run.status === "queued" || run.status === "waiting") {
+          status = "in_progress";
+        } else if (run.status === "completed") {
+          status = run.conclusion === "success" ? "success" : "failure";
+        } else {
+          status = "unknown";
+        }
+        return {
+          status,
+          message: run.name,
+          updatedAt: run.updated_at,
+          url: run.html_url,
+        };
+      } catch {
+        return { status: "unknown" as const, message: "Error fetching status", updatedAt: null };
+      }
+    }),
+  }),
+});
 export type AppRouter = typeof appRouter;
