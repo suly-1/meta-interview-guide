@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { useXPContext } from "@/contexts/XPContext";
+import { useXPContext } from "@/contexts/useXPContext";
 import {
   Bug, PlusCircle, TrendingUp, Clock, Play, Square, ChevronDown, ChevronUp,
   CheckCircle2, AlertTriangle, Lightbulb, RotateCcw, Target, Brain,

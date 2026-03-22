@@ -26,7 +26,7 @@ import XPLevelBar from "@/components/XPLevelBar";
 import NavCountdownChip from "@/components/NavCountdownChip";
 import SoundtrackPlayer from "@/components/SoundtrackPlayer";
 import TopicRoulette from "@/components/TopicRoulette";
-import { useXPContext } from "@/contexts/XPContext";
+import { useXPContext } from "@/contexts/useXPContext";
 import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
 import GauntletMode, { type GauntletState } from "@/components/GauntletMode";
 import ProgressDashboard from "@/components/ProgressDashboard";

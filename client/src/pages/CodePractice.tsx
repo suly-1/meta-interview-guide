@@ -13,7 +13,7 @@ import { useCTCIProgress } from "@/hooks/useCTCIProgress";
 import { useSpacedRepetition } from "@/hooks/useSpacedRepetition";
 import { getWeakestPatterns } from "@/hooks/useDrillRatings";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
-import { useXPContext } from "@/contexts/XPContext";
+import { useXPContext } from "@/contexts/useXPContext";
 import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
 import CodeDiffViewer from "@/components/CodeDiffViewer";
 import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";

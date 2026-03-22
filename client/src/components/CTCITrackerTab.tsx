@@ -10,7 +10,7 @@ import { CTCI_PROBLEMS, CTCI_TOPICS, DIFFICULTY_COLORS } from '@/lib/ctciProblem
 import { useCTCIProgress } from '@/hooks/useCTCIProgress';
 import { useCTCIStreak } from '@/hooks/useCTCIStreak';
 import CTCIExport from '@/components/CTCIExport';
-import { useXPContext } from '@/contexts/XPContext';
+import { useXPContext } from '@/contexts/useXPContext';
 import {
   CheckCircle2, Circle, Star, StarOff, ExternalLink,
   ChevronDown, ChevronUp, Search, X, RotateCcw, SlidersHorizontal,

@@ -1,7 +1,7 @@
 // SystemDesignMockSession — 45-min timed mock with 5-section answer panels + LLM IC-level debrief
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { useXPContext } from "@/contexts/XPContext";
+import { useXPContext } from "@/contexts/useXPContext";
 import {
   Clock, Play, Square, ChevronDown, ChevronUp, RotateCcw,
   CheckCircle2, AlertCircle, Loader2, Zap, Trophy, Target,

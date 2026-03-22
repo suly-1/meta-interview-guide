@@ -11,7 +11,7 @@ import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
 import AchievementBadgeWall from "@/components/AchievementBadgeWall";
 import XPStatsPanel from "@/components/XPStatsPanel";
-import { useXPContext } from "@/contexts/XPContext";
+import { useXPContext } from "@/contexts/useXPContext";
 import { PATTERNS, BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { computeReadiness } from "@/hooks/useReadinessScore";

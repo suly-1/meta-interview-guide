@@ -1,7 +1,7 @@
 // Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useICLevel } from "@/contexts/ICLevelContext";
-import { useXPContext } from "@/contexts/XPContext";
+import { useXPContext } from "@/contexts/useXPContext";
 import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";

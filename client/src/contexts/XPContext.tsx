@@ -1,13 +1,15 @@
 /**
  * XPContext — provides XP state and addXP function to the entire app
  * Also renders the XPToast queue
+ *
+ * NOTE: useXPContext hook is in ./useXPContext.ts (split for Vite Fast Refresh compatibility)
  */
-import React, { createContext, useContext, useCallback, useState } from "react";
+import React, { createContext, useCallback, useState } from "react";
 import { useXP } from "@/hooks/useXP";
 import type { XPEvent } from "@/hooks/useXP";
 import XPToast from "@/components/XPToast";
 
-interface XPContextType {
+export interface XPContextType {
   totalXP: number;
   events: XPEvent[];
   todayXP: number;
@@ -15,7 +17,7 @@ interface XPContextType {
   addXP: (type: XPEvent["type"], label: string, customAmount?: number) => number;
 }
 
-const XPContext = createContext<XPContextType | undefined>(undefined);
+export const XPContext = createContext<XPContextType | undefined>(undefined);
 
 interface ToastItem {
   id: string;
@@ -52,10 +54,4 @@ export function XPProvider({ children }: { children: React.ReactNode }) {
       ))}
     </XPContext.Provider>
   );
-}
-
-export function useXPContext(): XPContextType {
-  const ctx = useContext(XPContext);
-  if (!ctx) throw new Error("useXPContext must be used within XPProvider");
-  return ctx;
 }
