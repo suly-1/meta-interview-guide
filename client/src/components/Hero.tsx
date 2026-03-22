@@ -323,7 +323,7 @@ export default function Hero() {
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight mb-4"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            <span className="text-[#4d9fff]">Interview Guide</span>
+            <span className="text-[#4d9fff]">Independence Study Guide</span>
           </h1>
 
           <p className="text-[#93c5fd] text-base md:text-lg max-w-2xl mb-4 leading-relaxed">
