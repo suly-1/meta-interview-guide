@@ -215,8 +215,9 @@ export default function Hero() {
           <div className="flex flex-wrap gap-2 mb-5">
             {[
               { label: "Updated March 2026", color: "rgba(8,102,255,0.25)", border: "rgba(8,102,255,0.5)", text: "#93c5fd" },
-              { label: "IC6 · IC7 Levels",   color: "rgba(5,150,105,0.2)",  border: "rgba(5,150,105,0.45)", text: "#6ee7b7" },
+              { label: "IC4 · IC5 · IC6 · IC7",   color: "rgba(5,150,105,0.2)",  border: "rgba(5,150,105,0.45)", text: "#6ee7b7" },
               { label: "Behavioral & Coding Focus", color: "rgba(217,119,6,0.2)", border: "rgba(217,119,6,0.45)", text: "#fcd34d" },
+              { label: "Community Resource · Not affiliated with Meta", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.2)", text: "#cbd5e1" },
             ].map((b) => (
               <span
                 key={b.label}
@@ -240,9 +241,37 @@ export default function Hero() {
             Interview Guide
           </h1>
 
-          <p className="text-[#93c5fd] text-base md:text-lg max-w-2xl mb-8 leading-relaxed">
-            A focused, comprehensive preparation resource for Meta's Behavioral and Coding interview rounds at the Senior and Staff Engineer levels — covering LeetCode patterns, the AI-enabled coding round, Meta's 4 behavioral focus areas, STAR framework, and curated resources.
+          <p className="text-[#93c5fd] text-base md:text-lg max-w-2xl mb-4 leading-relaxed">
+            Built from 200+ candidate reports. Refined for 2026. A community-sourced, independent study resource — not affiliated with Meta. Covers IC4–IC7 Behavioral &amp; Coding rounds, including the AI-Enabled Coding Round, 14 LeetCode patterns, STAR framework, and curated resources.
           </p>
+
+          {/* Official prep notice */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-8 p-3 rounded-xl border border-white/10 bg-white/5 max-w-2xl">
+            <span className="text-amber-300 text-xs font-bold uppercase tracking-widest flex-shrink-0">⚠ Always refer first to</span>
+            <span className="text-white/60 text-xs hidden sm:inline">|</span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="text-white/60">the official preparation materials your recruiter or hiring manager shared with you, including:</span>
+              <a
+                href="https://www.metacareers.com/swe-prep-techscreen"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[#4d9fff] hover:text-blue-300 font-semibold transition-colors underline underline-offset-2"
+              >
+                Technical Screen Guide
+                <ExternalLink size={10} />
+              </a>
+              <span className="text-white/30">&middot;</span>
+              <a
+                href="https://www.metacareers.com/swe-prep-onsite"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[#4d9fff] hover:text-blue-300 font-semibold transition-colors underline underline-offset-2"
+              >
+                Full Loop Interview Guide
+                <ExternalLink size={10} />
+              </a>
+            </div>
+          </div>
 
           {/* Pill features */}
           <div className="flex flex-wrap gap-3">
