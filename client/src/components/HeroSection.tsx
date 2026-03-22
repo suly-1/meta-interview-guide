@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
 import CrossDeviceSync from "@/components/CrossDeviceSync";
+import ShareMessageButton from "@/components/ShareMessageButton";
 
 // ── Achievement Badges ─────────────────────────────────────────────────────
 const BADGE_DEFS = [
@@ -164,11 +165,11 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
               className="text-2xl font-bold text-foreground mb-1"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Meta Interview Prep
+              Staff Engineer Interview Prep
             </h1>
             <p className="text-sm text-muted-foreground">
-              IC6 (Staff) &amp; IC7 (Senior Staff) — Coding · System Design ·
-              Behavioral
+              IC4 (SWE) · IC5 (Senior) · IC6 (Staff) · IC7 (Senior Staff) — Coding · System Design ·
+              Behavioral · Independent Community Resource
             </p>
           </div>
           {/* Streak hero badge */}
@@ -348,6 +349,10 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
             </div>
           </button>
         </div>
+      </div>
+      {/* Share Message Copy Button */}
+      <div className="container mt-4">
+        <ShareMessageButton />
       </div>
       {/* Achievement Badges */}
       <div className="container mt-4">

@@ -120,7 +120,7 @@ function LevelCards() {
         className="w-full flex items-center justify-between group"
       >
         <div className="section-title mb-0 pb-0 border-0 group-hover:text-foreground transition-colors">
-          IC6 vs IC7 — What Meta Expects
+          IC4 · IC5 · IC6 · IC7 — What FAANG Expects by Level
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span>{open ? "Collapse" : "Expand reference"}</span>
@@ -134,7 +134,7 @@ function LevelCards() {
             <div className="prep-card p-5 border-blue-500/20">
               <div className="flex items-center gap-2 mb-3">
                 <span className="badge badge-blue text-sm px-3 py-1">
-                  IC6 — Staff Engineer
+                  IC6 — Staff Engineer (FAANG)
                 </span>
               </div>
               <div className="space-y-3 text-sm">
@@ -169,7 +169,7 @@ function LevelCards() {
             <div className="prep-card p-5 border-purple-500/20">
               <div className="flex items-center gap-2 mb-3">
                 <span className="badge badge-purple text-sm px-3 py-1">
-                  IC7 — Senior Staff Engineer
+                  IC7 — Senior Staff Engineer (FAANG)
                 </span>
               </div>
               <div className="space-y-3 text-sm">
@@ -1257,7 +1257,7 @@ function ProgressExport() {
       doc.setTextColor(59, 130, 246);
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text("Meta Interview Prep — Readiness Report", 14, 18);
+      doc.text("Staff Engineer Interview Prep — Readiness Report", 14, 18);
       doc.setTextColor(148, 163, 184);
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");

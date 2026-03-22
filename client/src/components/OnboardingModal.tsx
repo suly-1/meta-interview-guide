@@ -4,8 +4,8 @@ import { X, ChevronRight, ChevronLeft } from "lucide-react";
 
 const STEPS = [
   {
-    title: "Welcome to Meta Prep",
-    body: "This guide covers everything you need for Meta IC6 (Staff) and IC7 (Senior Staff) interviews: Coding, System Design, and Behavioral rounds.",
+    title: "Welcome to Staff Eng Prep",
+    body: "This guide covers everything you need for Software Engineer (IC4) through Senior Staff (IC7) engineering interviews at FAANG companies: Coding, System Design, and Behavioral rounds.",
     icon: "🎯",
   },
   {

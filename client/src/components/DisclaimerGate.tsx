@@ -211,6 +211,18 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
           {/* Divider */}
           <div className="border-t border-white/10" />
 
+          {/* Community resource proof */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-1.5">
+            <p className="text-xs font-semibold text-blue-400">📢 Public Community Resource</p>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              This guide is <strong className="text-zinc-200">publicly available</strong> at{" "}
+              <span className="text-blue-400">www.metaguide.blog</span> and open-source at{" "}
+              <a href="https://github.com/suly-1/meta-prep-guide" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">github.com/suly-1/meta-prep-guide</a>.
+              It is discoverable by anyone via search engines — it was{" "}
+              <strong className="text-zinc-200">not distributed</strong> by any interviewer, recruiter, or company employee.
+            </p>
+          </div>
+
           {/* Checkbox acknowledgment */}
           <button
             onClick={() => setChecked(c => !c)}
@@ -234,9 +246,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
                   : "text-zinc-400 group-hover:text-zinc-200"
               }`}
             >
-              ☑️ I acknowledge this guide is independent, not affiliated with
-              Meta, provided without warranty, and that I assume all risk of
-              use.
+              ✅ I am a job seeker using this resource for my own preparation. I independently discovered this public guide — it was not provided to me by any interviewer or company employee. I acknowledge it is independent, not affiliated with Meta or any FAANG company, provided without warranty, and I assume all risk of use.
             </span>
           </button>
 

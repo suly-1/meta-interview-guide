@@ -3526,10 +3526,10 @@ export default function BehavioralTab() {
                   Dimension
                 </th>
                 <th className="text-left p-3 text-xs font-semibold text-blue-400 uppercase tracking-wider">
-                  IC6 — Staff
+                  IC6 — Staff Engineer
                 </th>
                 <th className="text-left p-3 text-xs font-semibold text-purple-400 uppercase tracking-wider">
-                  IC7 — Senior Staff
+                  IC7 — Senior Staff Engineer
                 </th>
               </tr>
             </thead>

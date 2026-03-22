@@ -487,3 +487,11 @@
 - [ ] Add IC4/IC5 entry-level section to Behavioral tab
 - [ ] Add external link confirmation modal to CommunityBanner official links
 - [ ] Run pnpm build:standalone
+
+## Professional Protection Features
+
+- [ ] #5: Rename all Meta-specific branding to FAANG/Staff Engineer framing
+- [ ] #4: Add one-click share message copy button in hero section
+- [ ] #1: Add Candidate-Initiated Discovery landing page
+- [ ] Option A: Persistent "Not affiliated with Meta" banner on every tab
+- [ ] Option D: "I am a job seeker" checkbox gate on first visit

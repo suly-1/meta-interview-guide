@@ -406,7 +406,7 @@ export function OnboardingChecklist() {
     }
     // Share toast
     const tweetText =
-      "I just finished onboarding on my Meta IC6 interview prep! 🎉 #SoftwareEngineering #MetaInterview #IC6";
+      "I just started my Staff Engineer interview prep journey! 🎉 #SoftwareEngineering #StaffEngineer #FAANG #IC6";
     toast(
       <div className="flex flex-col gap-2">
         <div className="text-sm font-bold text-emerald-400">

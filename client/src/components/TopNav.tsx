@@ -735,10 +735,10 @@ export default function TopNav({
               className="font-bold text-sm text-foreground hidden sm:inline"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Meta Prep
+              Staff Eng Prep
             </span>
             <span className="badge badge-blue hidden md:inline-flex">
-              IC6/IC7
+              IC4–IC7
             </span>
           </div>
 

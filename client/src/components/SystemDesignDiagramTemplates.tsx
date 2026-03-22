@@ -246,7 +246,7 @@ function buildNewsFeedTemplate(): object {
     makeLabel(
       40,
       20,
-      "📰 News Feed System Design (Meta IC6/IC7)",
+      "📰 News Feed System Design (FAANG IC6/IC7)",
       "#8b5cf6",
       20,
       true
@@ -471,7 +471,7 @@ function buildMessengerTemplate(): object {
     makeLabel(
       40,
       20,
-      "💬 Messenger / Chat System Design (Meta IC6/IC7)",
+      "💬 Messenger / Chat System Design (FAANG IC6/IC7)",
       "#06b6d4",
       20,
       true
@@ -698,7 +698,7 @@ function buildInstagramTemplate(): object {
     makeLabel(
       40,
       20,
-      "📸 Instagram / Photo Sharing System Design (Meta IC6/IC7)",
+      "📸 Instagram / Photo Sharing System Design (FAANG IC6/IC7)",
       "#ec4899",
       20,
       true

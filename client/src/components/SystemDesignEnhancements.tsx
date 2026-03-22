@@ -2312,7 +2312,7 @@ export function EnhancedQuestionBank() {
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Questions categorised by Meta interview round type and Meta relevance.
+        Questions categorised by FAANG interview round type and relevance.
         Start with Critical + Full System Design for maximum ROI.
       </p>
       <div className="space-y-2">

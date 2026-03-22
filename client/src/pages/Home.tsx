@@ -210,18 +210,16 @@ export default function Home() {
 
       {/* Disclaimer banner */}
       {!disclaimerDismissed && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5">
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3">
           <div className="container flex items-start gap-3">
             <AlertTriangle
               size={14}
               className="text-amber-400 shrink-0 mt-0.5"
             />
             <div className="flex-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-amber-400">Disclaimer: </span>
-              This guide is an independent study resource and is not affiliated
-              with, endorsed by, or connected to Meta Platforms, Inc. Interview
-              formats and expectations may change. Always verify current
-              information with your recruiter.
+              <span className="font-semibold text-amber-400">Public Community Resource: </span>
+              This is an independent, publicly available study guide at{" "}
+              <span className="text-blue-400">www.metaguide.blog</span> — not affiliated with, endorsed by, or distributed by Meta, Google, Amazon, or any FAANG company. It was not provided to you by any interviewer or recruiter. Always verify interview details with your recruiter.
               <label className="ml-3 inline-flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
@@ -231,7 +229,7 @@ export default function Home() {
                   }
                 />
                 <span className="text-amber-400 font-medium">
-                  I have read the disclaimer
+                  I understand
                 </span>
               </label>
             </div>
@@ -345,7 +343,7 @@ export default function Home() {
         <footer className="border-t border-border py-6 mt-8">
           <div className="container text-center text-xs text-muted-foreground space-y-1">
             <div>
-              Meta IC6/IC7 Interview Prep Guide · All progress saved locally in
+              Staff Engineer Interview Prep Guide · All progress saved locally in
               your browser
             </div>
             <div>

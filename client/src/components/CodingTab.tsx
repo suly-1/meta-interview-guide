@@ -2984,7 +2984,7 @@ function CTCITracker() {
             <BookOpen size={14} className="text-purple-400" />
             <div className="text-left">
               <div className="text-sm font-bold text-foreground">
-                500 curated LeetCode problems · Meta Frequency tags
+                500 curated LeetCode problems · FAANG Frequency tags
               </div>
               <div className="text-xs text-muted-foreground">
                 {solvedCount}/500 solved · Click to{" "}
@@ -3049,7 +3049,7 @@ function CTCITracker() {
             {/* High-freq progress bar */}
             <div>
               <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                <span>🔥 High Meta Frequency ({highFreqTotal} problems)</span>
+                <span>🔥 High FAANG Frequency ({highFreqTotal} problems)</span>
                 <span>
                   {Math.round((highFreqSolved / highFreqTotal) * 100)}%
                 </span>

@@ -652,7 +652,7 @@ export function CodingMockSession() {
                         : "bg-secondary border-border text-muted-foreground hover:border-muted-foreground"
                     }`}
                   >
-                    {level === "IC6" ? "IC6 — Staff" : "IC7 — Sr. Staff"}
+                    {level === "IC6" ? "IC6 — Staff Engineer" : "IC7 — Senior Staff Engineer"}
                     {icMode === level && (
                       <span className="ml-1.5 text-[9px] opacity-70">
                         {level === "IC7" ? "(stricter)" : "(standard)"}

@@ -143,6 +143,14 @@ export function useDisclaimerDismissed() {
   return useLocalStorage<boolean>("meta_disclaimer_v1", false);
 }
 
+// ── Discovery gate confirmed (job seeker checkbox) ────────────────────────────
+export function useDiscoveryConfirmed() {
+  return useLocalStorage<boolean>("staffprep_discovery_v1", false);
+}
+// ── Disclaimer banner dismissed ───────────────────────────────────────────
+export function useDisclaimerBannerDismissed() {
+  return useLocalStorage<boolean>("staffprep_disclaimer_banner_v1", false);
+}
 // ── Confetti fired ────────────────────────────────────────────────────────────────────────────────
 export function useCongratsShown() {
   return useLocalStorage<boolean>("meta_congrats_v1", false);

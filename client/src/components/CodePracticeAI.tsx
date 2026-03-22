@@ -822,7 +822,7 @@ export function FollowUpGenerator({
           {!followUpMutation.data && !followUpMutation.isPending && (
             <p className="text-xs text-muted-foreground">
               Submit your solution first, then generate the follow-up questions
-              a real Meta interviewer would ask.
+              a FAANG-style interviewer would ask.
             </p>
           )}
         </div>
@@ -1061,7 +1061,7 @@ export function PatternRecognitionTrainer({
         <div className="px-4 pb-4 space-y-3 border-t border-cyan-500/10">
           <p className="text-xs text-muted-foreground pt-3">
             Before writing any code, identify the algorithmic pattern. This
-            trains the most critical first-2-minute skill in a Meta interview.
+            trains the most critical first-2-minute skill in a FAANG-style interview.
           </p>
 
           {!submitted ? (

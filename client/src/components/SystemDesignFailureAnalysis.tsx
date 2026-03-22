@@ -877,7 +877,7 @@ function IC6vsIC7Table() {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <h3 className="text-sm font-semibold text-foreground mb-1">
-        IC6 vs IC7 — System Design Differentiators
+        IC4 vs IC5 vs IC6 vs IC7 — System Design Differentiators
       </h3>
       <p className="text-xs text-muted-foreground mb-4">
         What separates a hire at IC6 from a hire at IC7 in the system design

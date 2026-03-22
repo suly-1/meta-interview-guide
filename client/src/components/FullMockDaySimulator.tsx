@@ -626,7 +626,7 @@ export function FullMockDaySimulator() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground text-center">
-                Simulates a full Meta interview loop. Each round is
+                Simulates a full FAANG-style interview loop. Each round is
                 independently scored, then the AI generates a composite IC6/IC7
                 promotion decision and a personalised 2-week remediation plan.
               </p>

@@ -70,7 +70,7 @@ export async function reviewCode(
     {
       role: "system",
       content: `You are a Meta senior engineer conducting a code review for an IC6/IC7 interview. 
-Evaluate the solution on: correctness, time/space complexity, code quality, edge cases, and Meta-specific signals (scalability, clean abstractions).
+Evaluate the solution on: correctness, time/space complexity, code quality, edge cases, and FAANG-level signals (scalability, clean abstractions).
 Format your response with these sections:
 ## Overall Score: X/10
 ## Correctness
@@ -102,7 +102,7 @@ export async function getHint(
     [
       {
         role: "system",
-        content: `You are a Meta interviewer giving a level-${level} hint: ${levelDesc}. Be concise and helpful without giving away the full solution.`,
+        content: `You are a FAANG-style interviewer giving a level-${level} hint: ${levelDesc}. Be concise and helpful without giving away the full solution.`,
       },
       {
         role: "user",
@@ -148,7 +148,7 @@ export async function generateFollowUps(
       {
         role: "system",
         content:
-          "You are a Meta interviewer. Generate 4 follow-up questions an interviewer would ask after seeing this solution. Focus on scalability, edge cases, and design decisions. Format as a numbered list.",
+          "You are a FAANG-style interviewer. Generate 4 follow-up questions an interviewer would ask after seeing this solution. Focus on scalability, edge cases, and design decisions. Format as a numbered list.",
       },
       {
         role: "user",
