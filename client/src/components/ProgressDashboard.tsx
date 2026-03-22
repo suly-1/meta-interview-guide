@@ -278,6 +278,100 @@ function ProgressBar({ label, value, max, color }: { label: string; value: numbe
   );
 }
 
+// ── Screen History Section (extracted from IIFE to fix React hooks violation) ──
+const RATING_ORDER_MAP: Record<string, number> = {
+  "Exceptional": 5, "Strong": 4, "Solid": 3, "Moderate": 2, "Insufficient": 1, "": 0
+};
+const RATING_COLORS_MAP: Record<string, string> = {
+  "Exceptional": "text-violet-600 bg-violet-50 dark:bg-violet-900/20",
+  "Strong": "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20",
+  "Solid": "text-blue-600 bg-blue-50 dark:bg-blue-900/20",
+  "Moderate": "text-amber-600 bg-amber-50 dark:bg-amber-900/20",
+  "Insufficient": "text-red-600 bg-red-50 dark:bg-red-900/20",
+};
+function ScreenHistorySection() {
+  const sessions = loadScreenSessions();
+  const [showAll, setShowAll] = useState(false);
+  const [sortBy, setSortBy] = useState<"date" | "rating">("date");
+  if (sessions.length === 0) return null;
+  const sorted = [...sessions].sort((a, b) =>
+    sortBy === "date"
+      ? b.date - a.date
+      : (RATING_ORDER_MAP[b.overallRating] ?? 0) - (RATING_ORDER_MAP[a.overallRating] ?? 0)
+  );
+  const displayed = showAll ? sorted : sorted.slice(0, 5);
+  return (
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Monitor size={15} className="text-indigo-500" />
+          <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Screen Simulation History</h3>
+          <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-semibold">{sessions.length} sessions</span>
+        </div>
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as "date" | "rating")}
+          className="text-xs bg-background border border-border rounded px-2 py-1 text-foreground"
+        >
+          <option value="date">Sort: Latest</option>
+          <option value="rating">Sort: Best Rating</option>
+        </select>
+      </div>
+      <div className="space-y-2">
+        {displayed.map(s => {
+          const mins = Math.floor(s.durationSec / 60);
+          const secs = s.durationSec % 60;
+          const proceed = s.recommendation === "Proceed";
+          return (
+            <div key={s.id} className="rounded-lg border border-gray-100 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-900/30">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-mono text-muted-foreground">{new Date(s.date).toLocaleDateString()}</span>
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{s.targetLevel}</span>
+                {s.overallRating && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${RATING_COLORS_MAP[s.overallRating] ?? "text-gray-500"}`}>
+                    {s.overallRating}
+                  </span>
+                )}
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto ${
+                  proceed
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                }`}>
+                  {proceed ? "✓ Proceed" : "✗ Do Not Proceed"}
+                </span>
+                <span className="text-[10px] text-muted-foreground">{mins}m {secs}s</span>
+              </div>
+              <div className="mt-2 flex gap-3 flex-wrap">
+                {s.questions?.map((q, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                    <span className="font-semibold text-muted-foreground">Q{i + 1}:</span>
+                    <span className="truncate max-w-[120px] text-foreground">{q.problemName}</span>
+                    {q.execResult ? (
+                      q.execResult.passed
+                        ? <span className="text-emerald-600 font-bold shrink-0">✓{q.execResult.testCasesTotal ? ` ${q.execResult.testCasesPassed}/${q.execResult.testCasesTotal}TC` : ""}</span>
+                        : <span className="text-red-600 font-bold shrink-0">✗{q.execResult.testCasesTotal ? ` ${q.execResult.testCasesPassed}/${q.execResult.testCasesTotal}TC` : ""}</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {sessions.length > 5 && (
+        <button
+          onClick={() => setShowAll(o => !o)}
+          className="mt-2 w-full flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+        >
+          {showAll ? <><ChevronUp size={12} /> Show less</> : <><ChevronDown size={12} /> Show all {sessions.length} sessions</>}
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ── Main Component ───────────────────────────────────────────────────────────
 interface Props {
   open: boolean;
@@ -586,104 +680,8 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
             );
           })()}
 
-          {/* Screen Simulation Session History */}
-          {(() => {
-            const sessions = loadScreenSessions();
-            const [showAll, setShowAll] = useState(false);
-            const [sortBy, setSortBy] = useState<"date" | "rating">("date");
-            if (sessions.length === 0) return null;
-
-            const RATING_ORDER: Record<string, number> = {
-              "Exceptional": 5, "Strong": 4, "Solid": 3, "Moderate": 2, "Insufficient": 1, "": 0
-            };
-            const sorted = [...sessions].sort((a, b) =>
-              sortBy === "date"
-                ? b.date - a.date
-                : (RATING_ORDER[b.overallRating] ?? 0) - (RATING_ORDER[a.overallRating] ?? 0)
-            );
-            const displayed = showAll ? sorted : sorted.slice(0, 5);
-
-            const RATING_COLORS_LOCAL: Record<string, string> = {
-              "Exceptional": "text-violet-600 bg-violet-50 dark:bg-violet-900/20",
-              "Strong": "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20",
-              "Solid": "text-blue-600 bg-blue-50 dark:bg-blue-900/20",
-              "Moderate": "text-amber-600 bg-amber-50 dark:bg-amber-900/20",
-              "Insufficient": "text-red-600 bg-red-50 dark:bg-red-900/20",
-            };
-
-            return (
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Monitor size={15} className="text-indigo-500" />
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Screen Simulation History</h3>
-                    <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-semibold">{sessions.length} sessions</span>
-                  </div>
-                  <select
-                    value={sortBy}
-                    onChange={e => setSortBy(e.target.value as "date" | "rating")}
-                    className="text-xs bg-background border border-border rounded px-2 py-1 text-foreground"
-                  >
-                    <option value="date">Sort: Latest</option>
-                    <option value="rating">Sort: Best Rating</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  {displayed.map(s => {
-                    const mins = Math.floor(s.durationSec / 60);
-                    const secs = s.durationSec % 60;
-                    const proceed = s.recommendation === "Proceed";
-                    return (
-                      <div key={s.id} className="rounded-lg border border-gray-100 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-900/30">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-mono text-muted-foreground">{new Date(s.date).toLocaleDateString()}</span>
-                          <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{s.targetLevel}</span>
-                          {s.overallRating && (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${RATING_COLORS_LOCAL[s.overallRating] ?? "text-gray-500"}`}>
-                              {s.overallRating}
-                            </span>
-                          )}
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto ${
-                            proceed
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          }`}>
-                            {proceed ? "✓ Proceed" : "✗ Do Not Proceed"}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">{mins}m {secs}s</span>
-                        </div>
-                        <div className="mt-2 flex gap-3 flex-wrap">
-                          {s.questions?.map((q, i) => (
-                            <div key={i} className="flex items-center gap-1.5 text-[10px]">
-                              <span className="font-semibold text-muted-foreground">Q{i + 1}:</span>
-                              <span className="truncate max-w-[120px] text-foreground">{q.problemName}</span>
-                              {q.execResult ? (
-                                q.execResult.passed
-                                  ? <span className="text-emerald-600 font-bold shrink-0">✓{q.execResult.testCasesTotal ? ` ${q.execResult.testCasesPassed}/${q.execResult.testCasesTotal}TC` : ""}</span>
-                                  : <span className="text-red-600 font-bold shrink-0">✗{q.execResult.testCasesTotal ? ` ${q.execResult.testCasesPassed}/${q.execResult.testCasesTotal}TC` : ""}</span>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {sessions.length > 5 && (
-                  <button
-                    onClick={() => setShowAll(o => !o)}
-                    className="mt-2 w-full flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
-                  >
-                    {showAll ? <><ChevronUp size={12} /> Show less</> : <><ChevronDown size={12} /> Show all {sessions.length} sessions</>}
-                  </button>
-                )}
-              </div>
-            );
-          })()}
+          {/* Screen Simulation Session History — extracted to proper component to avoid hooks-in-IIFE violation */}
+          <ScreenHistorySection />
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-1">

@@ -328,7 +328,7 @@ export default function CodingTab() {
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            The Coding Interview at Meta IC6/IC7
+            The Coding Interview IC6/IC7
           </h2>
           <p className="text-sm text-gray-500 mt-1">What to expect, how you are evaluated, and what separates a pass from a fail</p>
         </div>

@@ -379,3 +379,4 @@
 
 ## Deployment Status Badge
 - [x] Live GitHub Actions deployment status badge in UI (green ✅ / yellow 🟡 / red ✗) visible in hero/footer
+- [ ] Fix Progress Dashboard not working
