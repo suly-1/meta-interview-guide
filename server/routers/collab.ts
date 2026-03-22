@@ -9,11 +9,13 @@ import { notifyOwner } from "../_core/notification";
 // ── Room management ────────────────────────────────────────────────────────
 export const collabRouter = router({
   createRoom: publicProcedure
-    .input(z.object({
-      roomCode: z.string().min(4).max(16),
-      questionTitle: z.string().optional(),
-      mode: z.enum(["human", "ai"]).default("human"),
-    }))
+    .input(
+      z.object({
+        roomCode: z.string().min(4).max(16),
+        questionTitle: z.string().optional(),
+        mode: z.enum(["human", "ai"]).default("human"),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
@@ -31,16 +33,22 @@ export const collabRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return null;
-      const rows = await db.select().from(collabRooms).where(eq(collabRooms.roomCode, input.roomCode)).limit(1);
+      const rows = await db
+        .select()
+        .from(collabRooms)
+        .where(eq(collabRooms.roomCode, input.roomCode))
+        .limit(1);
       return rows[0] ?? null;
     }),
 
   updateRoom: publicProcedure
-    .input(z.object({
-      roomCode: z.string(),
-      status: z.enum(["waiting", "active", "ended"]).optional(),
-      questionTitle: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        roomCode: z.string(),
+        status: z.enum(["waiting", "active", "ended"]).optional(),
+        questionTitle: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) return;
@@ -48,18 +56,23 @@ export const collabRouter = router({
       if (input.status) update.status = input.status;
       if (input.questionTitle) update.questionTitle = input.questionTitle;
       if (input.status === "ended") update.endedAt = new Date();
-      await db.update(collabRooms).set(update).where(eq(collabRooms.roomCode, input.roomCode));
+      await db
+        .update(collabRooms)
+        .set(update)
+        .where(eq(collabRooms.roomCode, input.roomCode));
     }),
 
   // ── Session events (for replay) ──────────────────────────────────────────
   saveEvent: publicProcedure
-    .input(z.object({
-      roomCode: z.string(),
-      eventType: z.string(),
-      payload: z.any(),
-      actorName: z.string().optional(),
-      ts: z.number(),
-    }))
+    .input(
+      z.object({
+        roomCode: z.string(),
+        eventType: z.string(),
+        payload: z.any(),
+        actorName: z.string().optional(),
+        ts: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) return;
@@ -77,27 +90,38 @@ export const collabRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return [];
-      return db.select().from(sessionEvents).where(eq(sessionEvents.roomCode, input.roomCode));
+      return db
+        .select()
+        .from(sessionEvents)
+        .where(eq(sessionEvents.roomCode, input.roomCode));
     }),
 
   // ── Scorecard ────────────────────────────────────────────────────────────
   saveScorecard: publicProcedure
-    .input(z.object({
-      roomCode: z.string(),
-      scorerName: z.string().optional(),
-      candidateName: z.string().optional(),
-      requirementsScore: z.number().min(1).max(5),
-      architectureScore: z.number().min(1).max(5),
-      scalabilityScore: z.number().min(1).max(5),
-      communicationScore: z.number().min(1).max(5),
-      overallFeedback: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        roomCode: z.string(),
+        scorerName: z.string().optional(),
+        candidateName: z.string().optional(),
+        requirementsScore: z.number().min(1).max(5),
+        architectureScore: z.number().min(1).max(5),
+        scalabilityScore: z.number().min(1).max(5),
+        communicationScore: z.number().min(1).max(5),
+        overallFeedback: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
 
       // Generate AI coaching note
-      const avg = ((input.requirementsScore + input.architectureScore + input.scalabilityScore + input.communicationScore) / 4).toFixed(1);
+      const avg = (
+        (input.requirementsScore +
+          input.architectureScore +
+          input.scalabilityScore +
+          input.communicationScore) /
+        4
+      ).toFixed(1);
       const weakDims = [
         input.requirementsScore <= 2 ? "Requirements Gathering" : null,
         input.architectureScore <= 2 ? "Architecture Design" : null,
@@ -109,8 +133,15 @@ export const collabRouter = router({
       try {
         const res = await invokeLLM({
           messages: [
-            { role: "system", content: "You are a senior Meta engineering interviewer providing concise, actionable feedback. Be direct and specific. 2-3 sentences max." },
-            { role: "user", content: `Candidate scored ${avg}/5 overall in a system design interview. Scores: Requirements ${input.requirementsScore}/5, Architecture ${input.architectureScore}/5, Scalability ${input.scalabilityScore}/5, Communication ${input.communicationScore}/5. ${weakDims.length > 0 ? `Weak areas: ${weakDims.join(", ")}.` : "Strong performance across all dimensions."} ${input.overallFeedback ? `Interviewer notes: ${input.overallFeedback}` : ""} Provide a 2-3 sentence coaching note for the candidate.` },
+            {
+              role: "system",
+              content:
+                "You are a senior Meta engineering interviewer providing concise, actionable feedback. Be direct and specific. 2-3 sentences max.",
+            },
+            {
+              role: "user",
+              content: `Candidate scored ${avg}/5 overall in a system design interview. Scores: Requirements ${input.requirementsScore}/5, Architecture ${input.architectureScore}/5, Scalability ${input.scalabilityScore}/5, Communication ${input.communicationScore}/5. ${weakDims.length > 0 ? `Weak areas: ${weakDims.join(", ")}.` : "Strong performance across all dimensions."} ${input.overallFeedback ? `Interviewer notes: ${input.overallFeedback}` : ""} Provide a 2-3 sentence coaching note for the candidate.`,
+            },
           ],
         });
         aiCoachingNote = String(res.choices?.[0]?.message?.content ?? "");
@@ -137,20 +168,32 @@ export const collabRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return null;
-      const rows = await db.select().from(scorecards).where(eq(scorecards.roomCode, input.roomCode)).limit(1);
+      const rows = await db
+        .select()
+        .from(scorecards)
+        .where(eq(scorecards.roomCode, input.roomCode))
+        .limit(1);
       return rows[0] ?? null;
     }),
 
   // ── AI Interviewer ────────────────────────────────────────────────────────
   aiFollowUp: publicProcedure
-    .input(z.object({
-      questionTitle: z.string(),
-      transcript: z.array(z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string() })),
-      weakAreas: z.array(z.string()).optional(),
-    }))
+    .input(
+      z.object({
+        questionTitle: z.string(),
+        transcript: z.array(
+          z.object({
+            role: z.enum(["interviewer", "candidate"]),
+            text: z.string(),
+          })
+        ),
+        weakAreas: z.array(z.string()).optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const history = input.transcript.map(t => ({
-        role: t.role === "interviewer" ? "assistant" as const : "user" as const,
+        role:
+          t.role === "interviewer" ? ("assistant" as const) : ("user" as const),
         content: t.text,
       }));
 
@@ -158,23 +201,38 @@ export const collabRouter = router({
         messages: [
           {
             role: "system",
-            content: String(`You are a senior Meta Staff Engineer (IC6/IC7) conducting a system design interview. The question is: "${input.questionTitle}". Ask ONE focused follow-up question to probe deeper. Be concise (1-2 sentences). ${input.weakAreas?.length ? `The candidate seems weak on: ${input.weakAreas.join(", ")}. Probe those areas.` : ""} Do not give hints or answers. Only ask a question.`),
+            content: String(
+              `You are a senior Meta Staff Engineer (IC6/IC7) conducting a system design interview. The question is: "${input.questionTitle}". Ask ONE focused follow-up question to probe deeper. Be concise (1-2 sentences). ${input.weakAreas?.length ? `The candidate seems weak on: ${input.weakAreas.join(", ")}. Probe those areas.` : ""} Do not give hints or answers. Only ask a question.`
+            ),
           },
           ...history,
         ],
       });
 
-      return { question: res.choices?.[0]?.message?.content ?? "Can you elaborate on your approach to handling failures in this system?" };
+      return {
+        question:
+          res.choices?.[0]?.message?.content ??
+          "Can you elaborate on your approach to handling failures in this system?",
+      };
     }),
 
   aiFinalFeedback: publicProcedure
-    .input(z.object({
-      questionTitle: z.string(),
-      transcript: z.array(z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string() })),
-      durationMinutes: z.number(),
-    }))
+    .input(
+      z.object({
+        questionTitle: z.string(),
+        transcript: z.array(
+          z.object({
+            role: z.enum(["interviewer", "candidate"]),
+            text: z.string(),
+          })
+        ),
+        durationMinutes: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
-      const transcriptText = input.transcript.map(t => `${t.role.toUpperCase()}: ${t.text}`).join("\n");
+      const transcriptText = input.transcript
+        .map(t => `${t.role.toUpperCase()}: ${t.text}`)
+        .join("\n");
 
       const res = await invokeLLM({
         messages: [
@@ -205,7 +263,17 @@ export const collabRouter = router({
                 icLevel: { type: "string" },
                 summary: { type: "string" },
               },
-              required: ["overallScore", "requirementsScore", "architectureScore", "scalabilityScore", "communicationScore", "strengths", "improvements", "icLevel", "summary"],
+              required: [
+                "overallScore",
+                "requirementsScore",
+                "architectureScore",
+                "scalabilityScore",
+                "communicationScore",
+                "strengths",
+                "improvements",
+                "icLevel",
+                "summary",
+              ],
               additionalProperties: false,
             },
           },
@@ -214,18 +282,32 @@ export const collabRouter = router({
 
       const content = res.choices?.[0]?.message?.content ?? "{}";
       try {
-        return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+        return JSON.parse(
+          typeof content === "string" ? content : JSON.stringify(content)
+        );
       } catch {
-        return { overallScore: 3, requirementsScore: 3, architectureScore: 3, scalabilityScore: 3, communicationScore: 3, strengths: ["Attempted the problem"], improvements: ["More detail needed"], icLevel: "IC5", summary: "Keep practicing system design fundamentals." };
+        return {
+          overallScore: 3,
+          requirementsScore: 3,
+          architectureScore: 3,
+          scalabilityScore: 3,
+          communicationScore: 3,
+          strengths: ["Attempted the problem"],
+          improvements: ["More detail needed"],
+          icLevel: "IC5",
+          summary: "Keep practicing system design fundamentals.",
+        };
       }
     }),
 
   // ── STAR Answer Quality Scorer ────────────────────────────────────────────
   scoreStarAnswer: publicProcedure
-    .input(z.object({
-      question: z.string(),
-      answer: z.string(),
-    }))
+    .input(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       const res = await invokeLLM({
         messages: [
@@ -262,7 +344,13 @@ export const collabRouter = router({
                   additionalProperties: false,
                 },
               },
-              required: ["specificityScore", "impactScore", "icLevel", "coachingNote", "starBreakdown"],
+              required: [
+                "specificityScore",
+                "impactScore",
+                "icLevel",
+                "coachingNote",
+                "starBreakdown",
+              ],
               additionalProperties: false,
             },
           },
@@ -271,24 +359,37 @@ export const collabRouter = router({
 
       const content = res.choices?.[0]?.message?.content ?? "{}";
       try {
-        return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+        return JSON.parse(
+          typeof content === "string" ? content : JSON.stringify(content)
+        );
       } catch {
-        return { specificityScore: 3, impactScore: 3, icLevel: "IC5", coachingNote: "Add more specific metrics and quantify your impact.", starBreakdown: { situation: "", task: "", action: "", result: "" } };
+        return {
+          specificityScore: 3,
+          impactScore: 3,
+          icLevel: "IC5",
+          coachingNote: "Add more specific metrics and quantify your impact.",
+          starBreakdown: { situation: "", task: "", action: "", result: "" },
+        };
       }
     }),
 
   // ── Voice-to-STAR (transcription + structuring) ───────────────────────────
   transcribeAndStructure: publicProcedure
-    .input(z.object({
-      audioUrl: z.string().url(),
-      question: z.string(),
-    }))
+    .input(
+      z.object({
+        audioUrl: z.string().url(),
+        question: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       // Dynamic import to avoid issues if voiceTranscription module not available
       let transcription = "";
       try {
         const { transcribeAudio } = await import("../_core/voiceTranscription");
-        const result = await transcribeAudio({ audioUrl: input.audioUrl, language: "en" });
+        const result = await transcribeAudio({
+          audioUrl: input.audioUrl,
+          language: "en",
+        });
         transcription = (result as { text: string }).text ?? "";
       } catch {
         throw new Error("Transcription failed. Please check audio format.");
@@ -320,7 +421,13 @@ export const collabRouter = router({
                 result: { type: "string" },
                 rawTranscript: { type: "string" },
               },
-              required: ["situation", "task", "action", "result", "rawTranscript"],
+              required: [
+                "situation",
+                "task",
+                "action",
+                "result",
+                "rawTranscript",
+              ],
               additionalProperties: false,
             },
           },
@@ -329,18 +436,28 @@ export const collabRouter = router({
 
       const content = res.choices?.[0]?.message?.content ?? "{}";
       try {
-        return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+        return JSON.parse(
+          typeof content === "string" ? content : JSON.stringify(content)
+        );
       } catch {
-        return { situation: "", task: "", action: "", result: "", rawTranscript: transcription };
+        return {
+          situation: "",
+          task: "",
+          action: "",
+          result: "",
+          rawTranscript: transcription,
+        };
       }
     }),
 
   // ── Answer Quality Scorer ────────────────────────────────────────────────
   scoreAnswer: publicProcedure
-    .input(z.object({
-      question: z.string(),
-      answer: z.string(),
-    }))
+    .input(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       const res = await invokeLLM({
         messages: [
@@ -365,14 +482,41 @@ Score this answer.`,
             schema: {
               type: "object",
               properties: {
-                specificity: { type: "number", description: "1-5: how specific and concrete the answer is" },
-                impactClarity: { type: "number", description: "1-5: how clearly the impact/result is communicated" },
-                icLevel: { type: "string", description: "IC5, IC6, or IC7 — the level this answer signals" },
-                coachingNote: { type: "string", description: "One paragraph of actionable coaching feedback" },
-                strengths: { type: "string", description: "What the candidate did well" },
-                improvements: { type: "string", description: "Key areas to improve" },
+                specificity: {
+                  type: "number",
+                  description: "1-5: how specific and concrete the answer is",
+                },
+                impactClarity: {
+                  type: "number",
+                  description:
+                    "1-5: how clearly the impact/result is communicated",
+                },
+                icLevel: {
+                  type: "string",
+                  description:
+                    "IC5, IC6, or IC7 — the level this answer signals",
+                },
+                coachingNote: {
+                  type: "string",
+                  description: "One paragraph of actionable coaching feedback",
+                },
+                strengths: {
+                  type: "string",
+                  description: "What the candidate did well",
+                },
+                improvements: {
+                  type: "string",
+                  description: "Key areas to improve",
+                },
               },
-              required: ["specificity", "impactClarity", "icLevel", "coachingNote", "strengths", "improvements"],
+              required: [
+                "specificity",
+                "impactClarity",
+                "icLevel",
+                "coachingNote",
+                "strengths",
+                "improvements",
+              ],
               additionalProperties: false,
             },
           },
@@ -380,18 +524,29 @@ Score this answer.`,
       });
       const content = res.choices?.[0]?.message?.content ?? "{}";
       try {
-        return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+        return JSON.parse(
+          typeof content === "string" ? content : JSON.stringify(content)
+        );
       } catch {
-        return { specificity: 3, impactClarity: 3, icLevel: "IC6", coachingNote: "Unable to score at this time.", strengths: "", improvements: "" };
+        return {
+          specificity: 3,
+          impactClarity: 3,
+          icLevel: "IC6",
+          coachingNote: "Unable to score at this time.",
+          strengths: "",
+          improvements: "",
+        };
       }
     }),
 
   // ── Upload audio for Voice-to-STAR ───────────────────────────────────────
   uploadAudio: publicProcedure
-    .input(z.object({
-      audioBase64: z.string(),
-      mimeType: z.string().default("audio/webm"),
-    }))
+    .input(
+      z.object({
+        audioBase64: z.string(),
+        mimeType: z.string().default("audio/webm"),
+      })
+    )
     .mutation(async ({ input }) => {
       const { storagePut } = await import("../storage");
       const { nanoid } = await import("nanoid");
@@ -401,18 +556,23 @@ Score this answer.`,
       return { url };
     }),
 
-    // ── Weekly Progress Digest ────────────────────────────────────────────────
+  // ── Weekly Progress Digest ────────────────────────────────────────────────
   sendWeeklyDigest: publicProcedure
-    .input(z.object({
-      masteredCount: z.number(),
-      totalPatterns: z.number(),
-      streakDays: z.number(),
-      mockSessions: z.number(),
-      weakSpots: z.array(z.string()),
-      overallPct: z.number(),
-    }))
+    .input(
+      z.object({
+        masteredCount: z.number(),
+        totalPatterns: z.number(),
+        streakDays: z.number(),
+        mockSessions: z.number(),
+        weakSpots: z.array(z.string()),
+        overallPct: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
-      const weakList = input.weakSpots.slice(0, 3).map((w, i) => `${i + 1}. ${w}`).join("\n");
+      const weakList = input.weakSpots
+        .slice(0, 3)
+        .map((w, i) => `${i + 1}. ${w}`)
+        .join("\n");
       await notifyOwner({
         title: `📊 Weekly Meta Prep Digest — ${input.overallPct}% Ready`,
         content: `**Weekly Progress Summary**\n\n✅ Patterns Mastered: ${input.masteredCount}/${input.totalPatterns}\n🔥 Current Streak: ${input.streakDays} days\n🎯 Mock Sessions: ${input.mockSessions}\n📈 Overall Readiness: ${input.overallPct}%\n\n**Top 3 Weak Spots to Focus On:**\n${weakList || "None — great work!"}`,

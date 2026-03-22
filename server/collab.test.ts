@@ -5,7 +5,9 @@ import type { TrpcContext } from "./_core/context";
 // Mock DB and LLM to avoid real network calls
 vi.mock("./db", () => ({
   getDb: vi.fn().mockResolvedValue({
-    insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+    insert: vi
+      .fn()
+      .mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
     select: vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
@@ -18,7 +20,13 @@ vi.mock("./db", () => ({
 
 vi.mock("./_core/llm", () => ({
   invokeLLM: vi.fn().mockResolvedValue({
-    choices: [{ message: { content: "What are your scale requirements for this system?" } }],
+    choices: [
+      {
+        message: {
+          content: "What are your scale requirements for this system?",
+        },
+      },
+    ],
   }),
 }));
 
@@ -37,13 +45,19 @@ function createCtx(): TrpcContext {
 describe("collab.createRoom", () => {
   it("creates a room with valid roomCode", async () => {
     const caller = appRouter.createCaller(createCtx());
-    const result = await caller.collab.createRoom({ roomCode: "TEST01", questionTitle: "Design a URL Shortener", mode: "human" });
+    const result = await caller.collab.createRoom({
+      roomCode: "TEST01",
+      questionTitle: "Design a URL Shortener",
+      mode: "human",
+    });
     expect(result).toHaveProperty("roomCode", "TEST01");
   });
 
   it("rejects roomCode shorter than 4 chars", async () => {
     const caller = appRouter.createCaller(createCtx());
-    await expect(caller.collab.createRoom({ roomCode: "AB", mode: "human" })).rejects.toThrow();
+    await expect(
+      caller.collab.createRoom({ roomCode: "AB", mode: "human" })
+    ).rejects.toThrow();
   });
 });
 

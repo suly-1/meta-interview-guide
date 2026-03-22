@@ -39,11 +39,13 @@ export const ctciProgressRouter = router({
         .where(eq(ctciProgress.userId, ctx.user.id))
         .limit(1);
       if (existing.length === 0) {
-        await db.insert(ctciProgress).values([{
-          userId: ctx.user.id,
-          solved: input.solved as Record<string, boolean>,
-          difficulty: input.difficulty as Record<string, string>,
-        }]);
+        await db.insert(ctciProgress).values([
+          {
+            userId: ctx.user.id,
+            solved: input.solved as Record<string, boolean>,
+            difficulty: input.difficulty as Record<string, string>,
+          },
+        ]);
       } else {
         await db
           .update(ctciProgress)

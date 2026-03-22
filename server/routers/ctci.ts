@@ -18,7 +18,17 @@ export const ctciRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const { codingProblem, codingNotes, codingTimeUsed, bq1Question, bq1Answer, bq2Question, bq2Answer, icTarget, totalTimeUsed } = input;
+      const {
+        codingProblem,
+        codingNotes,
+        codingTimeUsed,
+        bq1Question,
+        bq1Answer,
+        bq2Question,
+        bq2Answer,
+        icTarget,
+        totalTimeUsed,
+      } = input;
 
       const systemPrompt = `You are a senior Meta engineering interviewer writing a post-interview debrief.
 Assess the candidate's performance in a 45-minute mock interview for ${icTarget} level.
@@ -82,7 +92,18 @@ Generate the debrief JSON.`;
                 criticalGaps: { type: "array", items: { type: "string" } },
                 nextSteps: { type: "array", items: { type: "string" } },
               },
-              required: ["overallVerdict","overallScore","codingAssessment","codingScore","behavioralAssessment","behavioralScore","icLevelAssessment","topStrengths","criticalGaps","nextSteps"],
+              required: [
+                "overallVerdict",
+                "overallScore",
+                "codingAssessment",
+                "codingScore",
+                "behavioralAssessment",
+                "behavioralScore",
+                "icLevelAssessment",
+                "topStrengths",
+                "criticalGaps",
+                "nextSteps",
+              ],
               additionalProperties: false,
             },
           },
@@ -91,7 +112,9 @@ Generate the debrief JSON.`;
 
       const raw = response.choices?.[0]?.message?.content ?? "{}";
       try {
-        const p = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        const p = JSON.parse(
+          typeof raw === "string" ? raw : JSON.stringify(raw)
+        );
         return {
           overallVerdict: p.overallVerdict ?? "Borderline",
           overallScore: Math.min(5, Math.max(1, p.overallScore ?? 3)),
@@ -106,11 +129,16 @@ Generate the debrief JSON.`;
         };
       } catch {
         return {
-          overallVerdict: "Borderline", overallScore: 3,
-          codingAssessment: "Could not generate assessment.", codingScore: 3,
-          behavioralAssessment: "Could not generate assessment.", behavioralScore: 3,
+          overallVerdict: "Borderline",
+          overallScore: 3,
+          codingAssessment: "Could not generate assessment.",
+          codingScore: 3,
+          behavioralAssessment: "Could not generate assessment.",
+          behavioralScore: 3,
           icLevelAssessment: "Could not generate assessment.",
-          topStrengths: [], criticalGaps: [], nextSteps: ["Retry the debrief."],
+          topStrengths: [],
+          criticalGaps: [],
+          nextSteps: ["Retry the debrief."],
         };
       }
     }),
@@ -168,7 +196,14 @@ ${answer.slice(0, 2000)}`;
                 strengths: { type: "array", items: { type: "string" } },
                 improvements: { type: "array", items: { type: "string" } },
               },
-              required: ["specificity", "impact", "icLevelFit", "overall", "strengths", "improvements"],
+              required: [
+                "specificity",
+                "impact",
+                "icLevelFit",
+                "overall",
+                "strengths",
+                "improvements",
+              ],
               additionalProperties: false,
             },
           },
@@ -177,7 +212,9 @@ ${answer.slice(0, 2000)}`;
 
       const raw = response.choices?.[0]?.message?.content ?? "{}";
       try {
-        const parsed = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        const parsed = JSON.parse(
+          typeof raw === "string" ? raw : JSON.stringify(raw)
+        );
         return {
           specificity: Math.min(5, Math.max(1, parsed.specificity ?? 3)),
           impact: Math.min(5, Math.max(1, parsed.impact ?? 3)),
@@ -187,7 +224,14 @@ ${answer.slice(0, 2000)}`;
           improvements: parsed.improvements ?? [],
         };
       } catch {
-        return { specificity: 3, impact: 3, icLevelFit: 3, overall: 3, strengths: [], improvements: ["Could not parse AI response."] };
+        return {
+          specificity: 3,
+          impact: 3,
+          icLevelFit: 3,
+          overall: 3,
+          strengths: [],
+          improvements: ["Could not parse AI response."],
+        };
       }
     }),
 
@@ -203,7 +247,14 @@ ${answer.slice(0, 2000)}`;
       })
     )
     .mutation(async ({ input }) => {
-      const { patternName, patternDesc, patternKeyIdea, examples, hintLevel, userRating } = input;
+      const {
+        patternName,
+        patternDesc,
+        patternKeyIdea,
+        examples,
+        hintLevel,
+        userRating,
+      } = input;
 
       const levelInstructions = {
         gentle: `Give a GENTLE hint (1-2 sentences). Only point toward the category/intuition. Do NOT name the algorithm or data structure directly. Ask a guiding question.`,
@@ -229,7 +280,9 @@ I'm stuck. Give me a ${hintLevel} hint.`;
         ],
       });
 
-      const hint = response.choices?.[0]?.message?.content ?? "Think about what data structure gives you the key property you need here.";
+      const hint =
+        response.choices?.[0]?.message?.content ??
+        "Think about what data structure gives you the key property you need here.";
       return { hint: typeof hint === "string" ? hint : JSON.stringify(hint) };
     }),
 
@@ -248,7 +301,17 @@ I'm stuck. Give me a ${hintLevel} hint.`;
       })
     )
     .mutation(async ({ input }) => {
-      const { durationMins, icTarget, readinessPct, srDuePatterns, srDueBehavioral, mostHintedPatterns, weakPatterns, ctciUnsolved, daysToInterview } = input;
+      const {
+        durationMins,
+        icTarget,
+        readinessPct,
+        srDuePatterns,
+        srDueBehavioral,
+        mostHintedPatterns,
+        weakPatterns,
+        ctciUnsolved,
+        daysToInterview,
+      } = input;
 
       const systemPrompt = `You are a Meta interview prep coach building a focused study session plan.
 Create a prioritised, time-boxed plan for a ${durationMins}-minute session targeting ${icTarget}.
@@ -265,11 +328,11 @@ Respond ONLY with valid JSON:
 }`;
 
       const userMsg = `Session: ${durationMins} min | Target: ${icTarget} | Readiness: ${readinessPct}%
-Days to interview: ${daysToInterview ?? 'unknown'}
-SR due patterns: ${srDuePatterns.slice(0,5).join(', ') || 'none'}
-SR due behavioral: ${srDueBehavioral.slice(0,3).join(', ') || 'none'}
-Most-hinted patterns (need work): ${mostHintedPatterns.slice(0,3).join(', ') || 'none'}
-Weak patterns (rated ≤2): ${weakPatterns.slice(0,5).join(', ') || 'none'}
+Days to interview: ${daysToInterview ?? "unknown"}
+SR due patterns: ${srDuePatterns.slice(0, 5).join(", ") || "none"}
+SR due behavioral: ${srDueBehavioral.slice(0, 3).join(", ") || "none"}
+Most-hinted patterns (need work): ${mostHintedPatterns.slice(0, 3).join(", ") || "none"}
+Weak patterns (rated ≤2): ${weakPatterns.slice(0, 5).join(", ") || "none"}
 Unsolved CTCI problems: ${ctciUnsolved}
 
 Build the optimal study plan.`;
@@ -314,7 +377,9 @@ Build the optimal study plan.`;
 
       const raw = response.choices?.[0]?.message?.content ?? "{}";
       try {
-        const p = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        const p = JSON.parse(
+          typeof raw === "string" ? raw : JSON.stringify(raw)
+        );
         return {
           headline: p.headline ?? "Let's get to work!",
           blocks: p.blocks ?? [],
@@ -322,7 +387,12 @@ Build the optimal study plan.`;
           warningIfAny: p.warningIfAny ?? null,
         };
       } catch {
-        return { headline: "Session ready!", blocks: [], tip: "Focus on your weakest patterns first.", warningIfAny: null };
+        return {
+          headline: "Session ready!",
+          blocks: [],
+          tip: "Focus on your weakest patterns first.",
+          warningIfAny: null,
+        };
       }
     }),
 
@@ -361,7 +431,9 @@ Give me a hint to get unstuck without spoiling the solution.`;
         ],
       });
 
-      const hint = response.choices?.[0]?.message?.content ?? "Think about which data structure gives you O(1) lookup here.";
+      const hint =
+        response.choices?.[0]?.message?.content ??
+        "Think about which data structure gives you O(1) lookup here.";
 
       return { hint: typeof hint === "string" ? hint : JSON.stringify(hint) };
     }),

@@ -82,6 +82,7 @@
 **Rationale:** This is a tool used by engineers preparing for one of the most important interviews of their career. The design should feel like a professional monitoring dashboard — serious, data-forward, and confidence-inspiring. The dark theme reduces eye strain during long study sessions. The large stat numbers and color-coded mastery grid give instant visual feedback on progress.
 
 **Chosen palette:**
+
 - Background: `#111827` (gray-900)
 - Surface: `#1f2937` (gray-800)
 - Border: `#374151` (gray-700)

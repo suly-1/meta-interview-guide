@@ -3,18 +3,69 @@
 // weak-spot dashboard, interview countdown, STAR story bank, recruiter card
 // with peer comparison, progress export, interview day checklist
 import { useState, useEffect } from "react";
-import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send, Trophy, HelpCircle } from "lucide-react";
-import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, TEN_WEEK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates, useAIReviewHistory } from "@/hooks/useLocalStorage";
+import {
+  Calendar,
+  Download,
+  Printer,
+  Target,
+  Brain,
+  TrendingUp,
+  Flame,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Check,
+  Send,
+  Trophy,
+  HelpCircle,
+} from "lucide-react";
+import {
+  PATTERNS,
+  BEHAVIORAL_QUESTIONS,
+  STAR_STORIES,
+  PREP_TIMELINE,
+  FAST_TRACK_TIMELINE,
+  TEN_WEEK_TIMELINE,
+  INTERVIEW_DAY_CHECKLIST,
+  RESOURCES,
+  IC_COMPARISON,
+  PEER_BENCHMARKS,
+} from "@/lib/data";
+import {
+  usePatternRatings,
+  useBehavioralRatings,
+  useMockHistory,
+  useInterviewDate,
+  useStarNotes,
+  useStreak,
+  useReadinessTrend,
+  useCTCIStreak,
+  useReadinessGoal,
+  useHintAnalytics,
+  useCTCIDifficultyEstimates,
+  useAIReviewHistory,
+} from "@/hooks/useLocalStorage";
 import { CTCI_QUESTIONS } from "@/lib/ctciData";
 import { toast } from "sonner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
 import { FullMockDaySimulator } from "@/components/FullMockDaySimulator";
-import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/components/OverviewExtras";
+import {
+  DailyStudyChecklist,
+  UrgencyModeBanner,
+  OnboardingChecklist,
+} from "@/components/OverviewExtras";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { DayOfModePanel, LastMileCheatSheet, ConfidenceCalibrationQuiz } from "@/components/DayOfMode";
+import {
+  DayOfModePanel,
+  LastMileCheatSheet,
+  ConfidenceCalibrationQuiz,
+} from "@/components/DayOfMode";
 import { WeakPatternHeatmap } from "@/components/WeakPatternHeatmap";
 import { WeakSpotStudyPlan } from "@/components/WeakSpotStudyPlan";
 
@@ -34,7 +85,9 @@ function DisclaimerStatusBadge() {
         <span>
           <span className="font-semibold">Disclaimer acknowledged</span>
           {" — "}
-          <span className="text-muted-foreground">Server record saved on {date}</span>
+          <span className="text-muted-foreground">
+            Server record saved on {date}
+          </span>
         </span>
       </span>
       {user?.role === "admin" && (
@@ -66,7 +119,9 @@ function LevelCards() {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between group"
       >
-        <div className="section-title mb-0 pb-0 border-0 group-hover:text-foreground transition-colors">IC6 vs IC7 — What Meta Expects</div>
+        <div className="section-title mb-0 pb-0 border-0 group-hover:text-foreground transition-colors">
+          IC6 vs IC7 — What Meta Expects
+        </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span>{open ? "Collapse" : "Expand reference"}</span>
           {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -78,17 +133,33 @@ function LevelCards() {
             {/* IC6 */}
             <div className="prep-card p-5 border-blue-500/20">
               <div className="flex items-center gap-2 mb-3">
-                <span className="badge badge-blue text-sm px-3 py-1">IC6 — Staff Engineer</span>
+                <span className="badge badge-blue text-sm px-3 py-1">
+                  IC6 — Staff Engineer
+                </span>
               </div>
               <div className="space-y-3 text-sm">
                 {[
-                  ["Scope & Impact", "Leads major initiatives at team/org level. Defines technical direction for a domain."],
-                  ["Technical Leadership", "Designs systems used by 25–30+ engineers. Owns architecture decisions end-to-end."],
-                  ["Business & XFN", "Project-level cross-functional collaboration. Connects technical work to business outcomes."],
-                  ["Communication", "Clear and precise within team and org. Writes design docs that drive alignment."],
+                  [
+                    "Scope & Impact",
+                    "Leads major initiatives at team/org level. Defines technical direction for a domain.",
+                  ],
+                  [
+                    "Technical Leadership",
+                    "Designs systems used by 25–30+ engineers. Owns architecture decisions end-to-end.",
+                  ],
+                  [
+                    "Business & XFN",
+                    "Project-level cross-functional collaboration. Connects technical work to business outcomes.",
+                  ],
+                  [
+                    "Communication",
+                    "Clear and precise within team and org. Writes design docs that drive alignment.",
+                  ],
                 ].map(([title, desc]) => (
                   <div key={title}>
-                    <div className="text-xs font-semibold text-blue-400 mb-0.5">{title}</div>
+                    <div className="text-xs font-semibold text-blue-400 mb-0.5">
+                      {title}
+                    </div>
                     <div className="text-xs text-muted-foreground">{desc}</div>
                   </div>
                 ))}
@@ -97,17 +168,33 @@ function LevelCards() {
             {/* IC7 */}
             <div className="prep-card p-5 border-purple-500/20">
               <div className="flex items-center gap-2 mb-3">
-                <span className="badge badge-purple text-sm px-3 py-1">IC7 — Senior Staff Engineer</span>
+                <span className="badge badge-purple text-sm px-3 py-1">
+                  IC7 — Senior Staff Engineer
+                </span>
               </div>
               <div className="space-y-3 text-sm">
                 {[
-                  ["Scope & Impact", "Leads portfolios of initiatives across multiple teams. Shapes org-level technical strategy."],
-                  ["Technical Leadership", "Influences 30–50+ engineers. Sets the technical bar for the entire org."],
-                  ["Business & XFN", "Long-term strategic partnerships with product, design, and business leadership."],
-                  ["Communication", "Communicates across disciplines and all levels. Drives industry-level conversations."],
+                  [
+                    "Scope & Impact",
+                    "Leads portfolios of initiatives across multiple teams. Shapes org-level technical strategy.",
+                  ],
+                  [
+                    "Technical Leadership",
+                    "Influences 30–50+ engineers. Sets the technical bar for the entire org.",
+                  ],
+                  [
+                    "Business & XFN",
+                    "Long-term strategic partnerships with product, design, and business leadership.",
+                  ],
+                  [
+                    "Communication",
+                    "Communicates across disciplines and all levels. Drives industry-level conversations.",
+                  ],
                 ].map(([title, desc]) => (
                   <div key={title}>
-                    <div className="text-xs font-semibold text-purple-400 mb-0.5">{title}</div>
+                    <div className="text-xs font-semibold text-purple-400 mb-0.5">
+                      {title}
+                    </div>
                     <div className="text-xs text-muted-foreground">{desc}</div>
                   </div>
                 ))}
@@ -120,17 +207,32 @@ function LevelCards() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Dimension</th>
-                    <th className="text-left p-3 text-xs font-semibold text-blue-400">IC6</th>
-                    <th className="text-left p-3 text-xs font-semibold text-purple-400">IC7</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">
+                      Dimension
+                    </th>
+                    <th className="text-left p-3 text-xs font-semibold text-blue-400">
+                      IC6
+                    </th>
+                    <th className="text-left p-3 text-xs font-semibold text-purple-400">
+                      IC7
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {IC_COMPARISON.map((row, i) => (
-                    <tr key={i} className={i % 2 === 0 ? "bg-secondary/20" : ""}>
-                      <td className="p-3 text-xs font-semibold text-foreground">{row.dimension}</td>
-                      <td className="p-3 text-xs text-muted-foreground">{row.ic6}</td>
-                      <td className="p-3 text-xs text-muted-foreground">{row.ic7}</td>
+                    <tr
+                      key={i}
+                      className={i % 2 === 0 ? "bg-secondary/20" : ""}
+                    >
+                      <td className="p-3 text-xs font-semibold text-foreground">
+                        {row.dimension}
+                      </td>
+                      <td className="p-3 text-xs text-muted-foreground">
+                        {row.ic6}
+                      </td>
+                      <td className="p-3 text-xs text-muted-foreground">
+                        {row.ic7}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -151,9 +253,15 @@ function ReadinessTrendChart({ currentPct }: { currentPct: number }) {
   const today = new Date().toISOString().split("T")[0];
   // Use useEffect to avoid state updates during render
   const [recorded, setRecorded] = useState(false);
-  if (!recorded && (trend.length === 0 || trend[trend.length - 1].date !== today)) {
+  if (
+    !recorded &&
+    (trend.length === 0 || trend[trend.length - 1].date !== today)
+  ) {
     setRecorded(true);
-    const pruned = [...trend.filter(s => s.date !== today), { date: today, pct: currentPct }]
+    const pruned = [
+      ...trend.filter(s => s.date !== today),
+      { date: today, pct: currentPct },
+    ]
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(-14);
     setTrend(pruned);
@@ -164,9 +272,13 @@ function ReadinessTrendChart({ currentPct }: { currentPct: number }) {
       <div className="prep-card p-4">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp size={13} className="text-emerald-400" />
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">14-Day Readiness Trend</span>
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            14-Day Readiness Trend
+          </span>
         </div>
-        <div className="text-xs text-muted-foreground text-center py-4">Come back tomorrow to see your trend line.</div>
+        <div className="text-xs text-muted-foreground text-center py-4">
+          Come back tomorrow to see your trend line.
+        </div>
       </div>
     );
   }
@@ -181,46 +293,95 @@ function ReadinessTrendChart({ currentPct }: { currentPct: number }) {
     days.push({ date: key, pct: snap ? snap.pct : null });
   }
 
-  const W = 280, H = 60, PAD = 4;
+  const W = 280,
+    H = 60,
+    PAD = 4;
   const points = days
-    .map((d, i) => d.pct !== null ? { x: PAD + (i / 13) * (W - PAD * 2), y: H - PAD - (d.pct / 100) * (H - PAD * 2) } : null)
+    .map((d, i) =>
+      d.pct !== null
+        ? {
+            x: PAD + (i / 13) * (W - PAD * 2),
+            y: H - PAD - (d.pct / 100) * (H - PAD * 2),
+          }
+        : null
+    )
     .filter(Boolean) as { x: number; y: number }[];
 
   const polyline = points.map(p => `${p.x},${p.y}`).join(" ");
-  const area = points.length > 1
-    ? `M${points[0].x},${H - PAD} L${polyline.split(" ").map(p => p).join(" L")} L${points[points.length-1].x},${H - PAD} Z`
-    : "";
+  const area =
+    points.length > 1
+      ? `M${points[0].x},${H - PAD} L${polyline
+          .split(" ")
+          .map(p => p)
+          .join(" L")} L${points[points.length - 1].x},${H - PAD} Z`
+      : "";
 
   const firstPct = trend[0].pct;
   const lastPct = trend[trend.length - 1].pct;
   const delta = lastPct - firstPct;
-  const deltaColor = delta > 0 ? "text-emerald-400" : delta < 0 ? "text-red-400" : "text-muted-foreground";
-  const deltaLabel = delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : "Flat";
+  const deltaColor =
+    delta > 0
+      ? "text-emerald-400"
+      : delta < 0
+        ? "text-red-400"
+        : "text-muted-foreground";
+  const deltaLabel =
+    delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : "Flat";
 
   return (
     <div className="prep-card p-4">
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp size={13} className="text-emerald-400" />
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">14-Day Readiness Trend</span>
-        <span className={`ml-auto text-xs font-bold ${deltaColor}`}>{deltaLabel} over {trend.length} days</span>
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          14-Day Readiness Trend
+        </span>
+        <span className={`ml-auto text-xs font-bold ${deltaColor}`}>
+          {deltaLabel} over {trend.length} days
+        </span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 60 }}>
         {/* Grid lines */}
         {[0, 25, 50, 75, 100].map(pct => {
           const y = H - PAD - (pct / 100) * (H - PAD * 2);
-          return <line key={pct} x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="oklch(0.28 0.012 264)" strokeWidth="0.5" />;
+          return (
+            <line
+              key={pct}
+              x1={PAD}
+              y1={y}
+              x2={W - PAD}
+              y2={y}
+              stroke="oklch(0.28 0.012 264)"
+              strokeWidth="0.5"
+            />
+          );
         })}
         {/* Area fill */}
         {area && <path d={area} fill="oklch(0.62 0.19 158 / 0.15)" />}
         {/* Line */}
-        {points.length > 1 && <polyline points={polyline} fill="none" stroke="oklch(0.62 0.19 158)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />}
+        {points.length > 1 && (
+          <polyline
+            points={polyline}
+            fill="none"
+            stroke="oklch(0.62 0.19 158)"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        )}
         {/* Dots */}
         {points.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r="2" fill="oklch(0.62 0.19 158)" />
         ))}
         {/* Today dot highlight */}
         {points.length > 0 && (
-          <circle cx={points[points.length-1].x} cy={points[points.length-1].y} r="3.5" fill="oklch(0.62 0.19 158)" stroke="oklch(0.15 0.01 264)" strokeWidth="1.5" />
+          <circle
+            cx={points[points.length - 1].x}
+            cy={points[points.length - 1].y}
+            r="3.5"
+            fill="oklch(0.62 0.19 158)"
+            stroke="oklch(0.15 0.01 264)"
+            strokeWidth="1.5"
+          />
         )}
       </svg>
       <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -233,12 +394,28 @@ function ReadinessTrendChart({ currentPct }: { currentPct: number }) {
 
 // ── Readiness Dashboard ─────────────────────────────────────────────────────
 function loadSDHistory() {
-  try { return JSON.parse(localStorage.getItem("sd_mock_history_v1") ?? "[]") as Array<{ scorecard: { overallScore: number; icLevel: string }; date: string }>; }
-  catch { return []; }
+  try {
+    return JSON.parse(
+      localStorage.getItem("sd_mock_history_v1") ?? "[]"
+    ) as Array<{
+      scorecard: { overallScore: number; icLevel: string };
+      date: string;
+    }>;
+  } catch {
+    return [];
+  }
 }
 function loadBehHistory() {
-  try { return JSON.parse(localStorage.getItem("beh_mock_history_v1") ?? "[]") as Array<{ scorecard: { overallScore: number; icLevel: string }; date: string }>; }
-  catch { return []; }
+  try {
+    return JSON.parse(
+      localStorage.getItem("beh_mock_history_v1") ?? "[]"
+    ) as Array<{
+      scorecard: { overallScore: number; icLevel: string };
+      date: string;
+    }>;
+  } catch {
+    return [];
+  }
 }
 
 function icLevelToNum(level: string): number {
@@ -252,8 +429,12 @@ function ReadinessDashboard() {
   const [bqRatings] = useBehavioralRatings();
   const [mockHistory] = useMockHistory();
   const streak = useStreak();
-  const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length;
-  const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length;
+  const masteredPatterns = PATTERNS.filter(
+    p => (patternRatings[p.id] ?? 0) >= 4
+  ).length;
+  const readyStories = BEHAVIORAL_QUESTIONS.filter(
+    q => (bqRatings[q.id] ?? 0) >= 4
+  ).length;
   const avgMock = mockHistory.length
     ? mockHistory.reduce((s, m) => s + m.avgScore, 0) / mockHistory.length
     : 0;
@@ -261,10 +442,20 @@ function ReadinessDashboard() {
   // Load System Design and XFN Behavioral mock sessions from localStorage
   const sdHistory = loadSDHistory();
   const behHistory = loadBehHistory();
-  const sdAvg = sdHistory.length ? sdHistory.reduce((s, e) => s + e.scorecard.overallScore, 0) / sdHistory.length : 0;
-  const xfnAvg = behHistory.length ? behHistory.reduce((s, e) => s + e.scorecard.overallScore, 0) / behHistory.length : 0;
-  const latestSDLevel = sdHistory.length ? sdHistory[sdHistory.length - 1].scorecard.icLevel : null;
-  const latestXFNLevel = behHistory.length ? behHistory[behHistory.length - 1].scorecard.icLevel : null;
+  const sdAvg = sdHistory.length
+    ? sdHistory.reduce((s, e) => s + e.scorecard.overallScore, 0) /
+      sdHistory.length
+    : 0;
+  const xfnAvg = behHistory.length
+    ? behHistory.reduce((s, e) => s + e.scorecard.overallScore, 0) /
+      behHistory.length
+    : 0;
+  const latestSDLevel = sdHistory.length
+    ? sdHistory[sdHistory.length - 1].scorecard.icLevel
+    : null;
+  const latestXFNLevel = behHistory.length
+    ? behHistory[behHistory.length - 1].scorecard.icLevel
+    : null;
 
   // Combined IC readiness score (weighted): coding 40%, behavioral 30%, sys design 20%, xfn 10%
   const codingScore = (masteredPatterns / PATTERNS.length) * 5;
@@ -276,13 +467,17 @@ function ReadinessDashboard() {
 
   let combinedScore: number;
   if (!hasSDData && !hasXFNData) {
-    combinedScore = (codingScore * 0.6 + behavioralScore * 0.4);
+    combinedScore = codingScore * 0.6 + behavioralScore * 0.4;
   } else if (!hasSDData) {
-    combinedScore = (codingScore * 0.5 + behavioralScore * 0.3 + xfnScore * 0.2);
+    combinedScore = codingScore * 0.5 + behavioralScore * 0.3 + xfnScore * 0.2;
   } else if (!hasXFNData) {
-    combinedScore = (codingScore * 0.5 + behavioralScore * 0.25 + sdScore * 0.25);
+    combinedScore = codingScore * 0.5 + behavioralScore * 0.25 + sdScore * 0.25;
   } else {
-    combinedScore = (codingScore * 0.4 + behavioralScore * 0.3 + sdScore * 0.2 + xfnScore * 0.1);
+    combinedScore =
+      codingScore * 0.4 +
+      behavioralScore * 0.3 +
+      sdScore * 0.2 +
+      xfnScore * 0.1;
   }
   const overallPct = Math.round((combinedScore / 5) * 100);
 
@@ -290,21 +485,70 @@ function ReadinessDashboard() {
   const icSignals: number[] = [];
   if (latestSDLevel) icSignals.push(icLevelToNum(latestSDLevel));
   if (latestXFNLevel) icSignals.push(icLevelToNum(latestXFNLevel));
-  const avgICNum = icSignals.length ? icSignals.reduce((a, b) => a + b, 0) / icSignals.length : 0;
-  const icSignal = avgICNum >= 2.5 ? "IC7" : avgICNum >= 1.5 ? "IC6" : icSignals.length > 0 ? "IC5" : null;
+  const avgICNum = icSignals.length
+    ? icSignals.reduce((a, b) => a + b, 0) / icSignals.length
+    : 0;
+  const icSignal =
+    avgICNum >= 2.5
+      ? "IC7"
+      : avgICNum >= 1.5
+        ? "IC6"
+        : icSignals.length > 0
+          ? "IC5"
+          : null;
 
-  const weakPatterns = PATTERNS.filter(p => { const r = patternRatings[p.id] ?? 0; return r > 0 && r <= 2; }).slice(0, 3);
-  const weakBQ = BEHAVIORAL_QUESTIONS.filter(q => { const r = bqRatings[q.id] ?? 0; return r > 0 && r <= 2; }).slice(0, 3);
-
+  const weakPatterns = PATTERNS.filter(p => {
+    const r = patternRatings[p.id] ?? 0;
+    return r > 0 && r <= 2;
+  }).slice(0, 3);
+  const weakBQ = BEHAVIORAL_QUESTIONS.filter(q => {
+    const r = bqRatings[q.id] ?? 0;
+    return r > 0 && r <= 2;
+  }).slice(0, 3);
 
   // Achievement badge share toasts
   useEffect(() => {
-    const BADGE_MILESTONES: { pct: number; label: string; emoji: string; tweet: string }[] = [
-      { pct: 25, label: "Getting Started", emoji: "🚀", tweet: "🚀 I'm 25% ready for my Meta {level} interview! Starting my prep journey. #MetaInterview #SoftwareEngineering" },
-      { pct: 50, label: "Halfway There", emoji: "⚡", tweet: "⚡ I'm 50% ready for my Meta {level} interview! Halfway through my prep. #MetaInterview #SoftwareEngineering" },
-      { pct: 75, label: "Almost Ready", emoji: "🔥", tweet: "🔥 I'm 75% ready for my Meta {level} interview! Almost there. #MetaInterview #SoftwareEngineering" },
-      { pct: 90, label: "Interview Ready", emoji: "⭐", tweet: "⭐ I'm 90%+ ready for my Meta {level} interview! Feeling confident. #MetaInterview #SoftwareEngineering" },
-      { pct: 100, label: "IC7 Ready", emoji: "🏆", tweet: "🏆 I've hit 100% readiness on my Meta {level} prep! Time to crush the interview. #MetaInterview #SoftwareEngineering" },
+    const BADGE_MILESTONES: {
+      pct: number;
+      label: string;
+      emoji: string;
+      tweet: string;
+    }[] = [
+      {
+        pct: 25,
+        label: "Getting Started",
+        emoji: "🚀",
+        tweet:
+          "🚀 I'm 25% ready for my Meta {level} interview! Starting my prep journey. #MetaInterview #SoftwareEngineering",
+      },
+      {
+        pct: 50,
+        label: "Halfway There",
+        emoji: "⚡",
+        tweet:
+          "⚡ I'm 50% ready for my Meta {level} interview! Halfway through my prep. #MetaInterview #SoftwareEngineering",
+      },
+      {
+        pct: 75,
+        label: "Almost Ready",
+        emoji: "🔥",
+        tweet:
+          "🔥 I'm 75% ready for my Meta {level} interview! Almost there. #MetaInterview #SoftwareEngineering",
+      },
+      {
+        pct: 90,
+        label: "Interview Ready",
+        emoji: "⭐",
+        tweet:
+          "⭐ I'm 90%+ ready for my Meta {level} interview! Feeling confident. #MetaInterview #SoftwareEngineering",
+      },
+      {
+        pct: 100,
+        label: "IC7 Ready",
+        emoji: "🏆",
+        tweet:
+          "🏆 I've hit 100% readiness on my Meta {level} prep! Time to crush the interview. #MetaInterview #SoftwareEngineering",
+      },
     ];
     const BADGE_KEY = "meta-prep-badge-shown";
     const shown: number[] = JSON.parse(localStorage.getItem(BADGE_KEY) ?? "[]");
@@ -317,12 +561,19 @@ function ReadinessDashboard() {
             <div className="flex items-center gap-2">
               <span className="text-xl">{m.emoji}</span>
               <div>
-                <div className="font-bold text-foreground text-sm">Achievement: {m.label}</div>
-                <div className="text-xs text-muted-foreground">{overallPct}% IC Readiness reached!</div>
+                <div className="font-bold text-foreground text-sm">
+                  Achievement: {m.label}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {overallPct}% IC Readiness reached!
+                </div>
               </div>
             </div>
             <button
-              onClick={() => { navigator.clipboard.writeText(tweetText); toast.success("Tweet copied!"); }}
+              onClick={() => {
+                navigator.clipboard.writeText(tweetText);
+                toast.success("Tweet copied!");
+              }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-xs font-semibold transition-all w-fit"
             >
               📤 Share Achievement
@@ -338,47 +589,67 @@ function ReadinessDashboard() {
   return (
     <div className="space-y-4">
       {/* Overall readiness */}
-      <div className={`prep-card p-5 ${overallPct >= 100 ? "border-emerald-500/40 bg-emerald-500/5" : ""}`}>
+      <div
+        className={`prep-card p-5 ${overallPct >= 100 ? "border-emerald-500/40 bg-emerald-500/5" : ""}`}
+      >
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="section-title mb-0 pb-0 border-0">Combined IC Readiness</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Coding 40% · Behavioral 30% · Sys Design 20% · XFN 10%</div>
+            <div className="section-title mb-0 pb-0 border-0">
+              Combined IC Readiness
+            </div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Coding 40% · Behavioral 30% · Sys Design 20% · XFN 10%
+            </div>
           </div>
           <div className="text-right">
-            <span className={`text-2xl font-extrabold stat-num ${overallPct >= 80 ? "text-emerald-400" : overallPct >= 50 ? "text-amber-400" : "text-red-400"}`}>
+            <span
+              className={`text-2xl font-extrabold stat-num ${overallPct >= 80 ? "text-emerald-400" : overallPct >= 50 ? "text-amber-400" : "text-red-400"}`}
+            >
               {overallPct}%
             </span>
             {icSignal && (
-              <div className={`text-xs font-bold mt-0.5 ${icSignal === "IC7" ? "text-violet-400" : icSignal === "IC6" ? "text-blue-400" : "text-muted-foreground"}`}>
+              <div
+                className={`text-xs font-bold mt-0.5 ${icSignal === "IC7" ? "text-violet-400" : icSignal === "IC6" ? "text-blue-400" : "text-muted-foreground"}`}
+              >
                 Signal: {icSignal}
               </div>
             )}
           </div>
         </div>
         <div className="progress-bar mb-4">
-          <div className={`progress-bar-fill ${overallPct >= 80 ? "bg-emerald-500" : overallPct >= 50 ? "bg-amber-500" : "bg-red-500"}`}
-            style={{ width: `${overallPct}%` }} />
+          <div
+            className={`progress-bar-fill ${overallPct >= 80 ? "bg-emerald-500" : overallPct >= 50 ? "bg-amber-500" : "bg-red-500"}`}
+            style={{ width: `${overallPct}%` }}
+          />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="text-center p-2 rounded-lg bg-secondary">
-            <div className="stat-num text-base text-blue-400">{masteredPatterns}/{PATTERNS.length}</div>
+            <div className="stat-num text-base text-blue-400">
+              {masteredPatterns}/{PATTERNS.length}
+            </div>
             <div className="text-[10px] text-muted-foreground">Patterns</div>
             <div className="text-[10px] text-blue-400/70">40% weight</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-secondary">
-            <div className="stat-num text-base text-purple-400">{readyStories}/{BEHAVIORAL_QUESTIONS.length}</div>
+            <div className="stat-num text-base text-purple-400">
+              {readyStories}/{BEHAVIORAL_QUESTIONS.length}
+            </div>
             <div className="text-[10px] text-muted-foreground">BQ Stories</div>
             <div className="text-[10px] text-purple-400/70">30% weight</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-secondary">
-            <div className={`stat-num text-base ${hasSDData ? "text-cyan-400" : "text-muted-foreground"}`}>
+            <div
+              className={`stat-num text-base ${hasSDData ? "text-cyan-400" : "text-muted-foreground"}`}
+            >
               {hasSDData ? sdAvg.toFixed(1) : "—"}
             </div>
             <div className="text-[10px] text-muted-foreground">Sys Design</div>
             <div className="text-[10px] text-cyan-400/70">20% weight</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-secondary">
-            <div className={`stat-num text-base ${hasXFNData ? "text-teal-400" : "text-muted-foreground"}`}>
+            <div
+              className={`stat-num text-base ${hasXFNData ? "text-teal-400" : "text-muted-foreground"}`}
+            >
               {hasXFNData ? xfnAvg.toFixed(1) : "—"}
             </div>
             <div className="text-[10px] text-muted-foreground">XFN Mock</div>
@@ -388,7 +659,14 @@ function ReadinessDashboard() {
         {(!hasSDData || !hasXFNData) && (
           <div className="mt-3 p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
             <div className="text-xs text-blue-400">
-              💡 Complete {[!hasSDData && "a System Design mock", !hasXFNData && "an XFN Behavioral mock"].filter(Boolean).join(" and ")} to unlock the full IC readiness gauge.
+              💡 Complete{" "}
+              {[
+                !hasSDData && "a System Design mock",
+                !hasXFNData && "an XFN Behavioral mock",
+              ]
+                .filter(Boolean)
+                .join(" and ")}{" "}
+              to unlock the full IC readiness gauge.
             </div>
           </div>
         )}
@@ -397,15 +675,21 @@ function ReadinessDashboard() {
       {/* Weak-spot dashboard */}
       {(weakPatterns.length > 0 || weakBQ.length > 0) && (
         <div className="prep-card p-4 border-amber-500/20">
-          <div className="section-title text-amber-400 mb-3">⚠ Weak-Spot Dashboard</div>
+          <div className="section-title text-amber-400 mb-3">
+            ⚠ Weak-Spot Dashboard
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {weakPatterns.length > 0 && (
               <div>
-                <div className="text-xs font-semibold text-muted-foreground mb-2">Weak Patterns</div>
+                <div className="text-xs font-semibold text-muted-foreground mb-2">
+                  Weak Patterns
+                </div>
                 <div className="space-y-1.5">
                   {weakPatterns.map(p => (
                     <div key={p.id} className="flex items-center gap-2 text-xs">
-                      <span className="badge badge-red">★{patternRatings[p.id]}</span>
+                      <span className="badge badge-red">
+                        ★{patternRatings[p.id]}
+                      </span>
                       <span className="text-foreground">{p.name}</span>
                     </div>
                   ))}
@@ -414,11 +698,15 @@ function ReadinessDashboard() {
             )}
             {weakBQ.length > 0 && (
               <div>
-                <div className="text-xs font-semibold text-muted-foreground mb-2">Weak Behavioral Areas</div>
+                <div className="text-xs font-semibold text-muted-foreground mb-2">
+                  Weak Behavioral Areas
+                </div>
                 <div className="space-y-1.5">
                   {weakBQ.map(q => (
                     <div key={q.id} className="flex items-center gap-2 text-xs">
-                      <span className="badge badge-red">★{bqRatings[q.id]}</span>
+                      <span className="badge badge-red">
+                        ★{bqRatings[q.id]}
+                      </span>
                       <span className="text-foreground truncate">{q.area}</span>
                     </div>
                   ))}
@@ -433,27 +721,62 @@ function ReadinessDashboard() {
       <ReadinessTrendChart currentPct={overallPct} />
 
       {/* Recruiter card with peer comparison */}
-      <RecruiterCard masteredPatterns={masteredPatterns} readyStories={readyStories} avgMock={avgMock} streak={streak.currentStreak} overallPct={overallPct} />
+      <RecruiterCard
+        masteredPatterns={masteredPatterns}
+        readyStories={readyStories}
+        avgMock={avgMock}
+        streak={streak.currentStreak}
+        overallPct={overallPct}
+      />
     </div>
   );
 }
 
 // ── Recruiter Card with Peer Comparison ───────────────────────────────────
-function RecruiterCard({ masteredPatterns, readyStories, avgMock, streak, overallPct }: {
-  masteredPatterns: number; readyStories: number; avgMock: number; streak: number; overallPct: number;
+function RecruiterCard({
+  masteredPatterns,
+  readyStories,
+  avgMock,
+  streak,
+  overallPct,
+}: {
+  masteredPatterns: number;
+  readyStories: number;
+  avgMock: number;
+  streak: number;
+  overallPct: number;
 }) {
-  const patternsPercentile = masteredPatterns >= PEER_BENCHMARKS.patternsTop20 ? "Top 20%" : masteredPatterns >= PEER_BENCHMARKS.patternsTop50 ? "Top 50%" : "Below median";
-  const storiesPercentile = readyStories >= PEER_BENCHMARKS.storiesTop20 ? "Top 20%" : readyStories >= PEER_BENCHMARKS.storiesTop50 ? "Top 50%" : "Below median";
-  const mockPercentile = avgMock >= PEER_BENCHMARKS.mockAvgTop20 ? "Top 20%" : avgMock > 0 ? "Average" : "No data";
+  const patternsPercentile =
+    masteredPatterns >= PEER_BENCHMARKS.patternsTop20
+      ? "Top 20%"
+      : masteredPatterns >= PEER_BENCHMARKS.patternsTop50
+        ? "Top 50%"
+        : "Below median";
+  const storiesPercentile =
+    readyStories >= PEER_BENCHMARKS.storiesTop20
+      ? "Top 20%"
+      : readyStories >= PEER_BENCHMARKS.storiesTop50
+        ? "Top 50%"
+        : "Below median";
+  const mockPercentile =
+    avgMock >= PEER_BENCHMARKS.mockAvgTop20
+      ? "Top 20%"
+      : avgMock > 0
+        ? "Average"
+        : "No data";
 
   const handlePrint = () => window.print();
 
   return (
     <div className="prep-card p-5 border-indigo-500/20">
       <div className="flex items-center justify-between mb-4">
-        <div className="section-title mb-0 pb-0 border-0 text-indigo-400">Recruiter-Ready Summary</div>
-        <button onClick={handlePrint}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 text-xs font-semibold transition-all">
+        <div className="section-title mb-0 pb-0 border-0 text-indigo-400">
+          Recruiter-Ready Summary
+        </div>
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 text-xs font-semibold transition-all"
+        >
           <Printer size={11} /> Print / Save PDF
         </button>
       </div>
@@ -462,32 +785,70 @@ function RecruiterCard({ masteredPatterns, readyStories, avgMock, streak, overal
         <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary">
           <TrendingUp size={16} className="text-emerald-400 shrink-0" />
           <div className="flex-1">
-            <div className="text-xs text-muted-foreground">Overall Readiness</div>
+            <div className="text-xs text-muted-foreground">
+              Overall Readiness
+            </div>
             <div className="progress-bar mt-1">
-              <div className="progress-bar-fill bg-emerald-500" style={{ width: `${overallPct}%` }} />
+              <div
+                className="progress-bar-fill bg-emerald-500"
+                style={{ width: `${overallPct}%` }}
+              />
             </div>
           </div>
-          <span className="text-lg font-bold stat-num text-emerald-400">{overallPct}%</span>
+          <span className="text-lg font-bold stat-num text-emerald-400">
+            {overallPct}%
+          </span>
         </div>
         {/* Stats with peer comparison */}
         <div className="grid grid-cols-2 gap-2">
           {[
-            { icon: <Target size={13} className="text-blue-400" />, label: "Patterns Mastered", value: `${masteredPatterns}/${PATTERNS.length}`, peer: patternsPercentile },
-            { icon: <Brain size={13} className="text-purple-400" />, label: "Stories Ready", value: `${readyStories}/${BEHAVIORAL_QUESTIONS.length}`, peer: storiesPercentile },
-            { icon: <TrendingUp size={13} className="text-emerald-400" />, label: "Mock Avg Score", value: avgMock > 0 ? `${avgMock.toFixed(1)}/5` : "—", peer: mockPercentile },
-            { icon: <Flame size={13} className="text-orange-400" />, label: "Current Streak", value: `${streak} days`, peer: streak >= PEER_BENCHMARKS.streakTop20 ? "Top 20%" : "Active" },
+            {
+              icon: <Target size={13} className="text-blue-400" />,
+              label: "Patterns Mastered",
+              value: `${masteredPatterns}/${PATTERNS.length}`,
+              peer: patternsPercentile,
+            },
+            {
+              icon: <Brain size={13} className="text-purple-400" />,
+              label: "Stories Ready",
+              value: `${readyStories}/${BEHAVIORAL_QUESTIONS.length}`,
+              peer: storiesPercentile,
+            },
+            {
+              icon: <TrendingUp size={13} className="text-emerald-400" />,
+              label: "Mock Avg Score",
+              value: avgMock > 0 ? `${avgMock.toFixed(1)}/5` : "—",
+              peer: mockPercentile,
+            },
+            {
+              icon: <Flame size={13} className="text-orange-400" />,
+              label: "Current Streak",
+              value: `${streak} days`,
+              peer:
+                streak >= PEER_BENCHMARKS.streakTop20 ? "Top 20%" : "Active",
+            },
           ].map(item => (
             <div key={item.label} className="p-3 rounded-lg bg-secondary">
-              <div className="flex items-center gap-1.5 mb-1">{item.icon}<span className="text-xs text-muted-foreground">{item.label}</span></div>
-              <div className="text-base font-bold stat-num text-foreground">{item.value}</div>
-              <div className={`text-xs mt-0.5 ${item.peer === "Top 20%" ? "text-emerald-400" : item.peer === "Top 50%" ? "text-amber-400" : "text-muted-foreground"}`}>
+              <div className="flex items-center gap-1.5 mb-1">
+                {item.icon}
+                <span className="text-xs text-muted-foreground">
+                  {item.label}
+                </span>
+              </div>
+              <div className="text-base font-bold stat-num text-foreground">
+                {item.value}
+              </div>
+              <div
+                className={`text-xs mt-0.5 ${item.peer === "Top 20%" ? "text-emerald-400" : item.peer === "Top 50%" ? "text-amber-400" : "text-muted-foreground"}`}
+              >
                 {item.peer}
               </div>
             </div>
           ))}
         </div>
         <div className="text-xs text-muted-foreground text-center pt-1">
-          Peer benchmarks based on anonymised aggregate data from similar candidates
+          Peer benchmarks based on anonymised aggregate data from similar
+          candidates
         </div>
       </div>
     </div>
@@ -503,18 +864,32 @@ function InterviewCountdown() {
     <div className="prep-card p-5">
       <div className="flex items-center gap-2 mb-4">
         <Calendar size={14} className="text-amber-400" />
-        <span className="section-title mb-0 pb-0 border-0">Interview Countdown</span>
+        <span className="section-title mb-0 pb-0 border-0">
+          Interview Countdown
+        </span>
       </div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className={`text-5xl font-extrabold stat-num ${daysLeft === null ? "text-muted-foreground" : daysLeft <= 7 ? "text-red-400" : daysLeft <= 14 ? "text-amber-400" : "text-emerald-400"}`}>
+        <div
+          className={`text-5xl font-extrabold stat-num ${daysLeft === null ? "text-muted-foreground" : daysLeft <= 7 ? "text-red-400" : daysLeft <= 14 ? "text-amber-400" : "text-emerald-400"}`}
+        >
           {daysLeft === null ? "—" : daysLeft === 0 ? "🎯" : `${daysLeft}d`}
         </div>
         <div className="flex-1 space-y-2">
           <div className="text-sm text-muted-foreground">
-            {daysLeft === null ? "Set your interview date to track your countdown." : daysLeft === 0 ? "Today is the day! You've got this." : daysLeft <= 7 ? `${daysLeft} days left — final sprint mode!` : `${daysLeft} days remaining — stay consistent.`}
+            {daysLeft === null
+              ? "Set your interview date to track your countdown."
+              : daysLeft === 0
+                ? "Today is the day! You've got this."
+                : daysLeft <= 7
+                  ? `${daysLeft} days left — final sprint mode!`
+                  : `${daysLeft} days remaining — stay consistent.`}
           </div>
-          <input type="date" value={interviewDate ?? ""} onChange={e => setInterviewDate(e.target.value || null)}
-            className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-amber-500/50" />
+          <input
+            type="date"
+            value={interviewDate ?? ""}
+            onChange={e => setInterviewDate(e.target.value || null)}
+            className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-amber-500/50"
+          />
         </div>
       </div>
     </div>
@@ -526,7 +901,12 @@ function PrepTimeline() {
   const [interviewDate] = useInterviewDate();
   const [mode, setMode] = useState<"standard" | "fast" | "10week">("standard");
 
-  const timeline = mode === "fast" ? FAST_TRACK_TIMELINE : mode === "10week" ? TEN_WEEK_TIMELINE : PREP_TIMELINE;
+  const timeline =
+    mode === "fast"
+      ? FAST_TRACK_TIMELINE
+      : mode === "10week"
+        ? TEN_WEEK_TIMELINE
+        : PREP_TIMELINE;
 
   const currentWeek = (() => {
     if (!interviewDate) return -1;
@@ -553,8 +933,10 @@ function PrepTimeline() {
     return 3;
   })();
 
-  const accentColor = mode === "fast" ? "orange" : mode === "10week" ? "emerald" : "blue";
-  const totalLabel = mode === "fast" ? "2 weeks" : mode === "10week" ? "10 weeks" : "4 weeks";
+  const accentColor =
+    mode === "fast" ? "orange" : mode === "10week" ? "emerald" : "blue";
+  const totalLabel =
+    mode === "fast" ? "2 weeks" : mode === "10week" ? "10 weeks" : "4 weeks";
 
   return (
     <div className="prep-card p-5">
@@ -599,13 +981,19 @@ function PrepTimeline() {
       {mode === "fast" && (
         <div className="mb-3 p-3 rounded-lg border border-orange-500/30 bg-orange-500/5 text-xs text-orange-300">
           <span className="font-semibold text-orange-400">⚠️ Fast-Track: </span>
-          Requires 3–4 hours of focused daily practice. Best for candidates with strong CS fundamentals who need to sharpen interview-specific skills quickly.
+          Requires 3–4 hours of focused daily practice. Best for candidates with
+          strong CS fundamentals who need to sharpen interview-specific skills
+          quickly.
         </div>
       )}
       {mode === "10week" && (
         <div className="mb-3 p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-xs text-emerald-300">
-          <span className="font-semibold text-emerald-400">🗓️ Comprehensive Plan: </span>
-          Ideal for candidates with 10+ weeks before their interview. Builds deep mastery with time for multiple full mock days and weak-spot elimination. Requires ~2 hours/day.
+          <span className="font-semibold text-emerald-400">
+            🗓️ Comprehensive Plan:{" "}
+          </span>
+          Ideal for candidates with 10+ weeks before their interview. Builds
+          deep mastery with time for multiple full mock days and weak-spot
+          elimination. Requires ~2 hours/day.
         </div>
       )}
 
@@ -625,26 +1013,53 @@ function PrepTimeline() {
             }`}
           >
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="text-xs font-bold text-foreground">{week.week}</span>
-              <span className={`badge ${
-                i === currentWeek
-                  ? mode === "fast" ? "badge-orange" : mode === "10week" ? "badge-green" : "badge-blue"
-                  : "badge-gray"
-              }`}>{week.focus}</span>
+              <span className="text-xs font-bold text-foreground">
+                {week.week}
+              </span>
+              <span
+                className={`badge ${
+                  i === currentWeek
+                    ? mode === "fast"
+                      ? "badge-orange"
+                      : mode === "10week"
+                        ? "badge-green"
+                        : "badge-blue"
+                    : "badge-gray"
+                }`}
+              >
+                {week.focus}
+              </span>
               {i === currentWeek && (
-                <span className={`badge text-xs ${
-                  mode === "fast" ? "badge-orange" : mode === "10week" ? "badge-green" : "badge-blue"
-                }`}>
+                <span
+                  className={`badge text-xs ${
+                    mode === "fast"
+                      ? "badge-orange"
+                      : mode === "10week"
+                        ? "badge-green"
+                        : "badge-blue"
+                  }`}
+                >
                   ← You are here
                 </span>
               )}
             </div>
             <ul className="space-y-1">
               {week.items.map((item, j) => (
-                <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <span className={`mt-0.5 ${
-                    mode === "fast" ? "text-orange-400" : mode === "10week" ? "text-emerald-400" : "text-blue-400"
-                  }`}>·</span>
+                <li
+                  key={j}
+                  className="flex items-start gap-2 text-xs text-muted-foreground"
+                >
+                  <span
+                    className={`mt-0.5 ${
+                      mode === "fast"
+                        ? "text-orange-400"
+                        : mode === "10week"
+                          ? "text-emerald-400"
+                          : "text-blue-400"
+                    }`}
+                  >
+                    ·
+                  </span>
                   {item}
                 </li>
               ))}
@@ -656,10 +1071,17 @@ function PrepTimeline() {
       {/* Footer */}
       <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
         <span>
-          Total: <span className="font-semibold text-foreground">{totalLabel}</span> to interview-ready
+          Total:{" "}
+          <span className="font-semibold text-foreground">{totalLabel}</span> to
+          interview-ready
         </span>
         {interviewDate && (
-          <span>Interview in <span className="font-semibold text-foreground">{getDaysUntil(interviewDate)} days</span></span>
+          <span>
+            Interview in{" "}
+            <span className="font-semibold text-foreground">
+              {getDaysUntil(interviewDate)} days
+            </span>
+          </span>
         )}
       </div>
     </div>
@@ -726,30 +1148,67 @@ function StarStoryBank() {
       </div>
       <div className="space-y-2">
         {STAR_STORIES.map(story => (
-          <div key={story.id} className="rounded-lg border border-border overflow-hidden">
-            <button className="w-full flex items-center gap-3 p-3 text-left hover:bg-secondary/50 transition-all"
-              onClick={() => setExpanded(expanded === story.id ? null : story.id)}>
+          <div
+            key={story.id}
+            className="rounded-lg border border-border overflow-hidden"
+          >
+            <button
+              className="w-full flex items-center gap-3 p-3 text-left hover:bg-secondary/50 transition-all"
+              onClick={() =>
+                setExpanded(expanded === story.id ? null : story.id)
+              }
+            >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-semibold text-foreground">{story.title}</span>
-                  {story.tags.map(t => <span key={t} className="badge badge-purple text-xs">{t}</span>)}
+                  <span className="text-sm font-semibold text-foreground">
+                    {story.title}
+                  </span>
+                  {story.tags.map(t => (
+                    <span key={t} className="badge badge-purple text-xs">
+                      {t}
+                    </span>
+                  ))}
                 </div>
               </div>
-              {expanded === story.id ? <ChevronUp size={13} className="text-muted-foreground shrink-0" /> : <ChevronDown size={13} className="text-muted-foreground shrink-0" />}
+              {expanded === story.id ? (
+                <ChevronUp
+                  size={13}
+                  className="text-muted-foreground shrink-0"
+                />
+              ) : (
+                <ChevronDown
+                  size={13}
+                  className="text-muted-foreground shrink-0"
+                />
+              )}
             </button>
             {expanded === story.id && (
               <div className="p-3 border-t border-border space-y-3">
-                <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono bg-secondary p-3 rounded-lg">{story.template}</pre>
+                <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono bg-secondary p-3 rounded-lg">
+                  {story.template}
+                </pre>
                 <div className="flex gap-2">
-                  <button onClick={() => handleCopy(story.id, story.template)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-xs font-semibold text-muted-foreground transition-all">
-                    {copied === story.id ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                  <button
+                    onClick={() => handleCopy(story.id, story.template)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-xs font-semibold text-muted-foreground transition-all"
+                  >
+                    {copied === story.id ? (
+                      <Check size={11} className="text-emerald-400" />
+                    ) : (
+                      <Copy size={11} />
+                    )}
                     {copied === story.id ? "Copied!" : "Copy template"}
                   </button>
                 </div>
-                <textarea value={notes[story.id] ?? ""} onChange={e => setNotes(n => ({ ...n, [story.id]: e.target.value }))}
-                  placeholder="Add your personal story notes here…" rows={3}
-                  className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 resize-none" />
+                <textarea
+                  value={notes[story.id] ?? ""}
+                  onChange={e =>
+                    setNotes(n => ({ ...n, [story.id]: e.target.value }))
+                  }
+                  placeholder="Add your personal story notes here…"
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 resize-none"
+                />
               </div>
             )}
           </div>
@@ -771,11 +1230,26 @@ function ProgressExport() {
     setExporting(true);
     try {
       const { jsPDF } = await import("jspdf");
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4);
-      const weakPatterns = PATTERNS.filter(p => { const r = patternRatings[p.id] ?? 0; return r > 0 && r <= 2; });
-      const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4);
-      const overallPct = Math.round(((masteredPatterns.length / PATTERNS.length) * 0.6 + (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) * 100);
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const masteredPatterns = PATTERNS.filter(
+        p => (patternRatings[p.id] ?? 0) >= 4
+      );
+      const weakPatterns = PATTERNS.filter(p => {
+        const r = patternRatings[p.id] ?? 0;
+        return r > 0 && r <= 2;
+      });
+      const readyStories = BEHAVIORAL_QUESTIONS.filter(
+        q => (bqRatings[q.id] ?? 0) >= 4
+      );
+      const overallPct = Math.round(
+        ((masteredPatterns.length / PATTERNS.length) * 0.6 +
+          (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+          100
+      );
 
       // Header
       doc.setFillColor(15, 23, 42);
@@ -788,11 +1262,18 @@ function ProgressExport() {
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
-      doc.text(`Overall Readiness: ${overallPct}%  |  Streak: ${streak.currentStreak} days (best: ${streak.longestStreak})`, 14, 35);
+      doc.text(
+        `Overall Readiness: ${overallPct}%  |  Streak: ${streak.currentStreak} days (best: ${streak.longestStreak})`,
+        14,
+        35
+      );
 
       let y = 50;
       const section = (title: string) => {
-        if (y > 260) { doc.addPage(); y = 20; }
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
         doc.setFillColor(30, 41, 59);
         doc.rect(10, y - 4, 190, 8, "F");
         doc.setTextColor(59, 130, 246);
@@ -801,8 +1282,14 @@ function ProgressExport() {
         doc.text(title, 14, y + 1);
         y += 10;
       };
-      const line = (text: string, color: [number, number, number] = [203, 213, 225]) => {
-        if (y > 270) { doc.addPage(); y = 20; }
+      const line = (
+        text: string,
+        color: [number, number, number] = [203, 213, 225]
+      ) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
         doc.setTextColor(...color);
         doc.setFontSize(8.5);
         doc.setFont("helvetica", "normal");
@@ -810,24 +1297,54 @@ function ProgressExport() {
         y += 6;
       };
 
-      section(`Patterns Mastered (${masteredPatterns.length}/${PATTERNS.length})`);
+      section(
+        `Patterns Mastered (${masteredPatterns.length}/${PATTERNS.length})`
+      );
       if (masteredPatterns.length === 0) line("None mastered yet");
-      else masteredPatterns.forEach(p => line(`★${patternRatings[p.id]}  ${p.name}  [${p.diff}]`, [134, 239, 172]));
+      else
+        masteredPatterns.forEach(p =>
+          line(
+            `★${patternRatings[p.id]}  ${p.name}  [${p.diff}]`,
+            [134, 239, 172]
+          )
+        );
 
       y += 4;
       section(`Weak Patterns (${weakPatterns.length})`);
       if (weakPatterns.length === 0) line("No weak patterns — great!");
-      else weakPatterns.forEach(p => line(`★${patternRatings[p.id]}  ${p.name}  [${p.diff}]`, [252, 165, 165]));
+      else
+        weakPatterns.forEach(p =>
+          line(
+            `★${patternRatings[p.id]}  ${p.name}  [${p.diff}]`,
+            [252, 165, 165]
+          )
+        );
 
       y += 4;
-      section(`Behavioral Stories Ready (${readyStories.length}/${BEHAVIORAL_QUESTIONS.length})`);
+      section(
+        `Behavioral Stories Ready (${readyStories.length}/${BEHAVIORAL_QUESTIONS.length})`
+      );
       if (readyStories.length === 0) line("No stories rated 4+ yet");
-      else readyStories.forEach(q => line(`★${bqRatings[q.id]}  [${q.area}]  ${q.q.slice(0, 70)}…`, [167, 243, 208]));
+      else
+        readyStories.forEach(q =>
+          line(
+            `★${bqRatings[q.id]}  [${q.area}]  ${q.q.slice(0, 70)}…`,
+            [167, 243, 208]
+          )
+        );
 
       y += 4;
       section(`Mock Session History (${mockHistory.length} sessions)`);
       if (mockHistory.length === 0) line("No mock sessions completed yet");
-      else mockHistory.slice(-10).forEach(m => line(`${new Date(m.date).toLocaleDateString()}  avg ★${m.avgScore.toFixed(1)}`, [203, 213, 225]));
+      else
+        mockHistory
+          .slice(-10)
+          .forEach(m =>
+            line(
+              `${new Date(m.date).toLocaleDateString()}  avg ★${m.avgScore.toFixed(1)}`,
+              [203, 213, 225]
+            )
+          );
 
       doc.save("meta_prep_readiness_report.pdf");
       toast.success("PDF report downloaded!");
@@ -840,10 +1357,21 @@ function ProgressExport() {
   };
 
   const exportTxt = () => {
-    const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4);
-    const weakPatterns = PATTERNS.filter(p => { const r = patternRatings[p.id] ?? 0; return r > 0 && r <= 2; });
-    const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4);
-    const overallPct = Math.round(((masteredPatterns.length / PATTERNS.length) * 0.6 + (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) * 100);
+    const masteredPatterns = PATTERNS.filter(
+      p => (patternRatings[p.id] ?? 0) >= 4
+    );
+    const weakPatterns = PATTERNS.filter(p => {
+      const r = patternRatings[p.id] ?? 0;
+      return r > 0 && r <= 2;
+    });
+    const readyStories = BEHAVIORAL_QUESTIONS.filter(
+      q => (bqRatings[q.id] ?? 0) >= 4
+    );
+    const overallPct = Math.round(
+      ((masteredPatterns.length / PATTERNS.length) * 0.6 +
+        (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+        100
+    );
 
     const lines = [
       "META INTERVIEW PREP — PROGRESS REPORT",
@@ -859,24 +1387,38 @@ function ProgressExport() {
       ...weakPatterns.map(p => `  ★${patternRatings[p.id]} ${p.name}`),
       "",
       `BEHAVIORAL STORIES READY (${readyStories.length}/${BEHAVIORAL_QUESTIONS.length}):`,
-      ...readyStories.map(q => `  ★${bqRatings[q.id]} [${q.area}] ${q.q.slice(0, 60)}…`),
+      ...readyStories.map(
+        q => `  ★${bqRatings[q.id]} [${q.area}] ${q.q.slice(0, 60)}…`
+      ),
       "",
       `MOCK SESSION HISTORY (${mockHistory.length} sessions):`,
-      ...mockHistory.map(m => `  ${new Date(m.date).toLocaleDateString()} — avg ★${m.avgScore.toFixed(1)}`),
+      ...mockHistory.map(
+        m =>
+          `  ${new Date(m.date).toLocaleDateString()} — avg ★${m.avgScore.toFixed(1)}`
+      ),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "meta_prep_progress.txt"; a.click();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "meta_prep_progress.txt";
+    a.click();
     toast.success("Progress report downloaded!");
   };
 
   return (
     <div className="flex gap-2 flex-wrap">
-      <button onClick={exportPDF} disabled={exporting}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-all disabled:opacity-50">
-        <Download size={13} /> {exporting ? "Generating PDF…" : "Export Readiness Report (.pdf)"}
+      <button
+        onClick={exportPDF}
+        disabled={exporting}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-all disabled:opacity-50"
+      >
+        <Download size={13} />{" "}
+        {exporting ? "Generating PDF…" : "Export Readiness Report (.pdf)"}
       </button>
-      <button onClick={exportTxt}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-secondary hover:bg-accent border border-border text-sm font-semibold text-muted-foreground hover:text-foreground transition-all">
+      <button
+        onClick={exportTxt}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-secondary hover:bg-accent border border-border text-sm font-semibold text-muted-foreground hover:text-foreground transition-all"
+      >
         <Download size={13} /> Export Progress Report (.txt)
       </button>
     </div>
@@ -891,9 +1433,17 @@ function SharePrepState() {
   const [copied, setCopied] = useState(false);
 
   const generateShareUrl = () => {
-    const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).map(p => p.id);
-    const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).map(q => q.id);
-    const overallPct = Math.round(((masteredPatterns.length / PATTERNS.length) * 0.6 + (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) * 100);
+    const masteredPatterns = PATTERNS.filter(
+      p => (patternRatings[p.id] ?? 0) >= 4
+    ).map(p => p.id);
+    const readyStories = BEHAVIORAL_QUESTIONS.filter(
+      q => (bqRatings[q.id] ?? 0) >= 4
+    ).map(q => q.id);
+    const overallPct = Math.round(
+      ((masteredPatterns.length / PATTERNS.length) * 0.6 +
+        (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+        100
+    );
     const params = new URLSearchParams();
     params.set("tab", "overview");
     params.set("shared", "1");
@@ -906,34 +1456,54 @@ function SharePrepState() {
 
   const handleCopy = () => {
     const url = generateShareUrl();
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-      toast.success("Share URL copied to clipboard!");
-    }).catch(() => toast.error("Could not copy — try manually"));
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+        toast.success("Share URL copied to clipboard!");
+      })
+      .catch(() => toast.error("Could not copy — try manually"));
   };
 
-  const masteredCount = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length;
-  const readyCount = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length;
-  const overallPct = Math.round(((masteredCount / PATTERNS.length) * 0.6 + (readyCount / BEHAVIORAL_QUESTIONS.length) * 0.4) * 100);
+  const masteredCount = PATTERNS.filter(
+    p => (patternRatings[p.id] ?? 0) >= 4
+  ).length;
+  const readyCount = BEHAVIORAL_QUESTIONS.filter(
+    q => (bqRatings[q.id] ?? 0) >= 4
+  ).length;
+  const overallPct = Math.round(
+    ((masteredCount / PATTERNS.length) * 0.6 +
+      (readyCount / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+      100
+  );
 
   return (
     <div className="prep-card p-5">
       <div className="section-title">Share Your Prep Progress</div>
       <div className="text-xs text-muted-foreground mb-4">
-        Generate a shareable URL that encodes your readiness snapshot. Your actual ratings are not included — only the summary stats.
+        Generate a shareable URL that encodes your readiness snapshot. Your
+        actual ratings are not included — only the summary stats.
       </div>
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="p-3 rounded-lg bg-secondary/50 border border-border text-center">
           <div className="text-lg font-black text-blue-400">{overallPct}%</div>
-          <div className="text-[10px] text-muted-foreground">Overall Readiness</div>
+          <div className="text-[10px] text-muted-foreground">
+            Overall Readiness
+          </div>
         </div>
         <div className="p-3 rounded-lg bg-secondary/50 border border-border text-center">
-          <div className="text-lg font-black text-emerald-400">{masteredCount}/{PATTERNS.length}</div>
-          <div className="text-[10px] text-muted-foreground">Patterns Mastered</div>
+          <div className="text-lg font-black text-emerald-400">
+            {masteredCount}/{PATTERNS.length}
+          </div>
+          <div className="text-[10px] text-muted-foreground">
+            Patterns Mastered
+          </div>
         </div>
         <div className="p-3 rounded-lg bg-secondary/50 border border-border text-center">
-          <div className="text-lg font-black text-amber-400">{readyCount}/{BEHAVIORAL_QUESTIONS.length}</div>
+          <div className="text-lg font-black text-amber-400">
+            {readyCount}/{BEHAVIORAL_QUESTIONS.length}
+          </div>
           <div className="text-[10px] text-muted-foreground">Stories Ready</div>
         </div>
       </div>
@@ -951,11 +1521,20 @@ function SharePrepState() {
               : "bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/30 text-blue-400"
           }`}
         >
-          {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy URL</>}
+          {copied ? (
+            <>
+              <Check size={12} /> Copied!
+            </>
+          ) : (
+            <>
+              <Copy size={12} /> Copy URL
+            </>
+          )}
         </button>
       </div>
       <div className="mt-3 text-[10px] text-muted-foreground">
-        Tip: Share this link with your prep partner or mentor to show your current readiness snapshot.
+        Tip: Share this link with your prep partner or mentor to show your
+        current readiness snapshot.
       </div>
     </div>
   );
@@ -969,24 +1548,41 @@ function InterviewDayChecklist() {
   return (
     <div className="prep-card p-5">
       <div className="flex items-center justify-between mb-4">
-        <div className="section-title mb-0 pb-0 border-0">Interview Day Checklist</div>
-        <button onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-xs font-semibold text-muted-foreground transition-all">
+        <div className="section-title mb-0 pb-0 border-0">
+          Interview Day Checklist
+        </div>
+        <button
+          onClick={() => window.print()}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-xs font-semibold text-muted-foreground transition-all"
+        >
           <Printer size={11} /> Print
         </button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {INTERVIEW_DAY_CHECKLIST.map(phase => (
           <div key={phase.phase}>
-            <div className="text-xs font-bold text-foreground mb-2">{phase.phase}</div>
+            <div className="text-xs font-bold text-foreground mb-2">
+              {phase.phase}
+            </div>
             <div className="space-y-1.5">
               {phase.items.map((item, i) => {
                 const key = `${phase.phase}-${i}`;
                 return (
-                  <label key={key} className="flex items-start gap-2 cursor-pointer group">
-                    <input type="checkbox" checked={checked[key] ?? false} onChange={() => toggle(key)}
-                      className="mt-0.5 accent-blue-500 shrink-0" />
-                    <span className={`text-xs transition-colors ${checked[key] ? "line-through text-muted-foreground/50" : "text-muted-foreground group-hover:text-foreground"}`}>{item}</span>
+                  <label
+                    key={key}
+                    className="flex items-start gap-2 cursor-pointer group"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked[key] ?? false}
+                      onChange={() => toggle(key)}
+                      className="mt-0.5 accent-blue-500 shrink-0"
+                    />
+                    <span
+                      className={`text-xs transition-colors ${checked[key] ? "line-through text-muted-foreground/50" : "text-muted-foreground group-hover:text-foreground"}`}
+                    >
+                      {item}
+                    </span>
                   </label>
                 );
               })}
@@ -1000,18 +1596,35 @@ function InterviewDayChecklist() {
 
 // ── Resources ──────────────────────────────────────────────────────────────
 function ResourcesSection() {
-  const TAG_COLORS: Record<string, string> = { Coding: "badge-blue", "System Design": "badge-purple", Behavioral: "badge-amber" };
+  const TAG_COLORS: Record<string, string> = {
+    Coding: "badge-blue",
+    "System Design": "badge-purple",
+    Behavioral: "badge-amber",
+  };
   return (
     <div className="prep-card p-5">
       <div className="section-title">Curated Resources</div>
       <div className="space-y-2">
         {RESOURCES.map(r => (
-          <a key={r.title} href={r.url} target="_blank" rel="noopener noreferrer"
-            className="flex items-start gap-3 p-3 rounded-lg bg-secondary hover:bg-accent border border-border transition-all group">
-            <span className={`badge ${TAG_COLORS[r.tag] ?? "badge-gray"} shrink-0 mt-0.5`}>{r.tag}</span>
+          <a
+            key={r.title}
+            href={r.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-3 p-3 rounded-lg bg-secondary hover:bg-accent border border-border transition-all group"
+          >
+            <span
+              className={`badge ${TAG_COLORS[r.tag] ?? "badge-gray"} shrink-0 mt-0.5`}
+            >
+              {r.tag}
+            </span>
             <div className="min-w-0">
-              <div className="text-sm font-semibold text-foreground group-hover:text-blue-400 transition-colors">{r.title}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{r.desc}</div>
+              <div className="text-sm font-semibold text-foreground group-hover:text-blue-400 transition-colors">
+                {r.title}
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {r.desc}
+              </div>
             </div>
           </a>
         ))}
@@ -1030,32 +1643,60 @@ function ReadinessGoalSetter() {
   const [inputPct, setInputPct] = useState(goal?.targetPct ?? 80);
   const [inputDate, setInputDate] = useState(goal?.targetDate ?? "");
 
-  const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length;
-  const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length;
+  const masteredPatterns = PATTERNS.filter(
+    p => (patternRatings[p.id] ?? 0) >= 4
+  ).length;
+  const readyStories = BEHAVIORAL_QUESTIONS.filter(
+    q => (bqRatings[q.id] ?? 0) >= 4
+  ).length;
   const currentPct = Math.round(
-    (masteredPatterns / PATTERNS.length * 0.6 + readyStories / BEHAVIORAL_QUESTIONS.length * 0.4) * 100
+    ((masteredPatterns / PATTERNS.length) * 0.6 +
+      (readyStories / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+      100
   );
 
   const saveGoal = () => {
-    if (!inputDate) { toast.error("Please set a target date."); return; }
-    if (inputPct < 1 || inputPct > 100) { toast.error("Target must be between 1 and 100."); return; }
+    if (!inputDate) {
+      toast.error("Please set a target date.");
+      return;
+    }
+    if (inputPct < 1 || inputPct > 100) {
+      toast.error("Target must be between 1 and 100.");
+      return;
+    }
     setGoal({ targetPct: inputPct, targetDate: inputDate });
     setEditing(false);
     toast.success("Goal saved!");
   };
 
-  const daysLeft = goal ? Math.max(0, Math.ceil(
-    (new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  )) : 0;
+  const daysLeft = goal
+    ? Math.max(
+        0,
+        Math.ceil(
+          (new Date(goal.targetDate).getTime() - Date.now()) /
+            (1000 * 60 * 60 * 24)
+        )
+      )
+    : 0;
 
   // Daily tasks needed
   const pctGap = goal ? Math.max(0, goal.targetPct - currentPct) : 0;
   const totalPatterns = PATTERNS.length;
   const totalStories = BEHAVIORAL_QUESTIONS.length;
-  const patternsNeeded = Math.max(0, Math.ceil((goal?.targetPct ?? 0) / 100 * totalPatterns / 0.6) - masteredPatterns);
-  const storiesNeeded = Math.max(0, Math.ceil((goal?.targetPct ?? 0) / 100 * totalStories / 0.4) - readyStories);
-  const patternsPerDay = daysLeft > 0 ? (patternsNeeded / daysLeft).toFixed(1) : "0";
-  const storiesPerDay = daysLeft > 0 ? (storiesNeeded / daysLeft).toFixed(1) : "0";
+  const patternsNeeded = Math.max(
+    0,
+    Math.ceil((((goal?.targetPct ?? 0) / 100) * totalPatterns) / 0.6) -
+      masteredPatterns
+  );
+  const storiesNeeded = Math.max(
+    0,
+    Math.ceil((((goal?.targetPct ?? 0) / 100) * totalStories) / 0.4) -
+      readyStories
+  );
+  const patternsPerDay =
+    daysLeft > 0 ? (patternsNeeded / daysLeft).toFixed(1) : "0";
+  const storiesPerDay =
+    daysLeft > 0 ? (storiesNeeded / daysLeft).toFixed(1) : "0";
   const onTrack = pctGap <= 0;
 
   return (
@@ -1063,15 +1704,24 @@ function ReadinessGoalSetter() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Target size={14} className="text-blue-400" />
-          <span className="text-sm font-bold text-foreground">Readiness Goal</span>
+          <span className="text-sm font-bold text-foreground">
+            Readiness Goal
+          </span>
           {goal && !editing && (
-            <span className={`badge ${onTrack ? 'badge-green' : 'badge-amber'}`}>
-              {onTrack ? '✅ On Track' : `⚠️ ${daysLeft}d left`}
+            <span
+              className={`badge ${onTrack ? "badge-green" : "badge-amber"}`}
+            >
+              {onTrack ? "✅ On Track" : `⚠️ ${daysLeft}d left`}
             </span>
           )}
         </div>
         {goal && !editing && (
-          <button onClick={() => setEditing(true)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Edit</button>
+          <button
+            onClick={() => setEditing(true)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Edit
+          </button>
         )}
       </div>
 
@@ -1079,16 +1729,22 @@ function ReadinessGoalSetter() {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-muted-foreground block mb-1">Target Readiness %</label>
+              <label className="text-xs font-bold text-muted-foreground block mb-1">
+                Target Readiness %
+              </label>
               <input
-                type="number" min={1} max={100}
+                type="number"
+                min={1}
+                max={100}
                 value={inputPct}
                 onChange={e => setInputPct(Number(e.target.value))}
                 className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-blue-500/50"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-muted-foreground block mb-1">Target Date</label>
+              <label className="text-xs font-bold text-muted-foreground block mb-1">
+                Target Date
+              </label>
               <input
                 type="date"
                 value={inputDate}
@@ -1098,14 +1754,20 @@ function ReadinessGoalSetter() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={saveGoal}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all">
+            <button
+              onClick={saveGoal}
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all"
+            >
               Save Goal
             </button>
-            {goal && <button onClick={() => setEditing(false)}
-              className="px-4 py-2 rounded-lg bg-secondary text-sm text-muted-foreground hover:text-foreground transition-all">
-              Cancel
-            </button>}
+            {goal && (
+              <button
+                onClick={() => setEditing(false)}
+                className="px-4 py-2 rounded-lg bg-secondary text-sm text-muted-foreground hover:text-foreground transition-all"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </div>
       ) : goal ? (
@@ -1113,13 +1775,24 @@ function ReadinessGoalSetter() {
           {/* Progress bar */}
           <div>
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-muted-foreground">Current: <span className="font-bold text-foreground">{currentPct}%</span></span>
-              <span className="text-muted-foreground">Goal: <span className="font-bold text-blue-400">{goal.targetPct}%</span> by {new Date(goal.targetDate).toLocaleDateString()}</span>
+              <span className="text-muted-foreground">
+                Current:{" "}
+                <span className="font-bold text-foreground">{currentPct}%</span>
+              </span>
+              <span className="text-muted-foreground">
+                Goal:{" "}
+                <span className="font-bold text-blue-400">
+                  {goal.targetPct}%
+                </span>{" "}
+                by {new Date(goal.targetDate).toLocaleDateString()}
+              </span>
             </div>
             <div className="h-2 rounded-full bg-secondary overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-700 ${onTrack ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                style={{ width: `${Math.min(100, (currentPct / goal.targetPct) * 100)}%` }}
+                className={`h-full rounded-full transition-all duration-700 ${onTrack ? "bg-emerald-500" : "bg-blue-500"}`}
+                style={{
+                  width: `${Math.min(100, (currentPct / goal.targetPct) * 100)}%`,
+                }}
               />
             </div>
           </div>
@@ -1127,29 +1800,49 @@ function ReadinessGoalSetter() {
           {/* Daily task card */}
           {!onTrack && daysLeft > 0 && (
             <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
-              <div className="text-xs font-bold text-amber-400 mb-2">📅 Daily Task Card — {daysLeft} days to goal</div>
+              <div className="text-xs font-bold text-amber-400 mb-2">
+                📅 Daily Task Card — {daysLeft} days to goal
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-2.5 rounded-lg bg-secondary">
-                  <div className="text-lg font-extrabold text-blue-400">{patternsPerDay}</div>
-                  <div className="text-xs text-muted-foreground">patterns/day</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{patternsNeeded} remaining</div>
+                  <div className="text-lg font-extrabold text-blue-400">
+                    {patternsPerDay}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    patterns/day
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {patternsNeeded} remaining
+                  </div>
                 </div>
                 <div className="text-center p-2.5 rounded-lg bg-secondary">
-                  <div className="text-lg font-extrabold text-purple-400">{storiesPerDay}</div>
-                  <div className="text-xs text-muted-foreground">stories/day</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{storiesNeeded} remaining</div>
+                  <div className="text-lg font-extrabold text-purple-400">
+                    {storiesPerDay}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    stories/day
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {storiesNeeded} remaining
+                  </div>
                 </div>
               </div>
               <div className="text-xs text-muted-foreground mt-2 text-center">
-                Gap: {pctGap}% · {patternsNeeded} patterns + {storiesNeeded} stories to reach {goal.targetPct}%
+                Gap: {pctGap}% · {patternsNeeded} patterns + {storiesNeeded}{" "}
+                stories to reach {goal.targetPct}%
               </div>
             </div>
           )}
 
           {onTrack && (
             <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-center">
-              <div className="text-sm font-bold text-emerald-400">🎉 Goal reached! You're at {currentPct}% — above your {goal.targetPct}% target.</div>
-              <div className="text-xs text-muted-foreground mt-1">Consider raising your goal to keep pushing.</div>
+              <div className="text-sm font-bold text-emerald-400">
+                🎉 Goal reached! You're at {currentPct}% — above your{" "}
+                {goal.targetPct}% target.
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Consider raising your goal to keep pushing.
+              </div>
             </div>
           )}
         </div>
@@ -1168,38 +1861,58 @@ function WeeklyDigest() {
   const [ctciStreak] = useCTCIStreak();
 
   const notifyMutation = trpc.system.notifyOwner.useMutation({
-    onSuccess: (data) => {
-      if (data.success) toast.success("Weekly digest sent! Check your Manus notifications.");
+    onSuccess: data => {
+      if (data.success)
+        toast.success("Weekly digest sent! Check your Manus notifications.");
       else toast.error("Digest queued but delivery failed. Try again later.");
     },
-    onError: () => toast.error("Could not send digest. Make sure you are logged in as the app owner."),
+    onError: () =>
+      toast.error(
+        "Could not send digest. Make sure you are logged in as the app owner."
+      ),
   });
 
   const sendDigest = () => {
-    const masteredPatterns = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4);
-    const weakPatterns = PATTERNS.filter(p => { const r = patternRatings[p.id] ?? 0; return r > 0 && r <= 2; });
-    const readyStories = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4);
+    const masteredPatterns = PATTERNS.filter(
+      p => (patternRatings[p.id] ?? 0) >= 4
+    );
+    const weakPatterns = PATTERNS.filter(p => {
+      const r = patternRatings[p.id] ?? 0;
+      return r > 0 && r <= 2;
+    });
+    const readyStories = BEHAVIORAL_QUESTIONS.filter(
+      q => (bqRatings[q.id] ?? 0) >= 4
+    );
     const overallPct = Math.round(
-      ((masteredPatterns.length / PATTERNS.length) * 0.6 + (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) * 100
+      ((masteredPatterns.length / PATTERNS.length) * 0.6 +
+        (readyStories.length / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+        100
     );
 
     // Compute 7-day readiness delta from trend snapshots
     const sortedTrend = [...trend].sort((a, b) => a.date.localeCompare(b.date));
     const recentTrend = sortedTrend.slice(-7);
-    const trendDelta = recentTrend.length >= 2
-      ? overallPct - recentTrend[0].pct
-      : 0;
+    const trendDelta =
+      recentTrend.length >= 2 ? overallPct - recentTrend[0].pct : 0;
 
     // Mock sessions this week
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const weekMocks = mockHistory.filter(m => new Date(m.date) >= oneWeekAgo);
     const weekAvgMock = weekMocks.length
-      ? (weekMocks.reduce((s, m) => s + m.avgScore, 0) / weekMocks.length).toFixed(1)
+      ? (
+          weekMocks.reduce((s, m) => s + m.avgScore, 0) / weekMocks.length
+        ).toFixed(1)
       : "—";
 
     const ctciSolvedCount = (() => {
-      try { return Object.values(JSON.parse(localStorage.getItem("ctci_solved") ?? "{}")).filter(Boolean).length; } catch { return 0; }
+      try {
+        return Object.values(
+          JSON.parse(localStorage.getItem("ctci_solved") ?? "{}")
+        ).filter(Boolean).length;
+      } catch {
+        return 0;
+      }
     })() as number;
 
     const title = `📊 Meta Prep Weekly Digest — ${new Date().toLocaleDateString()}`;
@@ -1212,32 +1925,55 @@ function WeeklyDigest() {
       "",
       `✅ **Patterns Mastered:** ${masteredPatterns.length}/${PATTERNS.length}`,
       masteredPatterns.length > 0
-        ? masteredPatterns.slice(-5).map(p => `  - ★${patternRatings[p.id]} ${p.name}`).join("\n")
+        ? masteredPatterns
+            .slice(-5)
+            .map(p => `  - ★${patternRatings[p.id]} ${p.name}`)
+            .join("\n")
         : "  (none yet)",
       "",
       `⚠️ **Weak Patterns (★1-2):** ${weakPatterns.length}`,
-      weakPatterns.slice(0, 5).map(p => `  - ★${patternRatings[p.id]} ${p.name}`).join("\n"),
+      weakPatterns
+        .slice(0, 5)
+        .map(p => `  - ★${patternRatings[p.id]} ${p.name}`)
+        .join("\n"),
       "",
       `🗣️ **Behavioral Stories Ready:** ${readyStories.length}/${BEHAVIORAL_QUESTIONS.length}`,
       "",
       `🎭 **Mock Sessions This Week:** ${weekMocks.length} (avg ★${weekAvgMock})`,
-      weekMocks.slice(-3).map(m => `  - ${new Date(m.date).toLocaleDateString()} avg ★${m.avgScore.toFixed(1)}`).join("\n"),
-    ].filter(l => l !== undefined).join("\n");
+      weekMocks
+        .slice(-3)
+        .map(
+          m =>
+            `  - ${new Date(m.date).toLocaleDateString()} avg ★${m.avgScore.toFixed(1)}`
+        )
+        .join("\n"),
+    ]
+      .filter(l => l !== undefined)
+      .join("\n");
 
     notifyMutation.mutate({ title, content });
   };
 
   const overallPct = Math.round(
-    (PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length / PATTERNS.length * 0.6 +
-     BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length / BEHAVIORAL_QUESTIONS.length * 0.4) * 100
+    ((PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length /
+      PATTERNS.length) *
+      0.6 +
+      (BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length /
+        BEHAVIORAL_QUESTIONS.length) *
+        0.4) *
+      100
   );
 
   return (
     <div className="prep-card p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="section-title mb-0 pb-0 border-0">Weekly Progress Digest</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Send a formatted summary to your Manus notifications</div>
+          <div className="section-title mb-0 pb-0 border-0">
+            Weekly Progress Digest
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            Send a formatted summary to your Manus notifications
+          </div>
         </div>
         <button
           onClick={sendDigest}
@@ -1250,19 +1986,27 @@ function WeeklyDigest() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-3 rounded-lg bg-secondary text-center">
-          <div className="text-lg font-extrabold text-blue-400">{overallPct}%</div>
+          <div className="text-lg font-extrabold text-blue-400">
+            {overallPct}%
+          </div>
           <div className="text-xs text-muted-foreground">Readiness</div>
         </div>
         <div className="p-3 rounded-lg bg-secondary text-center">
-          <div className="text-lg font-extrabold text-orange-400">{streak.currentStreak}d</div>
+          <div className="text-lg font-extrabold text-orange-400">
+            {streak.currentStreak}d
+          </div>
           <div className="text-xs text-muted-foreground">Study Streak</div>
         </div>
         <div className="p-3 rounded-lg bg-secondary text-center">
-          <div className="text-lg font-extrabold text-purple-400">{ctciStreak.currentStreak}d</div>
+          <div className="text-lg font-extrabold text-purple-400">
+            {ctciStreak.currentStreak}d
+          </div>
           <div className="text-xs text-muted-foreground">CTCI Streak</div>
         </div>
         <div className="p-3 rounded-lg bg-secondary text-center">
-          <div className="text-lg font-extrabold text-emerald-400">{mockHistory.length}</div>
+          <div className="text-lg font-extrabold text-emerald-400">
+            {mockHistory.length}
+          </div>
           <div className="text-xs text-muted-foreground">Mock Sessions</div>
         </div>
       </div>
@@ -1295,22 +2039,39 @@ function MostHintedBadge() {
     <div className="prep-card p-5">
       <div className="flex items-center gap-2 mb-4">
         <Flame size={14} className="text-orange-400" />
-        <span className="text-sm font-bold text-foreground">Hint Usage Analytics</span>
+        <span className="text-sm font-bold text-foreground">
+          Hint Usage Analytics
+        </span>
         <span className="badge badge-amber text-xs">Most-Hinted Patterns</span>
       </div>
       <div className="text-xs text-muted-foreground mb-4">
-        Patterns where you've used the Stuck? hint ladder most — these need the most dedicated practice.
+        Patterns where you've used the Stuck? hint ladder most — these need the
+        most dedicated practice.
       </div>
       <div className="space-y-2">
         {entries.map((e, i) => (
           <div key={e.id} className="flex items-center gap-3">
-            <span className={`text-xs font-bold w-5 text-center ${
-              i === 0 ? 'text-amber-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-orange-600' : 'text-muted-foreground'
-            }`}>{i + 1}</span>
+            <span
+              className={`text-xs font-bold w-5 text-center ${
+                i === 0
+                  ? "text-amber-400"
+                  : i === 1
+                    ? "text-slate-300"
+                    : i === 2
+                      ? "text-orange-600"
+                      : "text-muted-foreground"
+              }`}
+            >
+              {i + 1}
+            </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-foreground truncate">{e.name}</span>
-                <span className="text-xs text-muted-foreground ml-2 shrink-0">{e.total} hints</span>
+                <span className="text-xs font-semibold text-foreground truncate">
+                  {e.name}
+                </span>
+                <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                  {e.total} hints
+                </span>
               </div>
               <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
                 <div
@@ -1319,9 +2080,19 @@ function MostHintedBadge() {
                 />
               </div>
               <div className="flex gap-2 mt-1">
-                {e.gentle > 0 && <span className="text-[10px] text-emerald-400">💡 {e.gentle}×</span>}
-                {e.medium > 0 && <span className="text-[10px] text-amber-400">🔍 {e.medium}×</span>}
-                {e.full > 0 && <span className="text-[10px] text-red-400">📖 {e.full}×</span>}
+                {e.gentle > 0 && (
+                  <span className="text-[10px] text-emerald-400">
+                    💡 {e.gentle}×
+                  </span>
+                )}
+                {e.medium > 0 && (
+                  <span className="text-[10px] text-amber-400">
+                    🔍 {e.medium}×
+                  </span>
+                )}
+                {e.full > 0 && (
+                  <span className="text-[10px] text-red-400">📖 {e.full}×</span>
+                )}
               </div>
             </div>
           </div>
@@ -1343,11 +2114,24 @@ type StudyPlanRecord = {
   durationMins: string;
   icTarget: string;
   headline: string;
-  plan?: { headline: string; blocks: { emoji: string; title: string; durationMins: number; tasks: string[] }[]; tip: string; warningIfAny: string | null };
+  plan?: {
+    headline: string;
+    blocks: {
+      emoji: string;
+      title: string;
+      durationMins: number;
+      tasks: string[];
+    }[];
+    tip: string;
+    warningIfAny: string | null;
+  };
 };
 function loadStudyPlanHistory(): StudyPlanRecord[] {
-  try { return JSON.parse(localStorage.getItem(STUDY_PLAN_HISTORY_KEY) ?? "[]"); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(STUDY_PLAN_HISTORY_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
 }
 function StudySessionPlanner() {
   const [patternRatings] = usePatternRatings();
@@ -1367,51 +2151,91 @@ function StudySessionPlanner() {
 
   const [plan, setPlan] = useState<{
     headline: string;
-    blocks: { emoji: string; title: string; durationMins: number; tasks: string[] }[];
+    blocks: {
+      emoji: string;
+      title: string;
+      durationMins: number;
+      tasks: string[];
+    }[];
     tip: string;
     warningIfAny: string | null;
   } | null>(todayRecord?.plan ?? null);
-  const lastPlan = (() => { const h = loadStudyPlanHistory(); return h.length ? h[h.length - 1] : null; })();
+  const lastPlan = (() => {
+    const h = loadStudyPlanHistory();
+    return h.length ? h[h.length - 1] : null;
+  })();
   const planMutation = trpc.ctci.studyPlan.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setPlan(data);
       try {
         const history = loadStudyPlanHistory();
-        history.push({ date: new Date().toISOString().split("T")[0], durationMins: duration, icTarget, headline: data.headline, plan: data });
-        localStorage.setItem(STUDY_PLAN_HISTORY_KEY, JSON.stringify(history.slice(-20)));
-      } catch { /* ignore */ }
+        history.push({
+          date: new Date().toISOString().split("T")[0],
+          durationMins: duration,
+          icTarget,
+          headline: data.headline,
+          plan: data,
+        });
+        localStorage.setItem(
+          STUDY_PLAN_HISTORY_KEY,
+          JSON.stringify(history.slice(-20))
+        );
+      } catch {
+        /* ignore */
+      }
     },
     onError: () => toast.error("Could not generate plan. Try again."),
   });
 
   const generatePlan = () => {
-    const srDuePatterns = PATTERNS
-      .filter(p => {
-        const r = patternRatings[p.id] ?? 0;
-        return r > 0 && r < 5;
-      })
+    const srDuePatterns = PATTERNS.filter(p => {
+      const r = patternRatings[p.id] ?? 0;
+      return r > 0 && r < 5;
+    })
       .slice(0, 10)
       .map(p => p.name);
-    const srDueBehavioral = BEHAVIORAL_QUESTIONS
-      .filter(q => (bqRatings[q.id] ?? 0) < 4)
+    const srDueBehavioral = BEHAVIORAL_QUESTIONS.filter(
+      q => (bqRatings[q.id] ?? 0) < 4
+    )
       .slice(0, 5)
       .map(q => q.q.slice(0, 60));
     const mostHintedPatterns = Object.entries(hintAnalytics)
-      .map(([id, c]) => ({ id, total: (c.gentle ?? 0) + (c.medium ?? 0) + (c.full ?? 0) }))
+      .map(([id, c]) => ({
+        id,
+        total: (c.gentle ?? 0) + (c.medium ?? 0) + (c.full ?? 0),
+      }))
       .sort((a, b) => b.total - a.total)
       .slice(0, 3)
       .map(e => PATTERNS.find(p => p.id === e.id)?.name ?? e.id);
-    const weakPatterns = PATTERNS
-      .filter(p => { const r = patternRatings[p.id] ?? 0; return r > 0 && r <= 2; })
+    const weakPatterns = PATTERNS.filter(p => {
+      const r = patternRatings[p.id] ?? 0;
+      return r > 0 && r <= 2;
+    })
       .map(p => p.name)
       .slice(0, 5);
     const ctciUnsolved = (() => {
-      try { return 500 - Object.values(JSON.parse(localStorage.getItem("ctci_solved") ?? "{}")).filter(Boolean).length; } catch { return 500; }
+      try {
+        return (
+          500 -
+          Object.values(
+            JSON.parse(localStorage.getItem("ctci_solved") ?? "{}")
+          ).filter(Boolean).length
+        );
+      } catch {
+        return 500;
+      }
     })() as number;
-    const daysToInterview = interviewDate ? getDaysUntil(interviewDate) : undefined;
+    const daysToInterview = interviewDate
+      ? getDaysUntil(interviewDate)
+      : undefined;
     const overallPct = Math.round(
-      (PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length / PATTERNS.length * 0.6 +
-       BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length / BEHAVIORAL_QUESTIONS.length * 0.4) * 100
+      ((PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length /
+        PATTERNS.length) *
+        0.6 +
+        (BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length /
+          BEHAVIORAL_QUESTIONS.length) *
+          0.4) *
+        100
     );
 
     planMutation.mutate({
@@ -1423,7 +2247,10 @@ function StudySessionPlanner() {
       mostHintedPatterns,
       weakPatterns,
       ctciUnsolved,
-      daysToInterview: daysToInterview !== undefined && daysToInterview > 0 ? daysToInterview : undefined,
+      daysToInterview:
+        daysToInterview !== undefined && daysToInterview > 0
+          ? daysToInterview
+          : undefined,
     });
   };
 
@@ -1431,12 +2258,17 @@ function StudySessionPlanner() {
     <div className="prep-card p-5">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
-          <div className="section-title mb-0 pb-0 border-0">🗓️ AI Study Session Planner</div>
+          <div className="section-title mb-0 pb-0 border-0">
+            🗓️ AI Study Session Planner
+          </div>
           <div className="flex items-center gap-2 flex-wrap mt-0.5">
-            <div className="text-xs text-muted-foreground">Get a personalised, time-boxed plan based on your current gaps</div>
+            <div className="text-xs text-muted-foreground">
+              Get a personalised, time-boxed plan based on your current gaps
+            </div>
             {lastPlan && !plan && !planMutation.isPending && (
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 font-medium whitespace-nowrap">
-                Last plan: {lastPlan.date.slice(5).replace("-", "/")} · {lastPlan.durationMins}m · {lastPlan.icTarget}
+                Last plan: {lastPlan.date.slice(5).replace("-", "/")} ·{" "}
+                {lastPlan.durationMins}m · {lastPlan.icTarget}
               </span>
             )}
           </div>
@@ -1444,22 +2276,30 @@ function StudySessionPlanner() {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex gap-1">
             {(["30", "60", "90"] as const).map(d => (
-              <button key={d}
+              <button
+                key={d}
                 onClick={() => setDuration(d)}
                 className={`text-xs px-2.5 py-1 rounded-full border font-semibold transition-all ${
-                  duration === d ? 'bg-blue-500/20 border-blue-400 text-blue-300' : 'border-border text-muted-foreground hover:bg-accent'
-                }`}>
+                  duration === d
+                    ? "bg-blue-500/20 border-blue-400 text-blue-300"
+                    : "border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
                 {d}m
               </button>
             ))}
           </div>
           <div className="flex gap-1">
             {(["IC5", "IC6", "IC7"] as const).map(ic => (
-              <button key={ic}
+              <button
+                key={ic}
                 onClick={() => setIcTarget(ic)}
                 className={`text-xs px-2.5 py-1 rounded-full border font-semibold transition-all ${
-                  icTarget === ic ? 'bg-purple-500/20 border-purple-400 text-purple-300' : 'border-border text-muted-foreground hover:bg-accent'
-                }`}>
+                  icTarget === ic
+                    ? "bg-purple-500/20 border-purple-400 text-purple-300"
+                    : "border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
                 {ic}
               </button>
             ))}
@@ -1478,15 +2318,22 @@ function StudySessionPlanner() {
       {!plan && !planMutation.isPending && (
         <div className="text-center py-8 text-muted-foreground">
           <div className="text-3xl mb-2">🧠</div>
-          <div className="text-sm">Click "Plan Today's Session" to get a personalised study plan</div>
-          <div className="text-xs mt-1 opacity-70">Uses your SR due dates, hint history, weak patterns, and readiness goal</div>
+          <div className="text-sm">
+            Click "Plan Today's Session" to get a personalised study plan
+          </div>
+          <div className="text-xs mt-1 opacity-70">
+            Uses your SR due dates, hint history, weak patterns, and readiness
+            goal
+          </div>
         </div>
       )}
 
       {planMutation.isPending && (
         <div className="text-center py-8">
           <div className="text-2xl mb-2 animate-pulse">⏳</div>
-          <div className="text-sm text-muted-foreground">Analysing your prep data…</div>
+          <div className="text-sm text-muted-foreground">
+            Analysing your prep data…
+          </div>
         </div>
       )}
 
@@ -1499,19 +2346,33 @@ function StudySessionPlanner() {
             </div>
           )}
           <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-            <span className="text-sm font-semibold text-emerald-300">🎯 {plan.headline}</span>
+            <span className="text-sm font-semibold text-emerald-300">
+              🎯 {plan.headline}
+            </span>
           </div>
           <div className="space-y-3">
             {plan.blocks.map((block, i) => (
-              <div key={i} className="p-3 rounded-lg bg-secondary border border-border">
+              <div
+                key={i}
+                className="p-3 rounded-lg bg-secondary border border-border"
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-foreground">{block.emoji} {block.title}</span>
-                  <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">{block.durationMins} min</span>
+                  <span className="text-sm font-bold text-foreground">
+                    {block.emoji} {block.title}
+                  </span>
+                  <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
+                    {block.durationMins} min
+                  </span>
                 </div>
                 <ul className="space-y-1">
                   {block.tasks.map((task, j) => (
-                    <li key={j} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                      <span className="text-emerald-500 mt-0.5 shrink-0">›</span>
+                    <li
+                      key={j}
+                      className="text-xs text-muted-foreground flex items-start gap-1.5"
+                    >
+                      <span className="text-emerald-500 mt-0.5 shrink-0">
+                        ›
+                      </span>
                       <span>{task}</span>
                     </li>
                   ))}
@@ -1542,11 +2403,15 @@ function CTCIDivergenceReport() {
   const [diffEstimates] = useCTCIDifficultyEstimates();
   const [expanded, setExpanded] = useState(false);
 
-  const SELF_IDX: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2, "Very Hard": 3 };
+  const SELF_IDX: Record<string, number> = {
+    Easy: 0,
+    Medium: 1,
+    Hard: 2,
+    "Very Hard": 3,
+  };
   const OFF_IDX: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
 
-  const divergences = CTCI_QUESTIONS
-    .filter(q => diffEstimates[q.num])
+  const divergences = CTCI_QUESTIONS.filter(q => diffEstimates[q.num])
     .map(q => {
       const self = diffEstimates[q.num].selfRating;
       const official = q.difficulty;
@@ -1563,12 +2428,16 @@ function CTCIDivergenceReport() {
     return (
       <div className="prep-card p-5">
         <div className="section-title">
-          <span className="text-pink-400">📊</span> CTCI Difficulty Divergence Report
+          <span className="text-pink-400">📊</span> CTCI Difficulty Divergence
+          Report
         </div>
         <div className="text-center py-6 text-muted-foreground text-sm">
           <div className="text-3xl mb-2">🔍</div>
           <div>No self-assessments yet.</div>
-          <div className="text-xs mt-1">Rate problem difficulty in the Coding tab to see your calibration report.</div>
+          <div className="text-xs mt-1">
+            Rate problem difficulty in the Coding tab to see your calibration
+            report.
+          </div>
         </div>
       </div>
     );
@@ -1584,11 +2453,18 @@ function CTCIDivergenceReport() {
         <div className="flex items-center gap-2">
           <span className="text-pink-400 text-lg">📊</span>
           <div>
-            <div className="text-sm font-bold text-foreground">CTCI Difficulty Divergence Report</div>
-            <div className="text-xs text-muted-foreground">{total} problems rated · {calibrationPct}% calibration accuracy</div>
+            <div className="text-sm font-bold text-foreground">
+              CTCI Difficulty Divergence Report
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {total} problems rated · {calibrationPct}% calibration accuracy
+            </div>
           </div>
         </div>
-        <button onClick={() => setExpanded(e => !e)} className="text-muted-foreground hover:text-foreground transition-colors">
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
       </div>
@@ -1596,16 +2472,26 @@ function CTCIDivergenceReport() {
       {/* Summary bar */}
       <div className="p-4 grid grid-cols-3 gap-3">
         <div className="text-center p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-          <div className="text-xl font-black text-emerald-400 stat-num">{total - diverged}</div>
+          <div className="text-xl font-black text-emerald-400 stat-num">
+            {total - diverged}
+          </div>
           <div className="text-xs text-muted-foreground">Calibrated</div>
         </div>
         <div className="text-center p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
-          <div className="text-xl font-black text-orange-400 stat-num">{harder.length}</div>
-          <div className="text-xs text-muted-foreground">Harder than expected</div>
+          <div className="text-xl font-black text-orange-400 stat-num">
+            {harder.length}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Harder than expected
+          </div>
         </div>
         <div className="text-center p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <div className="text-xl font-black text-blue-400 stat-num">{easier.length}</div>
-          <div className="text-xs text-muted-foreground">Easier than expected</div>
+          <div className="text-xl font-black text-blue-400 stat-num">
+            {easier.length}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Easier than expected
+          </div>
         </div>
       </div>
 
@@ -1613,11 +2499,23 @@ function CTCIDivergenceReport() {
       <div className="px-4 pb-3">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs text-muted-foreground">Calibration</span>
-          <span className="text-xs font-bold text-foreground">{calibrationPct}%</span>
+          <span className="text-xs font-bold text-foreground">
+            {calibrationPct}%
+          </span>
         </div>
         <div className="h-2 rounded-full bg-secondary overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${calibrationPct}%`, background: calibrationPct >= 80 ? "oklch(0.65 0.18 145)" : calibrationPct >= 60 ? "oklch(0.78 0.17 75)" : "oklch(0.65 0.22 25)" }} />
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${calibrationPct}%`,
+              background:
+                calibrationPct >= 80
+                  ? "oklch(0.65 0.18 145)"
+                  : calibrationPct >= 60
+                    ? "oklch(0.78 0.17 75)"
+                    : "oklch(0.65 0.22 25)",
+            }}
+          />
         </div>
       </div>
 
@@ -1625,17 +2523,34 @@ function CTCIDivergenceReport() {
         <div className="border-t border-border divide-y divide-border">
           {harder.length > 0 && (
             <div className="p-4">
-              <div className="text-xs font-bold text-orange-400 mb-2">⚠️ Harder Than Expected — Focus Here</div>
+              <div className="text-xs font-bold text-orange-400 mb-2">
+                ⚠️ Harder Than Expected — Focus Here
+              </div>
               <div className="space-y-2">
                 {harder.slice(0, 5).map(q => (
-                  <div key={q.num} className="flex items-center gap-3 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20">
-                    <span className="text-xs font-mono text-muted-foreground w-6">#{q.num}</span>
-                    <a href={q.url} target="_blank" rel="noopener noreferrer"
-                      className="text-xs font-medium text-foreground hover:text-orange-400 flex-1 truncate transition-colors">{q.name}</a>
-                    <span className="text-xs text-muted-foreground shrink-0">{q.difficulty} → {q.selfRating}</span>
+                  <div
+                    key={q.num}
+                    className="flex items-center gap-3 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20"
+                  >
+                    <span className="text-xs font-mono text-muted-foreground w-6">
+                      #{q.num}
+                    </span>
+                    <a
+                      href={q.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-foreground hover:text-orange-400 flex-1 truncate transition-colors"
+                    >
+                      {q.name}
+                    </a>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {q.difficulty} → {q.selfRating}
+                    </span>
                     <div className="flex gap-0.5 shrink-0">
                       {Array.from({ length: q.gap }).map((_, i) => (
-                        <span key={i} className="text-orange-400 text-xs">▲</span>
+                        <span key={i} className="text-orange-400 text-xs">
+                          ▲
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -1645,17 +2560,34 @@ function CTCIDivergenceReport() {
           )}
           {easier.length > 0 && (
             <div className="p-4">
-              <div className="text-xs font-bold text-blue-400 mb-2">💪 Easier Than Expected — Strong Areas</div>
+              <div className="text-xs font-bold text-blue-400 mb-2">
+                💪 Easier Than Expected — Strong Areas
+              </div>
               <div className="space-y-2">
                 {easier.slice(0, 5).map(q => (
-                  <div key={q.num} className="flex items-center gap-3 p-2 rounded-lg bg-blue-500/5 border border-blue-500/20">
-                    <span className="text-xs font-mono text-muted-foreground w-6">#{q.num}</span>
-                    <a href={q.url} target="_blank" rel="noopener noreferrer"
-                      className="text-xs font-medium text-foreground hover:text-blue-400 flex-1 truncate transition-colors">{q.name}</a>
-                    <span className="text-xs text-muted-foreground shrink-0">{q.difficulty} → {q.selfRating}</span>
+                  <div
+                    key={q.num}
+                    className="flex items-center gap-3 p-2 rounded-lg bg-blue-500/5 border border-blue-500/20"
+                  >
+                    <span className="text-xs font-mono text-muted-foreground w-6">
+                      #{q.num}
+                    </span>
+                    <a
+                      href={q.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-foreground hover:text-blue-400 flex-1 truncate transition-colors"
+                    >
+                      {q.name}
+                    </a>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {q.difficulty} → {q.selfRating}
+                    </span>
                     <div className="flex gap-0.5 shrink-0">
                       {Array.from({ length: Math.abs(q.gap) }).map((_, i) => (
-                        <span key={i} className="text-blue-400 text-xs">▼</span>
+                        <span key={i} className="text-blue-400 text-xs">
+                          ▼
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -1667,7 +2599,8 @@ function CTCIDivergenceReport() {
       )}
       {expanded && divergences.length === 0 && (
         <div className="p-4 text-center text-sm text-emerald-400">
-          🎯 Perfect calibration! Your self-assessments match official difficulty on all rated problems.
+          🎯 Perfect calibration! Your self-assessments match official
+          difficulty on all rated problems.
         </div>
       )}
     </div>
@@ -1704,14 +2637,52 @@ function DailyDrillButton() {
   if (sorted.length === 0) return null;
 
   const handleClick = () => {
-    const topicList = sorted.map((t, i) => `${i + 1}. ${t.topic} (avg ${t.avg.toFixed(1)}/5)`).join("\n");
-    toast.custom(() => (
-      <div style={{ background: "oklch(0.18 0.025 264)", border: "1px solid oklch(0.38 0.08 264)", color: "oklch(0.92 0.04 264)", borderRadius: "0.75rem", padding: "0.875rem 1rem", minWidth: "280px", maxWidth: "360px", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "oklch(0.75 0.18 264)" }}>🎯 3 Topics to Drill Today</div>
-        <div style={{ fontSize: "0.75rem", opacity: 0.85, whiteSpace: "pre-line" }}>{topicList}</div>
-        <div style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "0.25rem" }}>Head to the Code Practice tab → filter by these topics</div>
-      </div>
-    ), { duration: 8000 });
+    const topicList = sorted
+      .map((t, i) => `${i + 1}. ${t.topic} (avg ${t.avg.toFixed(1)}/5)`)
+      .join("\n");
+    toast.custom(
+      () => (
+        <div
+          style={{
+            background: "oklch(0.18 0.025 264)",
+            border: "1px solid oklch(0.38 0.08 264)",
+            color: "oklch(0.92 0.04 264)",
+            borderRadius: "0.75rem",
+            padding: "0.875rem 1rem",
+            minWidth: "280px",
+            maxWidth: "360px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              color: "oklch(0.75 0.18 264)",
+            }}
+          >
+            🎯 3 Topics to Drill Today
+          </div>
+          <div
+            style={{
+              fontSize: "0.75rem",
+              opacity: 0.85,
+              whiteSpace: "pre-line",
+            }}
+          >
+            {topicList}
+          </div>
+          <div
+            style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "0.25rem" }}
+          >
+            Head to the Code Practice tab → filter by these topics
+          </div>
+        </div>
+      ),
+      { duration: 8000 }
+    );
   };
 
   return (
@@ -1720,8 +2691,7 @@ function DailyDrillButton() {
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-300 text-xs font-semibold transition-all"
       title={`Weakest topics: ${sorted.map(t => t.topic).join(", ")}`}
     >
-      <Target size={12} />
-      3 Drills Due Today
+      <Target size={12} />3 Drills Due Today
     </button>
   );
 }
@@ -1739,31 +2709,75 @@ function QuickActionsRow() {
   const today = new Date().toISOString().split("T")[0];
 
   // Streak milestone toasts — fire once per milestone per day
-  const [lastMilestoneDay, setLastMilestoneDay] = useState<string | null>(() => {
-    try { return localStorage.getItem("streak_milestone_day"); } catch { return null; }
-  });
+  const [lastMilestoneDay, setLastMilestoneDay] = useState<string | null>(
+    () => {
+      try {
+        return localStorage.getItem("streak_milestone_day");
+      } catch {
+        return null;
+      }
+    }
+  );
   useEffect(() => {
     const milestone = STREAK_MILESTONES[streak.currentStreak];
     if (milestone && lastMilestoneDay !== today) {
       const tweetText = `🔥 ${streak.currentStreak}-day streak on my Meta IC${streak.currentStreak >= 30 ? 7 : 6} interview prep! ${milestone} #SoftwareEngineering #MetaInterview`;
-      toast.custom(() => (
-        <div style={{ background: "oklch(0.22 0.02 60)", border: "1px solid oklch(0.55 0.18 60)", color: "oklch(0.92 0.08 60)", borderRadius: "0.75rem", padding: "0.75rem 1rem", display: "flex", flexDirection: "column", gap: "0.5rem", minWidth: "280px", maxWidth: "380px" }}>
-          <div style={{ fontWeight: 700, fontSize: "0.875rem" }}>🔥 {streak.currentStreak}-day streak!</div>
-          <div style={{ fontSize: "0.75rem", opacity: 0.85 }}>{milestone}</div>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(tweetText).then(() => {
-                toast.success("Tweet copied to clipboard!", { duration: 2500 });
-              }).catch(() => {
-                toast.error("Couldn't copy — try manually", { duration: 2500 });
-              });
+      toast.custom(
+        () => (
+          <div
+            style={{
+              background: "oklch(0.22 0.02 60)",
+              border: "1px solid oklch(0.55 0.18 60)",
+              color: "oklch(0.92 0.08 60)",
+              borderRadius: "0.75rem",
+              padding: "0.75rem 1rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5rem",
+              minWidth: "280px",
+              maxWidth: "380px",
             }}
-            style={{ alignSelf: "flex-start", marginTop: "0.25rem", padding: "0.25rem 0.75rem", borderRadius: "0.5rem", background: "oklch(0.55 0.18 60)", color: "oklch(0.1 0.01 60)", fontSize: "0.7rem", fontWeight: 700, border: "none", cursor: "pointer" }}
           >
-            📤 Share
-          </button>
-        </div>
-      ), { duration: 8000 });
+            <div style={{ fontWeight: 700, fontSize: "0.875rem" }}>
+              🔥 {streak.currentStreak}-day streak!
+            </div>
+            <div style={{ fontSize: "0.75rem", opacity: 0.85 }}>
+              {milestone}
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard
+                  .writeText(tweetText)
+                  .then(() => {
+                    toast.success("Tweet copied to clipboard!", {
+                      duration: 2500,
+                    });
+                  })
+                  .catch(() => {
+                    toast.error("Couldn't copy — try manually", {
+                      duration: 2500,
+                    });
+                  });
+              }}
+              style={{
+                alignSelf: "flex-start",
+                marginTop: "0.25rem",
+                padding: "0.25rem 0.75rem",
+                borderRadius: "0.5rem",
+                background: "oklch(0.55 0.18 60)",
+                color: "oklch(0.1 0.01 60)",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              📤 Share
+            </button>
+          </div>
+        ),
+        { duration: 8000 }
+      );
       localStorage.setItem("streak_milestone_day", today);
       setLastMilestoneDay(today);
     }
@@ -1772,9 +2786,13 @@ function QuickActionsRow() {
   // Check if a plan was already generated today
   const hasTodayPlan = (() => {
     try {
-      const history = JSON.parse(localStorage.getItem("study_plan_history_v1") ?? "[]") as Array<{ date: string }>;
+      const history = JSON.parse(
+        localStorage.getItem("study_plan_history_v1") ?? "[]"
+      ) as Array<{ date: string }>;
       return history.length > 0 && history[history.length - 1].date === today;
-    } catch { return false; }
+    } catch {
+      return false;
+    }
   })();
 
   const scrollTo = (id: string) => {
@@ -1784,22 +2802,31 @@ function QuickActionsRow() {
 
   const clearTodayPlan = () => {
     try {
-      const history = JSON.parse(localStorage.getItem("study_plan_history_v1") ?? "[]") as Array<{ date: string }>;
+      const history = JSON.parse(
+        localStorage.getItem("study_plan_history_v1") ?? "[]"
+      ) as Array<{ date: string }>;
       const filtered = history.filter(h => h.date !== today);
       localStorage.setItem("study_plan_history_v1", JSON.stringify(filtered));
       // Force page re-render by dispatching a storage event
       window.dispatchEvent(new Event("storage"));
       scrollTo("study-session-planner");
-    } catch { scrollTo("study-session-planner"); }
+    } catch {
+      scrollTo("study-session-planner");
+    }
   };
 
   const lastActiveFormatted = streak.lastVisit
-    ? new Date(streak.lastVisit + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })
+    ? new Date(streak.lastVisit + "T00:00:00").toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      })
     : null;
 
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Quick Actions</span>
+      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">
+        Quick Actions
+      </span>
       <div className="flex gap-2 flex-1 flex-wrap">
         <button
           onClick={() => scrollTo("study-session-planner")}
@@ -1807,7 +2834,9 @@ function QuickActionsRow() {
         >
           <Brain size={12} />
           {hasTodayPlan ? "Resume Today's Plan" : "Plan Today's Session"}
-          <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-emerald-900/40 text-emerald-400 border border-emerald-700/40">⌥1</kbd>
+          <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-emerald-900/40 text-emerald-400 border border-emerald-700/40">
+            ⌥1
+          </kbd>
         </button>
         {hasTodayPlan && (
           <button
@@ -1831,19 +2860,34 @@ function QuickActionsRow() {
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="flex items-center gap-1 text-xs font-bold text-amber-400 whitespace-nowrap ml-auto cursor-default select-none">
-              🔥 {streak.currentStreak} day{streak.currentStreak !== 1 ? "s" : ""}
+              🔥 {streak.currentStreak} day
+              {streak.currentStreak !== 1 ? "s" : ""}
             </span>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs space-y-1">
             <div className="font-semibold">Daily Prep Streak</div>
-            <div>Current: {streak.currentStreak} day{streak.currentStreak !== 1 ? "s" : ""}</div>
-            <div>Best: {streak.longestStreak} day{streak.longestStreak !== 1 ? "s" : ""}</div>
-            {lastActiveFormatted && <div className="text-muted-foreground">Last active: {lastActiveFormatted}</div>}
-           </TooltipContent>
+            <div>
+              Current: {streak.currentStreak} day
+              {streak.currentStreak !== 1 ? "s" : ""}
+            </div>
+            <div>
+              Best: {streak.longestStreak} day
+              {streak.longestStreak !== 1 ? "s" : ""}
+            </div>
+            {lastActiveFormatted && (
+              <div className="text-muted-foreground">
+                Last active: {lastActiveFormatted}
+              </div>
+            )}
+          </TooltipContent>
         </Tooltip>
       )}
       <button
-        onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "?", bubbles: true }))}
+        onClick={() =>
+          window.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "?", bubbles: true })
+          )
+        }
         title="Keyboard shortcuts (?)"
         className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all shrink-0"
       >

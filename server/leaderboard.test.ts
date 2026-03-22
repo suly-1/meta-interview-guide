@@ -26,7 +26,9 @@ describe("leaderboard.getTop", () => {
 describe("leaderboard.checkHandle", () => {
   it("returns taken: false when DB is unavailable", async () => {
     const caller = appRouter.createCaller(createCtx());
-    const result = await caller.leaderboard.checkHandle({ anonHandle: "test_user" });
+    const result = await caller.leaderboard.checkHandle({
+      anonHandle: "test_user",
+    });
     expect(result).toEqual({ taken: false });
   });
 });

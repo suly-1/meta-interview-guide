@@ -13,7 +13,10 @@ export const leaderboardRouter = router({
     const rows = await db
       .select()
       .from(leaderboardEntries)
-      .orderBy(desc(leaderboardEntries.patternsMastered), desc(leaderboardEntries.streakDays))
+      .orderBy(
+        desc(leaderboardEntries.patternsMastered),
+        desc(leaderboardEntries.streakDays)
+      )
       .limit(20);
     return rows;
   }),

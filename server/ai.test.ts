@@ -17,7 +17,11 @@ vi.mock("./_core/llm", () => ({
             icLevel: "IC6",
             strengths: ["Clear STAR structure", "Concrete outcomes"],
             improvements: ["Add org-level impact", "More strategic framing"],
-            followUpQuestions: ["How did you handle pushback?", "What would you do differently?", "How did you scale this?"],
+            followUpQuestions: [
+              "How did you handle pushback?",
+              "What would you do differently?",
+              "How did you scale this?",
+            ],
             summary: "Strong IC6-level collaboration with clear examples.",
           }),
         },
@@ -39,9 +43,21 @@ describe("ai.xfnMockScorecard", () => {
     const caller = appRouter.createCaller(createCtx());
     const result = await caller.ai.xfnMockScorecard({
       rounds: [
-        { question: "Tell me about a time you worked with a cross-functional team.", answer: "I collaborated with PM and design to ship a feature." },
-        { question: "Describe a conflict with a partner team.", answer: "We had disagreement on API design, I facilitated a sync to align." },
-        { question: "How do you build trust with XFN partners?", answer: "Regular check-ins, clear docs, and follow-through on commitments." },
+        {
+          question:
+            "Tell me about a time you worked with a cross-functional team.",
+          answer: "I collaborated with PM and design to ship a feature.",
+        },
+        {
+          question: "Describe a conflict with a partner team.",
+          answer:
+            "We had disagreement on API design, I facilitated a sync to align.",
+        },
+        {
+          question: "How do you build trust with XFN partners?",
+          answer:
+            "Regular check-ins, clear docs, and follow-through on commitments.",
+        },
       ],
       icMode: "IC6",
     });
@@ -64,9 +80,18 @@ describe("ai.xfnMockScorecard", () => {
     const caller = appRouter.createCaller(createCtx());
     const result = await caller.ai.xfnMockScorecard({
       rounds: [
-        { question: "Describe an org-level XFN initiative you drove.", answer: "I led a cross-org alignment effort spanning 5 teams." },
-        { question: "How have you influenced without authority?", answer: "I built consensus through data and stakeholder workshops." },
-        { question: "Tell me about a strategic partnership you built.", answer: "I partnered with a sister org to create a shared platform." },
+        {
+          question: "Describe an org-level XFN initiative you drove.",
+          answer: "I led a cross-org alignment effort spanning 5 teams.",
+        },
+        {
+          question: "How have you influenced without authority?",
+          answer: "I built consensus through data and stakeholder workshops.",
+        },
+        {
+          question: "Tell me about a strategic partnership you built.",
+          answer: "I partnered with a sister org to create a shared platform.",
+        },
       ],
       icMode: "IC7",
     });
@@ -81,7 +106,10 @@ describe("ai.xfnMockScorecard", () => {
     const caller = appRouter.createCaller(createCtx());
     const result = await caller.ai.xfnMockScorecard({
       rounds: [
-        { question: "Tell me about XFN collaboration.", answer: "I worked with multiple teams." },
+        {
+          question: "Tell me about XFN collaboration.",
+          answer: "I worked with multiple teams.",
+        },
       ],
       // icMode defaults to "IC7"
     });

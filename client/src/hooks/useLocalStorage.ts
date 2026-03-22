@@ -10,15 +10,19 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     }
   });
 
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
-    }
-  }, [key, storedValue]);
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [key, storedValue]
+  );
 
   return [storedValue, setValue] as const;
 }
@@ -40,15 +44,20 @@ export function useStreak() {
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
-    setStreak((prev) => {
+    setStreak(prev => {
       if (prev.lastVisit === today) return prev;
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split("T")[0];
-      const newStreak = prev.lastVisit === yesterdayStr ? prev.currentStreak + 1 : 1;
-      return { currentStreak: newStreak, lastVisit: today, longestStreak: Math.max(newStreak, prev.longestStreak) };
+      const newStreak =
+        prev.lastVisit === yesterdayStr ? prev.currentStreak + 1 : 1;
+      return {
+        currentStreak: newStreak,
+        lastVisit: today,
+        longestStreak: Math.max(newStreak, prev.longestStreak),
+      };
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today]);
 
   return streak;
@@ -117,7 +126,11 @@ export interface NotifSettings {
 }
 
 export function useNotifSettings() {
-  return useLocalStorage<NotifSettings>("meta_notif_v1", { enabled: false, time: "09:00", dismissed: false });
+  return useLocalStorage<NotifSettings>("meta_notif_v1", {
+    enabled: false,
+    time: "09:00",
+    dismissed: false,
+  });
 }
 
 // ── Onboarding dismissed ──────────────────────────────────────────────────
@@ -138,7 +151,7 @@ export function useCongratsShown() {
 // ── Readiness trend (14-day daily snapshots) ───────────────────────────────────────
 export interface ReadinessSnapshot {
   date: string; // ISO date YYYY-MM-DD
-  pct: number;  // 0-100
+  pct: number; // 0-100
 }
 
 export function useReadinessTrend() {
@@ -168,8 +181,8 @@ export function useCTCIStreak() {
 
 // ── Readiness Goal Setter ──────────────────────────────────────────────────
 export interface ReadinessGoal {
-  targetPct: number;   // 0-100
-  targetDate: string;  // YYYY-MM-DD
+  targetPct: number; // 0-100
+  targetDate: string; // YYYY-MM-DD
 }
 
 export function useReadinessGoal() {
@@ -179,7 +192,7 @@ export function useReadinessGoal() {
 // ── Mock Interview Simulator history ──────────────────────────────────────────
 export interface SimulatorSession {
   id: string;
-  date: string;           // ISO date YYYY-MM-DD
+  date: string; // ISO date YYYY-MM-DD
   icTarget: "IC5" | "IC6" | "IC7";
   codingProblem: string;
   codingNotes: string;
@@ -187,7 +200,7 @@ export interface SimulatorSession {
   bq1Answer: string;
   bq2Question: string;
   bq2Answer: string;
-  totalTimeUsed: number;  // seconds
+  totalTimeUsed: number; // seconds
   // Debrief results
   overallVerdict: string;
   overallScore: number;
@@ -213,7 +226,10 @@ export interface HintCounts {
 }
 
 export function useHintAnalytics() {
-  return useLocalStorage<Record<string, HintCounts>>("meta_hint_analytics_v1", {});
+  return useLocalStorage<Record<string, HintCounts>>(
+    "meta_hint_analytics_v1",
+    {}
+  );
 }
 
 // ── CTCI Difficulty Estimator (self-assessment per problem) ───────────────────
@@ -223,7 +239,10 @@ export interface DifficultyEstimate {
   timestamp: number;
 }
 export function useCTCIDifficultyEstimates() {
-  return useLocalStorage<Record<string, DifficultyEstimate>>("meta_ctci_difficulty_v1", {});
+  return useLocalStorage<Record<string, DifficultyEstimate>>(
+    "meta_ctci_difficulty_v1",
+    {}
+  );
 }
 
 // ── Behavioral Story Strength Tracker (per-question rating history) ───────────
@@ -232,7 +251,10 @@ export interface StoryRatingEntry {
   rating: number;
 }
 export function useStoryStrengthHistory() {
-  return useLocalStorage<Record<string, StoryRatingEntry[]>>("meta_story_strength_v1", {});
+  return useLocalStorage<Record<string, StoryRatingEntry[]>>(
+    "meta_story_strength_v1",
+    {}
+  );
 }
 
 // ── Technical Retrospective Projects ──────────────────────────────────────────
@@ -258,12 +280,18 @@ export function useFlashCardSRDue() {
 
 // ── Daily study checklist ──────────────────────────────────────────────────
 export function useDailyChecklist() {
-  return useLocalStorage<Record<string, boolean>>("meta_daily_checklist_v1", {});
+  return useLocalStorage<Record<string, boolean>>(
+    "meta_daily_checklist_v1",
+    {}
+  );
 }
 
 // ── Onboarding progress (5-step guided checklist for new users) ────────────
 export function useOnboardingProgress() {
-  return useLocalStorage<Record<string, boolean>>("meta_onboarding_progress_v1", {});
+  return useLocalStorage<Record<string, boolean>>(
+    "meta_onboarding_progress_v1",
+    {}
+  );
 }
 
 // ── Theme preference ───────────────────────────────────────────────────────
@@ -280,9 +308,9 @@ export function useDensity() {
 // ── Gauntlet Mode state ────────────────────────────────────────────────────
 export interface GauntletState {
   active: boolean;
-  startedAt: number | null;   // epoch ms
-  tabsCompleted: string[];    // tab ids completed in order
-  bestTimeMs: number | null;  // best all-7-tab run in ms
+  startedAt: number | null; // epoch ms
+  tabsCompleted: string[]; // tab ids completed in order
+  bestTimeMs: number | null; // best all-7-tab run in ms
 }
 export function useGauntletState() {
   return useLocalStorage<GauntletState>("meta_gauntlet_v1", {

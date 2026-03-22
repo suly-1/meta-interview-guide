@@ -479,3 +479,11 @@
 - [x] User selects preferred option (Option C — navy/purple gradient, center-aligned)
 - [x] Implement chosen banner design (Option A — CommunityBanner component)
 - [x] Run pnpm build:standalone
+
+## Banner & Content Round 3
+
+- [ ] Add dismiss (×) button to CommunityBanner with localStorage persistence
+- [ ] Add IC4/IC5 entry-level section to Coding tab
+- [ ] Add IC4/IC5 entry-level section to Behavioral tab
+- [ ] Add external link confirmation modal to CommunityBanner official links
+- [ ] Run pnpm build:standalone

@@ -1,4 +1,13 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, bigint } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  json,
+  bigint,
+} from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -33,7 +42,9 @@ export const collabRooms = mysqlTable("collab_rooms", {
   questionId: varchar("questionId", { length: 64 }),
   questionTitle: text("questionTitle"),
   mode: mysqlEnum("mode", ["human", "ai"]).default("human").notNull(),
-  status: mysqlEnum("status", ["waiting", "active", "ended"]).default("waiting").notNull(),
+  status: mysqlEnum("status", ["waiting", "active", "ended"])
+    .default("waiting")
+    .notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   endedAt: timestamp("endedAt"),
 });

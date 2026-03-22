@@ -1,8 +1,31 @@
 // Design: Bold Engineering Dashboard
 // Dark charcoal base, Space Grotesk headings, Inter body
-import { Sun, Moon, BookOpen, CalendarClock, Dices, Swords, Music, AlignJustify } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  BookOpen,
+  CalendarClock,
+  Dices,
+  Swords,
+  Music,
+  AlignJustify,
+  Calendar,
+} from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useStreak, useInterviewDate, useSpacedRepetition, usePatternRatings, useBehavioralRatings, useFlashCardSRDue, useDailyChecklist, useDensity, useGauntletState, useSoundtrack, type Density, type SoundtrackTrack } from "@/hooks/useLocalStorage";
+import {
+  useStreak,
+  useInterviewDate,
+  useSpacedRepetition,
+  usePatternRatings,
+  useBehavioralRatings,
+  useFlashCardSRDue,
+  useDailyChecklist,
+  useDensity,
+  useGauntletState,
+  useSoundtrack,
+  type Density,
+  type SoundtrackTrack,
+} from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 import { toast } from "sonner";
 
@@ -22,7 +45,11 @@ function getDaysUntil(dateStr: string): number {
 }
 
 // ── Countdown pill ─────────────────────────────────────────────────────────
-function CountdownPill({ onTabChange }: { onTabChange: (tab: string) => void }) {
+function CountdownPill({
+  onTabChange,
+}: {
+  onTabChange: (tab: string) => void;
+}) {
   const [interviewDate] = useInterviewDate();
   if (!interviewDate) return null;
   const days = getDaysUntil(interviewDate);
@@ -30,12 +57,18 @@ function CountdownPill({ onTabChange }: { onTabChange: (tab: string) => void }) 
     days < 0
       ? "text-muted-foreground border-border bg-secondary"
       : days <= 7
-      ? "text-red-400 border-red-500/30 bg-red-500/10"
-      : days <= 14
-      ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
-      : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
+        ? "text-red-400 border-red-500/30 bg-red-500/10"
+        : days <= 14
+          ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+          : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
   const label =
-    days < 0 ? "Interview passed" : days === 0 ? "Interview today!" : days === 1 ? "1 day left" : `${days} days left`;
+    days < 0
+      ? "Interview passed"
+      : days === 0
+        ? "Interview today!"
+        : days === 1
+          ? "1 day left"
+          : `${days} days left`;
   return (
     <button
       onClick={() => onTabChange("overview")}
@@ -45,6 +78,118 @@ function CountdownPill({ onTabChange }: { onTabChange: (tab: string) => void }) 
       <CalendarClock size={11} />
       {label}
     </button>
+  );
+}
+
+// ── Prominent countdown bar (exported, rendered below the header) ─────────────────
+export function CountdownBar({
+  onTabChange,
+}: {
+  onTabChange: (tab: string) => void;
+}) {
+  const [interviewDate, setInterviewDate] = useInterviewDate();
+  const [showInput, setShowInput] = useState(false);
+  const days = interviewDate ? getDaysUntil(interviewDate) : null;
+
+  const urgency =
+    days === null
+      ? {
+          bar: "bg-blue-500/5 border-blue-500/20",
+          num: "text-blue-400",
+          badge: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+        }
+      : days < 0
+        ? {
+            bar: "bg-secondary border-border",
+            num: "text-muted-foreground",
+            badge: "bg-secondary text-muted-foreground border-border",
+          }
+        : days <= 7
+          ? {
+              bar: "bg-red-500/8 border-red-500/20",
+              num: "text-red-400",
+              badge: "bg-red-500/15 text-red-300 border-red-500/30",
+            }
+          : days <= 14
+            ? {
+                bar: "bg-amber-500/8 border-amber-500/20",
+                num: "text-amber-400",
+                badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+              }
+            : {
+                bar: "bg-emerald-500/5 border-emerald-500/20",
+                num: "text-emerald-400",
+                badge:
+                  "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+              };
+
+  const message =
+    days === null
+      ? "Set your interview date to start the countdown"
+      : days < 0
+        ? "Interview date has passed"
+        : days === 0
+          ? "Today is the day — you've got this!"
+          : days === 1
+            ? "1 day left — final review mode!"
+            : days <= 7
+              ? `${days} days left — final sprint mode!`
+              : days <= 14
+                ? `${days} days remaining — stay focused!`
+                : `${days} days remaining — stay consistent!`;
+
+  return (
+    <div className={`border-b ${urgency.bar} px-4 py-2`}>
+      <div className="container flex items-center gap-3 flex-wrap">
+        <Calendar size={13} className={urgency.num} />
+        {days !== null && (
+          <span
+            className={`text-2xl font-extrabold tabular-nums leading-none ${urgency.num}`}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            {days < 0 ? "—" : days === 0 ? "🎯" : `${days}d`}
+          </span>
+        )}
+        <span className="text-xs text-muted-foreground flex-1 min-w-0">
+          {message}
+        </span>
+        {showInput ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={interviewDate ?? ""}
+              onChange={e => {
+                setInterviewDate(e.target.value || null);
+                setShowInput(false);
+              }}
+              autoFocus
+              className="px-2.5 py-1 rounded-md bg-secondary border border-border text-xs text-foreground focus:outline-none focus:border-blue-500/50"
+            />
+            <button
+              onClick={() => setShowInput(false)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowInput(true)}
+            className={`text-xs font-medium px-2.5 py-1 rounded-md border transition-all hover:opacity-80 ${urgency.badge}`}
+          >
+            {interviewDate ? "Change date" : "Set date"}
+          </button>
+        )}
+        {interviewDate && (
+          <button
+            onClick={() => onTabChange("overview")}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View checklist →
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -69,25 +214,49 @@ function BadgePopover({ items, onJump, onClose, title }: BadgePopoverProps) {
     <div
       ref={ref}
       className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-[200] w-64 rounded-xl border border-amber-500/30 bg-background shadow-xl shadow-black/30 overflow-hidden"
-      onClick={(e) => e.stopPropagation()}
+      onClick={e => e.stopPropagation()}
     >
       <div className="flex items-center justify-between px-3 py-2 bg-amber-500/10 border-b border-amber-500/20">
         <span className="text-xs font-bold text-amber-400">{title}</span>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+        <button
+          onClick={onClose}
+          className="text-muted-foreground hover:text-foreground text-xs"
+        >
+          ✕
+        </button>
       </div>
       <div className="max-h-52 overflow-y-auto divide-y divide-border">
         {items.slice(0, 12).map((item, i) => (
-          <button key={i} onClick={() => { onJump(); onClose(); }} className="w-full text-left px-3 py-2 hover:bg-secondary transition-colors group">
-            <div className="text-xs font-medium text-foreground group-hover:text-amber-400 transition-colors truncate">{item.label}</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">{item.reason}</div>
+          <button
+            key={i}
+            onClick={() => {
+              onJump();
+              onClose();
+            }}
+            className="w-full text-left px-3 py-2 hover:bg-secondary transition-colors group"
+          >
+            <div className="text-xs font-medium text-foreground group-hover:text-amber-400 transition-colors truncate">
+              {item.label}
+            </div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">
+              {item.reason}
+            </div>
           </button>
         ))}
         {items.length > 12 && (
-          <div className="px-3 py-2 text-[10px] text-muted-foreground">+{items.length - 12} more — go to tab to see all</div>
+          <div className="px-3 py-2 text-[10px] text-muted-foreground">
+            +{items.length - 12} more — go to tab to see all
+          </div>
         )}
       </div>
       <div className="px-3 py-2 border-t border-border bg-secondary/30">
-        <button onClick={() => { onJump(); onClose(); }} className="w-full text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors text-center">
+        <button
+          onClick={() => {
+            onJump();
+            onClose();
+          }}
+          className="w-full text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors text-center"
+        >
           Go to tab to review →
         </button>
       </div>
@@ -104,32 +273,72 @@ function useTabBadgeCounts() {
   const [dailyChecklist] = useDailyChecklist();
   const today = new Date().toISOString().split("T")[0];
 
-  const codingSRDuePatterns = PATTERNS.filter(p => srDue[p.id] && srDue[p.id] <= today);
-  const weakPatternsList = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) > 0 && (patternRatings[p.id] ?? 0) <= 2);
+  const codingSRDuePatterns = PATTERNS.filter(
+    p => srDue[p.id] && srDue[p.id] <= today
+  );
+  const weakPatternsList = PATTERNS.filter(
+    p => (patternRatings[p.id] ?? 0) > 0 && (patternRatings[p.id] ?? 0) <= 2
+  );
   const codingItemsMap = new Map<string, { label: string; reason: string }>();
-  for (const p of codingSRDuePatterns) codingItemsMap.set(p.id, { label: p.name, reason: "SR review due" });
+  for (const p of codingSRDuePatterns)
+    codingItemsMap.set(p.id, { label: p.name, reason: "SR review due" });
   for (const p of weakPatternsList) {
-    if (!codingItemsMap.has(p.id)) codingItemsMap.set(p.id, { label: p.name, reason: `Rated ${patternRatings[p.id] ?? 0}/5 — needs practice` });
-    else codingItemsMap.set(p.id, { label: p.name, reason: `SR due + rated ${patternRatings[p.id] ?? 0}/5` });
+    if (!codingItemsMap.has(p.id))
+      codingItemsMap.set(p.id, {
+        label: p.name,
+        reason: `Rated ${patternRatings[p.id] ?? 0}/5 — needs practice`,
+      });
+    else
+      codingItemsMap.set(p.id, {
+        label: p.name,
+        reason: `SR due + rated ${patternRatings[p.id] ?? 0}/5`,
+      });
   }
   const codingItems = Array.from(codingItemsMap.values());
   const codingDue = codingItems.length;
 
-  const behavioralSRDueBQs = BEHAVIORAL_QUESTIONS.filter(q => srDue[q.id] && srDue[q.id] <= today);
-  const weakBQsList = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) > 0 && (bqRatings[q.id] ?? 0) <= 2);
-  const behavioralItemsMap = new Map<string, { label: string; reason: string }>();
-  for (const q of behavioralSRDueBQs) behavioralItemsMap.set(q.id, { label: q.q.length > 50 ? q.q.slice(0, 50) + "…" : q.q, reason: "SR review due" });
+  const behavioralSRDueBQs = BEHAVIORAL_QUESTIONS.filter(
+    q => srDue[q.id] && srDue[q.id] <= today
+  );
+  const weakBQsList = BEHAVIORAL_QUESTIONS.filter(
+    q => (bqRatings[q.id] ?? 0) > 0 && (bqRatings[q.id] ?? 0) <= 2
+  );
+  const behavioralItemsMap = new Map<
+    string,
+    { label: string; reason: string }
+  >();
+  for (const q of behavioralSRDueBQs)
+    behavioralItemsMap.set(q.id, {
+      label: q.q.length > 50 ? q.q.slice(0, 50) + "…" : q.q,
+      reason: "SR review due",
+    });
   for (const q of weakBQsList) {
-    if (!behavioralItemsMap.has(q.id)) behavioralItemsMap.set(q.id, { label: q.q.length > 50 ? q.q.slice(0, 50) + "…" : q.q, reason: `Rated ${bqRatings[q.id] ?? 0}/5 — needs practice` });
-    else behavioralItemsMap.set(q.id, { label: q.q.length > 50 ? q.q.slice(0, 50) + "…" : q.q, reason: `SR due + rated ${bqRatings[q.id] ?? 0}/5` });
+    if (!behavioralItemsMap.has(q.id))
+      behavioralItemsMap.set(q.id, {
+        label: q.q.length > 50 ? q.q.slice(0, 50) + "…" : q.q,
+        reason: `Rated ${bqRatings[q.id] ?? 0}/5 — needs practice`,
+      });
+    else
+      behavioralItemsMap.set(q.id, {
+        label: q.q.length > 50 ? q.q.slice(0, 50) + "…" : q.q,
+        reason: `SR due + rated ${bqRatings[q.id] ?? 0}/5`,
+      });
   }
   const behavioralItems = Array.from(behavioralItemsMap.values());
   const behavioralDue = behavioralItems.length;
 
-  const flashCardDue = Object.values(flashCardSRDue).filter(d => d <= today).length;
+  const flashCardDue = Object.values(flashCardSRDue).filter(
+    d => d <= today
+  ).length;
   void dailyChecklist;
 
-  return { codingDue, behavioralDue, flashCardDue, codingItems, behavioralItems };
+  return {
+    codingDue,
+    behavioralDue,
+    flashCardDue,
+    codingItems,
+    behavioralItems,
+  };
 }
 
 // ── Density Selector ───────────────────────────────────────────────────────
@@ -140,7 +349,8 @@ function DensitySelector() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -152,9 +362,13 @@ function DensitySelector() {
   }, [density]);
 
   const options: { value: Density; label: string; desc: string }[] = [
-    { value: "compact",     label: "S",  desc: "Compact — more content, less spacing" },
-    { value: "comfortable", label: "M",  desc: "Comfortable — default spacing" },
-    { value: "spacious",    label: "L",  desc: "Spacious — relaxed reading" },
+    {
+      value: "compact",
+      label: "S",
+      desc: "Compact — more content, less spacing",
+    },
+    { value: "comfortable", label: "M", desc: "Comfortable — default spacing" },
+    { value: "spacious", label: "L", desc: "Spacious — relaxed reading" },
   ];
 
   return (
@@ -165,18 +379,29 @@ function DensitySelector() {
         className="flex items-center gap-1 px-2 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-xs font-semibold"
       >
         <AlignJustify size={13} />
-        <span className="hidden sm:inline">{density === "compact" ? "S" : density === "comfortable" ? "M" : "L"}</span>
+        <span className="hidden sm:inline">
+          {density === "compact" ? "S" : density === "comfortable" ? "M" : "L"}
+        </span>
       </button>
       {open && (
         <div className="absolute top-full right-0 mt-2 z-[200] w-52 rounded-xl border border-border bg-background shadow-xl shadow-black/30 overflow-hidden">
-          <div className="px-3 py-2 bg-secondary/40 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-wide">Layout Density</div>
+          <div className="px-3 py-2 bg-secondary/40 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-wide">
+            Layout Density
+          </div>
           {options.map(opt => (
             <button
               key={opt.value}
-              onClick={() => { setDensity(opt.value); setOpen(false); }}
+              onClick={() => {
+                setDensity(opt.value);
+                setOpen(false);
+              }}
               className={`w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary transition-colors ${density === opt.value ? "bg-blue-500/10" : ""}`}
             >
-              <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold border ${density === opt.value ? "bg-blue-500 border-blue-500 text-white" : "border-border text-muted-foreground"}`}>{opt.label}</span>
+              <span
+                className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold border ${density === opt.value ? "bg-blue-500 border-blue-500 text-white" : "border-border text-muted-foreground"}`}
+              >
+                {opt.label}
+              </span>
               <span className="text-xs text-foreground">{opt.desc}</span>
             </button>
           ))}
@@ -187,15 +412,23 @@ function DensitySelector() {
 }
 
 // ── Topic Roulette ─────────────────────────────────────────────────────────
-function TopicRoulette({ onTabChange }: { onTabChange: (tab: string) => void }) {
+function TopicRoulette({
+  onTabChange,
+}: {
+  onTabChange: (tab: string) => void;
+}) {
   const [spinning, setSpinning] = useState(false);
 
   const ROULETTE_TOPICS = [
-    ...PATTERNS.map(p => ({ label: p.name, tab: "coding",    emoji: "💻" })),
-    ...BEHAVIORAL_QUESTIONS.slice(0, 20).map(q => ({ label: q.q.length > 40 ? q.q.slice(0, 40) + "…" : q.q, tab: "behavioral", emoji: "🎯" })),
+    ...PATTERNS.map(p => ({ label: p.name, tab: "coding", emoji: "💻" })),
+    ...BEHAVIORAL_QUESTIONS.slice(0, 20).map(q => ({
+      label: q.q.length > 40 ? q.q.slice(0, 40) + "…" : q.q,
+      tab: "behavioral",
+      emoji: "🎯",
+    })),
     { label: "Design a URL Shortener", tab: "design", emoji: "🏗️" },
-    { label: "Design Instagram Feed",  tab: "design", emoji: "🏗️" },
-    { label: "Design a Rate Limiter",  tab: "design", emoji: "🏗️" },
+    { label: "Design Instagram Feed", tab: "design", emoji: "🏗️" },
+    { label: "Design a Rate Limiter", tab: "design", emoji: "🏗️" },
     { label: "Design Distributed Cache", tab: "design", emoji: "🏗️" },
   ];
 
@@ -203,12 +436,15 @@ function TopicRoulette({ onTabChange }: { onTabChange: (tab: string) => void }) 
     if (spinning) return;
     setSpinning(true);
     setTimeout(() => {
-      const pick = ROULETTE_TOPICS[Math.floor(Math.random() * ROULETTE_TOPICS.length)];
+      const pick =
+        ROULETTE_TOPICS[Math.floor(Math.random() * ROULETTE_TOPICS.length)];
       setSpinning(false);
       onTabChange(pick.tab);
-      toast(`${pick.emoji} Topic Roulette — Your challenge: ${pick.label}`, { duration: 6000 });
+      toast(`${pick.emoji} Topic Roulette — Your challenge: ${pick.label}`, {
+        duration: 6000,
+      });
     }, 600);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spinning, onTabChange]);
 
   return (
@@ -227,7 +463,13 @@ function TopicRoulette({ onTabChange }: { onTabChange: (tab: string) => void }) 
 // ── Gauntlet Mode ──────────────────────────────────────────────────────────
 const GAUNTLET_TABS = ["overview", "coding", "behavioral", "design", "collab"];
 
-function GauntletButton({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) {
+function GauntletButton({
+  activeTab,
+  onTabChange,
+}: {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}) {
   const [gauntlet, setGauntlet] = useGauntletState();
   const [elapsed, setElapsed] = useState(0);
 
@@ -250,30 +492,56 @@ function GauntletButton({ activeTab, onTabChange }: { activeTab: string; onTabCh
       const totalMs = Date.now() - (gauntlet.startedAt ?? Date.now());
       const prev = gauntlet.bestTimeMs;
       const isNewBest = prev === null || totalMs < prev;
-      setGauntlet({ active: false, startedAt: null, tabsCompleted: [], bestTimeMs: isNewBest ? totalMs : prev });
+      setGauntlet({
+        active: false,
+        startedAt: null,
+        tabsCompleted: [],
+        bestTimeMs: isNewBest ? totalMs : prev,
+      });
       const mins = Math.floor(totalMs / 60000);
       const secs = Math.floor((totalMs % 60000) / 1000);
-      toast(`🏆 Gauntlet Complete! All ${GAUNTLET_TABS.length} tabs in ${mins}m ${secs}s${isNewBest ? " — New best time! 🎉" : ""}`, { duration: 8000 });
+      toast(
+        `🏆 Gauntlet Complete! All ${GAUNTLET_TABS.length} tabs in ${mins}m ${secs}s${isNewBest ? " — New best time! 🎉" : ""}`,
+        { duration: 8000 }
+      );
     } else {
       setGauntlet(g => ({ ...g, tabsCompleted: updated }));
     }
   }, [activeTab, gauntlet.active]);
 
   const startGauntlet = () => {
-    setGauntlet({ active: true, startedAt: Date.now(), tabsCompleted: [activeTab], bestTimeMs: gauntlet.bestTimeMs });
+    setGauntlet({
+      active: true,
+      startedAt: Date.now(),
+      tabsCompleted: [activeTab],
+      bestTimeMs: gauntlet.bestTimeMs,
+    });
     onTabChange("overview");
-    toast("⚔️ Gauntlet Mode Started! Visit all 5 tabs without stopping. Timer is running!", { duration: 5000 });
+    toast(
+      "⚔️ Gauntlet Mode Started! Visit all 5 tabs without stopping. Timer is running!",
+      { duration: 5000 }
+    );
   };
 
   const stopGauntlet = () => {
-    setGauntlet(g => ({ ...g, active: false, startedAt: null, tabsCompleted: [] }));
-    toast("Gauntlet cancelled — your best time is preserved.", { duration: 3000 });
+    setGauntlet(g => ({
+      ...g,
+      active: false,
+      startedAt: null,
+      tabsCompleted: [],
+    }));
+    toast("Gauntlet cancelled — your best time is preserved.", {
+      duration: 3000,
+    });
   };
 
-  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const fmt = (s: number) =>
+    `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   if (gauntlet.active) {
-    const remaining = GAUNTLET_TABS.filter(t => !gauntlet.tabsCompleted.includes(t));
+    const remaining = GAUNTLET_TABS.filter(
+      t => !gauntlet.tabsCompleted.includes(t)
+    );
     return (
       <button
         onClick={stopGauntlet}
@@ -282,7 +550,9 @@ function GauntletButton({ activeTab, onTabChange }: { activeTab: string; onTabCh
       >
         <Swords size={13} className="animate-pulse" />
         <span className="hidden sm:inline">{fmt(elapsed)}</span>
-        <span className="text-[10px] opacity-70 hidden sm:inline">({gauntlet.tabsCompleted.length}/{GAUNTLET_TABS.length})</span>
+        <span className="text-[10px] opacity-70 hidden sm:inline">
+          ({gauntlet.tabsCompleted.length}/{GAUNTLET_TABS.length})
+        </span>
       </button>
     );
   }
@@ -290,24 +560,50 @@ function GauntletButton({ activeTab, onTabChange }: { activeTab: string; onTabCh
   return (
     <button
       onClick={startGauntlet}
-      title={gauntlet.bestTimeMs ? `Gauntlet Mode — Best: ${fmt(Math.floor(gauntlet.bestTimeMs / 1000))}` : "Gauntlet Mode — visit all 5 tabs in one run"}
+      title={
+        gauntlet.bestTimeMs
+          ? `Gauntlet Mode — Best: ${fmt(Math.floor(gauntlet.bestTimeMs / 1000))}`
+          : "Gauntlet Mode — visit all 5 tabs in one run"
+      }
       className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 hover:border hover:border-orange-500/20 transition-all"
     >
       <Swords size={13} />
       <span className="hidden sm:inline">Gauntlet</span>
       {gauntlet.bestTimeMs && (
-        <span className="hidden sm:inline text-[10px] text-orange-400/70">{fmt(Math.floor(gauntlet.bestTimeMs / 1000))}</span>
+        <span className="hidden sm:inline text-[10px] text-orange-400/70">
+          {fmt(Math.floor(gauntlet.bestTimeMs / 1000))}
+        </span>
       )}
     </button>
   );
 }
 
 // ── Study Soundtrack ───────────────────────────────────────────────────────
-const SOUNDTRACK_OPTIONS: { value: SoundtrackTrack; label: string; url: string; emoji: string }[] = [
-  { value: "off",    label: "Off",          url: "",                                                                                  emoji: "🔇" },
-  { value: "lofi",   label: "Lo-fi Beats",  url: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&loop=1&playlist=jfKfPfyJRdk", emoji: "🎵" },
-  { value: "focus",  label: "Focus Flow",   url: "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&loop=1&playlist=5qap5aO4i9A", emoji: "🎧" },
-  { value: "nature", label: "Nature Sounds",url: "https://www.youtube.com/embed/eKFTSSKCzWA?autoplay=1&loop=1&playlist=eKFTSSKCzWA", emoji: "🌿" },
+const SOUNDTRACK_OPTIONS: {
+  value: SoundtrackTrack;
+  label: string;
+  url: string;
+  emoji: string;
+}[] = [
+  { value: "off", label: "Off", url: "", emoji: "🔇" },
+  {
+    value: "lofi",
+    label: "Lo-fi Beats",
+    url: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&loop=1&playlist=jfKfPfyJRdk",
+    emoji: "🎵",
+  },
+  {
+    value: "focus",
+    label: "Focus Flow",
+    url: "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&loop=1&playlist=5qap5aO4i9A",
+    emoji: "🎧",
+  },
+  {
+    value: "nature",
+    label: "Nature Sounds",
+    url: "https://www.youtube.com/embed/eKFTSSKCzWA?autoplay=1&loop=1&playlist=eKFTSSKCzWA",
+    emoji: "🌿",
+  },
 ];
 
 function StudySoundtrack() {
@@ -318,40 +614,63 @@ function StudySoundtrack() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const current = SOUNDTRACK_OPTIONS.find(o => o.value === track) ?? SOUNDTRACK_OPTIONS[0];
+  const current =
+    SOUNDTRACK_OPTIONS.find(o => o.value === track) ?? SOUNDTRACK_OPTIONS[0];
   const isPlaying = track !== "off";
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        title={isPlaying ? `Playing: ${current.label} — click to change` : "Study Soundtrack — ambient music while you prep"}
+        title={
+          isPlaying
+            ? `Playing: ${current.label} — click to change`
+            : "Study Soundtrack — ambient music while you prep"
+        }
         className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold transition-all ${isPlaying ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" : "text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10"}`}
       >
         <Music size={13} className={isPlaying ? "animate-pulse" : ""} />
-        <span className="hidden sm:inline">{isPlaying ? current.label : "Music"}</span>
+        <span className="hidden sm:inline">
+          {isPlaying ? current.label : "Music"}
+        </span>
       </button>
       {open && (
         <div className="absolute top-full right-0 mt-2 z-[200] w-52 rounded-xl border border-border bg-background shadow-xl shadow-black/30 overflow-hidden">
-          <div className="px-3 py-2 bg-secondary/40 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-wide">Study Soundtrack</div>
+          <div className="px-3 py-2 bg-secondary/40 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-wide">
+            Study Soundtrack
+          </div>
           {SOUNDTRACK_OPTIONS.map(opt => (
             <button
               key={opt.value}
-              onClick={() => { setTrack(opt.value); setOpen(false); }}
+              onClick={() => {
+                setTrack(opt.value);
+                setOpen(false);
+              }}
               className={`w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary transition-colors ${track === opt.value ? "bg-emerald-500/10" : ""}`}
             >
               <span className="text-base">{opt.emoji}</span>
-              <span className={`text-xs ${track === opt.value ? "text-emerald-400 font-semibold" : "text-foreground"}`}>{opt.label}</span>
-              {track === opt.value && <span className="ml-auto text-emerald-400 text-[10px]">▶ playing</span>}
+              <span
+                className={`text-xs ${track === opt.value ? "text-emerald-400 font-semibold" : "text-foreground"}`}
+              >
+                {opt.label}
+              </span>
+              {track === opt.value && (
+                <span className="ml-auto text-emerald-400 text-[10px]">
+                  ▶ playing
+                </span>
+              )}
             </button>
           ))}
-          <div className="px-3 py-2 border-t border-border text-[10px] text-muted-foreground">Audio plays via YouTube embed (muted tab allowed)</div>
+          <div className="px-3 py-2 border-t border-border text-[10px] text-muted-foreground">
+            Audio plays via YouTube embed (muted tab allowed)
+          </div>
         </div>
       )}
       {/* Hidden YouTube iframe for audio */}
@@ -368,18 +687,39 @@ function StudySoundtrack() {
   );
 }
 
-export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark }: TopNavProps) {
+export default function TopNav({
+  activeTab,
+  onTabChange,
+  darkMode,
+  onToggleDark,
+}: TopNavProps) {
   const streak = useStreak();
-  const { codingDue, behavioralDue, flashCardDue, codingItems, behavioralItems } = useTabBadgeCounts();
+  const {
+    codingDue,
+    behavioralDue,
+    flashCardDue,
+    codingItems,
+    behavioralItems,
+  } = useTabBadgeCounts();
   const [openPopover, setOpenPopover] = useState<string | null>(null);
 
   const TABS = [
-    { id: "overview",   label: "Overview",      due: 0,             items: [] as { label: string; reason: string }[] },
-    { id: "coding",     label: "Coding",        due: codingDue,     items: codingItems },
-    { id: "behavioral", label: "Behavioral",    due: behavioralDue, items: behavioralItems },
-    { id: "design",     label: "System Design", due: flashCardDue,  items: [] },
-    { id: "collab",     label: "Collab",        due: 0,             items: [] },
-    { id: "practice",   label: "Practice",      due: 0,             items: [] },
+    {
+      id: "overview",
+      label: "Overview",
+      due: 0,
+      items: [] as { label: string; reason: string }[],
+    },
+    { id: "coding", label: "Coding", due: codingDue, items: codingItems },
+    {
+      id: "behavioral",
+      label: "Behavioral",
+      due: behavioralDue,
+      items: behavioralItems,
+    },
+    { id: "design", label: "System Design", due: flashCardDue, items: [] },
+    { id: "collab", label: "Collab", due: 0, items: [] },
+    { id: "practice", label: "Practice", due: 0, items: [] },
   ];
 
   return (
@@ -391,18 +731,26 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
             <div className="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center">
               <BookOpen size={14} className="text-white" />
             </div>
-            <span className="font-bold text-sm text-foreground hidden sm:inline" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <span
+              className="font-bold text-sm text-foreground hidden sm:inline"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
               Meta Prep
             </span>
-            <span className="badge badge-blue hidden md:inline-flex">IC6/IC7</span>
+            <span className="badge badge-blue hidden md:inline-flex">
+              IC6/IC7
+            </span>
           </div>
 
           {/* Tabs — desktop */}
           <nav className="hidden md:flex items-center gap-1">
-            {TABS.map((tab) => (
+            {TABS.map(tab => (
               <div key={tab.id} className="relative">
                 <button
-                  onClick={() => { onTabChange(tab.id); setOpenPopover(null); }}
+                  onClick={() => {
+                    onTabChange(tab.id);
+                    setOpenPopover(null);
+                  }}
                   className={`relative px-3.5 py-1.5 rounded-md text-sm font-medium transition-all ${
                     activeTab === tab.id
                       ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
@@ -412,7 +760,10 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
                   {tab.label}
                   {tab.due > 0 && (
                     <span
-                      onClick={(e) => { e.stopPropagation(); setOpenPopover(openPopover === tab.id ? null : tab.id); }}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setOpenPopover(openPopover === tab.id ? null : tab.id);
+                      }}
                       title={`${tab.due} item${tab.due !== 1 ? "s" : ""} need attention — click for details`}
                       className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-[10px] font-bold text-black flex items-center justify-center leading-none cursor-pointer hover:bg-amber-400 transition-colors"
                     >
@@ -428,11 +779,14 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
                     onClose={() => setOpenPopover(null)}
                   />
                 )}
-                {openPopover === tab.id && tab.items.length === 0 && tab.due > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-[200] px-3 py-2 rounded-lg border border-border bg-background shadow-lg text-xs text-muted-foreground whitespace-nowrap">
-                    {tab.due} flash card{tab.due !== 1 ? "s" : ""} due for SR review
-                  </div>
-                )}
+                {openPopover === tab.id &&
+                  tab.items.length === 0 &&
+                  tab.due > 0 && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-[200] px-3 py-2 rounded-lg border border-border bg-background shadow-lg text-xs text-muted-foreground whitespace-nowrap">
+                      {tab.due} flash card{tab.due !== 1 ? "s" : ""} due for SR
+                      review
+                    </div>
+                  )}
               </div>
             ))}
           </nav>
@@ -476,7 +830,7 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
 
         {/* Mobile tabs */}
         <div className="flex md:hidden gap-1 pb-2 overflow-x-auto">
-          {TABS.map((tab) => (
+          {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}

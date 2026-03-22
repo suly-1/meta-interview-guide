@@ -42,14 +42,20 @@ function makeMutation<TInput = unknown, TOutput = unknown>(
   const listeners: Array<() => void> = [];
 
   return {
-    mutate: (input: TInput, opts?: { onSuccess?: (d: TOutput) => void; onError?: (e: unknown) => void }) => {
+    mutate: (
+      input: TInput,
+      opts?: {
+        onSuccess?: (d: TOutput) => void;
+        onError?: (e: unknown) => void;
+      }
+    ) => {
       isPending = true;
       Promise.resolve(fn(input))
-        .then((d) => {
+        .then(d => {
           isPending = false;
           opts?.onSuccess?.(d);
         })
-        .catch((e) => {
+        .catch(e => {
           isPending = false;
           opts?.onError?.(e);
         });
@@ -126,17 +132,24 @@ export const trpc = {
   ctciProgress: {
     get: {
       useQuery: (_?: unknown, _opts?: unknown) =>
-        makeQuery(ls<{ solved: Record<string, boolean>; difficulty: Record<string, string> }>(
-          CTCI_KEY,
-          { solved: {}, difficulty: {} }
-        )),
+        makeQuery(
+          ls<{
+            solved: Record<string, boolean>;
+            difficulty: Record<string, string>;
+          }>(CTCI_KEY, { solved: {}, difficulty: {} })
+        ),
     },
     save: {
       useMutation: () =>
-        makeMutation((input: { solved: Record<string, boolean>; difficulty: Record<string, string> }) => {
-          lsSet(CTCI_KEY, input);
-          return { success: true };
-        }),
+        makeMutation(
+          (input: {
+            solved: Record<string, boolean>;
+            difficulty: Record<string, string>;
+          }) => {
+            lsSet(CTCI_KEY, input);
+            return { success: true };
+          }
+        ),
     },
   },
 
@@ -144,17 +157,24 @@ export const trpc = {
   onboarding: {
     get: {
       useQuery: (_?: unknown, _opts?: unknown) =>
-        makeQuery(ls<{ completed: Record<string, boolean>; dismissed: boolean }>(
-          ONBOARDING_KEY,
-          { completed: {}, dismissed: false }
-        )),
+        makeQuery(
+          ls<{ completed: Record<string, boolean>; dismissed: boolean }>(
+            ONBOARDING_KEY,
+            { completed: {}, dismissed: false }
+          )
+        ),
     },
     save: {
       useMutation: () =>
-        makeMutation((input: { completed: Record<string, boolean>; dismissed: boolean }) => {
-          lsSet(ONBOARDING_KEY, input);
-          return { success: true };
-        }),
+        makeMutation(
+          (input: {
+            completed: Record<string, boolean>;
+            dismissed: boolean;
+          }) => {
+            lsSet(ONBOARDING_KEY, input);
+            return { success: true };
+          }
+        ),
     },
   },
 
@@ -183,7 +203,8 @@ export const trpc = {
     chat: {
       useMutation: () =>
         makeMutation(() => ({
-          content: "⚠️ AI features require the online version at the Manus app.",
+          content:
+            "⚠️ AI features require the online version at the Manus app.",
         })),
     },
     explainPattern: {
@@ -239,8 +260,7 @@ export const trpc = {
         })),
     },
     uploadAudio: {
-      useMutation: () =>
-        makeMutation(() => ({ url: "" })),
+      useMutation: () => makeMutation(() => ({ url: "" })),
     },
   },
 

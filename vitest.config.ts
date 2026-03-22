@@ -28,8 +28,6 @@ export default defineConfig({
     // Required so @testing-library/jest-dom can call expect.extend() at import time
     globals: true,
     // Per-file environment override: client tests run in jsdom
-    environmentMatchGlobs: [
-      ["client/**", "jsdom"],
-    ],
+    environmentMatchGlobs: [["client/**", "jsdom"]],
   },
 });

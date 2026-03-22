@@ -3,7 +3,7 @@ import { Flame, Download } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface DayActivity {
-  date: string;       // YYYY-MM-DD
+  date: string; // YYYY-MM-DD
   drills: number;
   mocks: number;
   stories: number;
@@ -26,7 +26,10 @@ function getLast60Days(): string[] {
   return days;
 }
 
-function readActivityLog(): Record<string, { drills: number; mocks: number; stories: number }> {
+function readActivityLog(): Record<
+  string,
+  { drills: number; mocks: number; stories: number }
+> {
   try {
     return JSON.parse(localStorage.getItem("meta_prep_activity_log") ?? "{}");
   } catch {
@@ -36,17 +39,17 @@ function readActivityLog(): Record<string, { drills: number; mocks: number; stor
 
 function getIntensityClass(total: number): string {
   if (total === 0) return "bg-secondary border border-border/50";
-  if (total <= 2)  return "bg-emerald-900/60 border border-emerald-800/60";
-  if (total <= 5)  return "bg-emerald-700/70 border border-emerald-600/50";
-  if (total <= 9)  return "bg-emerald-500/80 border border-emerald-400/50";
+  if (total <= 2) return "bg-emerald-900/60 border border-emerald-800/60";
+  if (total <= 5) return "bg-emerald-700/70 border border-emerald-600/50";
+  if (total <= 9) return "bg-emerald-500/80 border border-emerald-400/50";
   return "bg-emerald-400 border border-emerald-300/70";
 }
 
 function getIntensityLabel(total: number): string {
   if (total === 0) return "No activity";
-  if (total <= 2)  return "Light";
-  if (total <= 5)  return "Moderate";
-  if (total <= 9)  return "Active";
+  if (total <= 2) return "Light";
+  if (total <= 5) return "Moderate";
+  if (total <= 9) return "Active";
   return "Intense";
 }
 
@@ -55,9 +58,9 @@ export function recordActivity(type: "drill" | "mock" | "story", count = 1) {
   const log = readActivityLog();
   const today = toDateKey(new Date());
   if (!log[today]) log[today] = { drills: 0, mocks: 0, stories: 0 };
-  if (type === "drill")  log[today].drills  += count;
-  if (type === "mock")   log[today].mocks   += count;
-  if (type === "story")  log[today].stories += count;
+  if (type === "drill") log[today].drills += count;
+  if (type === "mock") log[today].mocks += count;
+  if (type === "story") log[today].stories += count;
   localStorage.setItem("meta_prep_activity_log", JSON.stringify(log));
 }
 
@@ -65,16 +68,20 @@ export function recordActivity(type: "drill" | "mock" | "story", count = 1) {
 export default function HeatmapCalendar() {
   const heatmapRef = useRef<HTMLDivElement>(null);
   const days = useMemo(() => getLast60Days(), []);
-  const log  = useMemo(() => readActivityLog(), []);
+  const log = useMemo(() => readActivityLog(), []);
 
   const activity: DayActivity[] = days.map(date => {
     const entry = log[date] ?? { drills: 0, mocks: 0, stories: 0 };
-    return { date, ...entry, total: entry.drills + entry.mocks + entry.stories };
+    return {
+      date,
+      ...entry,
+      total: entry.drills + entry.mocks + entry.stories,
+    };
   });
 
-  const activeDays   = activity.filter(d => d.total > 0).length;
-  const totalDrills  = activity.reduce((s, d) => s + d.drills, 0);
-  const totalMocks   = activity.reduce((s, d) => s + d.mocks, 0);
+  const activeDays = activity.filter(d => d.total > 0).length;
+  const totalDrills = activity.reduce((s, d) => s + d.drills, 0);
+  const totalMocks = activity.reduce((s, d) => s + d.mocks, 0);
   const totalStories = activity.reduce((s, d) => s + d.stories, 0);
 
   // Streak calculation
@@ -85,11 +92,20 @@ export default function HeatmapCalendar() {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const key = toDateKey(d);
-      if (key === today && (log[key]?.drills ?? 0) + (log[key]?.mocks ?? 0) + (log[key]?.stories ?? 0) === 0) {
+      if (
+        key === today &&
+        (log[key]?.drills ?? 0) +
+          (log[key]?.mocks ?? 0) +
+          (log[key]?.stories ?? 0) ===
+          0
+      ) {
         // today with no activity — don't break streak yet
         continue;
       }
-      const total = (log[key]?.drills ?? 0) + (log[key]?.mocks ?? 0) + (log[key]?.stories ?? 0);
+      const total =
+        (log[key]?.drills ?? 0) +
+        (log[key]?.mocks ?? 0) +
+        (log[key]?.stories ?? 0);
       if (total > 0) s++;
       else break;
     }
@@ -106,7 +122,9 @@ export default function HeatmapCalendar() {
   const monthLabels: { label: string; col: number }[] = [];
   let lastMonth = "";
   weeks.forEach((week, wi) => {
-    const month = new Date(week[0].date).toLocaleString("default", { month: "short" });
+    const month = new Date(week[0].date).toLocaleString("default", {
+      month: "short",
+    });
     if (month !== lastMonth) {
       monthLabels.push({ label: month, col: wi });
       lastMonth = month;
@@ -156,17 +174,33 @@ export default function HeatmapCalendar() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Flame size={15} className="text-orange-400" />
-          <span className="section-title text-sm mb-0 pb-0 border-0">60-Day Activity Calendar</span>
+          <span className="section-title text-sm mb-0 pb-0 border-0">
+            60-Day Activity Calendar
+          </span>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
           <span className="flex items-center gap-1.5">
-            <span className="text-orange-400 font-bold text-sm">🔥 {streak}</span>
+            <span className="text-orange-400 font-bold text-sm">
+              🔥 {streak}
+            </span>
             <span>day streak</span>
           </span>
-          <span><span className="text-foreground font-semibold">{activeDays}</span> active days</span>
-          <span><span className="text-blue-400 font-semibold">{totalDrills}</span> drills</span>
-          <span><span className="text-purple-400 font-semibold">{totalMocks}</span> mocks</span>
-          <span><span className="text-amber-400 font-semibold">{totalStories}</span> stories</span>
+          <span>
+            <span className="text-foreground font-semibold">{activeDays}</span>{" "}
+            active days
+          </span>
+          <span>
+            <span className="text-blue-400 font-semibold">{totalDrills}</span>{" "}
+            drills
+          </span>
+          <span>
+            <span className="text-purple-400 font-semibold">{totalMocks}</span>{" "}
+            mocks
+          </span>
+          <span>
+            <span className="text-amber-400 font-semibold">{totalStories}</span>{" "}
+            stories
+          </span>
           <button
             onClick={exportHeatmapAsPNG}
             className="flex items-center gap-1 px-2 py-1 rounded-md bg-secondary hover:bg-accent border border-border text-xs text-muted-foreground transition-all"
@@ -185,7 +219,10 @@ export default function HeatmapCalendar() {
             {weeks.map((_, wi) => {
               const ml = monthLabels.find(m => m.col === wi);
               return (
-                <div key={wi} className="w-7 mr-1 text-xs text-muted-foreground">
+                <div
+                  key={wi}
+                  className="w-7 mr-1 text-xs text-muted-foreground"
+                >
                   {ml ? ml.label : ""}
                 </div>
               );
@@ -197,7 +234,10 @@ export default function HeatmapCalendar() {
             {/* Day labels */}
             <div className="flex flex-col gap-1 mr-2">
               {dayLabels.map((d, i) => (
-                <div key={d} className={`h-5 w-6 text-right text-xs text-muted-foreground leading-5 ${i % 2 === 0 ? "opacity-0" : ""}`}>
+                <div
+                  key={d}
+                  className={`h-5 w-6 text-right text-xs text-muted-foreground leading-5 ${i % 2 === 0 ? "opacity-0" : ""}`}
+                >
                   {d.slice(0, 1)}
                 </div>
               ))}
@@ -224,17 +264,25 @@ export default function HeatmapCalendar() {
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span>Less</span>
         {[0, 2, 5, 8, 12].map(v => (
-          <div key={v} className={`w-4 h-4 rounded-sm ${getIntensityClass(v)}`} />
+          <div
+            key={v}
+            className={`w-4 h-4 rounded-sm ${getIntensityClass(v)}`}
+          />
         ))}
         <span>More</span>
-        <span className="ml-auto text-xs text-muted-foreground/60">Hover a cell for details</span>
+        <span className="ml-auto text-xs text-muted-foreground/60">
+          Hover a cell for details
+        </span>
       </div>
 
       {/* Empty state hint */}
       {activeDays === 0 && (
         <div className="text-center py-4 text-xs text-muted-foreground">
           <p>No activity recorded yet.</p>
-          <p className="mt-1">Complete a Quick Drill, Full Mock, or STAR practice to see your calendar fill up.</p>
+          <p className="mt-1">
+            Complete a Quick Drill, Full Mock, or STAR practice to see your
+            calendar fill up.
+          </p>
         </div>
       )}
     </div>

@@ -16,7 +16,10 @@ export const onboardingRouter = router({
       .where(eq(onboardingProgress.userId, ctx.user.id))
       .limit(1);
     if (rows.length === 0) return null;
-    return { progress: rows[0].progress as Record<string, boolean>, dismissed: rows[0].dismissed === 1 };
+    return {
+      progress: rows[0].progress as Record<string, boolean>,
+      dismissed: rows[0].dismissed === 1,
+    };
   }),
 
   /** Upsert onboarding progress for the current user */
@@ -39,11 +42,16 @@ export const onboardingRouter = router({
 
       const progressValue = input.progress as Record<string, boolean>;
       if (existing.length === 0) {
-        await db.insert(onboardingProgress).values([{
-          userId: ctx.user.id,
-          progress: Object.keys(progressValue).length > 0 ? progressValue : ({} as Record<string, boolean>),
-          dismissed: input.dismissed ? 1 : 0,
-        }]);
+        await db.insert(onboardingProgress).values([
+          {
+            userId: ctx.user.id,
+            progress:
+              Object.keys(progressValue).length > 0
+                ? progressValue
+                : ({} as Record<string, boolean>),
+            dismissed: input.dismissed ? 1 : 0,
+          },
+        ]);
       } else {
         await db
           .update(onboardingProgress)

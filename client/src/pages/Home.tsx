@@ -11,7 +11,7 @@ import {
   useInterviewDate,
 } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
-import TopNav from "@/components/TopNav";
+import TopNav, { CountdownBar } from "@/components/TopNav";
 import HeroSection from "@/components/HeroSection";
 import CommunityBanner from "@/components/CommunityBanner";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -261,6 +261,7 @@ export default function Home() {
       )}
 
       {/* Community resource banner — always visible (not hidden in focus mode) */}
+      <CountdownBar onTabChange={setActiveTabWithUrl} />
       <CommunityBanner />
       {/* Hero section — hidden in focus mode */}
       {!focusMode && <HeroSection onTabChange={setActiveTabWithUrl} />}

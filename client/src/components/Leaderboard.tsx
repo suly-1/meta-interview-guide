@@ -1,13 +1,31 @@
 import { useState, useMemo } from "react";
-import { Trophy, Plus, X, RefreshCw, Crown, Flame, Code2, Layers } from "lucide-react";
+import {
+  Trophy,
+  Plus,
+  X,
+  RefreshCw,
+  Crown,
+  Flame,
+  Code2,
+  Layers,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { usePatternRatings, useBehavioralRatings, useMockHistory, useStreak } from "@/hooks/useLocalStorage";
+import {
+  usePatternRatings,
+  useBehavioralRatings,
+  useMockHistory,
+  useStreak,
+} from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 
 const HANDLE_KEY = "meta_prep_leaderboard_handle";
 
-function getBadges(patternsMastered: number, mockSessions: number, streakDays: number): string[] {
+function getBadges(
+  patternsMastered: number,
+  mockSessions: number,
+  streakDays: number
+): string[] {
   const badges: string[] = [];
   if (patternsMastered >= 1) badges.push("First Blood");
   if (streakDays >= 7) badges.push("On Fire 🔥");
@@ -21,13 +39,19 @@ function getRankIcon(rank: number) {
   if (rank === 1) return <Crown size={14} className="text-yellow-400" />;
   if (rank === 2) return <Crown size={14} className="text-slate-300" />;
   if (rank === 3) return <Crown size={14} className="text-amber-600" />;
-  return <span className="text-xs text-muted-foreground font-mono w-3.5 text-center">{rank}</span>;
+  return (
+    <span className="text-xs text-muted-foreground font-mono w-3.5 text-center">
+      {rank}
+    </span>
+  );
 }
 
 export default function Leaderboard() {
   const [expanded, setExpanded] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [handle, setHandle] = useState(() => localStorage.getItem(HANDLE_KEY) ?? "");
+  const [handle, setHandle] = useState(
+    () => localStorage.getItem(HANDLE_KEY) ?? ""
+  );
   const [inputHandle, setInputHandle] = useState("");
   const [joining, setJoining] = useState(false);
 
@@ -39,18 +63,32 @@ export default function Leaderboard() {
 
   // Compute local stats
   const localStats = useMemo(() => {
-    const patternsMastered = PATTERNS.filter(p => (patternRatings[p.id] ?? 0) >= 4).length;
-    const storiesReady = BEHAVIORAL_QUESTIONS.filter(q => (bqRatings[q.id] ?? 0) >= 4).length;
+    const patternsMastered = PATTERNS.filter(
+      p => (patternRatings[p.id] ?? 0) >= 4
+    ).length;
+    const storiesReady = BEHAVIORAL_QUESTIONS.filter(
+      q => (bqRatings[q.id] ?? 0) >= 4
+    ).length;
     const mockSessions = mockHistory.length;
     const overallPct = Math.round(
       (patternsMastered / PATTERNS.length) * 0.6 * 100 +
-      (storiesReady / BEHAVIORAL_QUESTIONS.length) * 0.4 * 100
+        (storiesReady / BEHAVIORAL_QUESTIONS.length) * 0.4 * 100
     );
     const badges = getBadges(patternsMastered, mockSessions, streak);
-    return { patternsMastered, mockSessions, overallPct, badges, streakDays: streak };
+    return {
+      patternsMastered,
+      mockSessions,
+      overallPct,
+      badges,
+      streakDays: streak,
+    };
   }, [patternRatings, bqRatings, mockHistory, streak]);
 
-  const { data: entries = [], refetch, isLoading } = trpc.leaderboard.getTop.useQuery(undefined, {
+  const {
+    data: entries = [],
+    refetch,
+    isLoading,
+  } = trpc.leaderboard.getTop.useQuery(undefined, {
     enabled: expanded,
     staleTime: 30_000,
   });
@@ -61,7 +99,7 @@ export default function Leaderboard() {
       toast.success(`You're on the leaderboard as @${handle}!`);
       setShowJoinModal(false);
     },
-    onError: (e) => toast.error(e.message),
+    onError: e => toast.error(e.message),
   });
 
   const remove = trpc.leaderboard.remove.useMutation({
@@ -74,8 +112,14 @@ export default function Leaderboard() {
   });
 
   const handleJoin = async () => {
-    const h = inputHandle.trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32);
-    if (h.length < 2) { toast.error("Handle must be at least 2 characters."); return; }
+    const h = inputHandle
+      .trim()
+      .replace(/[^a-zA-Z0-9_-]/g, "")
+      .slice(0, 32);
+    if (h.length < 2) {
+      toast.error("Handle must be at least 2 characters.");
+      return;
+    }
     setJoining(true);
     localStorage.setItem(HANDLE_KEY, h);
     setHandle(h);
@@ -100,7 +144,9 @@ export default function Leaderboard() {
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <Trophy size={14} className="text-yellow-400" />
-          <span className="text-sm font-semibold text-foreground">Anonymous Leaderboard</span>
+          <span className="text-sm font-semibold text-foreground">
+            Anonymous Leaderboard
+          </span>
           {myRank > 0 && (
             <span className="badge badge-amber text-xs">You: #{myRank}</span>
           )}
@@ -142,11 +188,15 @@ export default function Leaderboard() {
       {expanded && (
         <div className="mt-4 space-y-1">
           {isLoading ? (
-            <div className="text-xs text-muted-foreground text-center py-4">Loading leaderboard…</div>
+            <div className="text-xs text-muted-foreground text-center py-4">
+              Loading leaderboard…
+            </div>
           ) : entries.length === 0 ? (
             <div className="text-xs text-muted-foreground text-center py-6">
               <p>No entries yet — be the first!</p>
-              <p className="mt-1 text-muted-foreground/60">Click "Add me" to join the leaderboard anonymously.</p>
+              <p className="mt-1 text-muted-foreground/60">
+                Click "Add me" to join the leaderboard anonymously.
+              </p>
             </div>
           ) : (
             <>
@@ -154,9 +204,15 @@ export default function Leaderboard() {
               <div className="grid grid-cols-[1.5rem_1fr_auto_auto_auto] gap-x-3 px-2 py-1 text-xs text-muted-foreground/60 uppercase tracking-wide">
                 <span>#</span>
                 <span>Handle</span>
-                <span className="flex items-center gap-1"><Code2 size={10} /> Patterns</span>
-                <span className="flex items-center gap-1"><Flame size={10} /> Streak</span>
-                <span className="flex items-center gap-1"><Layers size={10} /> Mocks</span>
+                <span className="flex items-center gap-1">
+                  <Code2 size={10} /> Patterns
+                </span>
+                <span className="flex items-center gap-1">
+                  <Flame size={10} /> Streak
+                </span>
+                <span className="flex items-center gap-1">
+                  <Layers size={10} /> Mocks
+                </span>
               </div>
 
               {entries.map((entry, i) => {
@@ -171,10 +227,16 @@ export default function Leaderboard() {
                       {getRankIcon(i + 1)}
                     </div>
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className={`font-medium truncate ${isMe ? "text-blue-400" : "text-foreground"}`}>
+                      <span
+                        className={`font-medium truncate ${isMe ? "text-blue-400" : "text-foreground"}`}
+                      >
                         @{entry.anonHandle}
                       </span>
-                      {isMe && <span className="badge badge-blue text-xs shrink-0">you</span>}
+                      {isMe && (
+                        <span className="badge badge-blue text-xs shrink-0">
+                          you
+                        </span>
+                      )}
                       {(entry.badges as string[]).length > 0 && (
                         <span className="text-xs text-muted-foreground truncate hidden sm:block">
                           {(entry.badges as string[]).slice(0, 2).join(" · ")}
@@ -209,29 +271,41 @@ export default function Leaderboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-yellow-400" />
-                <span className="font-semibold text-foreground">Join the Leaderboard</span>
+                <span className="font-semibold text-foreground">
+                  Join the Leaderboard
+                </span>
               </div>
-              <button onClick={() => setShowJoinModal(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setShowJoinModal(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X size={16} />
               </button>
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Pick an anonymous handle. Your real name is never shared. Stats are synced from your local progress.
+              Pick an anonymous handle. Your real name is never shared. Stats
+              are synced from your local progress.
             </p>
 
             {/* Current stats preview */}
             <div className="grid grid-cols-3 gap-2 p-3 rounded-lg bg-secondary text-center">
               <div>
-                <div className="text-emerald-400 font-bold text-lg">{localStats.patternsMastered}</div>
+                <div className="text-emerald-400 font-bold text-lg">
+                  {localStats.patternsMastered}
+                </div>
                 <div className="text-xs text-muted-foreground">Patterns</div>
               </div>
               <div>
-                <div className="text-orange-400 font-bold text-lg">🔥{localStats.streakDays}</div>
+                <div className="text-orange-400 font-bold text-lg">
+                  🔥{localStats.streakDays}
+                </div>
                 <div className="text-xs text-muted-foreground">Streak</div>
               </div>
               <div>
-                <div className="text-purple-400 font-bold text-lg">{localStats.mockSessions}</div>
+                <div className="text-purple-400 font-bold text-lg">
+                  {localStats.mockSessions}
+                </div>
                 <div className="text-xs text-muted-foreground">Mocks</div>
               </div>
             </div>
@@ -239,17 +313,25 @@ export default function Leaderboard() {
             {localStats.badges.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {localStats.badges.map(b => (
-                  <span key={b} className="badge badge-amber text-xs">{b}</span>
+                  <span key={b} className="badge badge-amber text-xs">
+                    {b}
+                  </span>
                 ))}
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Anonymous handle (letters, numbers, _ -)</label>
+              <label className="text-xs text-muted-foreground">
+                Anonymous handle (letters, numbers, _ -)
+              </label>
               <input
                 type="text"
                 value={inputHandle}
-                onChange={e => setInputHandle(e.target.value.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32))}
+                onChange={e =>
+                  setInputHandle(
+                    e.target.value.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32)
+                  )
+                }
                 placeholder="e.g. prep_ninja_42"
                 className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
                 onKeyDown={e => e.key === "Enter" && handleJoin()}

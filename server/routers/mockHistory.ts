@@ -26,7 +26,7 @@ export const mockHistoryRouter = router({
         )
         .orderBy(desc(mockSessions.createdAt))
         .limit(50);
-      return rows.map((r) => ({
+      return rows.map(r => ({
         sessionId: r.sessionId,
         sessionData: r.sessionData as Record<string, unknown>,
         createdAt: r.createdAt,
@@ -57,12 +57,14 @@ export const mockHistoryRouter = router({
         )
         .limit(1);
       if (existing.length > 0) return { success: true }; // already synced
-      await db.insert(mockSessions).values([{
-        userId: ctx.user.id,
-        sessionType: input.sessionType,
-        sessionId: input.sessionId,
-        sessionData: input.sessionData as Record<string, unknown>,
-      }]);
+      await db.insert(mockSessions).values([
+        {
+          userId: ctx.user.id,
+          sessionType: input.sessionType,
+          sessionId: input.sessionId,
+          sessionData: input.sessionData as Record<string, unknown>,
+        },
+      ]);
       return { success: true };
     }),
 

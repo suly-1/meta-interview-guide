@@ -30,9 +30,9 @@ const htmlPath = resolve(DIST, "index.standalone.html");
 let html = readFileSync(htmlPath, "utf-8");
 
 // Find the main app JS and CSS references in the HTML
-const assetRefs = [...html.matchAll(/(?:src|href)=["'](\/?assets\/[^"']+)['"]/g)].map(
-  (m) => m[1]
-);
+const assetRefs = [
+  ...html.matchAll(/(?:src|href)=["'](\/?assets\/[^"']+)['"]/g),
+].map(m => m[1]);
 console.log(`\n📦 HTML asset references: ${assetRefs.join(", ")}`);
 
 // ─── Step 3: Upload helper ────────────────────────────────────────────────────
@@ -53,8 +53,8 @@ function uploadFile(filePath, retries = 3) {
 }
 
 // ─── Step 4: Upload CSS ───────────────────────────────────────────────────────
-const cssRef = assetRefs.find((r) => r.endsWith(".css"));
-const appJsRef = assetRefs.find((r) => r.includes("app.") && r.endsWith(".js"));
+const cssRef = assetRefs.find(r => r.endsWith(".css"));
+const appJsRef = assetRefs.find(r => r.includes("app.") && r.endsWith(".js"));
 
 let cssCdnUrl = null;
 if (cssRef) {
@@ -69,7 +69,7 @@ const appJsPath = resolve(DIST, appJsRef.replace(/^\//, ""));
 let appJs = readFileSync(appJsPath, "utf-8");
 
 const chunkRefs = [...new Set(appJs.match(/"assets\/[^"]+\.js"/g) || [])].map(
-  (s) => s.slice(1, -1) // strip quotes
+  s => s.slice(1, -1) // strip quotes
 );
 console.log(`\n📦 Found ${chunkRefs.length} lazy chunk references in app.js`);
 
@@ -79,7 +79,7 @@ const chunkMap = {};
 
 async function uploadBatch(batch) {
   return Promise.all(
-    batch.map(async (ref) => {
+    batch.map(async ref => {
       const p = resolve(DIST, ref);
       try {
         const url = uploadFile(p);
@@ -121,10 +121,16 @@ console.log(`  → ${appJsCdnUrl}`);
 let patchedHtml = html;
 if (cssCdnUrl && cssRef) {
   patchedHtml = patchedHtml.replace(`href="${cssRef}"`, `href="${cssCdnUrl}"`);
-  patchedHtml = patchedHtml.replace(`href="/${cssRef.replace(/^\//, '')}"`, `href="${cssCdnUrl}"`);
+  patchedHtml = patchedHtml.replace(
+    `href="/${cssRef.replace(/^\//, "")}"`,
+    `href="${cssCdnUrl}"`
+  );
 }
 patchedHtml = patchedHtml.replace(`src="${appJsRef}"`, `src="${appJsCdnUrl}"`);
-patchedHtml = patchedHtml.replace(`src="/${appJsRef.replace(/^\//, '')}"`, `src="${appJsCdnUrl}"`);
+patchedHtml = patchedHtml.replace(
+  `src="/${appJsRef.replace(/^\//, "")}"`,
+  `src="${appJsCdnUrl}"`
+);
 
 const finalHtmlPath = resolve(DIST, "meta-ic67-prep-guide-latest.html");
 writeFileSync(finalHtmlPath, patchedHtml);

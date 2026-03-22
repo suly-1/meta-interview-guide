@@ -12,6 +12,7 @@
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "build:standalone": "node scripts/build-standalone.mjs",
+    "deploy:github-pages": "node scripts/deploy-github-pages.mjs",
     "prepare": "husky",
     "test:watch": "vitest"
   },
@@ -106,6 +107,7 @@
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
+    "gh-pages": "^6.3.0",
     "husky": "^9.1.7",
     "jsdom": "^29.0.1",
     "lint-staged": "^16.4.0",

@@ -6,9 +6,21 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
-import { ShieldAlert, CheckCircle2, XCircle, ArrowUpDown, ArrowLeft, Download } from "lucide-react";
+import {
+  ShieldAlert,
+  CheckCircle2,
+  XCircle,
+  ArrowUpDown,
+  ArrowLeft,
+  Download,
+} from "lucide-react";
 
-type SortKey = "name" | "email" | "createdAt" | "lastSignedIn" | "acknowledgedAt";
+type SortKey =
+  | "name"
+  | "email"
+  | "createdAt"
+  | "lastSignedIn"
+  | "acknowledgedAt";
 type SortDir = "asc" | "desc";
 
 function formatDate(d: Date | null | undefined): string {
@@ -20,10 +32,16 @@ export default function AdminDisclaimerReport() {
   const { user, loading } = useAuth();
   const [sortKey, setSortKey] = useState<SortKey>("acknowledgedAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [filter, setFilter] = useState<"all" | "acknowledged" | "pending">("all");
+  const [filter, setFilter] = useState<"all" | "acknowledged" | "pending">(
+    "all"
+  );
   const [search, setSearch] = useState("");
 
-  const { data: rows = [], isLoading, error } = trpc.disclaimer.adminReport.useQuery(undefined, {
+  const {
+    data: rows = [],
+    isLoading,
+    error,
+  } = trpc.disclaimer.adminReport.useQuery(undefined, {
     enabled: !!user && user.role === "admin",
   });
 
@@ -43,17 +61,26 @@ export default function AdminDisclaimerReport() {
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
-        r => r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)
+        r =>
+          r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)
       );
     }
     result.sort((a, b) => {
       let av: string | number | Date | null = null;
       let bv: string | number | Date | null = null;
-      if (sortKey === "name") { av = a.name; bv = b.name; }
-      else if (sortKey === "email") { av = a.email; bv = b.email; }
-      else if (sortKey === "createdAt") { av = a.createdAt ? new Date(a.createdAt).getTime() : 0; bv = b.createdAt ? new Date(b.createdAt).getTime() : 0; }
-      else if (sortKey === "lastSignedIn") { av = a.lastSignedIn ? new Date(a.lastSignedIn).getTime() : 0; bv = b.lastSignedIn ? new Date(b.lastSignedIn).getTime() : 0; }
-      else if (sortKey === "acknowledgedAt") {
+      if (sortKey === "name") {
+        av = a.name;
+        bv = b.name;
+      } else if (sortKey === "email") {
+        av = a.email;
+        bv = b.email;
+      } else if (sortKey === "createdAt") {
+        av = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        bv = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      } else if (sortKey === "lastSignedIn") {
+        av = a.lastSignedIn ? new Date(a.lastSignedIn).getTime() : 0;
+        bv = b.lastSignedIn ? new Date(b.lastSignedIn).getTime() : 0;
+      } else if (sortKey === "acknowledgedAt") {
         av = a.acknowledgedAt ? new Date(a.acknowledgedAt).getTime() : -1;
         bv = b.acknowledgedAt ? new Date(b.acknowledgedAt).getTime() : -1;
       }
@@ -70,7 +97,16 @@ export default function AdminDisclaimerReport() {
   const pendingCount = rows.length - acknowledgedCount;
 
   const exportCsv = () => {
-    const header = ["ID", "Name", "Email", "Role", "Registered", "Last Sign-in", "Acknowledged", "Acknowledged At"];
+    const header = [
+      "ID",
+      "Name",
+      "Email",
+      "Role",
+      "Registered",
+      "Last Sign-in",
+      "Acknowledged",
+      "Acknowledged At",
+    ];
     const csvRows = filtered.map(r => [
       r.id,
       r.name,
@@ -81,7 +117,14 @@ export default function AdminDisclaimerReport() {
       r.acknowledged ? "Yes" : "No",
       formatDate(r.acknowledgedAt),
     ]);
-    const csv = [header, ...csvRows].map(row => row.map(String).map(v => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = [header, ...csvRows]
+      .map(row =>
+        row
+          .map(String)
+          .map(v => `"${v.replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -107,9 +150,13 @@ export default function AdminDisclaimerReport() {
         <ShieldAlert size={40} className="text-amber-400" />
         <h1 className="text-xl font-bold text-foreground">Access Denied</h1>
         <p className="text-muted-foreground text-sm text-center max-w-sm">
-          This page is restricted to administrators. If you believe this is an error, contact the site owner.
+          This page is restricted to administrators. If you believe this is an
+          error, contact the site owner.
         </p>
-        <Link href="/" className="text-sm text-blue-400 hover:underline flex items-center gap-1">
+        <Link
+          href="/"
+          className="text-sm text-blue-400 hover:underline flex items-center gap-1"
+        >
           <ArrowLeft size={14} /> Back to Guide
         </Link>
       </div>
@@ -121,7 +168,10 @@ export default function AdminDisclaimerReport() {
       {/* Header */}
       <div className="border-b border-border px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ArrowLeft size={18} />
           </Link>
           <div>
@@ -129,7 +179,9 @@ export default function AdminDisclaimerReport() {
               <ShieldAlert size={18} className="text-amber-400" />
               Disclaimer Acknowledgment Report
             </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Admin audit — all registered users</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Admin audit — all registered users
+            </p>
           </div>
         </div>
         <button
@@ -145,16 +197,28 @@ export default function AdminDisclaimerReport() {
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4">
           <div className="rounded-xl border border-border bg-card p-4">
-            <div className="text-2xl font-bold text-foreground">{rows.length}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Total Users</div>
+            <div className="text-2xl font-bold text-foreground">
+              {rows.length}
+            </div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Total Users
+            </div>
           </div>
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
-            <div className="text-2xl font-bold text-emerald-400">{acknowledgedCount}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Acknowledged</div>
+            <div className="text-2xl font-bold text-emerald-400">
+              {acknowledgedCount}
+            </div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Acknowledged
+            </div>
           </div>
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-            <div className="text-2xl font-bold text-amber-400">{pendingCount}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Pending / Not Yet Seen</div>
+            <div className="text-2xl font-bold text-amber-400">
+              {pendingCount}
+            </div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Pending / Not Yet Seen
+            </div>
           </div>
         </div>
 
@@ -186,22 +250,28 @@ export default function AdminDisclaimerReport() {
 
         {/* Table */}
         {isLoading ? (
-          <div className="text-sm text-muted-foreground py-12 text-center">Loading report…</div>
+          <div className="text-sm text-muted-foreground py-12 text-center">
+            Loading report…
+          </div>
         ) : error ? (
-          <div className="text-sm text-destructive py-12 text-center">Failed to load report. You may not have admin access.</div>
+          <div className="text-sm text-destructive py-12 text-center">
+            Failed to load report. You may not have admin access.
+          </div>
         ) : (
           <div className="rounded-xl border border-border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-secondary/40">
-                    {([
-                      { key: "name", label: "Name" },
-                      { key: "email", label: "Email" },
-                      { key: "createdAt", label: "Registered" },
-                      { key: "lastSignedIn", label: "Last Sign-in" },
-                      { key: "acknowledgedAt", label: "Acknowledged At" },
-                    ] as { key: SortKey; label: string }[]).map(col => (
+                    {(
+                      [
+                        { key: "name", label: "Name" },
+                        { key: "email", label: "Email" },
+                        { key: "createdAt", label: "Registered" },
+                        { key: "lastSignedIn", label: "Last Sign-in" },
+                        { key: "acknowledgedAt", label: "Acknowledged At" },
+                      ] as { key: SortKey; label: string }[]
+                    ).map(col => (
                       <th
                         key={col.key}
                         onClick={() => handleSort(col.key)}
@@ -209,18 +279,32 @@ export default function AdminDisclaimerReport() {
                       >
                         <span className="flex items-center gap-1">
                           {col.label}
-                          <ArrowUpDown size={11} className={sortKey === col.key ? "text-foreground" : "opacity-40"} />
+                          <ArrowUpDown
+                            size={11}
+                            className={
+                              sortKey === col.key
+                                ? "text-foreground"
+                                : "opacity-40"
+                            }
+                          />
                         </span>
                       </th>
                     ))}
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground whitespace-nowrap">Status</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground whitespace-nowrap">Role</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground whitespace-nowrap">
+                      Status
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground whitespace-nowrap">
+                      Role
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-muted-foreground text-sm">
+                      <td
+                        colSpan={7}
+                        className="text-center py-12 text-muted-foreground text-sm"
+                      >
                         No users match the current filter.
                       </td>
                     </tr>
@@ -232,15 +316,27 @@ export default function AdminDisclaimerReport() {
                           i % 2 === 0 ? "" : "bg-secondary/10"
                         }`}
                       >
-                        <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{row.name}</td>
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{row.email}</td>
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">{formatDate(row.createdAt)}</td>
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">{formatDate(row.lastSignedIn)}</td>
+                        <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
+                          {row.name}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                          {row.email}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
+                          {formatDate(row.createdAt)}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
+                          {formatDate(row.lastSignedIn)}
+                        </td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
                           {row.acknowledged ? (
-                            <span className="text-emerald-400">{formatDate(row.acknowledgedAt)}</span>
+                            <span className="text-emerald-400">
+                              {formatDate(row.acknowledgedAt)}
+                            </span>
                           ) : (
-                            <span className="text-amber-400/70 italic">Not yet</span>
+                            <span className="text-amber-400/70 italic">
+                              Not yet
+                            </span>
                           )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -255,11 +351,13 @@ export default function AdminDisclaimerReport() {
                           )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
-                            row.role === "admin"
-                              ? "text-violet-400 bg-violet-500/10 border-violet-500/20"
-                              : "text-zinc-400 bg-zinc-500/10 border-zinc-500/20"
-                          }`}>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                              row.role === "admin"
+                                ? "text-violet-400 bg-violet-500/10 border-violet-500/20"
+                                : "text-zinc-400 bg-zinc-500/10 border-zinc-500/20"
+                            }`}
+                          >
                             {row.role}
                           </span>
                         </td>

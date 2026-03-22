@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { SYSTEM_DESIGN_QUESTIONS } from "@/lib/data";
-import { Brain, Play, Pause, RotateCcw, History, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import {
+  Brain,
+  Play,
+  Pause,
+  RotateCcw,
+  History,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -70,21 +79,33 @@ function saveHistory(entries: HistoryEntry[]) {
 }
 
 const scoreColor = (s: number) =>
-  s >= 4 ? "text-emerald-400" : s >= 3 ? "text-blue-400" : s >= 2 ? "text-amber-400" : "text-red-400";
+  s >= 4
+    ? "text-emerald-400"
+    : s >= 3
+      ? "text-blue-400"
+      : s >= 2
+        ? "text-amber-400"
+        : "text-red-400";
 
 const diffColor = (delta: number) =>
-  delta > 0.2 ? "text-emerald-400" : delta < -0.2 ? "text-red-400" : "text-muted-foreground";
+  delta > 0.2
+    ? "text-emerald-400"
+    : delta < -0.2
+      ? "text-red-400"
+      : "text-muted-foreground";
 
 // ── History Panel ─────────────────────────────────────────────────────────────
 function HistoryPanel({ onClose }: { onClose: () => void }) {
-  const [entries, setEntries] = useState<HistoryEntry[]>(() => loadHistory().reverse());
+  const [entries, setEntries] = useState<HistoryEntry[]>(() =>
+    loadHistory().reverse()
+  );
   const [expanded, setExpanded] = useState<string | null>(null);
   const [compareA, setCompareA] = useState<string | null>(null);
   const [compareB, setCompareB] = useState<string | null>(null);
   const [compareMode, setCompareMode] = useState(false);
 
   const deleteEntry = (id: string) => {
-    const updated = loadHistory().filter((e) => e.id !== id);
+    const updated = loadHistory().filter(e => e.id !== id);
     saveHistory(updated);
     setEntries(updated.slice().reverse());
     if (compareA === id) setCompareA(null);
@@ -108,14 +129,23 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <History size={14} className="text-blue-400" />
-            <span className="text-sm font-bold text-foreground">Mock Session History</span>
+            <span className="text-sm font-bold text-foreground">
+              Mock Session History
+            </span>
           </div>
-          <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground transition-colors">✕ Close</button>
+          <button
+            onClick={onClose}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ✕ Close
+          </button>
         </div>
         <div className="text-center py-8 text-muted-foreground">
           <div className="text-3xl mb-2">📋</div>
           <div className="text-sm">No completed sessions yet.</div>
-          <div className="text-xs mt-1">Complete a mock session to see your history here.</div>
+          <div className="text-xs mt-1">
+            Complete a mock session to see your history here.
+          </div>
         </div>
       </div>
     );
@@ -126,13 +156,21 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History size={14} className="text-blue-400" />
-          <span className="text-sm font-bold text-foreground">Mock Session History</span>
-          <span className="badge badge-blue">{entries.length} session{entries.length !== 1 ? "s" : ""}</span>
+          <span className="text-sm font-bold text-foreground">
+            Mock Session History
+          </span>
+          <span className="badge badge-blue">
+            {entries.length} session{entries.length !== 1 ? "s" : ""}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           {entries.length >= 2 && (
             <button
-              onClick={() => { setCompareMode(!compareMode); setCompareA(null); setCompareB(null); }}
+              onClick={() => {
+                setCompareMode(!compareMode);
+                setCompareA(null);
+                setCompareB(null);
+              }}
               className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all ${
                 compareMode
                   ? "bg-blue-500/20 border-blue-500/30 text-blue-400"
@@ -142,18 +180,31 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
               {compareMode ? "✕ Cancel Compare" : "⇄ Compare"}
             </button>
           )}
-          <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground transition-colors">✕ Close</button>
+          <button
+            onClick={onClose}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ✕ Close
+          </button>
         </div>
       </div>
 
       {/* Comparison diff panel */}
       {compareMode && entryA && entryB && (
         <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-3">
-          <div className="text-xs font-bold text-blue-400">⇄ Session Comparison</div>
+          <div className="text-xs font-bold text-blue-400">
+            ⇄ Session Comparison
+          </div>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="text-[10px] text-muted-foreground font-semibold">Session A</div>
-            <div className="text-[10px] text-muted-foreground font-semibold">Dimension</div>
-            <div className="text-[10px] text-muted-foreground font-semibold">Session B</div>
+            <div className="text-[10px] text-muted-foreground font-semibold">
+              Session A
+            </div>
+            <div className="text-[10px] text-muted-foreground font-semibold">
+              Dimension
+            </div>
+            <div className="text-[10px] text-muted-foreground font-semibold">
+              Session B
+            </div>
           </div>
           {SD_DIMS.map(({ key, label }) => {
             const a = entryA.scorecard[key];
@@ -161,55 +212,91 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
             const delta = b - a;
             return (
               <div key={key} className="grid grid-cols-3 gap-2 items-center">
-                <div className={`text-center text-sm font-bold ${scoreColor(a)}`}>{a.toFixed(1)}</div>
+                <div
+                  className={`text-center text-sm font-bold ${scoreColor(a)}`}
+                >
+                  {a.toFixed(1)}
+                </div>
                 <div className="text-center">
-                  <div className="text-[10px] text-muted-foreground">{label}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {label}
+                  </div>
                   <div className={`text-xs font-bold ${diffColor(delta)}`}>
-                    {delta > 0.05 ? `+${delta.toFixed(1)}` : delta < -0.05 ? delta.toFixed(1) : "=="}
+                    {delta > 0.05
+                      ? `+${delta.toFixed(1)}`
+                      : delta < -0.05
+                        ? delta.toFixed(1)
+                        : "=="}
                   </div>
                 </div>
-                <div className={`text-center text-sm font-bold ${scoreColor(b)}`}>{b.toFixed(1)}</div>
+                <div
+                  className={`text-center text-sm font-bold ${scoreColor(b)}`}
+                >
+                  {b.toFixed(1)}
+                </div>
               </div>
             );
           })}
           <div className="grid grid-cols-2 gap-3 mt-2">
             <div className="text-center p-2 rounded-lg bg-secondary">
               <div className="text-[10px] text-muted-foreground">Session A</div>
-              <div className="text-xs font-bold text-foreground truncate">{entryA.questionTitle.slice(0, 30)}…</div>
-              <div className="text-[10px] text-muted-foreground">{new Date(entryA.date).toLocaleDateString()} · {entryA.scorecard.icLevel}</div>
+              <div className="text-xs font-bold text-foreground truncate">
+                {entryA.questionTitle.slice(0, 30)}…
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                {new Date(entryA.date).toLocaleDateString()} ·{" "}
+                {entryA.scorecard.icLevel}
+              </div>
             </div>
             <div className="text-center p-2 rounded-lg bg-secondary">
               <div className="text-[10px] text-muted-foreground">Session B</div>
-              <div className="text-xs font-bold text-foreground truncate">{entryB.questionTitle.slice(0, 30)}…</div>
-              <div className="text-[10px] text-muted-foreground">{new Date(entryB.date).toLocaleDateString()} · {entryB.scorecard.icLevel}</div>
+              <div className="text-xs font-bold text-foreground truncate">
+                {entryB.questionTitle.slice(0, 30)}…
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                {new Date(entryB.date).toLocaleDateString()} ·{" "}
+                {entryB.scorecard.icLevel}
+              </div>
             </div>
           </div>
         </div>
       )}
       {compareMode && (!entryA || !entryB) && (
         <div className="p-3 rounded-lg bg-secondary border border-border text-xs text-muted-foreground">
-          Select two sessions below to compare them (click the checkbox icon on each).
+          Select two sessions below to compare them (click the checkbox icon on
+          each).
         </div>
       )}
 
       <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-        {entries.map((entry) => (
-          <div key={entry.id} className={`rounded-lg border bg-secondary overflow-hidden transition-all ${
-            compareMode && (compareA === entry.id || compareB === entry.id)
-              ? "border-blue-500/50"
-              : "border-border"
-          }`}>
+        {entries.map(entry => (
+          <div
+            key={entry.id}
+            className={`rounded-lg border bg-secondary overflow-hidden transition-all ${
+              compareMode && (compareA === entry.id || compareB === entry.id)
+                ? "border-blue-500/50"
+                : "border-border"
+            }`}
+          >
             {/* Header row */}
             <div className="flex items-center gap-3 p-3">
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-foreground truncate">{entry.questionTitle}</div>
+                <div className="text-xs font-bold text-foreground truncate">
+                  {entry.questionTitle}
+                </div>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className="badge badge-blue">{entry.level}</span>
-                  <span className="text-[10px] text-muted-foreground">{new Date(entry.date).toLocaleDateString()}</span>
-                  <span className={`text-xs font-bold ${scoreColor(entry.scorecard.overallScore)}`}>
+                  <span className="text-[10px] text-muted-foreground">
+                    {new Date(entry.date).toLocaleDateString()}
+                  </span>
+                  <span
+                    className={`text-xs font-bold ${scoreColor(entry.scorecard.overallScore)}`}
+                  >
                     {entry.scorecard.overallScore.toFixed(1)}/5
                   </span>
-                  <span className={`text-xs font-bold ${entry.scorecard.icLevel === "IC7" ? "text-violet-400" : entry.scorecard.icLevel === "IC6" ? "text-blue-400" : "text-muted-foreground"}`}>
+                  <span
+                    className={`text-xs font-bold ${entry.scorecard.icLevel === "IC7" ? "text-violet-400" : entry.scorecard.icLevel === "IC6" ? "text-blue-400" : "text-muted-foreground"}`}
+                  >
                     {entry.scorecard.icLevel}
                   </span>
                 </div>
@@ -218,25 +305,49 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
                 {compareMode && (
                   <button
                     onClick={() => {
-                      if (compareA === entry.id) { setCompareA(null); return; }
-                      if (compareB === entry.id) { setCompareB(null); return; }
-                      if (!compareA) { setCompareA(entry.id); return; }
-                      if (!compareB) { setCompareB(entry.id); return; }
+                      if (compareA === entry.id) {
+                        setCompareA(null);
+                        return;
+                      }
+                      if (compareB === entry.id) {
+                        setCompareB(null);
+                        return;
+                      }
+                      if (!compareA) {
+                        setCompareA(entry.id);
+                        return;
+                      }
+                      if (!compareB) {
+                        setCompareB(entry.id);
+                        return;
+                      }
                     }}
                     className={`px-2 py-1 rounded text-[10px] font-bold border transition-all ${
-                      compareA === entry.id ? "bg-blue-500/20 border-blue-500/40 text-blue-400" :
-                      compareB === entry.id ? "bg-violet-500/20 border-violet-500/40 text-violet-400" :
-                      "bg-secondary border-border text-muted-foreground hover:border-blue-500/30"
+                      compareA === entry.id
+                        ? "bg-blue-500/20 border-blue-500/40 text-blue-400"
+                        : compareB === entry.id
+                          ? "bg-violet-500/20 border-violet-500/40 text-violet-400"
+                          : "bg-secondary border-border text-muted-foreground hover:border-blue-500/30"
                     }`}
                   >
-                    {compareA === entry.id ? "A" : compareB === entry.id ? "B" : "+"}
+                    {compareA === entry.id
+                      ? "A"
+                      : compareB === entry.id
+                        ? "B"
+                        : "+"}
                   </button>
                 )}
                 <button
-                  onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}
+                  onClick={() =>
+                    setExpanded(expanded === entry.id ? null : entry.id)
+                  }
                   className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {expanded === entry.id ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  {expanded === entry.id ? (
+                    <ChevronUp size={13} />
+                  ) : (
+                    <ChevronDown size={13} />
+                  )}
                 </button>
                 <button
                   onClick={() => deleteEntry(entry.id)}
@@ -254,27 +365,54 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {[
                     { label: "Overall", score: entry.scorecard.overallScore },
-                    { label: "Requirements", score: entry.scorecard.requirementsScore },
-                    { label: "Architecture", score: entry.scorecard.architectureScore },
-                    { label: "Scalability", score: entry.scorecard.scalabilityScore },
-                    { label: "Communication", score: entry.scorecard.communicationScore },
+                    {
+                      label: "Requirements",
+                      score: entry.scorecard.requirementsScore,
+                    },
+                    {
+                      label: "Architecture",
+                      score: entry.scorecard.architectureScore,
+                    },
+                    {
+                      label: "Scalability",
+                      score: entry.scorecard.scalabilityScore,
+                    },
+                    {
+                      label: "Communication",
+                      score: entry.scorecard.communicationScore,
+                    },
                   ].map(({ label, score }) => (
                     <div key={label} className="text-center">
-                      <div className="text-[10px] text-muted-foreground">{label}</div>
-                      <div className={`text-base font-black ${scoreColor(score)}`}>{score.toFixed(1)}</div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {label}
+                      </div>
+                      <div
+                        className={`text-base font-black ${scoreColor(score)}`}
+                      >
+                        {score.toFixed(1)}
+                      </div>
                     </div>
                   ))}
                 </div>
                 {/* Summary */}
-                <div className="text-xs text-muted-foreground leading-relaxed">{entry.scorecard.summary}</div>
+                <div className="text-xs text-muted-foreground leading-relaxed">
+                  {entry.scorecard.summary}
+                </div>
                 {/* Answers */}
                 <div className="space-y-2">
-                  {MOCK_PHASES.map((p, i) => entry.answers[i] && (
-                    <div key={i}>
-                      <div className="text-[10px] font-bold text-violet-400 mb-0.5">{p.phase}</div>
-                      <div className="text-[11px] text-foreground leading-relaxed bg-background rounded p-2 border border-border whitespace-pre-wrap">{entry.answers[i]}</div>
-                    </div>
-                  ))}
+                  {MOCK_PHASES.map(
+                    (p, i) =>
+                      entry.answers[i] && (
+                        <div key={i}>
+                          <div className="text-[10px] font-bold text-violet-400 mb-0.5">
+                            {p.phase}
+                          </div>
+                          <div className="text-[11px] text-foreground leading-relaxed bg-background rounded p-2 border border-border whitespace-pre-wrap">
+                            {entry.answers[i]}
+                          </div>
+                        </div>
+                      )
+                  )}
                 </div>
               </div>
             )}
@@ -287,13 +425,19 @@ function HistoryPanel({ onClose }: { onClose: () => void }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export function SystemDesignMockSession() {
-  const [view, setView] = useState<"entry" | "picker" | "idle" | "running" | "done" | "history">("entry");
-  const [levelFilter, setLevelFilter] = useState<"All" | "IC6+" | "IC7+">("All");
+  const [view, setView] = useState<
+    "entry" | "picker" | "idle" | "running" | "done" | "history"
+  >("entry");
+  const [levelFilter, setLevelFilter] = useState<"All" | "IC6+" | "IC7+">(
+    "All"
+  );
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [step, setStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(MOCK_PHASES[0].time);
   const [running, setRunning] = useState(false);
-  const [answers, setAnswers] = useState<string[]>(Array(MOCK_PHASES.length).fill(""));
+  const [answers, setAnswers] = useState<string[]>(
+    Array(MOCK_PHASES.length).fill("")
+  );
   const [scorecard, setScorecard] = useState<ScorecardResult | null>(null);
   const [showHint, setShowHint] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -302,7 +446,7 @@ export function SystemDesignMockSession() {
   const upsertSessionMutation = trpc.mockHistory.upsertSession.useMutation();
 
   const filteredQuestions = SYSTEM_DESIGN_QUESTIONS.filter(
-    (q) => levelFilter === "All" || q.level === levelFilter
+    q => levelFilter === "All" || q.level === levelFilter
   );
 
   const question =
@@ -325,7 +469,7 @@ export function SystemDesignMockSession() {
   const startTimer = useCallback(() => {
     setRunning(true);
     timerRef.current = setInterval(() => {
-      setTimeLeft((t) => {
+      setTimeLeft(t => {
         if (t <= 1) {
           clearInterval(timerRef.current!);
           setRunning(false);
@@ -342,7 +486,12 @@ export function SystemDesignMockSession() {
     setTimeLeft(MOCK_PHASES[step].time);
   }, [pauseTimer, step]);
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    },
+    []
+  );
 
   const goToNextPhase = async () => {
     pauseTimer();
@@ -358,7 +507,10 @@ export function SystemDesignMockSession() {
           questionTitle: question.title,
           level: question.level,
           tags: question.tags,
-          phases: MOCK_PHASES.map((p, i) => ({ phase: p.phase, answer: answers[i] })),
+          phases: MOCK_PHASES.map((p, i) => ({
+            phase: p.phase,
+            answer: answers[i],
+          })),
         });
         setScorecard(result);
         // Persist to history
@@ -409,13 +561,18 @@ export function SystemDesignMockSession() {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold text-foreground">System Design Mock Session</span>
+                <span className="text-sm font-bold text-foreground">
+                  System Design Mock Session
+                </span>
                 <span className="badge badge-purple">~38 min</span>
                 <span className="badge badge-blue">AI Scorecard</span>
-                {historyCount > 0 && <span className="badge badge-gray">{historyCount} past</span>}
+                {historyCount > 0 && (
+                  <span className="badge badge-gray">{historyCount} past</span>
+                )}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                Full 5-phase mock round — Requirements → HLD → Deep Dive → Trade-offs — with timer and AI evaluation
+                Full 5-phase mock round — Requirements → HLD → Deep Dive →
+                Trade-offs — with timer and AI evaluation
               </div>
             </div>
           </div>
@@ -451,12 +608,14 @@ export function SystemDesignMockSession() {
       <div className="prep-card p-5 space-y-4">
         <div className="flex items-center gap-2">
           <Brain size={14} className="text-violet-400" />
-          <span className="text-sm font-bold text-foreground">Choose Your Question</span>
+          <span className="text-sm font-bold text-foreground">
+            Choose Your Question
+          </span>
         </div>
 
         {/* Level filter */}
         <div className="flex gap-2">
-          {(["All", "IC6+", "IC7+"] as const).map((lvl) => (
+          {(["All", "IC6+", "IC7+"] as const).map(lvl => (
             <button
               key={lvl}
               onClick={() => setLevelFilter(lvl)}
@@ -485,22 +644,31 @@ export function SystemDesignMockSession() {
 
         {/* Question list */}
         <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-          {filteredQuestions.map((q) => {
+          {filteredQuestions.map(q => {
             const idx = SYSTEM_DESIGN_QUESTIONS.indexOf(q);
             return (
               <button
                 key={idx}
-                onClick={() => { setSelectedIdx(idx); setView("idle"); }}
+                onClick={() => {
+                  setSelectedIdx(idx);
+                  setView("idle");
+                }}
                 className={`w-full text-left p-3 rounded-lg border transition-all ${
                   selectedIdx === idx
                     ? "bg-violet-500/15 border-violet-500/40"
                     : "bg-secondary border-border hover:border-violet-500/30"
                 }`}
               >
-                <div className="text-sm font-semibold text-foreground">{q.title}</div>
+                <div className="text-sm font-semibold text-foreground">
+                  {q.title}
+                </div>
                 <div className="flex flex-wrap gap-1 mt-1">
                   <span className="badge badge-blue">{q.level}</span>
-                  {q.tags.map((t) => <span key={t} className="badge badge-gray">{t}</span>)}
+                  {q.tags.map(t => (
+                    <span key={t} className="badge badge-gray">
+                      {t}
+                    </span>
+                  ))}
                 </div>
               </button>
             );
@@ -523,20 +691,32 @@ export function SystemDesignMockSession() {
       <div className="prep-card p-5 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <Brain size={14} className="text-violet-400" />
-          <span className="text-sm font-bold text-foreground">System Design Mock Session</span>
+          <span className="text-sm font-bold text-foreground">
+            System Design Mock Session
+          </span>
           <span className="badge badge-purple">5 phases · ~38 min</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Simulates a real Meta system design round. Work through all 5 framework phases with a timer, capture your answers, then receive an AI scorecard with IC-level assessment.
+          Simulates a real Meta system design round. Work through all 5
+          framework phases with a timer, capture your answers, then receive an
+          AI scorecard with IC-level assessment.
         </p>
 
         {/* Selected question */}
         <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/30">
-          <div className="text-xs font-bold text-violet-400 mb-1">Your Question</div>
-          <div className="text-base font-black text-foreground mb-2">{question.title}</div>
+          <div className="text-xs font-bold text-violet-400 mb-1">
+            Your Question
+          </div>
+          <div className="text-base font-black text-foreground mb-2">
+            {question.title}
+          </div>
           <div className="flex flex-wrap gap-1.5">
             <span className="badge badge-blue">{question.level}</span>
-            {question.tags.map((t) => <span key={t} className="badge badge-gray">{t}</span>)}
+            {question.tags.map(t => (
+              <span key={t} className="badge badge-gray">
+                {t}
+              </span>
+            ))}
           </div>
           <button
             onClick={() => setView("picker")}
@@ -549,12 +729,19 @@ export function SystemDesignMockSession() {
         {/* Phase overview */}
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
           {MOCK_PHASES.map((p, i) => (
-            <div key={i} className="p-2.5 rounded-lg bg-secondary border border-border text-center">
-              <div className="text-[10px] font-bold text-muted-foreground mb-0.5">Phase {i + 1}</div>
+            <div
+              key={i}
+              className="p-2.5 rounded-lg bg-secondary border border-border text-center"
+            >
+              <div className="text-[10px] font-bold text-muted-foreground mb-0.5">
+                Phase {i + 1}
+              </div>
               <div className="text-[11px] font-semibold text-foreground leading-tight">
                 {p.phase.replace(/^\d+\.\s*/, "")}
               </div>
-              <div className="text-[10px] text-violet-400 mt-0.5">{Math.floor(p.time / 60)} min</div>
+              <div className="text-[10px] text-violet-400 mt-0.5">
+                {Math.floor(p.time / 60)} min
+              </div>
             </div>
           ))}
         </div>
@@ -583,19 +770,27 @@ export function SystemDesignMockSession() {
       <div className="prep-card p-5 space-y-4">
         <div className="flex items-center gap-2">
           <Brain size={14} className="text-emerald-400" />
-          <span className="text-sm font-bold text-foreground">Mock Complete</span>
+          <span className="text-sm font-bold text-foreground">
+            Mock Complete
+          </span>
           <span className="badge badge-green">Session done</span>
         </div>
 
         <div className="p-3 rounded-lg bg-secondary border border-border">
           <div className="text-xs text-muted-foreground mb-0.5">Question</div>
-          <div className="text-sm font-bold text-foreground">{question.title}</div>
+          <div className="text-sm font-bold text-foreground">
+            {question.title}
+          </div>
         </div>
 
         {scoreMutation.isPending && (
           <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/30 text-center">
-            <div className="text-sm text-violet-400 animate-pulse">🤖 AI is evaluating your session…</div>
-            <div className="text-xs text-muted-foreground mt-1">This may take 10–20 seconds</div>
+            <div className="text-sm text-violet-400 animate-pulse">
+              🤖 AI is evaluating your session…
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              This may take 10–20 seconds
+            </div>
           </div>
         )}
 
@@ -609,15 +804,28 @@ export function SystemDesignMockSession() {
                 { label: "Scalability", score: scorecard.scalabilityScore },
                 { label: "Communication", score: scorecard.communicationScore },
               ].map(({ label, score }) => (
-                <div key={label} className="p-3 rounded-lg bg-secondary border border-border text-center">
-                  <div className="text-xs text-muted-foreground mb-1">{label}</div>
-                  <div className={`text-2xl font-black stat-num ${scoreColor(score)}`}>{score.toFixed(1)}</div>
+                <div
+                  key={label}
+                  className="p-3 rounded-lg bg-secondary border border-border text-center"
+                >
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {label}
+                  </div>
+                  <div
+                    className={`text-2xl font-black stat-num ${scoreColor(score)}`}
+                  >
+                    {score.toFixed(1)}
+                  </div>
                   <div className="text-xs text-muted-foreground">/5</div>
                 </div>
               ))}
               <div className="p-3 rounded-lg bg-secondary border border-border text-center">
-                <div className="text-xs text-muted-foreground mb-1">IC Level</div>
-                <div className={`text-xl font-black ${scorecard.icLevel === "IC7" ? "text-violet-400" : scorecard.icLevel === "IC6" ? "text-blue-400" : "text-muted-foreground"}`}>
+                <div className="text-xs text-muted-foreground mb-1">
+                  IC Level
+                </div>
+                <div
+                  className={`text-xl font-black ${scorecard.icLevel === "IC7" ? "text-violet-400" : scorecard.icLevel === "IC6" ? "text-blue-400" : "text-muted-foreground"}`}
+                >
                   {scorecard.icLevel}
                 </div>
               </div>
@@ -630,48 +838,79 @@ export function SystemDesignMockSession() {
                 { label: "Architecture", score: scorecard.architectureScore },
                 { label: "Scalability", score: scorecard.scalabilityScore },
                 { label: "Communication", score: scorecard.communicationScore },
-              ].sort((a, b) => a.score - b.score).slice(0, 2).filter(d => d.score < 4);
+              ]
+                .sort((a, b) => a.score - b.score)
+                .slice(0, 2)
+                .filter(d => d.score < 4);
               if (dims.length === 0) return null;
               return (
                 <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-                  <div className="text-xs font-bold text-red-400 mb-2">⚠️ Focus Areas — Lowest Scoring Dimensions</div>
+                  <div className="text-xs font-bold text-red-400 mb-2">
+                    ⚠️ Focus Areas — Lowest Scoring Dimensions
+                  </div>
                   <div className="space-y-2">
                     {dims.map(d => (
                       <div key={d.label} className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-red-300 w-28 shrink-0">{d.label}</span>
+                        <span className="text-xs font-semibold text-red-300 w-28 shrink-0">
+                          {d.label}
+                        </span>
                         <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
-                          <div className="h-full rounded-full bg-red-500 transition-all duration-700" style={{ width: `${(d.score / 5) * 100}%` }} />
+                          <div
+                            className="h-full rounded-full bg-red-500 transition-all duration-700"
+                            style={{ width: `${(d.score / 5) * 100}%` }}
+                          />
                         </div>
-                        <span className="text-xs font-bold text-red-400 w-8 text-right">{d.score.toFixed(1)}</span>
+                        <span className="text-xs font-bold text-red-400 w-8 text-right">
+                          {d.score.toFixed(1)}
+                        </span>
                       </div>
                     ))}
-                    <p className="text-[10px] text-muted-foreground mt-1">Prioritise these dimensions in your next session. Review the framework phases for each.</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Prioritise these dimensions in your next session. Review
+                      the framework phases for each.
+                    </p>
                   </div>
                 </div>
               );
             })()}
             <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <div className="text-xs font-bold text-blue-400 mb-1">📝 AI Summary</div>
-              <div className="text-xs text-foreground leading-relaxed">{scorecard.summary}</div>
+              <div className="text-xs font-bold text-blue-400 mb-1">
+                📝 AI Summary
+              </div>
+              <div className="text-xs text-foreground leading-relaxed">
+                {scorecard.summary}
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <div className="text-xs font-bold text-emerald-400 mb-2">✅ Strengths</div>
+                <div className="text-xs font-bold text-emerald-400 mb-2">
+                  ✅ Strengths
+                </div>
                 <ul className="space-y-1">
                   {scorecard.strengths.map((s, i) => (
-                    <li key={i} className="text-xs text-foreground leading-relaxed flex gap-1.5">
-                      <span className="text-emerald-400 shrink-0">•</span>{s}
+                    <li
+                      key={i}
+                      className="text-xs text-foreground leading-relaxed flex gap-1.5"
+                    >
+                      <span className="text-emerald-400 shrink-0">•</span>
+                      {s}
                     </li>
                   ))}
                 </ul>
               </div>
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="text-xs font-bold text-amber-400 mb-2">💡 Improvements</div>
+                <div className="text-xs font-bold text-amber-400 mb-2">
+                  💡 Improvements
+                </div>
                 <ul className="space-y-1">
                   {scorecard.improvements.map((s, i) => (
-                    <li key={i} className="text-xs text-foreground leading-relaxed flex gap-1.5">
-                      <span className="text-amber-400 shrink-0">•</span>{s}
+                    <li
+                      key={i}
+                      className="text-xs text-foreground leading-relaxed flex gap-1.5"
+                    >
+                      <span className="text-amber-400 shrink-0">•</span>
+                      {s}
                     </li>
                   ))}
                 </ul>
@@ -679,12 +918,18 @@ export function SystemDesignMockSession() {
             </div>
 
             <div className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/20">
-              <div className="text-xs font-bold text-violet-400 mb-2">🔍 Follow-up Questions the Interviewer Would Ask</div>
+              <div className="text-xs font-bold text-violet-400 mb-2">
+                🔍 Follow-up Questions the Interviewer Would Ask
+              </div>
               <ol className="space-y-1.5">
                 {scorecard.followUpQuestions.map((q, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="text-violet-400 font-bold text-xs shrink-0">{i + 1}.</span>
-                    <span className="text-xs text-foreground leading-relaxed">{q}</span>
+                    <span className="text-violet-400 font-bold text-xs shrink-0">
+                      {i + 1}.
+                    </span>
+                    <span className="text-xs text-foreground leading-relaxed">
+                      {q}
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -719,7 +964,11 @@ export function SystemDesignMockSession() {
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-all ${
-              i < step ? "bg-emerald-500" : i === step ? "bg-violet-500" : "bg-secondary"
+              i < step
+                ? "bg-emerald-500"
+                : i === step
+                  ? "bg-violet-500"
+                  : "bg-secondary"
             }`}
           />
         ))}
@@ -732,39 +981,71 @@ export function SystemDesignMockSession() {
         {/* Timer ring */}
         <div className="relative w-24 h-24 shrink-0 mx-auto sm:mx-0">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-            <circle cx="50" cy="50" r={r} fill="none" stroke="oklch(0.28 0.012 264)" strokeWidth="8" />
             <circle
-              cx="50" cy="50" r={r} fill="none"
-              stroke={timeLeft <= 60 ? "oklch(0.65 0.22 25)" : timeLeft <= 120 ? "oklch(0.78 0.18 85)" : "oklch(0.62 0.19 290)"}
-              strokeWidth="8" strokeLinecap="round"
-              strokeDasharray={circ} strokeDashoffset={circ * (1 - pct / 100)}
+              cx="50"
+              cy="50"
+              r={r}
+              fill="none"
+              stroke="oklch(0.28 0.012 264)"
+              strokeWidth="8"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r={r}
+              fill="none"
+              stroke={
+                timeLeft <= 60
+                  ? "oklch(0.65 0.22 25)"
+                  : timeLeft <= 120
+                    ? "oklch(0.78 0.18 85)"
+                    : "oklch(0.62 0.19 290)"
+              }
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={circ}
+              strokeDashoffset={circ * (1 - pct / 100)}
               style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s" }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="mono text-base font-bold text-foreground">{mm}:{ss}</span>
-            <span className="text-[9px] text-muted-foreground">{Math.floor(currentPhase.time / 60)}m total</span>
+            <span className="mono text-base font-bold text-foreground">
+              {mm}:{ss}
+            </span>
+            <span className="text-[9px] text-muted-foreground">
+              {Math.floor(currentPhase.time / 60)}m total
+            </span>
           </div>
         </div>
 
         <div className="flex-1 space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="badge badge-purple">{currentPhase.phase}</span>
-            <span className="text-xs text-muted-foreground">{Math.floor(currentPhase.time / 60)} min allocated</span>
+            <span className="text-xs text-muted-foreground">
+              {Math.floor(currentPhase.time / 60)} min allocated
+            </span>
           </div>
 
           <div className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/20">
-            <div className="text-xs text-violet-400 font-bold mb-1">Design Question</div>
-            <div className="text-sm font-bold text-foreground">{question.title}</div>
+            <div className="text-xs text-violet-400 font-bold mb-1">
+              Design Question
+            </div>
+            <div className="text-sm font-bold text-foreground">
+              {question.title}
+            </div>
             <div className="flex flex-wrap gap-1 mt-1.5">
               <span className="badge badge-blue">{question.level}</span>
-              {question.tags.map((t) => <span key={t} className="badge badge-gray">{t}</span>)}
+              {question.tags.map(t => (
+                <span key={t} className="badge badge-gray">
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
 
           <div>
             <button
-              onClick={() => setShowHint((h) => !h)}
+              onClick={() => setShowHint(h => !h)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               {showHint ? "▲ Hide hint" : "▼ Show phase hint"}
@@ -778,8 +1059,12 @@ export function SystemDesignMockSession() {
 
           <textarea
             value={answers[step]}
-            onChange={(e) =>
-              setAnswers((a) => { const n = [...a]; n[step] = e.target.value; return n; })
+            onChange={e =>
+              setAnswers(a => {
+                const n = [...a];
+                n[step] = e.target.value;
+                return n;
+              })
             }
             placeholder={`Write your ${currentPhase.phase} answer here… (bullet points, notes, design decisions)`}
             rows={5}
@@ -788,24 +1073,34 @@ export function SystemDesignMockSession() {
 
           <div className="flex gap-2 flex-wrap">
             {!running && (
-              <button onClick={startTimer}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-400 text-xs font-semibold transition-all">
+              <button
+                onClick={startTimer}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-400 text-xs font-semibold transition-all"
+              >
                 <Play size={11} /> Start Timer
               </button>
             )}
             {running && (
-              <button onClick={pauseTimer}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all">
+              <button
+                onClick={pauseTimer}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all"
+              >
                 <Pause size={11} /> Pause
               </button>
             )}
-            <button onClick={resetTimer}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all">
+            <button
+              onClick={resetTimer}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-accent border border-border text-muted-foreground text-xs font-semibold transition-all"
+            >
               <RotateCcw size={11} /> Reset
             </button>
-            <button onClick={goToNextPhase}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all ml-auto">
-              {step < MOCK_PHASES.length - 1 ? "Next Phase →" : "🏁 Finish & Score"}
+            <button
+              onClick={goToNextPhase}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all ml-auto"
+            >
+              {step < MOCK_PHASES.length - 1
+                ? "Next Phase →"
+                : "🏁 Finish & Score"}
             </button>
           </div>
         </div>

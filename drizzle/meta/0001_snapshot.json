@@ -72,17 +72,13 @@
       "compositePrimaryKeys": {
         "collab_rooms_id": {
           "name": "collab_rooms_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "collab_rooms_roomCode_unique": {
           "name": "collab_rooms_roomCode_unique",
-          "columns": [
-            "roomCode"
-          ]
+          "columns": ["roomCode"]
         }
       },
       "checkConstraint": {}
@@ -178,9 +174,7 @@
       "compositePrimaryKeys": {
         "scorecards_id": {
           "name": "scorecards_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -245,9 +239,7 @@
       "compositePrimaryKeys": {
         "session_events_id": {
           "name": "session_events_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -330,17 +322,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ]
+          "columns": ["openId"]
         }
       },
       "checkConstraint": {}

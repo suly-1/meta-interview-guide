@@ -1,4 +1,9 @@
-import { protectedProcedure, publicProcedure, adminProcedure, router } from "../_core/trpc";
+import {
+  protectedProcedure,
+  publicProcedure,
+  adminProcedure,
+  router,
+} from "../_core/trpc";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
 import { eq, asc } from "drizzle-orm";

@@ -6,7 +6,13 @@
  */
 import { useState } from "react";
 import { useAIReviewHistory } from "@/hooks/useLocalStorage";
-import { ChevronDown, ChevronUp, Flame, TrendingUp, AlertTriangle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Flame,
+  TrendingUp,
+  AlertTriangle,
+} from "lucide-react";
 
 interface TopicStats {
   topic: string;
@@ -16,7 +22,9 @@ interface TopicStats {
   trend: "up" | "down" | "flat";
 }
 
-function computeTopicStats(history: ReturnType<typeof useAIReviewHistory>[0]): TopicStats[] {
+function computeTopicStats(
+  history: ReturnType<typeof useAIReviewHistory>[0]
+): TopicStats[] {
   const byTopic: Record<string, number[]> = {};
   for (const r of history) {
     if (!byTopic[r.topic]) byTopic[r.topic] = [];
@@ -26,8 +34,10 @@ function computeTopicStats(history: ReturnType<typeof useAIReviewHistory>[0]): T
     .map(([topic, scores]) => {
       const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
       const lastScore = scores[scores.length - 1];
-      const prevScore = scores.length >= 2 ? scores[scores.length - 2] : lastScore;
-      const trend: "up" | "down" | "flat" = lastScore > prevScore ? "up" : lastScore < prevScore ? "down" : "flat";
+      const prevScore =
+        scores.length >= 2 ? scores[scores.length - 2] : lastScore;
+      const trend: "up" | "down" | "flat" =
+        lastScore > prevScore ? "up" : lastScore < prevScore ? "down" : "flat";
       return { topic, avgScore, attempts: scores.length, lastScore, trend };
     })
     .sort((a, b) => a.avgScore - b.avgScore); // weakest first
@@ -76,15 +86,23 @@ export function WeakPatternHeatmap() {
       >
         <div className="flex items-center gap-2">
           <Flame size={14} className="text-orange-400" />
-          <span className="text-sm font-semibold text-foreground">Weak Pattern Heatmap</span>
+          <span className="text-sm font-semibold text-foreground">
+            Weak Pattern Heatmap
+          </span>
           {weakTopics.length > 0 && (
             <span className="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-300 text-[10px] font-bold">
               {weakTopics.length} weak area{weakTopics.length !== 1 ? "s" : ""}
             </span>
           )}
-          <span className="text-xs text-muted-foreground">{totalReviews} AI reviews analyzed</span>
+          <span className="text-xs text-muted-foreground">
+            {totalReviews} AI reviews analyzed
+          </span>
         </div>
-        {open ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
+        {open ? (
+          <ChevronUp size={14} className="text-muted-foreground" />
+        ) : (
+          <ChevronDown size={14} className="text-muted-foreground" />
+        )}
       </button>
 
       {open && (
@@ -92,39 +110,77 @@ export function WeakPatternHeatmap() {
           {/* Overall summary */}
           <div className="flex items-center gap-4 pt-3">
             <div className="rounded-lg bg-background border border-border px-4 py-2.5 text-center">
-              <div className="text-[10px] text-muted-foreground">Overall Avg</div>
-              <div className={`text-xl font-black ${heatTextColor(overallAvg)}`}>{overallAvg.toFixed(1)}</div>
-              <div className={`text-[9px] font-semibold ${heatTextColor(overallAvg)}`}>{heatLabel(overallAvg)}</div>
+              <div className="text-[10px] text-muted-foreground">
+                Overall Avg
+              </div>
+              <div
+                className={`text-xl font-black ${heatTextColor(overallAvg)}`}
+              >
+                {overallAvg.toFixed(1)}
+              </div>
+              <div
+                className={`text-[9px] font-semibold ${heatTextColor(overallAvg)}`}
+              >
+                {heatLabel(overallAvg)}
+              </div>
             </div>
             <div className="rounded-lg bg-background border border-border px-4 py-2.5 text-center">
-              <div className="text-[10px] text-muted-foreground">Topics Tracked</div>
-              <div className="text-xl font-black text-foreground">{stats.length}</div>
+              <div className="text-[10px] text-muted-foreground">
+                Topics Tracked
+              </div>
+              <div className="text-xl font-black text-foreground">
+                {stats.length}
+              </div>
             </div>
             <div className="rounded-lg bg-background border border-border px-4 py-2.5 text-center">
-              <div className="text-[10px] text-muted-foreground">Total Reviews</div>
-              <div className="text-xl font-black text-foreground">{totalReviews}</div>
+              <div className="text-[10px] text-muted-foreground">
+                Total Reviews
+              </div>
+              <div className="text-xl font-black text-foreground">
+                {totalReviews}
+              </div>
             </div>
           </div>
 
           {/* Heatmap grid */}
           <div>
-            <div className="text-[10px] font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Topic Heatmap (weakest first)</div>
+            <div className="text-[10px] font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+              Topic Heatmap (weakest first)
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {stats.map((s) => (
+              {stats.map(s => (
                 <div
                   key={s.topic}
                   className={`rounded-lg border p-2.5 ${heatColor(s.avgScore)}`}
                 >
                   <div className="flex items-start justify-between gap-1">
-                    <span className="text-xs font-semibold text-white leading-tight">{s.topic}</span>
-                    {s.trend === "up" && <TrendingUp size={10} className="text-emerald-300 shrink-0 mt-0.5" />}
-                    {s.trend === "down" && <AlertTriangle size={10} className="text-red-300 shrink-0 mt-0.5" />}
+                    <span className="text-xs font-semibold text-white leading-tight">
+                      {s.topic}
+                    </span>
+                    {s.trend === "up" && (
+                      <TrendingUp
+                        size={10}
+                        className="text-emerald-300 shrink-0 mt-0.5"
+                      />
+                    )}
+                    {s.trend === "down" && (
+                      <AlertTriangle
+                        size={10}
+                        className="text-red-300 shrink-0 mt-0.5"
+                      />
+                    )}
                   </div>
                   <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-base font-black text-white">{s.avgScore.toFixed(1)}</span>
-                    <span className="text-[9px] text-white/70">/5 · {s.attempts} try</span>
+                    <span className="text-base font-black text-white">
+                      {s.avgScore.toFixed(1)}
+                    </span>
+                    <span className="text-[9px] text-white/70">
+                      /5 · {s.attempts} try
+                    </span>
                   </div>
-                  <div className="text-[9px] text-white/80 font-medium">{heatLabel(s.avgScore)}</div>
+                  <div className="text-[9px] text-white/80 font-medium">
+                    {heatLabel(s.avgScore)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -133,16 +189,24 @@ export function WeakPatternHeatmap() {
           {/* Focus recommendations */}
           {weakTopics.length > 0 && (
             <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 space-y-2">
-              <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Focus on these now</div>
-              {weakTopics.slice(0, 3).map((t) => (
+              <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
+                Focus on these now
+              </div>
+              {weakTopics.slice(0, 3).map(t => (
                 <div key={t.topic} className="flex items-center gap-2">
                   <Flame size={10} className="text-red-400 shrink-0" />
-                  <span className="text-xs text-foreground font-semibold">{t.topic}</span>
-                  <span className="text-xs text-muted-foreground">— avg {t.avgScore.toFixed(1)}/5 across {t.attempts} attempt{t.attempts !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-foreground font-semibold">
+                    {t.topic}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    — avg {t.avgScore.toFixed(1)}/5 across {t.attempts} attempt
+                    {t.attempts !== 1 ? "s" : ""}
+                  </span>
                 </div>
               ))}
               <p className="text-[10px] text-muted-foreground pt-1">
-                Go to the Code Practice tab, filter by these topics, and use the AI Solution Reviewer to close the gap.
+                Go to the Code Practice tab, filter by these topics, and use the
+                AI Solution Reviewer to close the gap.
               </p>
             </div>
           )}
@@ -158,7 +222,9 @@ export function WeakPatternHeatmap() {
             ].map(({ label, color }) => (
               <div key={label} className="flex items-center gap-1">
                 <div className={`w-2.5 h-2.5 rounded-sm ${color}`} />
-                <span className="text-[9px] text-muted-foreground">{label}</span>
+                <span className="text-[9px] text-muted-foreground">
+                  {label}
+                </span>
               </div>
             ))}
           </div>

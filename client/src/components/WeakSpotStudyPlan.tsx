@@ -5,9 +5,20 @@
  */
 import { useState, useMemo } from "react";
 import { useAIReviewHistory } from "@/hooks/useLocalStorage";
-import { usePatternRatings, useBehavioralRatings } from "@/hooks/useLocalStorage";
+import {
+  usePatternRatings,
+  useBehavioralRatings,
+} from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
-import { CalendarDays, ChevronDown, ChevronUp, TrendingDown, Zap, RefreshCw, CheckCircle2 } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  TrendingDown,
+  Zap,
+  RefreshCw,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -32,18 +43,59 @@ interface StudyDay {
 }
 
 // ─── Tool mapping ─────────────────────────────────────────────────────────────
-const TOOL_MAP: Record<string, { tool: string; anchor: string; icon: string }> = {
-  "Coding Correctness": { tool: "AI Solution Reviewer", anchor: "#code-practice", icon: "💻" },
-  "Time/Space Complexity": { tool: "Complexity Analyzer", anchor: "#code-practice", icon: "⏱️" },
-  "Edge Case Coverage": { tool: "AI Hint System", anchor: "#code-practice", icon: "🔍" },
-  "Code Quality": { tool: "IC7 Optimization Challenge", anchor: "#code-practice", icon: "✨" },
-  "Pattern Recognition": { tool: "Pattern Recognition Trainer", anchor: "#code-practice", icon: "🧩" },
-  "System Design": { tool: "Guided Walkthrough Mode", anchor: "#system-design", icon: "🏗️" },
-  "Scale Estimation": { tool: "Scale Estimation Calculator", anchor: "#system-design", icon: "📊" },
-  "Trade-off Reasoning": { tool: "Trade-off Decision Simulator", anchor: "#system-design", icon: "⚖️" },
-  "Behavioral STAR": { tool: "Flashcard Flip Deck", anchor: "#behavioral", icon: "🎯" },
-  "XFN Communication": { tool: "Voice Answer Mode", anchor: "#behavioral", icon: "🎤" },
-};
+const TOOL_MAP: Record<string, { tool: string; anchor: string; icon: string }> =
+  {
+    "Coding Correctness": {
+      tool: "AI Solution Reviewer",
+      anchor: "#code-practice",
+      icon: "💻",
+    },
+    "Time/Space Complexity": {
+      tool: "Complexity Analyzer",
+      anchor: "#code-practice",
+      icon: "⏱️",
+    },
+    "Edge Case Coverage": {
+      tool: "AI Hint System",
+      anchor: "#code-practice",
+      icon: "🔍",
+    },
+    "Code Quality": {
+      tool: "IC7 Optimization Challenge",
+      anchor: "#code-practice",
+      icon: "✨",
+    },
+    "Pattern Recognition": {
+      tool: "Pattern Recognition Trainer",
+      anchor: "#code-practice",
+      icon: "🧩",
+    },
+    "System Design": {
+      tool: "Guided Walkthrough Mode",
+      anchor: "#system-design",
+      icon: "🏗️",
+    },
+    "Scale Estimation": {
+      tool: "Scale Estimation Calculator",
+      anchor: "#system-design",
+      icon: "📊",
+    },
+    "Trade-off Reasoning": {
+      tool: "Trade-off Decision Simulator",
+      anchor: "#system-design",
+      icon: "⚖️",
+    },
+    "Behavioral STAR": {
+      tool: "Flashcard Flip Deck",
+      anchor: "#behavioral",
+      icon: "🎯",
+    },
+    "XFN Communication": {
+      tool: "Voice Answer Mode",
+      anchor: "#behavioral",
+      icon: "🎤",
+    },
+  };
 
 const WEEK_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -62,13 +114,19 @@ function scoreBg(score: number) {
 
 function scoreBar(score: number) {
   const pct = (score / 5) * 100;
-  const color = score >= 4 ? "bg-emerald-500" : score >= 3 ? "bg-amber-500" : "bg-red-500";
+  const color =
+    score >= 4 ? "bg-emerald-500" : score >= 3 ? "bg-amber-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-slate-700">
-        <div className={`h-1.5 rounded-full ${color} transition-all`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-1.5 rounded-full ${color} transition-all`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <span className={`text-xs font-bold ${scoreColor(score)}`}>{score.toFixed(1)}</span>
+      <span className={`text-xs font-bold ${scoreColor(score)}`}>
+        {score.toFixed(1)}
+      </span>
     </div>
   );
 }
@@ -80,15 +138,24 @@ export function WeakSpotStudyPlan() {
   const [bqRatings] = useBehavioralRatings();
   const [expanded, setExpanded] = useState(false);
   const [completedDays, setCompletedDays] = useState<Set<number>>(() => {
-    try { return new Set(JSON.parse(localStorage.getItem("weak_spot_plan_completed_v1") ?? "[]")); }
-    catch { return new Set(); }
+    try {
+      return new Set(
+        JSON.parse(localStorage.getItem("weak_spot_plan_completed_v1") ?? "[]")
+      );
+    } catch {
+      return new Set();
+    }
   });
 
   const toggleDay = (day: number) => {
     setCompletedDays(prev => {
       const next = new Set(prev);
-      if (next.has(day)) next.delete(day); else next.add(day);
-      localStorage.setItem("weak_spot_plan_completed_v1", JSON.stringify(Array.from(next)));
+      if (next.has(day)) next.delete(day);
+      else next.add(day);
+      localStorage.setItem(
+        "weak_spot_plan_completed_v1",
+        JSON.stringify(Array.from(next))
+      );
       return next;
     });
   };
@@ -100,21 +167,53 @@ export function WeakSpotStudyPlan() {
     // From AI review history
     if (aiHistory.length >= 3) {
       const recent = aiHistory.slice(-20);
-      const avgScore = (field: keyof typeof recent[0]) =>
+      const avgScore = (field: keyof (typeof recent)[0]) =>
         recent.reduce((s, r) => s + (Number(r[field]) || 0), 0) / recent.length;
 
       dims.push(
-        { label: "Coding Correctness", avgScore: avgScore("correctness"), tool: "AI Solution Reviewer", toolAnchor: "#code-practice", icon: "💻", description: "Correctness of your algorithmic solutions" },
-        { label: "Time/Space Complexity", avgScore: avgScore("complexity"), tool: "Complexity Analyzer", toolAnchor: "#code-practice", icon: "⏱️", description: "Accuracy of your complexity analysis" },
-        { label: "Edge Case Coverage", avgScore: avgScore("edgeCases"), tool: "AI Hint System", toolAnchor: "#code-practice", icon: "🔍", description: "Identifying and handling edge cases" },
-        { label: "Code Quality", avgScore: avgScore("codeQuality"), tool: "IC7 Optimization Challenge", toolAnchor: "#code-practice", icon: "✨", description: "Code clarity, naming, and structure" },
+        {
+          label: "Coding Correctness",
+          avgScore: avgScore("correctness"),
+          tool: "AI Solution Reviewer",
+          toolAnchor: "#code-practice",
+          icon: "💻",
+          description: "Correctness of your algorithmic solutions",
+        },
+        {
+          label: "Time/Space Complexity",
+          avgScore: avgScore("complexity"),
+          tool: "Complexity Analyzer",
+          toolAnchor: "#code-practice",
+          icon: "⏱️",
+          description: "Accuracy of your complexity analysis",
+        },
+        {
+          label: "Edge Case Coverage",
+          avgScore: avgScore("edgeCases"),
+          tool: "AI Hint System",
+          toolAnchor: "#code-practice",
+          icon: "🔍",
+          description: "Identifying and handling edge cases",
+        },
+        {
+          label: "Code Quality",
+          avgScore: avgScore("codeQuality"),
+          tool: "IC7 Optimization Challenge",
+          toolAnchor: "#code-practice",
+          icon: "✨",
+          description: "Code clarity, naming, and structure",
+        }
       );
     }
 
     // From pattern ratings
-    const ratedPatterns = PATTERNS.filter(p => patternRatings[p.id] !== undefined);
+    const ratedPatterns = PATTERNS.filter(
+      p => patternRatings[p.id] !== undefined
+    );
     if (ratedPatterns.length >= 3) {
-      const avgPatternScore = ratedPatterns.reduce((s, p) => s + (patternRatings[p.id] ?? 3), 0) / ratedPatterns.length;
+      const avgPatternScore =
+        ratedPatterns.reduce((s, p) => s + (patternRatings[p.id] ?? 3), 0) /
+        ratedPatterns.length;
       // Normalize 1-5 rating to 0-5 score (1=very weak → 1.0, 5=mastered → 5.0)
       dims.push({
         label: "Pattern Recognition",
@@ -127,9 +226,13 @@ export function WeakSpotStudyPlan() {
     }
 
     // From behavioral ratings
-    const ratedBQs = BEHAVIORAL_QUESTIONS.filter(q => bqRatings[q.id] !== undefined);
+    const ratedBQs = BEHAVIORAL_QUESTIONS.filter(
+      q => bqRatings[q.id] !== undefined
+    );
     if (ratedBQs.length >= 3) {
-      const avgBQScore = ratedBQs.reduce((s, q) => s + (bqRatings[q.id] ?? 3), 0) / ratedBQs.length;
+      const avgBQScore =
+        ratedBQs.reduce((s, q) => s + (bqRatings[q.id] ?? 3), 0) /
+        ratedBQs.length;
       dims.push({
         label: "Behavioral STAR",
         avgScore: avgBQScore,
@@ -143,17 +246,48 @@ export function WeakSpotStudyPlan() {
     // Always add system design and scale estimation as defaults if no data
     if (dims.length < 3) {
       dims.push(
-        { label: "System Design", avgScore: 2.5, tool: "Guided Walkthrough Mode", toolAnchor: "#system-design", icon: "🏗️", description: "End-to-end system design ability" },
-        { label: "Scale Estimation", avgScore: 2.5, tool: "Scale Estimation Calculator", toolAnchor: "#system-design", icon: "📊", description: "Capacity estimation accuracy" },
-        { label: "Trade-off Reasoning", avgScore: 2.5, tool: "Trade-off Decision Simulator", toolAnchor: "#system-design", icon: "⚖️", description: "Articulating architectural trade-offs" },
-        { label: "XFN Communication", avgScore: 2.5, tool: "Voice Answer Mode", toolAnchor: "#behavioral", icon: "🎤", description: "Cross-functional communication skills" },
+        {
+          label: "System Design",
+          avgScore: 2.5,
+          tool: "Guided Walkthrough Mode",
+          toolAnchor: "#system-design",
+          icon: "🏗️",
+          description: "End-to-end system design ability",
+        },
+        {
+          label: "Scale Estimation",
+          avgScore: 2.5,
+          tool: "Scale Estimation Calculator",
+          toolAnchor: "#system-design",
+          icon: "📊",
+          description: "Capacity estimation accuracy",
+        },
+        {
+          label: "Trade-off Reasoning",
+          avgScore: 2.5,
+          tool: "Trade-off Decision Simulator",
+          toolAnchor: "#system-design",
+          icon: "⚖️",
+          description: "Articulating architectural trade-offs",
+        },
+        {
+          label: "XFN Communication",
+          avgScore: 2.5,
+          tool: "Voice Answer Mode",
+          toolAnchor: "#behavioral",
+          icon: "🎤",
+          description: "Cross-functional communication skills",
+        }
       );
     }
 
     return dims.sort((a, b) => a.avgScore - b.avgScore);
   }, [aiHistory, patternRatings, bqRatings]);
 
-  const hasData = aiHistory.length >= 3 || Object.keys(patternRatings).length >= 3 || Object.keys(bqRatings).length >= 3;
+  const hasData =
+    aiHistory.length >= 3 ||
+    Object.keys(patternRatings).length >= 3 ||
+    Object.keys(bqRatings).length >= 3;
 
   // ── Build 7-day plan ─────────────────────────────────────────────────────
   const studyPlan = useMemo((): StudyDay[] => {
@@ -187,7 +321,13 @@ export function WeakSpotStudyPlan() {
     });
 
     // Day 5: Weak dimension 4 (or system design if not enough data)
-    const dim4 = weakDimensions[3] ?? { label: "System Design", tool: "Guided Walkthrough Mode", toolAnchor: "#system-design", icon: "🏗️", avgScore: 2.5 };
+    const dim4 = weakDimensions[3] ?? {
+      label: "System Design",
+      tool: "Guided Walkthrough Mode",
+      toolAnchor: "#system-design",
+      icon: "🏗️",
+      avgScore: 2.5,
+    };
     plan.push({
       day: 5,
       label: WEEK_LABELS[4],
@@ -238,7 +378,9 @@ export function WeakSpotStudyPlan() {
         <div className="flex items-center gap-3">
           <CalendarDays size={18} className="text-blue-400" />
           <div className="text-left">
-            <div className="text-sm font-bold text-foreground">Personalized 7-Day Study Plan</div>
+            <div className="text-sm font-bold text-foreground">
+              Personalized 7-Day Study Plan
+            </div>
             <div className="text-xs text-muted-foreground">
               {hasData
                 ? `Built from your actual AI scores · ${completedCount}/7 days complete`
@@ -252,7 +394,11 @@ export function WeakSpotStudyPlan() {
               {completedCount}/7 done
             </span>
           )}
-          {expanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+          {expanded ? (
+            <ChevronUp size={16} className="text-muted-foreground" />
+          ) : (
+            <ChevronDown size={16} className="text-muted-foreground" />
+          )}
         </div>
       </button>
 
@@ -262,20 +408,31 @@ export function WeakSpotStudyPlan() {
           <div className="pt-4">
             <div className="flex items-center gap-2 mb-3">
               <TrendingDown size={13} className="text-red-400" />
-              <span className="text-xs font-bold text-foreground">Your Weakest Dimensions</span>
+              <span className="text-xs font-bold text-foreground">
+                Your Weakest Dimensions
+              </span>
               {!hasData && (
-                <span className="text-xs text-amber-400 ml-auto">Complete 3+ AI reviews for personalized data</span>
+                <span className="text-xs text-amber-400 ml-auto">
+                  Complete 3+ AI reviews for personalized data
+                </span>
               )}
             </div>
             <div className="grid grid-cols-1 gap-2">
-              {weakDimensions.slice(0, 5).map((dim) => (
-                <div key={dim.label} className={`rounded-lg border p-2.5 ${scoreBg(dim.avgScore)}`}>
+              {weakDimensions.slice(0, 5).map(dim => (
+                <div
+                  key={dim.label}
+                  className={`rounded-lg border p-2.5 ${scoreBg(dim.avgScore)}`}
+                >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm">{dim.icon}</span>
-                      <span className="text-xs font-semibold text-foreground">{dim.label}</span>
+                      <span className="text-xs font-semibold text-foreground">
+                        {dim.label}
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{dim.tool}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {dim.tool}
+                    </span>
                   </div>
                   {scoreBar(dim.avgScore)}
                 </div>
@@ -287,7 +444,9 @@ export function WeakSpotStudyPlan() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Zap size={13} className="text-blue-400" />
-              <span className="text-xs font-bold text-foreground">Your 7-Day Plan</span>
+              <span className="text-xs font-bold text-foreground">
+                Your 7-Day Plan
+              </span>
               <button
                 onClick={() => {
                   setCompletedDays(new Set());
@@ -300,7 +459,7 @@ export function WeakSpotStudyPlan() {
               </button>
             </div>
             <div className="space-y-2">
-              {studyPlan.map((day) => {
+              {studyPlan.map(day => {
                 const done = completedDays.has(day.day);
                 return (
                   <div
@@ -309,27 +468,43 @@ export function WeakSpotStudyPlan() {
                   >
                     <div className="flex items-start gap-3 p-3">
                       {/* Day badge */}
-                      <div className={`shrink-0 w-10 h-10 rounded-lg flex flex-col items-center justify-center border ${done ? "bg-emerald-500/20 border-emerald-500/40" : "bg-slate-700/60 border-slate-600/50"}`}>
-                        <span className="text-[10px] font-bold text-muted-foreground">{day.label}</span>
-                        <span className="text-base">{done ? "✓" : day.icon}</span>
+                      <div
+                        className={`shrink-0 w-10 h-10 rounded-lg flex flex-col items-center justify-center border ${done ? "bg-emerald-500/20 border-emerald-500/40" : "bg-slate-700/60 border-slate-600/50"}`}
+                      >
+                        <span className="text-[10px] font-bold text-muted-foreground">
+                          {day.label}
+                        </span>
+                        <span className="text-base">
+                          {done ? "✓" : day.icon}
+                        </span>
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-bold text-foreground">{day.focus}</span>
+                          <span className="text-xs font-bold text-foreground">
+                            {day.focus}
+                          </span>
                           {day.score > 0 && (
-                            <span className={`text-[10px] font-semibold ${scoreColor(day.score)}`}>
+                            <span
+                              className={`text-[10px] font-semibold ${scoreColor(day.score)}`}
+                            >
                               avg {day.score.toFixed(1)}/5
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{day.task}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {day.task}
+                        </p>
                         <a
                           href={day.toolAnchor}
-                          onClick={(e) => {
+                          onClick={e => {
                             e.preventDefault();
-                            const el = document.querySelector('[data-tab="' + day.toolAnchor.replace('#', '') + '"]');
+                            const el = document.querySelector(
+                              '[data-tab="' +
+                                day.toolAnchor.replace("#", "") +
+                                '"]'
+                            );
                             if (el) el.scrollIntoView({ behavior: "smooth" });
                             else toast.info(`Navigate to: ${day.tool}`);
                           }}
@@ -343,7 +518,8 @@ export function WeakSpotStudyPlan() {
                       <button
                         onClick={() => {
                           toggleDay(day.day);
-                          if (!done) toast.success(`Day ${day.day} marked complete! 🎉`);
+                          if (!done)
+                            toast.success(`Day ${day.day} marked complete! 🎉`);
                         }}
                         className={`shrink-0 p-1.5 rounded-lg transition-all ${done ? "text-emerald-400 hover:text-red-400" : "text-muted-foreground hover:text-emerald-400"}`}
                         title={done ? "Mark incomplete" : "Mark complete"}
