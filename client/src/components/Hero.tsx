@@ -6,8 +6,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 
 const STORAGE_KEY = "meta-guide-disclaimer-acknowledged-v2";
+const DISMISSED_KEY = "meta-guide-banner-dismissed-v1";
 
 function DisclaimerBanner() {
+  // Dismissed = banner fully hidden for returning users
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(DISMISSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
   // Read acknowledgement from localStorage on first render
   const [acknowledged, setAcknowledged] = useState<boolean>(() => {
     try {
@@ -45,13 +55,26 @@ function DisclaimerBanner() {
     setAcknowledged(false);
   };
 
+  const handleDismiss = () => {
+    try {
+      localStorage.setItem(DISMISSED_KEY, "true");
+    } catch {
+      // ignore
+    }
+    setDismissed(true);
+  };
+
+  // All hooks declared above — safe to conditionally render now
+  if (dismissed) return null;
+
   return (
     <div className="bg-amber-950 border-b border-amber-700/60">
       <div className="container py-3">
         {/* Header row — always visible */}
+        <div className="flex items-start gap-2">
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="w-full flex items-start sm:items-center justify-between gap-3 text-left group"
+          className="flex-1 flex items-start sm:items-center justify-between gap-3 text-left group"
         >
           <div className="flex items-start sm:items-center gap-2.5">
             <span className="text-base leading-none mt-0.5 sm:mt-0 flex-shrink-0">⚠️</span>
@@ -85,6 +108,16 @@ function DisclaimerBanner() {
             </span>
           </div>
         </button>
+        {/* Dismiss button — hides banner permanently for returning users */}
+        <button
+          onClick={handleDismiss}
+          title="Dismiss banner"
+          className="flex-shrink-0 mt-0.5 text-amber-600 hover:text-amber-200 transition-colors p-1 rounded hover:bg-amber-900/60"
+          aria-label="Dismiss disclaimer banner"
+        >
+          <X size={14} />
+        </button>
+        </div>
 
         {/* Expandable body */}
         <AnimatePresence initial={false}>
