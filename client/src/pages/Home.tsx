@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon,
   ListChecks, BarChart2, Layers, ClipboardList, Terminal,
-  HelpCircle, Dices, Sword, TrendingUp, Bookmark, Search,
+  HelpCircle, Dices, Sword, TrendingUp, Bookmark, Search, Wrench,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -33,6 +33,7 @@ import BookmarksPanel from "@/components/BookmarksPanel";
 import GlobalSearch from "@/components/GlobalSearch";
 import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/FocusMode";
 import MilestoneNotifications from "@/components/MilestoneNotifications";
+import AIToolsTab from "@/components/AIToolsTab";
 
 // ── Tab Groups ─────────────────────────────────────────────────────────────────
 // Tabs are split into two rows for better visibility:
@@ -120,6 +121,14 @@ const SECONDARY_TABS = [
     color: "slate",
     emoji: "🏗️",
   },
+  {
+    id: "ai-tools",
+    label: "AI Tools",
+    shortLabel: "AI Tools",
+    icon: <Wrench size={15} />,
+    color: "violet",
+    emoji: "🛠️",
+  },
 ];
 
 // Flat list for keyboard shortcut indexing
@@ -138,6 +147,7 @@ const SECONDARY_ACTIVE: Record<string, string> = {
   emerald: "text-emerald-600 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20",
   rose:    "text-rose-600 border-rose-500 bg-rose-50 dark:bg-rose-900/20",
   slate:   "text-slate-600 border-slate-500 bg-slate-50 dark:bg-slate-900/20",
+  violet:  "text-violet-600 border-violet-500 bg-violet-50 dark:bg-violet-900/20",
 };
 
 export default function Home() {
@@ -483,6 +493,7 @@ export default function Home() {
               {activeTab === "readiness"   && <ReadinessTab />}
               {activeTab === "sysdesign"   && <SystemDesignTab />}
               {activeTab === "practice"    && <CodePractice />}
+              {activeTab === "ai-tools"    && <AIToolsTab />}
             </div>
           </motion.div>
         </AnimatePresence>
