@@ -495,3 +495,11 @@
 - [ ] #1: Add Candidate-Initiated Discovery landing page
 - [ ] Option A: Persistent "Not affiliated with Meta" banner on every tab
 - [ ] Option D: "I am a job seeker" checkbox gate on first visit
+
+## Protection Features Round 4 (from pasted_content_2.txt)
+
+- [x] Update tagline to Option 2: "Everything the community learned the hard way — organized, refined, and ready for your 2026 interviews."
+- [x] #2: Add "Community Contributors" author byline + published date to footer and hero
+- [x] #5: Add Version E "not intended for distribution by employees" language to footer and How-to-Use section
+- [x] #7: Add Terms of Use page accessible from footer
+- [x] Deploy to GitHub Pages

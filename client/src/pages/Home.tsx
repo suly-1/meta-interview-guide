@@ -121,6 +121,7 @@ export default function Home() {
   const [bqRatings] = useBehavioralRatings();
   const [focusMode, setFocusMode] = useState(false);
   const [showKeyHelp, setShowKeyHelp] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   // Apply dark mode class
   useEffect(() => {
@@ -217,9 +218,15 @@ export default function Home() {
               className="text-amber-400 shrink-0 mt-0.5"
             />
             <div className="flex-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-amber-400">Public Community Resource: </span>
+              <span className="font-semibold text-amber-400">
+                Public Community Resource:{" "}
+              </span>
               This is an independent, publicly available study guide at{" "}
-              <span className="text-blue-400">www.metaguide.blog</span> — not affiliated with, endorsed by, or distributed by Meta, Google, Amazon, or any FAANG company. It was not provided to you by any interviewer or recruiter. Always verify interview details with your recruiter.
+              <span className="text-blue-400">www.metaguide.blog</span> — not
+              affiliated with, endorsed by, or distributed by Meta, Google,
+              Amazon, or any FAANG company. It was not provided to you by any
+              interviewer or recruiter. Always verify interview details with
+              your recruiter.
               <label className="ml-3 inline-flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
@@ -228,9 +235,7 @@ export default function Home() {
                     e.target.checked && setDisclaimerDismissed(true)
                   }
                 />
-                <span className="text-amber-400 font-medium">
-                  I understand
-                </span>
+                <span className="text-amber-400 font-medium">I understand</span>
               </label>
             </div>
             <button
@@ -341,27 +346,54 @@ export default function Home() {
       {/* Footer — hidden in focus mode */}
       {!focusMode && (
         <footer className="border-t border-border py-6 mt-8">
-          <div className="container text-center text-xs text-muted-foreground space-y-1">
-            <div>
-              Staff Engineer Interview Prep Guide · All progress saved locally in
-              your browser
+          <div className="container text-center text-xs text-muted-foreground space-y-2">
+            {/* #2 — Author byline */}
+            <div className="font-medium text-foreground/70">
+              Staff Engineer Interview Prep Guide
             </div>
             <div>
-              Press{" "}
-              <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
-                1
-              </kbd>
-              –
-              <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
-                5
-              </kbd>{" "}
-              to switch tabs ·{" "}
-              <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
-                F
-              </kbd>{" "}
-              Focus Mode
+              By{" "}
+              <span className="text-foreground/80 font-medium">
+                Community Contributors
+              </span>{" "}
+              · Published March 2026 · All progress saved locally in your
+              browser
             </div>
-            <div className="pt-2">
+            {/* #5 — Version E relaxed distribution note */}
+            <div className="max-w-xl mx-auto text-[11px] text-muted-foreground/70 leading-relaxed border-t border-border/50 pt-2 mt-1">
+              This is a community guide for self-directed learners. If you're a
+              recruiter or hiring manager thinking about sharing it — totally
+              your call, but it's worth checking your company's guidelines on
+              external resources first. This guide works best when candidates
+              discover it on their own anyway.
+            </div>
+            {/* Keyboard shortcuts + Terms link */}
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1">
+              <span>
+                Press{" "}
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                  1
+                </kbd>
+                –
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                  5
+                </kbd>{" "}
+                to switch tabs ·{" "}
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                  F
+                </kbd>{" "}
+                Focus Mode
+              </span>
+              <span className="text-border">·</span>
+              {/* #7 — Terms of Use link */}
+              <button
+                onClick={() => setShowTerms(true)}
+                className="text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+              >
+                Terms of Use
+              </button>
+            </div>
+            <div className="pt-1">
               <button
                 onClick={async () => {
                   // Unregister service workers
@@ -496,6 +528,104 @@ export default function Home() {
                 Esc
               </kbd>{" "}
               to close
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terms of Use Modal (#7) */}
+      {showTerms && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowTerms(false)}
+        >
+          <div
+            className="bg-background border border-border rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                className="text-base font-bold text-foreground"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Terms of Use
+              </h2>
+              <button
+                onClick={() => setShowTerms(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  What this guide is
+                </p>
+                <p>
+                  Staff Engineer Interview Prep is a free, community-created
+                  study resource. It was built by engineers who went through the
+                  process and wanted to share what they learned. It is not
+                  affiliated with Meta, Google, Amazon, Apple, Netflix, or any
+                  other company.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  Who it's for
+                </p>
+                <p>
+                  This guide is designed for self-directed learners — people who
+                  found it on their own and are using it for their own interview
+                  preparation. It works best when candidates discover it
+                  independently and use it alongside the official materials
+                  their recruiter has shared.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  A note for recruiters and hiring managers
+                </p>
+                <p>
+                  This is a community guide for self-directed learners. If
+                  you're a recruiter or hiring manager thinking about sharing it
+                  — totally your call, but it's worth checking your company's
+                  guidelines on external resources first. This guide works best
+                  when candidates discover it on their own anyway.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  No guarantees
+                </p>
+                <p>
+                  Interview formats change. This guide reflects community
+                  knowledge as of March 2026. Always verify current expectations
+                  with your recruiter. This guide is provided as-is, without
+                  warranty of any kind.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">Your data</p>
+                <p>
+                  All your progress (ratings, stories, mock history) is stored
+                  locally in your browser. Nothing is sent to any server without
+                  your explicit action. The optional leaderboard and
+                  cross-device sync features use Supabase and are entirely
+                  opt-in.
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-border text-[10px] text-muted-foreground/60">
+                By Community Contributors · Published March 2026 ·
+                www.metaguide.blog
+              </div>
             </div>
           </div>
         </div>

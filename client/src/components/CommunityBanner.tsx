@@ -231,8 +231,9 @@ export default function CommunityBanner() {
           {/* ── Left: copy ──────────────────────────────────────────────────── */}
           <div className="flex-1 flex flex-col justify-center py-10 pr-8 max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight mb-3">
-              Synthesized from publicly available candidate experiences, community forums, and published interview resources.{" "}
-              <span className="text-white">Refined for 2026.</span>
+              Everything the community learned the hard way — organized,
+              refined, and ready for your{" "}
+              <span className="text-white">2026 interviews.</span>
             </h1>
 
             <p className="text-sm sm:text-base text-slate-400 leading-relaxed mb-4">

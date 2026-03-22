@@ -30,7 +30,7 @@ writeFileSync(resolve(ROOT, "dist/public/CNAME"), "www.metaguide.blog\n");
 // ── Step 3: Deploy dist/public to gh-pages branch ─────────────────────────
 console.log("🚀 Deploying to gh-pages branch…");
 execSync(
-  `node node_modules/gh-pages/bin/gh-pages.js --dist dist/public --branch gh-pages --message "Deploy to GitHub Pages [skip ci]"`,
+  `node node_modules/gh-pages/bin/gh-pages.js --dist dist/public --branch gh-pages --remote github --message "Deploy to GitHub Pages [skip ci]"`,
   {
     cwd: ROOT,
     stdio: "inherit",
