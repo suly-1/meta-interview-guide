@@ -1,4 +1,4 @@
-// Staff Engineer Interview Guide — FAANG Edition — All Content Data
+// Independence Study Guide — All Content Data
 
 export const PATTERNS = [
   {

@@ -1,4 +1,4 @@
-// IC7AnswerUpgrader — side-by-side L6 vs L7 answer snippets for the same scenario
+// L7AnswerUpgrader — side-by-side L6 vs L7 answer snippets for the same scenario
 // Makes the scope delta concrete and easy to internalize
 import { useState } from "react";
 import { ChevronRight, ChevronDown, ArrowRight } from "lucide-react";
@@ -85,7 +85,7 @@ const ANSWER_EXAMPLES: AnswerExample[] = [
   },
 ];
 
-export default function IC7AnswerUpgrader() {
+export default function L7AnswerUpgrader() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [showIC7, setShowIC7] = useState<Record<number, boolean>>({});
 

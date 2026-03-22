@@ -188,7 +188,7 @@ function computeSnapshot(): ProgressSnapshot {
 
 function exportProgress(snap: ProgressSnapshot) {
   const lines = [
-    `# Staff Engineer Interview Guide — FAANG Edition — Progress Export`,
+    `# Independence Study Guide — Progress Export`,
     `Generated: ${new Date().toLocaleString()}`,
     ``,
     `## Overview`,

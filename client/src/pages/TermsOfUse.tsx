@@ -29,9 +29,9 @@ export default function TermsOfUse() {
             className="text-3xl md:text-4xl font-extrabold mb-3"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Staff Engineer Interview Guide
+            Independence Study Guide
             <br />
-            <span className="text-white/40 text-2xl font-semibold">FAANG Edition</span>
+            <span className="text-white/40 text-2xl font-semibold">Independence Study Guide</span>
           </h1>
           <p className="text-white/50 text-sm">Last updated: March 2026</p>
         </div>

@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import STARGapAnalyzer from "@/components/STARGapAnalyzer";
 import BehavioralFlashcardDeck from "@/components/BehavioralFlashcardDeck";
 import InterviewerPersonaSimulator from "@/components/InterviewerPersonaSimulator";
-import IC7AnswerUpgrader from "@/components/IC7AnswerUpgrader";
+import L7AnswerUpgrader from "@/components/L7AnswerUpgrader";
 import BehavioralAnswerScorer from "@/components/BehavioralAnswerScorer";
 
 const VALUE_COLORS: Record<string, { bg: string; border: string; title: string }> = {
@@ -1266,7 +1266,7 @@ export default function BehavioralTab() {
           </h2>
           <p className="text-sm text-gray-500 mt-1">Side-by-side L6 vs L7 answer snippets for the same scenario — see the scope delta concretely.</p>
         </div>
-        <IC7AnswerUpgrader />
+        <L7AnswerUpgrader />
       </section>}
 
       {/* Interviewer Persona Simulator */}

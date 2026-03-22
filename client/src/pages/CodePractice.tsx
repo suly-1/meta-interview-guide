@@ -3687,7 +3687,7 @@ export default function CodePractice() {
                       const ics = [
                         "BEGIN:VCALENDAR",
                         "VERSION:2.0",
-                        "PRODID:-//Staff Engineer Interview Guide//Study Planner//EN",
+                        "PRODID:-//Independence Study Guide//Study Planner//EN",
                         "CALSCALE:GREGORIAN",
                         "METHOD:PUBLISH",
                         `X-WR-CALNAME:${studyPlan.headline}`,

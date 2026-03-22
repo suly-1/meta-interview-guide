@@ -94,7 +94,7 @@ function buildDigestContent(
   lines.push(`   3. Practice ${Math.max(0, 5 - ratedBehavioral)} more behavioral questions`);
   lines.push(``);
   lines.push(`${'─'.repeat(50)}`);
-  lines.push(`Staff Engineer Interview Guide — FAANG Edition — Independent Study Resource`);
+  lines.push(`Independence Study Guide — Independent Study Resource`);
   return lines.join('\n');
 }
 
