@@ -198,7 +198,7 @@ function PatternRow({
 }
 
 export default function CodingTab() {
-  const { isSenior } = useICLevel();
+  const { isSenior, isMidOrAbove } = useICLevel();
   const [expandedPattern, setExpandedPattern] = useState<string | null>(null);
   const patterns = useProgress("patterns", PATTERNS.length);
   const drillRatings = useDrillRatings();

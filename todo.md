@@ -369,3 +369,10 @@
 - [x] #5 Rename Meta-specific labels to FAANG/Staff Engineer framing across all components
 - [x] #4 Add one-click share message button to hero (copies Framing Option A to clipboard)
 - [x] #1 Add candidate-initiated discovery landing/splash page
+
+## Protection Features Batch 2
+- [ ] #2 Add "Community Contributors" author byline to hero and footer
+- [ ] #5 Add Version E relaxed employee-sharing note to footer and Terms of Use page
+- [ ] #7 Add Terms of Use page accessible from footer
+- [ ] Expand IC level selector to 3 tiers: IC4 (Junior), IC5 (Senior), IC6/IC7 (Staff+)
+- [ ] Update BehavioralTab IC6 vs IC7 labels to use correct level names

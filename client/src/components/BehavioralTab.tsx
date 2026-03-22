@@ -938,7 +938,7 @@ function FullMockMode() {
 
 // ── Main Export ─────────────────────────────────────────────────────────────
 export default function BehavioralTab() {
-  const { isSenior } = useICLevel();
+  const { isSenior, isMidOrAbove } = useICLevel();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredAreas = useMemo(() => {

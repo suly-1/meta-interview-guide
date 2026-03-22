@@ -363,7 +363,7 @@ export default function Hero() {
           </div>
 
           {/* IC Level Selector */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <span className="text-white/50 text-xs font-bold uppercase tracking-widest">Your Level:</span>
             <div className="flex rounded-lg overflow-hidden border border-white/20 text-sm font-semibold">
               <button
@@ -373,23 +373,41 @@ export default function Hero() {
                     ? "bg-emerald-600 text-white"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
+                title="IC4 — Junior Engineer"
               >
-                IC4 / IC5
+                IC4
+              </button>
+              <button
+                onClick={() => setICLevel("mid")}
+                className={`px-4 py-1.5 transition-all border-l border-white/10 ${
+                  icLevel === "mid"
+                    ? "bg-violet-600 text-white"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+                title="IC5 — Senior Engineer"
+              >
+                IC5 / Senior
               </button>
               <button
                 onClick={() => setICLevel("senior")}
-                className={`px-4 py-1.5 transition-all ${
+                className={`px-4 py-1.5 transition-all border-l border-white/10 ${
                   icLevel === "senior"
                     ? "bg-[#4d9fff] text-white"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
+                title="IC6/IC7 — Staff / Senior Staff Engineer"
               >
                 IC6 / IC7
               </button>
             </div>
             {icLevel === "junior" && (
               <span className="text-emerald-400 text-xs font-medium">
-                Showing IC4/IC5 content — senior-only sections are hidden
+                IC4 view — senior &amp; staff sections hidden
+              </span>
+            )}
+            {icLevel === "mid" && (
+              <span className="text-violet-400 text-xs font-medium">
+                IC5 / Senior view — staff-only sections hidden
               </span>
             )}
           </div>

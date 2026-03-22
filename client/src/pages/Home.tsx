@@ -576,8 +576,12 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
         <p className="font-semibold text-white/90 mb-1">Staff Engineer Interview Guide — FAANG Edition</p>
+        <p className="text-white/40 text-xs mb-1">By Community Contributors · Not affiliated with any company</p>
         <p>Updated March 2026 · Content synthesized from candidate reports, NeetCode, Coditioning, HelloInterview, igotanoffer, and Taro.</p>
-        <p className="mt-3">
+        <p className="mt-2 text-white/40 text-xs max-w-xl mx-auto">
+          This is a community guide for self-directed learners. If you're a recruiter or hiring manager thinking about sharing it — totally your call, but it's worth checking your company's guidelines on external resources first. This guide works best when candidates discover it on their own anyway.
+        </p>
+        <p className="mt-3 flex items-center justify-center gap-4">
           <button
             onClick={() => {
               try { localStorage.removeItem("meta-guide-banner-dismissed-v1"); } catch { /* ignore */ }
@@ -587,6 +591,13 @@ export default function Home() {
           >
             Show disclaimer again
           </button>
+          <span className="text-white/20">·</span>
+          <a
+            href="#/terms"
+            className="text-white/30 hover:text-white/70 text-xs underline underline-offset-2 transition-colors"
+          >
+            Terms of Use
+          </a>
         </p>
       </footer>
 
