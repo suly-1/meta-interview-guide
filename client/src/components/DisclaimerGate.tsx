@@ -13,7 +13,7 @@
 //   3. Invalidate disclaimer.status query so the badge in OverviewTab refreshes
 
 import { useState } from "react";
-import { ShieldAlert, CheckSquare, Square, Loader2 } from "lucide-react";
+import { CheckSquare, Square, Loader2, BookOpen } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -138,88 +138,82 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
       {/* DB-loading spinner overlay */}
       {loading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40">
-          <Loader2 size={28} className="animate-spin text-amber-400" />
-          <p className="text-xs text-zinc-400">
-            Checking acknowledgment status…
-          </p>
+          <Loader2 size={28} className="animate-spin text-blue-400" />
+          <p className="text-xs text-zinc-400">Just a moment…</p>
         </div>
       )}
 
-      <div className="relative w-full max-w-2xl rounded-2xl border border-amber-500/30 bg-[oklch(0.13_0.02_264)] shadow-2xl shadow-black/60 overflow-hidden my-8">
-        {/* Amber top accent bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600" />
+      <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[oklch(0.13_0.02_264)] shadow-2xl shadow-black/60 overflow-hidden my-8">
+        {/* Blue top accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-blue-700 via-blue-400 to-blue-700" />
 
         <div className="p-8 sm:p-10 space-y-6">
           {/* Header */}
           <div className="flex items-start gap-4">
-            <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25">
-              <ShieldAlert size={22} className="text-amber-400" />
+            <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/15 border border-blue-500/25">
+              <BookOpen size={22} className="text-blue-400" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                ⚠️ Disclaimer
+              <h1
+                className="text-xl font-bold text-white tracking-tight"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Quick note before you start
               </h1>
-              <p className="text-sm text-amber-300/80 mt-0.5">
-                Please read carefully before proceeding
+              <p className="text-sm text-blue-300/70 mt-0.5">
+                Takes 10 seconds — worth it
               </p>
             </div>
           </div>
 
-          {/* Disclaimer body */}
-          <div className="space-y-4 text-sm text-zinc-300 leading-relaxed">
+          {/* Main body */}
+          <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
             <p>
-              This is an{" "}
-              <strong className="text-white">independent study resource</strong>{" "}
-              for software engineering interview preparation. It is{" "}
+              This guide was built by the community, for candidates doing their
+              own research. It's{" "}
               <strong className="text-white">
-                not affiliated with, endorsed by, or connected to Meta
-                Platforms, Inc.
+                not affiliated with Meta, Google, Amazon, or any other company
               </strong>{" "}
-              in any way. All trademarks are property of their respective
-              owners, used here for identification only under nominative fair
-              use.
+              — just engineers sharing what they learned the hard way.
             </p>
             <p>
-              All content is based on{" "}
-              <strong className="text-white">
-                publicly available information
-              </strong>{" "}
-              and may be outdated, incomplete, or inaccurate. This is{" "}
-              <strong className="text-white">
-                not professional or career advice.
-              </strong>{" "}
-              Always verify details with your recruiter or hiring manager.
-            </p>
-            <p>
-              This guide is provided{" "}
-              <strong className="text-white">"AS IS"</strong> without warranty
-              of any kind, express or implied. The author(s) shall not be liable
-              for any damages — direct, indirect, incidental, or consequential —
-              arising from your use of or reliance on this guide.{" "}
-              <strong className="text-white">No outcome is guaranteed.</strong>{" "}
-              By using this guide, you assume all risk, agree you are solely
-              responsible for any decisions made based on its content, and agree
-              to indemnify and hold harmless the author(s) from any claims
-              arising from your use.
-            </p>
-            <p className="text-zinc-500 text-xs">
-              If any provision of this disclaimer is unenforceable, the
-              remainder shall remain in effect.
+              Always pair it with whatever your recruiter sends you. Interview
+              formats evolve, and their guidance is the source of truth.
             </p>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-white/10" />
-
-          {/* Community resource proof */}
-          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-1.5">
-            <p className="text-xs font-semibold text-blue-400">📢 Public Community Resource</p>
+          {/* "The legal bit" plain-talk card */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+            <p className="text-xs font-semibold text-zinc-300">
+              The legal bit, in plain English:
+            </p>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              This guide is <strong className="text-zinc-200">publicly available</strong> at{" "}
-              <span className="text-blue-400">www.metaguide.blog</span> and open-source at{" "}
-              <a href="https://github.com/suly-1/meta-prep-guide" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">github.com/suly-1/meta-prep-guide</a>.
-              It is discoverable by anyone via search engines — it was{" "}
-              <strong className="text-zinc-200">not distributed</strong> by any interviewer, recruiter, or company employee.
+              This is a free community resource provided as-is. The people who
+              built it aren't responsible for your interview outcomes or any
+              decisions you make based on it. No warranties, no guarantees —
+              just good faith effort from engineers who've been through it.
+            </p>
+          </div>
+
+          {/* Community resource proof box */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-1.5">
+            <p className="text-xs font-semibold text-blue-400">
+              📢 Public community resource
+            </p>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Openly available at{" "}
+              <span className="text-blue-400">www.metaguide.blog</span> and
+              open-source at{" "}
+              <a
+                href="https://github.com/suly-1/meta-prep-guide"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-400 hover:underline"
+              >
+                github.com/suly-1/meta-prep-guide
+              </a>
+              . Not distributed by any interviewer, recruiter, or company
+              employee.
             </p>
           </div>
 
@@ -240,13 +234,16 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
               )}
             </span>
             <span
-              className={`text-sm font-medium transition-colors ${
+              className={`text-sm transition-colors ${
                 checked
                   ? "text-emerald-300"
                   : "text-zinc-400 group-hover:text-zinc-200"
               }`}
             >
-              ✅ I am a job seeker using this resource for my own preparation. I independently discovered this public guide — it was not provided to me by any interviewer or company employee. I acknowledge it is independent, not affiliated with Meta or any FAANG company, provided without warranty, and I assume all risk of use.
+              I'm a job seeker using this for my own prep. I found this guide
+              independently — it wasn't provided to me by any interviewer or
+              company employee. I understand it's a community resource with no
+              guarantees attached.
             </span>
           </button>
 
@@ -256,24 +253,24 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
             disabled={!checked || loading}
             className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 ${
               checked && !loading
-                ? "bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/25 cursor-pointer"
+                ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25 cursor-pointer"
                 : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
             }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 size={14} className="animate-spin" /> Verifying…
+                <Loader2 size={14} className="animate-spin" /> Just a moment…
               </span>
             ) : checked ? (
-              "I Understand — Enter the Guide →"
+              "Sounds good — enter the guide →"
             ) : (
               "Check the box above to continue"
             )}
           </button>
 
           <p className="text-center text-xs text-zinc-600">
-            Your acknowledgment is saved to your account. You will not see this
-            screen again after confirming.
+            Your choice is saved locally. You won't see this screen again on
+            this device.
           </p>
         </div>
       </div>

@@ -503,3 +503,8 @@
 - [x] #5: Add Version E "not intended for distribution by employees" language to footer and How-to-Use section
 - [x] #7: Add Terms of Use page accessible from footer
 - [x] Deploy to GitHub Pages
+
+## Protection Features Round 5
+
+- [x] Rewrite DisclaimerGate wording to match relaxed footer tone (friendlier, less legal) — Option B4 selected
+- [x] Deploy to GitHub Pages
