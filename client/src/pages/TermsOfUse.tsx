@@ -31,7 +31,7 @@ export default function TermsOfUse() {
           >
             Independence Study Guide
             <br />
-            <span className="text-white/40 text-2xl font-semibold">Independence Study Guide</span>
+            <span className="text-white/40 text-2xl font-semibold">Terms of Use &amp; Community Guidelines</span>
           </h1>
           <p className="text-white/50 text-sm">Last updated: March 2026</p>
         </div>
@@ -43,7 +43,7 @@ export default function TermsOfUse() {
             <h2 className="font-bold text-white text-base">What this guide is</h2>
           </div>
           <p className="text-white/70 text-sm leading-relaxed">
-            This is a free, community-sourced study resource for software engineers preparing for Staff-level interviews at FAANG-tier companies. It was built by synthesizing publicly available candidate experiences, community forums, YouTube channels, and published interview resources. It is not affiliated with, endorsed by, or connected to Meta Platforms, Google, Amazon, Apple, or any other company.
+            This is a free, community-sourced study resource for software engineers preparing for L4–L7 software engineering interviews. It was built by synthesizing publicly available candidate experiences, community forums, YouTube channels, and published interview resources. It is not affiliated with, endorsed by, or connected to any company.
           </p>
         </section>
 
@@ -54,7 +54,7 @@ export default function TermsOfUse() {
             <h2 className="font-bold text-white text-base">Who made this</h2>
           </div>
           <p className="text-white/70 text-sm leading-relaxed mb-3">
-            This guide was created and is maintained by <strong className="text-white">Community Contributors</strong> — a group of software engineers who went through the Staff Engineer interview process and wanted to share what they learned. No individual author is named. No company is responsible for this content.
+            This guide was created and is maintained by <strong className="text-white">Community Contributors</strong> — a group of software engineers who went through the L4–L7 interview process and wanted to share what they learned. No individual author is named. No company is responsible for this content.
           </p>
           <p className="text-white/50 text-xs italic">
             Content is synthesized from publicly available sources including NeetCode, Coditioning, HelloInterview, igotanoffer, Taro, Glassdoor, and community forums. All trademarks belong to their respective owners.

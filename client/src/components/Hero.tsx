@@ -230,7 +230,7 @@ function DisclaimerBanner() {
   );
 }
 
-const SHARE_MESSAGE = `I came across this community-built study resource online — it covers general SWE interview patterns for Staff Engineer levels (L4–L7). It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
+const SHARE_MESSAGE = `I came across this community-built study resource online — the Independence Study Guide. It covers general SWE interview patterns for L4–L7 levels. It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
 
 function ShareButton() {
   const [copied, setCopied] = useState(false);
