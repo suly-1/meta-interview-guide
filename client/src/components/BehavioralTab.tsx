@@ -1,5 +1,6 @@
 // Design: Structured Clarity — behavioral tab with focus areas, STAR framework, Practice Mode randomizer
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useICLevel } from "@/contexts/ICLevelContext";
 import { useXPContext } from "@/contexts/XPContext";
 import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search } from "lucide-react";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
@@ -937,6 +938,7 @@ function FullMockMode() {
 
 // ── Main Export ─────────────────────────────────────────────────────────────
 export default function BehavioralTab() {
+  const { isSenior } = useICLevel();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredAreas = useMemo(() => {
@@ -1049,8 +1051,8 @@ export default function BehavioralTab() {
         </div>
       </section>
 
-      {/* IC6 vs IC7 Comparison */}
-      <section>
+      {/* IC6 vs IC7 Comparison — only shown for IC6/IC7 level */}
+      {isSenior && <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             IC6 vs IC7 — Scope &amp; Evaluation Bar
@@ -1153,7 +1155,7 @@ export default function BehavioralTab() {
         </div>
         <p className="text-xs text-gray-400 mt-3 italic">The step from IC6 → IC7 is fundamentally about scope of influence and ownership: from team-level execution to org-level strategy and outcomes.</p>
       </section>
-
+      }
             {/* 4 Focus Areas */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
@@ -1256,8 +1258,8 @@ export default function BehavioralTab() {
         <STARGapAnalyzer />
       </section>
 
-      {/* IC7 Answer Upgrader */}
-      <section>
+      {/* IC7 Answer Upgrader — only shown for IC6/IC7 level */}
+      {isSenior && <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             "What Would an IC7 Say?" Answer Upgrader
@@ -1265,7 +1267,7 @@ export default function BehavioralTab() {
           <p className="text-sm text-gray-500 mt-1">Side-by-side IC6 vs IC7 answer snippets for the same scenario — see the scope delta concretely.</p>
         </div>
         <IC7AnswerUpgrader />
-      </section>
+      </section>}
 
       {/* Interviewer Persona Simulator */}
       <section>

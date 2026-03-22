@@ -577,6 +577,17 @@ export default function Home() {
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
         <p className="font-semibold text-white/90 mb-1">Meta IC6/IC7 Behavioral &amp; Coding Interview Guide</p>
         <p>Updated March 2026 · Content synthesized from candidate reports, NeetCode, Coditioning, HelloInterview, igotanoffer, and Taro.</p>
+        <p className="mt-3">
+          <button
+            onClick={() => {
+              try { localStorage.removeItem("meta-guide-banner-dismissed-v1"); } catch { /* ignore */ }
+              window.location.reload();
+            }}
+            className="text-white/30 hover:text-white/70 text-xs underline underline-offset-2 transition-colors"
+          >
+            Show disclaimer again
+          </button>
+        </p>
       </footer>
 
       {/* Mobile Bottom Navigation */}

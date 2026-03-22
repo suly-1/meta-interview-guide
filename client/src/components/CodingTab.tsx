@@ -1,5 +1,6 @@
 // Design: Structured Clarity — coding tab with full pattern table + filter bar + expandable cards
 import { useState, useMemo } from "react";
+import { useICLevel } from "@/contexts/ICLevelContext";
 import InterviewTimer from "@/components/InterviewTimer";
 import QuickDrill from "@/components/QuickDrill";
 import PatternHeatmap from "@/components/PatternHeatmap";
@@ -197,6 +198,7 @@ function PatternRow({
 }
 
 export default function CodingTab() {
+  const { isSenior } = useICLevel();
   const [expandedPattern, setExpandedPattern] = useState<string | null>(null);
   const patterns = useProgress("patterns", PATTERNS.length);
   const drillRatings = useDrillRatings();
@@ -304,13 +306,15 @@ export default function CodingTab() {
               </div>
             </div>
 
-            {/* E6+ note */}
+            {/* E6+ note — only shown for IC6/IC7 level */}
+            {isSenior && (
             <div className="flex gap-3 p-3 rounded-xl bg-cyan-400/20 border border-cyan-400/40">
               <span className="text-xl flex-shrink-0">👑</span>
               <p className="text-cyan-100 text-sm leading-relaxed">
                 <strong className="text-white">E6+ candidates:</strong> Select the <strong className="text-white">E6+</strong> target level to unlock two additional senior focus areas — <strong className="text-white">XFN Collaboration</strong> and <strong className="text-white">Scope &amp; Conflict Resolution</strong> — which are assessed in senior screens to determine IC5 vs IC6 level fit.
               </p>
             </div>
+            )}
           </div>
         </div>
 

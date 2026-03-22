@@ -1,12 +1,23 @@
 // Design: Structured Clarity — dark navy hero, Meta blue accent, Space Grotesk headings
 // Disclaimer: collapsible banner with acknowledgement checkbox persisted to localStorage
 import { useState, useEffect, useRef } from "react";
-import { Code2, MessageSquare, Cpu, Calendar, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square, CalendarDays, X, Pencil } from "lucide-react";
+import { Code2, MessageSquare, Cpu, Calendar, CalendarDays, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square, X, Pencil } from "lucide-react";
+import { useICLevel } from "@/contexts/ICLevelContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
 
 const STORAGE_KEY = "meta-guide-disclaimer-acknowledged-v2";
 const DISMISSED_KEY = "meta-guide-banner-dismissed-v1";
+
+/** Exported so the footer can call it to restore the banner */
+export function restoreDisclaimerBanner() {
+  try {
+    localStorage.removeItem(DISMISSED_KEY);
+    window.location.reload();
+  } catch {
+    window.location.reload();
+  }
+}
 
 function DisclaimerBanner() {
   // Dismissed = banner fully hidden for returning users
@@ -220,6 +231,8 @@ function DisclaimerBanner() {
 }
 
 export default function Hero() {
+  const { icLevel, setICLevel } = useICLevel();
+
   return (
     <div>
       <DisclaimerBanner />
@@ -304,6 +317,38 @@ export default function Hero() {
                 <ExternalLink size={10} />
               </a>
             </div>
+          </div>
+
+          {/* IC Level Selector */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-white/50 text-xs font-bold uppercase tracking-widest">Your Level:</span>
+            <div className="flex rounded-lg overflow-hidden border border-white/20 text-sm font-semibold">
+              <button
+                onClick={() => setICLevel("junior")}
+                className={`px-4 py-1.5 transition-all ${
+                  icLevel === "junior"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                IC4 / IC5
+              </button>
+              <button
+                onClick={() => setICLevel("senior")}
+                className={`px-4 py-1.5 transition-all ${
+                  icLevel === "senior"
+                    ? "bg-[#4d9fff] text-white"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                IC6 / IC7
+              </button>
+            </div>
+            {icLevel === "junior" && (
+              <span className="text-emerald-400 text-xs font-medium">
+                Showing IC4/IC5 content — senior-only sections are hidden
+              </span>
+            )}
           </div>
 
           {/* Pill features */}

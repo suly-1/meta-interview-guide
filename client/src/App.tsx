@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { XPProvider } from "./contexts/XPContext";
 import { DensityProvider } from "./contexts/DensityContext";
+import { ICLevelProvider } from "./contexts/ICLevelContext";
 import Home from "./pages/Home";
 import DisclaimerGate from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
@@ -26,6 +27,7 @@ function AppRouter() {
 function App() {
   return (
     <ErrorBoundary>
+      <ICLevelProvider>
       <DensityProvider>
       <ThemeProvider
         defaultTheme="light"
@@ -48,6 +50,7 @@ function App() {
         </XPProvider>
       </ThemeProvider>
       </DensityProvider>
+      </ICLevelProvider>
     </ErrorBoundary>
   );
 }
