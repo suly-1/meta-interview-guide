@@ -273,7 +273,7 @@ export default function ApproachAnalyzer() {
             </button>
           </div>
 
-          {/* Meta SWE Rubric — shown after approach analysis */}
+          {/* Staff Engineer Rubric — shown after approach analysis */}
           <div className="mt-2">
             <MetaRubricAssessment
               problemName={currentProblem}

@@ -364,3 +364,8 @@
 - [x] Add 30/35/40/45 min duration selector to MetaCodingScreenSimulator setup phase
 - [x] Add explanatory note: 45-min interview = 15 min intro/clarification + 30 min coding; recommend 30 min practice
 - [x] Start button shows selected duration
+
+## Protection Features (Professional Safety)
+- [x] #5 Rename Meta-specific labels to FAANG/Staff Engineer framing across all components
+- [x] #4 Add one-click share message button to hero (copies Framing Option A to clipboard)
+- [x] #1 Add candidate-initiated discovery landing/splash page

@@ -1,5 +1,5 @@
 /**
- * MetaRubricAssessment — Meta SWE Focus Area Rubric
+ * MetaRubricAssessment — Staff Engineer Focus Area Rubric
  * Displays AI-scored assessment across Meta's 4 official focus areas:
  *   Problem Solving | Coding | Verification | Communication
  * Each rated on Meta's 6-point scale:

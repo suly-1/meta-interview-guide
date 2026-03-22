@@ -1,7 +1,7 @@
 // Design: Structured Clarity — dark navy hero, Meta blue accent, Space Grotesk headings
 // Disclaimer: collapsible banner with acknowledgement checkbox persisted to localStorage
 import { useState, useEffect, useRef } from "react";
-import { Code2, MessageSquare, Cpu, Calendar, CalendarDays, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square, X, Pencil } from "lucide-react";
+import { Code2, MessageSquare, Cpu, Calendar, CalendarDays, ChevronDown, ChevronUp, ExternalLink, CheckSquare, Square, X, Pencil, Share2, Check } from "lucide-react";
 import { useICLevel } from "@/contexts/ICLevelContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInterviewCountdown } from "@/hooks/useInterviewCountdown";
@@ -230,6 +230,49 @@ function DisclaimerBanner() {
   );
 }
 
+const SHARE_MESSAGE = `I came across this community-built study resource online — it covers general SWE interview patterns for Staff Engineer levels (IC4–IC7). It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
+
+function ShareButton() {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(SHARE_MESSAGE);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // fallback
+      const el = document.createElement("textarea");
+      el.value = SHARE_MESSAGE;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+  return (
+    <div className="mt-5 max-w-2xl">
+      <button
+        onClick={handleCopy}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${
+          copied
+            ? "bg-emerald-700/40 border-emerald-500/60 text-emerald-300"
+            : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/40"
+        }`}
+      >
+        {copied ? <Check size={15} className="text-emerald-400" /> : <Share2 size={15} />}
+        {copied ? "Message copied to clipboard!" : "Copy safe share message"}
+      </button>
+      {copied && (
+        <p className="mt-2 text-xs text-white/40 leading-relaxed max-w-lg">
+          Paste this into WhatsApp, LinkedIn DM, or personal email. It frames the guide as a community resource you found online — not official Meta prep material.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Hero() {
   const { icLevel, setICLevel } = useICLevel();
 
@@ -280,15 +323,15 @@ export default function Hero() {
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight mb-4"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Meta IC6/IC7
+            Staff Engineer
             <br />
-            <span className="text-[#4d9fff]">Behavioral &amp; Coding</span>
+            <span className="text-[#4d9fff]">Interview Guide</span>
             <br />
-            Interview Guide
+            <span className="text-2xl md:text-3xl font-semibold text-white/60">FAANG Edition — Google · Meta · Amazon · Apple</span>
           </h1>
 
           <p className="text-[#93c5fd] text-base md:text-lg max-w-2xl mb-4 leading-relaxed">
-            Built from 200+ candidate reports. Refined for 2026. A community-sourced, independent study resource — not affiliated with Meta. Covers IC4–IC7 Behavioral &amp; Coding rounds, including the AI-Enabled Coding Round, 14 LeetCode patterns, STAR framework, and curated resources.
+            Built from 200+ publicly available candidate reports. Refined for 2026. A community-sourced, independent study resource — not affiliated with any company. Covers IC4–IC7 Behavioral &amp; Coding rounds, including the AI-Enabled Coding Round, 14 LeetCode patterns, STAR framework, and curated resources.
           </p>
 
           {/* Official prep notice */}
@@ -368,6 +411,9 @@ export default function Hero() {
               </span>
             ))}
           </div>
+
+          {/* Share Button */}
+          <ShareButton />
 
           {/* Interview Countdown Clock */}
           <HeroCountdown />

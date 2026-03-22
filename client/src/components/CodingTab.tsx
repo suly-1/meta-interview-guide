@@ -270,7 +270,7 @@ export default function CodingTab() {
 
             {/* Title */}
             <h2 className="text-3xl md:text-4xl font-black text-white mb-2 leading-tight">
-              🖥️ Meta Coding Screen Simulator
+              🖥️ FAANG-Style Coding Screen Simulator
             </h2>
             <p className="text-violet-200 text-base md:text-lg font-semibold mb-5">
               The closest thing to the real Meta coding screen — without being in the room.
@@ -739,12 +739,12 @@ export default function CodingTab() {
         <InterviewScorecard />
       </section>
 
-      {/* Meta SWE Focus Area Rubric */}
+      {/* Staff Engineer Focus Area Rubric */}
       <section className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 rounded-full bg-violet-500" />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            ⭐ Meta SWE Rubric
+            ⭐ Staff Engineer Rubric
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">Official Meta focus areas — Problem Solving, Coding, Verification, Communication — rated on the 6-point Meta scale</p>
         </div>

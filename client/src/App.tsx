@@ -9,6 +9,7 @@ import { XPProvider } from "./contexts/XPContext";
 import { DensityProvider } from "./contexts/DensityContext";
 import { ICLevelProvider } from "./contexts/ICLevelContext";
 import Home from "./pages/Home";
+import CandidateDiscovery from "./pages/CandidateDiscovery";
 import DisclaimerGate from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -37,14 +38,20 @@ function App() {
           <FocusModeProvider>
           <TooltipProvider>
             <Toaster />
-            {/* DisclaimerGate blocks ALL content until the user explicitly acknowledges the disclaimer */}
-            <DisclaimerGate>
-              {/* Use hash-based routing so the standalone HTML file works without a server */}
-              <Router hook={useHashLocation}>
-                <AppRouter />
-              </Router>
-              <PatternUnlockCelebration />
-            </DisclaimerGate>
+            {/* Use hash-based routing so the standalone HTML file works without a server */}
+            <Router hook={useHashLocation}>
+              <Switch>
+                {/* /discover is accessible without DisclaimerGate — it IS the discovery page */}
+                <Route path="/discover" component={CandidateDiscovery} />
+                {/* All other routes go through DisclaimerGate */}
+                <Route>
+                  <DisclaimerGate>
+                    <AppRouter />
+                    <PatternUnlockCelebration />
+                  </DisclaimerGate>
+                </Route>
+              </Switch>
+            </Router>
           </TooltipProvider>
           </FocusModeProvider>
         </XPProvider>

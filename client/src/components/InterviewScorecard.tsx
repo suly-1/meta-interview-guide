@@ -167,7 +167,7 @@ export default function InterviewScorecard() {
         <RotateCcw size={14} /> Reset Scorecard
       </button>
 
-      {/* Meta SWE Rubric self-assessment — always visible below the scorecard */}
+      {/* Staff Engineer Rubric self-assessment — always visible below the scorecard */}
       <div className="mt-4">
         <MetaRubricAssessment
           problemName="Your last coding session"

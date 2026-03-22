@@ -809,7 +809,7 @@ export default function MetaCodingScreenSimulator() {
           <div className="flex items-center gap-2">
             <Code2 size={16} className="text-indigo-200" />
             <span className="text-sm font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Meta Coding Screen Simulator
+              FAANG-Style Coding Screen Simulator
             </span>
           </div>
           <button onClick={() => setPhase("history")} className="flex items-center gap-1.5 text-xs text-indigo-200 hover:text-white transition-colors">

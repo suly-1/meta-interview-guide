@@ -1,5 +1,5 @@
 /**
- * useXP — Daily XP System for the Meta Interview Guide
+ * useXP — Daily XP System for the Staff Engineer Interview Guide
  *
  * XP is earned from:
  *   - Solving a CTCI problem:          +10 XP

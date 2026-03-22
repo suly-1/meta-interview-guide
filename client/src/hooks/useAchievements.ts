@@ -1,5 +1,5 @@
 /**
- * useAchievements — Achievement Badge Wall for the Meta Interview Guide
+ * useAchievements — Achievement Badge Wall for the Staff Engineer Interview Guide
  *
  * Badges are computed from existing localStorage data — no new storage needed.
  * Categories: Coding, Behavioral, Mock Interviews, Streaks & Consistency, Milestones

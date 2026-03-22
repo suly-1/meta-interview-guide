@@ -1398,7 +1398,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         );
       })()}
 
-      {/* Meta Coding Screen Simulator */}
+      {/* FAANG-Style Coding Screen Simulator */}
       <MetaCodingScreenSimulator />
 
       {/* Recent session log */}
@@ -3684,7 +3684,7 @@ export default function CodePractice() {
                       const ics = [
                         "BEGIN:VCALENDAR",
                         "VERSION:2.0",
-                        "PRODID:-//Meta Interview Guide//Study Planner//EN",
+                        "PRODID:-//Staff Engineer Interview Guide//Study Planner//EN",
                         "CALSCALE:GREGORIAN",
                         "METHOD:PUBLISH",
                         `X-WR-CALNAME:${studyPlan.headline}`,

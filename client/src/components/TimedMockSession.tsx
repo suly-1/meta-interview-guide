@@ -231,10 +231,10 @@ export default function TimedMockSession() {
           )}
         </div>
 
-        {/* Meta SWE Rubric — shown after session is finished */}
+        {/* Staff Engineer Rubric — shown after session is finished */}
         {finished && problem && (
           <div className="border-t border-gray-100 pt-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3">Meta SWE Rubric Assessment</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3">Staff Engineer Rubric Assessment</p>
             <MetaRubricAssessment
               problemName={problem.name}
               approachText={`Timed mock session: ${problem.name} (${problem.difficulty}). Time used: ${formatTime(elapsed)}.`}

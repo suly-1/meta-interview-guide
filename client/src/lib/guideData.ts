@@ -1,4 +1,4 @@
-// Meta IC6/IC7 Interview Guide — All Content Data
+// Staff Engineer Interview Guide — FAANG Edition — All Content Data
 
 export const PATTERNS = [
   {

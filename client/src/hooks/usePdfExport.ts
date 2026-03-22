@@ -49,7 +49,7 @@ export function usePdfExport() {
       const addHeader = (pageNum: number, totalPages: number) => {
         pdf.setFontSize(7);
         pdf.setTextColor(150, 150, 150);
-        pdf.text("Meta IC6/IC7 Behavioral & Coding Interview Guide — March 2026", margin, 7);
+        pdf.text("Staff Engineer Interview Guide — FAANG Edition — March 2026", margin, 7);
         pdf.text(`Page ${pageNum} of ${totalPages}`, pageWidth - margin, 7, { align: "right" });
         pdf.setDrawColor(220, 220, 220);
         pdf.line(margin, 9, pageWidth - margin, 9);

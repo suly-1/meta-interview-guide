@@ -254,7 +254,7 @@ export default function Home() {
             <div className="flex items-center justify-between h-10 gap-2">
               {/* Left: app title */}
               <span className="text-xs font-bold text-gray-500 dark:text-gray-400 hidden sm:block tracking-wide uppercase">
-                Meta IC6/IC7 Interview Guide
+                Staff Engineer Interview Guide — FAANG Edition
               </span>
 
               {/* Right: utility buttons */}
@@ -478,7 +478,7 @@ export default function Home() {
             <div id="pdf-content" className="bg-white dark:bg-gray-900 rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
               {/* PDF header — visible only in PDF via print, hidden on screen */}
               <div className="hidden print:block mb-6 pb-4 border-b border-gray-200">
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Meta IC6/IC7 Interview Guide</p>
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Staff Engineer Interview Guide — FAANG Edition</p>
                 <h1 className="text-xl font-bold text-gray-900">
                   {ALL_TABS.find((t) => t.id === activeTab)?.label}
                 </h1>
@@ -575,7 +575,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
-        <p className="font-semibold text-white/90 mb-1">Meta IC6/IC7 Behavioral &amp; Coding Interview Guide</p>
+        <p className="font-semibold text-white/90 mb-1">Staff Engineer Interview Guide — FAANG Edition</p>
         <p>Updated March 2026 · Content synthesized from candidate reports, NeetCode, Coditioning, HelloInterview, igotanoffer, and Taro.</p>
         <p className="mt-3">
           <button
