@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Trophy,
   Plus,
@@ -9,7 +9,12 @@ import {
   Code2,
   Layers,
 } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import {
+  getLeaderboard,
+  upsertLeaderboard,
+  removeFromLeaderboard,
+  type LeaderboardEntry,
+} from "@/lib/supabase";
 import { toast } from "sonner";
 import {
   usePatternRatings,
@@ -62,6 +67,9 @@ export default function Leaderboard() {
   const streak = streakData.currentStreak ?? 0;
 
   // Compute local stats
+  const [sbEntries, setSbEntries] = useState<LeaderboardEntry[]>([]);
+  const [sbLoading, setSbLoading] = useState(false);
+
   const localStats = useMemo(() => {
     const patternsMastered = PATTERNS.filter(
       p => (patternRatings[p.id] ?? 0) >= 4
@@ -77,6 +85,7 @@ export default function Leaderboard() {
     const badges = getBadges(patternsMastered, mockSessions, streak);
     return {
       patternsMastered,
+      storiesReady,
       mockSessions,
       overallPct,
       badges,
@@ -84,32 +93,21 @@ export default function Leaderboard() {
     };
   }, [patternRatings, bqRatings, mockHistory, streak]);
 
-  const {
-    data: entries = [],
-    refetch,
-    isLoading,
-  } = trpc.leaderboard.getTop.useQuery(undefined, {
-    enabled: expanded,
-    staleTime: 30_000,
-  });
+  const fetchLeaderboard = useCallback(async () => {
+    setSbLoading(true);
+    try {
+      const data = await getLeaderboard();
+      setSbEntries(data);
+    } catch {
+      toast.error("Failed to load leaderboard.");
+    } finally {
+      setSbLoading(false);
+    }
+  }, []);
 
-  const upsert = trpc.leaderboard.upsert.useMutation({
-    onSuccess: () => {
-      refetch();
-      toast.success(`You're on the leaderboard as @${handle}!`);
-      setShowJoinModal(false);
-    },
-    onError: e => toast.error(e.message),
-  });
-
-  const remove = trpc.leaderboard.remove.useMutation({
-    onSuccess: () => {
-      localStorage.removeItem(HANDLE_KEY);
-      setHandle("");
-      refetch();
-      toast.success("Removed from leaderboard.");
-    },
-  });
+  useEffect(() => {
+    if (expanded) fetchLeaderboard();
+  }, [expanded, fetchLeaderboard]);
 
   const handleJoin = async () => {
     const h = inputHandle
@@ -121,19 +119,59 @@ export default function Leaderboard() {
       return;
     }
     setJoining(true);
-    localStorage.setItem(HANDLE_KEY, h);
-    setHandle(h);
-    await upsert.mutateAsync({ anonHandle: h, ...localStats });
-    setJoining(false);
+    try {
+      await upsertLeaderboard({
+        handle: h,
+        patterns_mastered: localStats.patternsMastered,
+        bq_ready: localStats.storiesReady,
+        mock_sessions: localStats.mockSessions,
+        streak: localStats.streakDays,
+      });
+      localStorage.setItem(HANDLE_KEY, h);
+      setHandle(h);
+      await fetchLeaderboard();
+      toast.success(`You're on the leaderboard as @${h}!`);
+      setShowJoinModal(false);
+    } catch {
+      toast.error("Failed to join. Try a different handle.");
+    } finally {
+      setJoining(false);
+    }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!handle) return;
-    upsert.mutate({ anonHandle: handle, ...localStats });
-    toast.success("Leaderboard stats updated!");
+    try {
+      await upsertLeaderboard({
+        handle,
+        patterns_mastered: localStats.patternsMastered,
+        bq_ready: localStats.storiesReady,
+        mock_sessions: localStats.mockSessions,
+        streak: localStats.streakDays,
+      });
+      await fetchLeaderboard();
+      toast.success("Leaderboard stats updated!");
+    } catch {
+      toast.error("Failed to update stats.");
+    }
   };
 
-  const myRank = entries.findIndex(e => e.anonHandle === handle) + 1;
+  const handleRemove = async () => {
+    if (!handle) return;
+    try {
+      await removeFromLeaderboard(handle);
+      localStorage.removeItem(HANDLE_KEY);
+      setHandle("");
+      await fetchLeaderboard();
+      toast.success("Removed from leaderboard.");
+    } catch {
+      toast.error("Failed to remove.");
+    }
+  };
+
+  const entries = sbEntries;
+  const isLoading = sbLoading;
+  const myRank = entries.findIndex(e => e.handle === handle) + 1;
 
   return (
     <div className="prep-card p-4">
@@ -161,7 +199,7 @@ export default function Leaderboard() {
                 <RefreshCw size={11} /> Sync
               </button>
               <button
-                onClick={() => remove.mutate({ anonHandle: handle })}
+                onClick={handleRemove}
                 className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
               >
                 <X size={11} /> Leave
@@ -216,10 +254,10 @@ export default function Leaderboard() {
               </div>
 
               {entries.map((entry, i) => {
-                const isMe = entry.anonHandle === handle;
+                const isMe = entry.handle === handle;
                 return (
                   <div
-                    key={entry.id}
+                    key={entry.handle}
                     className={`grid grid-cols-[1.5rem_1fr_auto_auto_auto] gap-x-3 items-center px-2 py-1.5 rounded-lg text-sm transition-colors
                       ${isMe ? "bg-blue-500/10 border border-blue-500/20" : "hover:bg-secondary/50"}`}
                   >
@@ -230,27 +268,22 @@ export default function Leaderboard() {
                       <span
                         className={`font-medium truncate ${isMe ? "text-blue-400" : "text-foreground"}`}
                       >
-                        @{entry.anonHandle}
+                        @{entry.handle}
                       </span>
                       {isMe && (
                         <span className="badge badge-blue text-xs shrink-0">
                           you
                         </span>
                       )}
-                      {(entry.badges as string[]).length > 0 && (
-                        <span className="text-xs text-muted-foreground truncate hidden sm:block">
-                          {(entry.badges as string[]).slice(0, 2).join(" · ")}
-                        </span>
-                      )}
                     </div>
                     <span className="text-emerald-400 font-semibold text-xs tabular-nums text-right">
-                      {entry.patternsMastered}/20
+                      {entry.patterns_mastered}/20
                     </span>
                     <span className="text-orange-400 font-semibold text-xs tabular-nums text-right">
-                      🔥{entry.streakDays}
+                      🔥{entry.streak}
                     </span>
                     <span className="text-purple-400 font-semibold text-xs tabular-nums text-right">
-                      {entry.mockSessions}
+                      {entry.mock_sessions}
                     </span>
                   </div>
                 );

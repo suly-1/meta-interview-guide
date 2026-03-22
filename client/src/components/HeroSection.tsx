@@ -16,6 +16,7 @@ import {
   Award,
 } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
+import CrossDeviceSync from "@/components/CrossDeviceSync";
 
 // ── Achievement Badges ─────────────────────────────────────────────────────
 const BADGE_DEFS = [
@@ -360,6 +361,10 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
       {/* Leaderboard */}
       <div className="mt-4" id="hero-leaderboard">
         <Leaderboard />
+      </div>
+      {/* Cross-device sync */}
+      <div className="mt-3">
+        <CrossDeviceSync />
       </div>
     </div>
   );

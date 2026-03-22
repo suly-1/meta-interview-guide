@@ -21,7 +21,7 @@ import {
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 
-import { CodePracticeAIPanel } from "@/components/CodePracticeAI";
+import CodePracticeAIStatic from "@/components/CodePracticeAIStatic";
 
 // ── Problem Data ───────────────────────────────────────────────────────────
 type Difficulty = "Easy" | "Medium" | "Hard";
@@ -1565,7 +1565,7 @@ export default function CodePracticeTab() {
             </div>
             {/* AI Panel */}
             <div className="xl:w-80 shrink-0 flex flex-col gap-2">
-              <CodePracticeAIPanel
+              <CodePracticeAIStatic
                 problem={selectedProblem}
                 code={code}
                 language={lang}

@@ -10,19 +10,24 @@
 import { execSync } from "child_process";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { writeFileSync } from "fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
-// ── Step 1: Build with GitHub Pages base path ──────────────────────────────
-console.log("📦 Building for GitHub Pages (base: /meta-prep-guide/)…");
-execSync("vite build --base=/meta-prep-guide/", {
+// ── Step 1: Build with root base path (custom domain: www.metaguide.blog) ──
+console.log("📦 Building for GitHub Pages (base: /)…");
+execSync("vite build --base=/", {
   cwd: ROOT,
   stdio: "inherit",
   env: { ...process.env, NODE_ENV: "production" },
 });
 
-// ── Step 2: Deploy dist/public to gh-pages branch ─────────────────────────
+// ── Step 2: Write CNAME file so GitHub Pages keeps the custom domain ────────
+console.log("📝 Writing CNAME file…");
+writeFileSync(resolve(ROOT, "dist/public/CNAME"), "www.metaguide.blog\n");
+
+// ── Step 3: Deploy dist/public to gh-pages branch ─────────────────────────
 console.log("🚀 Deploying to gh-pages branch…");
 execSync(
   `node node_modules/gh-pages/bin/gh-pages.js --dist dist/public --branch gh-pages --message "Deploy to GitHub Pages [skip ci]"`,
@@ -32,4 +37,4 @@ execSync(
   }
 );
 
-console.log("✅ Deployed! Visit: https://suly-1.github.io/meta-prep-guide/");
+console.log("✅ Deployed! Visit: https://www.metaguide.blog/");
