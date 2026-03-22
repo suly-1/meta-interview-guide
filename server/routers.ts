@@ -47,13 +47,13 @@ export const appRouter = router({
         z.object({
           answer: z.string().min(10, "Answer must be at least 10 characters"),
           question: z.string().optional(),
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
         })
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
         const systemPrompt = `You are an expert Meta software engineering interview coach specializing in behavioral interviews.
-You evaluate STAR (Situation, Task, Action, Result) answers for ${input.targetLevel} (${input.targetLevel === 'IC7' ? 'Staff Engineer' : 'Senior Engineer'}) candidates.
+You evaluate STAR (Situation, Task, Action, Result) answers for ${input.targetLevel} (${input.targetLevel === 'L7' ? 'Staff Engineer' : 'Senior Engineer'}) candidates.
 
 Score the answer on these 5 dimensions, each from 1 to 5:
 1. Specificity (1=vague/generic, 5=concrete details, metrics, names, dates)
@@ -173,7 +173,7 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
     followUps: publicProcedure
       .input(
         z.object({
-          targetLevel: z.enum(["IC6", "IC7", "IC7_PRINCIPAL"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7", "IC7_PRINCIPAL"]).default("L6"),
           behavioralFeedback: z.string(),
           codingFeedback: z.string().optional(),
           topImprovements: z.array(z.string()),
@@ -186,8 +186,8 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
         const levelLabel = input.targetLevel === "IC7_PRINCIPAL"
-          ? "Principal/Senior Staff Engineer (IC7+)"
-          : input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+          ? "Principal/Senior Staff Engineer (L7+)"
+          : input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const improvementsText = input.topImprovements.slice(0, 3).map((s, i) => `${i + 1}. ${s}`).join("\n");
         const answersText = input.behavioralAnswers
           .map((b, i) => `Q${i + 1}: ${b.question}\nA${i + 1}: ${b.answer.slice(0, 300)}${b.answer.length > 300 ? '...' : ''}`)
@@ -244,7 +244,7 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
     debrief: publicProcedure
       .input(
         z.object({
-          targetLevel: z.enum(["IC6", "IC7", "IC7_PRINCIPAL"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7", "IC7_PRINCIPAL"]).default("L6"),
           coding: z.object({
             problemName: z.string(),
             difficulty: z.string(),
@@ -264,8 +264,8 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
         const { invokeLLM } = await import("./_core/llm");
         const isPrincipal = input.targetLevel === "IC7_PRINCIPAL";
         const levelLabel = isPrincipal
-          ? "Principal/Senior Staff Engineer (IC7+)"
-          : input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+          ? "Principal/Senior Staff Engineer (L7+)"
+          : input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const behavioralSection = input.behavioral
           .map((b, i) => `Q${i + 1}: ${b.question}\nA${i + 1}: ${b.answer}`)
           .join("\n\n");
@@ -277,15 +277,15 @@ Keep your response concise (2-4 sentences max). Do not write any code.`;
           systemPrompt = `You are a senior Meta engineering panel evaluating a candidate for ${levelLabel}.
 This is a 60-minute behavioral-only interview focused on cross-functional leadership, org-wide impact, and retrospective ownership.
 Do NOT evaluate coding ability — this session has no coding component.
-Evaluate the candidate against the IC7+ bar at Meta:
+Evaluate the candidate against the L7+ bar at Meta:
 - Cross-functional influence: Does the candidate drive alignment across multiple teams, orgs, or functions?
 - Retrospective ownership: Do they demonstrate deep ownership of outcomes, including failures, with systemic improvements?
 - Org-wide impact: Are their examples scoped to org-level or company-level impact, not just team-level?
 - Communication & persuasion: Can they influence without authority, navigate ambiguity, and align senior stakeholders?
 - Strategic thinking: Do they demonstrate long-horizon thinking, trade-off reasoning, and prioritisation at scale?
-Be direct and calibrated. IC7+ requires clear evidence of staff-level leadership, not just strong IC execution.
+Be direct and calibrated. L7+ requires clear evidence of staff-level leadership, not just strong IC execution.
 Score behavioral from 1 (poor) to 5 (exceptional). Set codingScore to 0 and codingFeedback to "N/A — behavioral-only session".`;
-          userMessage = `=== BEHAVIORAL INTERVIEW (60 min, IC7+ Principal/Senior Staff) ===\n${behavioralSection}`;
+          userMessage = `=== BEHAVIORAL INTERVIEW (60 min, L7+ Principal/Senior Staff) ===\n${behavioralSection}`;
         } else {
           const codingResult = input.coding
             ? (input.coding.solved
@@ -296,7 +296,7 @@ Score behavioral from 1 (poor) to 5 (exceptional). Set codingScore to 0 and codi
 You have just completed a mock interview loop with one coding round and ${input.behavioral.length} behavioral questions.
 Evaluate the candidate holistically and return a structured JSON debrief.
 Be direct, specific, and calibrated to the ${input.targetLevel} bar at Meta.
-Do not be overly generous — IC7 requires demonstrable staff-level scope and impact.
+Do not be overly generous — L7 requires demonstrable staff-level scope and impact.
 Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
           userMessage = `=== CODING ROUND ===\nProblem: ${input.coding?.problemName ?? "Unknown"} (${input.coding?.difficulty ?? "Unknown"})\nResult: ${codingResult}${input.coding?.notes ? `\nCandidate notes: ${input.coding.notes}` : ""}\n\n=== BEHAVIORAL ROUNDS ===\n${behavioralSection}`;
         }
@@ -410,7 +410,7 @@ Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
           medium: "Give a medium hint — describe the core insight of this pattern at a high level. Mention what problem shape it solves and why. Do NOT write code.",
           full: "Give a full walkthrough — explain the pattern step by step in plain English: when to recognise it, the key invariant, and the general algorithm. Do NOT write actual code.",
         };
-        const systemPrompt = `You are a senior software engineer coaching a Meta IC6/IC7 candidate.\nYou are explaining the \"${input.patternName}\" coding pattern.\nCore idea: ${input.keyIdea}\n${levelInstructions[input.hintLevel]}\nKeep your response concise (3-5 sentences). Do not write code.`;
+        const systemPrompt = `You are a senior software engineer coaching a Meta L6/L7 candidate.\nYou are explaining the \"${input.patternName}\" coding pattern.\nCore idea: ${input.keyIdea}\n${levelInstructions[input.hintLevel]}\nKeep your response concise (3-5 sentences). Do not write code.`;
         const response = await invokeLLM({
           messages: [
             { role: "system", content: systemPrompt },
@@ -461,7 +461,7 @@ Score coding and behavioral each from 1 (poor) to 5 (exceptional).`;
         const unsolvedSection = input.unsolvedProblems.length > 0
           ? `Sample unsolved CTCI problems: ${input.unsolvedProblems.map(p => `${p.name} (${p.difficulty}, ${p.topic})`).join("; ")}`
           : "All CTCI problems solved";
-        const systemPrompt = `You are an expert Meta IC6/IC7 interview coach building a personalised ${durationLabel} study session plan.
+        const systemPrompt = `You are an expert Meta L6/L7 interview coach building a personalised ${durationLabel} study session plan.
 Candidate snapshot:
 - Readiness score: ${input.readinessScore}/100${input.daysUntilInterview ? `\n- Days until interview: ${input.daysUntilInterview}` : ""}
 - ${srSection}
@@ -546,7 +546,7 @@ Time allocations must sum to ${input.durationMinutes} minutes.`;
     debrief: publicProcedure
       .input(
         z.object({
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
           problem: z.object({
             id: z.string(),
             title: z.string(),
@@ -565,14 +565,14 @@ Time allocations must sum to ${input.durationMinutes} minutes.`;
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const levelLabel = input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const minutesSpent = Math.round(input.durationSec / 60);
         const systemPrompt = `You are a Meta engineering interview panel evaluating a candidate for ${levelLabel} on a System Design interview.
 The candidate was given 45 minutes to design: "${input.problem.title}" (${input.problem.difficulty}).
 They spent ${minutesSpent} minutes.
 
 Evaluate each of the 5 dimensions below on a 1-5 scale and provide specific, actionable feedback.
-Be calibrated to the ${input.targetLevel} bar at Meta. IC7 requires demonstrable staff-level scope, trade-off depth, and Meta-scale thinking.
+Be calibrated to the ${input.targetLevel} bar at Meta. L7 requires demonstrable staff-level scope, trade-off depth, and Meta-scale thinking.
 Do not be overly generous. Return a structured JSON debrief.`;
         const userMessage = [
           `=== PROBLEM ===${"\n"}${input.problem.title} — ${input.problem.tagline}`,
@@ -654,7 +654,7 @@ Do not be overly generous. Return a structured JSON debrief.`;
     followUp: publicProcedure
       .input(
         z.object({
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
           problem: z.object({ id: z.string(), title: z.string(), difficulty: z.string(), tagline: z.string() }),
           sections: z.object({
             requirements: z.string(),
@@ -668,7 +668,7 @@ Do not be overly generous. Return a structured JSON debrief.`;
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const levelLabel = input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const systemPrompt = `You are a senior Meta interviewer conducting a follow-up drill after a system design debrief for ${levelLabel}.
 The candidate just received a "${input.verdict}" verdict on "${input.problem.title}".
 Generate 3 probing follow-up questions that target the weakest areas of their response.
@@ -745,15 +745,15 @@ Questions should be specific, realistic, and escalate in difficulty. Return stru
           })),
           workflowNotes: z.string().optional(),
           aiUsageNotes: z.string().optional(),
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
           elapsedSeconds: z.number().optional(),
         })
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelBar = input.targetLevel === "IC7"
-          ? "IC7 Staff Engineer (owns large systems, drives technical direction, mentors others)"
-          : "IC6 Senior Engineer (independently solves complex problems, strong code quality and verification)";
+        const levelBar = input.targetLevel === "L7"
+          ? "L7 Staff Engineer (owns large systems, drives technical direction, mentors others)"
+          : "L6 Senior Engineer (independently solves complex problems, strong code quality and verification)";
         const phaseSummary = input.phases.map((p, i) =>
           `Phase ${i + 1} (${p.type} — ${p.title}):\n${p.answer || "(no answer provided)"}`
         ).join("\n\n");
@@ -842,7 +842,7 @@ Return ONLY valid JSON matching the schema exactly.`,
     drillDeeper: publicProcedure
       .input(
         z.object({
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
           problemTitle: z.string(),
           problemDomain: z.string(),
           verdict: z.string(),
@@ -852,7 +852,7 @@ Return ONLY valid JSON matching the schema exactly.`,
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const levelLabel = input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const systemPrompt = `You are a senior Meta interviewer running a targeted drill-deeper session after an AI-Enabled Coding Round debrief for ${levelLabel}. The candidate received a "${input.verdict}" verdict on "${input.problemTitle}" (domain: ${input.problemDomain}). Their weakest dimensions were: ${input.weakDimensions.join(", ")}. Generate 4 targeted follow-up challenges that directly address those weaknesses. Return structured JSON.`;
         const userContent = input.phaseAnswers.map((a, i) => `Phase ${i + 1}: ${a || "(no answer)"}`).join("\n");
         const response = await invokeLLM({
@@ -919,12 +919,12 @@ Return ONLY valid JSON matching the schema exactly.`,
           problemTitle: z.string(),
           problemTagline: z.string(),
           candidateQuestions: z.string().min(5, "Please write at least one clarifying question"),
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
         })
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const levelLabel = input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const systemPrompt = `You are a senior Meta system design interviewer evaluating a candidate's requirements clarification for ${levelLabel}.
 The problem is: "${input.problemTitle}" — ${input.problemTagline}.
 
@@ -937,7 +937,7 @@ At Meta, requirements clarification accounts for ~30% of the system design score
 Also identify:
 - The single most important question they MISSED that a ${input.targetLevel} candidate should always ask
 - Whether they asked about the right things in the right order (broad → narrow)
-- An IC-level verdict: IC4 (too shallow), IC5 (adequate), IC6 (strong), IC7 (exceptional)
+- An IC-level verdict: L4 (too shallow), L5 (adequate), L6 (strong), L7 (exceptional)
 
 Return ONLY valid JSON.`;
         const response = await invokeLLM({
@@ -963,7 +963,7 @@ Return ONLY valid JSON.`;
                   scopeNarrowingFeedback: { type: "string" },
                   biggestMissedQuestion: { type: "string" },
                   orderingFeedback: { type: "string" },
-                  icLevelVerdict: { type: "string", enum: ["IC4", "IC5", "IC6", "IC7"] },
+                  icLevelVerdict: { type: "string", enum: ["L4", "L5", "L6", "L7"] },
                   overallCoaching: { type: "string" },
                 },
                 required: [
@@ -988,7 +988,7 @@ Return ONLY valid JSON.`;
             constraintDiscoveryScore: number; constraintDiscoveryFeedback: string;
             scopeNarrowingScore: number; scopeNarrowingFeedback: string;
             biggestMissedQuestion: string; orderingFeedback: string;
-            icLevelVerdict: "IC4" | "IC5" | "IC6" | "IC7"; overallCoaching: string;
+            icLevelVerdict: "L4" | "L5" | "L6" | "L7"; overallCoaching: string;
           };
         } catch {
           return {
@@ -998,7 +998,7 @@ Return ONLY valid JSON.`;
             scopeNarrowingScore: 3, scopeNarrowingFeedback: "",
             biggestMissedQuestion: "What is the expected read-to-write ratio?",
             orderingFeedback: "Start with functional requirements, then scale, then constraints.",
-            icLevelVerdict: "IC5" as const, overallCoaching: "Please try again.",
+            icLevelVerdict: "L5" as const, overallCoaching: "Please try again.",
           };
         }
       }),
@@ -1018,12 +1018,12 @@ Return ONLY valid JSON.`;
           candidateChoice: z.enum(["A", "B"]),
           candidateJustification: z.string().min(10, "Please write a justification"),
           context: z.string(),
-          targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L6", "L7"]).default("L6"),
         })
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : "Senior Engineer (IC6)";
+        const levelLabel = input.targetLevel === "L7" ? "Staff Engineer (L7)" : "Senior Engineer (L6)";
         const systemPrompt = `You are a senior Meta system design interviewer evaluating a candidate's trade-off articulation for ${levelLabel}.
 
 The decision: "${input.decision}"
@@ -1208,7 +1208,7 @@ Return JSON with these exact fields:
 
   /**
    * signalDetector.classify — LLM classifies each paragraph of a candidate's
-   * System Design mock answer as IC4/IC5/IC6/IC7, explaining what signal level
+   * System Design mock answer as L4/L5/L6/L7, explaining what signal level
    * each paragraph demonstrates and what would elevate it.
    */
   signalDetector: router({
@@ -1258,10 +1258,10 @@ Return JSON with these exact fields:
         const prompt = `You are a Meta staff engineer scoring a ${input.targetLevel} system design interview for the problem: "${input.problemTitle}".
 
 For each numbered paragraph below, classify the IC signal level it demonstrates:
-- IC4: Basic awareness, generic statements, no depth ("We need a database", "Use caching")
-- IC5: Correct but surface-level (names the right technology, gives one reason)
-- IC6: Concrete trade-off reasoning, quantified claims, considers failure modes
-- IC7: Exceptional depth — references Meta internals, multi-dimensional trade-offs, proactively addresses edge cases
+- L4: Basic awareness, generic statements, no depth ("We need a database", "Use caching")
+- L5: Correct but surface-level (names the right technology, gives one reason)
+- L6: Concrete trade-off reasoning, quantified claims, considers failure modes
+- L7: Exceptional depth — references Meta internals, multi-dimensional trade-offs, proactively addresses edge cases
 
 Paragraphs to classify:
 ${paragraphList}
@@ -1270,7 +1270,7 @@ Return a JSON array with one object per paragraph index:
 [
   {
     "index": 0,
-    "level": "IC5",
+    "level": "L5",
     "reasoning": "Names the right approach but doesn't explain why or quantify the benefit",
     "elevationTip": "Add: 'because at 500M DAU, offset pagination causes full table scans — cursor pagination keeps O(1) per page'"
   },
@@ -1304,12 +1304,12 @@ Return a JSON array with one object per paragraph index:
 
           return { classifications };
         } catch {
-          // Fallback: return all paragraphs as IC5 with generic feedback
+          // Fallback: return all paragraphs as L5 with generic feedback
           return {
             classifications: allParagraphs.map(p => ({
               section: p.section,
               text: p.text,
-              level: "IC5",
+              level: "L5",
               reasoning: "Unable to classify — please try again.",
               elevationTip: "Add specific trade-off reasoning and quantified claims.",
             })),
@@ -1347,7 +1347,7 @@ Also provide:
 - mitigationFeedback: specific feedback on their mitigation proposals
 - quantificationFeedback: specific feedback on their quantification
 - overallFeedback: the single most important thing they should add/improve
-- passesBar: boolean — does this answer pass the IC6 bar for Technical Depth?
+- passesBar: boolean — does this answer pass the L6 bar for Technical Depth?
 
 Return ONLY valid JSON.`;
         const response = await invokeLLM({
@@ -1464,12 +1464,12 @@ Return ONLY valid JSON.`;
           problemName: z.string().min(1),
           approachText: z.string().min(10, "Approach must be at least 10 characters"),
           codeText: z.string().optional().default(""),
-          targetLevel: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+          targetLevel: z.enum(["L5", "L6", "L7"]).default("L6"),
         })
       )
       .mutation(async ({ input }) => {
         const { invokeLLM } = await import("./_core/llm");
-        const levelLabel = input.targetLevel === "IC7" ? "Staff Engineer (IC7)" : input.targetLevel === "IC6" ? "Senior Engineer (IC6)" : "Software Engineer (IC5)";
+        const levelLabel = input.targetLevel === "L7" ? "Staff Engineer (L7)" : input.targetLevel === "L6" ? "Senior Engineer (L6)" : "Software Engineer (L5)";
         const RATINGS = ["Insufficient", "Moderate", "Solid", "Strong", "Exceptional", "Can't Assess"] as const;
         const systemPrompt = `You are a Meta software engineering interviewer evaluating a candidate for ${levelLabel}.
 

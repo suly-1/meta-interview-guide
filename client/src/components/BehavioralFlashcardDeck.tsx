@@ -15,7 +15,7 @@ type FlashCard = {
   ic7Answer: string;
 };
 
-// IC6 vs IC7 sample answer pairs for representative questions
+// L6 vs L7 sample answer pairs for representative questions
 const IC6_IC7_ANSWERS: Record<string, { ic6: string; ic7: string }> = {
   "Tell me about a high-impact project you have worked on.": {
     ic6: "I led the migration of our payments service from a monolith to microservices. I owned the technical design, coordinated with the data team on schema changes, and delivered the migration in 3 sprints with zero downtime. The result was a 40% reduction in p99 latency and improved deploy frequency from monthly to weekly.",
@@ -31,7 +31,7 @@ const IC6_IC7_ANSWERS: Record<string, { ic6: string; ic7: string }> = {
   },
   "Describe a time when you disagreed with your manager or leadership on a technical or product decision.": {
     ic6: "My manager wanted to use an off-the-shelf solution for our search feature, but I believed a custom approach would give us better performance. I wrote a technical doc comparing both options with benchmarks, presented it in our weekly sync, and my manager agreed to try the custom approach. It ended up being 3× faster for our use case.",
-    ic7: "Leadership had decided to sunset a platform I believed was still strategically important. Rather than just accepting the decision, I built a quantitative case: I surveyed 12 teams, modeled the migration cost at $4M and 18 months, and identified 3 product bets that depended on the platform. I presented this to the Director and VP, acknowledged the legitimate reasons for sunsetting, and proposed a middle path — a 6-month maintenance mode with a clear deprecation timeline. They adopted my proposal. This taught me that disagreeing at the IC7 level means owning the full analysis, not just the technical opinion.",
+    ic7: "Leadership had decided to sunset a platform I believed was still strategically important. Rather than just accepting the decision, I built a quantitative case: I surveyed 12 teams, modeled the migration cost at $4M and 18 months, and identified 3 product bets that depended on the platform. I presented this to the Director and VP, acknowledged the legitimate reasons for sunsetting, and proposed a middle path — a 6-month maintenance mode with a clear deprecation timeline. They adopted my proposal. This taught me that disagreeing at the L7 level means owning the full analysis, not just the technical opinion.",
   },
   "Tell me about a time when your team had a conflict or disagreement with another team.": {
     ic6: "Our team and the platform team disagreed on API ownership. I set up a joint meeting, we mapped out the dependency graph, and agreed on a clear contract with versioning. The conflict was resolved in two weeks and we shipped without blocking each other.",
@@ -138,7 +138,7 @@ export default function BehavioralFlashcardDeck() {
           </div>
           <div>
             <h3 className="font-bold text-gray-900 text-base">Flashcard Flip Deck</h3>
-            <p className="text-sm text-gray-500">One question at a time — type your answer, then flip to see probes and IC6/IC7 examples</p>
+            <p className="text-sm text-gray-500">One question at a time — type your answer, then flip to see probes and L6/L7 examples</p>
           </div>
         </div>
 
@@ -299,7 +299,7 @@ export default function BehavioralFlashcardDeck() {
                         </ul>
                       </div>
 
-                      {/* IC6 vs IC7 toggle */}
+                      {/* L6 vs L7 toggle */}
                       {(card.ic6Answer || card.ic7Answer) && (
                         <div>
                           <button
@@ -307,7 +307,7 @@ export default function BehavioralFlashcardDeck() {
                             className="flex items-center gap-2 text-xs font-semibold text-purple-700 hover:text-purple-900 transition-colors mb-2"
                           >
                             <ChevronRight size={12} className={`transition-transform ${showIC6IC7 ? "rotate-90" : ""}`} />
-                            {showIC6IC7 ? "Hide" : "Show"} IC6 vs IC7 Sample Answers
+                            {showIC6IC7 ? "Hide" : "Show"} L6 vs L7 Sample Answers
                           </button>
                           <AnimatePresence>
                             {showIC6IC7 && (
@@ -322,14 +322,14 @@ export default function BehavioralFlashcardDeck() {
                                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                     <div className="flex items-center gap-2 mb-2">
                                       <span className="w-2 h-2 rounded-full bg-blue-500" />
-                                      <span className="text-xs font-bold text-blue-800">IC6 — Senior Engineer Level</span>
+                                      <span className="text-xs font-bold text-blue-800">L6 — Senior Engineer Level</span>
                                     </div>
                                     <p className="text-xs text-blue-900 leading-relaxed">{card.ic6Answer || "Team-scoped impact, strong individual execution, clear ownership of one system or feature."}</p>
                                   </div>
                                   <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
                                     <div className="flex items-center gap-2 mb-2">
                                       <span className="w-2 h-2 rounded-full bg-purple-500" />
-                                      <span className="text-xs font-bold text-purple-800">IC7 — Staff Engineer Level</span>
+                                      <span className="text-xs font-bold text-purple-800">L7 — Staff Engineer Level</span>
                                     </div>
                                     <p className="text-xs text-purple-900 leading-relaxed">{card.ic7Answer || "Org-wide impact, cross-team alignment, business-level framing, creates leverage for others."}</p>
                                   </div>

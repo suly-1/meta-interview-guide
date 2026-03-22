@@ -62,7 +62,7 @@ function analyzeApproach(text: string, patternName: string): AnalysisResult {
   const tradeoffMentioned = tradeoffWords.filter(w => lower.includes(w)).length;
   const tradeoffScore = tradeoffMentioned >= 2 ? 3 : tradeoffMentioned === 1 ? 2 : 0;
   const tradeoffFeedback = tradeoffScore === 3
-    ? "Discussed trade-offs and alternatives — this is IC7-level thinking."
+    ? "Discussed trade-offs and alternatives — this is L7-level thinking."
     : tradeoffScore === 2
     ? "Touched on trade-offs. Elaborate: 'The brute force is O(n²) but we can do better with…'"
     : "No trade-offs discussed. Mention the naive approach first, then explain why your solution is better.";
@@ -71,11 +71,11 @@ function analyzeApproach(text: string, patternName: string): AnalysisResult {
   const maxScore = 12;
   const pct = totalScore / maxScore;
 
-  const icLevel = pct >= 0.85 ? "IC7 Signal" : pct >= 0.65 ? "IC6 Signal" : pct >= 0.45 ? "IC5 Signal" : "Below Bar";
+  const icLevel = pct >= 0.85 ? "L7 Signal" : pct >= 0.65 ? "L6 Signal" : pct >= 0.45 ? "L5 Signal" : "Below Bar";
   const overallFeedback = pct >= 0.85
-    ? "Excellent approach explanation. You're demonstrating IC7-level communication."
+    ? "Excellent approach explanation. You're demonstrating L7-level communication."
     : pct >= 0.65
-    ? "Solid approach. Name the pattern explicitly and discuss trade-offs to reach IC7 level."
+    ? "Solid approach. Name the pattern explicitly and discuss trade-offs to reach L7 level."
     : pct >= 0.45
     ? "Decent start but missing key elements. Practice the formula: Pattern → Complexity → Edge Cases → Trade-offs."
     : "Approach needs significant work. Use the template: 'This is a [pattern] problem. I'll use [data structure] for O(n) time. Edge cases: [list]. Alternative: [brute force].'";
@@ -235,9 +235,9 @@ export default function ApproachAnalyzer() {
         <div className="space-y-3">
           {/* Overall */}
           <div className={`rounded-xl border p-4 ${
-            result.icLevel === "IC7 Signal" ? "bg-emerald-50 border-emerald-200" :
-            result.icLevel === "IC6 Signal" ? "bg-blue-50 border-blue-200" :
-            result.icLevel === "IC5 Signal" ? "bg-amber-50 border-amber-200" :
+            result.icLevel === "L7 Signal" ? "bg-emerald-50 border-emerald-200" :
+            result.icLevel === "L6 Signal" ? "bg-blue-50 border-blue-200" :
+            result.icLevel === "L5 Signal" ? "bg-amber-50 border-amber-200" :
             "bg-red-50 border-red-200"
           }`}>
             <div className="flex items-center justify-between mb-2">
@@ -278,7 +278,7 @@ export default function ApproachAnalyzer() {
             <MetaRubricAssessment
               problemName={currentProblem}
               approachText={approach}
-              targetLevel="IC6"
+              targetLevel="L6"
             />
           </div>
         </div>

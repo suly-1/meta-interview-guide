@@ -11,23 +11,23 @@ import { z } from "zod";
 const behavioralScoreInput = z.object({
   answer: z.string().min(10, "Answer must be at least 10 characters"),
   question: z.string().optional(),
-  targetLevel: z.enum(["IC6", "IC7"]).default("IC6"),
+  targetLevel: z.enum(["L6", "L7"]).default("L6"),
 });
 
 describe("behavioral.score input validation", () => {
-  it("accepts a valid IC6 answer", () => {
+  it("accepts a valid L6 answer", () => {
     const result = behavioralScoreInput.safeParse({
       answer: "This is a valid STAR answer with more than 10 characters.",
-      targetLevel: "IC6",
+      targetLevel: "L6",
     });
     expect(result.success).toBe(true);
   });
 
-  it("accepts a valid IC7 answer with optional question", () => {
+  it("accepts a valid L7 answer with optional question", () => {
     const result = behavioralScoreInput.safeParse({
       answer: "Led a cross-functional initiative that reduced latency by 40%.",
       question: "Tell me about a time you drove a major technical initiative.",
-      targetLevel: "IC7",
+      targetLevel: "L7",
     });
     expect(result.success).toBe(true);
   });
@@ -35,7 +35,7 @@ describe("behavioral.score input validation", () => {
   it("rejects an answer shorter than 10 characters", () => {
     const result = behavioralScoreInput.safeParse({
       answer: "Short",
-      targetLevel: "IC6",
+      targetLevel: "L6",
     });
     // Zod should reject because 'Short' has 5 chars, min is 10
     expect(result.success).toBe(false);
@@ -44,18 +44,18 @@ describe("behavioral.score input validation", () => {
   it("rejects an invalid target level", () => {
     const result = behavioralScoreInput.safeParse({
       answer: "A valid answer that is long enough.",
-      targetLevel: "IC5",
+      targetLevel: "L5",
     });
     expect(result.success).toBe(false);
   });
 
-  it("defaults targetLevel to IC6 when not provided", () => {
+  it("defaults targetLevel to L6 when not provided", () => {
     const result = behavioralScoreInput.safeParse({
       answer: "A valid answer that is long enough.",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.targetLevel).toBe("IC6");
+      expect(result.data.targetLevel).toBe("L6");
     }
   });
 });

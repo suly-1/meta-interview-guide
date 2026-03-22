@@ -87,10 +87,10 @@ const PERSONAS: Persona[] = [
   },
   {
     id: "ic7-bar",
-    name: "The IC7 Bar Setter",
+    name: "The L7 Bar Setter",
     emoji: "🎯",
     tagline: "Probes for org-level scope",
-    description: "Specifically probes for IC7-level signals: org-wide impact, cross-org influence, strategic thinking, growing other leaders, and identifying what the org should be working on. If your answer is team-scoped, they'll push for more.",
+    description: "Specifically probes for L7-level signals: org-wide impact, cross-org influence, strategic thinking, growing other leaders, and identifying what the org should be working on. If your answer is team-scoped, they'll push for more.",
     style: "Probes for org-level and strategic scope",
     color: "purple",
     bgColor: "#f5f3ff",

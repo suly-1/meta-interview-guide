@@ -196,7 +196,7 @@ function useSilenceDetector({
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Phase = "setup" | "coding" | "behavioral1" | "behavioral2" | "debrief";
-type ICLevel = "IC6" | "IC7" | "IC7_PRINCIPAL";
+type ICLevel = "L6" | "L7" | "IC7_PRINCIPAL";
 
 interface BehavioralQuestion {
   question: string;
@@ -281,7 +281,7 @@ function pickCodingProblem(progress: Record<number, { solved?: boolean }>): type
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function pickBehavioralQuestions(level: ICLevel = "IC6"): BehavioralQuestion[] {
+function pickBehavioralQuestions(level: ICLevel = "L6"): BehavioralQuestion[] {
   const pool = level === "IC7_PRINCIPAL" ? IC7_BEHAVIORAL_FOCUS_AREAS : BEHAVIORAL_FOCUS_AREAS;
   const allAreas = pool.filter(a => a.questions && a.questions.length > 0);
   // Shuffle and pick 2 from different focus areas
@@ -417,7 +417,7 @@ export default function MockInterviewSimulator() {
   const { progress, toggleSolved } = useCTCIProgress();
   const [phase, setPhase] = useState<Phase>("setup");
   const [session, setSession] = useState<SessionState>({
-    targetLevel: "IC6",
+    targetLevel: "L6",
     codingProblem: null,
     codingSolved: null,
     codingDurationSec: 0,
@@ -465,7 +465,7 @@ export default function MockInterviewSimulator() {
       const bas = session.behavioralAnswers;
       const isPrincipal = session.targetLevel === "IC7_PRINCIPAL";
       debrief.mutate({
-        targetLevel: "IC7", // both IC7 and IC7_PRINCIPAL use IC7 bar
+        targetLevel: "L7", // both L7 and IC7_PRINCIPAL use L7 bar
         coding: isPrincipal
           ? { problemName: "N/A (Behavioral-only session)", difficulty: "N/A", solved: false, durationSec: 0, notes: "" }
           : {
@@ -501,7 +501,7 @@ export default function MockInterviewSimulator() {
   const resetSimulator = () => {
     setPhase("setup");
     setSession({
-      targetLevel: "IC6",
+      targetLevel: "L6",
       codingProblem: null,
       codingSolved: null,
       codingDurationSec: 0,
@@ -566,9 +566,9 @@ export default function MockInterviewSimulator() {
               <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Target Level</p>
               <div className="flex gap-2 flex-wrap">
                 {([
-                  { level: "IC6" as ICLevel, label: "IC6", sub: "Staff Engineer" },
-                  { level: "IC7" as ICLevel, label: "IC7", sub: "Principal/Senior Staff" },
-                  { level: "IC7_PRINCIPAL" as ICLevel, label: "IC7+", sub: "Senior Staff/Principal\n(Behavioral only)" },
+                  { level: "L6" as ICLevel, label: "L6", sub: "Staff Engineer" },
+                  { level: "L7" as ICLevel, label: "L7", sub: "Principal/Senior Staff" },
+                  { level: "IC7_PRINCIPAL" as ICLevel, label: "L7+", sub: "Senior Staff/Principal\n(Behavioral only)" },
                 ] as { level: ICLevel; label: string; sub: string }[]).map(({ level, label, sub }) => (
                   <button
                     key={level}
@@ -590,7 +590,7 @@ export default function MockInterviewSimulator() {
                 <div className="mt-2 flex gap-2 p-3 bg-purple-50 border border-purple-200 rounded-xl">
                   <div className="w-1 rounded-full bg-purple-400 flex-shrink-0" />
                   <p className="text-xs text-purple-800 leading-relaxed">
-                    <strong>60-minute behavioral-only interview</strong> — no coding round. Questions are drawn from IC7 Cross-Functional Partnership and Retrospective Partnership Preparation material. The AI debrief evaluates org-level scope, upward influence, and outcome ownership.
+                    <strong>60-minute behavioral-only interview</strong> — no coding round. Questions are drawn from L7 Cross-Functional Partnership and Retrospective Partnership Preparation material. The AI debrief evaluates org-level scope, upward influence, and outcome ownership.
                   </p>
                 </div>
               )}
@@ -1117,8 +1117,8 @@ function DebriefPhase({
           </p>
           <p className={`text-xs ${verdictStyle.text} opacity-80`}>
             {session.targetLevel === "IC7_PRINCIPAL"
-              ? "IC7 Principal/Senior Staff — Behavioral-only bar"
-              : `${session.targetLevel} (${session.targetLevel === "IC7" ? "Principal/Senior Staff" : "Staff Engineer"}) bar`}
+              ? "L7 Principal/Senior Staff — Behavioral-only bar"
+              : `${session.targetLevel} (${session.targetLevel === "L7" ? "Principal/Senior Staff" : "Staff Engineer"}) bar`}
           </p>
         </div>
       </div>

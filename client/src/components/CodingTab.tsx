@@ -306,12 +306,12 @@ export default function CodingTab() {
               </div>
             </div>
 
-            {/* E6+ note — only shown for IC6/IC7 level */}
+            {/* E6+ note — only shown for L6/L7 level */}
             {isSenior && (
             <div className="flex gap-3 p-3 rounded-xl bg-cyan-400/20 border border-cyan-400/40">
               <span className="text-xl flex-shrink-0">👑</span>
               <p className="text-cyan-100 text-sm leading-relaxed">
-                <strong className="text-white">E6+ candidates:</strong> Select the <strong className="text-white">E6+</strong> target level to unlock two additional senior focus areas — <strong className="text-white">XFN Collaboration</strong> and <strong className="text-white">Scope &amp; Conflict Resolution</strong> — which are assessed in senior screens to determine IC5 vs IC6 level fit.
+                <strong className="text-white">E6+ candidates:</strong> Select the <strong className="text-white">E6+</strong> target level to unlock two additional senior focus areas — <strong className="text-white">XFN Collaboration</strong> and <strong className="text-white">Scope &amp; Conflict Resolution</strong> — which are assessed in senior screens to determine L5 vs L6 level fit.
               </p>
             </div>
             )}
@@ -328,12 +328,12 @@ export default function CodingTab() {
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            The Coding Interview IC6/IC7
+            The Coding Interview L6/L7
           </h2>
           <p className="text-sm text-gray-500 mt-1">What to expect, how you are evaluated, and what separates a pass from a fail</p>
         </div>
         <p className="text-gray-700 leading-relaxed mb-4">
-          Meta's coding screen rounds are 30-minute sessions conducted in CoderPad. For IC6 and IC7 candidates, the problem difficulty is typically LeetCode medium, but the bar for code quality, communication, and handling follow-up questions is significantly higher than for junior roles. Interviewers expect clean, production-quality code, proactive edge case handling, and the ability to discuss time and space complexity without prompting.
+          Meta's coding screen rounds are 30-minute sessions conducted in CoderPad. For L6 and L7 candidates, the problem difficulty is typically LeetCode medium, but the bar for code quality, communication, and handling follow-up questions is significantly higher than for junior roles. Interviewers expect clean, production-quality code, proactive edge case handling, and the ability to discuss time and space complexity without prompting.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -752,7 +752,7 @@ export default function CodingTab() {
           problemName="Your current practice problem"
           approachText=""
           selfAssessMode
-          targetLevel="IC6"
+          targetLevel="L6"
         />
       </section>
 

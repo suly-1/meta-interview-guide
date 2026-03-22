@@ -161,10 +161,10 @@ const TRAINER_PROBLEMS: TrainerProblem[] = [
 ];
 
 const IC_LEVEL_COLORS: Record<string, string> = {
-  IC4: "bg-gray-100 text-gray-700 border-gray-200",
-  IC5: "bg-blue-100 text-blue-700 border-blue-200",
-  IC6: "bg-indigo-100 text-indigo-700 border-indigo-200",
-  IC7: "bg-violet-100 text-violet-700 border-violet-200",
+  L4: "bg-gray-100 text-gray-700 border-gray-200",
+  L5: "bg-blue-100 text-blue-700 border-blue-200",
+  L6: "bg-indigo-100 text-indigo-700 border-indigo-200",
+  L7: "bg-violet-100 text-violet-700 border-violet-200",
 };
 
 function ScoreDimension({
@@ -196,7 +196,7 @@ function ScoreDimension({
 
 export default function SDRequirementsTrainer() {
   const [selectedProblem, setSelectedProblem] = useState<TrainerProblem>(TRAINER_PROBLEMS[0]);
-  const [targetLevel, setTargetLevel] = useState<"IC6" | "IC7">("IC6");
+  const [targetLevel, setTargetLevel] = useState<"L6" | "L7">("L6");
   const [phase, setPhase] = useState<"setup" | "writing" | "result">("setup");
   const [candidateQuestions, setCandidateQuestions] = useState("");
   const [openDims, setOpenDims] = useState<Record<string, boolean>>({});
@@ -252,7 +252,7 @@ export default function SDRequirementsTrainer() {
         <div>
           <p className="text-xs font-bold text-foreground mb-2">Target Level</p>
           <div className="flex gap-2">
-            {(["IC6", "IC7"] as const).map(lvl => (
+            {(["L6", "L7"] as const).map(lvl => (
               <button
                 key={lvl}
                 onClick={() => setTargetLevel(lvl)}
@@ -262,7 +262,7 @@ export default function SDRequirementsTrainer() {
                     : "bg-card text-muted-foreground border-border hover:border-emerald-400"
                 }`}
               >
-                {lvl === "IC6" ? "IC6 — Staff Engineer" : "IC7 — Principal/Senior Staff"}
+                {lvl === "L6" ? "L6 — Staff Engineer" : "L7 — Principal/Senior Staff"}
               </button>
             ))}
           </div>

@@ -1,4 +1,4 @@
-// Design: Structured Clarity — timeline tab with countdown, progress tracker, story notes, IC6 vs IC7 bar
+// Design: Structured Clarity — timeline tab with countdown, progress tracker, story notes, L6 vs L7 bar
 import { useState, useCallback } from "react";
 import { TIMELINE_WEEKS, STORY_BANK, PATTERNS } from "@/lib/guideData";
 import { CheckCircle2, Circle, RotateCcw, CalendarDays, ChevronDown, ChevronUp, FileText, Copy, Check, PartyPopper } from "lucide-react";
@@ -623,15 +623,15 @@ export default function TimelineTab() {
         <ProgressExport />
       </section>
 
-      {/* ── IC6 vs IC7 Bar ── */}
+      {/* ── L6 vs L7 Bar ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC6 vs. IC7 Behavioral Bar</h2>
+          <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>L6 vs. L7 Behavioral Bar</h2>
           <p className="text-sm text-gray-500 mt-1">What distinguishes a Senior Engineer answer from a Staff Engineer answer</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-            <h3 className="font-bold text-blue-900 text-base mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC6 — Senior Engineer</h3>
+            <h3 className="font-bold text-blue-900 text-base mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>L6 — Senior Engineer</h3>
             <ul className="space-y-2.5">
               {[
                 "Owns a significant technical scope within a team",
@@ -647,7 +647,7 @@ export default function TimelineTab() {
             </ul>
           </div>
           <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
-            <h3 className="font-bold text-indigo-900 text-base mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC7 — Staff Engineer</h3>
+            <h3 className="font-bold text-indigo-900 text-base mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>L7 — Staff Engineer</h3>
             <ul className="space-y-2.5">
               {[
                 "Defines technical strategy for an entire product surface",

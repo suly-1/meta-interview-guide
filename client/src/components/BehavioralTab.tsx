@@ -439,8 +439,8 @@ function PracticeMode() {
   );
 }
 
-// ── IC6 vs IC7 Comparison Data ─────────────────────────────────────────────
-// ── IC6 vs IC7 Axis Comparison Data (from PE Bar Setting Framework) ──────────
+// ── L6 vs L7 Comparison Data ─────────────────────────────────────────────
+// ── L6 vs L7 Axis Comparison Data (from PE Bar Setting Framework) ──────────
 const IC_AXIS_COMPARISON = [
   {
     axis: "🔨 Project Impact",
@@ -491,8 +491,8 @@ const IC7_KEY_SIGNALS = [
   "1–3 deep, large contributions affecting a broad area of services, technology, and people",
   "Builds strategies that help others achieve more impact than they would otherwise — the key is bringing change to what would otherwise happen",
   "Flexible roles — can code deeply, flip to leading, build a POC, depending on need",
-  "Owns outcomes, not just the path — e.g., a great service that doesn't get adopted is not success for an IC7",
-  "Grows IC5/6 leaders around them — creates space for other leaders, avoids being an SPOF",
+  "Owns outcomes, not just the path — e.g., a great service that doesn't get adopted is not success for an L7",
+  "Grows L5/6 leaders around them — creates space for other leaders, avoids being an SPOF",
   "Tells the hard truth — e.g., deprecating something or killing a project when ROI isn't there",
   "Influence is upward (business direction, directors) not just lateral",
 ];
@@ -980,7 +980,7 @@ export default function BehavioralTab() {
           <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
             <div className="w-1 rounded-full bg-red-500 flex-shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-800 mb-1">The Three Things Meta Tests at IC6+</p>
+              <p className="text-sm font-bold text-red-800 mb-1">The Three Things Meta Tests at L6+</p>
               <p className="text-sm text-red-700 leading-relaxed">
                 (1) <strong>Autonomy and Ownership</strong> — can you drive complex projects without being managed? (2) <strong>Influence Without Authority</strong> — can you align other teams and senior leaders? (3) <strong>Learning Loops</strong> — do you actively seek feedback and improve?
               </p>
@@ -996,7 +996,7 @@ export default function BehavioralTab() {
             Flashcard Flip Deck
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            One question at a time — type your answer, track word count, then flip to see probes and IC6 vs IC7 sample answers
+            One question at a time — type your answer, track word count, then flip to see probes and L6 vs L7 sample answers
           </p>
         </div>
         <BehavioralFlashcardDeck />
@@ -1051,13 +1051,13 @@ export default function BehavioralTab() {
         </div>
       </section>
 
-      {/* IC6 vs IC7 Comparison — only shown for IC6/IC7 level */}
+      {/* L6 vs L7 Comparison — only shown for L6/L7 level */}
       {isSenior && <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            IC6 vs IC7 — Scope &amp; Evaluation Bar
+            L6 vs L7 — Scope &amp; Evaluation Bar
           </h2>
-          <p className="text-sm text-gray-500 mt-1">From the PE Bar Setting Framework and IC7 intake forms — know which standard you are being held to</p>
+          <p className="text-sm text-gray-500 mt-1">From the PE Bar Setting Framework and L7 intake forms — know which standard you are being held to</p>
         </div>
 
         {/* Foundational difference */}
@@ -1065,7 +1065,7 @@ export default function BehavioralTab() {
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-              <h3 className="font-bold text-blue-900 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC6 — Senior Engineer</h3>
+              <h3 className="font-bold text-blue-900 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>L6 — Senior Engineer</h3>
             </div>
             <p className="text-xs text-blue-800 leading-relaxed mb-2"><strong>Template:</strong> Established senior engineer within the org</p>
             <p className="text-xs text-blue-700 leading-relaxed"><strong>Operating Level:</strong> Team / broader team</p>
@@ -1074,7 +1074,7 @@ export default function BehavioralTab() {
           <div className="rounded-xl border border-purple-200 bg-purple-50 p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-              <h3 className="font-bold text-purple-900 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>IC7 — Staff Engineer</h3>
+              <h3 className="font-bold text-purple-900 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>L7 — Staff Engineer</h3>
             </div>
             <p className="text-xs text-purple-800 leading-relaxed mb-2"><strong>Template:</strong> No easily made template — advancement comes from identifying and delivering an initiative with large impact and value to the org</p>
             <p className="text-xs text-purple-700 leading-relaxed"><strong>Operating Level:</strong> Org-wide and cross-org</p>
@@ -1101,10 +1101,10 @@ export default function BehavioralTab() {
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
                       <th className="text-left px-4 py-2 text-xs font-bold text-blue-700 w-1/2">
-                        <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" />IC6 — Senior Engineer</span>
+                        <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" />L6 — Senior Engineer</span>
                       </th>
                       <th className="text-left px-4 py-2 text-xs font-bold text-purple-700 w-1/2">
-                        <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-purple-500" />IC7 — Staff Engineer</span>
+                        <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-purple-500" />L7 — Staff Engineer</span>
                       </th>
                     </tr>
                   </thead>
@@ -1126,12 +1126,12 @@ export default function BehavioralTab() {
           })}
         </div>
 
-        {/* IC7 Key Signals */}
+        {/* L7 Key Signals */}
         <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-5">
           <h3 className="font-bold text-purple-900 text-sm mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Key Signals That Distinguish IC7 from IC6
+            Key Signals That Distinguish L7 from L6
           </h3>
-          <p className="text-xs text-purple-700 mb-3 italic">From the PE Bar Setting Framework and IC7 intake forms</p>
+          <p className="text-xs text-purple-700 mb-3 italic">From the PE Bar Setting Framework and L7 intake forms</p>
           <ul className="space-y-2">
             {IC7_KEY_SIGNALS.map((signal, i) => (
               <li key={i} className="flex items-start gap-2.5 text-xs text-purple-800 leading-relaxed">
@@ -1145,15 +1145,15 @@ export default function BehavioralTab() {
         {/* TL;DR */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-xs font-bold text-blue-800 mb-1">TL;DR — IC6</p>
+            <p className="text-xs font-bold text-blue-800 mb-1">TL;DR — L6</p>
             <p className="text-xs text-blue-700 leading-relaxed">Proven senior engineer who solves hard problems, leads major initiatives on their team, and mentors others.</p>
           </div>
           <div className="rounded-xl border border-purple-200 bg-purple-50 p-4">
-            <p className="text-xs font-bold text-purple-800 mb-1">TL;DR — IC7</p>
+            <p className="text-xs font-bold text-purple-800 mb-1">TL;DR — L7</p>
             <p className="text-xs text-purple-700 leading-relaxed">No template — demonstrates org-wide or cross-org impact, shapes technical strategy, independently identifies what the org should be working on, owns end-to-end outcomes, and grows other senior leaders.</p>
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-3 italic">The step from IC6 → IC7 is fundamentally about scope of influence and ownership: from team-level execution to org-level strategy and outcomes.</p>
+        <p className="text-xs text-gray-400 mt-3 italic">The step from L6 → L7 is fundamentally about scope of influence and ownership: from team-level execution to org-level strategy and outcomes.</p>
       </section>
       }
             {/* 4 Focus Areas */}
@@ -1253,18 +1253,18 @@ export default function BehavioralTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             STAR Story Gap Analyzer
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Cross-reference your completed STAR stories against IC7 key signals to find gaps and single points of failure.</p>
+          <p className="text-sm text-gray-500 mt-1">Cross-reference your completed STAR stories against L7 key signals to find gaps and single points of failure.</p>
         </div>
         <STARGapAnalyzer />
       </section>
 
-      {/* IC7 Answer Upgrader — only shown for IC6/IC7 level */}
+      {/* L7 Answer Upgrader — only shown for L6/L7 level */}
       {isSenior && <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            "What Would an IC7 Say?" Answer Upgrader
+            "What Would an L7 Say?" Answer Upgrader
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Side-by-side IC6 vs IC7 answer snippets for the same scenario — see the scope delta concretely.</p>
+          <p className="text-sm text-gray-500 mt-1">Side-by-side L6 vs L7 answer snippets for the same scenario — see the scope delta concretely.</p>
         </div>
         <IC7AnswerUpgrader />
       </section>}

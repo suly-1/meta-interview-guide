@@ -145,7 +145,7 @@ export default function SDComponentStressTest() {
             </p>
             <p className="text-xs text-orange-700 mt-1 leading-relaxed">
               Meta interviewers probe every component with failure scenarios: <em>"What happens when your cache hit rate drops to 5%?"</em>
-              Naming a component is IC4. Reasoning through its failure cascade is IC6. This quiz trains the 15%-weight <strong>Technical Depth</strong> signal.
+              Naming a component is L4. Reasoning through its failure cascade is L6. This quiz trains the 15%-weight <strong>Technical Depth</strong> signal.
             </p>
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function SDComponentStressTest() {
                 ? <CheckCircle2 size={16} className="text-emerald-600" />
                 : <XCircle size={16} className="text-red-500" />}
               <span className={`text-sm font-extrabold ${result.passesBar ? "text-emerald-700" : "text-red-700"}`}>
-                {result.passesBar ? "Passes IC6 bar for Technical Depth" : "Does not yet pass IC6 bar"}
+                {result.passesBar ? "Passes L6 bar for Technical Depth" : "Does not yet pass L6 bar"}
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2">

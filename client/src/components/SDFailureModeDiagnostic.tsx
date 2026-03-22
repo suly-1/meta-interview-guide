@@ -16,7 +16,7 @@ interface FailureMode {
   description: string;
   symptom: string;
   fix: string;
-  icLevel: "IC4 trap" | "IC5 gap" | "IC6 gap";
+  icLevel: "L4 trap" | "L5 gap" | "L6 gap";
   color: string;
   bgColor: string;
   borderColor: string;
@@ -32,7 +32,7 @@ const FAILURE_MODES: FailureMode[] = [
     description: "The single most common failure. Candidates open with 'I'll use a microservices architecture with Kafka…' before asking a single clarifying question. Interviewers stop listening at this point.",
     symptom: "You start drawing boxes and arrows within the first 2 minutes.",
     fix: "Spend the first 5–8 minutes exclusively on requirements. Write them down. Get the interviewer to confirm scope. Only then pick up the marker.",
-    icLevel: "IC4 trap",
+    icLevel: "L4 trap",
     color: "#dc2626",
     bgColor: "#fef2f2",
     borderColor: "#fecaca",
@@ -46,7 +46,7 @@ const FAILURE_MODES: FailureMode[] = [
     description: "Saying 'I'll use Cassandra' is worth zero points. Saying 'I'll use Cassandra because we're write-heavy, need horizontal scaling, and can tolerate eventual consistency — though we'd lose strong consistency which matters less here because…' is worth full points.",
     symptom: "You name technologies without explaining why you chose them over alternatives.",
     fix: "For every architectural decision, say: 'I'm choosing X over Y because [specific trade-off]. The downside is [Z], which is acceptable because [context].'",
-    icLevel: "IC5 gap",
+    icLevel: "L5 gap",
     color: "#ea580c",
     bgColor: "#fff7ed",
     borderColor: "#fed7aa",
@@ -57,10 +57,10 @@ const FAILURE_MODES: FailureMode[] = [
     rank: 3,
     title: "Treating components as opaque black boxes",
     scoreWeight: "~15% of score",
-    description: "Drawing a box labeled 'Cache' or 'Message Queue' without explaining the internals signals IC4 thinking. IC6+ candidates explain how the cache is structured, what eviction policy they'd use, and why.",
+    description: "Drawing a box labeled 'Cache' or 'Message Queue' without explaining the internals signals L4 thinking. L6+ candidates explain how the cache is structured, what eviction policy they'd use, and why.",
     symptom: "Your diagram has boxes with labels but no explanation of what happens inside them.",
     fix: "For each component you draw, be prepared to go one level deeper: data structure, consistency model, failure mode, and how it connects to the next component.",
-    icLevel: "IC5 gap",
+    icLevel: "L5 gap",
     color: "#d97706",
     bgColor: "#fffbeb",
     borderColor: "#fde68a",
@@ -71,10 +71,10 @@ const FAILURE_MODES: FailureMode[] = [
     rank: 4,
     title: "Poor time management — never reaching deep dives",
     scoreWeight: "~25% of score (structural)",
-    description: "Spending 30 minutes on requirements and data model means the interviewer never gets to probe your depth on scale and bottlenecks — which is where IC6/IC7 differentiation happens.",
+    description: "Spending 30 minutes on requirements and data model means the interviewer never gets to probe your depth on scale and bottlenecks — which is where L6/L7 differentiation happens.",
     symptom: "You get cut off by the interviewer before reaching scale discussion.",
     fix: "Use the 5-10-15 framework: 5 min requirements, 10 min high-level design, 15 min deep dives. Set a mental timer and move on even if a section feels incomplete.",
-    icLevel: "IC6 gap",
+    icLevel: "L6 gap",
     color: "#0891b2",
     bgColor: "#ecfeff",
     borderColor: "#a5f3fc",
@@ -88,7 +88,7 @@ const FAILURE_MODES: FailureMode[] = [
     description: "Designing a notification system for 1,000 users vs. 1 billion users are completely different problems. Candidates who skip capacity estimation miss the entire point of the exercise.",
     symptom: "Your design would work for a startup but breaks at Meta's actual scale.",
     fix: "Always do back-of-envelope math early: DAU × events/day × message size = storage/bandwidth. Let the numbers drive your architecture choices.",
-    icLevel: "IC5 gap",
+    icLevel: "L5 gap",
     color: "#7c3aed",
     bgColor: "#f5f3ff",
     borderColor: "#ddd6fe",
@@ -102,7 +102,7 @@ const FAILURE_MODES: FailureMode[] = [
     description: "Memorizing 'always use consistent hashing for sharding' and applying it everywhere signals that you don't understand when it applies and when it doesn't. Interviewers probe this immediately.",
     symptom: "You give the same answer regardless of the problem context.",
     fix: "For every pattern you've memorized, also memorize: (1) when it applies, (2) when it doesn't, and (3) what the alternative is.",
-    icLevel: "IC4 trap",
+    icLevel: "L4 trap",
     color: "#0f766e",
     bgColor: "#f0fdfa",
     borderColor: "#99f6e4",
@@ -111,12 +111,12 @@ const FAILURE_MODES: FailureMode[] = [
   {
     id: "level-mismatch",
     rank: 7,
-    title: "IC4-level preparation for an IC6/IC7 interview",
+    title: "L4-level preparation for an L6/L7 interview",
     scoreWeight: "Structural mismatch",
-    description: "IC4 answers describe what a system does. IC6 answers explain why each decision was made and what the alternatives were. IC7 answers also address org-level implications, cross-team dependencies, and long-term maintainability.",
+    description: "L4 answers describe what a system does. L6 answers explain why each decision was made and what the alternatives were. L7 answers also address org-level implications, cross-team dependencies, and long-term maintainability.",
     symptom: "You describe the system correctly but never discuss trade-offs, failure modes, or evolution paths.",
-    fix: "After every statement, ask yourself: 'Did I explain WHY, not just WHAT?' IC6 requires 'why' on every major decision. IC7 requires 'why now, why this team, and what happens in 2 years.'",
-    icLevel: "IC6 gap",
+    fix: "After every statement, ask yourself: 'Did I explain WHY, not just WHAT?' L6 requires 'why' on every major decision. L7 requires 'why now, why this team, and what happens in 2 years.'",
+    icLevel: "L6 gap",
     color: "#1e3a8a",
     bgColor: "#eff6ff",
     borderColor: "#bfdbfe",
@@ -159,7 +159,7 @@ const LEVEL_CALIBRATION_QUESTIONS = [
 
 const IC_LEVEL_EXPECTATIONS = [
   {
-    level: "IC4",
+    level: "L4",
     label: "Software Engineer",
     color: "text-gray-600",
     bgColor: "bg-gray-50",
@@ -177,7 +177,7 @@ const IC_LEVEL_EXPECTATIONS = [
     ],
   },
   {
-    level: "IC5",
+    level: "L5",
     label: "Senior Software Engineer",
     color: "text-blue-700",
     bgColor: "bg-blue-50",
@@ -195,7 +195,7 @@ const IC_LEVEL_EXPECTATIONS = [
     ],
   },
   {
-    level: "IC6",
+    level: "L6",
     label: "Staff Engineer",
     color: "text-indigo-700",
     bgColor: "bg-indigo-50",
@@ -214,13 +214,13 @@ const IC_LEVEL_EXPECTATIONS = [
     ],
   },
   {
-    level: "IC7",
+    level: "L7",
     label: "Principal/Senior Staff",
     color: "text-violet-700",
     bgColor: "bg-violet-50",
     borderColor: "border-violet-200",
     expectations: [
-      "All IC6 signals plus:",
+      "All L6 signals plus:",
       "Org-level implications of design choices",
       "Cross-team and cross-system dependencies",
       "Long-term maintainability and evolution",
@@ -234,9 +234,9 @@ const IC_LEVEL_EXPECTATIONS = [
 function FailureModeCard({ mode }: { mode: FailureMode }) {
   const [expanded, setExpanded] = useState(false);
   const levelColors: Record<string, string> = {
-    "IC4 trap": "bg-red-100 text-red-700 border-red-200",
-    "IC5 gap": "bg-amber-100 text-amber-700 border-amber-200",
-    "IC6 gap": "bg-blue-100 text-blue-700 border-blue-200",
+    "L4 trap": "bg-red-100 text-red-700 border-red-200",
+    "L5 gap": "bg-amber-100 text-amber-700 border-amber-200",
+    "L6 gap": "bg-blue-100 text-blue-700 border-blue-200",
   };
   return (
     <div
@@ -297,9 +297,9 @@ export default function SDFailureModeDiagnostic() {
   const totalAnswered = Object.values(calibrationAnswers).filter(v => v !== null).length;
 
   const estimatedLevel =
-    passCount >= 5 ? "IC6" :
-    passCount >= 3 ? "IC5" :
-    "IC4";
+    passCount >= 5 ? "L6" :
+    passCount >= 3 ? "L5" :
+    "L4";
 
   const estimatedLevelColor =
     passCount >= 5 ? "text-indigo-700" :
@@ -440,8 +440,8 @@ export default function SDFailureModeDiagnostic() {
               <p className="text-xs text-indigo-800 leading-relaxed">
                 You passed <strong>{passCount} of 5</strong> calibration signals.{" "}
                 {passCount < 3 && "Focus on requirements discipline and trade-off articulation first — these are the highest-leverage improvements."}
-                {passCount >= 3 && passCount < 5 && "You have a solid foundation. Focus on the signals you missed — they are the difference between IC5 and IC6 performance."}
-                {passCount === 5 && "Strong calibration. Your preparation is at IC6 level. To reach IC7, focus on org-level implications and cross-system dependencies."}
+                {passCount >= 3 && passCount < 5 && "You have a solid foundation. Focus on the signals you missed — they are the difference between L5 and L6 performance."}
+                {passCount === 5 && "Strong calibration. Your preparation is at L6 level. To reach L7, focus on org-level implications and cross-system dependencies."}
               </p>
               {/* Gap signals */}
               {Object.entries(calibrationAnswers).filter(([, v]) => v === "fail").length > 0 && (
@@ -467,7 +467,7 @@ export default function SDFailureModeDiagnostic() {
         <div className="space-y-3">
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
             <p className="text-xs text-gray-600 leading-relaxed">
-              Meta interviewers calibrate against a specific level bar. Understanding exactly what IC6 vs. IC7 looks like prevents the most common structural mismatch: IC4-level preparation for an IC6 interview.
+              Meta interviewers calibrate against a specific level bar. Understanding exactly what L6 vs. L7 looks like prevents the most common structural mismatch: L4-level preparation for an L6 interview.
             </p>
           </div>
           {IC_LEVEL_EXPECTATIONS.map(level => (

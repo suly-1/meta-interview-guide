@@ -36,7 +36,7 @@ interface ICSignalHistoryEntry {
   date: number;
   problemTitle: string;
   targetLevel: string;
-  counts: { IC4: number; IC5: number; IC6: number; IC7: number };
+  counts: { L4: number; L5: number; L6: number; L7: number };
   total: number;
 }
 
@@ -107,7 +107,7 @@ interface DesignProblem {
   };
 }
 
-type ICLevel = "IC6" | "IC7";
+type ICLevel = "L6" | "L7";
 type SessionPhase = "setup" | "active" | "debrief";
 type SectionKey = "requirements" | "dataModel" | "api" | "scaleBottlenecks" | "metaTips";
 
@@ -316,7 +316,7 @@ export default function SystemDesignMockSession() {
   const { addXP } = useXPContext();
   const [phase, setPhase] = useState<SessionPhase>("setup");
   const [selectedProblem, setSelectedProblem] = useState<DesignProblem>(PROBLEMS[0]);
-  const [targetLevel, setTargetLevel] = useState<ICLevel>("IC6");
+  const [targetLevel, setTargetLevel] = useState<ICLevel>("L6");
   const [secsLeft, setSecsLeft] = useState(45 * 60);
   const [secsElapsed, setSecsElapsed] = useState(0);
   const [answers, setAnswers] = useState<SectionAnswers>({
@@ -748,7 +748,7 @@ export default function SystemDesignMockSession() {
         <div>
           <p className="text-xs font-bold text-foreground mb-2">Target Level</p>
           <div className="flex gap-2">
-            {(["IC6", "IC7"] as ICLevel[]).map(lvl => (
+            {(["L6", "L7"] as ICLevel[]).map(lvl => (
               <button
                 key={lvl}
                 onClick={() => setTargetLevel(lvl)}
@@ -758,7 +758,7 @@ export default function SystemDesignMockSession() {
                     : "bg-card text-muted-foreground border-border hover:border-indigo-400"
                 }`}
               >
-                {lvl === "IC6" ? "IC6 — Staff Engineer" : "IC7 — Principal/Senior Staff"}
+                {lvl === "L6" ? "L6 — Staff Engineer" : "L7 — Principal/Senior Staff"}
               </button>
             ))}
           </div>
@@ -1201,7 +1201,7 @@ export default function SystemDesignMockSession() {
                       },
                     }, {
                       onSuccess: (data) => {
-                        const counts = { IC4: 0, IC5: 0, IC6: 0, IC7: 0 };
+                        const counts = { L4: 0, L5: 0, L6: 0, L7: 0 };
                         data.classifications.forEach((c: { level: string }) => {
                           if (c.level in counts) counts[c.level as keyof typeof counts]++;
                         });
@@ -1238,7 +1238,7 @@ export default function SystemDesignMockSession() {
               )}
             </div>
             <p className="text-xs text-purple-700 leading-relaxed">
-              Classifies every paragraph of your answer as <strong>IC4 / IC5 / IC6 / IC7</strong> and shows exactly what would elevate each statement to the next level.
+              Classifies every paragraph of your answer as <strong>L4 / L5 / L6 / L7</strong> and shows exactly what would elevate each statement to the next level.
             </p>
             {signalDetector.isPending && (
               <div className="flex items-center gap-2 py-2">
@@ -1252,13 +1252,13 @@ export default function SystemDesignMockSession() {
             {signalDetector.data && showSignalDetector && (() => {
               const { classifications } = signalDetector.data;
               const levelColors: Record<string, { bg: string; border: string; text: string; badge: string }> = {
-                IC4: { bg: "bg-red-50", border: "border-red-200", text: "text-red-900", badge: "bg-red-100 text-red-700 border-red-300" },
-                IC5: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-900", badge: "bg-amber-100 text-amber-700 border-amber-300" },
-                IC6: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-900", badge: "bg-blue-100 text-blue-700 border-blue-300" },
-                IC7: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-900", badge: "bg-emerald-100 text-emerald-700 border-emerald-300" },
+                L4: { bg: "bg-red-50", border: "border-red-200", text: "text-red-900", badge: "bg-red-100 text-red-700 border-red-300" },
+                L5: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-900", badge: "bg-amber-100 text-amber-700 border-amber-300" },
+                L6: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-900", badge: "bg-blue-100 text-blue-700 border-blue-300" },
+                L7: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-900", badge: "bg-emerald-100 text-emerald-700 border-emerald-300" },
               };
               // Summary counts
-              const counts: Record<string, number> = { IC4: 0, IC5: 0, IC6: 0, IC7: 0 };
+              const counts: Record<string, number> = { L4: 0, L5: 0, L6: 0, L7: 0 };
               classifications.forEach(c => { counts[c.level] = (counts[c.level] ?? 0) + 1; });
               const total = classifications.length;
               return (
@@ -1267,23 +1267,23 @@ export default function SystemDesignMockSession() {
                   <div className="rounded-lg border border-purple-200 bg-white p-3 space-y-2">
                     <p className="text-[10px] font-bold text-purple-700 uppercase tracking-wide mb-2">Signal Distribution ({total} paragraphs)</p>
                     <div className="flex gap-2 flex-wrap">
-                      {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => (
+                      {(["L4", "L5", "L6", "L7"] as const).map(lvl => (
                         <div key={lvl} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold ${levelColors[lvl]?.badge}`}>
                           {lvl}: {counts[lvl] ?? 0}
                         </div>
                       ))}
                     </div>
                     <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
-                      {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => {
+                      {(["L4", "L5", "L6", "L7"] as const).map(lvl => {
                         const pct = total > 0 ? ((counts[lvl] ?? 0) / total) * 100 : 0;
-                        const barColors: Record<string, string> = { IC4: "bg-red-400", IC5: "bg-amber-400", IC6: "bg-blue-400", IC7: "bg-emerald-400" };
+                        const barColors: Record<string, string> = { L4: "bg-red-400", L5: "bg-amber-400", L6: "bg-blue-400", L7: "bg-emerald-400" };
                         return pct > 0 ? <div key={lvl} className={`${barColors[lvl]} h-full transition-all`} style={{ width: `${pct}%` }} /> : null;
                       })}
                     </div>
                   </div>
                   {/* Per-paragraph cards */}
                   {classifications.map((c, i) => {
-                    const colors = levelColors[c.level] ?? levelColors["IC5"];
+                    const colors = levelColors[c.level] ?? levelColors["L5"];
                     return (
                       <details key={i} className={`rounded-lg border ${colors.border} ${colors.bg} overflow-hidden`}>
                         <summary className={`flex items-start gap-2 px-3 py-2.5 cursor-pointer select-none ${colors.text}`}>

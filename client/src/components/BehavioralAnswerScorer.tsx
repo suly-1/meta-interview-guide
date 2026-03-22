@@ -63,7 +63,7 @@ function ScoreBar({ score }: { score: number }) {
 export default function BehavioralAnswerScorer() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
-  const [targetLevel, setTargetLevel] = useState<"IC6" | "IC7">("IC6");
+  const [targetLevel, setTargetLevel] = useState<"L6" | "L7">("L6");
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [showTips, setShowTips] = useState(false);
 
@@ -111,7 +111,7 @@ export default function BehavioralAnswerScorer() {
         </div>
         {/* Target level toggle */}
         <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 flex-shrink-0">
-          {(["IC6", "IC7"] as const).map(level => (
+          {(["L6", "L7"] as const).map(level => (
             <button
               key={level}
               onClick={() => setTargetLevel(level)}
@@ -173,9 +173,9 @@ export default function BehavioralAnswerScorer() {
         {showTips && (
           <div className="px-4 pb-3 pt-1 text-xs text-gray-500 dark:text-gray-400 space-y-1.5 border-t border-gray-100 dark:border-gray-700">
             <p><strong className="text-gray-700 dark:text-gray-300">Situation:</strong> Set context in 1–2 sentences. Include team size, timeline, and stakes.</p>
-            <p><strong className="text-gray-700 dark:text-gray-300">Task:</strong> What was your specific responsibility? {targetLevel === "IC7" ? "For IC7: show you defined the problem, not just received it." : "For IC6: show clear ownership of a defined scope."}</p>
-            <p><strong className="text-gray-700 dark:text-gray-300">Action:</strong> Use "I" not "we". {targetLevel === "IC7" ? "For IC7: show cross-functional influence, ambiguity navigation, and strategic decisions." : "For IC6: show technical depth and independent execution."}</p>
-            <p><strong className="text-gray-700 dark:text-gray-300">Result:</strong> Quantify impact. {targetLevel === "IC7" ? "For IC7: org-level or multi-team impact, long-term outcomes." : "For IC6: team or product-level metrics, latency/reliability/velocity."}</p>
+            <p><strong className="text-gray-700 dark:text-gray-300">Task:</strong> What was your specific responsibility? {targetLevel === "L7" ? "For L7: show you defined the problem, not just received it." : "For L6: show clear ownership of a defined scope."}</p>
+            <p><strong className="text-gray-700 dark:text-gray-300">Action:</strong> Use "I" not "we". {targetLevel === "L7" ? "For L7: show cross-functional influence, ambiguity navigation, and strategic decisions." : "For L6: show technical depth and independent execution."}</p>
+            <p><strong className="text-gray-700 dark:text-gray-300">Result:</strong> Quantify impact. {targetLevel === "L7" ? "For L7: org-level or multi-team impact, long-term outcomes." : "For L6: team or product-level metrics, latency/reliability/velocity."}</p>
           </div>
         )}
       </div>

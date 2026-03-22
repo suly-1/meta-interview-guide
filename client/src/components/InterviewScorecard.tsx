@@ -175,7 +175,7 @@ export default function InterviewScorecard() {
             ? `Criteria met: ${Array.from(checked).join(", ")}. Score: ${score}/7.`
             : "No criteria checked yet. Complete the scorecard above first, then use self-assess mode below."}
           selfAssessMode
-          targetLevel="IC6"
+          targetLevel="L6"
         />
       </div>
     </div>

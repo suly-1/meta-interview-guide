@@ -1,5 +1,5 @@
 // STARGapAnalyzer — cross-references completed STAR stories against 4 focus areas
-// and IC7 key signals; surfaces gaps and stretch suggestions
+// and L7 key signals; surfaces gaps and stretch suggestions
 import { useMemo } from "react";
 import { AlertTriangle, CheckCircle2, AlertCircle, ChevronRight } from "lucide-react";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
@@ -16,7 +16,7 @@ const IC7_SIGNALS = [
   "Measurable business or org-level impact",
 ];
 
-// Map each focus area to which IC7 signals it can demonstrate
+// Map each focus area to which L7 signals it can demonstrate
 const AREA_IC7_SIGNAL_MAP: Record<string, number[]> = {
   xfn:              [0, 2, 4, 6],
   conflict:         [6, 4, 7],
@@ -69,7 +69,7 @@ export default function STARGapAnalyzer() {
     });
   }, [practicedTypes]);
 
-  // IC7 signal coverage
+  // L7 signal coverage
   const signalCoverage = useMemo(() => {
     return IC7_SIGNALS.map((signal, idx) => {
       // Find which areas cover this signal
@@ -115,7 +115,7 @@ export default function STARGapAnalyzer() {
         <div className={`rounded-xl border p-3.5 text-center ${ic7Gaps > 0 ? "border-purple-200 bg-purple-50" : "border-emerald-200 bg-emerald-50"}`}>
           <div className={`text-2xl font-extrabold mb-0.5 ${ic7Gaps > 0 ? "text-purple-700" : "text-emerald-700"}`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{ic7Gaps}</div>
-          <div className="text-[11px] font-semibold text-gray-600">IC7 Signal Gaps</div>
+          <div className="text-[11px] font-semibold text-gray-600">L7 Signal Gaps</div>
           <div className="text-[10px] text-gray-400 mt-0.5">uncovered signals</div>
         </div>
       </div>
@@ -176,10 +176,10 @@ export default function STARGapAnalyzer() {
         </div>
       </div>
 
-      {/* IC7 Signal Coverage */}
+      {/* L7 Signal Coverage */}
       <div>
         <h3 className="text-sm font-bold text-gray-800 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          IC7 Signal Coverage
+          L7 Signal Coverage
         </h3>
         <p className="text-xs text-gray-500 mb-3">Based on your practiced stories — each signal needs at least one supporting story</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

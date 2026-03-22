@@ -230,7 +230,7 @@ function DisclaimerBanner() {
   );
 }
 
-const SHARE_MESSAGE = `I came across this community-built study resource online — it covers general SWE interview patterns for Staff Engineer levels (IC4–IC7). It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
+const SHARE_MESSAGE = `I came across this community-built study resource online — it covers general SWE interview patterns for Staff Engineer levels (L4–L7). It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
 
 function ShareButton() {
   const [copied, setCopied] = useState(false);
@@ -304,7 +304,7 @@ export default function Hero() {
           <div className="flex flex-wrap gap-2 mb-5">
             {[
               { label: "Updated March 2026", color: "rgba(8,102,255,0.25)", border: "rgba(8,102,255,0.5)", text: "#93c5fd" },
-              { label: "IC4 · IC5 · IC6 · IC7",   color: "rgba(5,150,105,0.2)",  border: "rgba(5,150,105,0.45)", text: "#6ee7b7" },
+              { label: "L4 · L5 · L6 · L7",   color: "rgba(5,150,105,0.2)",  border: "rgba(5,150,105,0.45)", text: "#6ee7b7" },
               { label: "Behavioral & Coding Focus", color: "rgba(217,119,6,0.2)", border: "rgba(217,119,6,0.45)", text: "#fcd34d" },
               { label: "Community Resource · Not affiliated with Meta", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.2)", text: "#cbd5e1" },
             ].map((b) => (
@@ -327,7 +327,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-[#93c5fd] text-base md:text-lg max-w-2xl mb-4 leading-relaxed">
-            Built from 200+ publicly available candidate reports. Refined for 2026. A community-sourced, independent study resource — not affiliated with any company. Covers IC4–IC7 Behavioral &amp; Coding rounds, including the AI-Enabled Coding Round, 14 LeetCode patterns, STAR framework, and curated resources.
+            Built from 200+ publicly available candidate reports. Refined for 2026. A community-sourced, independent study resource — not affiliated with any company. Covers L4–L7 Behavioral &amp; Coding rounds, including the AI-Enabled Coding Round, 14 LeetCode patterns, STAR framework, and curated resources.
           </p>
 
           {/* Official prep notice */}
@@ -369,9 +369,9 @@ export default function Hero() {
                     ? "bg-emerald-600 text-white"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
-                title="IC4 — Junior Engineer"
+                title="L4 — Junior Engineer"
               >
-                IC4
+                L4
               </button>
               <button
                 onClick={() => setICLevel("mid")}
@@ -380,9 +380,9 @@ export default function Hero() {
                     ? "bg-violet-600 text-white"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
-                title="IC5 — Senior Engineer"
+                title="L5 — Senior Engineer"
               >
-                IC5 / Senior
+                L5 / Senior
               </button>
               <button
                 onClick={() => setICLevel("senior")}
@@ -391,19 +391,19 @@ export default function Hero() {
                     ? "bg-[#4d9fff] text-white"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
-                title="IC6/IC7 — Staff / Senior Staff Engineer"
+                title="L6/L7 — Staff / Senior Staff Engineer"
               >
-                IC6 / IC7
+                L6 / L7
               </button>
             </div>
             {icLevel === "junior" && (
               <span className="text-emerald-400 text-xs font-medium">
-                IC4 view — senior &amp; staff sections hidden
+                L4 view — senior &amp; staff sections hidden
               </span>
             )}
             {icLevel === "mid" && (
               <span className="text-violet-400 text-xs font-medium">
-                IC5 / Senior view — staff-only sections hidden
+                L5 / Senior view — staff-only sections hidden
               </span>
             )}
           </div>

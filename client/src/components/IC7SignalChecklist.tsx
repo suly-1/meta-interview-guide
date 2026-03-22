@@ -1,4 +1,4 @@
-// IC7 Signal Self-Assessment Checklist — Readiness tab
+// L7 Signal Self-Assessment Checklist — Readiness tab
 // Design: Structured Clarity — checklist with story backing, gap detection, and priority flags
 import { useState, useEffect } from "react";
 import { CheckCircle2, Circle, AlertTriangle, BookOpen, ChevronDown, ChevronUp, Lightbulb, Target } from "lucide-react";
@@ -39,14 +39,14 @@ const IC7_SIGNALS = [
   {
     id: "owns-outcomes",
     signal: "Owns outcomes, not just the path",
-    description: "A great service that doesn't get adopted is not success for an IC7. They own the full outcome including adoption, reliability, and business impact.",
+    description: "A great service that doesn't get adopted is not success for an L7. They own the full outcome including adoption, reliability, and business impact.",
     probeQuestion: "Tell me about a project you shipped. What was the adoption rate? What did you do when adoption was lower than expected?",
     storyHint: "Stories should show you tracked success metrics post-launch and took action when results fell short.",
     priority: "critical",
   },
   {
     id: "grows-leaders",
-    signal: "Grows IC5/6 leaders around them — avoids being an SPOF",
+    signal: "Grows L5/6 leaders around them — avoids being an SPOF",
     description: "IC7s create space for other leaders to emerge and deliberately avoid becoming a single point of failure.",
     probeQuestion: "Tell me about an engineer you helped grow into a more senior role. What did you do specifically to develop them?",
     storyHint: "Look for concrete examples: delegating ownership, sponsoring their ideas in design reviews, giving them visibility with leadership.",
@@ -117,7 +117,7 @@ export default function IC7SignalChecklist() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Target size={16} className="text-white/80" />
-              <p className="text-xs font-bold uppercase tracking-widest text-white/80">IC7 Signal Coverage</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-white/80">L7 Signal Coverage</p>
             </div>
             <p className="text-4xl font-extrabold leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {covered}<span className="text-2xl text-white/70">/{IC7_SIGNALS.length}</span>
@@ -140,7 +140,7 @@ export default function IC7SignalChecklist() {
               <text x="36" y="40" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">{pct}%</text>
             </svg>
             <p className="text-xs text-white/70 text-right">
-              {pct >= 75 ? "Strong IC7 story coverage" : pct >= 50 ? "Building coverage — keep going" : "Significant gaps to address"}
+              {pct >= 75 ? "Strong L7 story coverage" : pct >= 50 ? "Building coverage — keep going" : "Significant gaps to address"}
             </p>
           </div>
         </div>
@@ -301,9 +301,9 @@ export default function IC7SignalChecklist() {
       {covered === IC7_SIGNALS.length && (
         <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-center">
           <p className="text-lg font-bold text-emerald-700" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            🎯 All 8 IC7 Signals Covered
+            🎯 All 8 L7 Signals Covered
           </p>
-          <p className="text-sm text-emerald-600 mt-1">You have a real story for every key differentiator. Strong IC7 signal coverage.</p>
+          <p className="text-sm text-emerald-600 mt-1">You have a real story for every key differentiator. Strong L7 signal coverage.</p>
         </div>
       )}
     </div>

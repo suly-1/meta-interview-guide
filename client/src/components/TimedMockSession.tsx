@@ -239,7 +239,7 @@ export default function TimedMockSession() {
               problemName={problem.name}
               approachText={`Timed mock session: ${problem.name} (${problem.difficulty}). Time used: ${formatTime(elapsed)}.`}
               selfAssessMode
-              targetLevel="IC6"
+              targetLevel="L6"
             />
           </div>
         )}

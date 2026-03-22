@@ -23,7 +23,7 @@ const TOOLS: Tool[] = [
     description:
       "A fork of VS Code with AI deeply integrated into every aspect. Multi-file edits (Composer mode) and proactive tab-autocomplete make it the go-to environment for practising clean, production-quality code — exactly what Meta interviewers expect.",
     metaTip:
-      "Use Cursor's Composer mode to refactor your solutions after each practice session. Ask it to 'review this code for Meta IC6 standards — flag any readability or complexity issues.'",
+      "Use Cursor's Composer mode to refactor your solutions after each practice session. Ask it to 'review this code for Meta L6 standards — flag any readability or complexity issues.'",
     link: "https://cursor.sh",
     badge: "Most Popular",
     badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/40",
@@ -49,7 +49,7 @@ const TOOLS: Tool[] = [
     description:
       "Provides real-time, context-aware suggestions during live coding sessions. Simulates interview pressure by generating follow-up questions and evaluating your answers — closely mimicking how a Meta interviewer probes your reasoning.",
     metaTip:
-      "Use Final Round AI's follow-up question mode to practise the 'what if the input is very large?' and 'can you do better than O(n²)?' challenges that Meta interviewers consistently ask at IC6/IC7.",
+      "Use Final Round AI's follow-up question mode to practise the 'what if the input is very large?' and 'can you do better than O(n²)?' challenges that Meta interviewers consistently ask at L6/L7.",
     link: "https://www.finalroundai.com",
     badge: "Interview Copilot",
     badgeColor: "bg-violet-500/20 text-violet-300 border-violet-500/40",
@@ -90,7 +90,7 @@ const TOOLS: Tool[] = [
     description:
       "Connects you with real FAANG engineers for anonymous, high-signal mock interviews. The feedback is authentic in a way AI cannot replicate — a real engineer will notice communication patterns, hesitation, and code quality issues that automated tools miss.",
     metaTip:
-      "Book at least 2 sessions with engineers who have Meta experience. Ask them specifically: 'Did my communication match what you'd expect from an IC6 candidate?' The answer will tell you more than any AI debrief.",
+      "Book at least 2 sessions with engineers who have Meta experience. Ask them specifically: 'Did my communication match what you'd expect from an L6 candidate?' The answer will tell you more than any AI debrief.",
     link: "https://interviewing.io",
     badge: "Highest Signal",
     badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
@@ -192,7 +192,7 @@ export default function AIToolsTab() {
           </h2>
         </div>
         <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-3xl">
-          The best engineers preparing for Meta in 2026 are not just grinding LeetCode — they are using AI tools to practise smarter, simulate real interview conditions, and build the communication skills that separate a <strong>Strong</strong> from an <strong>Exceptional</strong> rating. This curated list covers the tools worth your time, with specific tips for Meta prep at IC4–IC7.
+          The best engineers preparing for Meta in 2026 are not just grinding LeetCode — they are using AI tools to practise smarter, simulate real interview conditions, and build the communication skills that separate a <strong>Strong</strong> from an <strong>Exceptional</strong> rating. This curated list covers the tools worth your time, with specific tips for Meta prep at L4–L7.
         </p>
       </div>
 
@@ -314,7 +314,7 @@ export default function AIToolsTab() {
               color: "border-teal-400/30 bg-teal-500/5",
             },
             {
-              goal: "IC6/IC7 full prep (8–10 weeks)",
+              goal: "L6/L7 full prep (8–10 weeks)",
               stack: ["Cursor AI", "Claude Code", "Interviewing.io (3+ sessions)", "CoderPad sandbox"],
               color: "border-violet-400/30 bg-violet-500/5",
             },

@@ -26,7 +26,7 @@ interface ICSignalEntry {
   date: number;
   problemTitle: string;
   targetLevel: string;
-  counts: { IC4: number; IC5: number; IC6: number; IC7: number };
+  counts: { L4: number; L5: number; L6: number; L7: number };
   total: number;
 }
 
@@ -36,7 +36,7 @@ function loadJSON<T>(key: string, fallback: T): T {
 
 function ICSignalTrendChart() {
   const history: ICSignalEntry[] = loadJSON<ICSignalEntry[]>(IC_SIGNAL_HISTORY_KEY, []);
-  // Read the IC6+ goal from ReadinessGoalSetter localStorage
+  // Read the L6+ goal from ReadinessGoalSetter localStorage
   const ic6PlusGoal: number | null = (() => {
     try {
       const saved = localStorage.getItem("meta_readiness_goal_v1");
@@ -57,7 +57,7 @@ function ICSignalTrendChart() {
                 IC Signal Detector Trend
               </h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Track how your IC4/IC5/IC6/IC7 signal distribution evolves across mock sessions.
+                Track how your L4/L5/L6/L7 signal distribution evolves across mock sessions.
               </p>
             </div>
           </div>
@@ -74,17 +74,17 @@ function ICSignalTrendChart() {
   }
 
   const levelColors = {
-    IC4: { bar: "bg-red-400", text: "text-red-700", badge: "bg-red-100 text-red-700 border-red-200" },
-    IC5: { bar: "bg-amber-400", text: "text-amber-700", badge: "bg-amber-100 text-amber-700 border-amber-200" },
-    IC6: { bar: "bg-blue-400", text: "text-blue-700", badge: "bg-blue-100 text-blue-700 border-blue-200" },
-    IC7: { bar: "bg-emerald-400", text: "text-emerald-700", badge: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+    L4: { bar: "bg-red-400", text: "text-red-700", badge: "bg-red-100 text-red-700 border-red-200" },
+    L5: { bar: "bg-amber-400", text: "text-amber-700", badge: "bg-amber-100 text-amber-700 border-amber-200" },
+    L6: { bar: "bg-blue-400", text: "text-blue-700", badge: "bg-blue-100 text-blue-700 border-blue-200" },
+    L7: { bar: "bg-emerald-400", text: "text-emerald-700", badge: "bg-emerald-100 text-emerald-700 border-emerald-200" },
   };
 
-  // Compute IC6+IC7 percentage trend
+  // Compute L6+L7 percentage trend
   const trendData = history.map(e => ({
     label: new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     problem: e.problemTitle,
-    ic67pct: e.total > 0 ? Math.round(((e.counts.IC6 + e.counts.IC7) / e.total) * 100) : 0,
+    ic67pct: e.total > 0 ? Math.round(((e.counts.L6 + e.counts.L7) / e.total) * 100) : 0,
     counts: e.counts,
     total: e.total,
   }));
@@ -115,7 +115,7 @@ function ICSignalTrendChart() {
               IC Signal Detector Trend
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              Your IC4/IC5/IC6/IC7 signal distribution across {history.length} mock session{history.length !== 1 ? "s" : ""}.
+              Your L4/L5/L6/L7 signal distribution across {history.length} mock session{history.length !== 1 ? "s" : ""}.
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@ function ICSignalTrendChart() {
       <div className="space-y-4">
         {/* Summary row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => {
+          {(["L4", "L5", "L6", "L7"] as const).map(lvl => {
             const latestCount = latest.counts[lvl];
             const latestPct = latest.total > 0 ? Math.round((latestCount / latest.total) * 100) : 0;
             return (
@@ -136,10 +136,10 @@ function ICSignalTrendChart() {
           })}
         </div>
 
-        {/* IC6+IC7 trend line */}
+        {/* L6+L7 trend line */}
         <div className="rounded-xl border border-purple-200 bg-white p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-purple-700">IC6+ Signal % over time</p>
+            <p className="text-xs font-bold text-purple-700">L6+ Signal % over time</p>
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
               trendDelta > 0 ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
               trendDelta < 0 ? "bg-red-100 text-red-700 border-red-200" :
@@ -193,7 +193,7 @@ function ICSignalTrendChart() {
                 <span className="text-xs font-semibold text-gray-700 flex-1 min-w-0 truncate">{e.problemTitle}</span>
                 <span className="text-[10px] font-bold text-gray-500 shrink-0">{e.targetLevel}</span>
                 <div className="flex gap-1 shrink-0">
-                  {(["IC4", "IC5", "IC6", "IC7"] as const).map(lvl => (
+                  {(["L4", "L5", "L6", "L7"] as const).map(lvl => (
                     e.counts[lvl] > 0 ? (
                       <span key={lvl} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${levelColors[lvl].badge}`}>
                         {lvl}:{e.counts[lvl]}
@@ -202,7 +202,7 @@ function ICSignalTrendChart() {
                   ))}
                 </div>
                 <div className="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
-                  <div className="h-full bg-purple-400 rounded-full" style={{ width: `${e.total > 0 ? ((e.counts.IC6 + e.counts.IC7) / e.total) * 100 : 0}%` }} />
+                  <div className="h-full bg-purple-400 rounded-full" style={{ width: `${e.total > 0 ? ((e.counts.L6 + e.counts.L7) / e.total) * 100 : 0}%` }} />
                 </div>
               </div>
             ))}
@@ -1191,17 +1191,17 @@ export default function ReadinessTab() {
         <OverallReadinessDashboard />
       </section>
 
-      {/* ── IC7 Signal Self-Assessment ── */}
+      {/* ── L7 Signal Self-Assessment ── */}
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <div className="flex items-center gap-3">
             <ShieldCheck size={20} className="text-indigo-600" />
             <div>
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                IC7 Signal Self-Assessment
+                L7 Signal Self-Assessment
               </h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Check off each of the 8 IC7 key signals you can back with a real story. Gaps are flagged as preparation priorities.
+                Check off each of the 8 L7 key signals you can back with a real story. Gaps are flagged as preparation priorities.
               </p>
             </div>
           </div>

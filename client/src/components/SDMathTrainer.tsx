@@ -255,7 +255,7 @@ export default function SDMathTrainer() {
               Back-of-Envelope Math Trainer
             </p>
             <p className="text-xs text-blue-700 mt-1 leading-relaxed">
-              Interviewers at IC6+ expect you to derive QPS, storage, and bandwidth from first principles — not memorize numbers.
+              Interviewers at L6+ expect you to derive QPS, storage, and bandwidth from first principles — not memorize numbers.
               This trainer checks your <strong>order of magnitude</strong> and <strong>reasoning process</strong>, not exact answers.
               Show your formula before your number.
             </p>

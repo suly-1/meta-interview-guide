@@ -1,9 +1,9 @@
 /**
  * ICLevelContext — manages IC level filter with three tiers:
  *
- * "junior"  -> IC4              (hides senior-only and staff-only content)
- * "mid"     -> IC5 / Senior     (hides staff-only content, shows IC5-relevant sections)
- * "senior"  -> IC6 / IC7 / Staff+ (shows everything, default)
+ * "junior"  -> L4              (hides senior-only and staff-only content)
+ * "mid"     -> L5 / Senior     (hides staff-only content, shows L5-relevant sections)
+ * "senior"  -> L6 / L7 / Staff+ (shows everything, default)
  */
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -12,11 +12,11 @@ export type ICLevel = "junior" | "mid" | "senior";
 interface ICLevelContextType {
   icLevel: ICLevel;
   setICLevel: (level: ICLevel) => void;
-  /** true when IC6/IC7 (Staff+) — shows all senior/staff content */
+  /** true when L6/L7 (Staff+) — shows all senior/staff content */
   isSenior: boolean;
-  /** true when IC5 or higher — shows IC5+ content but hides staff-only */
+  /** true when L5 or higher — shows L5+ content but hides staff-only */
   isMidOrAbove: boolean;
-  /** true when IC4 only — most restrictive view */
+  /** true when L4 only — most restrictive view */
   isJunior: boolean;
 }
 

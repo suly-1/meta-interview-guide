@@ -2,7 +2,7 @@
  * SystemDesignComparisonTable — side-by-side matrix comparing all 8 Meta
  * system design patterns across key dimensions:
  *   Read/Write ratio, Consistency model, Primary storage, Scaling strategy,
- *   Meta example system, IC7 differentiator.
+ *   Meta example system, L7 differentiator.
  */
 import { useState } from "react";
 import { Table2, ChevronDown, ChevronUp } from "lucide-react";
@@ -125,7 +125,7 @@ const COLUMNS = [
   { key: "primaryStorage",   label: "Primary Storage",      width: "w-40" },
   { key: "scalingStrategy",  label: "Scaling Strategy",     width: "w-52" },
   { key: "metaExample",      label: "Meta Example",         width: "w-36" },
-  { key: "ic7Differentiator",label: "IC7 Differentiator",   width: "w-52" },
+  { key: "ic7Differentiator",label: "L7 Differentiator",   width: "w-52" },
 ] as const;
 
 export default function SystemDesignComparisonTable() {
@@ -215,7 +215,7 @@ export default function SystemDesignComparisonTable() {
                     <span className="text-blue-700 dark:text-blue-400 font-medium">{row.metaExample}</span>
                   </td>
 
-                  {/* IC7 Differentiator */}
+                  {/* L7 Differentiator */}
                   <td className={`px-3 py-2.5 text-gray-500 dark:text-gray-400 leading-relaxed italic ${highlightCol === "ic7Differentiator" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
                     {row.ic7Differentiator}
                   </td>

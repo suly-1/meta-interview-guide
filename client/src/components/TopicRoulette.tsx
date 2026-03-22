@@ -133,7 +133,7 @@ const SEGMENTS: Segment[] = [
         "Review this week's study plan and mark completed items.",
         "Identify the one topic you've been avoiding and schedule it for today.",
         "Do a 30-minute mock interview with a timer.",
-        "Review the IC6/IC7 behavioral focus areas for this week.",
+        "Review the L6/L7 behavioral focus areas for this week.",
         "Update your interview countdown date and check your D-minus urgency.",
       ];
       return tasks[Math.floor(Math.random() * tasks.length)];

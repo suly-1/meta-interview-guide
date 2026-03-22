@@ -228,7 +228,7 @@ interface MetaRubricAssessmentProps {
   /** Optional: candidate's code */
   codeText?: string;
   /** Target level for calibration */
-  targetLevel?: "IC5" | "IC6" | "IC7";
+  targetLevel?: "L5" | "L6" | "L7";
   /** Allow manual self-assessment mode (no AI call) */
   selfAssessMode?: boolean;
 }
@@ -237,12 +237,12 @@ export default function MetaRubricAssessment({
   problemName,
   approachText,
   codeText = "",
-  targetLevel = "IC6",
+  targetLevel = "L6",
   selfAssessMode = false,
 }: MetaRubricAssessmentProps) {
   const [result, setResult] = useState<MetaRubricResult | null>(null);
   const [mode, setMode] = useState<"ai" | "self">(selfAssessMode ? "self" : "ai");
-  const [level, setLevel] = useState<"IC5" | "IC6" | "IC7">(targetLevel);
+  const [level, setLevel] = useState<"L5" | "L6" | "L7">(targetLevel);
 
   // Self-assessment state
   const [selfRatings, setSelfRatings] = useState<Record<string, MetaRating>>({
@@ -344,7 +344,7 @@ export default function MetaRubricAssessment({
             <div>
               <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">Calibrate to level</p>
               <div className="flex gap-2">
-                {(["IC5", "IC6", "IC7"] as const).map(l => (
+                {(["L5", "L6", "L7"] as const).map(l => (
                   <button
                     key={l}
                     onClick={() => setLevel(l)}
@@ -354,7 +354,7 @@ export default function MetaRubricAssessment({
                         : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-gray-400"
                     }`}
                   >
-                    {l === "IC5" ? "IC5 (SWE)" : l === "IC6" ? "IC6 (Senior)" : "IC7 (Staff)"}
+                    {l === "L5" ? "L5 (SWE)" : l === "L6" ? "L6 (Senior)" : "L7 (Staff)"}
                   </button>
                 ))}
               </div>

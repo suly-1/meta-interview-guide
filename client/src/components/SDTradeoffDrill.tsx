@@ -97,7 +97,7 @@ const TRADEOFF_DECISIONS: TradeoffDecision[] = [
     context: "Building a new internal tool for Meta's ads team. ~50 engineers, 6-month timeline, expected to serve 10K internal users.",
     difficulty: "Advanced",
     hint: "Context matters enormously here. What's the team size, timeline, and scale?",
-    modelAnswer: "Monolith for this context. Microservices add significant operational overhead (service discovery, distributed tracing, network latency, deployment complexity) that is only justified at large scale or large team size. With 50 engineers, 6 months, and 10K users, a well-structured monolith ships faster, is easier to debug, and can be decomposed later if needed. The IC6+ signal is recognizing that microservices are not always the right answer.",
+    modelAnswer: "Monolith for this context. Microservices add significant operational overhead (service discovery, distributed tracing, network latency, deployment complexity) that is only justified at large scale or large team size. With 50 engineers, 6 months, and 10K users, a well-structured monolith ships faster, is easier to debug, and can be decomposed later if needed. The L6+ signal is recognizing that microservices are not always the right answer.",
   },
   {
     id: "rate-limit-algorithm",
@@ -181,7 +181,7 @@ function ScoreDimension({
 
 export default function SDTradeoffDrill() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [targetLevel, setTargetLevel] = useState<"IC6" | "IC7">("IC6");
+  const [targetLevel, setTargetLevel] = useState<"L6" | "L7">("L6");
   const [selectedChoice, setSelectedChoice] = useState<"A" | "B" | null>(null);
   const [justification, setJustification] = useState("");
   const [phase, setPhase] = useState<"drill" | "result">("drill");
@@ -258,7 +258,7 @@ export default function SDTradeoffDrill() {
       {/* Level + Category filter */}
       <div className="flex flex-wrap gap-2 items-center">
         <div className="flex gap-1.5">
-          {(["IC6", "IC7"] as const).map(lvl => (
+          {(["L6", "L7"] as const).map(lvl => (
             <button
               key={lvl}
               onClick={() => setTargetLevel(lvl)}
@@ -381,7 +381,7 @@ export default function SDTradeoffDrill() {
                 className="w-full h-40 px-3 py-2.5 text-xs border border-border rounded-xl bg-card text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-violet-400 font-mono leading-relaxed"
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                Tip: Mention the downside of your choice and when the other option would be better. That's the IC6 signal.
+                Tip: Mention the downside of your choice and when the other option would be better. That's the L6 signal.
               </p>
             </div>
           )}

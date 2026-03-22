@@ -49,7 +49,7 @@ interface AISessionHistoryEntry {
   verificationScore: number;
   communicationScore: number;
   aiToolUsageScore: number;
-  targetLevel: "IC6" | "IC7";
+  targetLevel: "L6" | "L7";
   date: string;
   elapsedSeconds: number;
 }
@@ -500,7 +500,7 @@ export default function AIRoundMockSession() {
   const [phase, setPhase] = useState<Phase_>("setup");
   const [selectedProblem, setSelectedProblem] = useState<MockProblem | null>(null);
   const [randomize, setRandomize] = useState(false);
-  const [targetLevel, setTargetLevel] = useState<"IC6" | "IC7">("IC6");
+  const [targetLevel, setTargetLevel] = useState<"L6" | "L7">("L6");
   const [currentPhaseIdx, setCurrentPhaseIdx] = useState(0);
   const [phaseAnswers, setPhaseAnswers] = useState<string[]>(["", "", ""]);
   const [workflowNotes, setWorkflowNotes] = useState("");
@@ -641,7 +641,7 @@ export default function AIRoundMockSession() {
         <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
           <h4 className="text-sm font-bold text-gray-800">Target IC Level</h4>
           <div className="flex gap-2">
-            {(["IC6", "IC7"] as const).map((lvl) => (
+            {(["L6", "L7"] as const).map((lvl) => (
               <button
                 key={lvl}
                 onClick={() => setTargetLevel(lvl)}
@@ -651,7 +651,7 @@ export default function AIRoundMockSession() {
                     : "bg-white text-gray-600 border-gray-200 hover:border-violet-300"
                 }`}
               >
-                {lvl === "IC6" ? "IC6 — Senior Engineer" : "IC7 — Staff Engineer"}
+                {lvl === "L6" ? "L6 — Senior Engineer" : "L7 — Staff Engineer"}
               </button>
             ))}
           </div>

@@ -10,7 +10,7 @@ const LS_KEY = "meta_readiness_goal_v1";
 interface Goal {
   targetScore: number;
   targetDate: string; // ISO date string YYYY-MM-DD
-  targetIC6PlusPct?: number; // target % of IC6+ signals in SD mock debrief
+  targetIC6PlusPct?: number; // target % of L6+ signals in SD mock debrief
 }
 
 function getDaysUntil(dateStr: string): number {
@@ -41,7 +41,7 @@ function getReadinessScore(): number {
     const storiesCount = Object.values(starStories).filter(s => s && s.trim().length > 20).length;
     const behavioralScore = Math.min((storiesCount / 28) * 100, 100);
 
-    // IC7 signals (15%)
+    // L7 signals (15%)
     const signalsCount = Object.values(ic7Signals).filter(Boolean).length;
     const signalScore = (signalsCount / 8) * 100;
 
@@ -210,10 +210,10 @@ export default function ReadinessGoalSetter() {
             </div>
           </div>
 
-          {/* IC6+ target */}
+          {/* L6+ target */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-              Target IC6+ Signal %: <span className="text-blue-600 dark:text-blue-400 font-black">{draftIC6PlusPct}%</span>
+              Target L6+ Signal %: <span className="text-blue-600 dark:text-blue-400 font-black">{draftIC6PlusPct}%</span>
             </label>
             <input
               type="range"
@@ -225,9 +225,9 @@ export default function ReadinessGoalSetter() {
               className="w-full accent-blue-500"
             />
             <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-              <span>10% (IC4 heavy)</span>
+              <span>10% (L4 heavy)</span>
               <span className="font-bold text-blue-600">{draftIC6PlusPct}% target</span>
-              <span>100% (all IC6+)</span>
+              <span>100% (all L6+)</span>
             </div>
             <p className="text-[10px] text-gray-400 mt-1">This goal line appears on the IC Signal Trend chart in the System Design section.</p>
           </div>

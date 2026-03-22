@@ -622,14 +622,14 @@ export const TIMELINE_WEEKS = [
   },
 ];
 
-// ─── IC7 Behavioral Focus Areas (Principal / Senior Staff mock) ────────────
-// These questions target the IC7 bar: org-wide scope, retrospective ownership,
+// ─── L7 Behavioral Focus Areas (Principal / Senior Staff mock) ────────────
+// These questions target the L7 bar: org-wide scope, retrospective ownership,
 // cross-functional partnership, and upward influence.
 export const IC7_BEHAVIORAL_FOCUS_AREAS = [
   {
     id: "ic7-xfn-partnership",
     title: "Cross-Functional Partnership",
-    subtitle: "IC7 / Principal",
+    subtitle: "L7 / Principal",
     questions: [
       {
         question: "Tell me about a time you drove alignment across multiple organizations or business units on a technically ambiguous initiative.",
@@ -690,7 +690,7 @@ export const IC7_BEHAVIORAL_FOCUS_AREAS = [
   {
     id: "ic7-retrospective-partnership",
     title: "Retrospective Partnership & Ownership",
-    subtitle: "IC7 / Principal",
+    subtitle: "L7 / Principal",
     questions: [
       {
         question: "Tell me about a time you told the hard truth — for example, recommending deprecating a system or killing a project when the ROI wasn't there.",
@@ -707,7 +707,7 @@ export const IC7_BEHAVIORAL_FOCUS_AREAS = [
           "What was the failure and what was the business impact?",
           "How did you lead the retrospective and ensure psychological safety?",
           "What systemic changes did you drive — not just for your team but for the org?",
-          "How do you think about failure as an IC7?",
+          "How do you think about failure as an L7?",
         ],
       },
       {
@@ -716,7 +716,7 @@ export const IC7_BEHAVIORAL_FOCUS_AREAS = [
           "What was the gap between execution quality and outcome?",
           "How did you diagnose the root cause — was it strategy, adoption, measurement?",
           "What did you do differently as a result?",
-          "How do you think about the difference between output and outcome at the IC7 level?",
+          "How do you think about the difference between output and outcome at the L7 level?",
         ],
       },
       {
@@ -743,7 +743,7 @@ export const IC7_BEHAVIORAL_FOCUS_AREAS = [
           "What was the tension and what were the competing pressures?",
           "How did you make the trade-off decision and communicate it?",
           "How did you ensure the long-term concern wasn't permanently deferred?",
-          "What was the outcome and how do you think about this trade-off at the IC7 level?",
+          "What was the outcome and how do you think about this trade-off at the L7 level?",
         ],
       },
     ],

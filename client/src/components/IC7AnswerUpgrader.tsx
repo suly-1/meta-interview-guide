@@ -1,4 +1,4 @@
-// IC7AnswerUpgrader — side-by-side IC6 vs IC7 answer snippets for the same scenario
+// IC7AnswerUpgrader — side-by-side L6 vs L7 answer snippets for the same scenario
 // Makes the scope delta concrete and easy to internalize
 import { useState } from "react";
 import { ChevronRight, ChevronDown, ArrowRight } from "lucide-react";
@@ -29,7 +29,7 @@ const ANSWER_EXAMPLES: AnswerExample[] = [
     ic7Answer: "I identified that our auth architecture was becoming a bottleneck for three product orgs — not just my team. I wrote the technical strategy doc, got buy-in from 4 engineering directors, and coordinated a phased migration across 12 teams over two quarters. I also established the service ownership model that's now used org-wide. The migration reduced auth latency by 40% and unblocked $50M in new product surface area. I grew two senior engineers into tech leads through this project.",
     ic6Signals: ["Team-level execution", "XFN coordination within scope", "Measurable technical outcome"],
     ic7Signals: ["Identified org-level problem proactively", "Cross-org alignment across 4 directors", "Established org-wide patterns", "Grew other senior engineers", "Business-level impact quantified"],
-    keyDelta: "IC7 identifies the problem proactively, operates across org boundaries without authority, establishes lasting patterns, and quantifies business impact — not just technical metrics.",
+    keyDelta: "L7 identifies the problem proactively, operates across org boundaries without authority, establishes lasting patterns, and quantifies business impact — not just technical metrics.",
   },
   {
     scenario: "Conflict Resolution",
@@ -42,7 +42,7 @@ const ANSWER_EXAMPLES: AnswerExample[] = [
     ic7Answer: "Three product orgs and the data platform team had been blocked for two quarters on a schema standard — each team had different requirements and the disagreement was escalating to VP level. I volunteered to lead the resolution. I ran a structured RFC process, synthesized requirements from all parties, proposed a tiered schema standard with migration paths, and got alignment from all four org leads. The standard is now the company-wide schema policy and unblocked 8 teams. I also documented the decision-making framework so future cross-org technical disputes have a process.",
     ic6Signals: ["Resolved team-level conflict", "Collaborative compromise", "On-time delivery"],
     ic7Signals: ["Resolved multi-org, escalated conflict", "Ran structured RFC process", "Created company-wide policy", "Documented reusable framework", "Unblocked 8 teams"],
-    keyDelta: "IC7 resolves conflicts at org or company scale, creates lasting processes and policies, and operates without positional authority across multiple stakeholders.",
+    keyDelta: "L7 resolves conflicts at org or company scale, creates lasting processes and policies, and operates without positional authority across multiple stakeholders.",
   },
   {
     scenario: "Decision Under Ambiguity",
@@ -55,7 +55,7 @@ const ANSWER_EXAMPLES: AnswerExample[] = [
     ic7Answer: "We were 6 months from a major product launch with no clear technical direction on our real-time infrastructure — three viable approaches, each with different risk profiles, and the decision would affect 5 product teams for the next 3 years. I structured the evaluation: defined decision criteria with all stakeholders, ran time-boxed spikes on each approach, and built a risk matrix. I made the call to go with approach C despite pushback from two senior engineers, wrote the full technical rationale, and got sign-off from the CTO. I was wrong on one assumption — I documented this post-launch and updated our decision framework. The infrastructure has served 10x traffic growth without redesign.",
     ic6Signals: ["Made technical decision under uncertainty", "Consulted peers", "Documented trade-offs"],
     ic7Signals: ["Structured multi-stakeholder evaluation", "3-year architectural decision", "Made call despite senior pushback", "Acknowledged and documented error", "Outcome served 10x growth"],
-    keyDelta: "IC7 makes decisions with org-wide, multi-year consequences, structures the decision process itself, shows intellectual honesty about errors, and demonstrates the decision's durability.",
+    keyDelta: "L7 makes decisions with org-wide, multi-year consequences, structures the decision process itself, shows intellectual honesty about errors, and demonstrates the decision's durability.",
   },
   {
     scenario: "Communication & Influence",
@@ -68,7 +68,7 @@ const ANSWER_EXAMPLES: AnswerExample[] = [
     ic7Answer: "Our org had no shared technical vision — each team was building independently, creating duplication and integration debt. I wrote a 6-month technical strategy doc, ran a series of working sessions with 15 senior engineers across 4 teams, and presented to the VP of Engineering. I had to navigate significant resistance from two team leads who felt their autonomy was being constrained. I revised the strategy three times based on feedback, made the trade-offs explicit, and got full org alignment. The strategy reduced duplicated infrastructure by 30% and became the template for how we do org-level technical planning.",
     ic6Signals: ["Team-level alignment", "Clear structure", "Answered questions"],
     ic7Signals: ["Org-level technical vision", "Navigated resistance from senior peers", "Iterated based on feedback", "Quantified outcome", "Created reusable template"],
-    keyDelta: "IC7 communication shapes org-level direction, navigates resistance from senior stakeholders, and produces artifacts that outlast the immediate project.",
+    keyDelta: "L7 communication shapes org-level direction, navigates resistance from senior stakeholders, and produces artifacts that outlast the immediate project.",
   },
   {
     scenario: "Mentoring & Growing Engineers",
@@ -81,7 +81,7 @@ const ANSWER_EXAMPLES: AnswerExample[] = [
     ic7Answer: "I identified that our org had a systemic problem: senior engineers weren't growing into staff-level roles because there was no structured path or sponsorship culture. I designed and ran a 'Staff Engineer Readiness' program for 6 senior engineers across 3 teams — structured projects with increasing scope, bi-weekly group sessions, and explicit sponsorship from directors. Three engineers were promoted to staff level within 18 months. I also wrote the program framework, which was adopted by two other orgs. The program is now part of our standard engineering career development process.",
     ic6Signals: ["1:1 mentorship", "Code and design review", "Promoted one engineer"],
     ic7Signals: ["Identified systemic org problem", "Designed scalable program", "Grew 3 staff engineers", "Created reusable framework adopted by other orgs", "Changed org-level career development process"],
-    keyDelta: "IC7 grows multiple senior leaders at scale, identifies and fixes systemic org problems, and creates programs that outlast their direct involvement.",
+    keyDelta: "L7 grows multiple senior leaders at scale, identifies and fixes systemic org problems, and creates programs that outlast their direct involvement.",
   },
 ];
 
@@ -97,7 +97,7 @@ export default function IC7AnswerUpgrader() {
     <div className="space-y-4">
       <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
         <p className="text-xs text-indigo-800 leading-relaxed">
-          <strong>How to use:</strong> Read the IC6 answer first — it's a solid, passing answer at the Senior Engineer level. Then reveal the IC7 version to see how the same scenario is reframed with larger scope, org-level impact, and strategic thinking. The <strong>Key Delta</strong> explains exactly what changed and why.
+          <strong>How to use:</strong> Read the L6 answer first — it's a solid, passing answer at the Senior Engineer level. Then reveal the L7 version to see how the same scenario is reframed with larger scope, org-level impact, and strategic thinking. The <strong>Key Delta</strong> explains exactly what changed and why.
         </p>
       </div>
 
@@ -124,11 +124,11 @@ export default function IC7AnswerUpgrader() {
             <div className="border-t border-gray-100">
               {/* Side-by-side answers */}
               <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
-                {/* IC6 Answer */}
+                {/* L6 Answer */}
                 <div className="p-5 bg-blue-50/30">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    <span className="text-xs font-bold text-blue-800">IC6 — Senior Engineer Answer</span>
+                    <span className="text-xs font-bold text-blue-800">L6 — Senior Engineer Answer</span>
                   </div>
                   <p className="text-sm text-gray-700 leading-relaxed mb-3 italic">"{ex.ic6Answer}"</p>
                   <div className="space-y-1">
@@ -141,19 +141,19 @@ export default function IC7AnswerUpgrader() {
                   </div>
                 </div>
 
-                {/* IC7 Answer */}
+                {/* L7 Answer */}
                 <div className="p-5 bg-purple-50/30">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-purple-500" />
-                      <span className="text-xs font-bold text-purple-800">IC7 — Staff Engineer Answer</span>
+                      <span className="text-xs font-bold text-purple-800">L7 — Staff Engineer Answer</span>
                     </div>
                     {!showIC7[idx] && (
                       <button
                         onClick={() => toggleIC7(idx)}
                         className="text-[11px] font-bold text-purple-600 hover:text-purple-800 bg-purple-100 hover:bg-purple-200 px-2.5 py-1 rounded-lg transition-colors"
                       >
-                        Reveal IC7 Answer
+                        Reveal L7 Answer
                       </button>
                     )}
                   </div>
@@ -172,7 +172,7 @@ export default function IC7AnswerUpgrader() {
                     </>
                   ) : (
                     <div className="rounded-xl border border-purple-200 bg-purple-50 p-4 text-center">
-                      <p className="text-xs text-purple-500 italic">Answer hidden — answer the IC6 version first, then reveal</p>
+                      <p className="text-xs text-purple-500 italic">Answer hidden — answer the L6 version first, then reveal</p>
                     </div>
                   )}
                 </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export interface CandidateProfile {
   name: string;
-  targetLevel: "IC6" | "IC7" | "";
+  targetLevel: "L6" | "L7" | "";
   currentRole: string;
   strongAreas: string[];
   weakAreas: string[];

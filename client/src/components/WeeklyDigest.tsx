@@ -29,7 +29,7 @@ function buildDigest(email: string, interviewDate: string): string {
   const daysLeft = Math.ceil((interview.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   const lines: string[] = [
-    `📋 Meta IC6/IC7 — Personalized 4-Week Prep Digest`,
+    `📋 Meta L6/L7 — Personalized 4-Week Prep Digest`,
     `For: ${email}`,
     `Interview Date: ${interview.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}`,
     `Days Remaining: ${daysLeft > 0 ? daysLeft : "Interview day!"}`,

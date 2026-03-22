@@ -205,7 +205,7 @@ export default function SDMetaBlogReader() {
             </p>
             <p className="text-xs text-teal-700 mt-1 leading-relaxed">
               Every post is annotated with: the system design topic it covers, what to extract from it, and the single key insight that interviewers want to hear.
-              Reading the original papers gives you the credibility to say "Meta solved this by..." — which is an IC7-level signal.
+              Reading the original papers gives you the credibility to say "Meta solved this by..." — which is an L7-level signal.
             </p>
           </div>
         </div>

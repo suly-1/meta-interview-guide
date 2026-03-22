@@ -1,6 +1,6 @@
 /**
  * PeerComparisonPrompts — Feature 14
- * For each behavioral question, shows strong/weak answer signals for IC6 calibration.
+ * For each behavioral question, shows strong/weak answer signals for L6 calibration.
  */
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, ChevronDown, ChevronUp } from "lucide-react";
@@ -102,7 +102,7 @@ export default function PeerComparisonPrompts({ question }: { question: string }
         className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-left transition-colors"
         onClick={() => setOpen(o => !o)}
       >
-        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">IC6 Answer Signals</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">L6 Answer Signals</span>
         {open ? <ChevronUp size={13} className="text-gray-400" /> : <ChevronDown size={13} className="text-gray-400" />}
       </button>
       {open && (
