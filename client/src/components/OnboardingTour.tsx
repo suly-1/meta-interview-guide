@@ -37,7 +37,7 @@ const STEPS = [
   {
     id: "welcome",
     title: "Welcome to the Meta IC6/IC7 Interview Guide",
-    subtitle: "Built by engineers, for engineers. Let's get you to 7/10 pass rate.",
+    subtitle: "Designed by The Architect — a Meta engineer. Let's get you to 7/10 pass rate.",
     content: null,
   },
   {

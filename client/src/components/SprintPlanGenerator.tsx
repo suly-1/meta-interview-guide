@@ -5,14 +5,15 @@
  * schedule referencing the 10 HIGH IMPACT tools. Supports print and JSON download.
  */
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Download, Printer, Calendar, CheckCircle2, Clock, Zap, RefreshCw } from "lucide-react";
+import { Loader2, Download, Printer, Calendar, CheckCircle2, Clock, Zap, RefreshCw, Trophy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import SprintPlanFeedback from "@/components/SprintPlanFeedback";
 import SprintPlanShare from "@/components/SprintPlanShare";
 import ProgressAnalyticsDashboard from "@/components/ProgressAnalyticsDashboard";
+import confetti from "canvas-confetti";
 
 type Day = {
   dayNumber: number;
@@ -106,6 +107,28 @@ export default function SprintPlanGenerator() {
   const totalTasks = plan ? plan.reduce((sum, d) => sum + d.tasks.length, 0) : 0;
   const completedCount = completedTasks.size;
   const progressPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+  const isComplete = progressPct === 100 && totalTasks > 0;
+  const [celebrationShown, setCelebrationShown] = useState(false);
+  const confettiFiredRef = useRef(false);
+
+  // Fire confetti + show celebration banner when sprint hits 100%
+  useEffect(() => {
+    if (!isComplete || confettiFiredRef.current) return;
+    confettiFiredRef.current = true;
+    setCelebrationShown(true);
+    const fire = (ratio: number, opts: confetti.Options) =>
+      confetti({ origin: { y: 0.6 }, ...opts, particleCount: Math.floor(200 * ratio) });
+    fire(0.25, { spread: 26, startVelocity: 55, colors: ["#f97316", "#10b981", "#6366f1"] });
+    fire(0.2,  { spread: 60,  colors: ["#f59e0b", "#3b82f6"] });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+    fire(0.1,  { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+    fire(0.1,  { spread: 120, startVelocity: 45 });
+  }, [isComplete]);
+
+  // Reset guard when plan is regenerated
+  useEffect(() => {
+    if (!isComplete) { confettiFiredRef.current = false; setCelebrationShown(false); }
+  }, [isComplete]);
 
   return (
     <div className="space-y-6">
@@ -234,6 +257,55 @@ export default function SprintPlanGenerator() {
           </div>
         </div>
       )}
+
+      {/* Celebration banner — shown when sprint is 100% complete */}
+      <AnimatePresence>
+        {celebrationShown && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 300, damping: 22 }}
+            className="rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-5 text-white shadow-xl"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Trophy size={28} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-lg font-black leading-tight">You finished your sprint!</p>
+                <p className="text-sm text-white/80 mt-0.5">
+                  Every task checked off. You are ready. Now go show them what you've got.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <Button
+                  size="sm"
+                  className="bg-white text-emerald-700 hover:bg-white/90 font-bold gap-1.5 text-xs"
+                  onClick={() => {
+                    const text = `I just completed my ${Math.min(days, 7)}-day Meta interview sprint on metaengguide.pro! 🚀`;
+                    if (navigator.share) {
+                      navigator.share({ title: "Sprint Complete!", text, url: window.location.origin });
+                    } else {
+                      navigator.clipboard.writeText(text + " " + window.location.origin);
+                    }
+                  }}
+                >
+                  <Share2 size={12} /> Share your win
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-white/40 text-white hover:bg-white/10 font-semibold text-xs"
+                  onClick={() => setCelebrationShown(false)}
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Plan */}
       <AnimatePresence>

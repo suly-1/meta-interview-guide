@@ -1754,7 +1754,7 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   deployStatus: router({
     get: publicProcedure.query(async () => {
       try {
-        const GITHUB_REPO = "suly-1/meta-interview-guide";
+        const GITHUB_REPO = "owner/meta-interview-guide";
         const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/actions/runs?per_page=1&branch=main`;
         const response = await fetch(GITHUB_API, {
           headers: {

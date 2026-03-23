@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import { registerFeedbackDigestCron } from "../emailDigest";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -63,3 +64,6 @@ async function startServer() {
 }
 
 startServer().catch(console.error);
+
+// Register weekly feedback digest cron (Mondays 08:00 UTC)
+registerFeedbackDigestCron();

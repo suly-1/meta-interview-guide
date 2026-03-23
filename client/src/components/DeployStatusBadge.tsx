@@ -52,7 +52,7 @@ export default function DeployStatusBadge() {
 
   return (
     <a
-      href={data?.url ?? "https://github.com/suly-1/meta-interview-guide/actions"}
+      href={data?.url ?? "https://github.com/the-architect/meta-interview-guide/actions"}
       target="_blank"
       rel="noopener noreferrer"
       title={`GitHub Actions: ${status}${ago ? ` · ${ago}` : ""}\nClick to view workflow runs`}

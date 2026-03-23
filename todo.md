@@ -428,3 +428,10 @@
 - [ ] Sprint plan sharing (shareable link + mentor view)
 - [ ] Detailed onboarding flow plan document in-app
 - [ ] Fix/document CodingTab JSX structure
+
+## Round 3 Features
+- [ ] Admin feedback view at /admin/feedback (owner-only, all site feedback sorted by category/rating)
+- [ ] Weekly email digest cron job → owner email
+- [ ] Sprint plan completion celebration (confetti + share prompt at 100%)
+- [ ] Enhanced admin dashboard: sortable feedback table at /admin/feedback
+- [ ] Aggregate anonymous pass-rate stats per feature (68% vs 41% style)

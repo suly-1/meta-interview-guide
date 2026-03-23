@@ -610,7 +610,7 @@ export default function Home() {
       <SiteFeedbackModal currentPage={activeTab} />
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
         <p className="font-semibold text-white/90 mb-1">Independent Study Guide</p>
-        <p className="text-white/40 text-xs mb-1">By Community Contributors · Not affiliated with any company</p>
+        <p className="text-white/40 text-xs mb-1">Designed by <span className="text-blue-400 font-semibold">The Architect</span> · Not affiliated with any company</p>
         <p>Updated March 2026 · Content synthesized from candidate reports, NeetCode, Coditioning, HelloInterview, igotanoffer, and Taro.</p>
         <p className="mt-2 text-white/40 text-xs max-w-xl mx-auto">
           This is a community guide for self-directed learners. If you're a recruiter or hiring manager thinking about sharing it — totally your call, but it's worth checking your company's guidelines on external resources first. This guide works best when candidates discover it on their own anyway.

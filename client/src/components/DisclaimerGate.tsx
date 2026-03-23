@@ -146,7 +146,7 @@ export default function DisclaimerGate({ onConfirm }: Props) {
                 Quick note before you start
               </h1>
               <p className="text-sm text-blue-300/70 mt-0.5">
-                A note from the community
+                A note from The Architect
               </p>
             </div>
           </div>
@@ -154,12 +154,11 @@ export default function DisclaimerGate({ onConfirm }: Props) {
           {/* Main body */}
           <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
             <p>
-              This guide was built by the community, for candidates doing their
-              own research. It's{" "}
-              <strong className="text-white">
-                not affiliated with any company
-              </strong>{" "}
-              — just engineers sharing what they learned the hard way.
+              This guide was designed by{" "}
+              <strong className="text-white">The Architect</strong> — a Meta
+              engineer who wanted candidates to succeed. It's{" "}
+              <strong className="text-white">not affiliated with any company</strong>{" "}
+              — just hard-won knowledge shared openly.
             </p>
             <p>
               Always pair it with any official guidance you receive. Interview
@@ -173,10 +172,10 @@ export default function DisclaimerGate({ onConfirm }: Props) {
               The legal bit, in plain English:
             </p>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              This is a free community resource provided as-is. The people who
-              built it aren't responsible for your interview outcomes or any
-              decisions you make based on it. No warranties, no guarantees —
-              just good faith effort from engineers who've been through it.
+              This is a free resource provided as-is by The Architect. It is
+              not responsible for your interview outcomes or any decisions you
+              make based on it. No warranties, no guarantees — just good faith
+              effort from someone who has been through it.
             </p>
           </div>
 
@@ -188,7 +187,7 @@ export default function DisclaimerGate({ onConfirm }: Props) {
             <p className="text-xs text-zinc-400 leading-relaxed">
               Openly available at{" "}
               <span className="text-blue-400">{window.location.hostname}</span>{" "}
-              — built and shared by engineers, for engineers.
+              — designed and shared by The Architect, for engineers.
             </p>
           </div>
 
@@ -216,7 +215,7 @@ export default function DisclaimerGate({ onConfirm }: Props) {
               }`}
             >
               I'm using this guide for my own interview prep and understand
-              it's a free community resource with no guarantees.
+              it's a free resource from The Architect with no guarantees.
             </span>
           </button>
 
