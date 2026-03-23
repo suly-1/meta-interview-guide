@@ -202,18 +202,8 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
             </p>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Openly available at{" "}
-              <span className="text-blue-400">www.metaguide.blog</span> and
-              open-source at{" "}
-              <a
-                href="https://github.com/suly-1/meta-prep-guide"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-purple-400 hover:underline"
-              >
-                github.com/suly-1/meta-prep-guide
-              </a>
-              . Not distributed by any interviewer, recruiter, or company
-              employee.
+              <span className="text-blue-400">www.metaguide.blog</span>. Not
+              distributed by any interviewer, recruiter, or company employee.
             </p>
           </div>
 

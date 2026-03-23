@@ -521,3 +521,7 @@
 - [x] Fix DisclaimerGate — use localStorage-only when no backend available
 - [x] Fix DeployStatusBadge — call GitHub API directly from browser (no tRPC)
 - [x] Deploy to GitHub Pages
+
+## DisclaimerGate Cleanup
+
+- [x] Remove GitHub repo link from community proof box in DisclaimerGate
