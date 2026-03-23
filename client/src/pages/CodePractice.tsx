@@ -5,8 +5,8 @@
  * custom test cases with pass/fail summary, submission history snapshots,
  * and personal stats dashboard.
  */
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import Editor from "@monaco-editor/react";
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense} from "react";
+const Editor = lazy(() => import("@monaco-editor/react").then(m => ({ default: m.default })));
 import { trpc } from "@/lib/trpc";
 import { CTCI_PROBLEMS, DIFFICULTY_COLORS } from "@/lib/ctciProblems";
 import { useCTCIProgress } from "@/hooks/useCTCIProgress";
@@ -16,7 +16,7 @@ import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { useXPContext } from "@/contexts/useXPContext";
 import SRDueDateHeatmap from "@/components/SRDueDateHeatmap";
 import CodeDiffViewer from "@/components/CodeDiffViewer";
-import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
+const MetaCodingScreenSimulator = lazy(() => import("@/components/MetaCodingScreenSimulator"));
 import MockInterviewerChat from "@/components/MockInterviewerChat";
 import {
   Play, Send, Lightbulb, Clock, CheckCircle2, Circle, Star, StarOff,
@@ -1334,7 +1334,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
       })()}
 
       {/* FAANG-Style Coding Screen Simulator */}
-      <MetaCodingScreenSimulator />
+      <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}><MetaCodingScreenSimulator /></Suspense>
 
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
@@ -3105,6 +3105,7 @@ export default function CodePractice() {
             <div className="flex-1 flex flex-col min-h-0">
               {/* Monaco Editor */}
               <div className="flex-1 min-h-0">
+                <Suspense fallback={<div className="w-full h-full bg-gray-900 animate-pulse rounded" />}>
                 <Editor
                   height="100%"
                   language={lang.monaco}
@@ -3127,6 +3128,7 @@ export default function CodePractice() {
                     folding: true,
                   }}
                 />
+                </Suspense>
               </div>
 
               {/* Output panel */}

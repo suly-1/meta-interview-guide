@@ -11,9 +11,9 @@
  * - Proceed / Do Not Proceed recommendation calibrated to target level (E4/E5/E6/E6+)
  * - Session history persisted in localStorage
  */
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense} from "react";
 import MockInterviewerChat from "@/components/MockInterviewerChat";
-import Editor from "@monaco-editor/react";
+const Editor = lazy(() => import("@monaco-editor/react").then(m => ({ default: m.default })));
 import { trpc } from "@/lib/trpc";
 import { CTCI_PROBLEMS } from "@/lib/ctciProblems";
 import { getWeakestPatterns } from "@/hooks/useDrillRatings";
@@ -1124,7 +1124,7 @@ export default function MetaCodingScreenSimulator() {
 
             {/* Monaco editor */}
             <div className="h-96 border-b border-border">
-              <Editor
+              <Suspense fallback={<div className="w-full h-full bg-gray-900 animate-pulse rounded" />}><Editor
                 height="100%"
                 language={lang.monaco}
                 value={q.code[q.langId] || getBoilerplate(q.langId, { id: q.problemId, name: q.problemName, difficulty: q.difficulty as "Easy" | "Medium" | "Hard", url: q.url, topic: q.topic })}
@@ -1139,7 +1139,7 @@ export default function MetaCodingScreenSimulator() {
                   tabSize: 4,
                   padding: { top: 8 },
                 }}
-              />
+              /></Suspense>
             </div>
 
             {/* Execution result */}

@@ -2,7 +2,7 @@
 // Features: IC6/IC7 comparison cards, readiness dashboard, pattern heatmap,
 // weak-spot dashboard, interview countdown, STAR story bank, recruiter card
 // with peer comparison, progress export, interview day checklist
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Calendar, Download, Printer, Target, Brain, TrendingUp, Flame, ChevronDown, ChevronUp, Copy, Check, Send, Trophy, HelpCircle } from "lucide-react";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, STAR_STORIES, PREP_TIMELINE, FAST_TRACK_TIMELINE, TEN_WEEK_TIMELINE, INTERVIEW_DAY_CHECKLIST, RESOURCES, IC_COMPARISON, PEER_BENCHMARKS } from "@/lib/data";
 import { usePatternRatings, useBehavioralRatings, useMockHistory, useInterviewDate, useStarNotes, useStreak, useReadinessTrend, useCTCIStreak, useReadinessGoal, useHintAnalytics, useCTCIDifficultyEstimates, useAIReviewHistory } from "@/hooks/useLocalStorage";
@@ -10,11 +10,13 @@ import { CTCI_QUESTIONS } from "@/lib/ctciData";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import HeatmapCalendar from "@/components/HeatmapCalendar";
-import { FullMockDaySimulator } from "@/components/FullMockDaySimulator";
+const FullMockDaySimulator = lazy(() => import("@/components/FullMockDaySimulator").then(m => ({ default: m.FullMockDaySimulator })));
 import { DailyStudyChecklist, UrgencyModeBanner, OnboardingChecklist } from "@/components/OverviewExtras";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { DayOfModePanel, LastMileCheatSheet, ConfidenceCalibrationQuiz } from "@/components/DayOfMode";
+const DayOfModePanel = lazy(() => import("@/components/DayOfMode").then(m => ({ default: m.DayOfModePanel })));
+const LastMileCheatSheet = lazy(() => import("@/components/DayOfMode").then(m => ({ default: m.LastMileCheatSheet })));
+const ConfidenceCalibrationQuiz = lazy(() => import("@/components/DayOfMode").then(m => ({ default: m.ConfidenceCalibrationQuiz })));
 import { WeakPatternHeatmap } from "@/components/WeakPatternHeatmap";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
@@ -1863,7 +1865,7 @@ export default function OverviewTab() {
         <StudySessionPlanner />
       </div>
       <div id="full-mock-day">
-        <FullMockDaySimulator />
+        <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}><FullMockDaySimulator /></Suspense>
       </div>
       <LevelCards />
       <ReadinessDashboard />
@@ -1874,9 +1876,9 @@ export default function OverviewTab() {
       <PrepTimeline />
       <StarStoryBank />
       <InterviewDayChecklist />
-      <DayOfModePanel />
-      <LastMileCheatSheet />
-      <ConfidenceCalibrationQuiz />
+      <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}><DayOfModePanel /></Suspense>
+      <Suspense fallback={null}><LastMileCheatSheet /></Suspense>
+      <Suspense fallback={null}><ConfidenceCalibrationQuiz /></Suspense>
       <ResourcesSection />
       <ReadinessGoalSetter />
       <CTCIDivergenceReport />

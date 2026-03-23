@@ -3,12 +3,12 @@
  * Chains: Coding (45 min) → System Design (45 min) → XFN Behavioral (45 min) → Behavioral STAR (30 min)
  * Ends with a combined AI scorecard (hiring recommendation + IC level verdict + 2-week remediation plan)
  */
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { trpc } from "@/lib/trpc";
 import { PATTERNS, BEHAVIORAL_QUESTIONS, SYSTEM_DESIGN_QUESTIONS } from "@/lib/data";
 import { toast } from "sonner";
 import { Play, ChevronRight, ChevronDown, ChevronUp, Trophy, RotateCcw, Loader2, Calendar } from "lucide-react";
-import Editor from "@monaco-editor/react";
+const Editor = lazy(() => import("@monaco-editor/react").then(m => ({ default: m.default })));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Round = "coding" | "sysdesign" | "xfn" | "behavioral";
@@ -154,7 +154,7 @@ function MiniRound({ round, question, durationSec, onComplete }: MiniRoundProps)
       {/* Answer area */}
       {round === "coding" ? (
         <div className="rounded-lg overflow-hidden border border-border">
-          <Editor
+          <Suspense fallback={<div className="w-full h-full bg-gray-900 animate-pulse rounded" />}><Editor
             height="220px"
             defaultLanguage="python"
             theme="vs-dark"
@@ -162,6 +162,7 @@ function MiniRound({ round, question, durationSec, onComplete }: MiniRoundProps)
             onChange={v => setAnswer(v ?? "")}
             options={{ fontSize: 13, minimap: { enabled: false }, scrollBeyondLastLine: false, wordWrap: "on" }}
           />
+</Suspense>
         </div>
       ) : (
         <textarea

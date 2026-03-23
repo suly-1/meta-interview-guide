@@ -439,3 +439,23 @@
 - [x] Instant admin notification email on new feedback submission
 - [ ] Weekly analytics report in Monday digest (visitor counts, sessions, page views, feature engagement, device breakdown)
 - [ ] Top 3 unactioned feedback items section in Monday digest
+
+## Bundle Optimization (Deployment Fix)
+- [x] Convert all tab components (CodingTab, AIRoundTab, BehavioralTab, TimelineTab, CTCITrackerTab, ReadinessTab, SystemDesignTab) to lazy imports in Home.tsx
+- [x] Convert MockInterviewSimulator and CodePractice to lazy imports
+- [x] Convert Monaco Editor to lazy import in CodingTab, CodePractice, FullMockDaySimulator, DayOfMode, MetaCodingScreenSimulator, CodingMockSession
+- [x] Convert ProgressAnalyticsDashboard to lazy import in SprintPlanGenerator
+- [x] Convert jsPDF/html2canvas to dynamic imports in usePdfExport hook
+- [x] Convert jsPDF to dynamic import in SystemDesignEnhancements
+- [x] Update vite.config.ts with comprehensive manual chunk splitting (monaco, pdf, charts, animation, trpc, radix, react, icons, utils)
+- [x] Initial load reduced from 5.67MB to ~381KB main entry (284KB gzip total core)
+
+## Bundle Optimization (Deployment Fix)
+- [x] Convert all tab components (CodingTab, AIRoundTab, BehavioralTab, TimelineTab, CTCITrackerTab, ReadinessTab, SystemDesignTab) to lazy imports in Home.tsx
+- [x] Convert MockInterviewSimulator and CodePractice to lazy imports
+- [x] Convert Monaco Editor to lazy import in CodingTab, CodePractice, FullMockDaySimulator, DayOfMode, MetaCodingScreenSimulator, CodingMockSession
+- [x] Convert ProgressAnalyticsDashboard to lazy import in SprintPlanGenerator
+- [x] Convert jsPDF/html2canvas to dynamic imports in usePdfExport hook
+- [x] Convert jsPDF to dynamic import in SystemDesignEnhancements
+- [x] Update vite.config.ts with comprehensive manual chunk splitting
+- [x] Initial load reduced from 5.67MB to ~381KB main entry (284KB gzip total core)

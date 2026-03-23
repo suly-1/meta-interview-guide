@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon,
@@ -15,32 +15,36 @@ import SiteFeedbackModal from "@/components/SiteFeedbackModal";
 import { useDensity, type Density } from "@/contexts/DensityContext";
 import Hero from "@/components/Hero";
 import ArchitectPicks from "@/components/ArchitectPicks";
-import CodingTab from "@/components/CodingTab";
-import AIRoundTab from "@/components/AIRoundTab";
-import BehavioralTab from "@/components/BehavioralTab";
-import TimelineTab from "@/components/TimelineTab";
-import CTCITrackerTab from "@/components/CTCITrackerTab";
-import ReadinessTab from "@/components/ReadinessTab";
-import SystemDesignTab from "@/components/SystemDesignTab";
-import DeployStatusBadge from "@/components/DeployStatusBadge";
-import MockInterviewSimulator from "@/components/MockInterviewSimulator";
-import CodePractice from "@/pages/CodePractice";
 import { useStreak } from "@/hooks/useStreak";
 import XPLevelBar from "@/components/XPLevelBar";
 import NavCountdownChip from "@/components/NavCountdownChip";
-import SoundtrackPlayer from "@/components/SoundtrackPlayer";
-import TopicRoulette from "@/components/TopicRoulette";
 import { useXPContext } from "@/contexts/useXPContext";
-import { KeyboardShortcutOverlay, useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
-import GauntletMode, { type GauntletState } from "@/components/GauntletMode";
-import ProgressDashboard from "@/components/ProgressDashboard";
-import BookmarksPanel from "@/components/BookmarksPanel";
-import GlobalSearch from "@/components/GlobalSearch";
+import { useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
 import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/FocusMode";
 import MilestoneNotifications from "@/components/MilestoneNotifications";
-import AIToolsTab from "@/components/AIToolsTab";
-import OverviewTab from "@/components/OverviewTab";
-import Leaderboard from "@/components/Leaderboard";
+import type { GauntletState } from "@/components/GauntletMode";
+
+// Heavy tab components — lazy loaded to keep initial bundle small
+const CodingTab = lazy(() => import("@/components/CodingTab"));
+const AIRoundTab = lazy(() => import("@/components/AIRoundTab"));
+const BehavioralTab = lazy(() => import("@/components/BehavioralTab"));
+const TimelineTab = lazy(() => import("@/components/TimelineTab"));
+const CTCITrackerTab = lazy(() => import("@/components/CTCITrackerTab"));
+const ReadinessTab = lazy(() => import("@/components/ReadinessTab"));
+const SystemDesignTab = lazy(() => import("@/components/SystemDesignTab"));
+const MockInterviewSimulator = lazy(() => import("@/components/MockInterviewSimulator"));
+const CodePractice = lazy(() => import("@/pages/CodePractice"));
+const SoundtrackPlayer = lazy(() => import("@/components/SoundtrackPlayer"));
+const TopicRoulette = lazy(() => import("@/components/TopicRoulette"));
+const KeyboardShortcutOverlay = lazy(() => import("@/components/KeyboardShortcutOverlay").then(m => ({ default: m.KeyboardShortcutOverlay })));
+const GauntletMode = lazy(() => import("@/components/GauntletMode"));
+const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
+const BookmarksPanel = lazy(() => import("@/components/BookmarksPanel"));
+const GlobalSearch = lazy(() => import("@/components/GlobalSearch"));
+const AIToolsTab = lazy(() => import("@/components/AIToolsTab"));
+const OverviewTab = lazy(() => import("@/components/OverviewTab"));
+const Leaderboard = lazy(() => import("@/components/Leaderboard"));
+const DeployStatusBadge = lazy(() => import("@/components/DeployStatusBadge"));
 
 // ── Tab Groups ─────────────────────────────────────────────────────────────────
 // Tabs are split into two rows for better visibility:
@@ -326,7 +330,7 @@ export default function Home() {
                 </button>
 
                 {/* Soundtrack */}
-                <span className="hidden sm:contents"><SoundtrackPlayer /></span>
+                <span className="hidden sm:contents"><Suspense fallback={null}><SoundtrackPlayer /></Suspense></span>
 
                 {/* Search */}
                 <button
@@ -508,18 +512,27 @@ export default function Home() {
                 </h1>
               </div>
 
-              {activeTab === "coding"      && <CodingTab />}
-              {activeTab === "mock"        && <MockInterviewSimulator />}
-              {activeTab === "ai-round"    && <AIRoundTab />}
-              {activeTab === "behavioral"  && <BehavioralTab />}
-              {activeTab === "timeline"    && <TimelineTab />}
-              {activeTab === "ctci"        && <CTCITrackerTab />}
-              {activeTab === "readiness"   && <ReadinessTab />}
-              {activeTab === "sysdesign"   && <SystemDesignTab />}
-              {activeTab === "practice"    && <CodePractice />}
-              {activeTab === "ai-tools"    && <AIToolsTab />}
-              {activeTab === "overview"    && <OverviewTab />}
-              {activeTab === "leaderboard" && <Leaderboard />}
+              <Suspense fallback={
+                <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <span className="text-sm">Loading...</span>
+                  </div>
+                </div>
+              }>
+                {activeTab === "coding"      && <CodingTab />}
+                {activeTab === "mock"        && <MockInterviewSimulator />}
+                {activeTab === "ai-round"    && <AIRoundTab />}
+                {activeTab === "behavioral"  && <BehavioralTab />}
+                {activeTab === "timeline"    && <TimelineTab />}
+                {activeTab === "ctci"        && <CTCITrackerTab />}
+                {activeTab === "readiness"   && <ReadinessTab />}
+                {activeTab === "sysdesign"   && <SystemDesignTab />}
+                {activeTab === "practice"    && <CodePractice />}
+                {activeTab === "ai-tools"    && <AIToolsTab />}
+                {activeTab === "overview"    && <OverviewTab />}
+                {activeTab === "leaderboard" && <Leaderboard />}
+              </Suspense>
             </div>
           </motion.div>
         </AnimatePresence>
@@ -534,7 +547,7 @@ export default function Home() {
           }}
         />
       )}
-      <KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
+      <Suspense fallback={null}><KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} /></Suspense>
 
       {/* Gauntlet Mode Modal */}
       {gauntletOpen && (
@@ -549,13 +562,13 @@ export default function Home() {
                 <span className="text-lg leading-none">&times;</span>
               </button>
             </div>
-            <GauntletMode
+            <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>}><GauntletMode
               gauntlet={gauntlet}
               onStart={startGauntlet}
               onAdvance={advanceGauntlet}
               onStop={() => { stopGauntlet(); setGauntletOpen(false); }}
               onNavigateTab={(tabId) => { handleTabChange(tabId); setGauntletOpen(false); }}
-            />
+            /></Suspense>
           </div>
         </div>
       )}
@@ -573,18 +586,18 @@ export default function Home() {
                 <span className="text-lg leading-none">&times;</span>
               </button>
             </div>
-            <TopicRoulette
+            <Suspense fallback={null}><TopicRoulette
               onSelect={(tabId, _problem, _seg) => {
                 handleTabChange(tabId);
                 setRouletteOpen(false);
               }}
-            />
+            /></Suspense>
           </div>
         </div>
       )}
 
       {/* Progress Dashboard */}
-      <ProgressDashboard
+      <Suspense fallback={null}><ProgressDashboard
         open={progressOpen}
         onClose={() => setProgressOpen(false)}
         onRetrySession={(problemIds) => {
@@ -592,20 +605,20 @@ export default function Home() {
           handleTabChange("coding");
           setProgressOpen(false);
         }}
-      />
+      /></Suspense>
 
       {/* Bookmarks Panel */}
-      <BookmarksPanel open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} onNavigate={(tabId) => handleTabChange(tabId)} />
+      <Suspense fallback={null}><BookmarksPanel open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} onNavigate={(tabId) => handleTabChange(tabId)} /></Suspense>
 
       {/* Global Search */}
-      <GlobalSearch
+      <Suspense fallback={null}><GlobalSearch
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
         onNavigate={(tabId) => {
           if (tabId === "__open_search__") { setSearchOpen(true); return; }
           handleTabChange(tabId);
         }}
-      />
+      /></Suspense>
 
       {/* Footer */}
       <SiteFeedbackModal currentPage={activeTab} />
@@ -618,7 +631,7 @@ export default function Home() {
         </p>
         {/* Live deployment status badge */}
         <div className="mt-3 flex justify-center">
-          <DeployStatusBadge />
+          <Suspense fallback={null}><DeployStatusBadge /></Suspense>
         </div>
         <p className="mt-2 flex items-center justify-center gap-4">
           <button

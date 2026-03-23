@@ -4,7 +4,7 @@
 //   2. LastMileCheatSheet — 1-page PDF with top STAR stories, weakest patterns, SD template
 //   3. ConfidenceCalibrationQuiz — 10-question rapid-fire self-assessment
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense} from "react";
 import {
   Timer, CheckCircle2, Circle, Download, RefreshCw, ChevronDown, ChevronUp,
   Wind, BookOpen, Code2, Layout, Zap, Target, Trophy, AlertCircle

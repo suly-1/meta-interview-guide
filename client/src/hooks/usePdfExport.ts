@@ -1,6 +1,4 @@
 import { useState, useCallback } from "react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 export function usePdfExport() {
   const [exporting, setExporting] = useState(false);
@@ -10,6 +8,14 @@ export function usePdfExport() {
     try {
       const element = document.getElementById(contentId);
       if (!element) throw new Error(`Element #${contentId} not found`);
+
+      // Dynamic imports to avoid bundling these heavy libs in the initial chunk
+      const [html2canvasModule, jsPDFModule] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const html2canvas = html2canvasModule.default;
+      const jsPDF = jsPDFModule.default;
 
       const canvas = await html2canvas(element, {
         scale: 2,

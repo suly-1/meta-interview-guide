@@ -1,5 +1,5 @@
 // Design: Structured Clarity — coding tab with full pattern table + filter bar + expandable cards
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { useICLevel } from "@/contexts/ICLevelContext";
 import InterviewTimer from "@/components/InterviewTimer";
 import QuickDrill from "@/components/QuickDrill";
@@ -28,7 +28,7 @@ import ThinkOutLoudCoach from "@/components/ThinkOutLoudCoach";
 import PatternRecognitionDrill from "@/components/PatternRecognitionDrill";
 import PersonalizedRemediationPlan from "@/components/PersonalizedRemediationPlan";
 import SpacedRepetitionQueue from "@/components/SpacedRepetitionQueue";
-import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
+const MetaCodingScreenSimulator = lazy(() => import("@/components/MetaCodingScreenSimulator"));
 
 const DIFF_COLORS: Record<string, string> = {
   green: "bg-emerald-100 text-emerald-700",
@@ -344,7 +344,7 @@ export default function CodingTab() {
 
         {/* Simulator component */}
         <div className="mt-6">
-          <MetaCodingScreenSimulator />
+          <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}><MetaCodingScreenSimulator /></Suspense>
         </div>
       </section>
 

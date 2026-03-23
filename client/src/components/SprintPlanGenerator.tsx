@@ -5,14 +5,14 @@
  * schedule referencing the 10 HIGH IMPACT tools. Supports print and JSON download.
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Download, Printer, Calendar, CheckCircle2, Clock, Zap, RefreshCw, Trophy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import SprintPlanFeedback from "@/components/SprintPlanFeedback";
 import SprintPlanShare from "@/components/SprintPlanShare";
-import ProgressAnalyticsDashboard from "@/components/ProgressAnalyticsDashboard";
+const ProgressAnalyticsDashboard = lazy(() => import("@/components/ProgressAnalyticsDashboard"));
 import confetti from "canvas-confetti";
 
 type Day = {
@@ -430,7 +430,7 @@ export default function SprintPlanGenerator() {
 
       {/* Progress Analytics Dashboard — always visible below the generator */}
       <div className="mt-8 print:hidden">
-        <ProgressAnalyticsDashboard />
+        <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}><ProgressAnalyticsDashboard /></Suspense>
       </div>
     </div>
   );

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, name, email, role FROM users ORDER BY id ASC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute SELECT id, name, email, role FROM users ORDER BY id ASC LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Suly Kamara",
+      "email": "suly@meta.com",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tSuly Kamara\tsuly@meta.com\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

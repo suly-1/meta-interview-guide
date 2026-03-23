@@ -8,7 +8,7 @@ import { ChevronDown, ChevronUp, Brain, Clock, FileText, AlertTriangle, Users, B
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
-import jsPDF from "jspdf";
+// jsPDF loaded dynamically on demand to reduce initial bundle size
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 function SectionWrapper({ id, title, icon, accent = "blue", children }: {
@@ -825,7 +825,8 @@ export function DesignDocGenerator() {
     toast.success("Design doc copied to clipboard!");
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     const md = generateMarkdown();
     const lines = md.split("\n");

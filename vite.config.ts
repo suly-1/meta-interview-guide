@@ -169,11 +169,47 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom"],
-          "vendor-ui": ["framer-motion", "lucide-react"],
-          "vendor-editor": ["@monaco-editor/react"],
-          "vendor-utils": ["date-fns", "nanoid"],
+        manualChunks(id) {
+          // Monaco Editor — very large, must be its own chunk
+          if (id.includes('@monaco-editor') || id.includes('monaco-editor')) {
+            return 'vendor-monaco';
+          }
+          // PDF generation libraries
+          if (id.includes('jspdf') || id.includes('html2canvas')) {
+            return 'vendor-pdf';
+          }
+          // Charts / recharts
+          if (id.includes('recharts') || id.includes('d3-')) {
+            return 'vendor-charts';
+          }
+          // Canvas confetti
+          if (id.includes('canvas-confetti')) {
+            return 'vendor-confetti';
+          }
+          // Animation
+          if (id.includes('framer-motion')) {
+            return 'vendor-animation';
+          }
+          // tRPC + react-query
+          if (id.includes('@trpc') || id.includes('@tanstack/react-query')) {
+            return 'vendor-trpc';
+          }
+          // Radix UI
+          if (id.includes('@radix-ui')) {
+            return 'vendor-radix';
+          }
+          // React core
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'vendor-react';
+          }
+          // Lucide icons
+          if (id.includes('lucide-react')) {
+            return 'vendor-icons';
+          }
+          // Utilities
+          if (id.includes('date-fns') || id.includes('nanoid') || id.includes('clsx') || id.includes('class-variance-authority')) {
+            return 'vendor-utils';
+          }
         },
       },
     },

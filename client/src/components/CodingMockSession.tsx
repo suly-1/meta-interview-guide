@@ -1,9 +1,9 @@
 // CodingMockSession — 45-min coding mock with pattern picker, timed phases, and AI scorecard
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense} from "react";
 import { trpc } from "@/lib/trpc";
 import { PATTERNS } from "@/lib/data";
 import { ChevronDown, ChevronUp, History, Trash2, Timer, Play, Pause, RotateCcw, Shuffle } from "lucide-react";
-import Editor from "@monaco-editor/react";
+const Editor = lazy(() => import("@monaco-editor/react").then(m => ({ default: m.default })));
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Pattern = typeof PATTERNS[number];
@@ -679,7 +679,7 @@ export function CodingMockSession() {
               <span className="text-xs font-semibold text-blue-400">Python</span>
               <span className="text-xs text-muted-foreground ml-auto">Monaco Editor</span>
             </div>
-            <Editor
+            <Suspense fallback={<div className="w-full h-full bg-gray-900 animate-pulse rounded" />}><Editor
               height="220px"
               defaultLanguage="python"
               theme="vs-dark"
@@ -694,7 +694,7 @@ export function CodingMockSession() {
                 folding: false,
                 automaticLayout: true,
               }}
-            />
+            /></Suspense>
           </div>
         ) : (
           <textarea
