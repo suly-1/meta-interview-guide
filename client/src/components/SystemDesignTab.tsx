@@ -13,7 +13,8 @@ import SDTradeoffLibrary from "./SDTradeoffLibrary";
 import SDDeepDiveBank from "./SDDeepDiveBank";
 import SDMetaBlogReader from "./SDMetaBlogReader";
 import SDBoECalculator from "./SDBoECalculator";
-import { Calculator, Zap as ZapIcon } from "lucide-react";
+import CollabRoom from "./CollabRoom";
+import { Calculator, Zap as ZapIcon, Users } from "lucide-react";
 
 interface DesignPattern {
   id: string;
@@ -588,7 +589,7 @@ function PatternCard({ p }: { p: DesignPattern }) {
 }
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math" | "boe" | "stresstest" | "tradeofflibrary" | "deepdive" | "metablog">("patterns");
+  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math" | "boe" | "stresstest" | "tradeofflibrary" | "deepdive" | "metablog" | "collab">("patterns");
   const [blogSearch, setBlogSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -749,6 +750,16 @@ export default function SystemDesignTab() {
           >
             <Rss size={11} /> Meta Papers
           </button>
+          <button
+            onClick={() => setActiveView("collab")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              activeView === "collab"
+                ? "bg-green-600 text-white border-green-600"
+                : "bg-white text-green-700 border-green-200 hover:border-green-400"
+            }`}
+          >
+            <Users size={11} /> Practice with a Partner
+          </button>
         </div>
       </div>
 
@@ -811,6 +822,9 @@ export default function SystemDesignTab() {
 
       {/* Meta Engineering Blog — Interview-Annotated */}
       {activeView === "metablog" && <SDMetaBlogReader />}
+
+      {/* Collab Room — Practice with a partner */}
+      {activeView === "collab" && <CollabRoom />}
 
       {/* Blog Feed */}
       {activeView === "blog" && (

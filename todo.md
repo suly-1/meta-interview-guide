@@ -388,3 +388,6 @@
 - [ ] Replace DisclaimerGate.tsx with DB-backed version (metaengguide.pro domain)
 - [ ] Add new UI components: AdminDisclaimerReport, SectionErrorBoundary, WeakPatternHeatmap, WeakSpotStudyPlan, HeatmapCalendar, ShareMessageButton, CommunityBanner, NotificationBanner, OverviewTab, OverviewExtras, CollabRoom, Leaderboard, VoiceAnswerMode, VoiceToStar, DayOfMode, FullMockDaySimulator, CrossDeviceSync
 - [ ] Run pnpm db:push to migrate schema
+- [ ] Wire OverviewTab into main nav in Home.tsx
+- [ ] Add Leaderboard tab to main nav in Home.tsx
+- [ ] Add 'Practice with a partner' CollabRoom button in SystemDesignTab

@@ -4,6 +4,7 @@ import {
   Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon,
   ListChecks, BarChart2, Layers, ClipboardList, Terminal,
   HelpCircle, Dices, Sword, TrendingUp, Bookmark, Search, Wrench,
+  LayoutDashboard, Trophy,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -35,6 +36,8 @@ import GlobalSearch from "@/components/GlobalSearch";
 import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/FocusMode";
 import MilestoneNotifications from "@/components/MilestoneNotifications";
 import AIToolsTab from "@/components/AIToolsTab";
+import OverviewTab from "@/components/OverviewTab";
+import Leaderboard from "@/components/Leaderboard";
 
 // ── Tab Groups ─────────────────────────────────────────────────────────────────
 // Tabs are split into two rows for better visibility:
@@ -129,6 +132,22 @@ const SECONDARY_TABS = [
     icon: <Wrench size={15} />,
     color: "violet",
     emoji: "🛠️",
+  },
+  {
+    id: "overview",
+    label: "Overview",
+    shortLabel: "Overview",
+    icon: <LayoutDashboard size={15} />,
+    color: "sky",
+    emoji: "📌",
+  },
+  {
+    id: "leaderboard",
+    label: "Leaderboard",
+    shortLabel: "Leaderboard",
+    icon: <Trophy size={15} />,
+    color: "yellow",
+    emoji: "🏆",
   },
 ];
 
@@ -495,6 +514,8 @@ export default function Home() {
               {activeTab === "sysdesign"   && <SystemDesignTab />}
               {activeTab === "practice"    && <CodePractice />}
               {activeTab === "ai-tools"    && <AIToolsTab />}
+              {activeTab === "overview"    && <OverviewTab />}
+              {activeTab === "leaderboard" && <Leaderboard />}
             </div>
           </motion.div>
         </AnimatePresence>
