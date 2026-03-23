@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS page_views (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  session_id VARCHAR(64) NOT NULL,\n  user_id INT NULL,\n  page VARCHAR(128) NOT NULL DEFAULT '/',\n  referrer VARCHAR(256) NULL,\n  device_type VARCHAR(16) NOT NULL DEFAULT 'desktop',\n  duration_seconds INT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  INDEX idx_pv_session (session_id),\n  INDEX idx_pv_created (created_at),\n  INDEX idx_pv_page (page)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute CREATE TABLE IF NOT EXISTS page_views (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  session_id VARCHAR(64) NOT NULL,\n  user_id INT NULL,\n  page VARCHAR(128) NOT NULL DEFAULT '/',\n  referrer VARCHAR(256) NULL,\n  device_type VARCHAR(16) NOT NULL DEFAULT 'desktop',\n  duration_seconds INT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  INDEX idx_pv_session (session_id),\n  INDEX idx_pv_created (created_at),\n  INDEX idx_pv_page (page)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1010
+}
