@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { Bot, User, Sparkles, RotateCcw, ChevronRight } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";

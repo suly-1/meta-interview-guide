@@ -618,6 +618,45 @@ export default function SystemDesignTab() {
         </p>
       </div>
 
+      {/* HIGH IMPACT section header */}
+      <div className="mt-3 rounded-xl border-2 border-orange-400 dark:border-orange-600 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 px-4 py-2.5">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] font-black text-white bg-orange-500 px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse">★ HIGH IMPACT</span>
+          <span className="text-xs font-bold text-orange-700 dark:text-orange-400">These 3 tools address the #1 reason candidates fail system design at Meta</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveView("interrupt")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+              activeView === "interrupt"
+                ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-200 dark:shadow-orange-900/30"
+                : "bg-white dark:bg-gray-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700 hover:border-orange-500 hover:shadow-md"
+            }`}
+          >
+            🤖 AI Interrupt Mode
+          </button>
+          <button
+            onClick={() => setActiveView("boegrade")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+              activeView === "boegrade"
+                ? "bg-violet-500 text-white border-violet-500 shadow-lg shadow-violet-200 dark:shadow-violet-900/30"
+                : "bg-white dark:bg-gray-900 text-violet-700 dark:text-violet-400 border-violet-300 dark:border-violet-700 hover:border-violet-500 hover:shadow-md"
+            }`}
+          >
+            🔢 BoE Grader
+          </button>
+          <button
+            onClick={() => setActiveView("adversarial")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+              activeView === "adversarial"
+                ? "bg-red-500 text-white border-red-500 shadow-lg shadow-red-200 dark:shadow-red-900/30"
+                : "bg-white dark:bg-gray-900 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700 hover:border-red-500 hover:shadow-md"
+            }`}
+          >
+            ⚔️ Adversarial Review
+          </button>
+        </div>
+      </div>
       {/* View toggle */}
       <div className="flex gap-2 flex-wrap">
         <button
@@ -762,45 +801,6 @@ export default function SystemDesignTab() {
             }`}
           >
             <Users size={11} /> Practice with a Partner
-          </button>
-        </div>
-      </div>
-      {/* HIGH IMPACT section header */}
-      <div className="mt-3 rounded-xl border-2 border-orange-400 dark:border-orange-600 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 px-4 py-2.5">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] font-black text-white bg-orange-500 px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse">★ HIGH IMPACT</span>
-          <span className="text-xs font-bold text-orange-700 dark:text-orange-400">These 3 tools address the #1 reason candidates fail system design at Meta</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setActiveView("interrupt")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-              activeView === "interrupt"
-                ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-200 dark:shadow-orange-900/30"
-                : "bg-white dark:bg-gray-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700 hover:border-orange-500 hover:shadow-md"
-            }`}
-          >
-            🤖 AI Interrupt Mode
-          </button>
-          <button
-            onClick={() => setActiveView("boegrade")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-              activeView === "boegrade"
-                ? "bg-violet-500 text-white border-violet-500 shadow-lg shadow-violet-200 dark:shadow-violet-900/30"
-                : "bg-white dark:bg-gray-900 text-violet-700 dark:text-violet-400 border-violet-300 dark:border-violet-700 hover:border-violet-500 hover:shadow-md"
-            }`}
-          >
-            🔢 BoE Grader
-          </button>
-          <button
-            onClick={() => setActiveView("adversarial")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-              activeView === "adversarial"
-                ? "bg-red-500 text-white border-red-500 shadow-lg shadow-red-200 dark:shadow-red-900/30"
-                : "bg-white dark:bg-gray-900 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700 hover:border-red-500 hover:shadow-md"
-            }`}
-          >
-            ⚔️ Adversarial Review
           </button>
         </div>
       </div>

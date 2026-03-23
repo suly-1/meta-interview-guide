@@ -250,6 +250,27 @@ export default function CodingTab() {
 
   return (
     <div className="space-y-10">
+      {/* HIGH IMPACT Coding Features */}
+      <section className="rounded-2xl border-2 border-orange-400 dark:border-orange-600 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-[10px] font-black text-white bg-orange-500 px-3 py-1 rounded-full uppercase tracking-widest animate-pulse">★ HIGH IMPACT</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Coding Game-Changers
+            </h2>
+            <p className="text-xs text-orange-700 dark:text-orange-400 font-semibold">These 3 tools target the exact reasons candidates fail coding rounds at Meta</p>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <ThinkOutLoudCoach />
+          <div className="border-t border-orange-200 dark:border-orange-800/40 pt-8">
+            <PatternRecognitionDrill />
+          </div>
+          <div className="border-t border-orange-200 dark:border-orange-800/40 pt-8">
+            <PersonalizedRemediationPlan />
+          </div>
+        </div>
+      </section>
 
       {/* ★ META CODING SCREEN SIMULATOR — MUST DO HERO BANNER ★ */}
       <section>

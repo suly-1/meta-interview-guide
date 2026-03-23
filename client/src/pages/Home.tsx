@@ -10,6 +10,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
 import OnboardingModal from "@/components/OnboardingModal";
+import OnboardingTour, { useOnboardingTour } from "@/components/OnboardingTour";
 import { useDensity, type Density } from "@/contexts/DensityContext";
 import Hero from "@/components/Hero";
 import CodingTab from "@/components/CodingTab";
@@ -172,6 +173,7 @@ const SECONDARY_ACTIVE: Record<string, string> = {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("coding");
+  const { shouldShow: showTour, dismiss: dismissTour } = useOnboardingTour();
   const [direction, setDirection] = useState(1);
   const { streak, activatedToday } = useStreak();
   const { totalXP, events } = useXPContext();
@@ -522,6 +524,14 @@ export default function Home() {
       </div>
 
       <OnboardingModal />
+      {showTour && (
+        <OnboardingTour
+          onComplete={(goToReadiness) => {
+            dismissTour();
+            if (goToReadiness) setActiveTab("readiness");
+          }}
+        />
+      )}
       <KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} />
 
       {/* Gauntlet Mode Modal */}

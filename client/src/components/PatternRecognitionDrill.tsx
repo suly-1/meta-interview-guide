@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { Zap, CheckCircle2, XCircle, RotateCcw, ChevronRight, Trophy } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -126,6 +127,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 export default function PatternRecognitionDrill() {
   const [phase, setPhase] = useState<"setup" | "drilling" | "done">("setup");
+  const { saveScore } = useScorePersistence("pattern_drill");
   const [problems, setProblems] = useState<DrillProblem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);

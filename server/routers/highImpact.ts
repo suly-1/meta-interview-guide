@@ -682,4 +682,86 @@ Last week: ${input.lastWeekActivity.problemsSolved} problems solved, ${input.las
         };
       }
     }),
+
+  generateSprintPlan: publicProcedure
+    .input(z.object({
+      weakAreas: z.array(z.string()).max(5),
+      daysUntilInterview: z.number().min(1).max(90).default(7),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+      focusPriority: z.enum(["system_design", "coding", "behavioral", "balanced"]).default("balanced"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview coach generating a personalized ${Math.min(input.daysUntilInterview, 7)}-day sprint plan.
+Each day must have exactly 3 tasks. Tasks must be specific, actionable, and reference real tools from this guide.
+Available tools: Story Coverage Matrix, Impact Quantification Coach, Persona Stress Test, Think Out Loud Coach, Pattern Recognition Drill, Personalized Remediation Plan, AI Interviewer Interrupt Mode, BoE Grader, Adversarial Design Review, Weekly Readiness Report.
+Return JSON with days array. Each day has: dayNumber (int), theme (string), tasks (array of 3 objects with: title, tool, duration, description).`,
+          },
+          {
+            role: "user",
+            content: `Weak areas: ${input.weakAreas.join(", ") || "balanced across all areas"}
+Days until interview: ${input.daysUntilInterview}
+Target level: ${input.targetLevel}
+Focus priority: ${input.focusPriority}
+Generate a ${Math.min(input.daysUntilInterview, 7)}-day sprint plan.`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "sprint_plan",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                days: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      dayNumber: { type: "integer" },
+                      theme: { type: "string" },
+                      tasks: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            title: { type: "string" },
+                            tool: { type: "string" },
+                            duration: { type: "string" },
+                            description: { type: "string" },
+                          },
+                          required: ["title", "tool", "duration", "description"],
+                          additionalProperties: false,
+                        },
+                      },
+                    },
+                    required: ["dayNumber", "theme", "tasks"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["days"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          days: {
+            dayNumber: number;
+            theme: string;
+            tasks: { title: string; tool: string; duration: string; description: string }[];
+          }[];
+        };
+      } catch {
+        return { days: [] };
+      }
+    }),
 });

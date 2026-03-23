@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { trpc } from "@/lib/trpc";
 import { Mic, Clock, Play, Square, RotateCcw, Sparkles, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
@@ -42,6 +43,7 @@ function fmtTime(s: number) {
 
 export default function ThinkOutLoudCoach() {
   const [selectedProblem, setSelectedProblem] = useState(PROBLEMS[0]);
+  const { saveScore } = useScorePersistence("think_out_loud");
   const [phase, setPhase] = useState<"setup" | "solving" | "done">("setup");
   const [narration, setNarration] = useState("");
   const [code, setCode] = useState("");

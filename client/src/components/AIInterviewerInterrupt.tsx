@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { Bot, Clock, Play, Square, Zap, ChevronRight, RotateCcw, AlertTriangle } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -66,6 +67,7 @@ export default function AIInterviewerInterrupt() {
 
   const getInterrupt = trpc.highImpact.interruptQuestion.useMutation();
   const scoreResponse = trpc.highImpact.scoreInterruptResponse.useMutation();
+  const { saveScore } = useScorePersistence("ai_interrupt_mode");
 
   const triggerInterrupt = useCallback(async (elapsed: number) => {
     if (designText.trim().length < 50) return;
@@ -137,6 +139,9 @@ export default function AIInterviewerInterrupt() {
       score: scored,
     };
     setInterrupts(prev => [...prev, completed]);
+    // Persist score to DB
+    const avgRaw = Math.round((scored.clarity + scored.depth + scored.recovery) / 3);
+    saveScore("response_quality", avgRaw, { verdict: scored.verdict, question: currentInterrupt.question });
     setCurrentInterrupt(null);
     setInterruptResponse("");
     setPhase("designing");

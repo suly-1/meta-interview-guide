@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { Calculator, CheckCircle2, AlertCircle, RotateCcw, Sparkles } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { motion, AnimatePresence } from "framer-motion";

@@ -15,6 +15,13 @@
       "when": 1774277668247,
       "tag": "0001_stiff_jetstream",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774291718791,
+      "tag": "0002_massive_joshua_kane",
+      "breakpoints": true
     }
   ]
 }

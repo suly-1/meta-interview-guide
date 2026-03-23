@@ -408,3 +408,15 @@
 - [x] #3 Adversarial Design Review — submit design, AI attacks 3 weakest points, candidate defends
 - [x] #10 Weekly AI Readiness Report — synthesizes all data → ranked top-3 focus areas + exercises
 - [x] Visual highlighting — HIGH IMPACT badges, glow borders, animated pulse labels
+
+## Phase 2 — Onboarding, Sprint Plan, DB Persistence, Tab Reorder
+
+- [ ] DB: user_scores table (userId, feature, scoreType, scoreValue, metadata, createdAt)
+- [ ] DB: sprint_plans table (userId, plan JSON, generatedAt)
+- [ ] Server: saveScore / getScores / getAggregateStats procedures
+- [x] Move all 10 HIGH IMPACT features to top of each tab
+- [ ] OnboardingTour component (60-second guided tour → Weekly Readiness Report)
+- [ ] Wire OnboardingTour into Home.tsx (show once for new users)
+- [ ] SprintPlanGenerator component (7-day plan from readiness data, print/save)
+- [x] Wire score persistence into all 10 feature components
+- [ ] Aggregate stats display (anonymized pass rates per feature)

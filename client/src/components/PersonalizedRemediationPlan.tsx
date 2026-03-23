@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { Target, Calendar, ChevronDown, ChevronUp, Sparkles, TrendingUp, AlertCircle } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { PATTERNS } from "@/lib/guideData";

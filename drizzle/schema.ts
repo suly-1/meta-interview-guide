@@ -110,3 +110,27 @@ export const mockSessions = mysqlTable("mock_sessions", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type MockSession = typeof mockSessions.$inferSelect;
+
+// High-impact feature scores — persisted per user per feature
+export const highImpactScores = mysqlTable("high_impact_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  feature: varchar("feature", { length: 64 }).notNull(),
+  scoreType: varchar("scoreType", { length: 64 }).notNull(),
+  scoreValue: int("scoreValue").notNull(),
+  metadata: json("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type HighImpactScore = typeof highImpactScores.$inferSelect;
+
+// Sprint plans — 7-day AI-generated study plans per user
+export const sprintPlans = mysqlTable("sprint_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  targetLevel: varchar("targetLevel", { length: 8 }).notNull().default("L6"),
+  daysUntilInterview: int("daysUntilInterview"),
+  plan: json("plan").notNull().$type<Record<string, unknown>[]>(),
+  readinessScore: int("readinessScore").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type SprintPlan = typeof sprintPlans.$inferSelect;

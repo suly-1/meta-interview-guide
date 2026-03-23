@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import { useScorePersistence } from "@/hooks/useScorePersistence";
 import { Plus, X, CheckCircle2, AlertCircle, Edit2, Save } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -74,6 +75,7 @@ function ScoreBar({ value, max }: { value: number; max: number }) {
 
 export default function StoryCoverageMatrix() {
   const [stories, setStories] = useState<Story[]>(loadStories);
+  const { saveScore } = useScorePersistence("story_coverage");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newStory, setNewStory] = useState<Omit<Story, "id">>({
