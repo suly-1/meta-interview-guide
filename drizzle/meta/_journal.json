@@ -22,6 +22,13 @@
       "when": 1774291718791,
       "tag": "0002_massive_joshua_kane",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1774294785390,
+      "tag": "0003_soft_gwen_stacy",
+      "breakpoints": true
     }
   ]
 }

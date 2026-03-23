@@ -11,6 +11,7 @@ import { ICLevelProvider } from "./contexts/ICLevelContext";
 import Home from "./pages/Home";
 import CandidateDiscovery from "@/pages/CandidateDiscovery";
 import TermsOfUse from "@/pages/TermsOfUse";
+import SharedPlanView from "@/pages/SharedPlanView";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -53,6 +54,7 @@ function App() {
                 {/* /discover is accessible without DisclaimerGate — it IS the discovery page */}
                 <Route path="/discover" component={CandidateDiscovery} />
         <Route path="/terms" component={TermsOfUse} />
+        <Route path="/shared-plan/:token" component={SharedPlanView} />
                 {/* All other routes go through DisclaimerGate */}
                 <Route>
                   <DisclaimerGateWrapper>

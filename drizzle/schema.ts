@@ -6,6 +6,7 @@ import {
   mysqlTable,
   text,
   timestamp,
+  tinyint,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -134,3 +135,42 @@ export const sprintPlans = mysqlTable("sprint_plans", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type SprintPlan = typeof sprintPlans.$inferSelect;
+
+// Site-wide user feedback
+export const siteFeedback = mysqlTable("site_feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  category: varchar("category", { length: 64 }).notNull().default("other"),
+  rating: int("rating"),
+  message: text("message").notNull(),
+  page: varchar("page", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type SiteFeedback = typeof siteFeedback.$inferSelect;
+
+// Sprint plan feedback
+export const sprintPlanFeedback = mysqlTable("sprint_plan_feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  dayNumber: int("dayNumber"),
+  rating: int("rating").notNull(),
+  suggestion: text("suggestion"),
+  helpful: tinyint("helpful"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type SprintPlanFeedback = typeof sprintPlanFeedback.$inferSelect;
+
+// Shared sprint plans (public shareable links)
+export const sharedSprintPlans = mysqlTable("shared_sprint_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  shareToken: varchar("shareToken", { length: 64 }).notNull().unique(),
+  userId: int("userId").notNull(),
+  planData: json("planData").notNull().$type<Record<string, unknown>[]>(),
+  targetLevel: varchar("targetLevel", { length: 8 }),
+  focusPriority: varchar("focusPriority", { length: 32 }),
+  weakAreas: json("weakAreas").$type<string[]>(),
+  viewCount: int("viewCount").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"),
+});
+export type SharedSprintPlan = typeof sharedSprintPlans.$inferSelect;

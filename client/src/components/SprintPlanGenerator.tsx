@@ -10,6 +10,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Download, Printer, Calendar, CheckCircle2, Clock, Zap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import SprintPlanFeedback from "@/components/SprintPlanFeedback";
+import SprintPlanShare from "@/components/SprintPlanShare";
+import ProgressAnalyticsDashboard from "@/components/ProgressAnalyticsDashboard";
 
 type Day = {
   dayNumber: number;
@@ -337,6 +340,26 @@ export default function SprintPlanGenerator() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Feedback + Share — shown after plan is generated */}
+      {plan && (
+        <div className="mt-6 space-y-4 print:hidden">
+          <div className="flex flex-wrap gap-3 items-center">
+            <SprintPlanShare
+              planData={plan}
+              targetLevel={targetLevel}
+              focusPriority={focusPriority}
+              weakAreas={weakAreas.split(',').map(s => s.trim()).filter(Boolean)}
+            />
+          </div>
+          <SprintPlanFeedback />
+        </div>
+      )}
+
+      {/* Progress Analytics Dashboard — always visible below the generator */}
+      <div className="mt-8 print:hidden">
+        <ProgressAnalyticsDashboard />
+      </div>
     </div>
   );
 }

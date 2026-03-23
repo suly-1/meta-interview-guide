@@ -420,3 +420,11 @@
 - [ ] SprintPlanGenerator component (7-day plan from readiness data, print/save)
 - [x] Wire score persistence into all 10 feature components
 - [ ] Aggregate stats display (anonymized pass rates per feature)
+
+## Batch 3 — Feedback, Analytics, Sharing, Onboarding Plan
+- [ ] Site-wide feedback modal (DB + owner notification)
+- [ ] Sprint plan inline feedback (rating + suggestions)
+- [ ] Progress & Analytics Dashboard (radar chart, trends)
+- [ ] Sprint plan sharing (shareable link + mentor view)
+- [ ] Detailed onboarding flow plan document in-app
+- [ ] Fix/document CodingTab JSX structure

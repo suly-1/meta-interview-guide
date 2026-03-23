@@ -11,6 +11,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
 import OnboardingModal from "@/components/OnboardingModal";
 import OnboardingTour, { useOnboardingTour } from "@/components/OnboardingTour";
+import SiteFeedbackModal from "@/components/SiteFeedbackModal";
 import { useDensity, type Density } from "@/contexts/DensityContext";
 import Hero from "@/components/Hero";
 import CodingTab from "@/components/CodingTab";
@@ -606,6 +607,7 @@ export default function Home() {
       />
 
       {/* Footer */}
+      <SiteFeedbackModal currentPage={activeTab} />
       <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
         <p className="font-semibold text-white/90 mb-1">Independent Study Guide</p>
         <p className="text-white/40 text-xs mb-1">By Community Contributors · Not affiliated with any company</p>
