@@ -16,8 +16,10 @@ import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
 
 function DisclaimerGateWrapper({ children }: { children: React.ReactNode }) {
-  const { gateOpen, dbLoading, confirm } = useDisclaimerGate();
-  if (gateOpen) return <DisclaimerGate onConfirm={confirm} loading={dbLoading} />;
+  const { gateOpen, initializing, confirm } = useDisclaimerGate();
+  // While auth/DB check is in-flight, render nothing — no gate, no spinner
+  if (initializing) return null;
+  if (gateOpen) return <DisclaimerGate onConfirm={confirm} />;
   return <>{children}</>;
 }
 

@@ -13,7 +13,7 @@
 //   3. Invalidate disclaimer.status query so the badge in OverviewTab refreshes
 
 import { useState } from "react";
-import { CheckSquare, Square, Loader2, BookOpen } from "lucide-react";
+import { CheckSquare, Square, BookOpen } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -31,7 +31,7 @@ const STORAGE_KEY = "meta_prep_disclaimer_v2";
  */
 export function useDisclaimerGate(): {
   gateOpen: boolean;
-  dbLoading: boolean;
+  initializing: boolean;
   confirm: () => void;
 } {
   const { user, loading: authLoading } = useAuth();
@@ -68,33 +68,27 @@ export function useDisclaimerGate(): {
     });
   };
 
-  // While auth is loading, keep gate closed to avoid flash
-  if (authLoading) return { gateOpen: false, dbLoading: true, confirm };
+  // While auth is still loading — render nothing (no gate, no spinner)
+  if (authLoading) return { gateOpen: false, initializing: true, confirm };
 
-  // Anonymous user: gate driven by localStorage only
-  if (!user) return { gateOpen: !localConfirmed, dbLoading: false, confirm };
+  // Anonymous user: gate driven by localStorage only — no DB check needed
+  if (!user) return { gateOpen: !localConfirmed, initializing: false, confirm };
 
-  // Logged-in user: if locally confirmed, still wait for DB to confirm
-  // (catches the case where localStorage was manually cleared or the user
-  //  is on a new device where localStorage is false but DB may already have a record)
-  if (localConfirmed) {
-    // DB query is disabled when localConfirmed=true, so we rely on the
-    // disclaimer.status query that OverviewTab already keeps warm.
-    // Re-enable a one-shot check:
-    return { gateOpen: false, dbLoading: false, confirm };
-  }
+  // Logged-in + already confirmed locally — skip gate immediately
+  if (localConfirmed) return { gateOpen: false, initializing: false, confirm };
 
-  // Logged-in, not locally confirmed: wait for DB
-  if (dbLoading) return { gateOpen: true, dbLoading: true, confirm };
+  // Logged-in, not locally confirmed: DB query is in-flight
+  // → render nothing until we know the answer (no spinner, no gate flash)
+  if (dbLoading) return { gateOpen: false, initializing: true, confirm };
 
-  // DB says acknowledged → release gate and sync localStorage
+  // DB says acknowledged → sync localStorage and skip gate
   if (dbStatus?.acknowledged) {
     localStorage.setItem(STORAGE_KEY, "true");
-    return { gateOpen: false, dbLoading: false, confirm };
+    return { gateOpen: false, initializing: false, confirm };
   }
 
-  // DB says not acknowledged → keep gate open
-  return { gateOpen: true, dbLoading: false, confirm };
+  // DB says not acknowledged → show gate (no spinner needed — we have the answer)
+  return { gateOpen: true, initializing: false, confirm };
 }
 
 // Legacy hook kept for backward compatibility (used in Home.tsx)
@@ -105,10 +99,9 @@ export function useDisclaimerAcknowledged(): [boolean, () => void] {
 
 interface Props {
   onConfirm: () => void;
-  loading?: boolean;
 }
 
-export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
+export default function DisclaimerGate({ onConfirm }: Props) {
   const [checked, setChecked] = useState(false);
 
   const handleConfirm = () => {
@@ -134,14 +127,6 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
           backgroundSize: "40px 40px",
         }}
       />
-
-      {/* DB-loading spinner overlay */}
-      {loading && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40">
-          <Loader2 size={28} className="animate-spin text-blue-400" />
-          <p className="text-xs text-zinc-400">Just a moment…</p>
-        </div>
-      )}
 
       <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[oklch(0.13_0.02_264)] shadow-2xl shadow-black/60 overflow-hidden my-8">
         {/* Blue top accent bar */}
@@ -238,18 +223,14 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
           {/* Confirm button */}
           <button
             onClick={handleConfirm}
-            disabled={!checked || loading}
+            disabled={!checked}
             className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 ${
-              checked && !loading
+              checked
                 ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25 cursor-pointer"
                 : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
             }`}
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 size={14} className="animate-spin" /> Just a moment…
-              </span>
-            ) : checked ? (
+            {checked ? (
               "Sounds good — enter the guide →"
             ) : (
               "Check the box above to continue"

@@ -394,3 +394,4 @@
 - [x] DisclaimerGate: soften body text - replace "not affiliated with Meta, Google, Amazon, or any other company" with "not affiliated with any company"
 - [x] DisclaimerGate: update header subtitle from "Takes 10 seconds — worth it" to "A note from the community"
 - [x] DisclaimerGate: add "I've seen this before" skip fast path for return visits that bypasses DB check
+- [x] DisclaimerGate: auto-skip for DB-acknowledged returning users, no loading spinner
