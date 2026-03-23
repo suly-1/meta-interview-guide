@@ -162,8 +162,8 @@ export default function DisclaimerGate({ onConfirm }: Props) {
               — just engineers sharing what they learned the hard way.
             </p>
             <p>
-              Always pair it with whatever your recruiter sends you. Interview
-              formats evolve, and their guidance is the source of truth.
+              Always pair it with any official guidance you receive. Interview
+              formats evolve, and official sources are the source of truth.
             </p>
           </div>
 
