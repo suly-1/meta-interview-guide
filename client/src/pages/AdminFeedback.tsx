@@ -29,6 +29,59 @@ import { toast } from "sonner";
 
 type SortKey = "createdAt" | "category" | "feedbackType";
 type SortDir = "asc" | "desc";
+type TriageStatus = "new" | "in_progress" | "done" | "dismissed";
+
+const STATUS_META: Record<
+  TriageStatus,
+  { label: string; color: string; bg: string }
+> = {
+  new: {
+    label: "New",
+    color: "text-sky-400",
+    bg: "bg-sky-500/10 border-sky-500/20",
+  },
+  in_progress: {
+    label: "In Progress",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10 border-amber-500/20",
+  },
+  done: {
+    label: "Done",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+  },
+  dismissed: {
+    label: "Dismissed",
+    color: "text-slate-400",
+    bg: "bg-slate-500/10 border-slate-500/20",
+  },
+};
+
+function StatusBadge({
+  status,
+  id,
+  onUpdate,
+}: {
+  status: TriageStatus;
+  id: number;
+  onUpdate: (id: number, status: TriageStatus) => void;
+}) {
+  const m = STATUS_META[status] ?? STATUS_META["new"];
+  return (
+    <select
+      value={status}
+      onChange={e => onUpdate(id, e.target.value as TriageStatus)}
+      onClick={e => e.stopPropagation()}
+      className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold cursor-pointer ${m.bg} ${m.color} focus:outline-none`}
+    >
+      {(Object.keys(STATUS_META) as TriageStatus[]).map(s => (
+        <option key={s} value={s} className="bg-background text-foreground">
+          {STATUS_META[s].label}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 const CATEGORY_META: Record<
   string,
@@ -108,10 +161,23 @@ export default function AdminFeedback() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [catFilter, setCatFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
 
   const isAdmin = user?.role === "admin";
+
+  const updateStatus = trpc.feedback.updateStatus.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Status updated.");
+    },
+    onError: () => toast.error("Failed to update status."),
+  });
+
+  const handleStatusUpdate = (id: number, status: TriageStatus) => {
+    updateStatus.mutate({ id, status });
+  };
 
   const triggerDigest = trpc.feedback.triggerDigest.useMutation({
     onSuccess: () => toast.success("Digest sent! Check your notifications."),
@@ -158,6 +224,8 @@ export default function AdminFeedback() {
     if (catFilter !== "all") rows = rows.filter(r => r.category === catFilter);
     if (typeFilter !== "all")
       rows = rows.filter(r => r.feedbackType === typeFilter);
+    if (statusFilter !== "all")
+      rows = rows.filter(r => r.status === statusFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(
@@ -422,6 +490,17 @@ export default function AdminFeedback() {
             <option value="general">General</option>
             <option value="sprint_plan">Sprint Plan</option>
           </select>
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="px-2.5 py-1.5 rounded-lg border border-border bg-secondary text-xs text-foreground focus:outline-none focus:border-blue-500/50"
+          >
+            <option value="all">All Statuses</option>
+            <option value="new">New</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+            <option value="dismissed">Dismissed</option>
+          </select>
           <input
             type="text"
             value={search}
@@ -477,6 +556,9 @@ export default function AdminFeedback() {
                       Message
                     </th>
                     <th className="px-3 py-2.5 text-left text-muted-foreground font-medium">
+                      Status
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-muted-foreground font-medium">
                       Page
                     </th>
                     <th
@@ -513,6 +595,13 @@ export default function AdminFeedback() {
                             {row.message}
                           </p>
                         </td>
+                        <td className="px-3 py-2.5">
+                          <StatusBadge
+                            status={(row.status ?? "new") as TriageStatus}
+                            id={row.id}
+                            onUpdate={handleStatusUpdate}
+                          />
+                        </td>
                         <td className="px-3 py-2.5 text-muted-foreground">
                           {row.page ?? "—"}
                         </td>
@@ -525,7 +614,7 @@ export default function AdminFeedback() {
                           key={`${row.id}-expanded`}
                           className="bg-secondary/20"
                         >
-                          <td colSpan={6} className="px-4 py-3">
+                          <td colSpan={7} className="px-4 py-3">
                             <div className="space-y-2">
                               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                                 Full Message

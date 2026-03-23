@@ -8,7 +8,8 @@ import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { notifyOwner } from "../_core/notification";
 import { getDb } from "../db";
 import { feedback as feedbackTable } from "../../drizzle/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { sendWeeklyDigest } from "../weeklyDigest";
 
 export const feedbackRouter = router({
@@ -135,6 +136,9 @@ export const feedbackRouter = router({
           .enum(["createdAt", "category", "feedbackType"])
           .default("createdAt"),
         sortDir: z.enum(["asc", "desc"]).default("desc"),
+        status: z
+          .enum(["all", "new", "in_progress", "done", "dismissed"])
+          .default("all"),
       })
     )
     .query(async ({ input }) => {
@@ -152,6 +156,9 @@ export const feedbackRouter = router({
       }
       if (input.feedbackType !== "all") {
         filtered = filtered.filter(i => i.feedbackType === input.feedbackType);
+      }
+      if (input.status !== "all") {
+        filtered = filtered.filter(i => i.status === input.status);
       }
       return { items: filtered, total: filtered.length };
     }),
@@ -193,4 +200,22 @@ export const feedbackRouter = router({
     await sendWeeklyDigest();
     return { success: true };
   }),
+
+  /** Admin: Update the triage status of a feedback item */
+  updateStatus: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.enum(["new", "in_progress", "done", "dismissed"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db
+        .update(feedbackTable)
+        .set({ status: input.status })
+        .where(eq(feedbackTable.id, input.id));
+      return { success: true };
+    }),
 });

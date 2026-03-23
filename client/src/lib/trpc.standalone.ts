@@ -492,6 +492,73 @@ export const trpc = {
     },
   },
 
+  // ── sprintPlan (no-op in standalone) ──────────────────────────────────────
+  sprintPlan: {
+    generate: {
+      useMutation: () =>
+        makeMutation(() => ({
+          planData: {
+            title: "⚠️ Sprint Plan requires the online version",
+            summary:
+              "Sign in at the Manus app to generate your personalized 7-day sprint plan.",
+            targetLevel: "L6",
+            timeline: "3-4 weeks",
+            days: [],
+            keyMetrics: {
+              totalHours: 0,
+              codingHours: 0,
+              behavioralHours: 0,
+              systemDesignHours: 0,
+            },
+            successCriteria: [],
+          },
+        })),
+    },
+    save: {
+      useMutation: () => makeMutation(() => ({ planId: "", shareToken: "" })),
+    },
+    getShared: {
+      useQuery: () => makeQuery(null),
+    },
+  },
+
+  // ── feedback (no-op in standalone) ───────────────────────────────────────
+  feedback: {
+    submitGeneral: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    submitSprintFeedback: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    adminGetAll: {
+      useQuery: () => makeQuery({ items: [], total: 0 }),
+    },
+    adminStats: {
+      useQuery: () =>
+        makeQuery({ byCategory: [], byType: [], total: 0, last7Days: 0 }),
+    },
+    triggerDigest: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    updateStatus: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+  },
+
+  // ── userScores (no-op in standalone) ─────────────────────────────────────
+  userScores: {
+    load: {
+      useQuery: () => makeQuery(null),
+    },
+    save: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    getAggregateStats: {
+      useQuery: () =>
+        makeQuery({ totalUsers: 0, patternAvgRatings: {}, bqAvgRatings: {} }),
+    },
+  },
+
   // ── system ────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {

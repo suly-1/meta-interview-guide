@@ -629,3 +629,9 @@
 - [x] Overall sprint progress bar
 - [x] Admin nickname set to "Apex"
 - [x] Owner name removed from DB and all code
+
+## Phase 5 (Mar 23, 2026)
+
+- [x] Fix standalone build crash - add sprintPlan/feedback/userScores mocks to trpc.standalone.ts
+- [x] SMTP email delivery setup (Gmail, verified via nodemailer.verify())
+- [x] Feedback triage status column (new/in_progress/done/dismissed) in DB + admin dashboard

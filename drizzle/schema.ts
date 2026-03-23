@@ -150,6 +150,9 @@ export const feedback = mysqlTable("feedback", {
     .default("other"),
   message: text("message").notNull(),
   page: varchar("page", { length: 64 }),
+  status: mysqlEnum("status", ["new", "in_progress", "done", "dismissed"])
+    .notNull()
+    .default("new"),
   metadata: json("metadata").$type<Record<string, unknown>>().default({}),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
