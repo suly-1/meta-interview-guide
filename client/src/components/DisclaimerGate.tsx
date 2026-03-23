@@ -187,8 +187,8 @@ export default function DisclaimerGate({ onConfirm }: Props) {
             </p>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Openly available at{" "}
-              <span className="text-blue-400">metaengguide.pro</span> — built
-              and shared by engineers, for engineers.
+              <span className="text-blue-400">{window.location.hostname}</span>{" "}
+              — built and shared by engineers, for engineers.
             </p>
           </div>
 
