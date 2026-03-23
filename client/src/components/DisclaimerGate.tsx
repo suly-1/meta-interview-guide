@@ -161,7 +161,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
                 Quick note before you start
               </h1>
               <p className="text-sm text-blue-300/70 mt-0.5">
-                Takes 10 seconds — worth it
+                A note from the community
               </p>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
               This guide was built by the community, for candidates doing their
               own research. It's{" "}
               <strong className="text-white">
-                not affiliated with Meta, Google, Amazon, or any other company
+                not affiliated with any company
               </strong>{" "}
               — just engineers sharing what they learned the hard way.
             </p>
@@ -256,10 +256,21 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
             )}
           </button>
 
-          <p className="text-center text-xs text-zinc-600">
-            Your choice is saved locally. You won't see this screen again on
-            this device.
-          </p>
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-center text-xs text-zinc-600">
+              Your choice is saved locally. You won't see this screen again on
+              this device.
+            </p>
+            <button
+              onClick={() => {
+                localStorage.setItem(STORAGE_KEY, "true");
+                onConfirm();
+              }}
+              className="text-xs text-zinc-600 hover:text-zinc-400 underline underline-offset-2 transition-colors"
+            >
+              I've seen this before — skip
+            </button>
+          </div>
         </div>
       </div>
     </div>

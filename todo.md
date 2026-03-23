@@ -391,3 +391,6 @@
 - [ ] Wire OverviewTab into main nav in Home.tsx
 - [ ] Add Leaderboard tab to main nav in Home.tsx
 - [ ] Add 'Practice with a partner' CollabRoom button in SystemDesignTab
+- [x] DisclaimerGate: soften body text - replace "not affiliated with Meta, Google, Amazon, or any other company" with "not affiliated with any company"
+- [x] DisclaimerGate: update header subtitle from "Takes 10 seconds — worth it" to "A note from the community"
+- [x] DisclaimerGate: add "I've seen this before" skip fast path for return visits that bypasses DB check
