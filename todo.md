@@ -459,3 +459,11 @@
 - [x] Convert jsPDF to dynamic import in SystemDesignEnhancements
 - [x] Update vite.config.ts with comprehensive manual chunk splitting
 - [x] Initial load reduced from 5.67MB to ~381KB main entry (284KB gzip total core)
+
+## UX & Performance Improvements (Round 2)
+- [x] Tab loading skeletons: create TabSkeleton component with content-shaped grey placeholders per tab type
+- [x] Replace spinner fallback in main Suspense with TabSkeleton in Home.tsx
+- [x] MockInterviewerChat chunk split: move Streamdown to vendor-streamdown chunk in vite.config.ts
+- [x] Lazy-load Streamdown inside MockInterviewerChat, MetaCodingScreenSimulator, SystemDesignEnhancements
+- [x] PWA Service Worker: install vite-plugin-pwa, configure Workbox to cache vendor chunks
+- [x] Add web app manifest (name, icons, theme color) for installability

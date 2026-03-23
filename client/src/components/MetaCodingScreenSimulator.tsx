@@ -25,7 +25,7 @@ import {
   ChevronRight, History, Trash2, Send, Terminal, Sparkles, Copy, Check,
   Users, Swords
 } from "lucide-react";
-import { Streamdown } from "streamdown";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 // -- Language config (mirrors CodePractice) ---------------------------------
 
@@ -971,7 +971,7 @@ export default function MetaCodingScreenSimulator() {
               <div className="border border-indigo-200 dark:border-indigo-700 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-900/20">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 mb-2">AI Debrief</p>
                 <div className="text-xs text-foreground prose prose-sm max-w-none">
-                  <Streamdown>{selectedSession.aiDebrief}</Streamdown>
+                  <MarkdownRenderer>{selectedSession.aiDebrief}</MarkdownRenderer>
                 </div>
               </div>
             )}
@@ -1320,7 +1320,7 @@ export default function MetaCodingScreenSimulator() {
             </div>
           ) : (
             <div className="text-xs text-foreground prose prose-sm max-w-none">
-              <Streamdown>{aiDebrief}</Streamdown>
+              <MarkdownRenderer>{aiDebrief}</MarkdownRenderer>
             </div>
           )}
         </div>

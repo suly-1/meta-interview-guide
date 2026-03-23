@@ -23,6 +23,7 @@ import { useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay
 import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/FocusMode";
 import MilestoneNotifications from "@/components/MilestoneNotifications";
 import type { GauntletState } from "@/components/GauntletMode";
+import TabSkeleton from "@/components/TabSkeleton";
 
 // Heavy tab components — lazy loaded to keep initial bundle small
 const CodingTab = lazy(() => import("@/components/CodingTab"));
@@ -512,14 +513,7 @@ export default function Home() {
                 </h1>
               </div>
 
-              <Suspense fallback={
-                <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                    <span className="text-sm">Loading...</span>
-                  </div>
-                </div>
-              }>
+              <Suspense fallback={<TabSkeleton tabId={activeTab} />}>
                 {activeTab === "coding"      && <CodingTab />}
                 {activeTab === "mock"        && <MockInterviewSimulator />}
                 {activeTab === "ai-round"    && <AIRoundTab />}

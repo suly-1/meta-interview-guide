@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronDown, ChevronUp, Brain, Clock, FileText, AlertTriangle, Users, BookOpen, Zap, Timer, Copy, Check, Play, Pause, RotateCcw, Download } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Streamdown } from "streamdown";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 // jsPDF loaded dynamically on demand to reduce initial bundle size
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ export function GuidedDesignWalkthrough() {
           <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"><RotateCcw size={11} /> New Session</button>
         </div>
         <div className="bg-secondary/40 rounded-lg p-4 text-sm">
-          <Streamdown>{feedback}</Streamdown>
+          <MarkdownRenderer>{feedback}</MarkdownRenderer>
         </div>
       </div>
     );
@@ -782,7 +782,7 @@ export function PeerDesignReview() {
         <div className="space-y-3">
           <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Peer Review Feedback</div>
           <div className="bg-secondary/40 rounded-lg p-4 text-sm">
-            <Streamdown>{finalFeedback}</Streamdown>
+            <MarkdownRenderer>{finalFeedback}</MarkdownRenderer>
           </div>
           <button onClick={reset} className="w-full py-2 rounded-lg bg-secondary hover:bg-secondary/80 border border-border text-sm text-muted-foreground transition-all">Start New Review</button>
         </div>
@@ -1003,7 +1003,7 @@ export function ExplainLikeAPM() {
         <div className="space-y-2">
           <div className="text-xs font-bold text-orange-400 uppercase tracking-wider">PM-Friendly Explanation</div>
           <div className="bg-secondary/40 rounded-lg p-4 text-sm">
-            <Streamdown>{result}</Streamdown>
+            <MarkdownRenderer>{result}</MarkdownRenderer>
           </div>
           <button onClick={() => setResult(null)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Clear</button>
         </div>

@@ -15,7 +15,7 @@
 import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Bot, Send, ChevronDown, ChevronUp, Loader2, MessageSquare, X, Sparkles } from "lucide-react";
-import { Streamdown } from "streamdown";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -222,7 +222,7 @@ function ChatBody({
             }`}>
               {msg.role === "assistant" ? (
                 <div className="prose prose-xs max-w-none dark:prose-invert">
-                  <Streamdown>{msg.content}</Streamdown>
+                  <MarkdownRenderer>{msg.content}</MarkdownRenderer>
                 </div>
               ) : (
                 <span>{msg.content}</span>
