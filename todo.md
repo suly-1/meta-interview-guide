@@ -380,3 +380,11 @@
 ## Deployment Status Badge
 - [x] Live GitHub Actions deployment status badge in UI (green ✅ / yellow 🟡 / red ✗) visible in hero/footer
 - [ ] Fix Progress Dashboard not working
+
+## ZIP Implementation Batch
+- [ ] Update DB schema: add disclaimerAcknowledgedAt to users, add collabRooms, sessionEvents, scorecards, leaderboardEntries, onboardingProgress, userRatings, ctciProgress, mockSessions tables
+- [ ] Add server router files: disclaimer.ts, collab.ts, leaderboard.ts, ratings.ts, ctci.ts, ctciProgress.ts, mockHistory.ts, onboarding.ts, deployStatus.ts
+- [ ] Wire all new sub-routers in server/routers.ts
+- [ ] Replace DisclaimerGate.tsx with DB-backed version (metaengguide.pro domain)
+- [ ] Add new UI components: AdminDisclaimerReport, SectionErrorBoundary, WeakPatternHeatmap, WeakSpotStudyPlan, HeatmapCalendar, ShareMessageButton, CommunityBanner, NotificationBanner, OverviewTab, OverviewExtras, CollabRoom, Leaderboard, VoiceAnswerMode, VoiceToStar, DayOfMode, FullMockDaySimulator, CrossDeviceSync
+- [ ] Run pnpm db:push to migrate schema

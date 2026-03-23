@@ -11,9 +11,15 @@ import { ICLevelProvider } from "./contexts/ICLevelContext";
 import Home from "./pages/Home";
 import CandidateDiscovery from "@/pages/CandidateDiscovery";
 import TermsOfUse from "@/pages/TermsOfUse";
-import DisclaimerGate from "./components/DisclaimerGate";
+import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
+
+function DisclaimerGateWrapper({ children }: { children: React.ReactNode }) {
+  const { gateOpen, dbLoading, confirm } = useDisclaimerGate();
+  if (gateOpen) return <DisclaimerGate onConfirm={confirm} loading={dbLoading} />;
+  return <>{children}</>;
+}
 
 function AppRouter() {
   return (
@@ -47,10 +53,10 @@ function App() {
         <Route path="/terms" component={TermsOfUse} />
                 {/* All other routes go through DisclaimerGate */}
                 <Route>
-                  <DisclaimerGate>
+                  <DisclaimerGateWrapper>
                     <AppRouter />
                     <PatternUnlockCelebration />
-                  </DisclaimerGate>
+                  </DisclaimerGateWrapper>
                 </Route>
               </Switch>
             </Router>

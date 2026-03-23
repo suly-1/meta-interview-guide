@@ -1,296 +1,269 @@
-/**
- * DisclaimerGate — Full-screen overlay that blocks ALL guide content
- * until the user explicitly checks the acknowledgement checkbox and
- * clicks "I Acknowledge — Enter Guide".
- *
- * Acknowledgement is persisted in localStorage so returning users
- * are not blocked again on subsequent visits.
- */
+// DisclaimerGate — full-screen blocker that must be explicitly acknowledged
+// before any guide content is visible.
+//
+// Gating logic:
+//   - Anonymous users: localStorage key "meta_prep_disclaimer_v2" === "true"
+//   - Logged-in users: DB record (disclaimerAcknowledgedAt IS NOT NULL) is the
+//     authoritative source. localStorage is still written as a fast-path cache,
+//     but if the DB says "not acknowledged" the gate is shown regardless.
+//
+// On confirm:
+//   1. Write localStorage (instant local gate release)
+//   2. Call disclaimer.acknowledge tRPC mutation (write DB timestamp)
+//   3. Invalidate disclaimer.status query so the badge in OverviewTab refreshes
 
 import { useState } from "react";
+import { CheckSquare, Square, Loader2, BookOpen } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
-const STORAGE_KEY = "meta-guide-disclaimer-acknowledged-v2";
+const STORAGE_KEY = "meta_prep_disclaimer_v2";
 
-interface DisclaimerGateProps {
-  children: React.ReactNode;
-}
+/**
+ * Returns [isGateOpen, confirmFn].
+ *
+ * isGateOpen === true  → show the gate (block content)
+ * isGateOpen === false → content is accessible
+ *
+ * For anonymous users the gate is driven purely by localStorage.
+ * For logged-in users the gate stays open until the DB record confirms
+ * acknowledgment (with a loading state while the query is in-flight).
+ */
+export function useDisclaimerGate(): {
+  gateOpen: boolean;
+  dbLoading: boolean;
+  confirm: () => void;
+} {
+  const { user, loading: authLoading } = useAuth();
 
-export function useDisclaimerAcknowledged() {
-  const [acknowledged, setAcknowledged] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(STORAGE_KEY) === "true";
-    } catch {
-      return false;
-    }
+  // Local fast-path: did this browser already acknowledge?
+  const localAck =
+    typeof window !== "undefined"
+      ? localStorage.getItem(STORAGE_KEY) === "true"
+      : false;
+
+  const [localConfirmed, setLocalConfirmed] = useState(localAck);
+
+  // DB status query — only runs for logged-in users
+  const utils = trpc.useUtils();
+  const acknowledgeMutation = trpc.disclaimer.acknowledge.useMutation({
+    onSuccess: () => {
+      utils.disclaimer.status.invalidate();
+    },
   });
 
-  const acknowledge = () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, "true");
-    } catch {}
-    setAcknowledged(true);
+  const { data: dbStatus, isLoading: dbLoading } =
+    trpc.disclaimer.status.useQuery(undefined, {
+      // Only fetch when user is logged in and hasn't already confirmed locally
+      enabled: !!user && !localConfirmed,
+      staleTime: 0,
+    });
+
+  const confirm = () => {
+    localStorage.setItem(STORAGE_KEY, "true");
+    setLocalConfirmed(true);
+    // Fire DB write; errors are silently ignored (user may be anonymous)
+    acknowledgeMutation.mutate(undefined, {
+      onError: () => {},
+    });
   };
 
-  const resetAcknowledgement = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {}
-    setAcknowledged(false);
-  };
+  // While auth is loading, keep gate closed to avoid flash
+  if (authLoading) return { gateOpen: false, dbLoading: true, confirm };
 
-  return { acknowledged, acknowledge, resetAcknowledgement };
-}
+  // Anonymous user: gate driven by localStorage only
+  if (!user) return { gateOpen: !localConfirmed, dbLoading: false, confirm };
 
-export default function DisclaimerGate({ children }: DisclaimerGateProps) {
-  const { acknowledged, acknowledge } = useDisclaimerAcknowledged();
-  const [checked, setChecked] = useState(false);
-  const [shake, setShake] = useState(false);
-
-  const handleEnter = () => {
-    if (!checked) {
-      setShake(true);
-      setTimeout(() => setShake(false), 600);
-      return;
-    }
-    acknowledge();
-  };
-
-  if (acknowledged) {
-    return <>{children}</>;
+  // Logged-in user: if locally confirmed, still wait for DB to confirm
+  // (catches the case where localStorage was manually cleared or the user
+  //  is on a new device where localStorage is false but DB may already have a record)
+  if (localConfirmed) {
+    // DB query is disabled when localConfirmed=true, so we rely on the
+    // disclaimer.status query that OverviewTab already keeps warm.
+    // Re-enable a one-shot check:
+    return { gateOpen: false, dbLoading: false, confirm };
   }
 
+  // Logged-in, not locally confirmed: wait for DB
+  if (dbLoading) return { gateOpen: true, dbLoading: true, confirm };
+
+  // DB says acknowledged → release gate and sync localStorage
+  if (dbStatus?.acknowledged) {
+    localStorage.setItem(STORAGE_KEY, "true");
+    return { gateOpen: false, dbLoading: false, confirm };
+  }
+
+  // DB says not acknowledged → keep gate open
+  return { gateOpen: true, dbLoading: false, confirm };
+}
+
+// Legacy hook kept for backward compatibility (used in Home.tsx)
+export function useDisclaimerAcknowledged(): [boolean, () => void] {
+  const { gateOpen, confirm } = useDisclaimerGate();
+  return [!gateOpen, confirm];
+}
+
+interface Props {
+  onConfirm: () => void;
+  loading?: boolean;
+}
+
+export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
+  const [checked, setChecked] = useState(false);
+
+  const handleConfirm = () => {
+    if (!checked) return;
+    onConfirm();
+  };
+
   return (
+    /* Full-viewport overlay — sits above everything, z-index 9999 */
     <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
       style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "16px",
-        fontFamily: "'Space Grotesk', 'Inter', sans-serif",
-        overflowY: "auto",
+        background:
+          "radial-gradient(ellipse at 50% 30%, oklch(0.18 0.04 264) 0%, oklch(0.08 0.015 264) 100%)",
       }}
     >
-      {/* Background pattern */}
+      {/* Subtle grid texture */}
       <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
-          position: "fixed",
-          inset: 0,
           backgroundImage:
-            "radial-gradient(circle at 20% 20%, rgba(29,78,216,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(29,78,216,0.1) 0%, transparent 50%)",
-          pointerEvents: "none",
+            "linear-gradient(oklch(0.7 0 0) 1px, transparent 1px), linear-gradient(90deg, oklch(0.7 0 0) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
         }}
       />
 
-      <div
-        style={{
-          position: "relative",
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: "16px",
-          maxWidth: "700px",
-          width: "100%",
-          padding: "40px",
-          backdropFilter: "blur(12px)",
-          boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
-          margin: "auto",
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "10px",
-              background: "rgba(29,78,216,0.2)",
-              border: "1px solid rgba(29,78,216,0.4)",
-              borderRadius: "40px",
-              padding: "8px 20px",
-              marginBottom: "20px",
-            }}
+      {/* DB-loading spinner overlay */}
+      {loading && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40">
+          <Loader2 size={28} className="animate-spin text-blue-400" />
+          <p className="text-xs text-zinc-400">Just a moment…</p>
+        </div>
+      )}
+
+      <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[oklch(0.13_0.02_264)] shadow-2xl shadow-black/60 overflow-hidden my-8">
+        {/* Blue top accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-blue-700 via-blue-400 to-blue-700" />
+
+        <div className="p-8 sm:p-10 space-y-6">
+          {/* Header */}
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/15 border border-blue-500/25">
+              <BookOpen size={22} className="text-blue-400" />
+            </div>
+            <div>
+              <h1
+                className="text-xl font-bold text-white tracking-tight"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Quick note before you start
+              </h1>
+              <p className="text-sm text-blue-300/70 mt-0.5">
+                Takes 10 seconds — worth it
+              </p>
+            </div>
+          </div>
+
+          {/* Main body */}
+          <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
+            <p>
+              This guide was built by the community, for candidates doing their
+              own research. It's{" "}
+              <strong className="text-white">
+                not affiliated with Meta, Google, Amazon, or any other company
+              </strong>{" "}
+              — just engineers sharing what they learned the hard way.
+            </p>
+            <p>
+              Always pair it with whatever your recruiter sends you. Interview
+              formats evolve, and their guidance is the source of truth.
+            </p>
+          </div>
+
+          {/* "The legal bit" plain-talk card */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+            <p className="text-xs font-semibold text-zinc-300">
+              The legal bit, in plain English:
+            </p>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              This is a free community resource provided as-is. The people who
+              built it aren't responsible for your interview outcomes or any
+              decisions you make based on it. No warranties, no guarantees —
+              just good faith effort from engineers who've been through it.
+            </p>
+          </div>
+
+          {/* Community resource proof box */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-1.5">
+            <p className="text-xs font-semibold text-blue-400">
+              📢 Public community resource
+            </p>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Openly available at{" "}
+              <span className="text-blue-400">metaengguide.pro</span>. Not
+              distributed by any interviewer, recruiter, or company employee.
+            </p>
+          </div>
+
+          {/* Checkbox acknowledgment */}
+          <button
+            onClick={() => setChecked(c => !c)}
+            className="flex items-start gap-3 w-full text-left group"
+            aria-pressed={checked}
           >
-            <span style={{ fontSize: "18px" }}>🔒</span>
-            <span style={{ color: "#93c5fd", fontSize: "13px", fontWeight: 700, letterSpacing: "0.05em" }}>
-              INDEPENDENT STUDY RESOURCE
+            <span className="shrink-0 mt-0.5 transition-colors">
+              {checked ? (
+                <CheckSquare size={20} className="text-emerald-400" />
+              ) : (
+                <Square
+                  size={20}
+                  className="text-zinc-500 group-hover:text-zinc-300"
+                />
+              )}
             </span>
-          </div>
-          <h1
-            style={{
-              color: "white",
-              fontSize: "clamp(22px, 4vw, 30px)",
-              fontWeight: 800,
-              margin: "0 0 8px",
-              lineHeight: 1.2,
-            }}
+            <span
+              className={`text-sm transition-colors ${
+                checked
+                  ? "text-emerald-300"
+                  : "text-zinc-400 group-hover:text-zinc-200"
+              }`}
+            >
+              I'm a job seeker using this for my own prep. I found this guide
+              independently — it wasn't provided to me by any interviewer or
+              company employee. I understand it's a community resource with no
+              guarantees attached.
+            </span>
+          </button>
+
+          {/* Confirm button */}
+          <button
+            onClick={handleConfirm}
+            disabled={!checked || loading}
+            className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 ${
+              checked && !loading
+                ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25 cursor-pointer"
+                : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+            }`}
           >
-            Independent Study Guide
-          </h1>
-          <p style={{ color: "#94a3b8", fontSize: "14px", margin: 0 }}>
-            Behavioral &amp; Coding Preparation — 2026
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={14} className="animate-spin" /> Just a moment…
+              </span>
+            ) : checked ? (
+              "Sounds good — enter the guide →"
+            ) : (
+              "Check the box above to continue"
+            )}
+          </button>
+
+          <p className="text-center text-xs text-zinc-600">
+            Your choice is saved locally. You won't see this screen again on
+            this device.
           </p>
         </div>
-
-        {/* Warning banner */}
-        <div
-          style={{
-            background: "rgba(217,119,6,0.15)",
-            border: "1px solid rgba(217,119,6,0.4)",
-            borderRadius: "10px",
-            padding: "16px 20px",
-            marginBottom: "20px",
-            display: "flex",
-            gap: "12px",
-            alignItems: "flex-start",
-          }}
-        >
-          <span style={{ fontSize: "20px", flexShrink: 0, marginTop: "1px" }}>⚠️</span>
-          <div>
-            <p style={{ color: "#fbbf24", fontWeight: 700, fontSize: "14px", margin: "0 0 2px" }}>
-              Disclaimer
-            </p>
-            <p style={{ color: "#fcd34d", fontSize: "12px", margin: 0, lineHeight: 1.4, fontStyle: "italic" }}>
-              Please read carefully before proceeding
-            </p>
-          </div>
-        </div>
-
-        {/* Main disclaimer body */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "10px",
-            padding: "20px",
-            marginBottom: "20px",
-            maxHeight: "340px",
-            overflowY: "auto",
-          }}
-        >
-          {/* Independence */}
-          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
-            Independence &amp; Non-Affiliation
-          </p>
-          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
-            This is an <strong style={{ color: "#e2e8f0" }}>independent study resource</strong> for software engineering interview preparation. It is{" "}
-            <strong style={{ color: "#fbbf24" }}>not affiliated with, endorsed by, or connected to Meta Platforms, Inc.</strong>{" "}in any way. All trademarks are property of their respective owners, used here for identification only under nominative fair use.
-          </p>
-
-          {/* Accuracy */}
-          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
-            Accuracy &amp; Currency of Information
-          </p>
-          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
-            All content is based on publicly available information and may be <strong style={{ color: "#fbbf24" }}>outdated, incomplete, or inaccurate</strong>. This is not professional or career advice. Always verify details with your recruiter or hiring manager.
-          </p>
-
-          {/* Warranty & Liability */}
-          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
-            No Warranty &amp; Limitation of Liability
-          </p>
-          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
-            This guide is provided <strong style={{ color: "#e2e8f0" }}>"AS IS"</strong> without warranty of any kind, express or implied. The author(s) shall not be liable for any damages — direct, indirect, incidental, or consequential — arising from your use of or reliance on this guide. <strong style={{ color: "#fbbf24" }}>No outcome is guaranteed.</strong>
-          </p>
-
-          {/* Assumption of Risk */}
-          <p style={{ color: "#e2e8f0", fontSize: "13px", fontWeight: 700, margin: "0 0 6px" }}>
-            Assumption of Risk &amp; Indemnification
-          </p>
-          <p style={{ color: "#cbd5e1", fontSize: "12px", lineHeight: 1.7, margin: "0 0 14px" }}>
-            By using this guide, you assume all risk, agree you are solely responsible for any decisions made based on its content, and agree to <strong style={{ color: "#e2e8f0" }}>indemnify and hold harmless</strong> the author(s) from any claims arising from your use.
-          </p>
-
-          {/* Severability */}
-          <p style={{ color: "#94a3b8", fontSize: "11px", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
-            If any provision of this disclaimer is unenforceable, the remainder shall remain in effect.
-          </p>
-        </div>
-
-        {/* Acknowledgement checkbox */}
-        <label
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "12px",
-            cursor: "pointer",
-            marginBottom: "24px",
-            padding: "16px",
-            background: checked ? "rgba(29,78,216,0.15)" : "rgba(255,255,255,0.04)",
-            border: `1px solid ${checked ? "rgba(59,130,246,0.5)" : "rgba(255,255,255,0.1)"}`,
-            borderRadius: "10px",
-            transition: "all 0.2s",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={checked}
-            onChange={e => setChecked(e.target.checked)}
-            style={{
-              width: "18px",
-              height: "18px",
-              flexShrink: 0,
-              marginTop: "2px",
-              accentColor: "#3b82f6",
-              cursor: "pointer",
-            }}
-          />
-          <span style={{ color: "#e2e8f0", fontSize: "13px", lineHeight: 1.6 }}>
-            <strong style={{ color: checked ? "#93c5fd" : "#e2e8f0" }}>☑️ I acknowledge</strong> this guide is independent, not affiliated with Meta, provided without warranty, and that I assume all risk of use.
-          </span>
-        </label>
-
-        {/* Enter button */}
-        <button
-          onClick={handleEnter}
-          style={{
-            width: "100%",
-            padding: "16px",
-            background: checked
-              ? "linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)"
-              : "rgba(255,255,255,0.08)",
-            border: checked ? "none" : "1px solid rgba(255,255,255,0.15)",
-            borderRadius: "10px",
-            color: checked ? "white" : "#64748b",
-            fontSize: "15px",
-            fontWeight: 700,
-            cursor: checked ? "pointer" : "not-allowed",
-            transition: "all 0.2s",
-            fontFamily: "'Space Grotesk', sans-serif",
-            letterSpacing: "0.02em",
-            animation: shake ? "shake 0.5s ease" : "none",
-            boxShadow: checked ? "0 4px 20px rgba(29,78,216,0.4)" : "none",
-          }}
-        >
-          {checked ? "✓ I Acknowledge — Enter Guide" : "Check the box above to continue"}
-        </button>
-
-        {!checked && (
-          <p
-            style={{
-              textAlign: "center",
-              color: "#475569",
-              fontSize: "12px",
-              marginTop: "12px",
-              marginBottom: 0,
-            }}
-          >
-            You must acknowledge the disclaimer to access this guide.
-          </p>
-        )}
       </div>
-
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-8px); }
-          40% { transform: translateX(8px); }
-          60% { transform: translateX(-6px); }
-          80% { transform: translateX(6px); }
-        }
-      `}</style>
     </div>
   );
 }

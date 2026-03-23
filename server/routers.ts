@@ -4,6 +4,15 @@ import { systemRouter } from "./_core/systemRouter";
 import { notifyOwner } from "./_core/notification";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import { disclaimerRouter } from "./routers/disclaimer";
+import { collabRouter } from "./routers/collab";
+import { leaderboardRouter } from "./routers/leaderboard";
+import { ratingsRouter } from "./routers/ratings";
+import { ctciRouter } from "./routers/ctci";
+import { ctciProgressRouter } from "./routers/ctciProgress";
+import { mockHistoryRouter } from "./routers/mockHistory";
+import { onboardingRouter } from "./routers/onboarding";
+import { aiRouter } from "./routers/ai";
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -1786,5 +1795,14 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
       }
     }),
   }),
+  disclaimer: disclaimerRouter,
+  collab: collabRouter,
+  leaderboard: leaderboardRouter,
+  ratings: ratingsRouter,
+  ctci: ctciRouter,
+  ctciProgress: ctciProgressRouter,
+  mockHistory: mockHistoryRouter,
+  onboarding: onboardingRouter,
+  ai: aiRouter,
 });
 export type AppRouter = typeof appRouter;
