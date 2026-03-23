@@ -437,3 +437,5 @@
 - [ ] Aggregate anonymous pass-rate stats per feature (68% vs 41% style)
 - [x] Feedback status counts in weekly digest email (new/in_progress/done breakdown)
 - [x] Instant admin notification email on new feedback submission
+- [ ] Weekly analytics report in Monday digest (visitor counts, sessions, page views, feature engagement, device breakdown)
+- [ ] Top 3 unactioned feedback items section in Monday digest
