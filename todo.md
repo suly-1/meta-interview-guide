@@ -603,3 +603,29 @@
 - [x] Progress & Performance Analytics Dashboard
 - [x] Score Persistence to DB (ScoreSyncBanner, cross-device sync)
 - [x] All 10 features moved to top of their respective tabs
+
+## Phase 4 Features (Mar 23 2026)
+
+- [ ] Admin Feedback View (/admin/feedback, owner-only role-gated)
+- [ ] Weekly email digest cron job (feedback summary to [owner email])
+- [ ] Sprint Plan 100% celebration (confetti + modal)
+
+## Phase 4 Features (Mar 23 2026)
+
+- [ ] Promote owner to admin in DB
+- [ ] Admin Feedback Dashboard (/admin/feedback, sortable table)
+- [ ] Aggregate Anonymous Stats (feature usage vs pass-rate)
+- [ ] Weekly email digest cron job ([owner email])
+- [ ] Sprint Plan 100% celebration (confetti + modal)
+
+## Phase 4 Completions (Mar 23, 2026)
+
+- [x] Admin Feedback Dashboard (/admin/feedback) - role-gated, sortable table, CSV export
+- [x] Aggregate Anonymous Stats (/admin/stats) - pattern/BQ heatmaps, feature engagement
+- [x] Weekly email digest cron (every Monday 08:00 UTC, SMTP + Manus notification fallback)
+- [x] Manual "Send Digest" button in admin dashboard
+- [x] Sprint Plan 100% celebration - confetti + celebration modal
+- [x] Task checkboxes in DayCard with per-day progress bars
+- [x] Overall sprint progress bar
+- [x] Admin nickname set to "Apex"
+- [x] Owner name removed from DB and all code

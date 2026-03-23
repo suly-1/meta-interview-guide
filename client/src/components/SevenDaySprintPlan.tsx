@@ -3,7 +3,7 @@
  * Uses AI + readiness data to generate a personalized day-by-day study schedule.
  * Features: AI generation, print/save, share with mentor, sprint-specific feedback.
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Zap,
   Calendar,
@@ -325,14 +325,27 @@ function DayCard({
   day,
   isExpanded,
   onToggle,
+  completedTasks,
+  onTaskToggle,
 }: {
   day: SprintDay;
   isExpanded: boolean;
   onToggle: () => void;
+  completedTasks: Set<string>;
+  onTaskToggle: (taskId: string) => void;
 }) {
   const totalMinutes = day.tasks.reduce((s, t) => s + t.timeMinutes, 0);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
+  const dayCompletedCount = day.tasks.filter(t =>
+    completedTasks.has(t.id)
+  ).length;
+  const dayTotalCount = day.tasks.length;
+  const dayPct =
+    dayTotalCount > 0
+      ? Math.round((dayCompletedCount / dayTotalCount) * 100)
+      : 0;
+  const dayDone = dayCompletedCount === dayTotalCount && dayTotalCount > 0;
 
   const DAY_COLORS = [
     "border-blue-500/30 bg-blue-500/5",
@@ -370,8 +383,26 @@ function DayCard({
               {mins > 0 ? `${mins}m` : ""}
             </span>
             <span className="text-[10px] text-muted-foreground">
-              {day.tasks.length} tasks
+              {dayCompletedCount}/{dayTotalCount} tasks
             </span>
+            {dayDone && (
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
+                ✓ Done
+              </span>
+            )}
+            {!dayDone && dayCompletedCount > 0 && (
+              <div className="flex items-center gap-1">
+                <div className="w-12 h-1 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-blue-500"
+                    style={{ width: `${dayPct}%` }}
+                  />
+                </div>
+                <span className="text-[9px] text-muted-foreground">
+                  {dayPct}%
+                </span>
+              </div>
+            )}
           </div>
         </div>
         {isExpanded ? (
@@ -388,14 +419,26 @@ function DayCard({
           {day.tasks.map(task => {
             const cat =
               CATEGORY_CONFIG[task.category] ?? CATEGORY_CONFIG.review;
+            const isDone = completedTasks.has(task.id);
             return (
               <div
                 key={task.id}
-                className={`flex gap-3 p-2.5 rounded-lg border ${cat.border} ${cat.bg}`}
+                className={`flex gap-3 p-2.5 rounded-lg border transition-all ${isDone ? "border-emerald-500/30 bg-emerald-500/5 opacity-70" : `${cat.border} ${cat.bg}`}`}
               >
-                <div className="shrink-0 mt-0.5">
+                <div className="shrink-0 mt-0.5 flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => onTaskToggle(task.id)}
+                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                      isDone
+                        ? "border-emerald-500 bg-emerald-500 text-white"
+                        : "border-border hover:border-emerald-400"
+                    }`}
+                    title={isDone ? "Mark incomplete" : "Mark complete"}
+                  >
+                    {isDone && <Check size={9} />}
+                  </button>
                   <div
-                    className={`w-1.5 h-1.5 rounded-full mt-1 ${PRIORITY_DOT[task.priority] ?? "bg-secondary"}`}
+                    className={`w-1 h-1 rounded-full ${PRIORITY_DOT[task.priority] ?? "bg-secondary"}`}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -474,6 +517,60 @@ export function SevenDaySprintPlan() {
   const [showShare, setShowShare] = useState(false);
   const [savedPlanId, setSavedPlanId] = useState<string | undefined>();
   const [shareToken, setShareToken] = useState<string | undefined>();
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const celebrationShownRef = useRef(false);
+
+  // Confetti burst
+  const triggerConfetti = useCallback(() => {
+    const colors = [
+      "#3b82f6",
+      "#10b981",
+      "#f59e0b",
+      "#8b5cf6",
+      "#ef4444",
+      "#f97316",
+    ];
+    for (let i = 0; i < 120; i++) {
+      const el = document.createElement("div");
+      el.style.cssText = `
+        position:fixed; top:0; left:${Math.random() * 100}vw; width:${6 + Math.random() * 6}px; height:${6 + Math.random() * 6}px;
+        background:${colors[Math.floor(Math.random() * colors.length)]};
+        border-radius:${Math.random() > 0.5 ? "50%" : "2px"};
+        z-index:9999; pointer-events:none;
+        animation: confetti-fall ${1.5 + Math.random() * 1.5}s ease-in forwards;
+        transform: rotate(${Math.random() * 360}deg);
+        animation-delay: ${Math.random() * 0.5}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+  }, []);
+
+  // Watch for 100% completion
+  useEffect(() => {
+    if (!planData) return;
+    const allTaskIds = planData.days.flatMap(d => d.tasks.map(t => t.id));
+    if (allTaskIds.length === 0) return;
+    const allDone = allTaskIds.every(id => completedTasks.has(id));
+    if (allDone && !celebrationShownRef.current) {
+      celebrationShownRef.current = true;
+      triggerConfetti();
+      setTimeout(() => setShowCelebration(true), 300);
+    }
+    if (!allDone) {
+      celebrationShownRef.current = false;
+    }
+  }, [completedTasks, planData, triggerConfetti]);
+
+  const handleTaskToggle = useCallback((taskId: string) => {
+    setCompletedTasks(prev => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  }, []);
 
   // Compute readiness data from localStorage
   const weakPatterns = PATTERNS.filter(
@@ -503,6 +600,8 @@ export function SevenDaySprintPlan() {
     onSuccess: data => {
       setPlanData(data.planData as unknown as SprintPlanData);
       setExpandedDays(new Set([1]));
+      setCompletedTasks(new Set());
+      celebrationShownRef.current = false;
       toast.success("Sprint plan generated!");
     },
     onError: () =>
@@ -724,6 +823,45 @@ export function SevenDaySprintPlan() {
               </button>
             </div>
 
+            {/* Overall progress bar */}
+            {(() => {
+              const allTaskIds = planData.days.flatMap(d =>
+                d.tasks.map(t => t.id)
+              );
+              const doneCount = allTaskIds.filter(id =>
+                completedTasks.has(id)
+              ).length;
+              const totalCount = allTaskIds.length;
+              const overallPct =
+                totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+              return (
+                <div className="mb-3 p-3 rounded-xl bg-secondary/30 border border-border">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-semibold text-foreground">
+                      Overall Progress
+                    </span>
+                    <span
+                      className={`text-[11px] font-bold ${
+                        overallPct === 100
+                          ? "text-emerald-400"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {doneCount}/{totalCount} tasks · {overallPct}%
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        overallPct === 100 ? "bg-emerald-500" : "bg-blue-500"
+                      }`}
+                      style={{ width: `${overallPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Key metrics */}
             {planData.keyMetrics && (
               <div className="grid grid-cols-4 gap-2 mb-4">
@@ -818,6 +956,8 @@ export function SevenDaySprintPlan() {
                   day={day}
                   isExpanded={expandedDays.has(day.day)}
                   onToggle={() => toggleDay(day.day)}
+                  completedTasks={completedTasks}
+                  onTaskToggle={handleTaskToggle}
                 />
               ))}
             </div>
@@ -862,6 +1002,66 @@ export function SevenDaySprintPlan() {
           planTitle={planData.title}
           onClose={() => setShowShare(false)}
         />
+      )}
+
+      {/* Sprint Completion Celebration Modal */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <style>{`
+            @keyframes confetti-fall {
+              0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+              100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+            }
+            @keyframes celebration-pop {
+              0% { transform: scale(0.7); opacity: 0; }
+              60% { transform: scale(1.05); opacity: 1; }
+              100% { transform: scale(1); opacity: 1; }
+            }
+          `}</style>
+          <div
+            className="relative max-w-sm w-full mx-4 rounded-2xl border border-emerald-500/30 bg-card p-8 text-center shadow-2xl"
+            style={{ animation: "celebration-pop 0.4s ease-out forwards" }}
+          >
+            <button
+              onClick={() => setShowCelebration(false)}
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X size={16} />
+            </button>
+            <div className="text-5xl mb-4">🎉</div>
+            <h2
+              className="text-xl font-bold text-foreground mb-2"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              You finished your sprint!
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+              You completed all{" "}
+              <span className="font-bold text-emerald-400">
+                {planData?.days.flatMap(d => d.tasks).length ?? 0} tasks
+              </span>{" "}
+              in your 7-day sprint plan. That&apos;s the kind of discipline that
+              separates candidates who get offers from those who don&apos;t.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  setShowCelebration(false);
+                  setShowFeedback(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold transition-all"
+              >
+                Share your experience →
+              </button>
+              <button
+                onClick={() => setShowCelebration(false)}
+                className="w-full py-2 rounded-xl border border-border text-sm text-muted-foreground hover:bg-secondary transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
