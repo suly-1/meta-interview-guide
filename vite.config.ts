@@ -5,7 +5,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
-import { VitePWA } from "vite-plugin-pwa";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -157,66 +156,7 @@ const plugins = [
   jsxLocPlugin(),
   vitePluginManusRuntime(),
   vitePluginManusDebugCollector(),
-  VitePWA({
-    registerType: "autoUpdate",
-    // Only generate SW in production builds
-    devOptions: { enabled: false },
-    // Manifest for installability
-    manifest: {
-      name: "Meta IC6/IC7 Interview Guide",
-      short_name: "Meta Interview",
-      description: "Comprehensive coding, behavioral, and system design prep for Meta IC6/IC7 interviews.",
-      theme_color: "#1e3a5f",
-      background_color: "#f9fafb",
-      display: "standalone",
-      start_url: "/",
-      icons: [
-        { src: "/favicon.ico", sizes: "64x64", type: "image/x-icon" },
-      ],
-    },
-    workbox: {
-      // Cache vendor chunks aggressively — they change only on deploys
-      runtimeCaching: [
-        {
-          // Vendor JS chunks (monaco, streamdown, charts, pdf, react, etc.)
-          urlPattern: /\/assets\/(vendor-[^/]+\.js)$/,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "vendor-js-cache",
-            expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 }, // 30 days
-            cacheableResponse: { statuses: [0, 200] },
-          },
-        },
-        {
-          // All other JS chunks (tab components, feature code)
-          urlPattern: /\/assets\/[^/]+\.js$/,
-          handler: "StaleWhileRevalidate",
-          options: {
-            cacheName: "app-js-cache",
-            expiration: { maxEntries: 120, maxAgeSeconds: 7 * 24 * 60 * 60 }, // 7 days
-            cacheableResponse: { statuses: [0, 200] },
-          },
-        },
-        {
-          // CSS chunks
-          urlPattern: /\/assets\/[^/]+\.css$/,
-          handler: "StaleWhileRevalidate",
-          options: {
-            cacheName: "app-css-cache",
-            expiration: { maxEntries: 30, maxAgeSeconds: 7 * 24 * 60 * 60 },
-            cacheableResponse: { statuses: [0, 200] },
-          },
-        },
-      ],
-      // Precache the app shell (index.html + critical assets)
-      // Exclude large language grammar chunks and shiki grammars from precache
-      globPatterns: ["**/*.{html,ico,svg}", "**/assets/index-*.{js,css}", "**/assets/vendor-react-*.js", "**/assets/vendor-radix-*.js", "**/assets/vendor-icons-*.js", "**/assets/vendor-utils-*.js", "**/assets/vendor-animation-*.js", "**/assets/vendor-trpc-*.js"],
-      // Raise the file size limit to accommodate larger vendor chunks
-      maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15 MB
-    },
-  }),
 ];
-
 export default defineConfig({
   plugins,
   resolve: {
