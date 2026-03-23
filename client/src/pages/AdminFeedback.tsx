@@ -164,8 +164,17 @@ export default function AdminFeedback() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [noteText, setNoteText] = useState<Record<number, string>>({});
 
   const isAdmin = user?.role === "admin";
+
+  const updateNote = trpc.feedback.updateNote.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Note saved.");
+    },
+    onError: () => toast.error("Failed to save note."),
+  });
 
   const updateStatus = trpc.feedback.updateStatus.useMutation({
     onSuccess: () => {
@@ -178,6 +187,14 @@ export default function AdminFeedback() {
   const handleStatusUpdate = (id: number, status: TriageStatus) => {
     updateStatus.mutate({ id, status });
   };
+
+  const triggerDailyAlert = trpc.feedback.triggerDailyAlert.useMutation({
+    onSuccess: () =>
+      toast.success(
+        "Daily alert check triggered! Check your email if threshold was met."
+      ),
+    onError: () => toast.error("Failed to trigger daily alert."),
+  });
 
   const triggerDigest = trpc.feedback.triggerDigest.useMutation({
     onSuccess: () => toast.success("Digest sent! Check your notifications."),
@@ -352,6 +369,14 @@ export default function AdminFeedback() {
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
             >
               <Download size={11} /> Export CSV
+            </button>
+            <button
+              onClick={() => triggerDailyAlert.mutate()}
+              disabled={triggerDailyAlert.isPending}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs text-amber-400 hover:bg-amber-500/20 transition-all disabled:opacity-50"
+            >
+              <Clock size={11} />{" "}
+              {triggerDailyAlert.isPending ? "Checking…" : "Test Alert"}
             </button>
             <button
               onClick={() => triggerDigest.mutate()}
@@ -633,6 +658,43 @@ export default function AdminFeedback() {
                                     </pre>
                                   </div>
                                 )}
+                              {/* Admin Note */}
+                              <div className="mt-3">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                                  Admin Note
+                                </p>
+                                <textarea
+                                  rows={2}
+                                  placeholder="e.g. Fixed in v2.3, or Backlogged for Q2…"
+                                  value={
+                                    noteText[row.id] ?? row.adminNote ?? ""
+                                  }
+                                  onChange={e =>
+                                    setNoteText(prev => ({
+                                      ...prev,
+                                      [row.id]: e.target.value,
+                                    }))
+                                  }
+                                  onClick={e => e.stopPropagation()}
+                                  className="w-full px-3 py-2 rounded-lg border border-border bg-secondary text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-500/50 resize-none"
+                                />
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    updateNote.mutate({
+                                      id: row.id,
+                                      adminNote:
+                                        noteText[row.id] ?? row.adminNote ?? "",
+                                    });
+                                  }}
+                                  disabled={updateNote.isPending}
+                                  className="mt-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold transition-colors disabled:opacity-50"
+                                >
+                                  {updateNote.isPending
+                                    ? "Saving…"
+                                    : "Save Note"}
+                                </button>
+                              </div>
                             </div>
                           </td>
                         </tr>

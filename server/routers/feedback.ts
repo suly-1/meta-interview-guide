@@ -12,6 +12,7 @@ import { feedback as feedbackTable } from "../../drizzle/schema";
 import { desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { sendWeeklyDigest, sendEmail } from "../weeklyDigest";
+import { checkAndSendDailyAlert } from "../dailyAlert";
 
 const DIGEST_EMAIL = process.env.DIGEST_EMAIL ?? "";
 
@@ -282,6 +283,30 @@ export const feedbackRouter = router({
     await sendWeeklyDigest();
     return { success: true };
   }),
+
+  /** Admin: Manually trigger the daily unactioned alert (for testing) */
+  triggerDailyAlert: adminProcedure.mutation(async () => {
+    await checkAndSendDailyAlert();
+    return { success: true };
+  }),
+
+  /** Admin: Save an internal note on a feedback item */
+  updateNote: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        adminNote: z.string().max(1000),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db
+        .update(feedbackTable)
+        .set({ adminNote: input.adminNote })
+        .where(eq(feedbackTable.id, input.id));
+      return { success: true };
+    }),
 
   /** Admin: Update the triage status of a feedback item */
   updateStatus: adminProcedure

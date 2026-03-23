@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startWeeklyDigestCron } from "../weeklyDigest";
 import { startWeeklyAnalyticsCron } from "../weeklyAnalytics";
+import { startDailyAlertCron } from "../dailyAlert";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -66,6 +67,7 @@ async function startServer() {
   // Start background jobs
   startWeeklyDigestCron();
   startWeeklyAnalyticsCron();
+  startDailyAlertCron();
 }
 
 startServer().catch(console.error);

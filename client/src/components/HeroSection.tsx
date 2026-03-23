@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
 import CrossDeviceSync from "@/components/CrossDeviceSync";
+import { ApexPicks } from "@/components/ApexPicks";
 import ShareMessageButton from "@/components/ShareMessageButton";
 
 // ── Achievement Badges ─────────────────────────────────────────────────────
@@ -371,6 +372,8 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
       <div className="mt-3">
         <CrossDeviceSync />
       </div>
+      {/* ── Apex Picks ── */}
+      <ApexPicks onTabChange={onTabChange} />
     </div>
   );
 }

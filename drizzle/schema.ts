@@ -154,7 +154,9 @@ export const feedback = mysqlTable("feedback", {
     .notNull()
     .default("new"),
   metadata: json("metadata").$type<Record<string, unknown>>().default({}),
+  adminNote: text("admin_note"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type Feedback = typeof feedback.$inferSelect;
 

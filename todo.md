@@ -655,3 +655,9 @@
 - [x] "Send Report Now" button on /admin/analytics (manual analytics email trigger)
 - [x] DAU 7-day and 30-day line chart on /admin/analytics
 - [x] Feature click heatmap badges ("N users today") on main site top-10 features
+
+## Phase 9 (Mar 23, 2026)
+
+- [x] APEX Picks section on homepage (curated feature recommendations for new visitors)
+- [x] Admin quick-reply notes on feedback items (DB column + inline edit in /admin/feedback)
+- [x] Daily unactioned feedback alert (cron: fires if 3+ new items, email to Apex)
