@@ -5,6 +5,7 @@
  *
  * The shape mirrors the real trpc client so components need zero changes.
  */
+import * as React from "react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -295,6 +296,69 @@ export const trpc = {
         makeMutation(() => ({
           plan: "⚠️ AI study plan requires the online version.",
         })),
+    },
+  },
+
+  // ── deployStatus ──────────────────────────────────────────────────────────
+  // In standalone/GitHub Pages mode, call the GitHub API directly from the browser.
+  // The repo is public so no token is needed.
+  deployStatus: {
+    latest: {
+      useQuery: (
+        _?: unknown,
+        opts?: { refetchInterval?: number; staleTime?: number }
+      ) => {
+        const [data, setData] = React.useState<{
+          status: string;
+          conclusion: string | null;
+          runUrl: string;
+          createdAt: Date | null;
+          commitSha: string | null;
+        } | null>(null);
+        const [isLoading, setIsLoading] = React.useState(true);
+        const [isError, setIsError] = React.useState(false);
+
+        const fetchStatus = React.useCallback(async () => {
+          try {
+            const res = await fetch(
+              "https://api.github.com/repos/suly-1/meta-prep-guide/actions/workflows/249634319/runs?per_page=1",
+              {
+                headers: {
+                  Accept: "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                },
+              }
+            );
+            if (!res.ok) throw new Error("GitHub API error");
+            const json = await res.json();
+            const run = json.workflow_runs?.[0];
+            if (!run) throw new Error("No runs");
+            setData({
+              status: run.status,
+              conclusion: run.conclusion,
+              runUrl: run.html_url,
+              createdAt: new Date(run.created_at),
+              commitSha: run.head_sha?.slice(0, 7) ?? null,
+            });
+            setIsError(false);
+          } catch {
+            setIsError(true);
+          } finally {
+            setIsLoading(false);
+          }
+        }, []);
+
+        React.useEffect(() => {
+          fetchStatus();
+          const interval = opts?.refetchInterval;
+          if (interval) {
+            const id = setInterval(fetchStatus, interval);
+            return () => clearInterval(id);
+          }
+        }, [fetchStatus, opts?.refetchInterval]);
+
+        return { data, isLoading, isError };
+      },
     },
   },
 

@@ -515,3 +515,9 @@
 - [x] Add tRPC procedure to fetch latest GitHub Actions run status
 - [x] Build DeployStatus badge component (green/yellow/red) in footer
 - [x] Deploy to GitHub Pages
+
+## Static Build Fix (GitHub Pages)
+
+- [x] Fix DisclaimerGate — use localStorage-only when no backend available
+- [x] Fix DeployStatusBadge — call GitHub API directly from browser (no tRPC)
+- [x] Deploy to GitHub Pages
