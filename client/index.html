@@ -13,12 +13,13 @@
   </head>
 
   <body>
-    <!-- Unregister any stale service workers to prevent blank-page issues after deploys -->
+    <!-- SW kill-switch: registers sw.js which immediately unregisters itself and clears all caches.
+         This evicts any stale Workbox SW from previous deploys that would serve broken cached files. -->
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (var r of registrations) { r.unregister(); }
-        });
+        // Register the kill-switch SW - it takes over, clears all caches, and unregisters itself
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function() {});
+        // Also eagerly clear caches in case we already have the new index.html without old SW
         if (window.caches) {
           caches.keys().then(function(keys) {
             keys.forEach(function(key) { caches.delete(key); });
