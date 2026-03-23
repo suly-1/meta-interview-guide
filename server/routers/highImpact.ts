@@ -1,0 +1,685 @@
+/**
+ * highImpact.ts — AI procedures for the 10 high-impact features
+ *
+ * Procedures:
+ *  - highImpact.quantifyImpact       (#9)  Highlight missing metrics in a STAR answer
+ *  - highImpact.personaStressTest    (#8)  Live persona exchange scoring
+ *  - highImpact.remediationPlan      (#6)  5-problem plan for weak patterns
+ *  - highImpact.interruptQuestion    (#1)  Generate a disruptive SD interviewer question
+ *  - highImpact.gradeBoE             (#2)  Grade back-of-envelope estimation steps
+ *  - highImpact.adversarialAttack    (#3)  Attack 3 weakest points of a system design
+ *  - highImpact.adversarialDefense   (#3)  Score candidate's defense of a design point
+ *  - highImpact.readinessReport      (#10) Weekly AI readiness report synthesis
+ */
+
+import { z } from "zod";
+import { publicProcedure, router } from "../_core/trpc";
+import { invokeLLM } from "../_core/llm";
+
+export const highImpactRouter = router({
+
+  // ── #9 Impact Quantification Coach ────────────────────────────────────────
+  quantifyImpact: publicProcedure
+    .input(z.object({
+      answer: z.string().max(3000),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview coach specializing in behavioral answers.
+Your job is to analyze a STAR answer and identify every sentence or clause that SHOULD contain a metric but doesn't.
+For each gap, suggest the specific metric type the candidate should add (e.g., "latency reduction in ms", "% of users impacted", "revenue saved in $", "time saved per week", "error rate reduction").
+Also identify sentences that already have strong metrics and praise them.
+Return a JSON object with:
+- sentences: array of { text: string, hasMetric: boolean, suggestion: string | null, praise: string | null }
+- overallScore: 1-5 (1=no metrics, 5=every claim quantified)
+- topSuggestion: the single most important metric to add (string)
+- rewrittenResult: rewrite ONLY the Result section of the answer with strong metrics added (string)`,
+          },
+          { role: "user", content: `STAR Answer:\n\n${input.answer}` },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "impact_quantification",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                sentences: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      text: { type: "string" },
+                      hasMetric: { type: "boolean" },
+                      suggestion: { type: ["string", "null"] },
+                      praise: { type: ["string", "null"] },
+                    },
+                    required: ["text", "hasMetric", "suggestion", "praise"],
+                    additionalProperties: false,
+                  },
+                },
+                overallScore: { type: "integer" },
+                topSuggestion: { type: "string" },
+                rewrittenResult: { type: "string" },
+              },
+              required: ["sentences", "overallScore", "topSuggestion", "rewrittenResult"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          sentences: { text: string; hasMetric: boolean; suggestion: string | null; praise: string | null }[];
+          overallScore: number;
+          topSuggestion: string;
+          rewrittenResult: string;
+        };
+      } catch {
+        return { sentences: [], overallScore: 3, topSuggestion: "Unable to parse. Please try again.", rewrittenResult: "" };
+      }
+    }),
+
+  // ── #8 Persona Stress Test — generate follow-up in persona ───────────────
+  personaFollowUp: publicProcedure
+    .input(z.object({
+      persona: z.enum(["skeptical_senior", "fast_paced_pm", "detail_oriented_l7", "friendly_peer"]),
+      question: z.string().max(500),
+      candidateAnswer: z.string().max(2000),
+      turnNumber: z.number().min(1).max(3),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const personaDescriptions: Record<string, string> = {
+        skeptical_senior: "You are a skeptical L7 Meta engineer. You push back on every claim, demand specifics, and are never satisfied with vague answers. You interrupt with 'But why?' and 'How do you know that?'",
+        fast_paced_pm: "You are a fast-paced Meta PM who cares only about user impact and speed. You get impatient with technical details and keep redirecting to 'But what did users actually experience?' and 'How fast did you ship?'",
+        detail_oriented_l7: "You are a meticulous L7 Staff Engineer who digs into every technical decision. You ask about edge cases, failure modes, and alternative approaches the candidate didn't mention.",
+        friendly_peer: "You are a friendly but probing L5 peer interviewer. You ask clarifying questions with genuine curiosity, but you always find the one thing the candidate glossed over.",
+      };
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `${personaDescriptions[input.persona]}
+This is turn ${input.turnNumber} of 3 in a behavioral interview stress test.
+The candidate is targeting ${input.targetLevel}.
+Generate ONE sharp follow-up question that probes the weakest part of their answer.
+Also provide a brief coaching note (1 sentence) explaining what gap this question targets.
+Return JSON: { followUpQuestion: string, coachingNote: string }`,
+          },
+          {
+            role: "user",
+            content: `Original question: ${input.question}\n\nCandidate's answer (turn ${input.turnNumber - 1} or initial): ${input.candidateAnswer}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "persona_followup",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                followUpQuestion: { type: "string" },
+                coachingNote: { type: "string" },
+              },
+              required: ["followUpQuestion", "coachingNote"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as { followUpQuestion: string; coachingNote: string };
+      } catch {
+        return { followUpQuestion: "Can you be more specific about the impact?", coachingNote: "Always quantify your results." };
+      }
+    }),
+
+  // Score the full 3-turn exchange
+  personaScore: publicProcedure
+    .input(z.object({
+      persona: z.string(),
+      question: z.string().max(500),
+      exchanges: z.array(z.object({
+        turn: z.number(),
+        interviewerQuestion: z.string(),
+        candidateAnswer: z.string(),
+      })),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const exchangeText = input.exchanges.map(e =>
+        `Turn ${e.turn}:\nInterviewer: ${e.interviewerQuestion}\nCandidate: ${e.candidateAnswer}`
+      ).join("\n\n");
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview evaluator scoring a behavioral stress test.
+Score the candidate's performance across 3 dimensions (1-5 each):
+1. Composure: Did they stay calm and structured under pressure?
+2. Depth: Did they add NEW information in each turn (not just repeat)?
+3. Metrics: Did they quantify impact when pushed?
+Also provide: overallVerdict (Pass/Borderline/Fail), keyStrength (1 sentence), keyGap (1 sentence).
+Return JSON: { composure: number, depth: number, metrics: number, overallVerdict: string, keyStrength: string, keyGap: string }`,
+          },
+          {
+            role: "user",
+            content: `Original question: ${input.question}\n\nFull exchange:\n${exchangeText}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "persona_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                composure: { type: "integer" },
+                depth: { type: "integer" },
+                metrics: { type: "integer" },
+                overallVerdict: { type: "string" },
+                keyStrength: { type: "string" },
+                keyGap: { type: "string" },
+              },
+              required: ["composure", "depth", "metrics", "overallVerdict", "keyStrength", "keyGap"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          composure: number; depth: number; metrics: number;
+          overallVerdict: string; keyStrength: string; keyGap: string;
+        };
+      } catch {
+        return { composure: 3, depth: 3, metrics: 3, overallVerdict: "Borderline", keyStrength: "Structured answers.", keyGap: "Add more metrics." };
+      }
+    }),
+
+  // ── #6 Personalized Weak Pattern Remediation Plan ─────────────────────────
+  remediationPlan: publicProcedure
+    .input(z.object({
+      weakPatterns: z.array(z.object({
+        name: z.string(),
+        rating: z.number(),
+        keyIdea: z.string(),
+      })).max(5),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const patternsText = input.weakPatterns.map(p =>
+        `- ${p.name} (current rating: ${p.rating}/5): ${p.keyIdea}`
+      ).join("\n");
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview coach building a personalized remediation plan.
+Given a candidate's weakest coding patterns, generate a 5-problem sequence that will fix the gaps in 3 days.
+For each problem:
+- problemName: exact LeetCode problem name
+- difficulty: Easy/Medium/Hard
+- targetPattern: which weak pattern this fixes
+- whyThisProblem: 1 sentence explaining why this specific problem targets the gap
+- keyInsight: the one thing they must understand to solve it
+Return JSON: { plan: array of 5 problems, studyOrder: string (overall 3-day schedule), mindsetTip: string }`,
+          },
+          { role: "user", content: `Weak patterns:\n${patternsText}` },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "remediation_plan",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                plan: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      problemName: { type: "string" },
+                      difficulty: { type: "string" },
+                      targetPattern: { type: "string" },
+                      whyThisProblem: { type: "string" },
+                      keyInsight: { type: "string" },
+                    },
+                    required: ["problemName", "difficulty", "targetPattern", "whyThisProblem", "keyInsight"],
+                    additionalProperties: false,
+                  },
+                },
+                studyOrder: { type: "string" },
+                mindsetTip: { type: "string" },
+              },
+              required: ["plan", "studyOrder", "mindsetTip"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          plan: { problemName: string; difficulty: string; targetPattern: string; whyThisProblem: string; keyInsight: string }[];
+          studyOrder: string;
+          mindsetTip: string;
+        };
+      } catch {
+        return { plan: [], studyOrder: "Unable to generate plan.", mindsetTip: "Focus on understanding the pattern, not memorizing solutions." };
+      }
+    }),
+
+  // ── #1 AI Interviewer Interrupt Mode — generate disruptive question ────────
+  interruptQuestion: publicProcedure
+    .input(z.object({
+      problemTitle: z.string(),
+      candidateText: z.string().max(2000),
+      minutesElapsed: z.number(),
+      previousInterrupts: z.array(z.string()).max(10),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const prevText = input.previousInterrupts.length > 0
+        ? `\nPrevious interrupts already asked: ${input.previousInterrupts.join(" | ")}`
+        : "";
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} system design interviewer who interrupts candidates to probe their reasoning.
+The candidate has been designing for ${input.minutesElapsed} minutes.
+Generate ONE sharp, disruptive interrupt question that:
+- Targets a specific gap or assumption in what they've written
+- Is phrased as a real interviewer would say it mid-session (direct, slightly challenging)
+- Forces them to defend a specific decision or recalculate an estimate
+- Is different from previous interrupts${prevText}
+Also provide: interruptType (one of: "math_check" | "failure_mode" | "trade_off" | "scale_assumption" | "alternative_approach")
+Return JSON: { question: string, interruptType: string, targetArea: string }`,
+          },
+          {
+            role: "user",
+            content: `Problem: ${input.problemTitle}\n\nCandidate's design so far:\n${input.candidateText}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "interrupt_question",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                question: { type: "string" },
+                interruptType: { type: "string" },
+                targetArea: { type: "string" },
+              },
+              required: ["question", "interruptType", "targetArea"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as { question: string; interruptType: string; targetArea: string };
+      } catch {
+        return { question: "Walk me through your capacity estimates — how did you arrive at those numbers?", interruptType: "math_check", targetArea: "Capacity estimation" };
+      }
+    }),
+
+  // Score candidate's response to an interrupt
+  scoreInterruptResponse: publicProcedure
+    .input(z.object({
+      interruptQuestion: z.string(),
+      candidateResponse: z.string().max(1000),
+      interruptType: z.string(),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview evaluator scoring how well a candidate handled an interviewer interrupt.
+Score the response (1-5) on:
+- clarity: Was the answer clear and direct?
+- depth: Did they add new information or just repeat?
+- recovery: Did they pivot gracefully and continue their design?
+Provide: verdict (Strong/Adequate/Weak), oneLineFeedback (1 sentence).
+Return JSON: { clarity: number, depth: number, recovery: number, verdict: string, oneLineFeedback: string }`,
+          },
+          {
+            role: "user",
+            content: `Interrupt type: ${input.interruptType}\nInterrupt question: ${input.interruptQuestion}\nCandidate's response: ${input.candidateResponse}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "interrupt_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                clarity: { type: "integer" },
+                depth: { type: "integer" },
+                recovery: { type: "integer" },
+                verdict: { type: "string" },
+                oneLineFeedback: { type: "string" },
+              },
+              required: ["clarity", "depth", "recovery", "verdict", "oneLineFeedback"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as { clarity: number; depth: number; recovery: number; verdict: string; oneLineFeedback: string };
+      } catch {
+        return { clarity: 3, depth: 3, recovery: 3, verdict: "Adequate", oneLineFeedback: "Answer was reasonable but could be more specific." };
+      }
+    }),
+
+  // ── #2 Back-of-Envelope Calculator with Grading ───────────────────────────
+  gradeBoE: publicProcedure
+    .input(z.object({
+      problemTitle: z.string(),
+      estimationSteps: z.string().max(2000),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} system design interviewer grading a candidate's back-of-envelope estimation.
+Evaluate three dimensions (1-5 each):
+1. mathAccuracy: Are the calculations correct? Check arithmetic and unit conversions.
+2. assumptionQuality: Are the assumptions reasonable and explicitly stated?
+3. architecturalConnection: Did they connect the numbers to a specific architectural decision (e.g., "This QPS means we need 5 app servers")?
+Also provide:
+- correctedMath: if there are errors, show the corrected calculation (string, or null if correct)
+- keyInsight: the most important number they derived and what it implies (string)
+- missedConnection: the architectural decision they should have derived but didn't (string, or null)
+- overallFeedback: 2-3 sentence summary
+Return JSON with all fields.`,
+          },
+          {
+            role: "user",
+            content: `Problem: ${input.problemTitle}\n\nCandidate's estimation steps:\n${input.estimationSteps}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "boe_grade",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                mathAccuracy: { type: "integer" },
+                assumptionQuality: { type: "integer" },
+                architecturalConnection: { type: "integer" },
+                correctedMath: { type: ["string", "null"] },
+                keyInsight: { type: "string" },
+                missedConnection: { type: ["string", "null"] },
+                overallFeedback: { type: "string" },
+              },
+              required: ["mathAccuracy", "assumptionQuality", "architecturalConnection", "correctedMath", "keyInsight", "missedConnection", "overallFeedback"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          mathAccuracy: number; assumptionQuality: number; architecturalConnection: number;
+          correctedMath: string | null; keyInsight: string; missedConnection: string | null; overallFeedback: string;
+        };
+      } catch {
+        return { mathAccuracy: 3, assumptionQuality: 3, architecturalConnection: 3, correctedMath: null, keyInsight: "Unable to parse.", missedConnection: null, overallFeedback: "Please try again." };
+      }
+    }),
+
+  // ── #3 Adversarial Design Review — attack 3 weakest points ────────────────
+  adversarialAttack: publicProcedure
+    .input(z.object({
+      problemTitle: z.string(),
+      designText: z.string().max(3000),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a highly critical Meta ${input.targetLevel} system design interviewer.
+Find the 3 weakest points in this system design and attack each with a sharp, specific challenge question.
+For each weakness:
+- weaknessTitle: short label (e.g., "Single Point of Failure", "No Cache Invalidation Strategy")
+- attackQuestion: the exact challenging question you'd ask the candidate
+- severity: "Critical" | "Major" | "Minor"
+- hint: a one-sentence hint to help the candidate think about the fix (shown after they respond)
+Return JSON: { attacks: array of 3 objects }`,
+          },
+          {
+            role: "user",
+            content: `Problem: ${input.problemTitle}\n\nCandidate's design:\n${input.designText}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "adversarial_attack",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                attacks: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      weaknessTitle: { type: "string" },
+                      attackQuestion: { type: "string" },
+                      severity: { type: "string" },
+                      hint: { type: "string" },
+                    },
+                    required: ["weaknessTitle", "attackQuestion", "severity", "hint"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["attacks"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          attacks: { weaknessTitle: string; attackQuestion: string; severity: string; hint: string }[];
+        };
+      } catch {
+        return { attacks: [] };
+      }
+    }),
+
+  // Score candidate's defense of a design point
+  scoreDefense: publicProcedure
+    .input(z.object({
+      attackQuestion: z.string(),
+      weaknessTitle: z.string(),
+      candidateDefense: z.string().max(1000),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview evaluator scoring a candidate's defense of their system design.
+Score (1-5):
+- acknowledgment: Did they acknowledge the weakness honestly?
+- solution: Did they propose a concrete fix?
+- tradeoffs: Did they discuss the trade-offs of their fix?
+Provide: verdict ("Strong Defense" | "Adequate Defense" | "Weak Defense"), feedback (2 sentences).
+Return JSON: { acknowledgment: number, solution: number, tradeoffs: number, verdict: string, feedback: string }`,
+          },
+          {
+            role: "user",
+            content: `Weakness: ${input.weaknessTitle}\nAttack question: ${input.attackQuestion}\nCandidate's defense: ${input.candidateDefense}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "defense_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                acknowledgment: { type: "integer" },
+                solution: { type: "integer" },
+                tradeoffs: { type: "integer" },
+                verdict: { type: "string" },
+                feedback: { type: "string" },
+              },
+              required: ["acknowledgment", "solution", "tradeoffs", "verdict", "feedback"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as { acknowledgment: number; solution: number; tradeoffs: number; verdict: string; feedback: string };
+      } catch {
+        return { acknowledgment: 3, solution: 3, tradeoffs: 3, verdict: "Adequate Defense", feedback: "Answer was reasonable. Add more specifics." };
+      }
+    }),
+
+  // ── #10 Weekly AI Readiness Report ────────────────────────────────────────
+  readinessReport: publicProcedure
+    .input(z.object({
+      readinessScore: z.number().min(0).max(100),
+      weakPatterns: z.array(z.string()).max(5),
+      strongPatterns: z.array(z.string()).max(5),
+      behavioralCoverage: z.number().min(0).max(100), // % of focus areas covered
+      mockScores: z.array(z.number()).max(10),
+      daysUntilInterview: z.number().optional(),
+      targetLevel: z.enum(["L4", "L5", "L6", "L7"]).default("L6"),
+      lastWeekActivity: z.object({
+        problemsSolved: z.number(),
+        mocksTaken: z.number(),
+        behavioralPracticed: z.number(),
+      }),
+    }))
+    .mutation(async ({ input }) => {
+      const avgMock = input.mockScores.length > 0
+        ? (input.mockScores.reduce((a, b) => a + b, 0) / input.mockScores.length).toFixed(1)
+        : "N/A";
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview coach generating a weekly readiness report.
+Be honest, specific, and actionable. Do NOT be generic.
+Generate:
+- headline: one punchy sentence summarizing the candidate's current state (e.g., "Strong coder, behavioral gaps will cost you the offer")
+- top3Focus: array of exactly 3 objects, each with { area: string, why: string, exercise: string } — ranked by urgency
+- weeklyGrade: letter grade A/B/C/D/F based on activity and scores
+- trajectory: "On Track" | "Needs Acceleration" | "At Risk" | "Ready"
+- coachMessage: 2-3 sentences of direct, honest coaching (not cheerleading)
+Return JSON with all fields.`,
+          },
+          {
+            role: "user",
+            content: `Readiness score: ${input.readinessScore}/100
+Target level: ${input.targetLevel}
+${input.daysUntilInterview ? `Days until interview: ${input.daysUntilInterview}` : "No interview date set"}
+Weak patterns: ${input.weakPatterns.join(", ") || "None identified"}
+Strong patterns: ${input.strongPatterns.join(", ") || "None identified"}
+Behavioral story coverage: ${input.behavioralCoverage}%
+Average mock score: ${avgMock}/5
+Last week: ${input.lastWeekActivity.problemsSolved} problems solved, ${input.lastWeekActivity.mocksTaken} mocks taken, ${input.lastWeekActivity.behavioralPracticed} behavioral sessions`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "readiness_report",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                headline: { type: "string" },
+                top3Focus: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      area: { type: "string" },
+                      why: { type: "string" },
+                      exercise: { type: "string" },
+                    },
+                    required: ["area", "why", "exercise"],
+                    additionalProperties: false,
+                  },
+                },
+                weeklyGrade: { type: "string" },
+                trajectory: { type: "string" },
+                coachMessage: { type: "string" },
+              },
+              required: ["headline", "top3Focus", "weeklyGrade", "trajectory", "coachMessage"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          headline: string;
+          top3Focus: { area: string; why: string; exercise: string }[];
+          weeklyGrade: string;
+          trajectory: string;
+          coachMessage: string;
+        };
+      } catch {
+        return {
+          headline: "Unable to generate report. Please try again.",
+          top3Focus: [],
+          weeklyGrade: "N/A",
+          trajectory: "Unknown",
+          coachMessage: "Keep practicing consistently.",
+        };
+      }
+    }),
+});

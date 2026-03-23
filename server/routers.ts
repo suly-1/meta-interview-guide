@@ -13,6 +13,7 @@ import { ctciProgressRouter } from "./routers/ctciProgress";
 import { mockHistoryRouter } from "./routers/mockHistory";
 import { onboardingRouter } from "./routers/onboarding";
 import { aiRouter } from "./routers/ai";
+import { highImpactRouter } from "./routers/highImpact";
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -1804,5 +1805,6 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   mockHistory: mockHistoryRouter,
   onboarding: onboardingRouter,
   ai: aiRouter,
+  highImpact: highImpactRouter,
 });
 export type AppRouter = typeof appRouter;

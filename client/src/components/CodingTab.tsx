@@ -24,6 +24,9 @@ import ApproachAnalyzer from "@/components/ApproachAnalyzer";
 import MetaRubricAssessment from "@/components/MetaRubricAssessment";
 import StreakBadges from "@/components/StreakBadges";
 import WeaknessHeatmap from "@/components/WeaknessHeatmap";
+import ThinkOutLoudCoach from "@/components/ThinkOutLoudCoach";
+import PatternRecognitionDrill from "@/components/PatternRecognitionDrill";
+import PersonalizedRemediationPlan from "@/components/PersonalizedRemediationPlan";
 import SpacedRepetitionQueue from "@/components/SpacedRepetitionQueue";
 import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
 

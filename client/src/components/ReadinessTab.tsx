@@ -10,6 +10,7 @@ import OverallReadinessDashboard from "@/components/OverallReadinessDashboard";
 import IC7SignalChecklist from "@/components/IC7SignalChecklist";
 import ReadinessGoalSetter from "@/components/ReadinessGoalSetter";
 import AchievementBadgeWall from "@/components/AchievementBadgeWall";
+import WeeklyReadinessReport from "@/components/WeeklyReadinessReport";
 import XPStatsPanel from "@/components/XPStatsPanel";
 import { useXPContext } from "@/contexts/useXPContext";
 import { PATTERNS, BEHAVIORAL_FOCUS_AREAS } from "@/lib/guideData";
@@ -1211,6 +1212,15 @@ export default function ReadinessTab() {
 
       {/* ── IC Signal Detector Trend ── */}
       <ICSignalTrendChart />
+
+      {/* HIGH IMPACT: Weekly AI Readiness Report */}
+      <section className="rounded-2xl border-2 border-emerald-400 dark:border-emerald-600 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-6">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-[10px] font-black text-white bg-emerald-500 px-3 py-1 rounded-full uppercase tracking-widest animate-pulse">★ HIGH IMPACT</span>
+          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">The honest weekly assessment most candidates never get until it's too late</p>
+        </div>
+        <WeeklyReadinessReport />
+      </section>
 
       {/* ── Recruiter-Ready Summary ── */}
       <section>

@@ -395,3 +395,16 @@
 - [x] DisclaimerGate: update header subtitle from "Takes 10 seconds — worth it" to "A note from the community"
 - [x] DisclaimerGate: add "I've seen this before" skip fast path for return visits that bypasses DB check
 - [x] DisclaimerGate: auto-skip for DB-acknowledged returning users, no loading spinner
+
+## 10 High-Impact Features (7/10 Candidate Success Rate)
+- [x] #7 Story Coverage Matrix — visual grid: STAR stories vs focus areas/values, red = gap
+- [x] #9 Impact Quantification Coach — paste STAR answer, AI highlights missing metrics
+- [ ] #8 Interviewer Persona Stress Test with Scoring — live 3-turn AI persona exchange, scored
+- [x] #4 Think Out Loud Coaching Mode — voice-recorded timed session, AI scores narration
+- [x] #5 Pattern Recognition Speed Drill — 90-sec: name pattern + complexity + edge case
+- [ ] #6 Personalized Weak Pattern Remediation Plan — AI 5-problem sequence for weakest patterns
+- [x] #1 AI Interviewer Interrupt Mode — SD session with AI disruptive questions every 3-5 min
+- [ ] #2 BoE Calculator with Show-Your-Work Grading — type estimation steps, AI grades
+- [x] #3 Adversarial Design Review — submit design, AI attacks 3 weakest points, candidate defends
+- [x] #10 Weekly AI Readiness Report — synthesizes all data → ranked top-3 focus areas + exercises
+- [x] Visual highlighting — HIGH IMPACT badges, glow borders, animated pulse labels
