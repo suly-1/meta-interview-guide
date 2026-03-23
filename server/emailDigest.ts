@@ -14,6 +14,7 @@ import { getDb } from "./db";
 import { siteFeedback, sprintPlanFeedback } from "../drizzle/schema";
 import { gte, sql } from "drizzle-orm";
 import { notifyOwner } from "./_core/notification";
+import { sendEmail, isSmtpConfigured } from "./email";
 
 // Recipient is configured via DIGEST_RECIPIENT_EMAIL env var (set in Secrets panel)
 const DIGEST_EMAIL = process.env.DIGEST_RECIPIENT_EMAIL ?? "owner";
@@ -59,6 +60,15 @@ async function buildDigest(days = 7): Promise<string | null> {
     .map(([cat, count]) => `  • ${cat.toUpperCase()}: ${count}`)
     .join("\n");
 
+  // Triage status counts (across ALL feedback, not just this week)
+  const allItems = await db.select().from(siteFeedback);
+  const statusCounts = { new: 0, in_progress: 0, done: 0, dismissed: 0 };
+  for (const item of allItems) {
+    const s = (item as { status?: string }).status ?? "new";
+    if (s in statusCounts) statusCounts[s as keyof typeof statusCounts]++;
+  }
+  const backlogHealth = `  🔵 New: ${statusCounts.new}  |  🟡 In Progress: ${statusCounts.in_progress}  |  🟢 Done: ${statusCounts.done}  |  ⚪ Dismissed: ${statusCounts.dismissed}`;
+
   // Top-rated site feedback (rating ≥ 4)
   const topFeedback = siteItems
     .filter(f => (f.rating ?? 0) >= 4)
@@ -88,7 +98,10 @@ async function buildDigest(days = 7): Promise<string | null> {
     `  ${dateRange}`,
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
     ``,
-    `SITE FEEDBACK SUMMARY`,
+    `BACKLOG HEALTH (all-time)`,
+    backlogHealth,
+    ``,
+    `SITE FEEDBACK SUMMARY (this week)`,
     `  Total submissions: ${siteItems.length}`,
     `  Average rating:    ${avgRating}/5`,
     ``,
@@ -134,12 +147,29 @@ export async function sendFeedbackDigest(days = 7): Promise<boolean> {
       console.log("[Digest] No new feedback in the past", days, "days — skipping.");
       return true;
     }
-    const delivered = await notifyOwner({
-      title: `📊 MetaEngGuide Weekly Digest — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-      content: digest,
-    });
+
+    const title = `📊 MetaEngGuide Weekly Digest — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+    const recipientEmail = process.env.DIGEST_RECIPIENT_EMAIL;
+
+    // Prefer SMTP if configured and recipient email is set
+    if (isSmtpConfigured() && recipientEmail) {
+      const sent = await sendEmail({
+        to: recipientEmail,
+        subject: title,
+        text: digest,
+        html: `<pre style="font-family:monospace;font-size:13px;white-space:pre-wrap;">${digest.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`,
+      });
+      if (sent) {
+        console.log("[Digest] Weekly digest sent via SMTP to", recipientEmail.replace(/(.{2}).*@/, "$1***@"));
+        return true;
+      }
+      console.warn("[Digest] SMTP send failed — falling back to notifyOwner.");
+    }
+
+    // Fallback: Manus owner notification channel
+    const delivered = await notifyOwner({ title, content: digest });
     if (delivered) {
-      console.log("[Digest] Weekly feedback digest sent successfully.");
+      console.log("[Digest] Weekly feedback digest sent via notifyOwner.");
     } else {
       console.warn("[Digest] notifyOwner returned false — digest may not have been delivered.");
     }

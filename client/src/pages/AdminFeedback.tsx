@@ -10,10 +10,30 @@ import { getLoginUrl } from "@/const";
 import {
   Bug, Lightbulb, BookOpen, Palette, HelpCircle,
   Star, Filter, ArrowLeft, RefreshCw, Lock, BarChart2,
-  TrendingUp, MessageSquare, Clock
+  TrendingUp, MessageSquare, Clock, Users, Trophy, Zap
 } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+
+const FEATURE_LABELS: Record<string, { label: string; emoji: string; domain: string }> = {
+  ai_interrupt:    { label: "AI Interrupt Mode",     emoji: "🤖", domain: "System Design" },
+  boe_grader:      { label: "BoE Grader",            emoji: "🔢", domain: "System Design" },
+  adversarial:     { label: "Adversarial Review",    emoji: "⚔️", domain: "System Design" },
+  think_out_loud:  { label: "Think Out Loud",        emoji: "🎙️", domain: "Coding" },
+  pattern_drill:   { label: "Pattern Speed Drill",   emoji: "⚡", domain: "Coding" },
+  remediation:     { label: "Remediation Plan",      emoji: "🗺️", domain: "Coding" },
+  story_matrix:    { label: "Story Matrix",          emoji: "🗂️", domain: "Behavioral" },
+  persona_stress:  { label: "Persona Stress Test",   emoji: "🎭", domain: "Behavioral" },
+  impact_coach:    { label: "Impact Coach",          emoji: "📊", domain: "Behavioral" },
+  readiness:       { label: "Readiness Report",      emoji: "📈", domain: "Cross-domain" },
+};
+
+const DOMAIN_COLORS: Record<string, string> = {
+  "System Design": "text-violet-600 bg-violet-50 border-violet-200",
+  "Coding":        "text-blue-600 bg-blue-50 border-blue-200",
+  "Behavioral":    "text-amber-600 bg-amber-50 border-amber-200",
+  "Cross-domain":  "text-emerald-600 bg-emerald-50 border-emerald-200",
+};
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
   bug:     { label: "Bug",     icon: <Bug size={13} />,        color: "text-red-700",    bg: "bg-red-100 border-red-200" },
@@ -24,6 +44,13 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; colo
 };
 
 const RATING_LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
+
+const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  new:         { label: "New",         color: "text-blue-700",    bg: "bg-blue-50",    border: "border-blue-200" },
+  in_progress: { label: "In Progress", color: "text-amber-700",   bg: "bg-amber-50",   border: "border-amber-200" },
+  done:        { label: "Done",        color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+  dismissed:   { label: "Dismissed",   color: "text-gray-500",   bg: "bg-gray-50",   border: "border-gray-200" },
+};
 
 function StarRow({ rating }: { rating: number | null }) {
   if (!rating) return <span className="text-xs text-gray-400">No rating</span>;
@@ -48,6 +75,15 @@ export default function AdminFeedback() {
 
   const { data: feedback, isLoading, refetch } = trpc.feedback.getAllSiteFeedback.useQuery(undefined, {
     enabled: isAuthenticated,
+  });
+
+  const { data: aggregateStats } = trpc.scores.getAggregate.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const utils = trpc.useUtils();
+  const updateStatus = trpc.feedback.updateFeedbackStatus.useMutation({
+    onSuccess: () => utils.feedback.getAllSiteFeedback.invalidate(),
   });
 
   const filtered = useMemo(() => {
@@ -148,6 +184,73 @@ export default function AdminFeedback() {
           </div>
         </div>
 
+        {/* Aggregate Anonymous Pass-Rate Stats */}
+        {aggregateStats && aggregateStats.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                <TrendingUp size={15} className="text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Feature Engagement &amp; Pass-Rate Stats</h2>
+                <p className="text-xs text-gray-500">Anonymized — candidates who scored ≥70 are counted as "passing"</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Object.entries(
+                aggregateStats.reduce((acc, row) => {
+                  if (!acc[row.feature]) acc[row.feature] = { totalSessions: 0, passRate: 0, avgScore: 0, count: 0 };
+                  acc[row.feature].totalSessions += row.totalSessions;
+                  acc[row.feature].passRate = Math.max(acc[row.feature].passRate, row.passRate);
+                  acc[row.feature].avgScore += row.avgScore;
+                  acc[row.feature].count += 1;
+                  return acc;
+                }, {} as Record<string, { totalSessions: number; passRate: number; avgScore: number; count: number }>)
+              )
+                .sort((a, b) => b[1].passRate - a[1].passRate)
+                .map(([feature, stats]) => {
+                  const meta = FEATURE_LABELS[feature];
+                  const label = meta?.label ?? feature;
+                  const domain = meta?.domain ?? "Other";
+                  const emoji = meta?.emoji ?? "📊";
+                  const domainColor = DOMAIN_COLORS[domain] ?? "text-gray-600 bg-gray-50 border-gray-200";
+                  const avgScore = stats.count > 0 ? Math.round(stats.avgScore / stats.count) : 0;
+                  const passColor = stats.passRate >= 60 ? "text-emerald-600" : stats.passRate >= 40 ? "text-amber-600" : "text-red-500";
+                  return (
+                    <div key={feature} className="rounded-xl border border-gray-100 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800/50 flex flex-col gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{emoji} {label}</p>
+                          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border mt-0.5 ${domainColor}`}>{domain}</span>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className={`text-xl font-black ${passColor}`}>{stats.passRate}%</p>
+                          <p className="text-xs text-gray-400">pass rate</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1"><Users size={11} /> {stats.totalSessions} sessions</span>
+                        <span className="flex items-center gap-1"><Trophy size={11} /> avg {avgScore}/100</span>
+                      </div>
+                      {/* Pass rate bar */}
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            stats.passRate >= 60 ? "bg-emerald-500" : stats.passRate >= 40 ? "bg-amber-500" : "bg-red-400"
+                          }`}
+                          style={{ width: `${stats.passRate}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
+              <Zap size={11} /> Stats update in real-time as candidates complete sessions. Minimum 5 sessions required per feature for reliable data.
+            </p>
+          </div>
+        )}
+
         {/* Filters */}
         <div className="flex flex-wrap gap-2 items-center">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mr-1">
@@ -243,6 +346,25 @@ export default function AdminFeedback() {
                           <span className="text-xs text-gray-400">User #{item.userId}</span>
                         )}
                       </div>
+                    </div>
+
+                    {/* Triage status dropdown */}
+                    <div className="flex-shrink-0">
+                      {(() => {
+                        const s = STATUS_META[(item as { status?: string }).status ?? "new"] ?? STATUS_META.new;
+                        return (
+                          <select
+                            value={(item as { status?: string }).status ?? "new"}
+                            onChange={e => updateStatus.mutate({ id: item.id, status: e.target.value as "new" | "in_progress" | "done" | "dismissed" })}
+                            className={`text-xs font-semibold px-2 py-1 rounded-lg border cursor-pointer focus:outline-none ${s.color} ${s.bg} ${s.border}`}
+                          >
+                            <option value="new">New</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="done">Done</option>
+                            <option value="dismissed">Dismissed</option>
+                          </select>
+                        );
+                      })()}
                     </div>
                   </div>
                 </motion.div>

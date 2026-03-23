@@ -14,6 +14,7 @@ import OnboardingTour, { useOnboardingTour } from "@/components/OnboardingTour";
 import SiteFeedbackModal from "@/components/SiteFeedbackModal";
 import { useDensity, type Density } from "@/contexts/DensityContext";
 import Hero from "@/components/Hero";
+import ArchitectPicks from "@/components/ArchitectPicks";
 import CodingTab from "@/components/CodingTab";
 import AIRoundTab from "@/components/AIRoundTab";
 import BehavioralTab from "@/components/BehavioralTab";
@@ -266,8 +267,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {!isFocused && <Hero />}
-
+       {!isFocused && <Hero />}
+      {!isFocused && <ArchitectPicks onTabChange={handleTabChange} />}
       {/* ── Sticky Navigation ─────────────────────────────────────────────── */}
       <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-md">
 

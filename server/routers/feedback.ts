@@ -8,6 +8,7 @@ import { getDb } from "../db";
 import { siteFeedback, sprintPlanFeedback, sharedSprintPlans } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import { notifyOwner } from "../_core/notification";
+import { sendEmail, isSmtpConfigured } from "../email";
 import { nanoid } from "nanoid";
 
 export const feedbackRouter = router({
@@ -32,11 +33,34 @@ export const feedbackRouter = router({
         message: input.message,
         page: input.page ?? null,
       });
-      // Notify owner
-      await notifyOwner({
-        title: `New Site Feedback: ${input.category.toUpperCase()}${input.rating ? ` (${input.rating}/5)` : ""}`,
-        content: `Page: ${input.page ?? "unknown"}\n\n${input.message}`,
-      });
+      // Instant notification — email if SMTP configured, else Manus channel
+      const notifTitle = `📨 New ${input.category.toUpperCase()} feedback${input.rating ? ` (${input.rating}★)` : ""} — MetaEngGuide`;
+      const notifBody = `Category: ${input.category}\nRating: ${input.rating ? `${input.rating}/5` : "none"}\nPage: ${input.page ?? "unknown"}\n\n${input.message}`;
+      const recipientEmail = process.env.DIGEST_RECIPIENT_EMAIL;
+      if (isSmtpConfigured() && recipientEmail) {
+        await sendEmail({ to: recipientEmail, subject: notifTitle, text: notifBody }).catch(() => {});
+      } else {
+        await notifyOwner({ title: notifTitle, content: notifBody }).catch(() => {});
+      }
+      return { success: true };
+    }),
+
+  // Update feedback triage status (admin only)
+  updateFeedbackStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int(),
+        status: z.enum(["new", "in_progress", "done", "dismissed"]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") return { success: false };
+      const db = await getDb();
+      if (!db) return { success: false };
+      await db
+        .update(siteFeedback)
+        .set({ status: input.status, statusUpdatedAt: Date.now() })
+        .where(eq(siteFeedback.id, input.id));
       return { success: true };
     }),
 

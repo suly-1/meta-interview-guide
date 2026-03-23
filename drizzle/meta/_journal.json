@@ -29,6 +29,13 @@
       "when": 1774294785390,
       "tag": "0003_soft_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1774299095664,
+      "tag": "0004_colossal_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }
