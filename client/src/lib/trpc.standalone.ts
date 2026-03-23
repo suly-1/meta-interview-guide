@@ -321,7 +321,7 @@ export const trpc = {
         const fetchStatus = React.useCallback(async () => {
           try {
             const res = await fetch(
-              "https://api.github.com/repos/suly-1/meta-prep-guide/actions/workflows/249634319/runs?per_page=1",
+              "https://api.github.com/repos/community-prep/engineering-interview-guide/actions/workflows/1/runs?per_page=1",
               {
                 headers: {
                   Accept: "application/vnd.github+json",

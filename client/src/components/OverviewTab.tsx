@@ -1257,7 +1257,7 @@ function ProgressExport() {
       doc.setTextColor(59, 130, 246);
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text("Staff Engineer Interview Prep — Readiness Report", 14, 18);
+      doc.text("Engineering Interview Prep — Readiness Report", 14, 18);
       doc.setTextColor(148, 163, 184);
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");

@@ -4,8 +4,8 @@
 // Gating logic:
 //   - Anonymous users: localStorage key "meta_prep_disclaimer_v2" === "true"
 //   - Logged-in users: DB record (disclaimerAcknowledgedAt IS NOT NULL) is the
-//     authoritative source. localStorage is still written as a fast-path cache,
-//     but if the DB says "not acknowledged" the gate is shown regardless.
+//     authoritative source. If DB says acknowledged, gate is skipped instantly
+//     and localStorage is synced — no loading spinner shown to returning users.
 //
 // On confirm:
 //   1. Write localStorage (instant local gate release)
@@ -20,14 +20,16 @@ import { useAuth } from "@/_core/hooks/useAuth";
 const STORAGE_KEY = "meta_prep_disclaimer_v2";
 
 /**
- * Returns [isGateOpen, confirmFn].
+ * Returns { gateOpen, dbLoading, confirm }.
  *
- * isGateOpen === true  → show the gate (block content)
- * isGateOpen === false → content is accessible
+ * gateOpen === true  → show the gate (block content)
+ * gateOpen === false → content is accessible
  *
  * For anonymous users the gate is driven purely by localStorage.
- * For logged-in users the gate stays open until the DB record confirms
- * acknowledgment (with a loading state while the query is in-flight).
+ * For logged-in users:
+ *   - If localStorage already confirmed → gate is open=false immediately (no spinner)
+ *   - If DB says acknowledged → gate is released instantly and localStorage synced
+ *   - Only shows loading state if DB hasn't responded yet AND localStorage is unset
  */
 export function useDisclaimerGate(): {
   gateOpen: boolean;
@@ -44,7 +46,7 @@ export function useDisclaimerGate(): {
 
   const [localConfirmed, setLocalConfirmed] = useState(localAck);
 
-  // DB status query — only runs for logged-in users
+  // DB status query — only runs for logged-in users who haven't confirmed locally
   const utils = trpc.useUtils();
   const acknowledgeMutation = trpc.disclaimer.acknowledge.useMutation({
     onSuccess: () => {
@@ -54,7 +56,6 @@ export function useDisclaimerGate(): {
 
   const { data: dbStatus, isLoading: dbLoading } =
     trpc.disclaimer.status.useQuery(undefined, {
-      // Only fetch when user is logged in and hasn't already confirmed locally
       enabled: !!user && !localConfirmed,
       staleTime: 0,
     });
@@ -74,24 +75,17 @@ export function useDisclaimerGate(): {
   // Anonymous user: gate driven by localStorage only
   if (!user) return { gateOpen: !localConfirmed, dbLoading: false, confirm };
 
-  // Logged-in user: if locally confirmed, still wait for DB to confirm
-  // (catches the case where localStorage was manually cleared or the user
-  //  is on a new device where localStorage is false but DB may already have a record)
-  if (localConfirmed) {
-    // DB query is disabled when localConfirmed=true, so we rely on the
-    // disclaimer.status query that OverviewTab already keeps warm.
-    // Re-enable a one-shot check:
-    return { gateOpen: false, dbLoading: false, confirm };
-  }
+  // Locally confirmed → always open immediately, no spinner
+  if (localConfirmed) return { gateOpen: false, dbLoading: false, confirm };
 
-  // Logged-in, not locally confirmed: wait for DB
-  if (dbLoading) return { gateOpen: true, dbLoading: true, confirm };
-
-  // DB says acknowledged → release gate and sync localStorage
+  // DB says acknowledged → auto-skip: sync localStorage and release gate instantly
   if (dbStatus?.acknowledged) {
     localStorage.setItem(STORAGE_KEY, "true");
     return { gateOpen: false, dbLoading: false, confirm };
   }
+
+  // DB still loading (first visit, logged-in, no local cache) → show gate with spinner
+  if (dbLoading) return { gateOpen: true, dbLoading: true, confirm };
 
   // DB says not acknowledged → keep gate open
   return { gateOpen: true, dbLoading: false, confirm };
@@ -135,7 +129,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
         }}
       />
 
-      {/* DB-loading spinner overlay */}
+      {/* DB-loading spinner overlay — only shown on first visit for logged-in users */}
       {loading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40">
           <Loader2 size={28} className="animate-spin text-blue-400" />
@@ -160,19 +154,20 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
               >
                 Quick note before you start
               </h1>
+              {/* Improvement #2: warmer subtitle */}
               <p className="text-sm text-blue-300/70 mt-0.5">
-                Takes 10 seconds — worth it
+                A note from the community
               </p>
             </div>
           </div>
 
-          {/* Main body */}
+          {/* Main body — Improvement #1: softer, no named companies */}
           <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
             <p>
               This guide was built by the community, for candidates doing their
               own research. It's{" "}
               <strong className="text-white">
-                not affiliated with Meta, Google, Amazon, or any other company
+                not affiliated with any company
               </strong>{" "}
               — just engineers sharing what they learned the hard way.
             </p>

@@ -165,11 +165,12 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
               className="text-2xl font-bold text-foreground mb-1"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Staff Engineer Interview Prep
+              Engineering Interview Prep
             </h1>
             <p className="text-sm text-muted-foreground">
-              IC4 (SWE) · IC5 (Senior) · IC6 (Staff) · IC7 (Senior Staff) — Coding · System Design ·
-              Behavioral · Independent Community Resource
+              IC4 (SWE) · IC5 (Senior) · IC6 (Staff) · IC7 (Senior Staff) —
+              Coding · System Design · Behavioral · Independent Community
+              Resource
             </p>
           </div>
           {/* Streak hero badge */}

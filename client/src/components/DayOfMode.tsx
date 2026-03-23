@@ -715,7 +715,7 @@ export function LastMileCheatSheet() {
         doc.setFontSize(7);
         doc.setTextColor(71, 85, 105);
         doc.text(
-          "Staff Engineer Interview Prep Guide · Independent community resource, not affiliated with Meta Platforms, Inc.",
+          "Engineering Interview Prep · Independent community resource, not affiliated with any company.",
           MARGIN,
           290
         );

@@ -4,7 +4,7 @@
  * that candidates discover independently — not distributed by interviewers.
  */
 import { useState } from "react";
-import { Search, Github, Globe, Users, ShieldCheck, X } from "lucide-react";
+import { Search, Globe, Users, ShieldCheck, X } from "lucide-react";
 
 interface DiscoveryLandingPageProps {
   onEnter: () => void;
@@ -27,7 +27,7 @@ export default function DiscoveryLandingPage({
             className="text-2xl font-extrabold text-foreground mb-2"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Staff Engineer Interview Prep
+            Engineering Interview Prep
           </h1>
           <p className="text-sm text-muted-foreground">
             IC4 · IC5 · IC6 · IC7 — FAANG Interview Study Guide
@@ -47,27 +47,6 @@ export default function DiscoveryLandingPage({
                 <span className="text-blue-400">www.metaguide.blog</span> and
                 discoverable via any search engine. It is not distributed
                 privately by any company or interviewer.
-              </p>
-            </div>
-          </div>
-
-          <div className="prep-card p-4 flex items-start gap-3">
-            <Github size={16} className="text-purple-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs font-semibold text-foreground mb-0.5">
-                Open source on GitHub
-              </p>
-              <p className="text-xs text-muted-foreground">
-                The full source code is publicly available at{" "}
-                <a
-                  href="https://github.com/suly-1/meta-prep-guide"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-purple-400 hover:underline"
-                >
-                  github.com/suly-1/meta-prep-guide
-                </a>
-                . Anyone can verify its community origins.
               </p>
             </div>
           </div>
@@ -136,7 +115,9 @@ export default function DiscoveryLandingPage({
           }`}
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          {confirmed ? "Enter Study Guide →" : "Please confirm above to continue"}
+          {confirmed
+            ? "Enter Study Guide →"
+            : "Please confirm above to continue"}
         </button>
 
         <p className="text-center text-[10px] text-muted-foreground mt-4">

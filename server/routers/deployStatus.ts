@@ -1,6 +1,6 @@
 import { publicProcedure, router } from "../_core/trpc";
 
-const GITHUB_OWNER = "suly-1";
+const GITHUB_OWNER = "community-prep";
 const GITHUB_REPO = "meta-prep-guide";
 const WORKFLOW_ID = "249634319"; // pages-build-deployment workflow
 

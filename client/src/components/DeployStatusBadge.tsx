@@ -51,7 +51,7 @@ export default function DeployStatusBadge() {
   if (isError || !data || data.status === "unknown") {
     return (
       <a
-        href="https://github.com/suly-1/meta-prep-guide/actions"
+        href="https://www.metaguide.blog"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"

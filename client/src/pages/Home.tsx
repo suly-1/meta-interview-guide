@@ -27,7 +27,6 @@ import {
   Trash2,
 } from "lucide-react";
 import DisclaimerGate, { useDisclaimerGate } from "@/components/DisclaimerGate";
-import DeployStatusBadge from "@/components/DeployStatusBadge";
 
 // Static imports — dynamic (lazy) imports are incompatible with the standalone
 // CDN build because chunk URLs become absolute CDN paths that cannot be resolved
@@ -350,7 +349,7 @@ export default function Home() {
           <div className="container text-center text-xs text-muted-foreground space-y-2">
             {/* #2 — Author byline */}
             <div className="font-medium text-foreground/70">
-              Staff Engineer Interview Prep Guide
+              Engineering Interview Prep
             </div>
             <div>
               By{" "}
@@ -393,9 +392,6 @@ export default function Home() {
               >
                 Terms of Use
               </button>
-              <span className="text-border">·</span>
-              {/* Deploy status badge */}
-              <DeployStatusBadge />
             </div>
             <div className="pt-1">
               <button
@@ -569,8 +565,8 @@ export default function Home() {
                   What this guide is
                 </p>
                 <p>
-                  Staff Engineer Interview Prep is a free, community-created
-                  study resource. It was built by engineers who went through the
+                  Engineering Interview Prep is a free, community-created study
+                  resource. It was built by engineers who went through the
                   process and wanted to share what they learned. It is not
                   affiliated with Meta, Google, Amazon, Apple, Netflix, or any
                   other company.

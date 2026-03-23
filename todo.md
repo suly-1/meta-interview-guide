@@ -530,3 +530,15 @@
 
 - [x] Update badge to Option A (Free community resource / built and shared by engineers)
 - [x] Update checkbox to Option 1 (straightforward, no "found independently" language)
+
+## Branding & Badge Cleanup
+
+- [x] Remove GitHub deploy status badge from footer
+- [x] Replace all "Staff Engineer Interview Prep Guide" with "Engineering Interview Prep"
+- [x] Remove all "suly" / "suly-1" personal name references from codebase
+
+## DisclaimerGate Improvements
+
+- [x] Soften body text: replace "not affiliated with Meta, Google, Amazon, or any other company" with "not affiliated with any company"
+- [x] Add warmer subtitle: replace "Takes 10 seconds — worth it" with "A note from the community"
+- [x] Auto-skip gate for returning users already in DB (remove loading spinner delay)
