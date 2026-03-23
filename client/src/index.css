@@ -171,3 +171,43 @@ html.density-spacious .container {
     }
   }
 }
+
+/* ============================================================
+   Highlight.js code block styles (used by MarkdownRenderer)
+   ============================================================ */
+@plugin "@tailwindcss/typography";
+
+.hljs-pre { background: #282c34; border-radius: 0.5rem; overflow-x: auto; margin: 0.75rem 0; }
+.hljs-pre code.hljs { display: block; padding: 1rem; font-size: 0.8125rem; line-height: 1.6; font-family: ui-monospace, Menlo, monospace; color: #abb2bf; }
+.hljs-comment, .hljs-quote { color: #5c6370; font-style: italic; }
+.hljs-keyword, .hljs-formula { color: #c678dd; }
+.hljs-name, .hljs-selector-tag, .hljs-deletion { color: #e06c75; }
+.hljs-literal { color: #56b6c2; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: #98c379; }
+.hljs-attr, .hljs-variable, .hljs-number { color: #d19a66; }
+.hljs-symbol, .hljs-link, .hljs-title { color: #61aeee; }
+.hljs-built_in { color: #e6c07b; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: bold; }
+
+/* Markdown prose styles for MarkdownRenderer */
+.markdown-body { color: inherit; line-height: 1.65; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+.markdown-body h1 { font-size: 1.25rem; }
+.markdown-body h2 { font-size: 1.125rem; }
+.markdown-body h3 { font-size: 1rem; }
+.markdown-body p { margin-bottom: 0.5rem; }
+.markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.markdown-body ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.markdown-body li { font-size: 0.875rem; }
+.markdown-body strong { font-weight: 600; }
+.markdown-body code:not(.hljs) { background: rgba(0,0,0,0.08); color: #d6336c; padding: 0.1em 0.35em; border-radius: 0.25rem; font-size: 0.8125rem; font-family: ui-monospace, Menlo, monospace; }
+.dark .markdown-body code:not(.hljs) { background: rgba(255,255,255,0.1); color: #f783ac; }
+.markdown-body blockquote { border-left: 3px solid #60a5fa; padding-left: 0.75rem; font-style: italic; color: #6b7280; margin: 0.5rem 0; }
+.markdown-body a { color: #2563eb; text-decoration: underline; }
+.dark .markdown-body a { color: #60a5fa; }
+.markdown-body table { width: 100%; font-size: 0.875rem; border-collapse: collapse; margin: 0.75rem 0; }
+.markdown-body th { background: #f3f4f6; font-weight: 600; padding: 0.375rem 0.75rem; text-align: left; border: 1px solid #e5e7eb; }
+.dark .markdown-body th { background: #1f2937; border-color: #374151; }
+.markdown-body td { padding: 0.375rem 0.75rem; border: 1px solid #e5e7eb; }
+.dark .markdown-body td { border-color: #374151; }
