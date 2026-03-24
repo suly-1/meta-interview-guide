@@ -760,7 +760,7 @@
 
 ## Phase 14 — Security & Privacy Audit (Mar 24, 2026)
 
-- [ ] Full codebase security audit (server, client, DB, auth, API, secrets)
-- [ ] Fix all critical/high severity issues found
-- [ ] Write security audit report for user
+- [x] Full codebase security audit (server, client, DB, auth, API, secrets)
+- [x] Fix all critical/high severity issues found (helmet, rate limiting, trust proxy, openId strip, body limit, owner gate)
+- [x] Write security audit report for user
 - [ ] pnpm build:standalone + deploy:github-pages

@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -30,12 +32,60 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+// Rate limiter for AI endpoints (LLM cost protection)
+const aiRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // max 20 AI calls per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too many requests. Please wait a moment before trying again.",
+  },
+  skip: req => {
+    // Skip rate limiting for localhost in development
+    const ip = req.ip || req.socket.remoteAddress || "";
+    return (
+      process.env.NODE_ENV === "development" &&
+      (ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1")
+    );
+  },
+});
+
+// General API rate limiter
+const apiRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // max 500 requests per 15 min per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please try again later." },
+});
+
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Trust the first proxy hop (required when running behind Manus reverse proxy)
+  app.set("trust proxy", 1);
+
+  // Security headers (helmet)
+  app.use(
+    helmet({
+      // Allow Vite HMR in development
+      contentSecurityPolicy: process.env.NODE_ENV === "production",
+      crossOriginEmbedderPolicy: false, // needed for OAuth iframe flows
+    })
+  );
+
+  // Body parser — 10mb for normal JSON, 50mb only for upload routes
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+  // Apply general rate limit to all API routes
+  app.use("/api/", apiRateLimit);
+
+  // Apply stricter rate limit to AI procedures
+  app.use("/api/trpc/ai.", aiRateLimit);
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API

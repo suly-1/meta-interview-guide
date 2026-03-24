@@ -26,7 +26,14 @@ export const appRouter = router({
   ctci: ctciRouter,
   ai: aiRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query(opts => {
+      const u = opts.ctx.user;
+      if (!u) return null;
+      // Omit openId from the public response — it's an internal OAuth identifier
+      // that should not be exposed to the frontend or logged in browser devtools.
+      const { openId: _openId, loginMethod: _loginMethod, ...safeUser } = u;
+      return safeUser;
+    }),
     /** Returns whether the current user is the site owner (OWNER_OPEN_ID match). */
     isOwner: protectedProcedure.query(({ ctx }) => {
       return {
