@@ -571,3 +571,16 @@
 - [x] Admin panel: time-lock controls at /admin/settings (start date, enable/disable, reset clock, manual lock)
 - [x] Admin panel: user management table at /admin/users (list all users, block/unblock toggles)
 - [x] Admin hub: linked Site Settings + User Management from /admin/disclaimer page
+
+## Batch: Time-Lock + Block Enhancements (March 24, 2026)
+
+- [x] Set today as time-lock start date in DB (lock_enabled=1, lock_start_date=2026-03-24, lock_duration_days=60, expires May 22 2026)
+- [x] Add Manus inbox notification when admin blocks a user (notifyOwner with user name/email + reason)
+- [x] Add "reason" field to block action in admin panel (optional text input in AdminUsers block dialog, stored in users.bannedReason)
+
+## Security Hardening Batch 2 (March 24, 2026)
+
+- [ ] Server-side block enforcement — add isBanned check in protectedProcedure middleware (throw FORBIDDEN if ctx.user.isBanned === 1)
+- [ ] Admin audit log — add user_events table (action, actorId, targetUserId, reason, createdAt)
+- [ ] Record block/unblock actions in user_events table from admin.ts
+- [ ] Show audit trail in /admin/users page (expandable log per user or separate audit section)

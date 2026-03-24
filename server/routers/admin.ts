@@ -4,6 +4,7 @@ import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
 import { eq, asc, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { notifyOwner } from "../_core/notification";
 
 export const adminRouter = router({
   /**
@@ -70,11 +71,27 @@ export const adminRouter = router({
         });
       }
 
+      // Fetch user info for the notification
+      const [blockedUser] = await db
+        .select({ name: users.name, email: users.email })
+        .from(users)
+        .where(eq(users.id, input.userId))
+        .limit(1);
+
       await db.update(users).set({
         isBanned: 1,
         bannedAt: new Date(),
         bannedReason: input.reason ?? "Blocked by administrator",
       }).where(eq(users.id, input.userId));
+
+      // Notify owner via Manus inbox
+      const userName = blockedUser?.name ?? `User #${input.userId}`;
+      const userEmail = blockedUser?.email ?? "unknown email";
+      const reason = input.reason ?? "No reason provided";
+      await notifyOwner({
+        title: `🚫 User Blocked: ${userName}`,
+        content: `**User access has been revoked.**\n\n**Name:** ${userName}\n**Email:** ${userEmail}\n**User ID:** ${input.userId}\n**Reason:** ${reason}\n**Blocked at:** ${new Date().toUTCString()}`,
+      }).catch(() => { /* non-critical — don't fail the block if notification fails */ });
 
       return { success: true };
     }),
