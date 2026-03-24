@@ -764,4 +764,223 @@ Generate a ${Math.min(input.daysUntilInterview, 7)}-day sprint plan.`,
         return { days: [] };
       }
     }),
+
+  // ── #2 IC6→IC7 Answer Upgrader — AI scores any answer and gives upgrade path ──
+  upgradeAnswer: publicProcedure
+    .input(z.object({
+      answer: z.string().min(20).max(4000),
+      question: z.string().max(300).optional(),
+      targetLevel: z.enum(["L5", "L6", "L7"]).default("L7"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta Staff/Principal Engineer interview coach. Your job is to:
+1. Detect the current IC level of the answer (L4/L5/L6/L7) based on scope, impact, and signals
+2. Give a score 1-10 for the answer at its current level
+3. List exactly what signals are present (strengths)
+4. List exactly what signals are missing to reach ${input.targetLevel}
+5. Provide a rewritten version of the answer upgraded to ${input.targetLevel} level
+6. Give 3 specific upgrade instructions the candidate can apply to their own stories
+
+IC Level criteria:
+- L4: Team-level execution, follows direction, delivers assigned work
+- L5: Owns features end-to-end, some cross-team coordination, measurable technical outcomes
+- L6: Drives org-level initiatives, cross-functional alignment, establishes patterns, quantified business impact
+- L7: Proactively identifies org-wide problems, influences directors+, creates lasting org-wide policies/frameworks, grows senior leaders, connects to company-level business value
+
+Return JSON only.`,
+          },
+          {
+            role: "user",
+            content: `${input.question ? `Question: ${input.question}\n\n` : ""}Answer to upgrade:\n\n${input.answer}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "answer_upgrade",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                detectedLevel: { type: "string", description: "Detected IC level: L4, L5, L6, or L7" },
+                currentScore: { type: "integer", description: "Score 1-10 at current level" },
+                presentSignals: { type: "array", items: { type: "string" }, description: "IC signals already present" },
+                missingSignals: { type: "array", items: { type: "string" }, description: "Signals missing to reach target level" },
+                upgradeInstructions: { type: "array", items: { type: "string" }, description: "3 specific actionable upgrade instructions" },
+                upgradedAnswer: { type: "string", description: "Full rewritten answer at target level" },
+                keyDelta: { type: "string", description: "One sentence: the single most important thing that changed" },
+              },
+              required: ["detectedLevel", "currentScore", "presentSignals", "missingSignals", "upgradeInstructions", "upgradedAnswer", "keyDelta"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          detectedLevel: string;
+          currentScore: number;
+          presentSignals: string[];
+          missingSignals: string[];
+          upgradeInstructions: string[];
+          upgradedAnswer: string;
+          keyDelta: string;
+        };
+      } catch {
+        return { detectedLevel: "L5", currentScore: 5, presentSignals: [], missingSignals: [], upgradeInstructions: [], upgradedAnswer: "", keyDelta: "" };
+      }
+    }),
+
+  // ── Story Coverage Gap Analysis — AI identifies weak coverage areas ─────────
+  storyGapAnalysis: publicProcedure
+    .input(z.object({
+      stories: z.array(z.object({
+        title: z.string(),
+        focusAreas: z.array(z.string()),
+        values: z.array(z.string()),
+        hasMetric: z.boolean(),
+      })),
+      targetLevel: z.enum(["L5", "L6", "L7"]).default("L6"),
+    }))
+    .mutation(async ({ input }) => {
+      const storySummary = input.stories.map(s =>
+        `- "${s.title}" covers: ${s.focusAreas.join(", ")} | values: ${s.values.join(", ")}${s.hasMetric ? " | has metrics" : " | NO metrics"}`
+      ).join("\n");
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} behavioral interview coach. Analyze a candidate's STAR story bank and identify gaps.
+Meta behavioral interviews cover 4 focus areas: XFN Collaboration, Problem Solving, Communication, Conflict Resolution.
+Meta's 6 core values: Move Fast, Long-Term Impact, Build Awesome Things, Live in the Future, Be Direct, Meta/Metamates/Me.
+Return JSON with gap analysis and specific story angle suggestions.`,
+          },
+          {
+            role: "user",
+            content: `Target level: ${input.targetLevel}\n\nStory bank:\n${storySummary}\n\nAnalyze gaps and suggest missing story angles.`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "story_gap_analysis",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                overallCoverage: { type: "integer", description: "Coverage score 0-100" },
+                verdict: { type: "string", description: "One sentence overall assessment" },
+                criticalGaps: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      area: { type: "string" },
+                      gap: { type: "string" },
+                      suggestedStoryAngle: { type: "string" },
+                      exampleQuestion: { type: "string" },
+                    },
+                    required: ["area", "gap", "suggestedStoryAngle", "exampleQuestion"],
+                    additionalProperties: false,
+                  },
+                },
+                strengths: { type: "array", items: { type: "string" } },
+                topPriority: { type: "string", description: "The single most important story to add" },
+              },
+              required: ["overallCoverage", "verdict", "criticalGaps", "strengths", "topPriority"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          overallCoverage: number;
+          verdict: string;
+          criticalGaps: { area: string; gap: string; suggestedStoryAngle: string; exampleQuestion: string }[];
+          strengths: string[];
+          topPriority: string;
+        };
+      } catch {
+        return { overallCoverage: 50, verdict: "", criticalGaps: [], strengths: [], topPriority: "" };
+      }
+    }),
+
+  // ── IC7 Signal Coaching — AI generates personalized story prompt for a gap ──
+  ic7SignalCoach: publicProcedure
+    .input(z.object({
+      signal: z.string(),
+      description: z.string(),
+      probeQuestion: z.string(),
+      gapNote: z.string().max(500).optional(),
+      targetLevel: z.enum(["L6", "L7"]).default("L7"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta ${input.targetLevel} interview coach helping a candidate find a story for a specific IC signal gap.
+Your job is to:
+1. Suggest 3 different story angles the candidate might have from their career that would demonstrate this signal
+2. Give a STAR framework outline for the strongest angle
+3. Provide 2-3 probing questions to help the candidate recall relevant experiences
+4. Give one example of what a strong ${input.targetLevel} answer opening line would sound like
+Be specific, practical, and encouraging.`,
+          },
+          {
+            role: "user",
+            content: `Signal needed: ${input.signal}\nDescription: ${input.description}\nProbe question: ${input.probeQuestion}${input.gapNote ? `\nCandidate's note: ${input.gapNote}` : ""}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "ic7_signal_coach",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                storyAngles: { type: "array", items: { type: "string" }, description: "3 story angle suggestions" },
+                starOutline: {
+                  type: "object",
+                  properties: {
+                    situation: { type: "string" },
+                    task: { type: "string" },
+                    action: { type: "string" },
+                    result: { type: "string" },
+                  },
+                  required: ["situation", "task", "action", "result"],
+                  additionalProperties: false,
+                },
+                recallQuestions: { type: "array", items: { type: "string" }, description: "2-3 questions to help recall" },
+                exampleOpener: { type: "string", description: "Example strong opening line" },
+              },
+              required: ["storyAngles", "starOutline", "recallQuestions", "exampleOpener"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      try {
+        const raw = response.choices?.[0]?.message?.content;
+        const content = typeof raw === 'string' ? raw : JSON.stringify(raw ?? {});
+        return JSON.parse(content) as {
+          storyAngles: string[];
+          starOutline: { situation: string; task: string; action: string; result: string };
+          recallQuestions: string[];
+          exampleOpener: string;
+        };
+      } catch {
+        return { storyAngles: [], starOutline: { situation: "", task: "", action: "", result: "" }, recallQuestions: [], exampleOpener: "" };
+      }
+    }),
 });

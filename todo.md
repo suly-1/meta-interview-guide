@@ -470,3 +470,48 @@
 
 ## UI Fixes Pending
 - [x] Fix yellow-on-yellow text contrast in FAANG-Style Coding Screen Simulator box header/title area
+
+## High-Impact Feature Enhancements (Batch-25)
+- [ ] IC6→IC7 Answer Upgrader: add live AI scoring mode — paste your own answer, get IC4/IC5/IC6/IC7 rating + exact upgrade instructions
+- [ ] Story Coverage Matrix: add AI gap analysis — after mapping stories, AI identifies weakest coverage areas and suggests story angles
+- [ ] Interview Day Protocol: add localStorage persistence so checklist state survives page refresh; surface DayOfMode panel more prominently
+- [ ] IC7 Signal Live Checklist: add AI coaching button per signal — generates a personalized story prompt based on the user's gap note
+
+## UX Upgrade Roadmap (7.5 → 9.5/10)
+
+### P0 — Critical
+- [ ] Smart "Start Here" sticky banner — new user vs returning user CTA routing
+- [ ] Typography hierarchy — section titles to text-base font-bold, space-y-8 between major sections
+- [ ] Amber/orange warning overuse — reserve red for ≤2 critical gaps only; gray out the rest
+
+### P1 — High Impact
+- [ ] Tab-level progress bars — h-1 bar at top of each tab showing mastery %
+- [ ] Mobile layout audit — top 5 components single-column mobile fix
+- [ ] Overview tab mega-sections — group into 3 collapsible sections: Assess → Practice → Simulate
+
+### P2 — Medium
+- [ ] Empty-state guidance — specific 1-line action when section has no data
+- [ ] Bump text-xs body copy to text-sm in expanded panels
+- [ ] Surface dark/light theme toggle in top nav
+
+### P3 — Polish
+- [ ] Confetti/success animation when any section hits 100%
+- [ ] Rename tabs to action-oriented labels: "Drill Patterns", "Tell Stories", etc.
+- [ ] Floating "?" keyboard shortcut legend button on mobile
+
+## Language / Copy Guidelines (Do After Current Work)
+- [ ] Audit all UI copy: replace any "guarantee" / "will pass" / "100%" language with "recommend" / "may help" / "based on candidate reports"
+
+## UX Upgrade Roadmap (Do After Current Work)
+- [ ] P0: Smart Start Here banner — new user vs returning user personalized CTA (ArchitectPicks.tsx rewrite)
+- [ ] P0: Typography hierarchy — increase section titles to text-base font-bold, add space-y-8 between major sections
+- [ ] P0: Amber/orange warnings overused — reserve red for ≤2 critical gaps only; gray out everything else
+- [ ] P1: Tab-level progress bars — h-1 bar at top of each tab showing mastery %
+- [ ] P1: Mobile layout audit — top 5 components for single-column mobile layout
+- [ ] P1: Overview mega-sections — group tools into 3 collapsible sections: Assess → Practice → Simulate
+- [ ] P2: Empty-state guidance — show specific 1-line action when section has no data
+- [ ] P2: Bump text-xs body copy to text-sm in expanded panels
+- [ ] P2: Surface dark/light toggle in top nav (currently buried)
+- [ ] P3: Confetti/celebration when any section hits 100%
+- [ ] P3: Rename tabs to action-oriented labels
+- [ ] P3: Floating "?" button on mobile for keyboard shortcut legend

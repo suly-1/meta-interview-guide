@@ -7,9 +7,10 @@
 
 import { useState } from "react";
 import { useScorePersistence } from "@/hooks/useScorePersistence";
-import { Plus, X, CheckCircle2, AlertCircle, Edit2, Save } from "lucide-react";
+import { Plus, X, CheckCircle2, AlertCircle, Edit2, Save, Sparkles, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
 import { motion, AnimatePresence } from "framer-motion";
+import { trpc } from "@/lib/trpc";
 
 const FOCUS_AREAS = [
   { id: "xfn", label: "XFN Collaboration", short: "XFN" },
@@ -78,6 +79,8 @@ export default function StoryCoverageMatrix() {
   const { saveScore } = useScorePersistence("story_coverage");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const gapAnalysis = trpc.highImpact.storyGapAnalysis.useMutation();
   const [newStory, setNewStory] = useState<Omit<Story, "id">>({
     title: "", focusAreas: [], values: [], hasMetric: false,
   });
@@ -287,6 +290,90 @@ export default function StoryCoverageMatrix() {
           ))}
         </div>
       </HighImpactWrapper>
+
+      {/* AI Gap Analysis */}
+      <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h4 className="text-sm font-bold text-indigo-800 flex items-center gap-1.5">
+              <Sparkles size={14} className="text-indigo-600" /> AI Gap Analysis
+            </h4>
+            <p className="text-xs text-indigo-600 mt-0.5">Get AI-powered suggestions for missing story angles and example questions</p>
+          </div>
+          <button
+            onClick={() => {
+              setShowAIPanel(true);
+              gapAnalysis.mutate({
+                stories: stories.map(s => ({
+                  title: s.title,
+                  focusAreas: s.focusAreas,
+                  values: s.values,
+                  hasMetric: s.hasMetric,
+                })),
+                targetLevel: "L7",
+              });
+            }}
+            disabled={gapAnalysis.isPending || stories.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-sm font-bold rounded-lg transition-colors"
+          >
+            {gapAnalysis.isPending ? (
+              <><Loader2 size={13} className="animate-spin" /> Analyzing…</>
+            ) : (
+              <><Sparkles size={13} /> Analyze My Gaps</>
+            )}
+          </button>
+        </div>
+
+        {showAIPanel && gapAnalysis.data && (
+          <div className="mt-4 space-y-3 border-t border-indigo-200 pt-4">
+            {/* Score + verdict */}
+            <div className="flex items-center gap-3">
+              <div className={`text-2xl font-extrabold ${
+                gapAnalysis.data.overallCoverage >= 80 ? "text-emerald-600" :
+                gapAnalysis.data.overallCoverage >= 60 ? "text-amber-600" : "text-red-600"
+              }`}>
+                {gapAnalysis.data.overallCoverage}<span className="text-sm text-gray-400">/100</span>
+              </div>
+              <p className="text-sm text-indigo-800 font-medium">{gapAnalysis.data.verdict}</p>
+            </div>
+
+            {/* Top priority */}
+            {gapAnalysis.data.topPriority && (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">Top Priority: </span>
+                <span className="text-xs text-amber-900">{gapAnalysis.data.topPriority}</span>
+              </div>
+            )}
+
+            {/* Critical gaps */}
+            {gapAnalysis.data.criticalGaps.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">Critical Gaps</p>
+                {gapAnalysis.data.criticalGaps.map((gap, i) => (
+                  <div key={i} className="rounded-lg border border-red-200 bg-red-50 p-3">
+                    <p className="text-xs font-bold text-red-800 mb-1">{gap.area}</p>
+                    <p className="text-xs text-red-700 mb-1.5">{gap.gap}</p>
+                    <p className="text-xs text-gray-700"><span className="font-semibold">Story angle: </span>{gap.suggestedStoryAngle}</p>
+                    <p className="text-xs text-gray-500 mt-1 italic">Q: {gap.exampleQuestion}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Strengths */}
+            {gapAnalysis.data.strengths.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">Strengths</p>
+                {gapAnalysis.data.strengths.map((s, i) => (
+                  <div key={i} className="flex items-start gap-1.5 text-xs text-emerald-800">
+                    <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0 mt-0.5" />{s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Coverage summary bars */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

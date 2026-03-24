@@ -1,7 +1,8 @@
 // L7 Signal Self-Assessment Checklist — Readiness tab
 // Design: Structured Clarity — checklist with story backing, gap detection, and priority flags
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, AlertTriangle, BookOpen, ChevronDown, ChevronUp, Lightbulb, Target } from "lucide-react";
+import { CheckCircle2, Circle, AlertTriangle, BookOpen, ChevronDown, ChevronUp, Lightbulb, Target, Sparkles, Loader2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 const IC7_SIGNALS = [
   {
@@ -108,6 +109,19 @@ export default function IC7SignalChecklist() {
   const gaps = IC7_SIGNALS.filter((s) => !states[s.id]?.hasStory);
   const criticalGaps = gaps.filter((s) => s.priority === "critical");
   const pct = Math.round((covered / IC7_SIGNALS.length) * 100);
+
+  // AI coaching per signal
+  const signalCoach = trpc.highImpact.ic7SignalCoach.useMutation();
+  const [coachingSignalId, setCoachingSignalId] = useState<string | null>(null);
+  const [coachResults, setCoachResults] = useState<Record<string, { storyAngles: string[]; starOutline: { situation: string; task: string; action: string; result: string }; recallQuestions: string[]; exampleOpener: string }>>({});
+
+  const requestCoaching = (signal: typeof IC7_SIGNALS[0]) => {
+    setCoachingSignalId(signal.id);
+    signalCoach.mutate(
+      { signal: signal.signal, description: signal.description, probeQuestion: signal.probeQuestion, gapNote: states[signal.id]?.storyNote || undefined, targetLevel: "L7" },
+      { onSuccess: (data) => { setCoachResults(prev => ({ ...prev, [signal.id]: data })); setCoachingSignalId(null); } }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -257,15 +271,89 @@ export default function IC7SignalChecklist() {
                       rows={3}
                       className="w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-300"
                     />
-                    {state.storyNote.trim() && !state.hasStory && (
-                      <button
-                        onClick={() => toggle(signal.id, "hasStory")}
-                        className="mt-2 text-xs font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
-                      >
-                        Mark as covered →
-                      </button>
-                    )}
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      {state.storyNote.trim() && !state.hasStory && (
+                        <button
+                          onClick={() => toggle(signal.id, "hasStory")}
+                          className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
+                        >
+                          Mark as covered →
+                        </button>
+                      )}
+                      {!state.hasStory && (
+                        <button
+                          onClick={() => requestCoaching(signal)}
+                          disabled={coachingSignalId === signal.id}
+                          className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          {coachingSignalId === signal.id ? (
+                            <><Loader2 size={11} className="animate-spin" /> Getting coaching…</>
+                          ) : (
+                            <><Sparkles size={11} /> Get AI Coaching</>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* AI Coaching Results */}
+                  {coachResults[signal.id] && (
+                    <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3 space-y-3">
+                      <p className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide flex items-center gap-1">
+                        <Sparkles size={11} /> AI Coaching
+                      </p>
+
+                      {/* Example opener */}
+                      {coachResults[signal.id].exampleOpener && (
+                        <div>
+                          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide mb-1">Strong Opening Line</p>
+                          <p className="text-xs text-indigo-900 italic">"{coachResults[signal.id].exampleOpener}"</p>
+                        </div>
+                      )}
+
+                      {/* Story angles */}
+                      {coachResults[signal.id].storyAngles.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide mb-1.5">3 Story Angles to Consider</p>
+                          <ol className="space-y-1">
+                            {coachResults[signal.id].storyAngles.map((angle, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs text-indigo-800">
+                                <span className="flex-shrink-0 w-4 h-4 rounded-full bg-indigo-200 text-indigo-700 font-bold text-[9px] flex items-center justify-center mt-0.5">{i + 1}</span>
+                                {angle}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      )}
+
+                      {/* STAR outline */}
+                      {coachResults[signal.id].starOutline && (
+                        <div>
+                          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide mb-1.5">STAR Framework Outline</p>
+                          <div className="space-y-1">
+                            {(['situation','task','action','result'] as const).map(k => (
+                              <div key={k} className="flex items-start gap-2 text-xs">
+                                <span className="font-bold text-indigo-600 uppercase w-16 flex-shrink-0">{k}</span>
+                                <span className="text-indigo-800">{coachResults[signal.id].starOutline[k]}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Recall questions */}
+                      {coachResults[signal.id].recallQuestions.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide mb-1">Recall Questions</p>
+                          <ul className="space-y-1">
+                            {coachResults[signal.id].recallQuestions.map((q, i) => (
+                              <li key={i} className="text-xs text-indigo-700 italic">• {q}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
