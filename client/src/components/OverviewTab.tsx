@@ -86,6 +86,10 @@ import { FavoriteQuestions } from "@/components/FavoriteQuestions";
 function DisclaimerStatusBadge() {
   const { data } = trpc.disclaimer.status.useQuery();
   const { user } = useAuth();
+  const { data: ownerData } = trpc.auth.isOwner.useQuery(undefined, {
+    enabled: !!user,
+  });
+  const isOwner = ownerData?.isOwner ?? false;
 
   if (!data?.acknowledged || !data.acknowledgedAt) return null;
 
@@ -103,7 +107,7 @@ function DisclaimerStatusBadge() {
           </span>
         </span>
       </span>
-      {user?.role === "admin" && (
+      {isOwner && (
         <a
           href="/admin/disclaimer"
           className="text-xs text-violet-400 hover:text-violet-300 underline underline-offset-2 whitespace-nowrap"

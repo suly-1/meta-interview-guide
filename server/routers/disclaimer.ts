@@ -1,7 +1,7 @@
 import {
   protectedProcedure,
   publicProcedure,
-  adminProcedure,
+  ownerProcedure,
   router,
 } from "../_core/trpc";
 import { getDb } from "../db";
@@ -45,10 +45,11 @@ export const disclaimerRouter = router({
   }),
 
   /**
-   * Admin-only: return all users with their disclaimer acknowledgment status.
+   * Owner-only: return all users with their disclaimer acknowledgment status.
+   * Only the account matching OWNER_OPEN_ID can call this.
    * Sorted by acknowledgedAt desc (acknowledged first), then by createdAt asc.
    */
-  adminReport: adminProcedure.query(async () => {
+  adminReport: ownerProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db

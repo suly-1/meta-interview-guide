@@ -37,12 +37,17 @@ export default function AdminDisclaimerReport() {
   );
   const [search, setSearch] = useState("");
 
+  const { data: ownerData } = trpc.auth.isOwner.useQuery(undefined, {
+    enabled: !!user,
+  });
+  const isOwner = ownerData?.isOwner ?? false;
+
   const {
     data: rows = [],
     isLoading,
     error,
   } = trpc.disclaimer.adminReport.useQuery(undefined, {
-    enabled: !!user && user.role === "admin",
+    enabled: !!user && isOwner,
   });
 
   const handleSort = (key: SortKey) => {
@@ -143,15 +148,14 @@ export default function AdminDisclaimerReport() {
     );
   }
 
-  // Not admin
-  if (!user || user.role !== "admin") {
+  // Not owner — show 404-style access denied
+  if (!loading && (!user || !isOwner)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-8">
         <ShieldAlert size={40} className="text-amber-400" />
-        <h1 className="text-xl font-bold text-foreground">Access Denied</h1>
+        <h1 className="text-xl font-bold text-foreground">Page Not Found</h1>
         <p className="text-muted-foreground text-sm text-center max-w-sm">
-          This page is restricted to administrators. If you believe this is an
-          error, contact the site owner.
+          The page you are looking for does not exist.
         </p>
         <Link
           href="/"

@@ -1,7 +1,8 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { ENV } from "./_core/env";
 import { collabRouter } from "./routers/collab";
 import { leaderboardRouter } from "./routers/leaderboard";
 import { ctciRouter } from "./routers/ctci";
@@ -26,6 +27,12 @@ export const appRouter = router({
   ai: aiRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    /** Returns whether the current user is the site owner (OWNER_OPEN_ID match). */
+    isOwner: protectedProcedure.query(({ ctx }) => {
+      return {
+        isOwner: !!ENV.ownerOpenId && ctx.user.openId === ENV.ownerOpenId,
+      };
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

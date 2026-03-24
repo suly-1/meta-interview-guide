@@ -749,3 +749,18 @@
 - [ ] Charts: line chart (readiness over time), bar chart (sessions per week), radar chart (category coverage)
 - [ ] Wire InterviewProgressTracker into OverviewTab and add nav entry
 - [ ] pnpm build:standalone + deploy:github-pages
+
+## Phase 13 — Owner-Only Disclaimer Report Gate (Mar 24, 2026)
+
+- [ ] Add ownerProcedure middleware (checks ctx.user.openId === OWNER_OPEN_ID)
+- [ ] Gate disclaimer.auditReport tRPC procedure behind ownerProcedure
+- [ ] Hide "View audit report →" link in DisclaimerStatusBadge for non-owners
+- [ ] Add /admin/disclaimer route guard: redirect non-owners to 404
+- [ ] pnpm build:standalone + deploy:github-pages
+
+## Phase 14 — Security & Privacy Audit (Mar 24, 2026)
+
+- [ ] Full codebase security audit (server, client, DB, auth, API, secrets)
+- [ ] Fix all critical/high severity issues found
+- [ ] Write security audit report for user
+- [ ] pnpm build:standalone + deploy:github-pages
