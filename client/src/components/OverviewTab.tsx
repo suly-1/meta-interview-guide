@@ -18,6 +18,7 @@ const DayOfModePanel = lazy(() => import("@/components/DayOfMode").then(m => ({ 
 const LastMileCheatSheet = lazy(() => import("@/components/DayOfMode").then(m => ({ default: m.LastMileCheatSheet })));
 const ConfidenceCalibrationQuiz = lazy(() => import("@/components/DayOfMode").then(m => ({ default: m.ConfidenceCalibrationQuiz })));
 import { WeakPatternHeatmap } from "@/components/WeakPatternHeatmap";
+import RoadmapJourney from "@/components/RoadmapJourney";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
 function DisclaimerStatusBadge() {
@@ -1853,11 +1854,12 @@ function QuickActionsRow() {
     </div>
   );
 }
-export default function OverviewTab() {
+export default function OverviewTab({ onTabChange }: { onTabChange?: (tabId: string) => void }) {
   const [interviewDate] = useInterviewDate();
   const daysLeft = interviewDate ? getDaysUntil(interviewDate) : null;
   return (
     <div className="space-y-6">
+      <RoadmapJourney onTabChange={onTabChange ?? (() => {})} />
       <QuickActionsRow />
       <OnboardingChecklist />
       {daysLeft !== null && <UrgencyModeBanner daysLeft={daysLeft} />}

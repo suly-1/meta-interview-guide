@@ -524,7 +524,7 @@ export default function Home() {
                 {activeTab === "sysdesign"   && <SystemDesignTab />}
                 {activeTab === "practice"    && <CodePractice />}
                 {activeTab === "ai-tools"    && <AIToolsTab />}
-                {activeTab === "overview"    && <OverviewTab />}
+                {activeTab === "overview"    && <OverviewTab onTabChange={handleTabChange} />}
                 {activeTab === "leaderboard" && <Leaderboard />}
               </Suspense>
             </div>

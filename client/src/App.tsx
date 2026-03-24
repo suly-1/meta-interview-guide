@@ -13,6 +13,7 @@ import CandidateDiscovery from "@/pages/CandidateDiscovery";
 import TermsOfUse from "@/pages/TermsOfUse";
 import SharedPlanView from "@/pages/SharedPlanView";
 import AdminFeedback from "@/pages/AdminFeedback";
+import AdminDisclaimerReport from "@/components/AdminDisclaimerReport";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -57,6 +58,7 @@ function App() {
         <Route path="/terms" component={TermsOfUse} />
         <Route path="/shared-plan/:token" component={SharedPlanView} />
         <Route path="/admin/feedback" component={AdminFeedback} />
+        <Route path="/admin/disclaimer" component={AdminDisclaimerReport} />
                 {/* All other routes go through DisclaimerGate */}
                 <Route>
                   <DisclaimerGateWrapper>

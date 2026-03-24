@@ -515,3 +515,23 @@
 - [ ] P3: Confetti/celebration when any section hits 100%
 - [ ] P3: Rename tabs to action-oriented labels
 - [ ] P3: Floating "?" button on mobile for keyboard shortcut legend
+
+## New Feature Batch (Current)
+- [ ] Guided candidate journey — reorganize Overview into a clear Day 1 → Interview Day path with priority ordering and "what to focus" callouts
+- [ ] Favorites system — heart/bookmark icon on every question across all tabs, dedicated Favorites tab/panel with practice mode
+- [ ] Dark/light mode toggle — move to prominent position in the main navigation bar (currently buried in utility bar)
+- [ ] Interview Progress & Performance Tracker — dedicated section showing score trends, mock history, weak area evolution, and time-series charts
+
+## 60-Day Guided Journey (Option A + C Combined)
+- [ ] 60-Day Roadmap component: 5 phases with gates (Days 1-30 = Behavioral+Coding, Days 31-60 = Full Loop)
+- [ ] Mission Control dashboard: Today's Mission, Where You Are, What's Next columns
+- [ ] Phase 1 (Days 1-3): Assess — rate all patterns + behavioral questions
+- [ ] Phase 2 (Days 4-30): Learn + Practice — Behavioral & Coding focus (1 hr/day)
+- [ ] Phase 3 (Days 31-45): Simulate — add System Design + Full Loop mocks
+- [ ] Phase 4 (Days 46-55): Sharpen — targeted weak area drills + IC7 signal coaching
+- [ ] Phase 5 (Days 56-60): Ready — Interview Day Protocol, Last-Mile Cheat Sheet, Confidence Quiz
+- [ ] Phase gate logic: each phase requires completion criteria before unlocking next
+- [ ] Roadmap progress bar shown at top of every tab
+
+## Privacy & Access Control
+- [x] Owner-only gate for disclaimer/readiness report (visible only to OWNER_OPEN_ID user) — /admin/disclaimer route wired, backend adminProcedure gates data, db.ts auto-assigns admin role to OWNER_OPEN_ID

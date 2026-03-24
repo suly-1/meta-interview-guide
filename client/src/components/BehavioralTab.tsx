@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useICLevel } from "@/contexts/ICLevelContext";
 import { useXPContext } from "@/contexts/useXPContext";
-import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search } from "lucide-react";
+import { ChevronRight, ExternalLink, Shuffle, Play, Pause, RotateCcw, CheckCircle2, X, Star, Search, Bookmark } from "lucide-react";
+import { useBookmarks } from "@/hooks/useBookmarks";
 import { BEHAVIORAL_FOCUS_AREAS, META_VALUES } from "@/lib/guideData";
 import { usePracticeRatings } from "@/hooks/usePracticeRatings";
 import { useStreak } from "@/hooks/useStreak";
@@ -169,6 +170,7 @@ function PracticeMode() {
     addXP('behavioral_session', `Behavioral: ${question.question.slice(0, 50)}`);
   }, [question, addRating, recordActivity, addXP]);
 
+  const { isBookmarked, toggleBookmark } = useBookmarks();
   const nextQuestion = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     startSession();
@@ -427,7 +429,18 @@ function PracticeMode() {
 
             {/* Footer actions */}
             <div className="flex items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-t border-gray-100">
-              <p className="text-xs text-gray-400">Tip: answer out loud as if in a real interview</p>
+              <button
+                onClick={() => question && toggleBookmark({ tabId: "behavioral", tabLabel: "Behavioral", title: question.question, subtitle: question.areaTitle })}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                  question && isBookmarked("behavioral", question.question)
+                    ? "bg-amber-100 text-amber-700"
+                    : "text-gray-400 hover:text-amber-600 hover:bg-amber-50"
+                }`}
+                title={question && isBookmarked("behavioral", question.question) ? "Remove from favorites" : "Save to favorites"}
+              >
+                <Bookmark size={13} fill={question && isBookmarked("behavioral", question.question) ? "currentColor" : "none"} />
+                {question && isBookmarked("behavioral", question.question) ? "Saved" : "Save"}
+              </button>
               <button
                 onClick={nextQuestion}
                 className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm"
