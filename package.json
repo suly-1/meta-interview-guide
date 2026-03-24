@@ -16,7 +16,8 @@
     "validate:chunks": "node scripts/validate-chunks.mjs",
     "smoke:test": "node scripts/smoke-test.mjs",
     "smoke:test:live": "node scripts/smoke-test.mjs --url https://metaengguide.pro",
-    "build:verify": "pnpm run build && pnpm run validate:chunks && pnpm run smoke:test"
+    "build:verify": "pnpm run build && pnpm run validate:chunks && pnpm run smoke:test",
+    "build:standalone:static": "vite build --config vite.standalone.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

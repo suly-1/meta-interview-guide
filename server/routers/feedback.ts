@@ -1,5 +1,7 @@
 /**
- * feedback router — site-wide feedback, sprint plan feedback, and sprint plan sharing
+ * feedback router — site-wide feedback, sprint plan feedback, and sprint plan sharing.
+ * Admin procedures: adminGetAll, adminStats, markAllNew, triggerDigest, triggerDailyAlert,
+ *                   updateNote, updateStatus (alias for updateFeedbackStatus)
  */
 
 import { z } from "zod";
@@ -10,6 +12,52 @@ import { eq, desc } from "drizzle-orm";
 import { notifyOwner } from "../_core/notification";
 import { sendEmail, isSmtpConfigured } from "../email";
 import { nanoid } from "nanoid";
+import { TRPCError } from "@trpc/server";
+
+// ── Weekly digest helper ──────────────────────────────────────────────────────
+
+async function sendWeeklyDigest(): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const all = await db.select().from(siteFeedback).orderBy(desc(siteFeedback.createdAt)).limit(200);
+  const recent = all.filter(r => new Date(r.createdAt) > sevenDaysAgo);
+  if (recent.length === 0) {
+    await notifyOwner({ title: "Weekly Feedback Digest — MetaEngGuide", content: "No new feedback this week." });
+    return true;
+  }
+  const lines = recent.map(r =>
+    `[${r.category.toUpperCase()}] ${r.rating ? `${r.rating}★ ` : ""}${r.message.slice(0, 200)}${r.message.length > 200 ? "…" : ""} (${r.page ?? "unknown page"})`
+  );
+  const body = `Weekly Feedback Digest — ${recent.length} item(s) in the last 7 days:\n\n${lines.join("\n\n")}`;
+  const recipientEmail = process.env.DIGEST_RECIPIENT_EMAIL;
+  if (isSmtpConfigured() && recipientEmail) {
+    return sendEmail({ to: recipientEmail, subject: "Weekly Feedback Digest — MetaEngGuide", text: body });
+  }
+  await notifyOwner({ title: "Weekly Feedback Digest — MetaEngGuide", content: body });
+  return true;
+}
+
+// ── Daily alert helper ────────────────────────────────────────────────────────
+
+const ALERT_THRESHOLD = 3;
+
+async function checkAndSendDailyAlert(): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const unactioned = await db
+    .select()
+    .from(siteFeedback)
+    .where(eq(siteFeedback.status, "new"));
+  if (unactioned.length < ALERT_THRESHOLD) return false;
+  const body = `⚠️ ${unactioned.length} unactioned feedback item(s) need your attention on MetaEngGuide.\n\nVisit /admin/feedback to triage them.`;
+  const recipientEmail = process.env.DIGEST_RECIPIENT_EMAIL;
+  if (isSmtpConfigured() && recipientEmail) {
+    return sendEmail({ to: recipientEmail, subject: `[MetaEngGuide] ${unactioned.length} unactioned feedback items`, text: body });
+  }
+  await notifyOwner({ title: `[MetaEngGuide] ${unactioned.length} unactioned feedback items`, content: body });
+  return true;
+}
 
 export const feedbackRouter = router({
   // ── Site-wide feedback ──────────────────────────────────────────────────────
@@ -73,6 +121,104 @@ export const feedbackRouter = router({
       .orderBy(desc(siteFeedback.createdAt))
       .limit(200);
   }),
+
+  /** Admin: Get all feedback with optional filters */
+  adminGetAll: adminProcedure
+    .input(
+      z.object({
+        limit: z.number().int().min(1).max(500).default(200),
+        category: z.string().default("all"),
+        status: z.string().default("all"),
+      })
+    )
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { items: [], total: 0 };
+      const items = await db
+        .select()
+        .from(siteFeedback)
+        .orderBy(desc(siteFeedback.createdAt))
+        .limit(input.limit);
+      let filtered = items;
+      if (input.category !== "all") filtered = filtered.filter(i => i.category === input.category);
+      if (input.status !== "all") filtered = filtered.filter(i => i.status === input.status);
+      return { items: filtered, total: filtered.length };
+    }),
+
+  /** Admin: Summary stats */
+  adminStats: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return { byCategory: [], total: 0, last7Days: 0, newCount: 0 };
+    const all = await db
+      .select({
+        category: siteFeedback.category,
+        status: siteFeedback.status,
+        createdAt: siteFeedback.createdAt,
+      })
+      .from(siteFeedback);
+    const total = all.length;
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const last7Days = all.filter(r => new Date(r.createdAt) > sevenDaysAgo).length;
+    const newCount = all.filter(r => r.status === "new").length;
+    const catMap: Record<string, number> = {};
+    for (const r of all) catMap[r.category] = (catMap[r.category] ?? 0) + 1;
+    const byCategory = Object.entries(catMap).map(([category, count]) => ({ category, count }));
+    return { byCategory, total, last7Days, newCount };
+  }),
+
+  /** Admin: Manually trigger weekly digest */
+  triggerDigest: adminProcedure.mutation(async () => {
+    await sendWeeklyDigest();
+    return { success: true };
+  }),
+
+  /** Admin: Manually trigger daily alert check */
+  triggerDailyAlert: adminProcedure.mutation(async () => {
+    const sent = await checkAndSendDailyAlert();
+    return { success: true, sent };
+  }),
+
+  /** Admin: Save internal note on a feedback item */
+  updateNote: adminProcedure
+    .input(z.object({ id: z.number().int(), adminNote: z.string().max(1000) }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db
+        .update(siteFeedback)
+        .set({ adminNote: input.adminNote })
+        .where(eq(siteFeedback.id, input.id));
+      return { success: true };
+    }),
+
+  /** Admin: Bulk-update all 'new' items to 'in_progress' */
+  markAllNew: adminProcedure.mutation(async () => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    const result = await db
+      .update(siteFeedback)
+      .set({ status: "in_progress", statusUpdatedAt: Date.now() })
+      .where(eq(siteFeedback.status, "new"));
+    return { success: true, updated: (result as { affectedRows?: number }).affectedRows ?? 0 };
+  }),
+
+  /** Admin: Update triage status (alias for updateFeedbackStatus) */
+  updateStatus: adminProcedure
+    .input(
+      z.object({
+        id: z.number().int(),
+        status: z.enum(["new", "in_progress", "done", "dismissed"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db
+        .update(siteFeedback)
+        .set({ status: input.status, statusUpdatedAt: Date.now() })
+        .where(eq(siteFeedback.id, input.id));
+      return { success: true };
+    }),
 
   // ── Sprint plan feedback ────────────────────────────────────────────────────
   submitSprintFeedback: publicProcedure

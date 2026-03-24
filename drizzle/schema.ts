@@ -151,6 +151,7 @@ export const siteFeedback = mysqlTable("site_feedback", {
   page: varchar("page", { length: 128 }),
   status: varchar("status", { length: 20 }).notNull().default("new"),
   statusUpdatedAt: bigint("status_updated_at", { mode: "number" }),
+  adminNote: text("admin_note"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type SiteFeedback = typeof siteFeedback.$inferSelect;

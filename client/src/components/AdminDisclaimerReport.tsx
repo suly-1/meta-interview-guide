@@ -6,7 +6,7 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
-import { ShieldAlert, CheckCircle2, XCircle, ArrowUpDown, ArrowLeft, Download, Users, Settings } from "lucide-react";
+import { ShieldAlert, CheckCircle2, XCircle, ArrowUpDown, ArrowLeft, Download, Users, Settings, BarChart2 } from "lucide-react";
 
 type SortKey = "name" | "email" | "createdAt" | "lastSignedIn" | "acknowledgedAt";
 type SortDir = "asc" | "desc";
@@ -133,6 +133,13 @@ export default function AdminDisclaimerReport() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/stats"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors"
+          >
+            <BarChart2 size={13} />
+            Feedback Stats
+          </Link>
           <Link
             href="/admin/settings"
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-secondary text-gray-400 transition-colors"

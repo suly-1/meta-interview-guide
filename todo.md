@@ -600,3 +600,23 @@
 ## Batch: Block Expiry Badge + Screenshot Guide (March 24, 2026)
 
 - [x] Add block expiry countdown badge to user table in /admin/users (amber badge showing "Auto-unblocks in X days" next to temporarily-blocked users)
+
+## Replication Guide Implementation (March 24, 2026)
+
+- [x] Add ownerProcedure to server/_core/trpc.ts (chains through requireUser, checks OWNER_OPEN_ID)
+- [x] Add auth.isOwner procedure to server/routers.ts
+- [x] Add feedback router: adminStats, markAllNew, triggerDigest, triggerDailyAlert, updateNote, adminGetAll procedures
+- [ ] Create siteAccess router (checkAccess, getDisclaimerEnabled, setDisclaimerEnabled, cohortReset) — separate from siteSettings
+- [ ] Register siteAccess and updated feedback routers in server/routers.ts
+- [x] Create AdminStats page (/admin/stats) — feedback stats, by category/type, last 7 days
+- [ ] Create AdminAnalytics page (/admin/analytics) — usage analytics, feature adoption
+- [ ] Create AdminAccess page (/admin/access) — disclaimer toggle, site lock controls
+- [x] Add route() helper to client/src/const.ts (hash routing for standalone, path routing for live)
+- [ ] Add TopNav admin badge with red dot notification (queries adminStats every 5 min)
+- [x] Register AdminStats route in App.tsx (/admin/stats)
+- [x] Create vite.standalone.config.ts with alias overrides for trpc and useAuth
+- [x] Create client/src/App.standalone.tsx with hash routing and all admin routes (via vite.standalone.config.ts)
+- [x] Create client/src/_core/hooks/useAuth.standalone.ts (mock admin user)
+- [x] Create client/src/lib/trpc.standalone.ts with all mock stubs (90 procedures across all namespaces)
+- [x] Add build:standalone:static script to package.json (vite build --config vite.standalone.config.ts)
+- [ ] Create scripts/build-standalone.mjs and scripts/deploy-github-pages.mjs

@@ -64,6 +64,13 @@
       "when": 1774322864843,
       "tag": "0008_fair_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1774371484802,
+      "tag": "0009_giant_johnny_storm",
+      "breakpoints": true
     }
   ]
 }

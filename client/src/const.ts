@@ -1,5 +1,12 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
+/**
+ * route() — type-safe route helper for wouter navigation.
+ * Returns the path as-is; useful for centralizing route definitions.
+ * Usage: route("/admin/feedback") or route("/admin/users")
+ */
+export const route = (path: string) => path;
+
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
