@@ -47,14 +47,27 @@ export function useDisclaimerGate(): {
   const [localConfirmed, setLocalConfirmed] = useState(localAck);
 
   // Server flag — owner can disable the disclaimer gate globally.
-  // On standalone/static builds (GitHub Pages, no backend), we disable this query
-  // so it never fires and we simply default to enabled=true (always show gate).
-  // VITE_STANDALONE is set to "true" in the standalone build script.
-  const isStandalone = import.meta.env.VITE_STANDALONE === "true";
+  // Guard: trpc.siteAccess may be undefined in standalone/mock builds that
+  // haven't yet defined this namespace. We call useQuery unconditionally
+  // (rules of hooks) but wrap the access in a safe getter.
+  const getDisclaimerEnabledQuery =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (trpc as any)?.siteAccess?.getDisclaimerEnabled?.useQuery;
+
+  // Always call a hook at the top level — if the procedure exists use it,
+  // otherwise fall back to a no-op query that returns enabled=true.
+  // This satisfies React’s rules-of-hooks because the branch is determined
+  // before render (it’s a stable property check, not a runtime condition).
+  const safeUseQuery =
+    typeof getDisclaimerEnabledQuery === "function"
+      ? getDisclaimerEnabledQuery
+      : (_input: undefined, _opts: unknown) => ({
+          data: { enabled: true },
+          isLoading: false,
+        });
 
   const { data: disclaimerEnabledData, isLoading: enabledLoading } =
-    trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined, {
-      enabled: !isStandalone,
+    safeUseQuery(undefined, {
       staleTime: 30_000,
       retry: false,
     });
