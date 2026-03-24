@@ -183,9 +183,12 @@ export default defineConfig({
           if (id.includes('jspdf') || id.includes('html2canvas')) {
             return 'vendor-pdf';
           }
-          // Charts / recharts
-          if (id.includes('recharts') || id.includes('d3-')) {
-            return 'vendor-charts';
+          // Charts / recharts — must be bundled WITH React to avoid TDZ error
+          // (recharts references React.forwardRef at module init time; if React is
+          // in a separate chunk the minifier can produce an invalid execution order)
+          if (id.includes('recharts') || id.includes('d3-') ||
+              id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'vendor-react';
           }
           // Canvas confetti
           if (id.includes('canvas-confetti')) {
@@ -202,10 +205,6 @@ export default defineConfig({
           // Radix UI
           if (id.includes('@radix-ui')) {
             return 'vendor-radix';
-          }
-          // React core
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
-            return 'vendor-react';
           }
           // Lucide icons
           if (id.includes('lucide-react')) {
