@@ -33,7 +33,7 @@ jobs:
         run: pnpm install
 
       - name: Build standalone static site
-        run: pnpm build:standalone
+        run: pnpm build:standalone:static
         env:
           VITE_APP_TITLE: "Meta IC6/IC7 Interview Guide"
           VITE_APP_ID: "placeholder"
