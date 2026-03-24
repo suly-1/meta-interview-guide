@@ -763,4 +763,37 @@
 - [x] Full codebase security audit (server, client, DB, auth, API, secrets)
 - [x] Fix all critical/high severity issues found (helmet, rate limiting, trust proxy, openId strip, body limit, owner gate)
 - [x] Write security audit report for user
-- [ ] pnpm build:standalone + deploy:github-pages
+- [x] pnpm build:standalone + deploy:github-pages
+
+## Phase 15 — Hybrid Access Gate (Mar 24, 2026)
+
+- [ ] Add site_settings table to DB schema (lock_enabled, lock_start_date, lock_days, lock_message, manual_lock)
+- [ ] Add tRPC procedures: checkAccess (public), getSiteSettings (ownerProcedure), updateSiteSettings (ownerProcedure)
+- [ ] Build AccessGate component wrapping entire app (auto-lock after N days + manual lock, owner bypass)
+- [ ] Build Admin Access Control panel at /admin/access (toggle lock, set start date, set message)
+- [ ] Wire AccessGate into App.tsx
+- [ ] TypeScript check, tests, build:standalone, deploy:github-pages
+
+## Phase 16 — Security Fixes (Mar 24, 2026)
+
+### HIGH severity
+
+- [ ] Fix #1: Move digest.send and collab.sendWeeklyDigest to protectedProcedure
+- [ ] Fix #2: Move uploadAudio to protectedProcedure + add server-side MIME/size validation
+- [ ] Fix #3: Add user ownership to leaderboard (require login to upsert/remove, userId stored)
+
+### MEDIUM severity
+
+- [ ] Fix #4: Add typed schema to collab saveEvent (replace z.any() with typed payload)
+- [ ] Fix #5: Move all LLM endpoints to protectedProcedure (require login)
+- [ ] Fix #6: Add expiry check to getSharedPlan query
+- [ ] Fix #7: Replace manual role checks in feedback.ts with adminProcedure
+
+### LOW severity
+
+- [ ] Fix #8: Change session cookie SameSite from "none" to "lax"
+- [ ] Fix #9: Remove skip button from DisclaimerGate (or require login for legal-weight disclaimer)
+
+### Deploy
+
+- [ ] TypeScript check, tests, build:standalone, deploy:github-pages

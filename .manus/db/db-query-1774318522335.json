@@ -1,0 +1,9 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS site_settings (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  lockStartDate VARCHAR(16),\n  lockDays INT NOT NULL DEFAULT 60,\n  manualLockEnabled INT NOT NULL DEFAULT 0,\n  lockMessage TEXT,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n);\n\n-- Insert the default row (id=1) if it doesn't exist\nINSERT IGNORE INTO site_settings (id, lockDays, manualLockEnabled)\nVALUES (1, 60, 0);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute \nCREATE TABLE IF NOT EXISTS site_settings (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  lockStartDate VARCHAR(16),\n  lockDays INT NOT NULL DEFAULT 60,\n  manualLockEnabled INT NOT NULL DEFAULT 0,\n  lockMessage TEXT,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n);\n\n-- Insert the default row (id=1) if it doesn't exist\nINSERT IGNORE INTO site_settings (id, lockDays, manualLockEnabled)\nVALUES (1, 60, 0);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 898
+}

@@ -303,3 +303,19 @@ export interface ApexPick {
   badge?: string; // optional badge text, e.g. "New" | "Hot" | "AI"
   badgeColor?: string; // "blue" | "green" | "amber" | "red" | "purple"
 }
+
+// ── Site Settings (access gate & global config) ───────────────────────────────
+// Single-row table (id=1). Controls the 60-day auto-lock and manual lock toggle.
+export const siteSettings = mysqlTable("site_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  /** When the 60-day clock started (ISO date string YYYY-MM-DD). Null = no auto-lock. */
+  lockStartDate: varchar("lockStartDate", { length: 16 }),
+  /** Number of days before auto-lock kicks in. Default 60. */
+  lockDays: int("lockDays").notNull().default(60),
+  /** If true, the site is manually locked regardless of the date. */
+  manualLockEnabled: int("manualLockEnabled").notNull().default(0), // 0=off, 1=on
+  /** Custom message shown on the locked gate screen. */
+  lockMessage: text("lockMessage"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SiteSettings = typeof siteSettings.$inferSelect;

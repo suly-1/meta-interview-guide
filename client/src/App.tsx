@@ -10,6 +10,8 @@ import AdminDisclaimerReport from "@/pages/AdminDisclaimerReport";
 import AdminFeedback from "@/pages/AdminFeedback";
 import AdminStats from "@/pages/AdminStats";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AdminAccess from "@/pages/AdminAccess";
+import AccessGate from "@/components/AccessGate";
 
 function Router() {
   return (
@@ -20,6 +22,7 @@ function Router() {
       <Route path="/admin/feedback" component={AdminFeedback} />
       <Route path="/admin/stats" component={AdminStats} />
       <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/access" component={AdminAccess} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -32,7 +35,9 @@ function App() {
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AccessGate>
+            <Router />
+          </AccessGate>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
