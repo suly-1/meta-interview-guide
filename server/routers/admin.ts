@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { adminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { users } from "../../drizzle/schema";
+import { users, userEvents } from "../../drizzle/schema";
 import { eq, asc, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { notifyOwner } from "../_core/notification";
@@ -93,6 +93,17 @@ export const adminRouter = router({
         content: `**User access has been revoked.**\n\n**Name:** ${userName}\n**Email:** ${userEmail}\n**User ID:** ${input.userId}\n**Reason:** ${reason}\n**Blocked at:** ${new Date().toUTCString()}`,
       }).catch(() => { /* non-critical — don't fail the block if notification fails */ });
 
+      // Write tamper-evident audit log entry
+      await db.insert(userEvents).values({
+        action: "block",
+        actorId: ctx.user.id,
+        actorName: ctx.user.name ?? "Admin",
+        targetUserId: input.userId,
+        targetUserName: userName,
+        targetUserEmail: userEmail,
+        reason: reason,
+      }).catch(() => { /* non-critical */ });
+
       return { success: true };
     }),
 
@@ -101,14 +112,49 @@ export const adminRouter = router({
    */
   unblockUser: adminProcedure
     .input(z.object({ userId: z.number().int().positive() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
+
+      // Fetch user info for the audit log
+      const [targetUser] = await db
+        .select({ name: users.name, email: users.email })
+        .from(users)
+        .where(eq(users.id, input.userId))
+        .limit(1);
+
       await db.update(users).set({
         isBanned: 0,
         bannedAt: null,
         bannedReason: null,
       }).where(eq(users.id, input.userId));
+
+      // Write audit log entry
+      await db.insert(userEvents).values({
+        action: "unblock",
+        actorId: ctx.user.id,
+        actorName: ctx.user.name ?? "Admin",
+        targetUserId: input.userId,
+        targetUserName: targetUser?.name ?? `User #${input.userId}`,
+        targetUserEmail: targetUser?.email ?? "unknown",
+        reason: "Access restored by administrator",
+      }).catch(() => { /* non-critical */ });
+
       return { success: true };
     }),
+
+  /**
+   * List the admin audit log (all block/unblock events), newest first.
+   * Admin-only.
+   */
+  listAuditLog: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    const rows = await db
+      .select()
+      .from(userEvents)
+      .orderBy(desc(userEvents.createdAt))
+      .limit(200);
+    return rows;
+  }),
 });

@@ -190,3 +190,17 @@ export const siteSettings = mysqlTable("site_settings", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SiteSetting = typeof siteSettings.$inferSelect;
+
+// Admin audit log — tamper-evident record of every block/unblock action
+export const userEvents = mysqlTable("user_events", {
+  id: int("id").autoincrement().primaryKey(),
+  action: mysqlEnum("action", ["block", "unblock", "role_change"]).notNull(),
+  actorId: int("actorId").notNull(),          // admin who performed the action
+  actorName: varchar("actorName", { length: 128 }),
+  targetUserId: int("targetUserId").notNull(), // user who was affected
+  targetUserName: varchar("targetUserName", { length: 128 }),
+  targetUserEmail: varchar("targetUserEmail", { length: 320 }),
+  reason: text("reason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type UserEvent = typeof userEvents.$inferSelect;

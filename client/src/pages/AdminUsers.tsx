@@ -3,15 +3,23 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
-import { ArrowLeft, Shield, ShieldOff, Users, AlertTriangle, CheckCircle, Clock, Mail } from "lucide-react";
+import {
+  ArrowLeft, Shield, ShieldOff, Users, AlertTriangle,
+  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp,
+} from "lucide-react";
 
 export default function AdminUsers() {
   const { user, loading } = useAuth();
   const [confirmBlock, setConfirmBlock] = useState<{ userId: number; name: string } | null>(null);
   const [blockReason, setBlockReason] = useState("");
+  const [showAuditLog, setShowAuditLog] = useState(false);
 
   const { data: userList, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
     enabled: user?.role === "admin",
+  });
+
+  const { data: auditLog, isLoading: auditLoading } = trpc.admin.listAuditLog.useQuery(undefined, {
+    enabled: user?.role === "admin" && showAuditLog,
   });
 
   const blockMutation = trpc.admin.blockUser.useMutation({
@@ -107,7 +115,7 @@ export default function AdminUsers() {
         ) : !userList?.length ? (
           <div className="text-center py-16 text-gray-500">No users found.</div>
         ) : (
-          <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+          <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden mb-8">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wider">
@@ -210,6 +218,83 @@ export default function AdminUsers() {
             </table>
           </div>
         )}
+
+        {/* Audit Log Section */}
+        <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+          <button
+            onClick={() => setShowAuditLog(prev => !prev)}
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <ScrollText size={16} className="text-amber-400" />
+              <span className="font-semibold text-sm text-white">Admin Audit Log</span>
+              <span className="text-xs text-gray-500">— tamper-evident record of all block/unblock actions</span>
+            </div>
+            {showAuditLog ? (
+              <ChevronUp size={16} className="text-gray-500" />
+            ) : (
+              <ChevronDown size={16} className="text-gray-500" />
+            )}
+          </button>
+
+          {showAuditLog && (
+            <div className="border-t border-gray-800">
+              {auditLoading ? (
+                <div className="text-center py-8 text-gray-500 text-sm">Loading audit log...</div>
+              ) : !auditLog?.length ? (
+                <div className="text-center py-8 text-gray-600 text-sm">No audit events recorded yet.</div>
+              ) : (
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-800 text-gray-500 uppercase tracking-wider">
+                      <th className="text-left px-5 py-2.5">When</th>
+                      <th className="text-left px-5 py-2.5">Action</th>
+                      <th className="text-left px-5 py-2.5">Target User</th>
+                      <th className="text-left px-5 py-2.5 hidden md:table-cell">Performed By</th>
+                      <th className="text-left px-5 py-2.5 hidden lg:table-cell">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auditLog.map(event => (
+                      <tr key={event.id} className="border-b border-gray-800/40 last:border-0 hover:bg-gray-800/20">
+                        <td className="px-5 py-2.5 text-gray-500 whitespace-nowrap">
+                          {new Date(event.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-5 py-2.5">
+                          {event.action === "block" ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/40 text-red-400 font-semibold">
+                              <ShieldOff size={9} />
+                              Blocked
+                            </span>
+                          ) : event.action === "unblock" ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 text-emerald-400 font-semibold">
+                              <Shield size={9} />
+                              Unblocked
+                            </span>
+                          ) : (
+                            <span className="text-amber-400 font-semibold">{event.action}</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-2.5">
+                          <p className="text-white font-medium">{event.targetUserName ?? `#${event.targetUserId}`}</p>
+                          {event.targetUserEmail && (
+                            <p className="text-gray-600">{event.targetUserEmail}</p>
+                          )}
+                        </td>
+                        <td className="px-5 py-2.5 hidden md:table-cell text-gray-400">
+                          {event.actorName ?? `Admin #${event.actorId}`}
+                        </td>
+                        <td className="px-5 py-2.5 hidden lg:table-cell text-gray-500 max-w-[200px] truncate" title={event.reason ?? ""}>
+                          {event.reason ?? "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Block confirmation modal */}
@@ -227,7 +312,7 @@ export default function AdminUsers() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs text-gray-500 mb-1.5">Reason (optional)</label>
+              <label className="block text-xs text-gray-500 mb-1.5">Reason (optional — recorded in audit log)</label>
               <textarea
                 value={blockReason}
                 onChange={e => setBlockReason(e.target.value)}

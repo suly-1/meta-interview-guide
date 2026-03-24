@@ -580,7 +580,7 @@
 
 ## Security Hardening Batch 2 (March 24, 2026)
 
-- [ ] Server-side block enforcement — add isBanned check in protectedProcedure middleware (throw FORBIDDEN if ctx.user.isBanned === 1)
-- [ ] Admin audit log — add user_events table (action, actorId, targetUserId, reason, createdAt)
-- [ ] Record block/unblock actions in user_events table from admin.ts
-- [ ] Show audit trail in /admin/users page (expandable log per user or separate audit section)
+- [x] Server-side block enforcement — isBanned check already in protectedProcedure middleware (FORBIDDEN thrown server-side)
+- [x] Admin audit log — user_events table created (action, actorId, actorName, targetUserId, targetUserName, targetUserEmail, reason, createdAt)
+- [x] Record block/unblock actions in user_events table from admin.ts
+- [x] Show audit trail in /admin/users page (expandable "Admin Audit Log" section, newest first, shows action/target/actor/reason)
