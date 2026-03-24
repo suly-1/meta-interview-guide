@@ -662,3 +662,7 @@
 - [x] Add frontend token context (read from URL ?key=, store in localStorage, inject as header)
 - [x] Remove auth guards from all admin pages
 - [x] Update admin nav button URL to include token
+
+## Admin Button Fix (March 24, 2026)
+
+- [x] Move Admin button to fixed bottom-left corner so it is always visible (not pushed off-screen by crowded nav)
