@@ -467,3 +467,6 @@
 - [x] Lazy-load Streamdown inside MockInterviewerChat, MetaCodingScreenSimulator, SystemDesignEnhancements
 - [x] PWA Service Worker: install vite-plugin-pwa, configure Workbox to cache vendor chunks
 - [x] Add web app manifest (name, icons, theme color) for installability
+
+## UI Fixes Pending
+- [x] Fix yellow-on-yellow text contrast in FAANG-Style Coding Screen Simulator box header/title area

@@ -42,14 +42,15 @@ jobs:
           VITE_FRONTEND_FORGE_API_URL: "https://api.manus.im"
           VITE_ANALYTICS_ENDPOINT: ""
           VITE_ANALYTICS_WEBSITE_ID: ""
-      # ── Build Validation (static analysis) ──────────────────────────────────────────
+
+      # ── Build Validation (static analysis) ──────────────────────────────────
       # Fast static check: scans all JS chunks for TDZ-prone cross-chunk
       # React dependencies (e.g. recharts in a separate chunk from React).
       # No browser needed — runs in seconds.
       - name: Validate chunks — detect TDZ bundling errors
         run: node scripts/validate-chunks.mjs
 
-      # ── Smoke Test (headless browser) ─────────────────────────────────────────
+      # ── Smoke Test (headless browser) ────────────────────────────────────────
       # Serves dist/public locally, opens it in headless Chromium, and verifies:
       #   1. No uncaught JavaScript errors (e.g. TDZ crashes, missing modules)
       #   2. React mounts and renders content inside #root (no blank page)
@@ -60,9 +61,8 @@ jobs:
 
       - name: Smoke test — verify build renders without errors
         run: node scripts/smoke-test.mjs
-        # Fail fast: if the smoke test fails, the deploy job never runs
 
-      # ── Upload artifact ───────────────────────────────────────────────
+      # ── Upload artifact ───────────────────────────────────────────────────────
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -70,6 +70,25 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist/public
+
+      # ── Notify on failure ─────────────────────────────────────────────────────
+      - name: Notify on build failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            core.warning(`Build/smoke test failed. Check the run: ${runUrl}`);
+            // To add email/Slack notifications, add your webhook secret to repo secrets
+            // and uncomment the relevant block below.
+            //
+            // Slack example (add SLACK_WEBHOOK_URL to repo secrets):
+            // await fetch(process.env.SLACK_WEBHOOK_URL, {
+            //   method: 'POST',
+            //   headers: { 'Content-Type': 'application/json' },
+            //   body: JSON.stringify({ text: `🚨 Deploy failed: ${runUrl}` })
+            // });
 
   deploy:
     environment:
