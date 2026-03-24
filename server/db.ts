@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, loginEvents } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -74,6 +74,19 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
+  }
+}
+
+/**
+ * Record a login event for a user (fire-and-forget, non-critical).
+ */
+export async function recordLoginEvent(userId: number, ipAddress?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.insert(loginEvents).values({ userId, ipAddress: ipAddress ?? null });
+  } catch {
+    // Non-critical — don't break login if this fails
   }
 }
 

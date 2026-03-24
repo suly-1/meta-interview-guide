@@ -67,3 +67,42 @@ startServer().catch(console.error);
 
 // Register weekly feedback digest cron (Mondays 08:00 UTC)
 registerFeedbackDigestCron();
+
+// Auto-unblock cron: check every hour for expired blocks and lift them
+import { getDb } from "../db";
+import { users, userEvents } from "../../drizzle/schema";
+import { and, eq, lte, inArray } from "drizzle-orm";
+
+async function processExpiredBlocks() {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    const now = new Date();
+    const expired = await db
+      .select({ id: users.id, name: users.name, email: users.email })
+      .from(users)
+      .where(and(eq(users.isBanned, 1), lte(users.bannedUntil, now)));
+    if (expired.length === 0) return;
+    const ids = expired.map(u => u.id);
+    await db.update(users).set({ isBanned: 0, bannedAt: null, bannedUntil: null, bannedReason: null })
+      .where(inArray(users.id, ids));
+    for (const u of expired) {
+      await db.insert(userEvents).values({
+        action: 'unblock',
+        actorId: 0,
+        actorName: 'System (auto-expiry)',
+        targetUserId: u.id,
+        targetUserName: u.name ?? `User #${u.id}`,
+        targetUserEmail: u.email ?? 'unknown',
+        reason: 'Block period expired — automatically unblocked',
+      }).catch(() => {});
+    }
+    console.log(`[AutoUnblock] Unblocked ${expired.length} user(s) with expired blocks`);
+  } catch (err) {
+    console.error('[AutoUnblock] Error processing expired blocks:', err);
+  }
+}
+
+// Run immediately on startup, then every hour
+processExpiredBlocks();
+setInterval(processExpiredBlocks, 60 * 60 * 1000);

@@ -5,7 +5,7 @@ import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
-  Clock, AlertTriangle, CheckCircle, Shield, Users, FileText
+  Clock, AlertTriangle, CheckCircle, Shield, Users, FileText, RefreshCw
 } from "lucide-react";
 
 export default function AdminSettings() {
@@ -13,6 +13,8 @@ export default function AdminSettings() {
   const [durationInput, setDurationInput] = useState("");
   const [startDateInput, setStartDateInput] = useState("");
   const [confirmLock, setConfirmLock] = useState(false);
+  const [confirmCohortReset, setConfirmCohortReset] = useState(false);
+  const [cohortResetSuccess, setCohortResetSuccess] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
 
@@ -35,6 +37,15 @@ export default function AdminSettings() {
 
   const updateSettings = trpc.siteSettings.updateLockSettings.useMutation({
     onSuccess: () => utils.siteSettings.getLockStatus.invalidate(),
+  });
+
+  const cohortReset = trpc.admin.cohortReset.useMutation({
+    onSuccess: (data) => {
+      utils.siteSettings.getLockStatus.invalidate();
+      setConfirmCohortReset(false);
+      setCohortResetSuccess(`New cohort started. Lock clock reset to ${data.newStartDate}. All disclaimer acknowledgments cleared.`);
+      setTimeout(() => setCohortResetSuccess(null), 8000);
+    },
   });
 
   if (loading) {
@@ -309,6 +320,29 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        {/* Cohort Reset */}
+        <div className="bg-gray-900 rounded-2xl border border-amber-800/30 p-6">
+          <h3 className="font-semibold text-white mb-1 flex items-center gap-2">
+            <RefreshCw size={15} className="text-amber-400" />
+            Cohort Reset
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Start a new cohort of candidates. This resets the 60-day clock to today and clears all disclaimer acknowledgments so every user must re-sign before accessing the guide.
+          </p>
+          {cohortResetSuccess && (
+            <div className="mb-4 px-4 py-3 bg-emerald-900/30 border border-emerald-700/40 rounded-xl text-xs text-emerald-300">
+              ✓ {cohortResetSuccess}
+            </div>
+          )}
+          <button
+            onClick={() => setConfirmCohortReset(true)}
+            className="w-full py-3 rounded-xl bg-amber-900/30 border border-amber-700/40 hover:bg-amber-900/50 text-amber-300 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <RefreshCw size={15} />
+            Start New Cohort
+          </button>
+        </div>
+
         {/* How it works */}
         <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">How the Time-Lock Works</h4>
@@ -321,6 +355,38 @@ export default function AdminSettings() {
           </ul>
         </div>
       </div>
+
+      {/* Cohort Reset confirmation modal */}
+      {confirmCohortReset && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-amber-800/50 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-900/50 flex items-center justify-center">
+                <RefreshCw size={18} className="text-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">Start New Cohort?</h3>
+                <p className="text-sm text-gray-400">This will reset the 60-day clock and clear all disclaimer acknowledgments.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmCohortReset(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => cohortReset.mutate()}
+                disabled={cohortReset.isPending}
+                className="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold transition-colors disabled:opacity-50"
+              >
+                {cohortReset.isPending ? "Resetting..." : "Confirm Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Lock confirmation modal */}
       {confirmLock && (

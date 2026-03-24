@@ -36,6 +36,13 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
+      // Record login event for admin activity monitoring (fire-and-forget)
+      const freshUser = await db.getUserByOpenId(userInfo.openId);
+      if (freshUser?.id) {
+        const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ?? req.socket.remoteAddress;
+        db.recordLoginEvent(freshUser.id, ip).catch(() => {});
+      }
+
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
         expiresInMs: ONE_YEAR_MS,

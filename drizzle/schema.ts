@@ -21,8 +21,9 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
   disclaimerAcknowledgedAt: timestamp("disclaimerAcknowledgedAt"),
-  isBanned: tinyint("isBanned").notNull().default(0), // 1 = blocked by admin
+  isBanned: tinyint("isBanned").notNull().default(0),
   bannedAt: timestamp("bannedAt"),
+  bannedUntil: timestamp("bannedUntil"),   // null = permanent block, set = auto-unblock date
   bannedReason: text("bannedReason"),
 });
 export type User = typeof users.$inferSelect;
@@ -204,3 +205,12 @@ export const userEvents = mysqlTable("user_events", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type UserEvent = typeof userEvents.$inferSelect;
+
+// Login activity log — one row per login event, used for admin activity monitoring
+export const loginEvents = mysqlTable("login_events", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  ipAddress: varchar("ipAddress", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type LoginEvent = typeof loginEvents.$inferSelect;

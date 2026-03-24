@@ -252,6 +252,7 @@ export default function AdminUsers() {
                       <th className="text-left px-5 py-2.5">Target User</th>
                       <th className="text-left px-5 py-2.5 hidden md:table-cell">Performed By</th>
                       <th className="text-left px-5 py-2.5 hidden lg:table-cell">Reason</th>
+                      <th className="px-5 py-2.5"></th>
                     </tr>
                   </thead>
                   <tbody>

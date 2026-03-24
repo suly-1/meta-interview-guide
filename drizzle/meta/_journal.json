@@ -57,6 +57,13 @@
       "when": 1774321487574,
       "tag": "0007_simple_alex_power",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1774322864843,
+      "tag": "0008_fair_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

@@ -584,3 +584,15 @@
 - [x] Admin audit log — user_events table created (action, actorId, actorName, targetUserId, targetUserName, targetUserEmail, reason, createdAt)
 - [x] Record block/unblock actions in user_events table from admin.ts
 - [x] Show audit trail in /admin/users page (expandable "Admin Audit Log" section, newest first, shows action/target/actor/reason)
+
+## Batch: Cohort Reset + Login Activity + Audit CSV (March 24, 2026)
+
+- [x] Add login_events table to schema (userId, createdAt) — track each login
+- [x] Record login event in oauth.ts OAuth callback after upsertUser
+- [x] Backend: cohortReset procedure (adminProcedure) — reset lock clock, clear all disclaimerAcknowledged, notify owner
+- [x] Backend: listLoginActivity procedure (adminProcedure) — return last 5 logins per user as map[userId -> timestamps]
+- [x] AdminSettings: add "Cohort Reset" button with confirmation dialog and success message
+- [x] AdminUsers: show last 5 login timestamps per user (expandable Activity button per row)
+- [x] AdminUsers: add "Export Audit Log CSV" button (download full user_events as CSV)
+- [x] Block expiry — blockedUntil column added to users table, auto-unblock cron every hour, optional duration field in block dialog
+- [x] Re-block shortcut in audit log — "Re-block" button on unblock rows in audit log (reBlockUser procedure)
