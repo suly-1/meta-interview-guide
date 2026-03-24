@@ -3,7 +3,7 @@
  * Owner-only page. Shows anonymized pass-rate comparisons for candidates
  * who used each feature vs those who skipped it, using DB scores data.
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
@@ -18,7 +18,9 @@ import {
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
+  Send,
 } from "lucide-react";
+import { toast } from "sonner";
 
 /** Mastery threshold: rating >= 4 counts as "mastered" */
 const MASTERY_THRESHOLD = 4;
@@ -64,6 +66,18 @@ export default function AdminStats() {
 
   const { data: feedbackStats } = trpc.feedback.adminStats.useQuery(undefined, {
     enabled: isAdmin,
+  });
+
+  const [digestSent, setDigestSent] = useState(false);
+  const sendDigest = trpc.feedback.triggerDailyAlert.useMutation({
+    onSuccess: () => {
+      toast.success("Digest email sent!");
+      setDigestSent(true);
+      setTimeout(() => setDigestSent(false), 5000);
+    },
+    onError: err => {
+      toast.error(`Failed to send digest: ${err.message}`);
+    },
   });
 
   // Compute pattern mastery stats
@@ -140,7 +154,7 @@ export default function AdminStats() {
           >
             <ArrowLeft size={16} />
           </Link>
-          <div>
+          <div className="flex-1">
             <h1
               className="text-sm font-bold"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
@@ -151,6 +165,18 @@ export default function AdminStats() {
               Anonymized performance data across all candidates
             </p>
           </div>
+          <button
+            onClick={() => sendDigest.mutate()}
+            disabled={sendDigest.isPending || digestSent}
+            className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white transition-colors"
+          >
+            <Send size={11} />
+            {digestSent
+              ? "Sent!"
+              : sendDigest.isPending
+                ? "Sending…"
+                : "Send Digest"}
+          </button>
         </div>
       </div>
 

@@ -911,3 +911,6 @@
 - [x] Feedback count badge on TopNav admin shield icon (red dot when last7Days > 0)
 - [x] Feedback count badge (red dot) on TopNav admin shield icon via adminStats query
 - [x] Server-side block enforcement: adminProcedure and ownerProcedure now chain through requireUser so blocked admins/owners are rejected
+- [x] Re-block shortcut in audit log (AdminUsers) — one-click re-apply last block reason
+- [x] Send Digest button on AdminStats page — reuse triggerDailyAlert mutation
+- [x] useUtils invalidation on disclaimer toggle in AdminAccess — instant UI update on flip
