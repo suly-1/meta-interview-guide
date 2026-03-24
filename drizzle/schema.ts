@@ -21,6 +21,9 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
   disclaimerAcknowledgedAt: timestamp("disclaimerAcknowledgedAt"),
+  isBanned: tinyint("isBanned").notNull().default(0), // 1 = blocked by admin
+  bannedAt: timestamp("bannedAt"),
+  bannedReason: text("bannedReason"),
 });
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -65,6 +68,7 @@ export type Scorecard = typeof scorecards.$inferSelect;
 
 export const leaderboardEntries = mysqlTable("leaderboard_entries", {
   id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"), // nullable for backward-compat; new entries always have userId
   anonHandle: varchar("anonHandle", { length: 32 }).notNull(),
   streakDays: int("streakDays").notNull().default(0),
   patternsMastered: int("patternsMastered").notNull().default(0),
@@ -176,3 +180,13 @@ export const sharedSprintPlans = mysqlTable("shared_sprint_plans", {
   expiresAt: timestamp("expiresAt"),
 });
 export type SharedSprintPlan = typeof sharedSprintPlans.$inferSelect;
+
+// Site settings — key/value store for admin-configurable settings
+// Keys: 'lock_enabled' (0/1), 'lock_start_date' (ISO date string), 'lock_duration_days' (number)
+export const siteSettings = mysqlTable("site_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 64 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SiteSetting = typeof siteSettings.$inferSelect;

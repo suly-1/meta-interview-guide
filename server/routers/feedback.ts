@@ -3,7 +3,7 @@
  */
 
 import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, adminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteFeedback, sprintPlanFeedback, sharedSprintPlans } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
@@ -45,8 +45,8 @@ export const feedbackRouter = router({
       return { success: true };
     }),
 
-  // Update feedback triage status (admin only)
-  updateFeedbackStatus: protectedProcedure
+  // Update feedback triage status (admin only) — Fix #7: use adminProcedure for consistent enforcement
+  updateFeedbackStatus: adminProcedure
     .input(
       z.object({
         id: z.number().int(),
@@ -54,7 +54,6 @@ export const feedbackRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin") return { success: false };
       const db = await getDb();
       if (!db) return { success: false };
       await db
@@ -64,9 +63,8 @@ export const feedbackRouter = router({
       return { success: true };
     }),
 
-  // Get all site feedback (owner only — for the dashboard)
-  getAllSiteFeedback: protectedProcedure.query(async ({ ctx }) => {
-    if (ctx.user.role !== "admin") return [];
+  // Get all site feedback (owner only — for the dashboard) — Fix #7: use adminProcedure
+  getAllSiteFeedback: adminProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return [];
     return db
@@ -154,6 +152,10 @@ export const feedbackRouter = router({
         .limit(1);
       if (!rows.length) return null;
       const plan = rows[0];
+      // Fix #6: Enforce expiry — treat expired plans as not found
+      if (plan.expiresAt && new Date() > new Date(plan.expiresAt)) {
+        return null;
+      }
       // Increment view count
       await db
         .update(sharedSprintPlans)

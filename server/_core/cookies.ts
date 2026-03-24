@@ -39,10 +39,12 @@ export function getSessionCookieOptions(
   //       ? hostname
   //       : undefined;
 
+  // Fix #8: SameSite="lax" prevents CSRF attacks while still allowing normal navigation.
+  // "none" was only needed for cross-site iframes — this app doesn't use them.
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "none",
+    sameSite: "lax",
     secure: isSecureRequest(req),
   };
 }

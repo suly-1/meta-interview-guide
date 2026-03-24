@@ -1,0 +1,1 @@
+ALTER TABLE `leaderboard_entries` ADD `userId` int;

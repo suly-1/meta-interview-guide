@@ -535,3 +535,39 @@
 
 ## Privacy & Access Control
 - [x] Owner-only gate for disclaimer/readiness report (visible only to OWNER_OPEN_ID user) — /admin/disclaimer route wired, backend adminProcedure gates data, db.ts auto-assigns admin role to OWNER_OPEN_ID
+
+## Security Audit Fixes (March 2026)
+
+- [x] Fix #1: Move digest.send and collab.sendWeeklyDigest to protectedProcedure (notification spam)
+- [x] Fix #2: Move collab.uploadAudio to protectedProcedure + add MIME type validation + size limit
+- [x] Fix #3: Add user ownership to leaderboard (require login to upsert/remove, store userId)
+- [ ] Fix #4: Add collab room access control (require login to create rooms, validate ownership on update)
+- [ ] Fix #5: Add server-side LLM rate limiting (per-IP throttling for public LLM endpoints)
+- [x] Fix #6: Enforce sprint plan expiry in getSharedPlan query
+- [x] Fix #7: Replace manual admin role checks in feedback.ts with adminProcedure
+- [ ] Fix #8: Change session cookie SameSite from "none" to "lax"
+- [ ] Fix #9: Remove skip button from DisclaimerGate (require checkbox acknowledgment)
+
+## Security Audit Fixes (March 2026)
+
+- [x] Fix #1: Move digest.send and collab.sendWeeklyDigest to protectedProcedure (notification spam)
+- [x] Fix #2: Move collab.uploadAudio to protectedProcedure + add MIME type validation + size limit
+- [x] Fix #3: Add user ownership to leaderboard (require login to upsert/remove, store userId)
+- [x] Fix #4: Add collab room access control (require login to create rooms, validate ownership on update)
+- [x] Fix #5: Add server-side LLM rate limiting (30 calls/10min per IP on all LLM endpoints)
+- [x] Fix #6: Enforce sprint plan expiry in getSharedPlan query
+- [x] Fix #7: Replace manual admin role checks in feedback.ts with adminProcedure
+- [x] Fix #8: Change session cookie SameSite from "none" to "lax"
+- [x] Fix #9: Remove skip button from DisclaimerGate (require checkbox acknowledgment)
+
+## Time-Lock Gate & User Blocking (Option 3)
+
+- [x] DB schema: add site_settings table (key/value), add users.isBanned/bannedAt/bannedReason columns
+- [x] Backend: siteSettings router (get/set lock start date, lock enabled toggle, manual lock override)
+- [x] Backend: access gate middleware (check lock status on every request, bypass for owner)
+- [x] Backend: user blocking (admin can block/unblock any user by id via adminRouter)
+- [x] Frontend: SiteLockGate component (shows "closed" wall when locked, owner sees bypass)
+- [x] Frontend: BannedGate component (shows "access revoked" screen to blocked users)
+- [x] Admin panel: time-lock controls at /admin/settings (start date, enable/disable, reset clock, manual lock)
+- [x] Admin panel: user management table at /admin/users (list all users, block/unblock toggles)
+- [x] Admin hub: linked Site Settings + User Management from /admin/disclaimer page

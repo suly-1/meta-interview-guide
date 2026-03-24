@@ -236,21 +236,11 @@ export default function DisclaimerGate({ onConfirm }: Props) {
             )}
           </button>
 
-          <div className="flex flex-col items-center gap-1.5">
-            <p className="text-center text-xs text-zinc-600">
-              Your choice is saved locally. You won't see this screen again on
-              this device.
-            </p>
-            <button
-              onClick={() => {
-                localStorage.setItem(STORAGE_KEY, "true");
-                onConfirm();
-              }}
-              className="text-xs text-zinc-600 hover:text-zinc-400 underline underline-offset-2 transition-colors"
-            >
-              I've seen this before — skip
-            </button>
-          </div>
+          {/* Fix #9: Removed skip button — users must check the box to acknowledge the disclaimer */}
+          <p className="text-center text-xs text-zinc-600">
+            Your acknowledgment is saved. You won't see this screen again on
+            this device.
+          </p>
         </div>
       </div>
     </div>

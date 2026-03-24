@@ -6,7 +6,7 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
-import { ShieldAlert, CheckCircle2, XCircle, ArrowUpDown, ArrowLeft, Download } from "lucide-react";
+import { ShieldAlert, CheckCircle2, XCircle, ArrowUpDown, ArrowLeft, Download, Users, Settings } from "lucide-react";
 
 type SortKey = "name" | "email" | "createdAt" | "lastSignedIn" | "acknowledgedAt";
 type SortDir = "asc" | "desc";
@@ -132,13 +132,29 @@ export default function AdminDisclaimerReport() {
             <p className="text-xs text-muted-foreground mt-0.5">Admin audit — all registered users</p>
           </div>
         </div>
-        <button
-          onClick={exportCsv}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-secondary transition-colors"
-        >
-          <Download size={13} />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/settings"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-secondary text-gray-400 transition-colors"
+          >
+            <Settings size={13} />
+            Site Settings
+          </Link>
+          <Link
+            href="/admin/users"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 transition-colors"
+          >
+            <Users size={13} />
+            User Management
+          </Link>
+          <button
+            onClick={exportCsv}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-secondary transition-colors"
+          >
+            <Download size={13} />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">

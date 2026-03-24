@@ -1,12 +1,15 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { leaderboardEntries } from "../../drizzle/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 // ── Leaderboard Router ────────────────────────────────────────────────────────
+// Fix #3: upsert and remove now require login and enforce user ownership.
+// getTop and checkHandle remain public so anyone can view the leaderboard.
 export const leaderboardRouter = router({
-  // Get top 20 entries
+  // Get top 20 entries — public read
   getTop: publicProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
@@ -18,8 +21,8 @@ export const leaderboardRouter = router({
     return rows;
   }),
 
-  // Upsert a leaderboard entry by handle
-  upsert: publicProcedure
+  // Upsert a leaderboard entry — requires login, enforces ownership
+  upsert: protectedProcedure
     .input(
       z.object({
         anonHandle: z.string().min(2).max(32),
@@ -30,30 +33,47 @@ export const leaderboardRouter = router({
         badges: z.array(z.string()).default([]),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
 
-      // Check if handle already exists
-      const existing = await db
+      // Check if this user already has an entry
+      const existingByUser = await db
         .select()
         .from(leaderboardEntries)
-        .where(eq(leaderboardEntries.anonHandle, input.anonHandle))
+        .where(eq(leaderboardEntries.userId, ctx.user.id))
         .limit(1);
 
-      if (existing.length > 0) {
+      if (existingByUser.length > 0) {
+        // User owns this entry — update it (handle may change too)
         await db
           .update(leaderboardEntries)
           .set({
+            anonHandle: input.anonHandle,
             streakDays: input.streakDays,
             patternsMastered: input.patternsMastered,
             mockSessions: input.mockSessions,
             overallPct: input.overallPct,
             badges: input.badges,
           })
-          .where(eq(leaderboardEntries.anonHandle, input.anonHandle));
+          .where(eq(leaderboardEntries.userId, ctx.user.id));
       } else {
+        // Check handle uniqueness before inserting
+        const handleTaken = await db
+          .select({ id: leaderboardEntries.id })
+          .from(leaderboardEntries)
+          .where(eq(leaderboardEntries.anonHandle, input.anonHandle))
+          .limit(1);
+
+        if (handleTaken.length > 0) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This handle is already taken. Please choose a different one.",
+          });
+        }
+
         await db.insert(leaderboardEntries).values({
+          userId: ctx.user.id,
           anonHandle: input.anonHandle,
           streakDays: input.streakDays,
           patternsMastered: input.patternsMastered,
@@ -66,19 +86,18 @@ export const leaderboardRouter = router({
       return { success: true, handle: input.anonHandle };
     }),
 
-  // Remove a handle from the leaderboard
-  remove: publicProcedure
-    .input(z.object({ anonHandle: z.string() }))
-    .mutation(async ({ input }) => {
+  // Remove own leaderboard entry — requires login, only deletes own entry
+  remove: protectedProcedure
+    .mutation(async ({ ctx }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
       await db
         .delete(leaderboardEntries)
-        .where(eq(leaderboardEntries.anonHandle, input.anonHandle));
+        .where(eq(leaderboardEntries.userId, ctx.user.id));
       return { success: true };
     }),
 
-  // Check if a handle is taken
+  // Check if a handle is taken — public
   checkHandle: publicProcedure
     .input(z.object({ anonHandle: z.string() }))
     .query(async ({ input }) => {
@@ -91,4 +110,16 @@ export const leaderboardRouter = router({
         .limit(1);
       return { taken: rows.length > 0 };
     }),
+
+  // Get current user's own entry (so they can see their rank)
+  getMyEntry: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return null;
+    const rows = await db
+      .select()
+      .from(leaderboardEntries)
+      .where(eq(leaderboardEntries.userId, ctx.user.id))
+      .limit(1);
+    return rows[0] ?? null;
+  }),
 });

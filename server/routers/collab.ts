@@ -1,14 +1,38 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { collabRooms, sessionEvents, scorecards } from "../../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
 import { notifyOwner } from "../_core/notification";
+import { TRPCError } from "@trpc/server";
+
+// ── Simple in-memory rate limiter (Fix #5) ────────────────────────────────────
+// Limits LLM calls to 30 per IP per 10 minutes to prevent API credit drain.
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
+function checkRateLimit(ip: string): void {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return;
+  }
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Too many AI requests. Please wait a few minutes before trying again.",
+    });
+  }
+}
 
 // ── Room management ────────────────────────────────────────────────────────
+// Fix #4: createRoom, updateRoom, saveEvent, saveScorecard now require login
 export const collabRouter = router({
-  createRoom: publicProcedure
+  createRoom: protectedProcedure
     .input(z.object({
       roomCode: z.string().min(4).max(16),
       questionTitle: z.string().optional(),
@@ -35,7 +59,7 @@ export const collabRouter = router({
       return rows[0] ?? null;
     }),
 
-  updateRoom: publicProcedure
+  updateRoom: protectedProcedure
     .input(z.object({
       roomCode: z.string(),
       status: z.enum(["waiting", "active", "ended"]).optional(),
@@ -52,7 +76,7 @@ export const collabRouter = router({
     }),
 
   // ── Session events (for replay) ──────────────────────────────────────────
-  saveEvent: publicProcedure
+  saveEvent: protectedProcedure
     .input(z.object({
       roomCode: z.string(),
       eventType: z.string(),
@@ -81,7 +105,7 @@ export const collabRouter = router({
     }),
 
   // ── Scorecard ────────────────────────────────────────────────────────────
-  saveScorecard: publicProcedure
+  saveScorecard: protectedProcedure
     .input(z.object({
       roomCode: z.string(),
       scorerName: z.string().optional(),
@@ -92,9 +116,13 @@ export const collabRouter = router({
       communicationScore: z.number().min(1).max(5),
       overallFeedback: z.string().optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("DB unavailable");
+
+      // Rate limit LLM call
+      const ip = (ctx.req as { ip?: string }).ip ?? "unknown";
+      checkRateLimit(ip);
 
       // Generate AI coaching note
       const avg = ((input.requirementsScore + input.architectureScore + input.scalabilityScore + input.communicationScore) / 4).toFixed(1);
@@ -141,14 +169,17 @@ export const collabRouter = router({
       return rows[0] ?? null;
     }),
 
-  // ── AI Interviewer ────────────────────────────────────────────────────────
+  // ── AI Interviewer (Fix #5: rate limited) ────────────────────────────────
   aiFollowUp: publicProcedure
     .input(z.object({
       questionTitle: z.string(),
       transcript: z.array(z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string() })),
       weakAreas: z.array(z.string()).optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const ip = (ctx.req as { ip?: string }).ip ?? "unknown";
+      checkRateLimit(ip);
+
       const history = input.transcript.map(t => ({
         role: t.role === "interviewer" ? "assistant" as const : "user" as const,
         content: t.text,
@@ -173,7 +204,10 @@ export const collabRouter = router({
       transcript: z.array(z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string() })),
       durationMinutes: z.number(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const ip = (ctx.req as { ip?: string }).ip ?? "unknown";
+      checkRateLimit(ip);
+
       const transcriptText = input.transcript.map(t => `${t.role.toUpperCase()}: ${t.text}`).join("\n");
 
       const res = await invokeLLM({
@@ -220,13 +254,16 @@ export const collabRouter = router({
       }
     }),
 
-  // ── STAR Answer Quality Scorer ────────────────────────────────────────────
+  // ── STAR Answer Quality Scorer (Fix #5: rate limited) ────────────────────
   scoreStarAnswer: publicProcedure
     .input(z.object({
       question: z.string(),
       answer: z.string(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const ip = (ctx.req as { ip?: string }).ip ?? "unknown";
+      checkRateLimit(ip);
+
       const res = await invokeLLM({
         messages: [
           {
@@ -277,13 +314,16 @@ export const collabRouter = router({
       }
     }),
 
-  // ── Voice-to-STAR (transcription + structuring) ───────────────────────────
+  // ── Voice-to-STAR (transcription + structuring, Fix #5: rate limited) ────
   transcribeAndStructure: publicProcedure
     .input(z.object({
       audioUrl: z.string().url(),
       question: z.string(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const ip = (ctx.req as { ip?: string }).ip ?? "unknown";
+      checkRateLimit(ip);
+
       // Dynamic import to avoid issues if voiceTranscription module not available
       let transcription = "";
       try {
@@ -335,23 +375,26 @@ export const collabRouter = router({
       }
     }),
 
-
-  // ── Upload Audio to S3 ────────────────────────────────────────────────────
-  uploadAudio: publicProcedure
+  // ── Upload Audio to S3 (Fix #2: requires login, validates MIME type, enforces 10MB limit) ──
+  uploadAudio: protectedProcedure
     .input(z.object({
-      audioBase64: z.string(),
-      mimeType: z.string().default("audio/webm"),
+      audioBase64: z.string().max(14_000_000, "Audio exceeds 10MB limit"), // base64 is ~4/3 of raw bytes
+      mimeType: z.enum(["audio/webm", "audio/mp3", "audio/mpeg", "audio/wav", "audio/ogg", "audio/m4a", "audio/mp4"]).default("audio/webm"),
     }))
     .mutation(async ({ input }) => {
       const { storagePut } = await import("../storage");
       const buffer = Buffer.from(input.audioBase64, "base64");
+      if (buffer.length > 10 * 1024 * 1024) {
+        throw new Error("Audio file exceeds 10MB limit");
+      }
       const ext = input.mimeType.split("/")[1]?.split(";")[0] ?? "webm";
       const key = `voice-answers/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { url } = await storagePut(key, buffer, input.mimeType);
       return { url };
     }),
-  // ── Weekly Progress Digest ────────────────────────────────────────────────
-  sendWeeklyDigest: publicProcedure
+
+  // ── Weekly Progress Digest (Fix #1: requires login to prevent notification spam) ──
+  sendWeeklyDigest: protectedProcedure
     .input(z.object({
       masteredCount: z.number(),
       totalPatterns: z.number(),

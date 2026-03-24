@@ -36,6 +36,20 @@
       "when": 1774299095664,
       "tag": "0004_colossal_wilson_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1774318880247,
+      "tag": "0005_petite_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774320138317,
+      "tag": "0006_superb_serpent_society",
+      "breakpoints": true
     }
   ]
 }

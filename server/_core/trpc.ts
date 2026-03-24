@@ -17,6 +17,14 @@ const requireUser = t.middleware(async opts => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
 
+  // Block banned users from all protected procedures
+  if (ctx.user.isBanned) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Your access to this guide has been revoked. Please contact the administrator.",
+    });
+  }
+
   return next({
     ctx: {
       ...ctx,

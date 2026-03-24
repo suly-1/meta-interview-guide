@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { notifyOwner } from "./_core/notification";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { disclaimerRouter } from "./routers/disclaimer";
 import { collabRouter } from "./routers/collab";
@@ -16,6 +16,8 @@ import { aiRouter } from "./routers/ai";
 import { highImpactRouter } from "./routers/highImpact";
 import { scoresRouter } from "./routers/scores";
 import { feedbackRouter } from "./routers/feedback";
+import { adminRouter } from "./routers/admin";
+import { siteSettingsRouter } from "./routers/siteSettings";
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -33,10 +35,10 @@ export const appRouter = router({
 
   /**
    * digest.send — sends a formatted weekly progress digest to the owner via Manus notifications.
-   * Uses publicProcedure so no login is required (personal-use guide).
+   * Requires login to prevent notification spam from anonymous users.
    */
   digest: router({
-    send: publicProcedure
+    send: protectedProcedure
       .input(
         z.object({
           title: z.string().min(1, "title is required"),
@@ -1810,5 +1812,7 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   highImpact: highImpactRouter,
   scores: scoresRouter,
   feedback: feedbackRouter,
+  admin: adminRouter,
+  siteSettings: siteSettingsRouter,
 });
 export type AppRouter = typeof appRouter;
