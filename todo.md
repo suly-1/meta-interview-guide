@@ -671,3 +671,12 @@
 
 - [x] Fix /admin/feedback route showing main page instead of admin panel (was using /admin/feedback instead of /#/admin/feedback for hash router)
 - [x] Fix admin data not loading (token reader now checks hash fragment for ?key= param)
+
+## Admin Button Always Visible Fix (March 24, 2026)
+
+- [ ] Make Admin button always visible regardless of token state (currently hidden when no token in localStorage)
+
+## Admin Button Not Showing on Live Site (March 24, 2026)
+
+- [ ] Ensure Admin button renders unconditionally (no hidden conditional logic)
+- [ ] Push latest code to GitHub so changes are preserved
