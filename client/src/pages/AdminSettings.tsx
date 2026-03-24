@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
-  Clock, AlertTriangle, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight
+  Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight
 } from "lucide-react";
 
 export default function AdminSettings() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [durationInput, setDurationInput] = useState("");
   const [startDateInput, setStartDateInput] = useState("");
   const [confirmLock, setConfirmLock] = useState(false);
@@ -18,9 +17,7 @@ export default function AdminSettings() {
 
   const utils = trpc.useUtils();
 
-  const { data: disclaimerStatus } = trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined, {
-    enabled: user?.role === "admin",
-  });
+  const { data: disclaimerStatus } = trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined);
   const setDisclaimerEnabled = trpc.siteAccess.setDisclaimerEnabled.useMutation({
     onSuccess: () => {
       utils.siteAccess.getDisclaimerEnabled.invalidate();
@@ -29,7 +26,6 @@ export default function AdminSettings() {
   });
 
   const { data: lockStatus, isLoading } = trpc.siteSettings.getLockStatus.useQuery(undefined, {
-    enabled: user?.role === "admin",
     refetchInterval: 30_000,
   });
 
@@ -58,38 +54,7 @@ export default function AdminSettings() {
     },
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">You must be signed in to access this page.</p>
-          <a href={getLoginUrl()} className="text-blue-400 hover:text-blue-300 underline">Sign in</a>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-          <p className="text-red-400 font-semibold text-lg">Access Denied</p>
-          <Link href="/" className="mt-4 inline-block text-blue-400 hover:text-blue-300 underline text-sm">
-            Return to guide
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Always accessible via admin token — no auth guard needed
 
   const progressPercent = lockStatus
     ? Math.min(100, Math.round(((lockStatus.daysElapsed ?? 0) / (lockStatus.lockDurationDays ?? 60)) * 100))

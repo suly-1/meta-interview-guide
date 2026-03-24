@@ -4,13 +4,13 @@
  * Provides site-wide access control procedures:
  *   - checkAccess (public): returns lock state for every page load
  *   - getDisclaimerEnabled (public): returns disclaimer gate toggle
- *   - getSettings (ownerProcedure): full settings row
- *   - updateSettings (ownerProcedure): update lock date, lock days, manual lock, message
- *   - setDisclaimerEnabled (ownerProcedure): toggle disclaimer gate globally
- *   - cohortReset (ownerProcedure): reset 60-day clock, clear all disclaimer acknowledgments
+ *   - getSettings (tokenAdminProcedure): full settings row
+ *   - updateSettings (tokenAdminProcedure): update lock date, lock days, manual lock, message
+ *   - setDisclaimerEnabled (tokenAdminProcedure): toggle disclaimer gate globally
+ *   - cohortReset (tokenAdminProcedure): reset 60-day clock, clear all disclaimer acknowledgments
  */
 import { z } from "zod";
-import { ownerProcedure, publicProcedure, router } from "../_core/trpc";
+import { tokenAdminProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -136,7 +136,7 @@ export const siteAccessRouter = router({
   /**
    * Owner: Returns all current site settings.
    */
-  getSettings: ownerProcedure.query(async () => {
+  getSettings: tokenAdminProcedure.query(async () => {
     const [lockEnabled, manualLock, lockStartDate, lockDays, lockMessage, disclaimerEnabled] =
       await Promise.all([
         getSetting("lock_enabled"),
@@ -159,7 +159,7 @@ export const siteAccessRouter = router({
   /**
    * Owner: Update lock settings.
    */
-  updateSettings: ownerProcedure
+  updateSettings: tokenAdminProcedure
     .input(
       z.object({
         lockEnabled: z.boolean().optional(),
@@ -195,7 +195,7 @@ export const siteAccessRouter = router({
   /**
    * Owner: Enable or disable the disclaimer gate globally.
    */
-  setDisclaimerEnabled: ownerProcedure
+  setDisclaimerEnabled: tokenAdminProcedure
     .input(z.object({ enabled: z.boolean() }))
     .mutation(async ({ input }) => {
       await setSetting("disclaimer_enabled", input.enabled ? "1" : "0");
@@ -206,7 +206,7 @@ export const siteAccessRouter = router({
    * Owner: Reset the cohort clock to today and clear all disclaimer acknowledgments.
    * This starts a fresh 60-day window for all users.
    */
-  cohortReset: ownerProcedure.mutation(async ({ ctx }) => {
+  cohortReset: tokenAdminProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new Error("DB unavailable");
 

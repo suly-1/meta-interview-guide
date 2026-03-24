@@ -647,3 +647,18 @@
 ## Persistent Admin Button (March 24, 2026)
 
 - [x] Add always-visible admin button to nav bar (not gated by login/role)
+
+## No-Auth Admin Access (March 24, 2026)
+
+- [ ] Persistent admin button always visible in nav bar
+- [ ] Remove sign-in requirement from all admin pages (AdminFeedback, AdminUsers, AdminSettings, AdminStats, AdminDisclaimerReport)
+- [ ] Backend admin procedures use ownerProcedure — bypass by making admin pages call procedures without auth requirement OR add a secret token bypass
+
+## Secret Admin Token Bypass (March 24, 2026)
+
+- [x] Add ADMIN_SECRET_TOKEN to env and server/_core/env.ts
+- [x] Add tokenAdminProcedure to trpc.ts (accepts x-admin-token header as alternative to session)
+- [x] Update all admin router procedures to use tokenAdminProcedure
+- [x] Add frontend token context (read from URL ?key=, store in localStorage, inject as header)
+- [x] Remove auth guards from all admin pages
+- [x] Update admin nav button URL to include token

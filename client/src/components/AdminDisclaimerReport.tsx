@@ -17,15 +17,13 @@ function formatDate(d: Date | null | undefined): string {
 }
 
 export default function AdminDisclaimerReport() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [sortKey, setSortKey] = useState<SortKey>("acknowledgedAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [filter, setFilter] = useState<"all" | "acknowledged" | "pending">("all");
   const [search, setSearch] = useState("");
 
-  const { data: rows = [], isLoading, error } = trpc.disclaimer.adminReport.useQuery(undefined, {
-    enabled: !!user && user.role === "admin",
-  });
+  const { data: rows = [], isLoading, error } = trpc.disclaimer.adminReport.useQuery(undefined);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -91,30 +89,7 @@ export default function AdminDisclaimerReport() {
     URL.revokeObjectURL(url);
   };
 
-  // Loading auth state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Loading…</div>
-      </div>
-    );
-  }
-
-  // Not admin
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-8">
-        <ShieldAlert size={40} className="text-amber-400" />
-        <h1 className="text-xl font-bold text-foreground">Access Denied</h1>
-        <p className="text-muted-foreground text-sm text-center max-w-sm">
-          This page is restricted to administrators. If you believe this is an error, contact the site owner.
-        </p>
-        <Link href="/" className="text-sm text-blue-400 hover:underline flex items-center gap-1">
-          <ArrowLeft size={14} /> Back to Guide
-        </Link>
-      </div>
-    );
-  }
+  // Always accessible via admin token — no auth guard needed
 
   return (
     <div className="min-h-screen bg-background text-foreground">

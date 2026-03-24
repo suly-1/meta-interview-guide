@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, publicProcedure, router } from "../_core/trpc";
+import { tokenAdminProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -67,7 +67,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Update lock settings.
    */
-  updateLockSettings: adminProcedure
+  updateLockSettings: tokenAdminProcedure
     .input(z.object({
       lockEnabled: z.boolean().optional(),
       lockStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD").optional(),
@@ -89,7 +89,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Reset the 60-day clock to today (start a new cohort).
    */
-  resetClock: adminProcedure.mutation(async () => {
+  resetClock: tokenAdminProcedure.mutation(async () => {
     const today = new Date().toISOString().slice(0, 10);
     await setSetting("lock_start_date", today);
     await setSetting("lock_enabled", "1");
@@ -99,7 +99,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Immediately lock the site (manual override).
    */
-  lockNow: adminProcedure.mutation(async () => {
+  lockNow: tokenAdminProcedure.mutation(async () => {
     // Set start date far in the past so it's immediately expired
     const pastDate = new Date(Date.now() - 61 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     await setSetting("lock_start_date", pastDate);
@@ -110,7 +110,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Unlock the site immediately.
    */
-  unlock: adminProcedure.mutation(async () => {
+  unlock: tokenAdminProcedure.mutation(async () => {
     await setSetting("lock_enabled", "0");
     return { success: true };
   }),
@@ -127,7 +127,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Enable or disable the disclaimer gate.
    */
-  setDisclaimerEnabled: adminProcedure
+  setDisclaimerEnabled: tokenAdminProcedure
     .input(z.object({ enabled: z.boolean() }))
     .mutation(async ({ input }) => {
       await setSetting("disclaimer_enabled", input.enabled ? "1" : "0");

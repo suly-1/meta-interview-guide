@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, router } from "../_core/trpc";
+import { tokenAdminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { users, userEvents, loginEvents, siteSettings } from "../../drizzle/schema";
 import { eq, asc, desc, inArray, lte, and } from "drizzle-orm";
@@ -11,7 +11,7 @@ export const adminRouter = router({
    * List all users with their ban status, role, and activity info.
    * Admin-only.
    */
-  listUsers: adminProcedure.query(async () => {
+  listUsers: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db
@@ -49,7 +49,7 @@ export const adminRouter = router({
   /**
    * Block a user by ID. Admin cannot block themselves.
    */
-  blockUser: adminProcedure
+  blockUser: tokenAdminProcedure
     .input(z.object({
       userId: z.number().int().positive(),
       reason: z.string().max(500).optional(),
@@ -112,7 +112,7 @@ export const adminRouter = router({
   /**
    * Unblock a user by ID.
    */
-  unblockUser: adminProcedure
+  unblockUser: tokenAdminProcedure
     .input(z.object({ userId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -149,7 +149,7 @@ export const adminRouter = router({
    * List the admin audit log (all block/unblock events), newest first.
    * Admin-only.
    */
-  listAuditLog: adminProcedure.query(async () => {
+  listAuditLog: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db
@@ -165,7 +165,7 @@ export const adminRouter = router({
    * Returns a map of userId -> login timestamps.
    * Admin-only.
    */
-  listLoginActivity: adminProcedure.query(async () => {
+  listLoginActivity: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return {};
     // Fetch the 500 most recent login events across all users
@@ -190,7 +190,7 @@ export const adminRouter = router({
    * disclaimer acknowledgments so the new cohort must re-sign.
    * Admin-only.
    */
-  cohortReset: adminProcedure.mutation(async ({ ctx }) => {
+  cohortReset: tokenAdminProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new Error("DB unavailable");
 
@@ -222,7 +222,7 @@ export const adminRouter = router({
    * Block a user with an optional expiry date (auto-unblock after N days).
    * This extends the existing blockUser to support blockedUntil.
    */
-  blockUserWithExpiry: adminProcedure
+  blockUserWithExpiry: tokenAdminProcedure
     .input(z.object({
       userId: z.number().int().positive(),
       reason: z.string().max(500).optional(),
@@ -279,7 +279,7 @@ export const adminRouter = router({
    * Re-block a user directly from the audit log (quick re-apply).
    * Uses the same reason as the original block event.
    */
-  reBlockUser: adminProcedure
+  reBlockUser: tokenAdminProcedure
     .input(z.object({
       userId: z.number().int().positive(),
       reason: z.string().max(500).optional(),
@@ -317,7 +317,7 @@ export const adminRouter = router({
    * Process expired blocks — auto-unblock users whose bannedUntil has passed.
    * Called by a cron job every hour.
    */
-  processExpiredBlocks: adminProcedure.mutation(async ({ ctx }) => {
+  processExpiredBlocks: tokenAdminProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return { unblocked: 0 };
 

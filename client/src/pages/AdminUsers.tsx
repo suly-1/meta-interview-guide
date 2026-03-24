@@ -1,25 +1,22 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
 import {
-  ArrowLeft, Shield, ShieldOff, Users, AlertTriangle,
+  ArrowLeft, Shield, ShieldOff, Users,
   CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 export default function AdminUsers() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [confirmBlock, setConfirmBlock] = useState<{ userId: number; name: string } | null>(null);
   const [blockReason, setBlockReason] = useState("");
   const [showAuditLog, setShowAuditLog] = useState(false);
 
-  const { data: userList, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
-    enabled: user?.role === "admin",
-  });
+  const { data: userList, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined);
 
   const { data: auditLog, isLoading: auditLoading } = trpc.admin.listAuditLog.useQuery(undefined, {
-    enabled: user?.role === "admin" && showAuditLog,
+    enabled: showAuditLog,
   });
 
   const blockMutation = trpc.admin.blockUser.useMutation({
@@ -34,39 +31,7 @@ export default function AdminUsers() {
     onSuccess: () => refetch(),
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">You must be signed in to access this page.</p>
-          <a href={getLoginUrl()} className="text-blue-400 hover:text-blue-300 underline">Sign in</a>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-          <p className="text-red-400 font-semibold text-lg">Access Denied</p>
-          <p className="text-gray-500 text-sm mt-1">This page is restricted to administrators.</p>
-          <Link href="/" className="mt-4 inline-block text-blue-400 hover:text-blue-300 underline text-sm">
-            Return to guide
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Always accessible via admin token — no auth guard needed
 
   const bannedCount = userList?.filter(u => u.isBanned).length ?? 0;
   const adminCount = userList?.filter(u => u.role === "admin").length ?? 0;

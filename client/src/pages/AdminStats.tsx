@@ -5,10 +5,8 @@
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import {
-  BarChart2, RefreshCw, Lock, ArrowLeft, Send, Bell,
+  BarChart2, RefreshCw, ArrowLeft, Send, Bell,
   Bug, Lightbulb, BookOpen, Palette, HelpCircle,
   CheckCircle2, Clock, XCircle, AlertCircle, TrendingUp
 } from "lucide-react";
@@ -24,13 +22,10 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; colo
 };
 
 export default function AdminStats() {
-  const { isAuthenticated, loading, user } = useAuth();
   const [digestLoading, setDigestLoading] = useState(false);
   const [alertLoading, setAlertLoading] = useState(false);
 
-  const { data: stats, isLoading, refetch } = trpc.feedback.adminStats.useQuery(undefined, {
-    enabled: isAuthenticated && user?.role === "admin",
-  });
+  const { data: stats, isLoading, refetch } = trpc.feedback.adminStats.useQuery(undefined);
 
   const triggerDigest = trpc.feedback.triggerDigest.useMutation({
     onMutate: () => setDigestLoading(true),
@@ -68,32 +63,7 @@ export default function AdminStats() {
     onError: () => toast.error("Failed to mark items."),
   });
 
-  // Auth guard
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    window.location.href = getLoginUrl();
-    return null;
-  }
-
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6">
-        <div className="text-center max-w-sm">
-          <Lock size={32} className="mx-auto mb-4 text-gray-400" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Admin Access Required</h1>
-          <p className="text-gray-500 text-sm mb-4">This page is restricted to administrators.</p>
-          <Link href="/" className="text-sm text-blue-500 hover:underline">← Back to guide</Link>
-        </div>
-      </div>
-    );
-  }
+  // Always accessible via admin token — no auth guard needed
 
   const total = stats?.total ?? 0;
   const last7Days = stats?.last7Days ?? 0;

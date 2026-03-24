@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { publicProcedure, protectedProcedure, adminProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, tokenAdminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteFeedback, sprintPlanFeedback, sharedSprintPlans } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
@@ -93,8 +93,8 @@ export const feedbackRouter = router({
       return { success: true };
     }),
 
-  // Update feedback triage status (admin only) — Fix #7: use adminProcedure for consistent enforcement
-  updateFeedbackStatus: adminProcedure
+  // Update feedback triage status (admin only) — Fix #7: use tokenAdminProcedure for consistent enforcement
+  updateFeedbackStatus: tokenAdminProcedure
     .input(
       z.object({
         id: z.number().int(),
@@ -111,8 +111,8 @@ export const feedbackRouter = router({
       return { success: true };
     }),
 
-  // Get all site feedback (owner only — for the dashboard) — Fix #7: use adminProcedure
-  getAllSiteFeedback: adminProcedure.query(async ({ ctx }) => {
+  // Get all site feedback (owner only — for the dashboard) — Fix #7: use tokenAdminProcedure
+  getAllSiteFeedback: tokenAdminProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return [];
     return db
@@ -123,7 +123,7 @@ export const feedbackRouter = router({
   }),
 
   /** Admin: Get all feedback with optional filters */
-  adminGetAll: adminProcedure
+  adminGetAll: tokenAdminProcedure
     .input(
       z.object({
         limit: z.number().int().min(1).max(500).default(200),
@@ -146,7 +146,7 @@ export const feedbackRouter = router({
     }),
 
   /** Admin: Summary stats */
-  adminStats: adminProcedure.query(async () => {
+  adminStats: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return { byCategory: [], total: 0, last7Days: 0, newCount: 0 };
     const all = await db
@@ -167,19 +167,19 @@ export const feedbackRouter = router({
   }),
 
   /** Admin: Manually trigger weekly digest */
-  triggerDigest: adminProcedure.mutation(async () => {
+  triggerDigest: tokenAdminProcedure.mutation(async () => {
     await sendWeeklyDigest();
     return { success: true };
   }),
 
   /** Admin: Manually trigger daily alert check */
-  triggerDailyAlert: adminProcedure.mutation(async () => {
+  triggerDailyAlert: tokenAdminProcedure.mutation(async () => {
     const sent = await checkAndSendDailyAlert();
     return { success: true, sent };
   }),
 
   /** Admin: Save internal note on a feedback item */
-  updateNote: adminProcedure
+  updateNote: tokenAdminProcedure
     .input(z.object({ id: z.number().int(), adminNote: z.string().max(1000) }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -192,7 +192,7 @@ export const feedbackRouter = router({
     }),
 
   /** Admin: Bulk-update all 'new' items to 'in_progress' */
-  markAllNew: adminProcedure.mutation(async () => {
+  markAllNew: tokenAdminProcedure.mutation(async () => {
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     const result = await db
@@ -203,7 +203,7 @@ export const feedbackRouter = router({
   }),
 
   /** Admin: Update triage status (alias for updateFeedbackStatus) */
-  updateStatus: adminProcedure
+  updateStatus: tokenAdminProcedure
     .input(
       z.object({
         id: z.number().int(),

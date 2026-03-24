@@ -13,7 +13,7 @@
  *   - checkInactiveUsers: find users inactive for 30+ days
  */
 import { z } from "zod";
-import { adminProcedure, router } from "../_core/trpc";
+import { tokenAdminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { users, userEvents, loginEvents } from "../../drizzle/schema";
 import { eq, desc, and, lte, gte, inArray } from "drizzle-orm";
@@ -53,7 +53,7 @@ export const adminUsersRouter = router({
   /**
    * List all users with their ban status, role, and activity info.
    */
-  listUsers: adminProcedure.query(async () => {
+  listUsers: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db
@@ -90,7 +90,7 @@ export const adminUsersRouter = router({
   /**
    * Aggregate user stats: total, weeklyActive, blocked.
    */
-  getUserStats: adminProcedure.query(async () => {
+  getUserStats: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return { total: 0, weeklyActive: 0, blocked: 0 };
 
@@ -113,7 +113,7 @@ export const adminUsersRouter = router({
   /**
    * Login history for a specific user (last 30 events).
    */
-  getUserLoginHistory: adminProcedure
+  getUserLoginHistory: tokenAdminProcedure
     .input(z.object({ userId: z.number().int().positive() }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -131,7 +131,7 @@ export const adminUsersRouter = router({
    * Block a user with an optional expiry (auto-unblock after N days).
    * Admin cannot block themselves or another admin.
    */
-  blockUser: adminProcedure
+  blockUser: tokenAdminProcedure
     .input(
       z.object({
         userId: z.number().int().positive(),
@@ -194,7 +194,7 @@ export const adminUsersRouter = router({
   /**
    * Unblock a user.
    */
-  unblockUser: adminProcedure
+  unblockUser: tokenAdminProcedure
     .input(z.object({ userId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -227,7 +227,7 @@ export const adminUsersRouter = router({
   /**
    * Re-block a user (quick re-apply from audit log).
    */
-  reBlockUser: adminProcedure
+  reBlockUser: tokenAdminProcedure
     .input(
       z.object({
         userId: z.number().int().positive(),
@@ -274,7 +274,7 @@ export const adminUsersRouter = router({
   /**
    * Export the full audit log as a CSV string.
    */
-  exportAuditLogCsv: adminProcedure.query(async () => {
+  exportAuditLogCsv: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return { csv: "" };
 
@@ -304,7 +304,7 @@ export const adminUsersRouter = router({
   /**
    * List all audit log events (most recent first, max 200).
    */
-  listEvents: adminProcedure.query(async () => {
+  listEvents: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db
@@ -318,7 +318,7 @@ export const adminUsersRouter = router({
   /**
    * Find users who have not signed in for 30+ days and notify the owner.
    */
-  checkInactiveUsers: adminProcedure.mutation(async () => {
+  checkInactiveUsers: tokenAdminProcedure.mutation(async () => {
     const db = await getDb();
     if (!db) return { notified: false, count: 0 };
 

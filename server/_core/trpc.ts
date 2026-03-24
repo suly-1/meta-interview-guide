@@ -80,6 +80,40 @@ export const adminProcedure = t.procedure
   );
 
 /**
+ * tokenAdminProcedure — accepts either a valid session (role=admin) OR
+ * a matching x-admin-token header. This allows the site owner to access
+ * admin procedures without signing in by passing the secret token.
+ */
+export const tokenAdminProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+    const tokenHeader = ctx.req.headers['x-admin-token'] as string | undefined;
+    const tokenValid = ENV.adminSecretToken && tokenHeader === ENV.adminSecretToken;
+    const sessionAdmin = ctx.user && ctx.user.role === 'admin';
+    if (!tokenValid && !sessionAdmin) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: NOT_ADMIN_ERR_MSG });
+    }
+    // Build a synthetic admin user context when using token-only access
+    const effectiveUser = ctx.user ?? {
+      id: 0,
+      openId: 'token-admin',
+      name: 'Admin',
+      email: null,
+      avatarUrl: null,
+      role: 'admin' as const,
+      isBanned: 0,
+      bannedReason: null,
+      bannedUntil: null,
+      bannedAt: null,
+      disclaimerAcknowledgedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return next({ ctx: { ...ctx, user: effectiveUser } });
+  })
+);
+
+/**
  * ownerProcedure — stricter than adminProcedure.
  * Only the account whose openId matches ENV.ownerOpenId can call these procedures.
  * Chains through requireUser so blocked owners are also rejected.
