@@ -46,6 +46,16 @@
             keys.forEach(function(key) { caches.delete(key); });
           });
         }
+        // Listen for the kill-switch SW postMessage and reload once per session
+        navigator.serviceWorker.addEventListener('message', function(event) {
+          if (event.data && event.data.type === 'SW_KILL_SWITCH_ACTIVATED') {
+            var reloadKey = 'sw_kill_reload_' + location.pathname;
+            if (!sessionStorage.getItem(reloadKey)) {
+              sessionStorage.setItem(reloadKey, '1');
+              location.reload(true);
+            }
+          }
+        });
       }
     </script>
     <div id="root"></div>

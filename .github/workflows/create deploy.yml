@@ -42,7 +42,27 @@ jobs:
           VITE_FRONTEND_FORGE_API_URL: "https://api.manus.im"
           VITE_ANALYTICS_ENDPOINT: ""
           VITE_ANALYTICS_WEBSITE_ID: ""
+      # ── Build Validation (static analysis) ──────────────────────────────────────────
+      # Fast static check: scans all JS chunks for TDZ-prone cross-chunk
+      # React dependencies (e.g. recharts in a separate chunk from React).
+      # No browser needed — runs in seconds.
+      - name: Validate chunks — detect TDZ bundling errors
+        run: node scripts/validate-chunks.mjs
 
+      # ── Smoke Test (headless browser) ─────────────────────────────────────────
+      # Serves dist/public locally, opens it in headless Chromium, and verifies:
+      #   1. No uncaught JavaScript errors (e.g. TDZ crashes, missing modules)
+      #   2. React mounts and renders content inside #root (no blank page)
+      #   3. No JS/CSS assets return 4xx/5xx
+      # If any check fails the workflow exits with code 1 → deploy is blocked.
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Smoke test — verify build renders without errors
+        run: node scripts/smoke-test.mjs
+        # Fail fast: if the smoke test fails, the deploy job never runs
+
+      # ── Upload artifact ───────────────────────────────────────────────
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
