@@ -704,7 +704,7 @@ export default function Home() {
       {/* Fixed Admin button — always visible in bottom-left corner */}
       {(() => {
         const tok = getAdminToken();
-        const adminHref = tok ? `/admin/feedback?key=${encodeURIComponent(tok)}` : "/admin/feedback";
+        const adminHref = tok ? `/#/admin/feedback?key=${encodeURIComponent(tok)}` : "/#/admin/feedback";
         return (
           <a
             href={adminHref}

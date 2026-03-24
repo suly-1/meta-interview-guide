@@ -666,3 +666,8 @@
 ## Admin Button Fix (March 24, 2026)
 
 - [x] Move Admin button to fixed bottom-left corner so it is always visible (not pushed off-screen by crowded nav)
+
+## Admin Button Routing Fix (March 24, 2026)
+
+- [x] Fix /admin/feedback route showing main page instead of admin panel (was using /admin/feedback instead of /#/admin/feedback for hash router)
+- [x] Fix admin data not loading (token reader now checks hash fragment for ?key= param)
