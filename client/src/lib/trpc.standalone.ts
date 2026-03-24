@@ -601,7 +601,41 @@ export const trpc = {
     },
   },
 
-  // ── system ────────────────────────────────────────────────────────────────
+  // ── siteAccess ─────────────────────────────────────────────────────────────────────────────
+  // In standalone mode, the disclaimer is always enabled (gate uses localStorage).
+  // All admin/owner procedures are no-ops.
+  siteAccess: {
+    checkAccess: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({
+          locked: false,
+          reason: "no_expiry" as const,
+          message: null,
+          daysRemaining: null,
+        }),
+    },
+    getDisclaimerEnabled: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ enabled: true }),
+    },
+    setDisclaimerEnabled: {
+      useMutation: () => makeMutation(() => ({ success: true, enabled: true })),
+    },
+    getSettings: {
+      useQuery: () => makeQuery(null),
+    },
+    updateSettings: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    cohortReset: {
+      useMutation: () =>
+        makeMutation(() => ({
+          success: true,
+          newStartDate: new Date().toISOString().slice(0, 10),
+        })),
+    },
+  },
+
+  // ── system ─────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {
       useMutation: () => makeMutation(() => ({ success: true })),

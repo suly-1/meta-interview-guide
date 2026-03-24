@@ -46,10 +46,17 @@ export function useDisclaimerGate(): {
 
   const [localConfirmed, setLocalConfirmed] = useState(localAck);
 
-  // Server flag — owner can disable the disclaimer gate globally
+  // Server flag — owner can disable the disclaimer gate globally.
+  // On standalone/static builds (GitHub Pages, no backend), we disable this query
+  // so it never fires and we simply default to enabled=true (always show gate).
+  // VITE_STANDALONE is set to "true" in the standalone build script.
+  const isStandalone = import.meta.env.VITE_STANDALONE === "true";
+
   const { data: disclaimerEnabledData, isLoading: enabledLoading } =
     trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined, {
+      enabled: !isStandalone,
       staleTime: 30_000,
+      retry: false,
     });
 
   // DB status query — only runs for logged-in users who haven't confirmed locally
