@@ -29,6 +29,7 @@ import {
   LineChart,
 } from "lucide-react";
 import { toast } from "sonner";
+import { route } from "@/const";
 
 type SortKey = "createdAt" | "category" | "feedbackType";
 type SortDir = "asc" | "desc";
@@ -305,7 +306,10 @@ export default function AdminFeedback() {
           <p className="text-muted-foreground text-sm mb-3">
             Please log in to access this page.
           </p>
-          <Link href="/" className="text-blue-400 text-sm hover:underline">
+          <Link
+            href={route("/")}
+            className="text-blue-400 text-sm hover:underline"
+          >
             ← Back to home
           </Link>
         </div>
@@ -322,7 +326,10 @@ export default function AdminFeedback() {
           <p className="text-muted-foreground text-sm mb-3">
             This page is restricted to admins only.
           </p>
-          <Link href="/" className="text-blue-400 text-sm hover:underline">
+          <Link
+            href={route("/")}
+            className="text-blue-400 text-sm hover:underline"
+          >
             ← Back to home
           </Link>
         </div>
@@ -337,7 +344,7 @@ export default function AdminFeedback() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
-              href="/"
+              href={route("/")}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft size={16} />
@@ -356,25 +363,25 @@ export default function AdminFeedback() {
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href="/admin/stats"
+              href={route("/admin/stats")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
             >
               <BarChart3 size={11} /> Stats
             </Link>
             <Link
-              href="/admin/analytics"
+              href={route("/admin/analytics")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
             >
               <LineChart size={11} /> Analytics
             </Link>
             <Link
-              href="/admin/access"
+              href={route("/admin/access")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
             >
               <Shield size={11} /> Access
             </Link>
             <Link
-              href="/admin/users"
+              href={route("/admin/users")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
             >
               <Users size={11} /> Users

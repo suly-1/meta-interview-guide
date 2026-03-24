@@ -1,14 +1,27 @@
 /**
  * Standalone useAuth mock — used in the self-contained HTML export.
- * Always returns "not authenticated" so all auth-gated DB calls are skipped.
+ * Returns a mock admin user so admin pages (feedback, users, access, etc.)
+ * render correctly. No real auth is performed; all data is from localStorage.
  */
 
 export function useAuth() {
   return {
-    user: null,
+    user: {
+      id: 1,
+      name: "Admin",
+      email: "",
+      role: "admin" as const,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastSignedIn: new Date().toISOString(),
+      disclaimerAcknowledgedAt: null,
+      blocked: 0,
+      blockReason: null,
+      blockedUntil: null,
+    },
     loading: false,
     error: null,
-    isAuthenticated: false,
+    isAuthenticated: true,
     logout: () => {},
   };
 }

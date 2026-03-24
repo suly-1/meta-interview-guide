@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
+import { route } from "@/const";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 import {
   ArrowLeft,
@@ -117,7 +118,10 @@ export default function AdminStats() {
           <p className="text-muted-foreground text-sm mb-3">
             This page is restricted to admins only.
           </p>
-          <Link href="/" className="text-blue-400 text-sm hover:underline">
+          <Link
+            href={route("/")}
+            className="text-blue-400 text-sm hover:underline"
+          >
             ← Back to home
           </Link>
         </div>
@@ -131,7 +135,7 @@ export default function AdminStats() {
       <div className="border-b border-border bg-card/50 sticky top-0 z-10 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link
-            href="/admin/feedback"
+            href={route("/admin/feedback")}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft size={16} />

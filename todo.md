@@ -905,3 +905,4 @@
 - [x] Save checkpoint
 - [x] Produce complete Feedback Dashboard replication document
 - [x] Fix missing React key prop warning in AdminUsers (Fragment key)
+- [x] Fix admin panel missing on metaguide.blog: isOwner stub returns true, mock admin user in useAuth.standalone, add admin routes to App.standalone, route() helper for hash routing

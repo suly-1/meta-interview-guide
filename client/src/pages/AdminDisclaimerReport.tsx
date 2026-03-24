@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
+import { route } from "@/const";
 import {
   ShieldAlert,
   CheckCircle2,
@@ -158,7 +159,7 @@ export default function AdminDisclaimerReport() {
           The page you are looking for does not exist.
         </p>
         <Link
-          href="/"
+          href={route("/")}
           className="text-sm text-blue-400 hover:underline flex items-center gap-1"
         >
           <ArrowLeft size={14} /> Back to Guide
@@ -173,7 +174,7 @@ export default function AdminDisclaimerReport() {
       <div className="border-b border-border px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href="/"
+            href={route("/")}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft size={18} />

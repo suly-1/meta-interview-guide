@@ -7,6 +7,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
+import { route } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -119,7 +120,7 @@ export default function AdminAnalytics() {
           <p className="text-sm text-muted-foreground">
             Admin access required.
           </p>
-          <Link href="/">
+          <Link href={route("/")}>
             <Button variant="outline" size="sm" className="mt-4">
               Go Home
             </Button>
@@ -137,7 +138,7 @@ export default function AdminAnalytics() {
       <div className="border-b border-[#30363d] bg-[#161b22] px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/admin/feedback">
+            <Link href={route("/admin/feedback")}>
               <Button variant="ghost" size="sm" className="gap-1">
                 <ArrowLeft size={14} />
                 Feedback
@@ -504,7 +505,7 @@ export default function AdminAnalytics() {
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <AlertCircle size={14} className="text-red-400" />
                   Top 3 Unactioned Feedback Items
-                  <Link href="/admin/feedback">
+                  <Link href={route("/admin/feedback")}>
                     <span className="ml-auto text-xs text-[#58a6ff] cursor-pointer hover:underline font-normal">
                       View all →
                     </span>

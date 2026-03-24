@@ -11,6 +11,10 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    // Flag used by components to detect standalone/static mode
+    "import.meta.env.VITE_STANDALONE": JSON.stringify("true"),
+  },
   resolve: {
     alias: {
       // Redirect tRPC client to the standalone mock

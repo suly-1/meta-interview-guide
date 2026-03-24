@@ -889,7 +889,11 @@ export default function TopNav({
             {/* Admin Panel — owner only */}
             {isOwner && (
               <a
-                href="/admin/feedback"
+                href={
+                  import.meta.env.VITE_STANDALONE === "true"
+                    ? "#/admin/feedback"
+                    : "/admin/feedback"
+                }
                 title="Admin Panel"
                 className="w-8 h-8 rounded-md flex items-center justify-center text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition-all"
               >
