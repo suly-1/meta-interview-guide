@@ -40,7 +40,67 @@ import {
   RefreshCw,
   Users,
   AlertTriangle,
+  FileText,
 } from "lucide-react";
+
+// ── Disclaimer Toggle Card ────────────────────────────────────────────────────
+// Self-contained sub-component so it can have its own query/mutation state
+// without polluting the main AdminAccess form state.
+function DisclaimerToggleCard() {
+  const { data, isLoading, refetch } =
+    trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined, {
+      staleTime: 0,
+    });
+
+  const setEnabled = trpc.siteAccess.setDisclaimerEnabled.useMutation({
+    onSuccess: result => {
+      toast.success(
+        result.enabled
+          ? "Disclaimer gate enabled — all users must acknowledge it."
+          : "Disclaimer gate disabled — users skip it until you re-enable."
+      );
+      refetch();
+    },
+    onError: err => toast.error(`Failed: ${err.message}`),
+  });
+
+  const enabled = data?.enabled ?? true;
+
+  return (
+    <Card className="border-border">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <FileText className="w-4 h-4 text-blue-400" />
+          Disclaimer Gate
+        </CardTitle>
+        <CardDescription>
+          When enabled, every new visitor must acknowledge the disclaimer before
+          accessing the guide. Disable it to let users skip the gate entirely —
+          useful when you want frictionless access for a trusted cohort.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {enabled ? "Disclaimer is shown" : "Disclaimer is hidden"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {enabled
+                ? "Users must check the box before entering."
+                : "Users bypass the disclaimer screen entirely."}
+            </p>
+          </div>
+          <Switch
+            checked={enabled}
+            disabled={isLoading || setEnabled.isPending}
+            onCheckedChange={val => setEnabled.mutate({ enabled: val })}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminAccess() {
   const { user, loading } = useAuth();
@@ -434,6 +494,9 @@ export default function AdminAccess() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Disclaimer Gate Toggle Card */}
+        <DisclaimerToggleCard />
 
         {/* Cohort Reset Card */}
         <Card className="border-amber-500/30 bg-amber-500/5">

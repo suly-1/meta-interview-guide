@@ -849,3 +849,14 @@
 - [x] Fix TopNav smoke tests: wrap with tRPC + QueryClient providers
 - [x] TypeScript: 0 errors | Tests: 30/30 passing
 - [x] build:standalone, deploy:github-pages, save checkpoint
+
+## Phase 21 — User Stats Summary Row + Disclaimer Toggle (Mar 24, 2026)
+
+- [x] Server: getUserStats procedure — total users, weekly active (logged in last 7 days), currently blocked
+- [x] UI: /admin/users — summary row at top (3 stat cards: Total Users / Active This Week / Blocked)
+- [x] DB: add disclaimerEnabled int column to site_settings (default 1), migration applied
+- [x] Server: getDisclaimerEnabled publicProcedure + setDisclaimerEnabled ownerProcedure
+- [x] UI: /admin/access — Disclaimer Gate card with Switch (saves immediately, shows current state)
+- [x] DisclaimerGate hook: respects disclaimerEnabled server flag (skips gate when disabled)
+- [x] TypeScript: 0 errors | Tests: 30/30 passing
+- [x] build:standalone, deploy:github-pages, save checkpoint

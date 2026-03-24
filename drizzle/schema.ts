@@ -322,6 +322,11 @@ export const siteSettings = mysqlTable("site_settings", {
   manualLockEnabled: int("manualLockEnabled").notNull().default(0), // 0=off, 1=on
   /** Custom message shown on the locked gate screen. */
   lockMessage: text("lockMessage"),
+  /**
+   * When 0, the disclaimer gate is hidden for all users (owner can toggle it off).
+   * Default 1 = disclaimer is shown.
+   */
+  disclaimerEnabled: int("disclaimerEnabled").notNull().default(1),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SiteSettings = typeof siteSettings.$inferSelect;

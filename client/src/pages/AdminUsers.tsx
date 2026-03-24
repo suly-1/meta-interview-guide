@@ -216,6 +216,12 @@ export default function AdminUsers() {
       enabled: false, // only fetch on demand
     });
 
+  // Cohort health summary stats
+  const { data: statsData } = trpc.adminUsers.getUserStats.useQuery(undefined, {
+    enabled: isOwnerQuery.data?.isOwner === true,
+    refetchInterval: 30_000, // refresh every 30 s
+  });
+
   const utils = trpc.useUtils();
 
   const blockUser = trpc.adminUsers.blockUser.useMutation({
@@ -352,6 +358,41 @@ export default function AdminUsers() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
+        {/* Cohort health summary row */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
+              Total Users
+            </span>
+            <span className="text-2xl font-bold text-zinc-100">
+              {statsData?.total ?? totalCount}
+            </span>
+            <span className="text-[10px] text-zinc-600">
+              registered accounts
+            </span>
+          </div>
+          <div className="bg-zinc-900 border border-blue-500/20 rounded-xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-blue-400/70 font-medium uppercase tracking-wider">
+              Active This Week
+            </span>
+            <span className="text-2xl font-bold text-blue-400">
+              {statsData?.weeklyActive ?? "—"}
+            </span>
+            <span className="text-[10px] text-zinc-600">
+              logged in last 7 days
+            </span>
+          </div>
+          <div className="bg-zinc-900 border border-red-500/20 rounded-xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-red-400/70 font-medium uppercase tracking-wider">
+              Blocked
+            </span>
+            <span className="text-2xl font-bold text-red-400">
+              {statsData?.blocked ?? blockedCount}
+            </span>
+            <span className="text-[10px] text-zinc-600">access revoked</span>
+          </div>
+        </div>
+
         {/* Info banner */}
         <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3 text-xs text-amber-300/80 flex items-start gap-2">
           <Crown size={14} className="shrink-0 mt-0.5 text-amber-400" />

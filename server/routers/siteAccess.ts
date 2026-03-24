@@ -191,4 +191,30 @@ export const siteAccessRouter = router({
       await db.update(siteSettings).set(patch).where(eq(siteSettings.id, 1));
       return { success: true };
     }),
+
+  /**
+   * Public — returns whether the disclaimer gate is currently enabled.
+   * Called by DisclaimerGate to decide whether to show the gate at all.
+   */
+  getDisclaimerEnabled: publicProcedure.query(async () => {
+    const settings = await getOrCreateSettings();
+    // Default to enabled (1) if DB is unavailable
+    return { enabled: settings ? settings.disclaimerEnabled !== 0 : true };
+  }),
+
+  /**
+   * Owner-only — toggle the disclaimer gate on or off globally.
+   * When disabled, all users skip the disclaimer regardless of their acknowledgment state.
+   */
+  setDisclaimerEnabled: ownerProcedure
+    .input(z.object({ enabled: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+      await db
+        .update(siteSettings)
+        .set({ disclaimerEnabled: input.enabled ? 1 : 0 })
+        .where(eq(siteSettings.id, 1));
+      return { success: true, enabled: input.enabled };
+    }),
 });

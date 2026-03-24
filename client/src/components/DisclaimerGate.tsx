@@ -46,6 +46,12 @@ export function useDisclaimerGate(): {
 
   const [localConfirmed, setLocalConfirmed] = useState(localAck);
 
+  // Server flag — owner can disable the disclaimer gate globally
+  const { data: disclaimerEnabledData, isLoading: enabledLoading } =
+    trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined, {
+      staleTime: 30_000,
+    });
+
   // DB status query — only runs for logged-in users who haven't confirmed locally
   const utils = trpc.useUtils();
   const acknowledgeMutation = trpc.disclaimer.acknowledge.useMutation({
@@ -71,6 +77,11 @@ export function useDisclaimerGate(): {
 
   // While auth is loading, keep gate closed to avoid flash
   if (authLoading) return { gateOpen: false, dbLoading: true, confirm };
+
+  // Owner has disabled the disclaimer globally — skip for everyone
+  if (!enabledLoading && disclaimerEnabledData?.enabled === false) {
+    return { gateOpen: false, dbLoading: false, confirm };
+  }
 
   // Anonymous user: gate driven by localStorage only
   if (!user) return { gateOpen: !localConfirmed, dbLoading: false, confirm };

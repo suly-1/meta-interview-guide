@@ -1,0 +1,1 @@
+ALTER TABLE `site_settings` ADD `disclaimerEnabled` int DEFAULT 1 NOT NULL;

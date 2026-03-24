@@ -11,7 +11,7 @@
  */
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, gte, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { users, userEvents, loginEvents } from "../../drizzle/schema";
 import { ownerProcedure, router } from "../_core/trpc";
@@ -40,6 +40,36 @@ async function writeAuditLog(
 }
 
 export const adminUsersRouter = router({
+  /**
+   * Cohort health summary — total users, weekly active, currently blocked.
+   * "Weekly active" = logged in at least once in the last 7 days.
+   */
+  getUserStats: ownerProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return { total: 0, weeklyActive: 0, blocked: 0 };
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000);
+
+    const [totals] = await db
+      .select({
+        total: sql<number>`COUNT(*)`,
+        blocked: sql<number>`SUM(CASE WHEN ${users.blocked} = 1 THEN 1 ELSE 0 END)`,
+      })
+      .from(users);
+
+    // Count distinct users who logged in within the last 7 days
+    const [activeRow] = await db
+      .select({ count: sql<number>`COUNT(DISTINCT ${loginEvents.userId})` })
+      .from(loginEvents)
+      .where(gte(loginEvents.createdAt, sevenDaysAgo));
+
+    return {
+      total: Number(totals?.total ?? 0),
+      weeklyActive: Number(activeRow?.count ?? 0),
+      blocked: Number(totals?.blocked ?? 0),
+    };
+  }),
+
   /** List all registered users (owner only) */
   listUsers: ownerProcedure.query(async () => {
     const db = await getDb();
