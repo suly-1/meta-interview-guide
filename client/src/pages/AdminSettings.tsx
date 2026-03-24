@@ -5,7 +5,7 @@ import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
-  Clock, AlertTriangle, CheckCircle, Shield, Users, FileText, RefreshCw
+  Clock, AlertTriangle, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight
 } from "lucide-react";
 
 export default function AdminSettings() {
@@ -17,6 +17,16 @@ export default function AdminSettings() {
   const [cohortResetSuccess, setCohortResetSuccess] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
+
+  const { data: disclaimerStatus } = trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined, {
+    enabled: user?.role === "admin",
+  });
+  const setDisclaimerEnabled = trpc.siteAccess.setDisclaimerEnabled.useMutation({
+    onSuccess: () => {
+      utils.siteAccess.getDisclaimerEnabled.invalidate();
+      utils.siteAccess.checkAccess.invalidate();
+    },
+  });
 
   const { data: lockStatus, isLoading } = trpc.siteSettings.getLockStatus.useQuery(undefined, {
     enabled: user?.role === "admin",
@@ -317,6 +327,42 @@ export default function AdminSettings() {
               </div>
               <p className="text-xs text-gray-600 mt-1">How many days before the site auto-locks</p>
             </div>
+          </div>
+        </div>
+
+        {/* Disclaimer Gate Toggle */}
+        <div className="bg-gray-900 rounded-2xl border border-blue-800/30 p-6">
+          <h3 className="font-semibold text-white mb-1 flex items-center gap-2">
+            <FileText size={15} className="text-blue-400" />
+            Disclaimer Gate
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            When enabled, all users must acknowledge the disclaimer before accessing the guide. Disable to let users in without the acknowledgment screen.
+          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-white font-medium">
+                {disclaimerStatus?.enabled ? "Gate is enabled" : "Gate is disabled"}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {disclaimerStatus?.enabled
+                  ? "Users must acknowledge before accessing content"
+                  : "Users can access content without acknowledgment"}
+              </p>
+            </div>
+            <button
+              onClick={() => setDisclaimerEnabled.mutate({ enabled: !disclaimerStatus?.enabled })}
+              disabled={setDisclaimerEnabled.isPending || disclaimerStatus === undefined}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 ${
+                disclaimerStatus?.enabled
+                  ? "bg-blue-900/30 text-blue-300 border border-blue-800/40 hover:bg-blue-900/50"
+                  : "bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700"
+              }`}
+            >
+              {disclaimerStatus?.enabled
+                ? <><ToggleRight size={18} className="text-blue-400" /> Enabled</>
+                : <><ToggleLeft size={18} /> Disabled</>}
+            </button>
           </div>
         </div>
 

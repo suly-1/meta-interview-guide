@@ -3,6 +3,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
 import { ENV } from "./env";
+import { getDb } from "../db";
+import { users } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
@@ -18,11 +21,31 @@ const requireUser = t.middleware(async opts => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
 
+  // Auto-unblock: if bannedUntil has passed, lift the ban before checking
+  if (ctx.user.isBanned === 1 && ctx.user.bannedUntil && ctx.user.id) {
+    const expiry = new Date(ctx.user.bannedUntil);
+    if (expiry <= new Date()) {
+      try {
+        const db = await getDb();
+        if (db) {
+          await db
+            .update(users)
+            .set({ isBanned: 0, bannedReason: null, bannedUntil: null, bannedAt: null })
+            .where(eq(users.id, ctx.user.id));
+          // Mutate the in-memory user so the check below passes
+          (ctx.user as { isBanned: number }).isBanned = 0;
+        }
+      } catch (err) {
+        console.warn("[Auth] Auto-unblock failed:", err);
+      }
+    }
+  }
+
   // Block banned users from all protected procedures
-  if (ctx.user.isBanned) {
+  if (ctx.user.isBanned === 1) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "Your access to this guide has been revoked. Please contact the administrator.",
+      message: "ACCESS_REVOKED",
     });
   }
 
@@ -36,44 +59,45 @@ const requireUser = t.middleware(async opts => {
 
 export const protectedProcedure = t.procedure.use(requireUser);
 
-export const adminProcedure = t.procedure.use(
-  t.middleware(async opts => {
-    const { ctx, next } = opts;
-
-    if (!ctx.user || ctx.user.role !== 'admin') {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
-    }
-
-    return next({
-      ctx: {
-        ...ctx,
-        user: ctx.user,
-      },
-    });
-  }),
-);
+/**
+ * adminProcedure — chains through requireUser so blocked admins are also rejected.
+ */
+export const adminProcedure = t.procedure
+  .use(requireUser)
+  .use(
+    t.middleware(async opts => {
+      const { ctx, next } = opts;
+      if (!ctx.user || ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+      }
+      return next({
+        ctx: {
+          ...ctx,
+          user: ctx.user,
+        },
+      });
+    })
+  );
 
 /**
  * ownerProcedure — stricter than adminProcedure.
  * Only the account whose openId matches ENV.ownerOpenId can call these procedures.
+ * Chains through requireUser so blocked owners are also rejected.
  * Useful for destructive operations (cohort reset, digest trigger, etc.).
  */
-export const ownerProcedure = t.procedure.use(
-  t.middleware(async opts => {
-    const { ctx, next } = opts;
-
-    if (!ctx.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
-    }
-    if (!ENV.ownerOpenId || ctx.user.openId !== ENV.ownerOpenId) {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
-    }
-
-    return next({
-      ctx: {
-        ...ctx,
-        user: ctx.user,
-      },
-    });
-  }),
-);
+export const ownerProcedure = t.procedure
+  .use(requireUser)
+  .use(
+    t.middleware(async opts => {
+      const { ctx, next } = opts;
+      if (!ENV.ownerOpenId || ctx.user!.openId !== ENV.ownerOpenId) {
+        throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+      }
+      return next({
+        ctx: {
+          ...ctx,
+          user: ctx.user,
+        },
+      });
+    })
+  );

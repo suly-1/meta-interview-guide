@@ -60,6 +60,9 @@ export const trpc = {
           lastSignedIn: new Date(),
         }),
     },
+    isOwner: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ isOwner: false }),
+    },
     logout: { useMutation: () => makeMutation(() => ({ success: true })) },
   },
 
@@ -277,22 +280,72 @@ export const trpc = {
     resetClock: { useMutation: () => makeMutation(() => ({ success: true })) },
     unlock: { useMutation: () => makeMutation(() => ({ success: true })) },
     updateLockSettings: { useMutation: () => makeMutation(() => ({ success: true })) },
+    getDisclaimerEnabled: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ enabled: true }) },
+    setDisclaimerEnabled: { useMutation: () => makeMutation(() => ({ success: true, enabled: true })) },
   },
 
-  // ── admin ─────────────────────────────────────────────────────────────────
+  // ── admin ────────────────────────────────────────────────────────────────────────────────────
   admin: {
     blockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
+    blockUserWithExpiry: { useMutation: () => makeMutation(() => ({ success: true })) },
     cohortReset: { useMutation: () => makeMutation(() => ({ success: true })) },
     listAuditLog: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    listLoginActivity: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
     },
     listUsers: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
     },
+    processExpiredBlocks: { useMutation: () => makeMutation(() => ({ success: true })) },
+    reBlockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
     unblockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
   },
 
-  // ── skepticScoring ────────────────────────────────────────────────────────
+  // ── adminUsers ─────────────────────────────────────────────────────────────────────────────────
+  adminUsers: {
+    listUsers: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    getUserStats: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ total: 0, weeklyActive: 0, blocked: 0 }),
+    },
+    getUserLoginHistory: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    blockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
+    unblockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
+    reBlockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
+    exportAuditLogCsv: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ csv: '' }),
+    },
+    listEvents: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    checkInactiveUsers: { useMutation: () => makeMutation(() => ({ notified: false, count: 0 })) },
+  },
+
+  // ── siteAccess ─────────────────────────────────────────────────────────────────────────────────
+  siteAccess: {
+    checkAccess: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ locked: false, reason: 'no_expiry' as const, message: null, daysRemaining: null, isAdmin: false }),
+    },
+    getDisclaimerEnabled: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ enabled: true }),
+    },
+    getSettings: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ lockEnabled: false, manualLockEnabled: false, lockStartDate: null, lockDays: 60, lockMessage: null, disclaimerEnabled: true }),
+    },
+    updateSettings: { useMutation: () => makeMutation(() => ({ success: true })) },
+    setDisclaimerEnabled: { useMutation: () => makeMutation(() => ({ success: true, enabled: true })) },
+    cohortReset: { useMutation: () => makeMutation(() => ({ success: true, newStartDate: '' })) },
+  },
+
+  // ── skepticScoring ─────────────────────────────────────────────────────────────────────────────────
   skepticScoring: {
     score: { useMutation: () => makeMutation(() => ({ score: 0 })) },
   },
@@ -352,6 +405,15 @@ export const trpc = {
     admin: {
       listUsers: { invalidate: () => {} },
       listAuditLog: { invalidate: () => {} },
+    },
+    adminUsers: {
+      listUsers: { invalidate: () => {} },
+      listEvents: { invalidate: () => {} },
+    },
+    siteAccess: {
+      checkAccess: { invalidate: () => {} },
+      getDisclaimerEnabled: { invalidate: () => {} },
+      getSettings: { invalidate: () => {} },
     },
   }),
 

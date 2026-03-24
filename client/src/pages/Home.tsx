@@ -4,8 +4,11 @@ import {
   Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon,
   ListChecks, BarChart2, Layers, ClipboardList, Terminal,
   HelpCircle, Dices, Sword, TrendingUp, Bookmark, Search, Wrench,
-  LayoutDashboard, Trophy,
+  LayoutDashboard, Trophy, Shield, ShieldCheck,
 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Link } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { emitKeyEvent } from "@/lib/keyEvents";
@@ -188,6 +191,17 @@ export default function Home() {
   const { density, setDensity } = useDensity();
   const isDark = theme === "dark";
   const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
+  const { user: authUser } = useAuth();
+  const isAdmin = authUser?.role === "admin";
+
+  // ── Admin badge: poll feedback stats every 5 minutes ────────────────────
+  const { data: adminStats } = trpc.feedback.adminStats.useQuery(undefined, {
+    enabled: isAdmin,
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
+    staleTime: 4 * 60 * 1000,
+  });
+  const adminNewCount = adminStats?.newCount ?? 0;
+
   const [rouletteOpen, setRouletteOpen] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
@@ -421,6 +435,22 @@ export default function Home() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" title="Active today" />
                   )}
                 </motion.div>
+                {/* Admin badge — only visible to admins */}
+                {isAdmin && (
+                  <Link
+                    href="/admin/feedback"
+                    title="Admin Panel"
+                    className="relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ml-1 bg-indigo-100 text-indigo-700 border border-indigo-200 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700 dark:hover:bg-indigo-900/50 transition-all"
+                  >
+                    <ShieldCheck size={12} />
+                    <span className="hidden sm:inline">Admin</span>
+                    {adminNewCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                        {adminNewCount > 9 ? "9+" : adminNewCount}
+                      </span>
+                    )}
+                  </Link>
+                )}
               </div>
             </div>
           </div>

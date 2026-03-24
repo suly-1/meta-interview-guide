@@ -18,12 +18,18 @@ import { scoresRouter } from "./routers/scores";
 import { feedbackRouter } from "./routers/feedback";
 import { adminRouter } from "./routers/admin";
 import { siteSettingsRouter } from "./routers/siteSettings";
+import { siteAccessRouter } from "./routers/siteAccess";
+import { adminUsersRouter } from "./routers/adminUsers";
+import { ENV } from "./_core/env";
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    isOwner: protectedProcedure.query(({ ctx }) => ({
+      isOwner: !!ENV.ownerOpenId && ctx.user.openId === ENV.ownerOpenId,
+    })),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -1814,5 +1820,7 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   feedback: feedbackRouter,
   admin: adminRouter,
   siteSettings: siteSettingsRouter,
+  siteAccess: siteAccessRouter,
+  adminUsers: adminUsersRouter,
 });
 export type AppRouter = typeof appRouter;

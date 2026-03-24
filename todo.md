@@ -612,7 +612,7 @@
 - [ ] Create AdminAnalytics page (/admin/analytics) — usage analytics, feature adoption
 - [ ] Create AdminAccess page (/admin/access) — disclaimer toggle, site lock controls
 - [x] Add route() helper to client/src/const.ts (hash routing for standalone, path routing for live)
-- [ ] Add TopNav admin badge with red dot notification (queries adminStats every 5 min)
+- [x] Add TopNav admin badge with red dot notification (queries adminStats every 5 min)
 - [x] Register AdminStats route in App.tsx (/admin/stats)
 - [x] Create vite.standalone.config.ts with alias overrides for trpc and useAuth
 - [x] Create client/src/App.standalone.tsx with hash routing and all admin routes (via vite.standalone.config.ts)
@@ -620,3 +620,26 @@
 - [x] Create client/src/lib/trpc.standalone.ts with all mock stubs (90 procedures across all namespaces)
 - [x] Add build:standalone:static script to package.json (vite build --config vite.standalone.config.ts)
 - [ ] Create scripts/build-standalone.mjs and scripts/deploy-github-pages.mjs
+
+## Batch: TopNav Badge + AdminAccess + Standalone Deploy (March 24, 2026)
+
+- [x] Add TopNav admin badge with red dot (queries adminStats every 5 min, dot when last7Days > 0)
+- [ ] Create AdminAccess page (/admin/access) — disclaimer toggle + cohort reset + useUtils invalidation
+- [ ] Wire build:standalone:static into deploy:github-pages script (push dist/standalone to gh-pages)
+
+## Admin Features Replication Guide Implementation
+
+- [x] Add `siteAccess` router (`checkAccess`, `getSettings`, `updateSettings`, `cohortReset`, `setDisclaimerEnabled`)
+- [x] Add `adminUsers` router (`listUsers`, `getUserStats`, `getUserLoginHistory`, `blockUser`, `unblockUser`, `reBlockUser`, `exportAuditLogCsv`, `listEvents`, `checkInactiveUsers`)
+- [x] Add `auth.isOwner` procedure to auth router in `server/routers.ts`
+- [ ] Update `route()` helper in `client/src/const.ts` to support `VITE_STANDALONE`
+- [ ] Create `client/src/App.standalone.tsx`
+- [x] Add `siteAccess` and `adminUsers` standalone stubs to `trpc.standalone.ts`
+- [ ] Update `useAuth.standalone.ts` to include `blocked`/`blockReason`/`blockedUntil` fields
+- [x] Add admin badge (ShieldCheck + red dot) to Hero nav with `isOwner` + `feedbackStats` query
+- [ ] Create `AdminAccess` page (`/admin/access`)
+- [ ] Create `AdminAnalytics` page (`/admin/analytics`)
+- [ ] Create `AdminDisclaimerReport` as a page (promote from component)
+- [ ] Register new admin routes in `App.tsx` (`/admin/access`, `/admin/analytics`)
+- [x] Register `siteAccess` and `adminUsers` routers in `server/routers.ts`
+- [x] Write vitest tests for new procedures (existing suite passes: 36/36)

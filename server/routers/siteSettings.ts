@@ -114,4 +114,23 @@ export const siteSettingsRouter = router({
     await setSetting("lock_enabled", "0");
     return { success: true };
   }),
+
+  /**
+   * Public: Get whether the disclaimer gate is enabled.
+   */
+  getDisclaimerEnabled: publicProcedure.query(async () => {
+    const val = await getSetting("disclaimer_enabled");
+    // Default to enabled ("1") if not set
+    return { enabled: val !== "0" };
+  }),
+
+  /**
+   * Admin: Enable or disable the disclaimer gate.
+   */
+  setDisclaimerEnabled: adminProcedure
+    .input(z.object({ enabled: z.boolean() }))
+    .mutation(async ({ input }) => {
+      await setSetting("disclaimer_enabled", input.enabled ? "1" : "0");
+      return { success: true, enabled: input.enabled };
+    }),
 });
