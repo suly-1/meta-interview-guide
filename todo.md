@@ -895,3 +895,12 @@
 - [x] Verified OWNER_OPEN_ID matches user ID 1 openId (6ZvUo3o3...) — admin shield icon works on live server
 - [x] TypeScript: 0 errors | Tests: 30/30 passing
 - [x] save checkpoint (no rebuild needed — DB-only fix)
+
+## Phase 26 — Fix all standalone TypeError crashes + Feedback Dashboard doc (Mar 24, 2026)
+
+- [x] Audit all tRPC calls in AdminFeedback, AdminUsers, AdminAccess, AdminStats, AdminAnalytics for missing stubs
+- [x] Add missing stubs to trpc.standalone.ts (feedback.updateNote, feedback.triggerDailyAlert, getAuditLog, etc.)
+- [x] Build standalone and deploy to GitHub Pages
+- [x] TypeScript: 0 errors | Tests: 30/30 passing
+- [x] Save checkpoint
+- [ ] Produce complete Feedback Dashboard replication document

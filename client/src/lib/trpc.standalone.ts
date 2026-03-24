@@ -378,6 +378,121 @@ export const trpc = {
           }),
         })),
     },
+    // ── AI stubs added in Phase 26 ────────────────────────────────────────
+    analyzeComplexity: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    analyzeDebrief: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    buildWhyCompanyStory: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    calibrateSeniorityLevel: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    challengeComplexity: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    detectAntiPatterns: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    explainLikeAPM: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    generateFollowUps: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    generateTenDaySprint: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    getProgressiveHint: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    guidedWalkthroughFeedback: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    interviewerPerspective: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    peerDesignReview: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    predictInterviewQuestions: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    reviewSolution: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    scorePatternGuess: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    scorePeerReviewAnswers: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    scoreTradeoff: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    transcribeAndScoreVoice: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
   },
 
   // ── collab (no-op in standalone) ─────────────────────────────────────────
@@ -396,6 +511,24 @@ export const trpc = {
     },
     uploadAudio: {
       useMutation: () => makeMutation(() => ({ url: "" })),
+    },
+    aiFinalFeedback: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ Collab features require the online version.",
+        })),
+    },
+    aiFollowUp: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ Collab features require the online version.",
+        })),
+    },
+    createRoom: {
+      useMutation: () => makeMutation(() => ({ roomId: "" })),
+    },
+    saveScorecard: {
+      useMutation: () => makeMutation(() => ({ success: true })),
     },
   },
 
@@ -544,7 +677,13 @@ export const trpc = {
     triggerDigest: {
       useMutation: () => makeMutation(() => ({ success: true })),
     },
+    triggerDailyAlert: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
     updateStatus: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    updateNote: {
       useMutation: () => makeMutation(() => ({ success: true })),
     },
   },

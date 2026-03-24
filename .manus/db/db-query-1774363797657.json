@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, email, openId, role, name, blocked FROM users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute SELECT id, email, openId, role, name, blocked FROM users LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "email": "suly@meta.com",
+      "openId": "6ZvUo3o3xTeAEt3sku9yNC",
+      "role": "admin",
+      "name": "Apex",
+      "blocked": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\topenId\trole\tname\tblocked\n1\tsuly@meta.com\t6ZvUo3o3xTeAEt3sku9yNC\tadmin\tApex\t0\n",
+  "stderr": "",
+  "execution_time_ms": 407
+}
