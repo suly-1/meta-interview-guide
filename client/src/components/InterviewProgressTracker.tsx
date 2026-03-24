@@ -252,9 +252,12 @@ export function InterviewProgressTracker() {
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center justify-between px-4 py-3 border-b border-border hover:bg-secondary/30 transition-colors"
+        onKeyDown={e => e.key === "Enter" && setExpanded(v => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 border-b border-border hover:bg-secondary/30 transition-colors cursor-pointer select-none"
       >
         <div className="flex items-center gap-2">
           <TrendingUp size={15} className="text-blue-400" />
@@ -283,7 +286,7 @@ export function InterviewProgressTracker() {
             <ChevronDown size={14} className="text-muted-foreground" />
           )}
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="p-4 space-y-6">
