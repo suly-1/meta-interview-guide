@@ -643,3 +643,7 @@
 - [ ] Register new admin routes in `App.tsx` (`/admin/access`, `/admin/analytics`)
 - [x] Register `siteAccess` and `adminUsers` routers in `server/routers.ts`
 - [x] Write vitest tests for new procedures (existing suite passes: 36/36)
+
+## Persistent Admin Button (March 24, 2026)
+
+- [x] Add always-visible admin button to nav bar (not gated by login/role)
