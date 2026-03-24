@@ -680,3 +680,9 @@
 
 - [ ] Ensure Admin button renders unconditionally (no hidden conditional logic)
 - [ ] Push latest code to GitHub so changes are preserved
+
+## Admin Visibility & Monitoring (Mar 24, 2026)
+- [x] Fix admin button: Admin button is intentionally visible to all (clicking without token shows empty admin panel — no data exposed). No change needed per user.
+- [x] Set up daily automated monitoring of deployment status and admin panel accessibility
+- [x] Create admin access documentation web page (deployment process + admin instructions)
+- [x] Fix unreadable text in FAANG Coding Screen Simulator "REAL INTERVIEW TIMING" info box (yellow on peach = invisible)

@@ -819,21 +819,21 @@ export default function MetaCodingScreenSimulator() {
 
         <div className="p-5 space-y-5">
           {/* Interview structure explainer */}
-          <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-600 rounded-xl p-4 space-y-2">
+          <div className="bg-amber-500 dark:bg-amber-600 border-2 border-amber-600 dark:border-amber-400 rounded-xl p-4 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-base">?</span>
-              <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Real Interview Timing ? Read This First</p>
+              <Clock size={15} className="text-white shrink-0" />
+              <p className="text-xs font-bold text-white uppercase tracking-wide">Real Interview Timing — Read This First</p>
             </div>
-            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-              A real Meta coding screen is <strong>45 minutes total</strong>, but the first ~15 minutes are spent on:
+            <p className="text-xs text-white leading-relaxed">
+              A real Meta coding screen is <strong className="underline decoration-white/70">45 minutes total</strong>, but the first ~15 minutes are spent on:
             </p>
-            <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-white space-y-1 list-disc list-inside">
               <li>Interviewer introduction and rapport building (~5 min)</li>
               <li>Problem explanation and setup (~5 min)</li>
-              <li><strong>Your clarification questions</strong> ? you must ask these! (~5 min)</li>
+              <li><strong>Your clarification questions</strong> — you must ask these! (~5 min)</li>
             </ul>
-            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed mt-1">
-              That leaves you <strong>~30 minutes to actually code and solve the problem</strong>. We strongly recommend practising at <strong>30 minutes</strong> to build the right muscle memory for the real screen.
+            <p className="text-xs text-white leading-relaxed mt-1">
+              That leaves you <strong className="underline decoration-white/70">~30 minutes to actually code and solve the problem</strong>. We strongly recommend practising at <strong>30 minutes</strong> to build the right muscle memory for the real screen.
             </p>
           </div>
 

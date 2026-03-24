@@ -1,0 +1,102 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm run build
+        env:
+          VITE_APP_TITLE: "Meta IC6/IC7 Interview Guide"
+          VITE_APP_ID: "placeholder"
+          VITE_OAUTH_PORTAL_URL: "https://manus.im"
+          VITE_FRONTEND_FORGE_API_KEY: "placeholder"
+          VITE_FRONTEND_FORGE_API_URL: "https://api.manus.im"
+          VITE_ANALYTICS_ENDPOINT: ""
+          VITE_ANALYTICS_WEBSITE_ID: ""
+
+      # ── Build Validation (static analysis) ──────────────────────────────────
+      # Fast static check: scans all JS chunks for TDZ-prone cross-chunk
+      # React dependencies (e.g. recharts in a separate chunk from React).
+      # No browser needed — runs in seconds.
+      - name: Validate chunks — detect TDZ bundling errors
+        run: node scripts/validate-chunks.mjs
+
+      # ── Smoke Test (headless browser) ────────────────────────────────────────
+      # Serves dist/public locally, opens it in headless Chromium, and verifies:
+      #   1. No uncaught JavaScript errors (e.g. TDZ crashes, missing modules)
+      #   2. React mounts and renders content inside #root (no blank page)
+      #   3. No JS/CSS assets return 4xx/5xx
+      # If any check fails the workflow exits with code 1 → deploy is blocked.
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Smoke test — verify build renders without errors
+        run: node scripts/smoke-test.mjs
+
+      # ── Upload artifact ───────────────────────────────────────────────────────
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist/public
+
+      # ── Notify on failure ─────────────────────────────────────────────────────
+      - name: Notify on build failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            core.warning(`Build/smoke test failed. Check the run: ${runUrl}`);
+            // To add email/Slack notifications, add your webhook secret to repo secrets
+            // and uncomment the relevant block below.
+            //
+            // Slack example (add SLACK_WEBHOOK_URL to repo secrets):
+            // await fetch(process.env.SLACK_WEBHOOK_URL, {
+            //   method: 'POST',
+            //   headers: { 'Content-Type': 'application/json' },
+            //   body: JSON.stringify({ text: `🚨 Deploy failed: ${runUrl}` })
+            // });
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
