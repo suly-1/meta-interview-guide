@@ -25,6 +25,7 @@ export const adminRouter = router({
         isBanned: users.isBanned,
         bannedAt: users.bannedAt,
         bannedReason: users.bannedReason,
+        bannedUntil: users.bannedUntil,
         disclaimerAcknowledgedAt: users.disclaimerAcknowledgedAt,
       })
       .from(users)
@@ -40,6 +41,7 @@ export const adminRouter = router({
       isBanned: r.isBanned === 1,
       bannedAt: r.bannedAt ?? null,
       bannedReason: r.bannedReason ?? null,
+      bannedUntil: r.bannedUntil ?? null,
       disclaimerAcknowledged: r.disclaimerAcknowledgedAt !== null,
     }));
   }),

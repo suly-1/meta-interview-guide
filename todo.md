@@ -596,3 +596,7 @@
 - [x] AdminUsers: add "Export Audit Log CSV" button (download full user_events as CSV)
 - [x] Block expiry — blockedUntil column added to users table, auto-unblock cron every hour, optional duration field in block dialog
 - [x] Re-block shortcut in audit log — "Re-block" button on unblock rows in audit log (reBlockUser procedure)
+
+## Batch: Block Expiry Badge + Screenshot Guide (March 24, 2026)
+
+- [x] Add block expiry countdown badge to user table in /admin/users (amber badge showing "Auto-unblocks in X days" next to temporarily-blocked users)

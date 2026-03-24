@@ -172,11 +172,26 @@ export default function AdminUsers() {
                     </td>
                     <td className="px-4 py-3">
                       {u.isBanned ? (
-                        <div>
+                        <div className="space-y-1">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/50 text-red-400 text-xs font-medium">
                             <ShieldOff size={10} />
                             Blocked
                           </span>
+                          {u.bannedUntil && (() => {
+                            const msLeft = new Date(u.bannedUntil).getTime() - Date.now();
+                            const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+                            return daysLeft > 0 ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
+                                <Clock size={9} />
+                                Auto-unblocks in {daysLeft}d
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
+                                <Clock size={9} />
+                                Expiry pending
+                              </span>
+                            );
+                          })()}
                           {u.bannedReason && (
                             <p className="text-[10px] text-gray-600 mt-0.5 max-w-[120px] truncate" title={u.bannedReason}>
                               {u.bannedReason}
