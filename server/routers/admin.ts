@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { tokenAdminProcedure, router, publicProcedure } from "../_core/trpc";
 import { getDb } from "../db";
-import { users, userEvents, loginEvents, siteSettings } from "../../drizzle/schema";
+import { users, userEvents, loginEvents, siteSettings, pinAttempts } from "../../drizzle/schema";
 import { eq, asc, desc, inArray, lte, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { notifyOwner } from "../_core/notification";
@@ -388,11 +388,40 @@ export const adminRouter = router({
    * verifyPin — public procedure (no OAuth required).
    * Accepts a PIN, compares it in constant-time to ADMIN_PIN env var,
    * and returns a short-lived signed JWT on success.
-   * The JWT is stored in React state only (never localStorage).
+   *
+   * Security features:
+   * - Constant-time comparison (prevents timing attacks)
+   * - Rate limiting: 5 failed attempts in 15 min = 15-min lockout
+   * - All attempts (success + failure) logged to pin_attempts table with IP
+   * - JWT stored in React state only (never localStorage)
    */
   verifyPin: publicProcedure
     .input(z.object({ pin: z.string().min(1).max(20) }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      const ip = ((ctx.req.headers['x-forwarded-for'] as string) ?? '')
+        .split(',')[0]?.trim() || ctx.req.socket?.remoteAddress || 'unknown';
+
+      // Rate-limit check: count failed attempts in the last 15 minutes
+      const LOCK_WINDOW_MS = 15 * 60 * 1000;
+      const MAX_ATTEMPTS = 5;
+      const windowStart = new Date(Date.now() - LOCK_WINDOW_MS);
+
+      if (db) {
+        const safeIp = ip.replace(/'/g, '');
+        const windowStartStr = windowStart.toISOString().replace('T', ' ').split('.')[0];
+        const [countRow] = await db.execute(
+          `SELECT COUNT(*) as cnt FROM pin_attempts WHERE ipAddress = '${safeIp}' AND success = 0 AND createdAt >= '${windowStartStr}'` as unknown as import('drizzle-orm').SQL
+        ) as unknown as [{ cnt: number }];
+        if (countRow && Number(countRow.cnt) >= MAX_ATTEMPTS) {
+          console.warn(`[PIN GATE] IP ${ip} is locked out (${countRow.cnt} failed attempts in 15 min)`);
+          throw new TRPCError({
+            code: 'TOO_MANY_REQUESTS',
+            message: 'Too many failed attempts. Try again in 15 minutes.',
+          });
+        }
+      }
+
       const storedPin = ENV.adminPin;
       if (!storedPin) {
         throw new TRPCError({
@@ -400,17 +429,30 @@ export const adminRouter = router({
           message: 'Admin PIN is not configured on the server.',
         });
       }
+
       // Constant-time comparison to prevent timing attacks
       const a = Buffer.from(input.pin.padEnd(32, '\0'));
       const b = Buffer.from(storedPin.padEnd(32, '\0'));
       let diff = 0;
       for (let i = 0; i < 32; i++) diff |= a[i] ^ b[i];
-      if (diff !== 0) {
+      const correct = diff === 0;
+
+      // Log the attempt (success or failure)
+      if (db) {
+        await db.insert(pinAttempts).values({
+          ipAddress: ip,
+          success: correct ? 1 : 0,
+        }).catch(() => {});
+      }
+
+      if (!correct) {
+        console.warn(`[PIN GATE] Failed attempt from IP ${ip}`);
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'Incorrect PIN.',
         });
       }
+
       // Issue a short-lived signed JWT (4 hours)
       const secret = new TextEncoder().encode(
         ENV.cookieSecret + ':admin-pin-gate'
@@ -420,7 +462,83 @@ export const adminRouter = router({
         .setIssuedAt()
         .setExpirationTime('4h')
         .sign(secret);
+
+      console.info(`[PIN GATE] Successful login from IP ${ip}`);
       return { token };
+    }),
+
+  /**
+   * getPinLockStatus — public procedure.
+   * Returns whether the calling IP is currently locked out and how many
+   * seconds remain until the lockout expires.
+   */
+  getPinLockStatus: publicProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return { locked: false, secondsRemaining: 0, failedAttempts: 0 };
+
+      const ip = ((ctx.req.headers['x-forwarded-for'] as string) ?? '')
+        .split(',')[0]?.trim() || ctx.req.socket?.remoteAddress || 'unknown';
+
+      const LOCK_WINDOW_MS = 15 * 60 * 1000;
+      const MAX_ATTEMPTS = 5;
+      const windowStart = new Date(Date.now() - LOCK_WINDOW_MS);
+      const windowStartStr = windowStart.toISOString().replace('T', ' ').split('.')[0];
+
+      const [countRow] = await db.execute(
+        `SELECT COUNT(*) as cnt, MIN(createdAt) as oldest FROM pin_attempts WHERE ipAddress = '${ip.replace(/'/g, '')}' AND success = 0 AND createdAt >= '${windowStartStr}'` as unknown as import('drizzle-orm').SQL
+      ) as unknown as [{ cnt: number; oldest: Date | null }];
+
+      const failedAttempts = Number(countRow?.cnt ?? 0);
+      if (failedAttempts < MAX_ATTEMPTS) {
+        return { locked: false, secondsRemaining: 0, failedAttempts };
+      }
+
+      // Locked: compute when the oldest attempt in the window expires
+      const oldestAttempt = countRow?.oldest ? new Date(countRow.oldest) : windowStart;
+      const unlockAt = new Date(oldestAttempt.getTime() + LOCK_WINDOW_MS);
+      const secondsRemaining = Math.max(0, Math.ceil((unlockAt.getTime() - Date.now()) / 1000));
+
+      return { locked: true, secondsRemaining, failedAttempts };
+    }),
+
+  /**
+   * changeAdminPin — owner-only procedure (requires valid PIN token).
+   * Updates ADMIN_PIN in siteSettings (runtime override) and in ENV.
+   * Takes effect immediately without server restart.
+   */
+  changeAdminPin: tokenAdminProcedure
+    .input(z.object({
+      currentPin: z.string().min(1).max(20),
+      newPin: z.string().min(4).max(20),
+    }))
+    .mutation(async ({ input }) => {
+      const storedPin = ENV.adminPin;
+      if (!storedPin) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Admin PIN is not configured on the server.',
+        });
+      }
+      // Verify current PIN first
+      const a = Buffer.from(input.currentPin.padEnd(32, '\0'));
+      const b = Buffer.from(storedPin.padEnd(32, '\0'));
+      let diff = 0;
+      for (let i = 0; i < 32; i++) diff |= a[i] ^ b[i];
+      if (diff !== 0) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Current PIN is incorrect.' });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database unavailable.' });
+      // Store new PIN in siteSettings (runtime override)
+      await db
+        .insert(siteSettings)
+        .values({ key: 'admin_pin_override', value: input.newPin })
+        .onDuplicateKeyUpdate({ set: { value: input.newPin } });
+      // Update in-memory ENV so it takes effect immediately
+      ENV.adminPin = input.newPin;
+      console.info('[PIN GATE] Admin PIN changed successfully');
+      return { success: true };
     }),
 
   /**

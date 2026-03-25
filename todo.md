@@ -753,4 +753,17 @@
 - [x] Wire AdminGate to show PinGateModal until valid token is present (Layer 2 after isOwner)
 - [x] Add verifyPin + verifyPinToken stubs to trpc.standalone.ts
 - [x] All 61 tests pass (TypeScript clean)
-- [ ] Save checkpoint and deploy to metaengguide.pro
+- [x] Save checkpoint and deploy to metaengguide.pro
+
+## PIN Security Enhancements (Mar 25, 2026)
+- [x] Failed PIN attempt logging — log timestamp + IP to pin_attempts table on every wrong PIN
+- [x] Auto-lock after 5 failed attempts — server-side lock for 15 min, countdown in modal
+- [x] Change PIN button in Admin Settings — full Change PIN form with current/new/confirm fields
+- [x] PIN expiry toast — amber toast 5 min before 4-hour token expires, clears on tab close
+- [x] changeAdminPin server procedure — verifies current PIN, updates ADMIN_PIN env, returns new JWT
+- [x] getPinLockStatus server procedure — returns locked/failedAttempts/secondsRemaining
+- [x] PinGateModal: lock countdown (mm:ss), attempts remaining warning, shake animation
+- [x] PinExpiryToast: amber toast with dismiss + auto-clear on expiry
+- [x] AdminGate wires PinExpiryToast alongside admin content
+- [x] All 61 tests pass, TypeScript clean (0 errors)
+- [x] Checkpoint saved

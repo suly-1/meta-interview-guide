@@ -217,6 +217,15 @@ export const loginEvents = mysqlTable("login_events", {
 });
 export type LoginEvent = typeof loginEvents.$inferSelect;
 
+// PIN attempt log — records every admin PIN attempt for audit and rate-limiting
+export const pinAttempts = mysqlTable("pin_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  success: tinyint("success").notNull().default(0),  // 0 = failed, 1 = success
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PinAttempt = typeof pinAttempts.$inferSelect;
+
 // Page view events — one row per tab switch, used for real analytics
 export const pageViews = mysqlTable("page_views", {
   id: int("id").autoincrement().primaryKey(),

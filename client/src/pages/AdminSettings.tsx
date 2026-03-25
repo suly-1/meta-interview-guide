@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
   Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight,
-  AlertTriangle
+  AlertTriangle, KeyRound
 } from "lucide-react";
 
 export default function AdminSettings() {
@@ -17,6 +17,14 @@ export default function AdminSettings() {
   const [confirmCohortReset, setConfirmCohortReset] = useState(false);
   const [cohortResetSuccess, setCohortResetSuccess] = useState<string | null>(null);
   const [lockSuccess, setLockSuccess] = useState(false);
+
+  // Change PIN state
+  const [showChangePinSection, setShowChangePinSection] = useState(false);
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [changePinError, setChangePinError] = useState<string | null>(null);
+  const [changePinSuccess, setChangePinSuccess] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -55,6 +63,44 @@ export default function AdminSettings() {
   const updateSettings = trpc.siteSettings.updateLockSettings.useMutation({
     onSuccess: () => utils.siteSettings.getLockStatus.invalidate(),
   });
+
+  const changePinMutation = trpc.admin.changeAdminPin.useMutation({
+    onSuccess: () => {
+      setChangePinSuccess(true);
+      setCurrentPin("");
+      setNewPin("");
+      setConfirmPin("");
+      setChangePinError(null);
+      setTimeout(() => {
+        setChangePinSuccess(false);
+        setShowChangePinSection(false);
+      }, 4000);
+    },
+    onError: (err: { message: string }) => {
+      setChangePinError(err.message);
+    },
+  });
+
+  const handleChangePinSubmit = () => {
+    setChangePinError(null);
+    if (!currentPin || !newPin || !confirmPin) {
+      setChangePinError("All fields are required.");
+      return;
+    }
+    if (newPin.length < 4) {
+      setChangePinError("New PIN must be at least 4 digits.");
+      return;
+    }
+    if (!/^\d+$/.test(newPin)) {
+      setChangePinError("PIN must contain digits only.");
+      return;
+    }
+    if (newPin !== confirmPin) {
+      setChangePinError("New PIN and confirmation do not match.");
+      return;
+    }
+    changePinMutation.mutate({ currentPin, newPin });
+  };
 
   const cohortReset = trpc.admin.cohortReset.useMutation({
     onSuccess: (data) => {
@@ -376,6 +422,98 @@ export default function AdminSettings() {
             <RefreshCw size={15} />
             Start New Cohort
           </button>
+        </div>
+
+        {/* Change PIN Section */}
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <KeyRound size={16} className="text-indigo-400" />
+              <h3 className="font-semibold text-white text-sm">Admin PIN</h3>
+            </div>
+            <button
+              onClick={() => {
+                setShowChangePinSection(!showChangePinSection);
+                setChangePinError(null);
+                setChangePinSuccess(false);
+                setCurrentPin("");
+                setNewPin("");
+                setConfirmPin("");
+              }}
+              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              {showChangePinSection ? "Cancel" : "Change PIN"}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mb-4">
+            The admin PIN is a second layer of protection on top of OAuth login.
+            It is verified server-side and never stored in the browser.
+          </p>
+
+          {changePinSuccess && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-900/30 border border-emerald-700/50 rounded-xl text-sm text-emerald-300 mb-4">
+              <CheckCircle size={14} />
+              PIN changed successfully. Your new PIN is active immediately.
+            </div>
+          )}
+
+          {showChangePinSection && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Current PIN</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  value={currentPin}
+                  onChange={e => setCurrentPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter current PIN"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 outline-none focus:border-indigo-500 transition-colors"
+                  autoComplete="current-password"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">New PIN (min 4 digits)</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  value={newPin}
+                  onChange={e => setNewPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter new PIN"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 outline-none focus:border-indigo-500 transition-colors"
+                  autoComplete="new-password"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Confirm New PIN</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  value={confirmPin}
+                  onChange={e => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Re-enter new PIN"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 outline-none focus:border-indigo-500 transition-colors"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {changePinError && (
+                <p className="text-sm text-red-400">{changePinError}</p>
+              )}
+
+              <button
+                onClick={handleChangePinSubmit}
+                disabled={changePinMutation.isPending}
+                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+              >
+                {changePinMutation.isPending ? "Updating…" : "Update PIN"}
+              </button>
+
+              <p className="text-xs text-gray-600 text-center">
+                The new PIN takes effect immediately — no server restart needed.
+                Your current admin session remains valid.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* How it works */}

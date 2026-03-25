@@ -16,7 +16,7 @@
 import { trpc } from "@/lib/trpc";
 import { clearAdminToken } from "@/lib/adminToken";
 import { usePinGate } from "@/contexts/PinGateContext";
-import PinGateModal from "@/components/PinGateModal";
+import PinGateModal, { PinExpiryToast } from "@/components/PinGateModal";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { ShieldAlert, LogIn } from "lucide-react";
@@ -136,5 +136,10 @@ export default function AdminGate({ children }: AdminGateProps) {
   }
 
   // ── Both layers passed — render admin content ────────────────────────────
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <PinExpiryToast />
+    </>
+  );
 }

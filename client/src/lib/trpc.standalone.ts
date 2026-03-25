@@ -333,6 +333,10 @@ export const trpc = {
     verifyPinToken: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ valid: true }),
     },
+    getPinLockStatus: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ locked: false, secondsRemaining: 0, failedAttempts: 0 }),
+    },
+    changeAdminPin: { useMutation: () => makeMutation(() => ({ success: true })) },
   },
 
   // ── adminUsers ─────────────────────────────────────────────────────────────────────────────────
