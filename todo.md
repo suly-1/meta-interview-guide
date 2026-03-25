@@ -704,3 +704,4 @@
 - [ ] pageView event tracker on tab switches for real analytics data
 - [x] Send Digest email preview modal before sending
 - [x] Fix: "Lock Now" button in AdminSettings does not actually lock the site
+- [x] Fix: Lock Now button still not working after first fix attempt — mutation may be silently failing

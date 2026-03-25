@@ -4,7 +4,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
-  Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight
+  Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight,
+  AlertTriangle
 } from "lucide-react";
 
 export default function AdminSettings() {
@@ -12,8 +13,10 @@ export default function AdminSettings() {
   const [durationInput, setDurationInput] = useState("");
   const [startDateInput, setStartDateInput] = useState("");
   const [confirmLock, setConfirmLock] = useState(false);
+  const [confirmUnlock, setConfirmUnlock] = useState(false);
   const [confirmCohortReset, setConfirmCohortReset] = useState(false);
   const [cohortResetSuccess, setCohortResetSuccess] = useState<string | null>(null);
+  const [lockSuccess, setLockSuccess] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -34,11 +37,19 @@ export default function AdminSettings() {
   });
 
   const lockNow = trpc.siteSettings.lockNow.useMutation({
-    onSuccess: () => { utils.siteSettings.getLockStatus.invalidate(); setConfirmLock(false); },
+    onSuccess: () => {
+      utils.siteSettings.getLockStatus.invalidate();
+      setConfirmLock(false);
+      setLockSuccess(true);
+      setTimeout(() => setLockSuccess(false), 8000);
+    },
   });
 
   const unlock = trpc.siteSettings.unlock.useMutation({
-    onSuccess: () => utils.siteSettings.getLockStatus.invalidate(),
+    onSuccess: () => {
+      utils.siteSettings.getLockStatus.invalidate();
+      setConfirmUnlock(false);
+    },
   });
 
   const updateSettings = trpc.siteSettings.updateLockSettings.useMutation({
@@ -53,8 +64,6 @@ export default function AdminSettings() {
       setTimeout(() => setCohortResetSuccess(null), 8000);
     },
   });
-
-  // Always accessible via admin token — no auth guard needed
 
   const progressPercent = lockStatus
     ? Math.min(100, Math.round(((lockStatus.daysElapsed ?? 0) / (lockStatus.lockDurationDays ?? 60)) * 100))
@@ -86,6 +95,17 @@ export default function AdminSettings() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Lock success banner */}
+        {lockSuccess && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-red-900/40 border border-red-700/50 rounded-xl text-sm text-red-200">
+            <Lock size={16} className="text-red-400 flex-shrink-0" />
+            <div>
+              <p className="font-semibold">Site is now locked for non-admin visitors.</p>
+              <p className="text-xs text-red-300/70 mt-0.5">You can still browse normally because you are an admin. Use "Unlock Site" to re-open.</p>
+            </div>
+          </div>
+        )}
 
         {/* Current Status Card */}
         <div className={`rounded-2xl border p-6 ${
@@ -187,7 +207,7 @@ export default function AdminSettings() {
               </div>
             </button>
 
-            {/* Lock Now */}
+            {/* Lock Now / Unlock Site — requires confirmation for both */}
             {!lockStatus?.isLocked ? (
               <button
                 onClick={() => setConfirmLock(true)}
@@ -201,7 +221,7 @@ export default function AdminSettings() {
               </button>
             ) : (
               <button
-                onClick={() => unlock.mutate()}
+                onClick={() => setConfirmUnlock(true)}
                 disabled={unlock.isPending}
                 className="flex flex-col items-center gap-2 p-4 rounded-xl bg-emerald-900/20 border border-emerald-800/40 hover:bg-emerald-900/40 text-emerald-300 transition-colors disabled:opacity-50"
               >
@@ -213,7 +233,7 @@ export default function AdminSettings() {
               </button>
             )}
 
-            {/* Disable Lock */}
+            {/* Disable / Enable Timer */}
             <button
               onClick={() => updateSettings.mutate({ lockEnabled: !lockStatus?.lockEnabled })}
               disabled={updateSettings.isPending}
@@ -429,6 +449,38 @@ export default function AdminSettings() {
                 className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors disabled:opacity-50"
               >
                 {lockNow.isPending ? "Locking..." : "Lock Now"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unlock confirmation modal */}
+      {confirmUnlock && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-emerald-800/50 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-emerald-900/50 flex items-center justify-center">
+                <AlertTriangle size={18} className="text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">Unlock the Site?</h3>
+                <p className="text-sm text-gray-400">All visitors will immediately regain access to the guide.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmUnlock(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => unlock.mutate()}
+                disabled={unlock.isPending}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-colors disabled:opacity-50"
+              >
+                {unlock.isPending ? "Unlocking..." : "Unlock Now"}
               </button>
             </div>
           </div>
