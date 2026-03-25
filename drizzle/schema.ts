@@ -215,3 +215,13 @@ export const loginEvents = mysqlTable("login_events", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type LoginEvent = typeof loginEvents.$inferSelect;
+
+// Page view events — one row per tab switch, used for real analytics
+export const pageViews = mysqlTable("page_views", {
+  id: int("id").autoincrement().primaryKey(),
+  tabName: varchar("tabName", { length: 64 }).notNull(),  // e.g. "coding", "behavioral"
+  userId: int("userId"),                                   // null for anonymous visitors
+  sessionId: varchar("sessionId", { length: 64 }),         // browser-generated session ID
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PageView = typeof pageViews.$inferSelect;

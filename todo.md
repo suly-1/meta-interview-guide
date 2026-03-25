@@ -697,3 +697,9 @@
 - [x] AdminAnalytics: Send Report Now button
 - [x] AdminUsers: Check Inactive button wired to checkInactiveUsers mutation
 - [x] AdminUsers: All existing features verified working
+
+## Bug Fixes & Follow-up Features (Mar 25, 2026)
+- [ ] Fix TypeError: hints.get.useMutation is not a function in CodePractice (standalone stubs)
+- [ ] Feedback notification badge on Admin button (shows count of "New" feedback items)
+- [ ] pageView event tracker on tab switches for real analytics data
+- [x] Send Digest email preview modal before sending

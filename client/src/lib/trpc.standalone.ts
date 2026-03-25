@@ -163,6 +163,16 @@ export const trpc = {
       useQuery: (_?: unknown, _opts?: unknown) =>
         makeQuery({ byCategory: [], total: 0, last7Days: 0, newCount: 0 }),
     },
+    getDigestPreview: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({
+          subject: "Weekly Feedback Digest — MetaEngGuide",
+          to: "(standalone mode — no backend)",
+          body: "[Standalone mode] No real feedback data available. In production, this would show the last 7 days of feedback items.",
+          itemCount: 0,
+          items: [] as Array<{ id: number; category: string; rating: number | null; message: string; page: string | null; createdAt: Date; status: string }>,
+        }),
+    },
     triggerDigest: { useMutation: () => makeMutation(() => ({ success: true })) },
     triggerDailyAlert: { useMutation: () => makeMutation(() => ({ success: true, sent: false })) },
     updateStatus: { useMutation: () => makeMutation(() => ({ success: true })) },
@@ -192,6 +202,7 @@ export const trpc = {
   hints: {
     get: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ hints: [] }),
+      useMutation: () => makeMutation(() => ({ hint: "AI hints are only available on the live server. Visit metaengguide.pro to use this feature." })),
     },
   },
 
@@ -376,6 +387,7 @@ export const trpc = {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([] as Array<{ id: number; category: string; message: string; createdAt: Date }>),
     },
     sendAnalyticsReport: { useMutation: () => makeMutation(() => ({ success: true })) },
+    trackPageView: { useMutation: () => makeMutation(() => ({ ok: true })) },
   },
   // ── systemDesign ──────────────────────────────────────────────────────────
   systemDesign: {

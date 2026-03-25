@@ -71,6 +71,13 @@
       "when": 1774371484802,
       "tag": "0009_giant_johnny_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1774445535348,
+      "tag": "0010_peaceful_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

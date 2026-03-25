@@ -274,11 +274,13 @@ export default function Home() {
   });
 
   const currentIndex = ALL_TABS.findIndex((t) => t.id === activeTab);
-
+  const trackPageView = trpc.analytics.trackPageView.useMutation();
   const handleTabChange = (id: string) => {
     const newIndex = ALL_TABS.findIndex((t) => t.id === id);
     setDirection(newIndex > currentIndex ? 1 : -1);
     setActiveTab(id);
+    // Track real page view for analytics
+    trackPageView.mutate({ tabName: id });
   };
 
   const { isFocused } = useFocusMode();

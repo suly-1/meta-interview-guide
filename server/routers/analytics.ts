@@ -5,12 +5,34 @@
 import { z } from "zod";
 import { tokenAdminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { users, loginEvents, highImpactScores, mockSessions, siteFeedback } from "../../drizzle/schema";
+import { users, loginEvents, highImpactScores, mockSessions, siteFeedback, pageViews } from "../../drizzle/schema";
+import { publicProcedure } from "../_core/trpc";
 import { desc, gte, and, eq, count, sql } from "drizzle-orm";
 import { notifyOwner } from "../_core/notification";
 import { sendEmail, isSmtpConfigured } from "../email";
 
 export const analyticsRouter = router({
+  /**
+   * trackPageView — records a tab switch / page view event (public, no auth required).
+   * Called from the frontend on every tab switch.
+   */
+  trackPageView: publicProcedure
+    .input(z.object({
+      tabName: z.string().max(64),
+      sessionId: z.string().max(64).optional(),
+      userId: z.number().int().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { ok: false };
+      await db.insert(pageViews).values({
+        tabName: input.tabName,
+        sessionId: input.sessionId ?? null,
+        userId: input.userId ?? null,
+      });
+      return { ok: true };
+    }),
+
   /**
    * getSiteAnalytics — returns sessions, logged-in users, page views (proxy via login events),
    * avg session duration (proxy via mock sessions), total time, and daily active users.
@@ -41,7 +63,12 @@ export const analyticsRouter = router({
       const sessions = loginRows.length;
       const loggedInUsers = uniqueUsers.size;
 
-      // Page views = proxy: each login event + each high-impact score submission (each is a "page interaction")
+      // Page views — use real page_views table if it has data, else fall back to proxy
+      const pvRows = await db
+        .select({ id: pageViews.id, createdAt: pageViews.createdAt })
+        .from(pageViews)
+        .where(gte(pageViews.createdAt, since));
+
       const scoreRows = await db
         .select({ userId: highImpactScores.userId, createdAt: highImpactScores.createdAt })
         .from(highImpactScores)
@@ -52,7 +79,10 @@ export const analyticsRouter = router({
         .from(mockSessions)
         .where(gte(mockSessions.createdAt, since));
 
-      const pageViews = sessions + scoreRows.length + mockRows.length;
+      // Use real page views if available, otherwise estimate from interactions
+      const realPageViews = pvRows.length;
+      const estimatedPageViews = sessions + scoreRows.length + mockRows.length;
+      const totalPageViews = realPageViews > 0 ? realPageViews : estimatedPageViews;
 
       // Avg session: each mock session counts as ~15 min, each score submission as ~5 min
       const totalMinutes = (mockRows.length * 15) + (scoreRows.length * 5);
@@ -74,7 +104,7 @@ export const analyticsRouter = router({
         dailyActive.push({ date: d, sessions: dailyMap[d]?.size ?? 0 });
       }
 
-      return { sessions, loggedInUsers, pageViews, avgSessionMinutes, totalTimeHours, dailyActive };
+      return { sessions, loggedInUsers, pageViews: totalPageViews, avgSessionMinutes, totalTimeHours, dailyActive };
     }),
 
   /**

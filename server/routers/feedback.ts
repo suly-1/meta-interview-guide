@@ -166,6 +166,45 @@ export const feedbackRouter = router({
     return { byCategory, total, last7Days, newCount };
   }),
 
+  /** Admin: Preview the weekly digest content without sending */
+  getDigestPreview: tokenAdminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const all = await db.select().from(siteFeedback).orderBy(desc(siteFeedback.createdAt)).limit(200);
+    const recent = all.filter(r => new Date(r.createdAt) > sevenDaysAgo);
+    const recipientEmail = process.env.DIGEST_RECIPIENT_EMAIL ?? "(Manus inbox — no SMTP configured)";
+    const subject = "Weekly Feedback Digest — MetaEngGuide";
+    if (recent.length === 0) {
+      return {
+        subject,
+        to: recipientEmail,
+        body: "No new feedback this week.",
+        itemCount: 0,
+        items: [] as Array<{ id: number; category: string; rating: number | null; message: string; page: string | null; createdAt: Date; status: string }>,
+      };
+    }
+    const lines = recent.map(r =>
+      `[${r.category.toUpperCase()}] ${r.rating ? `${r.rating}\u2605 ` : ""}${r.message.slice(0, 200)}${r.message.length > 200 ? "\u2026" : ""} (${r.page ?? "unknown page"})`
+    );
+    const body = `Weekly Feedback Digest \u2014 ${recent.length} item(s) in the last 7 days:\n\n${lines.join("\n\n")}`;
+    return {
+      subject,
+      to: recipientEmail,
+      body,
+      itemCount: recent.length,
+      items: recent.map(r => ({
+        id: r.id,
+        category: r.category,
+        rating: r.rating,
+        message: r.message.slice(0, 200),
+        page: r.page,
+        createdAt: r.createdAt,
+        status: r.status,
+      })),
+    };
+  }),
+
   /** Admin: Manually trigger weekly digest */
   triggerDigest: tokenAdminProcedure.mutation(async () => {
     await sendWeeklyDigest();

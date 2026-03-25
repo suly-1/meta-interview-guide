@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `page_views` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `tabName` varchar(64) NOT NULL,\n  `userId` int,\n  `sessionId` varchar(64),\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  CONSTRAINT `page_views_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute CREATE TABLE IF NOT EXISTS `page_views` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `tabName` varchar(64) NOT NULL,\n  `userId` int,\n  `sessionId` varchar(64),\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  CONSTRAINT `page_views_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 86
+}

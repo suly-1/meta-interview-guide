@@ -9,30 +9,11 @@ import {
   Bug, Lightbulb, BookOpen, Palette, HelpCircle,
   Star, Filter, ArrowLeft, RefreshCw, BarChart2,
   TrendingUp, MessageSquare, Clock, Users, Trophy, Zap,
-  Download, Bell, Send, Search, Lock, ChevronDown
+  Download, Bell, Send, Search, Lock, ChevronDown,
+  Eye, X, Mail, CheckCircle
 } from "lucide-react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
-
-const FEATURE_LABELS: Record<string, { label: string; emoji: string; domain: string }> = {
-  ai_interrupt:    { label: "AI Interrupt Mode",     emoji: "🤖", domain: "System Design" },
-  boe_grader:      { label: "BoE Grader",            emoji: "🔢", domain: "System Design" },
-  adversarial:     { label: "Adversarial Review",    emoji: "⚔️", domain: "System Design" },
-  think_out_loud:  { label: "Think Out Loud",        emoji: "🎙️", domain: "Coding" },
-  pattern_drill:   { label: "Pattern Speed Drill",   emoji: "⚡", domain: "Coding" },
-  remediation:     { label: "Remediation Plan",      emoji: "🗺️", domain: "Coding" },
-  story_matrix:    { label: "Story Matrix",          emoji: "🗂️", domain: "Behavioral" },
-  persona_stress:  { label: "Persona Stress Test",   emoji: "🎭", domain: "Behavioral" },
-  impact_coach:    { label: "Impact Coach",          emoji: "📊", domain: "Behavioral" },
-  readiness:       { label: "Readiness Report",      emoji: "📈", domain: "Cross-domain" },
-};
-
-const DOMAIN_COLORS: Record<string, string> = {
-  "System Design": "text-violet-600 bg-violet-50 border-violet-200",
-  "Coding":        "text-blue-600 bg-blue-50 border-blue-200",
-  "Behavioral":    "text-amber-600 bg-amber-50 border-amber-200",
-  "Cross-domain":  "text-emerald-600 bg-emerald-50 border-emerald-200",
-};
+import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
   bug:     { label: "Bug",     icon: <Bug size={13} />,        color: "text-red-700",    bg: "bg-red-100 border-red-200" },
@@ -105,6 +86,181 @@ function StatCard({ icon, label, value, color }: {
   );
 }
 
+// ── Digest Preview Modal ──────────────────────────────────────────────────────
+
+type DigestPreviewData = {
+  subject: string;
+  to: string;
+  body: string;
+  itemCount: number;
+  items: Array<{
+    id: number;
+    category: string;
+    rating: number | null;
+    message: string;
+    page: string | null;
+    createdAt: Date;
+    status: string;
+  }>;
+};
+
+function DigestPreviewModal({
+  data,
+  onClose,
+  onSend,
+  isSending,
+  sent,
+}: {
+  data: DigestPreviewData;
+  onClose: () => void;
+  onSend: () => void;
+  isSending: boolean;
+  sent: boolean;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 16 }}
+        transition={{ duration: 0.18 }}
+        className="bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+      >
+        {/* Modal header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+          <div className="flex items-center gap-2">
+            <Mail size={16} className="text-blue-400" />
+            <span className="font-bold text-white text-sm">Digest Preview</span>
+            <span className="text-xs text-gray-500 ml-1">— review before sending</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-white transition-colors rounded-lg p-1 hover:bg-gray-800"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Email metadata */}
+        <div className="px-5 py-3 border-b border-gray-800 space-y-1.5 bg-gray-950/50">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500 w-14 flex-shrink-0">To:</span>
+            <span className="text-gray-200 font-mono bg-gray-800 px-2 py-0.5 rounded">{data.to}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500 w-14 flex-shrink-0">Subject:</span>
+            <span className="text-gray-200 font-semibold">{data.subject}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500 w-14 flex-shrink-0">Items:</span>
+            <span className={`font-bold ${data.itemCount === 0 ? "text-gray-500" : "text-blue-400"}`}>
+              {data.itemCount} feedback item{data.itemCount !== 1 ? "s" : ""} from the last 7 days
+            </span>
+          </div>
+        </div>
+
+        {/* Email body preview */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {data.itemCount === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <MessageSquare size={32} className="mx-auto mb-3 opacity-30" />
+              <p className="text-sm font-semibold text-gray-400">No new feedback this week</p>
+              <p className="text-xs mt-1">The digest will say: "No new feedback this week."</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-gray-500 mb-3 italic">
+                Email body preview — formatted as plain text in the actual email:
+              </p>
+              {data.items.map((item, idx) => {
+                const meta = CATEGORY_META[item.category] ?? CATEGORY_META.other;
+                const statusMeta = STATUS_META[item.status] ?? STATUS_META.new;
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-gray-800/60 border border-gray-700 rounded-xl p-3 text-sm"
+                  >
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border ${meta.bg} ${meta.color}`}>
+                        {meta.icon}
+                        {meta.label.toUpperCase()}
+                      </span>
+                      {item.rating && (
+                        <span className="text-amber-400 text-xs font-bold">{item.rating}★</span>
+                      )}
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${statusMeta.color} ${statusMeta.bg} ${statusMeta.border}`}>
+                        {statusMeta.label}
+                      </span>
+                      <span className="text-xs text-gray-500 ml-auto">
+                        #{idx + 1} of {data.itemCount}
+                      </span>
+                    </div>
+                    <p className="text-gray-200 leading-relaxed text-sm">{item.message}</p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                      {item.page && (
+                        <span className="font-mono bg-gray-700 px-1.5 py-0.5 rounded">{item.page}</span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <Clock size={10} />
+                        {new Date(item.createdAt).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Modal footer */}
+        <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-gray-800">
+          <p className="text-xs text-gray-500">
+            {data.itemCount > 0
+              ? "This digest will be sent via email (if SMTP configured) or to your Manus inbox."
+              : "Sending will notify you that there is no new feedback this week."}
+          </p>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onSend}
+              disabled={isSending || sent}
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg border transition-all ${
+                sent
+                  ? "bg-green-700 border-green-600 text-white"
+                  : "bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
+              } disabled:opacity-60`}
+            >
+              {sent ? (
+                <>
+                  <CheckCircle size={13} />
+                  Sent!
+                </>
+              ) : (
+                <>
+                  <Send size={13} className={isSending ? "animate-pulse" : ""} />
+                  {isSending ? "Sending…" : "Send Now"}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
+
 export default function AdminFeedback() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -113,10 +269,15 @@ export default function AdminFeedback() {
   const [sortBy, setSortBy] = useState<"newest" | "rating_high" | "rating_low">("newest");
   const [alertSent, setAlertSent] = useState(false);
   const [digestSent, setDigestSent] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const { data: feedback, isLoading, refetch, isFetching } = trpc.feedback.getAllSiteFeedback.useQuery(undefined);
   const { data: stats } = trpc.feedback.adminStats.useQuery(undefined);
   const { data: aggregateStats } = trpc.scores.getAggregate.useQuery(undefined);
+  const { data: digestPreview, isLoading: isLoadingPreview } = trpc.feedback.getDigestPreview.useQuery(
+    undefined,
+    { enabled: showPreviewModal }
+  );
   const utils = trpc.useUtils();
 
   const updateStatus = trpc.feedback.updateFeedbackStatus.useMutation({
@@ -133,7 +294,10 @@ export default function AdminFeedback() {
   const triggerDigest = trpc.feedback.triggerDigest.useMutation({
     onSuccess: () => {
       setDigestSent(true);
-      setTimeout(() => setDigestSent(false), 3000);
+      setTimeout(() => {
+        setDigestSent(false);
+        setShowPreviewModal(false);
+      }, 2500);
     },
   });
 
@@ -167,6 +331,28 @@ export default function AdminFeedback() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
+      {/* ── Digest Preview Modal ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showPreviewModal && (
+          isLoadingPreview ? (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+              <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 flex flex-col items-center gap-3">
+                <RefreshCw size={24} className="text-blue-400 animate-spin" />
+                <p className="text-sm text-gray-300">Loading digest preview…</p>
+              </div>
+            </div>
+          ) : digestPreview ? (
+            <DigestPreviewModal
+              data={digestPreview as DigestPreviewData}
+              onClose={() => { setShowPreviewModal(false); setDigestSent(false); }}
+              onSend={() => triggerDigest.mutate(undefined)}
+              isSending={triggerDigest.isPending}
+              sent={digestSent}
+            />
+          ) : null
+        )}
+      </AnimatePresence>
+
       {/* ── Header Nav ─────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-50 bg-gray-900 border-b border-gray-800 shadow-lg">
         <div className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto">
@@ -237,6 +423,15 @@ export default function AdminFeedback() {
               <Bell size={13} className={triggerAlert.isPending ? "animate-pulse" : ""} />
               <span className="hidden sm:inline">{alertSent ? "Sent!" : "Test Alert"}</span>
             </button>
+            {/* Preview Digest button */}
+            <button
+              onClick={() => { setDigestSent(false); setShowPreviewModal(true); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all bg-gray-800 hover:bg-gray-700 border-gray-600 text-gray-200"
+            >
+              <Eye size={13} />
+              <span className="hidden sm:inline">Preview</span>
+            </button>
+            {/* Send Digest button (direct, no preview) */}
             <button
               onClick={() => triggerDigest.mutate(undefined)}
               disabled={triggerDigest.isPending || digestSent}
@@ -270,40 +465,26 @@ export default function AdminFeedback() {
                 <TrendingUp size={15} className="text-indigo-600" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Feature Engagement &amp; Pass-Rate Stats</h2>
-                <p className="text-xs text-gray-500">Anonymized — candidates who scored ≥70 are counted as "passing"</p>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Feature Performance</h3>
+                <p className="text-xs text-gray-500">Anonymous pass rates across all AI features</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {Object.entries(
-                aggregateStats.reduce((acc, row) => {
-                  if (!acc[row.feature]) acc[row.feature] = { totalSessions: 0, passRate: 0, avgScore: 0, count: 0 };
-                  acc[row.feature].totalSessions += row.totalSessions;
-                  acc[row.feature].passRate = Math.max(acc[row.feature].passRate, row.passRate);
-                  acc[row.feature].avgScore += row.avgScore;
-                  acc[row.feature].count += 1;
-                  return acc;
-                }, {} as Record<string, { totalSessions: number; passRate: number; avgScore: number; count: number }>)
-              )
-                .sort((a, b) => b[1].passRate - a[1].passRate)
-                .map(([feature, stats]) => {
-                  const meta = FEATURE_LABELS[feature];
-                  const label = meta?.label ?? feature;
-                  const domain = meta?.domain ?? "Other";
-                  const emoji = meta?.emoji ?? "📊";
-                  const domainColor = DOMAIN_COLORS[domain] ?? "text-gray-600 bg-gray-50 border-gray-200";
-                  const avgScore = stats.count > 0 ? Math.round(stats.avgScore / stats.count) : 0;
-                  const passColor = stats.passRate >= 60 ? "text-emerald-600" : stats.passRate >= 40 ? "text-amber-600" : "text-red-500";
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(aggregateStats as Array<{ feature: string; passRate: number; totalSessions: number; avgScore: number }>)
+                .filter(s => s.totalSessions >= 5)
+                .sort((a, b) => b.passRate - a.passRate)
+                .slice(0, 6)
+                .map(stats => {
+                  const avgScore = Math.round(stats.avgScore);
                   return (
-                    <div key={feature} className="rounded-xl border border-gray-100 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800/50 flex flex-col gap-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{emoji} {label}</p>
-                          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border mt-0.5 ${domainColor}`}>{domain}</span>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className={`text-xl font-black ${passColor}`}>{stats.passRate}%</p>
-                          <p className="text-xs text-gray-400">pass rate</p>
+                    <div key={stats.feature} className="flex flex-col gap-1.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 capitalize">
+                          {stats.feature.replace(/_/g, " ")}
+                        </span>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.passRate}%</p>
+                          <p className="text-[10px] text-gray-400">pass rate</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-gray-500">
@@ -381,6 +562,7 @@ export default function AdminFeedback() {
             <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
         </div>
+
         {/* Feedback list */}
         {isLoading ? (
           <div className="space-y-3">
@@ -411,11 +593,9 @@ export default function AdminFeedback() {
                       {meta.icon}
                       {meta.label}
                     </span>
-
                     <div className="flex-1 min-w-0">
                       {/* Message */}
                       <p className="text-sm text-gray-200 leading-relaxed">{item.message}</p>
-
                       {/* Meta row */}
                       <div className="flex flex-wrap items-center gap-3 mt-2">
                         <StarRow rating={item.rating} />
@@ -433,7 +613,6 @@ export default function AdminFeedback() {
                         )}
                       </div>
                     </div>
-
                     {/* Triage status dropdown */}
                     <div className="flex-shrink-0">
                       {(() => {
