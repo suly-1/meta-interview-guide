@@ -23,14 +23,17 @@ export const siteSettingsRouter = router({
   /**
    * Public: Get the current lock status.
    * Returns whether the site is locked, when it started, and how many days remain.
-   * The owner (admin) is never locked out — they bypass the gate.
+   *
+   * IMPORTANT: `isLocked` reflects the TRUE lock state for non-admin users.
+   * Admins bypass the gate (see SiteLockGate), but we still report the real
+   * state so the AdminSettings UI can show whether the site is actually locked.
+   * The `isOwner` flag tells the UI that the admin is bypassing the lock.
    */
   getLockStatus: publicProcedure.query(async ({ ctx }) => {
     const lockEnabled = (await getSetting("lock_enabled")) === "1";
     const lockStartDate = await getSetting("lock_start_date");
     const lockDurationDays = parseInt((await getSetting("lock_duration_days")) ?? "60", 10);
 
-    // Owner always bypasses the lock
     const isOwner = ctx.user?.role === "admin";
 
     if (!lockEnabled || !lockStartDate) {
@@ -53,7 +56,9 @@ export const siteSettingsRouter = router({
     const isExpired = daysElapsed >= lockDurationDays;
 
     return {
-      isLocked: isExpired && !isOwner,
+      // True lock state — admins bypass it in SiteLockGate, but the UI
+      // should still show "LOCKED" so the admin knows the site is closed.
+      isLocked: isExpired,
       isOwner,
       lockEnabled,
       lockStartDate,
@@ -98,9 +103,9 @@ export const siteSettingsRouter = router({
 
   /**
    * Admin: Immediately lock the site (manual override).
+   * Sets the start date 61 days in the past so the cohort is immediately expired.
    */
   lockNow: tokenAdminProcedure.mutation(async () => {
-    // Set start date far in the past so it's immediately expired
     const pastDate = new Date(Date.now() - 61 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     await setSetting("lock_start_date", pastDate);
     await setSetting("lock_enabled", "1");

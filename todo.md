@@ -703,3 +703,4 @@
 - [ ] Feedback notification badge on Admin button (shows count of "New" feedback items)
 - [ ] pageView event tracker on tab switches for real analytics data
 - [x] Send Digest email preview modal before sending
+- [x] Fix: "Lock Now" button in AdminSettings does not actually lock the site

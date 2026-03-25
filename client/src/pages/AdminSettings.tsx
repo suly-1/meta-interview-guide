@@ -106,8 +106,12 @@ export default function AdminSettings() {
                   <><Unlock size={16} className="text-emerald-400" /> Site is Open</>
                 )}
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {lockStatus?.isOwner && "You (admin) always have access regardless of lock status."}
+              <p className="text-xs mt-0.5">
+                {lockStatus?.isOwner && lockStatus?.isLocked ? (
+                  <span className="text-amber-400 font-medium">Non-admin visitors are locked out. You bypass the gate as admin.</span>
+                ) : lockStatus?.isOwner ? (
+                  <span className="text-gray-500">You (admin) always have access regardless of lock status.</span>
+                ) : null}
               </p>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-bold ${
