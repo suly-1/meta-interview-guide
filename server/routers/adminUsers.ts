@@ -342,4 +342,33 @@ export const adminUsersRouter = router({
 
     return { notified: true, count: inactive.length };
   }),
+  /**
+   * Get block/unblock history for a specific user.
+   */
+  getUserBlockHistory: tokenAdminProcedure
+    .input(z.object({ userId: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      const rows = await db
+        .select()
+        .from(userEvents)
+        .where(eq(userEvents.targetUserId, input.userId))
+        .orderBy(desc(userEvents.createdAt))
+        .limit(50);
+      return rows;
+    }),
+  /**
+   * List all audit log events (last 200).
+   */
+  listAuditLog: tokenAdminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    const rows = await db
+      .select()
+      .from(userEvents)
+      .orderBy(desc(userEvents.createdAt))
+      .limit(200);
+    return rows;
+  }),
 });

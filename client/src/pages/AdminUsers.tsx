@@ -27,7 +27,7 @@ function formatTimeLeft(bannedUntil: Date | string): string {
 
 // ── Per-user block history row ────────────────────────────────────────────────
 function UserBlockHistory({ userId }: { userId: number }) {
-  const { data: history, isLoading } = trpc.admin.getUserBlockHistory.useQuery({ userId });
+  const { data: history, isLoading } = trpc.adminUsers.getUserBlockHistory.useQuery({ userId });
 
   if (isLoading) {
     return (
@@ -51,7 +51,7 @@ function UserBlockHistory({ userId }: { userId: number }) {
 
   return (
     <>
-      {history.map(event => (
+      {history.map((event: { id: number; action: string; actorId: number; actorName: string | null; targetUserId: number; targetUserName: string | null; reason: string | null; createdAt: Date }) => (
         <tr key={event.id} className="bg-gray-800/40 border-b border-gray-700/30 last:border-0">
           <td className="px-6 py-2 text-[11px] text-gray-500 whitespace-nowrap">
             {new Date(event.createdAt).toLocaleString()}
@@ -90,13 +90,13 @@ export default function AdminUsers() {
   // Track which user rows have the history panel expanded
   const [expandedHistoryUserId, setExpandedHistoryUserId] = useState<number | null>(null);
 
-  const { data: userList, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined);
+  const { data: userList, isLoading, refetch } = trpc.adminUsers.listUsers.useQuery(undefined);
 
-  const { data: auditLog, isLoading: auditLoading } = trpc.admin.listAuditLog.useQuery(undefined, {
+  const { data: auditLog, isLoading: auditLoading } = trpc.adminUsers.listAuditLog.useQuery(undefined, {
     enabled: showAuditLog,
   });
 
-  const blockMutation = trpc.admin.blockUser.useMutation({
+  const blockMutation = trpc.adminUsers.blockUser.useMutation({
     onSuccess: () => {
       refetch();
       setConfirmBlock(null);
@@ -105,7 +105,7 @@ export default function AdminUsers() {
     },
   });
 
-  const unblockMutation = trpc.admin.unblockUser.useMutation({
+  const unblockMutation = trpc.adminUsers.unblockUser.useMutation({
     onSuccess: () => refetch(),
   });
 

@@ -328,7 +328,11 @@ export const trpc = {
     processExpiredBlocks: { useMutation: () => makeMutation(() => ({ success: true })) },
     reBlockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
     unblockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
-    // PIN gate stubs — standalone build bypasses PIN (admin panel is already blocked by isOwner=false)
+  },
+
+  // ── adminPin ─────────────────────────────────────────────────────────────────────────────────────
+  // PIN gate stubs — standalone build bypasses PIN (admin panel is already blocked by isOwner=false)
+  adminPin: {
     verifyPin: { useMutation: () => makeMutation(() => ({ token: 'standalone-pin-bypass' })) },
     verifyPinToken: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ valid: true }),
@@ -340,8 +344,14 @@ export const trpc = {
     getPinAttemptHistory: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
     },
+    getIpAllowlist: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ ips: [] }),
+    },
+    setIpAllowlist: { useMutation: () => makeMutation(() => ({ success: true, count: 0 })) },
+    getPinAttemptChart: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
   },
-
   // ── adminUsers ─────────────────────────────────────────────────────────────────────────────────
   adminUsers: {
     listUsers: {
@@ -364,9 +374,14 @@ export const trpc = {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
     },
     checkInactiveUsers: { useMutation: () => makeMutation(() => ({ notified: false, count: 0 })) },
+    getUserBlockHistory: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    listAuditLog: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
   },
-
-  // ── siteAccess ─────────────────────────────────────────────────────────────────────────────────
+  // ── siteAccesss ─────────────────────────────────────────────────────────────────────────────────
   siteAccess: {
     checkAccess: {
       useQuery: (_?: unknown, _opts?: unknown) =>
@@ -467,6 +482,11 @@ export const trpc = {
     adminUsers: {
       listUsers: { invalidate: () => {} },
       listEvents: { invalidate: () => {} },
+    },
+    adminPin: {
+      getIpAllowlist: { invalidate: () => {} },
+      getPinAttemptHistory: { invalidate: () => {} },
+      getPinAttemptChart: { invalidate: () => {} },
     },
     analytics: {
       getSiteAnalytics: { invalidate: () => {} },

@@ -5,8 +5,9 @@ import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
   Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight,
-  AlertTriangle, KeyRound, AlertOctagon
+  AlertTriangle, KeyRound, AlertOctagon, Plus, Trash2, Wifi
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 export default function AdminSettings() {
   const { user } = useAuth();
@@ -26,6 +27,10 @@ export default function AdminSettings() {
   const [changePinError, setChangePinError] = useState<string | null>(null);
   const [changePinSuccess, setChangePinSuccess] = useState(false);
 
+  // IP allowlist state
+  const [newIpInput, setNewIpInput] = useState("");
+  const [ipSaveSuccess, setIpSaveSuccess] = useState(false);
+
   const utils = trpc.useUtils();
 
   const { data: disclaimerStatus } = trpc.siteAccess.getDisclaimerEnabled.useQuery(undefined);
@@ -40,7 +45,23 @@ export default function AdminSettings() {
     refetchInterval: 30_000,
   });
 
-  const { data: pinAttempts, refetch: refetchPinAttempts } = trpc.admin.getPinAttemptHistory.useQuery(undefined, {
+  const { data: pinAttempts, refetch: refetchPinAttempts } = trpc.adminPin.getPinAttemptHistory.useQuery(undefined, {
+    refetchInterval: 60_000,
+  });
+
+  const { data: ipAllowlistData, refetch: refetchIpAllowlist } = trpc.adminPin.getIpAllowlist.useQuery(undefined);
+  const allowedIps: string[] = ipAllowlistData?.ips ?? [];
+
+  const setIpAllowlistMutation = trpc.adminPin.setIpAllowlist.useMutation({
+    onSuccess: () => {
+      refetchIpAllowlist();
+      setNewIpInput("");
+      setIpSaveSuccess(true);
+      setTimeout(() => setIpSaveSuccess(false), 3000);
+    },
+  });
+
+  const { data: chartData } = trpc.adminPin.getPinAttemptChart.useQuery(undefined, {
     refetchInterval: 60_000,
   });
 
@@ -68,7 +89,7 @@ export default function AdminSettings() {
     onSuccess: () => utils.siteSettings.getLockStatus.invalidate(),
   });
 
-  const changePinMutation = trpc.admin.changeAdminPin.useMutation({
+  const changePinMutation = trpc.adminPin.changeAdminPin.useMutation({
     onSuccess: () => {
       setChangePinSuccess(true);
       setCurrentPin("");
@@ -566,6 +587,99 @@ export default function AdminSettings() {
             </div>
           )}
           <p className="text-[10px] text-gray-600 mt-3">Shows the last 10 failed attempts. Auto-lock triggers after 5 failures within 15 minutes.</p>
+        </div>
+
+        {/* PIN Attempt Bar Chart */}
+        <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertOctagon size={16} className="text-amber-400" />
+            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Failed Attempts — Last 7 Days</h4>
+          </div>
+          {!chartData || chartData.every(d => d.count === 0) ? (
+            <p className="text-xs text-gray-600 text-center py-4">No failed PIN attempts in the last 7 days.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={140}>
+              <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, fontSize: 12 }}
+                  labelStyle={{ color: '#d1d5db' }}
+                  itemStyle={{ color: '#f87171' }}
+                  cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                />
+                <Bar dataKey="count" name="Failed Attempts" radius={[4, 4, 0, 0]}>
+                  {(chartData ?? []).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.count > 0 ? '#ef4444' : '#374151'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+          <p className="text-[10px] text-gray-600 mt-2">Each bar represents the number of failed PIN attempts on that calendar day.</p>
+        </div>
+
+        {/* IP Allowlist */}
+        <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Wifi size={16} className="text-emerald-400" />
+            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Trusted IP Allowlist</h4>
+          </div>
+          <p className="text-[11px] text-gray-500 mb-4">IPs on this list bypass the PIN gate entirely. Supports exact IPv4 (e.g. <code className="text-gray-400">1.2.3.4</code>) and /24 CIDR (e.g. <code className="text-gray-400">192.168.1.0/24</code>).</p>
+          {/* Current IPs */}
+          {allowedIps.length === 0 ? (
+            <p className="text-xs text-gray-600 mb-3">No trusted IPs configured. All visitors must enter the PIN.</p>
+          ) : (
+            <div className="space-y-1 mb-3">
+              {allowedIps.map((ip, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-gray-800/60 rounded-lg px-3 py-2">
+                  <span className="font-mono text-xs text-emerald-300">{ip}</span>
+                  <button
+                    onClick={() => {
+                      const updated = allowedIps.filter((_, i) => i !== idx);
+                      setIpAllowlistMutation.mutate({ ips: updated });
+                    }}
+                    className="text-gray-600 hover:text-red-400 transition-colors"
+                    title="Remove"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Add new IP */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newIpInput}
+              onChange={e => setNewIpInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && newIpInput.trim()) {
+                  setIpAllowlistMutation.mutate({ ips: [...allowedIps, newIpInput.trim()] });
+                }
+              }}
+              placeholder="e.g. 203.0.113.42 or 192.168.1.0/24"
+              className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-emerald-600"
+            />
+            <button
+              onClick={() => {
+                if (newIpInput.trim()) {
+                  setIpAllowlistMutation.mutate({ ips: [...allowedIps, newIpInput.trim()] });
+                }
+              }}
+              disabled={!newIpInput.trim() || setIpAllowlistMutation.isPending}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+            >
+              <Plus size={12} /> Add
+            </button>
+          </div>
+          {ipSaveSuccess && (
+            <p className="text-xs text-emerald-400 mt-2 flex items-center gap-1"><CheckCircle size={12} /> Allowlist saved.</p>
+          )}
+          {setIpAllowlistMutation.isError && (
+            <p className="text-xs text-red-400 mt-2">Failed to save: {setIpAllowlistMutation.error?.message}</p>
+          )}
         </div>
 
         {/* How it works */}

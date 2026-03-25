@@ -84,7 +84,7 @@ export default function PinGateModal() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Poll lock status every 10 seconds so the countdown updates live
-  const { data: lockStatus, refetch: refetchLock } = trpc.admin.getPinLockStatus.useQuery(undefined, {
+  const { data: lockStatus, refetch: refetchLock } = trpc.adminPin.getPinLockStatus.useQuery(undefined, {
     refetchInterval: 10_000,
   });
 
@@ -104,7 +104,7 @@ export default function PinGateModal() {
     if (!isLocked) inputRefs.current[0]?.focus();
   }, [isLocked]);
 
-  const verifyMutation = trpc.admin.verifyPin.useMutation({
+  const verifyMutation = trpc.adminPin.verifyPin.useMutation({
     onSuccess: (data: { token: string }) => {
       setPinToken(data.token);
     },

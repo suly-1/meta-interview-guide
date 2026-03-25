@@ -776,3 +776,15 @@
 - [x] Add getPinAttemptHistory stub to trpc.standalone.ts
 - [x] All 61 tests pass, TypeScript clean (0 errors)
 - [x] Checkpoint saved
+
+## BUG: Admin button and PIN box not showing (Mar 25, 2026)
+- [ ] Diagnose why admin shield button is not visible on live Manus-hosted site
+- [ ] Fix admin button visibility — must show for all users (anonymous + signed-in)
+- [ ] Fix PIN gate — must show PIN entry box when navigating to /admin/*
+- [ ] Verify fix on live site after deploy
+
+## PIN Security — Phase 3 (Mar 25, 2026)
+- [x] IP allowlist — store trusted IPs in siteSettings, skip PIN gate for those IPs, manage from Admin Settings
+- [x] SMTP email alert — send email via SMTP when 3+ failed PIN attempts from same IP in 15-min window
+- [x] PIN attempt bar chart — show failed attempts per day over last 7 days in Admin Settings
+- [x] Run tests (79 tests pass), save checkpoint, deploy

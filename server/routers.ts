@@ -17,6 +17,7 @@ import { highImpactRouter } from "./routers/highImpact";
 import { scoresRouter } from "./routers/scores";
 import { feedbackRouter } from "./routers/feedback";
 import { adminRouter } from "./routers/admin";
+import { adminPinRouter } from "./routers/adminPin";
 import { siteSettingsRouter } from "./routers/siteSettings";
 import { siteAccessRouter } from "./routers/siteAccess";
 import { adminUsersRouter } from "./routers/adminUsers";
@@ -1820,6 +1821,7 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   scores: scoresRouter,
   feedback: feedbackRouter,
   admin: adminRouter,
+  adminPin: adminPinRouter,
   siteSettings: siteSettingsRouter,
   siteAccess: siteAccessRouter,
   adminUsers: adminUsersRouter,
