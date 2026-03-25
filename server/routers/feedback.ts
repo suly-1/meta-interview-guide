@@ -13,6 +13,55 @@ import { desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { sendWeeklyDigest, sendEmail } from "../weeklyDigest";
 import { checkAndSendDailyAlert } from "../dailyAlert";
+import { invokeLLM, withLLMFallback } from "../_core/llm";
+
+// ── Sentiment tagging ────────────────────────────────────────────────────────
+type Sentiment = "positive" | "neutral" | "negative";
+
+async function tagSentiment(message: string): Promise<Sentiment> {
+  return withLLMFallback(
+    async () => {
+      const res = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a sentiment classifier. Classify the following user feedback as exactly one of: positive, neutral, or negative. Respond with a JSON object.",
+          },
+          { role: "user", content: message },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "sentiment_result",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                sentiment: {
+                  type: "string",
+                  enum: ["positive", "neutral", "negative"],
+                },
+              },
+              required: ["sentiment"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = res?.choices?.[0]?.message?.content;
+      if (!rawContent) return "neutral" as Sentiment;
+      const raw =
+        typeof rawContent === "string"
+          ? rawContent
+          : JSON.stringify(rawContent);
+      const parsed = JSON.parse(raw) as { sentiment: Sentiment };
+      return parsed.sentiment ?? "neutral";
+    },
+    "neutral" as Sentiment,
+    { label: "tagSentiment", timeoutMs: 12_000 }
+  );
+}
 
 const DIGEST_EMAIL = process.env.DIGEST_EMAIL ?? "";
 
@@ -122,14 +171,33 @@ export const feedbackRouter = router({
       const userId = ctx.user?.id ?? null;
       const db = await getDb();
       if (!db) return { success: false };
-      await db.insert(feedbackTable).values({
+      // Tag sentiment non-blocking (fire-and-forget, then update metadata)
+      const sentimentPromise = tagSentiment(input.message);
+
+      const insertResult = await db.insert(feedbackTable).values({
         userId,
         feedbackType: "general",
         category: input.category,
         message: input.message,
         page: input.page ?? null,
-        metadata: { userAgent: input.userAgent ?? null },
+        metadata: { userAgent: input.userAgent ?? null, sentiment: "neutral" },
       });
+      const newId = (insertResult as { insertId?: number }).insertId;
+
+      // Update sentiment once LLM responds (non-blocking)
+      sentimentPromise
+        .then(async sentiment => {
+          if (!newId) return;
+          const db2 = await getDb();
+          if (!db2) return;
+          await db2
+            .update(feedbackTable)
+            .set({
+              metadata: { userAgent: input.userAgent ?? null, sentiment },
+            })
+            .where(eq(feedbackTable.id, newId));
+        })
+        .catch(() => null);
 
       // Fire instant alert (non-blocking)
       sendInstantAlert({
@@ -164,7 +232,11 @@ export const feedbackRouter = router({
       const userId = ctx.user?.id ?? null;
       const db = await getDb();
       if (!db) return { success: false };
-      await db.insert(feedbackTable).values({
+
+      // Tag sentiment non-blocking
+      const sentimentPromise = tagSentiment(input.message);
+
+      const insertResult = await db.insert(feedbackTable).values({
         userId,
         feedbackType: "sprint_plan",
         category: "feature_request",
@@ -174,8 +246,29 @@ export const feedbackRouter = router({
           rating: input.rating,
           sprintPlanId: input.sprintPlanId ?? null,
           dayFeedback: input.dayFeedback ?? [],
+          sentiment: "neutral",
         },
       });
+      const newId = (insertResult as { insertId?: number }).insertId;
+
+      sentimentPromise
+        .then(async sentiment => {
+          if (!newId) return;
+          const db2 = await getDb();
+          if (!db2) return;
+          await db2
+            .update(feedbackTable)
+            .set({
+              metadata: {
+                rating: input.rating,
+                sprintPlanId: input.sprintPlanId ?? null,
+                dayFeedback: input.dayFeedback ?? [],
+                sentiment,
+              },
+            })
+            .where(eq(feedbackTable.id, newId));
+        })
+        .catch(() => null);
 
       // Fire instant alert (non-blocking)
       sendInstantAlert({

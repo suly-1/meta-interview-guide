@@ -335,3 +335,82 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   return (await response.json()) as InvokeResult;
 }
+
+// ── Graceful Degradation Wrapper ─────────────────────────────────────────────
+//
+// withLLMFallback wraps any async function that calls invokeLLM and:
+//   1. Enforces a configurable timeout (default 15 seconds)
+//   2. Returns a fallback value if the LLM call times out or throws
+//   3. Logs the error to stderr so it appears in server logs without crashing
+//
+// Usage:
+//   const sentiment = await withLLMFallback(
+//     () => tagSentiment(text),
+//     "neutral"   // fallback value
+//   );
+//
+// This prevents a slow or unavailable LLM from blocking the entire request.
+// The procedure still returns a valid response — just without the AI enrichment.
+
+export type LLMFallbackOptions = {
+  /** Timeout in milliseconds. Defaults to 15000 (15 seconds). */
+  timeoutMs?: number;
+  /** Label for log messages. Helps identify which call timed out. */
+  label?: string;
+};
+
+/**
+ * Wraps an async LLM call with a timeout and a fallback value.
+ * If the call throws or times out, returns `fallback` instead of crashing.
+ *
+ * @param fn - Async function that calls invokeLLM
+ * @param fallback - Value to return if the LLM call fails or times out
+ * @param options - Optional timeout and label configuration
+ * @returns The LLM result, or `fallback` on failure
+ */
+export async function withLLMFallback<T>(
+  fn: () => Promise<T>,
+  fallback: T,
+  options: LLMFallbackOptions = {}
+): Promise<T> {
+  const { timeoutMs = 15_000, label = "LLM call" } = options;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    // Allow Node.js to exit even if this timer is still pending
+    if (timer.unref) timer.unref();
+  });
+
+  try {
+    return await Promise.race([fn(), timeoutPromise]);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(
+      `[withLLMFallback] ${label} failed — using fallback. Reason: ${message}`
+    );
+    return fallback;
+  }
+}
+
+/**
+ * Wraps an async LLM call that returns a structured JSON object.
+ * If the call fails, returns the fallback object.
+ * Also handles JSON.parse errors on the LLM response content.
+ *
+ * @param fn - Async function that calls invokeLLM and returns a parsed object
+ * @param fallback - Object to return if the LLM call fails
+ * @param options - Optional timeout and label configuration
+ * @returns The parsed LLM result, or `fallback` on failure
+ */
+export async function withLLMJsonFallback<T extends Record<string, unknown>>(
+  fn: () => Promise<T>,
+  fallback: T,
+  options: LLMFallbackOptions = {}
+): Promise<T> {
+  return withLLMFallback(fn, fallback, {
+    label: "LLM JSON call",
+    ...options,
+  });
+}

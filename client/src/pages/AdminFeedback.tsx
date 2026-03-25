@@ -27,6 +27,9 @@ import {
   Users,
   Shield,
   LineChart,
+  Smile,
+  Meh,
+  Frown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { route } from "@/const";
@@ -149,6 +152,46 @@ function TypeBadge({ type }: { type: string }) {
   );
 }
 
+type Sentiment = "positive" | "neutral" | "negative";
+
+const SENTIMENT_META: Record<
+  Sentiment,
+  { label: string; icon: React.ReactNode; color: string; bg: string }
+> = {
+  positive: {
+    label: "Positive",
+    icon: <Smile size={11} />,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+  },
+  neutral: {
+    label: "Neutral",
+    icon: <Meh size={11} />,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10 border-amber-500/20",
+  },
+  negative: {
+    label: "Negative",
+    icon: <Frown size={11} />,
+    color: "text-red-400",
+    bg: "bg-red-500/10 border-red-500/20",
+  },
+};
+
+function SentimentBadge({ sentiment }: { sentiment?: string | null }) {
+  if (!sentiment)
+    return <span className="text-muted-foreground/40 text-[10px]">—</span>;
+  const m = SENTIMENT_META[sentiment as Sentiment] ?? SENTIMENT_META["neutral"];
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${m.bg} ${m.color}`}
+    >
+      {m.icon}
+      {m.label}
+    </span>
+  );
+}
+
 function formatDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   return new Date(d).toLocaleString(undefined, {
@@ -166,6 +209,7 @@ export default function AdminFeedback() {
   const [catFilter, setCatFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sentimentFilter, setSentimentFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
   const [noteText, setNoteText] = useState<Record<number, string>>({});
@@ -257,8 +301,15 @@ export default function AdminFeedback() {
     if (catFilter !== "all") rows = rows.filter(r => r.category === catFilter);
     if (typeFilter !== "all")
       rows = rows.filter(r => r.feedbackType === typeFilter);
-    if (statusFilter !== "all")
+    if (statusFilter !== "all") {
       rows = rows.filter(r => r.status === statusFilter);
+    }
+    if (sentimentFilter !== "all") {
+      rows = rows.filter(r => {
+        const meta = r.metadata as Record<string, unknown> | null;
+        return (meta?.sentiment ?? "neutral") === sentimentFilter;
+      });
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(
@@ -278,7 +329,16 @@ export default function AdminFeedback() {
       if (va > vb) return sortDir === "asc" ? 1 : -1;
       return 0;
     });
-  }, [data, catFilter, typeFilter, search, sortKey, sortDir]);
+  }, [
+    data,
+    catFilter,
+    typeFilter,
+    statusFilter,
+    sentimentFilter,
+    search,
+    sortKey,
+    sortDir,
+  ]);
 
   const exportCSV = () => {
     const rows = [
@@ -578,6 +638,16 @@ export default function AdminFeedback() {
             <option value="done">Done</option>
             <option value="dismissed">Dismissed</option>
           </select>
+          <select
+            value={sentimentFilter}
+            onChange={e => setSentimentFilter(e.target.value)}
+            className="px-2.5 py-1.5 rounded-lg border border-border bg-secondary text-xs text-foreground focus:outline-none focus:border-blue-500/50"
+          >
+            <option value="all">All Sentiments</option>
+            <option value="positive">😊 Positive</option>
+            <option value="neutral">😐 Neutral</option>
+            <option value="negative">😞 Negative</option>
+          </select>
           <input
             type="text"
             value={search}
@@ -630,6 +700,9 @@ export default function AdminFeedback() {
                       </span>
                     </th>
                     <th className="px-3 py-2.5 text-left text-muted-foreground font-medium">
+                      Sentiment
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-muted-foreground font-medium">
                       Message
                     </th>
                     <th className="px-3 py-2.5 text-left text-muted-foreground font-medium">
@@ -667,6 +740,14 @@ export default function AdminFeedback() {
                         <td className="px-3 py-2.5">
                           <CategoryBadge cat={row.category} />
                         </td>
+                        <td className="px-3 py-2.5">
+                          <SentimentBadge
+                            sentiment={
+                              (row.metadata as Record<string, unknown> | null)
+                                ?.sentiment as string | null
+                            }
+                          />
+                        </td>
                         <td className="px-3 py-2.5 max-w-xs">
                           <p className="truncate text-foreground/80">
                             {row.message}
@@ -691,7 +772,7 @@ export default function AdminFeedback() {
                           key={`${row.id}-expanded`}
                           className="bg-secondary/20"
                         >
-                          <td colSpan={7} className="px-4 py-3">
+                          <td colSpan={8} className="px-4 py-3">
                             <div className="space-y-2">
                               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                                 Full Message

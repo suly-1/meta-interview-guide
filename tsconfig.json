@@ -15,7 +15,20 @@
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
     "module": "ESNext",
+    // strict: true enables strictNullChecks, noImplicitAny, strictFunctionTypes,
+    // strictBindCallApply, strictPropertyInitialization, noImplicitThis, alwaysStrict.
+    // This is the primary safety net against runtime crashes.
     "strict": true,
+    // noFallthroughCasesInSwitch catches missing break/return in switch statements.
+    "noFallthroughCasesInSwitch": true,
+    // forceConsistentCasingInFileNames prevents cross-platform import issues.
+    "forceConsistentCasingInFileNames": true,
+    // NOTE: noUnusedLocals and noUnusedParameters are intentionally NOT enabled here.
+    // They are style rules (not safety rules) and are excluded from TypeScript's own
+    // strict bundle. Enabling them would require prefixing ~95 variables with _ across
+    // 38 files. Use ESLint's no-unused-vars rule for this instead.
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "preserve",
     "esModuleInterop": true,

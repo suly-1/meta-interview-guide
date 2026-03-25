@@ -19,6 +19,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Send,
+  HeartPulse,
+  ShieldCheck,
+  CalendarClock,
+  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +71,29 @@ export default function AdminStats() {
   const { data: feedbackStats } = trpc.feedback.adminStats.useQuery(undefined, {
     enabled: isAdmin,
   });
+
+  // Cohort Health data
+  const { data: userStats } = trpc.adminUsers.getUserStats.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+  const { data: disclaimerReport } = trpc.disclaimer.adminReport.useQuery(
+    undefined,
+    { enabled: isAdmin }
+  );
+  const { data: accessData } = trpc.siteAccess.checkAccess.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+
+  // Derived cohort health metrics
+  const totalUsers = userStats?.total ?? 0;
+  const acknowledgedCount = (disclaimerReport ?? []).filter(
+    (u: { acknowledged: boolean }) => u.acknowledged
+  ).length;
+  const disclaimerPct =
+    totalUsers > 0 ? Math.round((acknowledgedCount / totalUsers) * 100) : 0;
+  const daysRemaining = accessData?.daysRemaining ?? null;
+  const cohortActive =
+    accessData?.reason === "active" && daysRemaining !== null;
 
   const [digestSent, setDigestSent] = useState(false);
   const sendDigest = trpc.feedback.triggerDailyAlert.useMutation({
@@ -244,6 +271,124 @@ export default function AdminStats() {
             <p className="text-[10px] text-muted-foreground mt-1">
               {feedbackStats?.last7Days ?? 0} in last 7 days
             </p>
+          </div>
+        </div>
+
+        {/* Cohort Health Summary */}
+        <div className="prep-card p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <HeartPulse size={14} className="text-rose-400" />
+            <h2
+              className="text-sm font-bold"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              Cohort Health
+            </h2>
+            <span className="ml-auto text-[10px] text-muted-foreground">
+              Single-glance cohort progress
+            </span>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {/* Total registered users */}
+            <div className="bg-secondary/50 rounded-lg p-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Users size={13} className="text-blue-400" />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Registered Users
+                </span>
+              </div>
+              <p className="text-3xl font-bold text-foreground">{totalUsers}</p>
+              <p className="text-[10px] text-muted-foreground">
+                {userStats?.weeklyActive ?? 0} active this week
+                {(userStats?.blocked ?? 0) > 0 && (
+                  <span className="ml-1 text-red-400">
+                    · {userStats!.blocked} blocked
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Disclaimer acknowledgment % */}
+            <div className="bg-secondary/50 rounded-lg p-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={13} className="text-emerald-400" />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Disclaimer Ack'd
+                </span>
+              </div>
+              <p className="text-3xl font-bold text-foreground">
+                {disclaimerPct}
+                <span className="text-base text-muted-foreground">%</span>
+              </p>
+              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    disclaimerPct >= 80
+                      ? "bg-emerald-500"
+                      : disclaimerPct >= 50
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                  }`}
+                  style={{ width: `${disclaimerPct}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                {acknowledgedCount} of {totalUsers} users
+              </p>
+            </div>
+
+            {/* Days remaining in cohort window */}
+            <div className="bg-secondary/50 rounded-lg p-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <CalendarClock size={13} className="text-purple-400" />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Cohort Window
+                </span>
+              </div>
+              {cohortActive ? (
+                <>
+                  <p className="text-3xl font-bold text-foreground">
+                    {daysRemaining}
+                    <span className="text-base text-muted-foreground">
+                      {" "}
+                      days
+                    </span>
+                  </p>
+                  <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-purple-500 transition-all"
+                      style={{
+                        width: `${Math.min(100, Math.round(((60 - (daysRemaining ?? 0)) / 60) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    remaining in 60-day window
+                  </p>
+                </>
+              ) : accessData?.reason === "expired" ? (
+                <>
+                  <p className="text-2xl font-bold text-red-400">Expired</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Cohort window has ended
+                  </p>
+                </>
+              ) : accessData?.reason === "manual" ? (
+                <>
+                  <p className="text-2xl font-bold text-amber-400">Locked</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Site manually locked
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-muted-foreground">—</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    No cohort window set
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

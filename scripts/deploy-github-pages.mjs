@@ -52,3 +52,27 @@ execSync(
 );
 
 console.log("✅ Deployed! Visit: https://www.metaguide.blog/");
+
+// ── Step 5: Post-deploy smoke test ───────────────────────────────────────────
+// Wait 10 seconds for GitHub Pages CDN to propagate, then run smoke tests.
+// If smoke tests fail, the script exits with code 1 so CI/CD pipelines can
+// detect the failure. The site is already deployed at this point — this step
+// alerts you before users notice the problem.
+// Set SKIP_SMOKE_TEST=1 to skip (e.g. for fast iterative deploys).
+if (process.env.SKIP_SMOKE_TEST !== "1") {
+  console.log("⏳ Waiting 10s for CDN propagation before smoke test…");
+  await new Promise(r => setTimeout(r, 10_000));
+  console.log("🔍 Running post-deploy smoke test…");
+  try {
+    execSync("npx tsx scripts/smoke-test.ts https://www.metaguide.blog", {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+  } catch {
+    console.error("⚠️  Smoke test failed — site is deployed but may have issues.");
+    console.error("   Run manually: npx tsx scripts/smoke-test.ts https://www.metaguide.blog");
+    process.exit(1);
+  }
+} else {
+  console.log("⏭  Smoke test skipped (SKIP_SMOKE_TEST=1)");
+}

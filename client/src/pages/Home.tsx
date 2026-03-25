@@ -30,6 +30,7 @@ import {
   Trash2,
 } from "lucide-react";
 import DisclaimerGate, { useDisclaimerGate } from "@/components/DisclaimerGate";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 // Static imports — dynamic (lazy) imports are incompatible with the standalone
@@ -337,13 +338,35 @@ export default function Home() {
       {/* Main content */}
       <main className={`container ${focusMode ? "py-4" : "py-6"}`}>
         {activeTab === "overview" && (
-          <OverviewTab onTabChange={setActiveTabWithUrl} />
+          <SectionErrorBoundary label="Overview tab">
+            <OverviewTab onTabChange={setActiveTabWithUrl} />
+          </SectionErrorBoundary>
         )}
-        {activeTab === "coding" && <CodingTab />}
-        {activeTab === "behavioral" && <BehavioralTab />}
-        {activeTab === "design" && <SystemDesignTab />}
-        {activeTab === "collab" && <CollabLobby />}
-        {activeTab === "practice" && <CodePracticeTab />}
+        {activeTab === "coding" && (
+          <SectionErrorBoundary label="Coding tab">
+            <CodingTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "behavioral" && (
+          <SectionErrorBoundary label="Behavioral tab">
+            <BehavioralTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "design" && (
+          <SectionErrorBoundary label="System Design tab">
+            <SystemDesignTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "collab" && (
+          <SectionErrorBoundary label="Collab tab">
+            <CollabLobby />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "practice" && (
+          <SectionErrorBoundary label="Practice tab">
+            <CodePracticeTab />
+          </SectionErrorBoundary>
+        )}
       </main>
 
       {/* Footer — hidden in focus mode */}

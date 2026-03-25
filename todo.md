@@ -929,3 +929,24 @@
 - [ ] Add cohortReset server procedure (clears disclaimerAcknowledgedAt for all users)
 - [ ] Wire Cohort Reset button to AdminAccess UI with confirmation dialog
 - [ ] Add automated stub coverage test for trpc.standalone.ts
+
+## Phase 29 — LLM Sentiment Tagging
+
+- [ ] Add sentiment tagging (positive/neutral/negative) to feedback submission server-side using invokeLLM
+- [ ] Store sentiment in metadata JSON column
+- [ ] Add sentiment filter pill to Feedback Dashboard
+- [ ] Add colored sentiment badge to each feedback row
+- [ ] Add standalone mock stub for sentiment field
+
+## Bulletproofing Strategies (High Priority — All Must Be Implemented)
+
+- [x] Strategy 1 (P1): Error boundaries on every tab — wrap each of the 7 main tabs in <ErrorBoundary fallback={<TabErrorFallback />}> in Home.tsx
+- [x] Strategy 2 (P2): Feature flags — useFeatureFlag('xyz') hook + FeatureFlag wrapper component reading from VITE*FEATURE*\* env vars
+- [x] Strategy 3 (P3): Expand automated tests — server/procedures.smoke.test.ts (23 tests) + client/src/test/pages.render.test.tsx (7 tests) — 61 total tests passing
+- [x] Strategy 4 (P4): Smoke test after deploy — scripts/smoke-test.ts using Playwright, wired into deploy:github-pages script (SKIP_SMOKE_TEST=1 to bypass)
+- [x] Strategy 5 (P5): Strict TypeScript — strict:true already enabled; added noFallthroughCasesInSwitch + forceConsistentCasingInFileNames; documented why noUnusedLocals is intentionally excluded (style rule, not safety rule)
+- [x] Strategy 6 (P6): DB migration safety — scripts/db-migrate-safe.mjs with pre-migration snapshot, failure recovery instructions, and pnpm db:migrate-safe script
+- [x] Strategy 7 (P7): LLM graceful degradation — withLLMFallback() + withLLMJsonFallback() added to server/\_core/llm.ts; tagSentiment in feedback.ts now uses withLLMFallback with 12s timeout, falls back to 'neutral'
+- [x] Strategy 8 (P8): Dependency locking — .npmrc with save-exact=true + audit-level=moderate; added audit:check and audit:fix npm scripts
+- [x] Strategy 9 (P9): RUNBOOK.md rollback playbook — 3 scenarios: bad deploy (Manus UI rollback), DB migration error (exact SQL fixes + nuclear restore), LLM outage (withLLMFallback auto-handles + feature flag disable)
+- [x] Strategy 10 (P10): Staging environment guidance — docs/staging-environment.md with step-by-step Manus project setup, workflow, schema migration process, and pre-deploy checklist
