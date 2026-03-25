@@ -1,11 +1,13 @@
 /**
  * AdminGate — enforces that only the site owner (OWNER_OPEN_ID) can access
- * any /admin/* route. Non-owners are shown a 403 screen and redirected.
+ * any /admin/* route.
  *
  * Security model:
- * - Calls trpc.auth.isOwner (protectedProcedure) on the server.
- * - The server compares ctx.user.openId === ENV.ownerOpenId.
- * - If the user is not logged in, the protectedProcedure throws UNAUTHORIZED
+ * - In STANDALONE mode (static GitHub Pages build): blocks ALL access unconditionally.
+ *   There is no server to verify ownership, so the admin panel cannot be used.
+ * - In LIVE mode (Manus-hosted server build): calls trpc.auth.isOwner (protectedProcedure).
+ *   The server compares ctx.user.openId === ENV.ownerOpenId.
+ *   If the user is not logged in, the protectedProcedure throws UNAUTHORIZED
  *   and the query error is treated as "not owner".
  * - localStorage admin tokens are cleared for non-owners so stale tokens
  *   cannot be used to bypass the gate on future visits.
@@ -23,15 +25,20 @@ interface AdminGateProps {
   children: React.ReactNode;
 }
 
+// Detect standalone (static GitHub Pages) build — no server available
+const IS_STANDALONE = import.meta.env.VITE_STANDALONE === "true";
+
 export default function AdminGate({ children }: AdminGateProps) {
   const [, navigate] = useLocation();
+
   const { data, isLoading, error } = trpc.auth.isOwner.useQuery(undefined, {
     retry: false,
     staleTime: 30_000,
+    // In standalone mode, skip the query entirely — we know there's no server
+    enabled: !IS_STANDALONE,
   });
 
-  const isOwner = data?.isOwner === true;
-  const notLoggedIn = !!error || (!isLoading && !data);
+  const isOwner = !IS_STANDALONE && data?.isOwner === true;
 
   // Clear stale localStorage token for non-owners
   useEffect(() => {
@@ -39,6 +46,31 @@ export default function AdminGate({ children }: AdminGateProps) {
       clearAdminToken();
     }
   }, [isLoading, isOwner]);
+
+  // Standalone build: always block — no server to verify ownership
+  if (IS_STANDALONE) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 rounded-full bg-red-900/30 flex items-center justify-center mx-auto mb-5">
+            <ShieldAlert size={28} className="text-red-400" />
+          </div>
+          <h1 className="text-xl font-bold text-white mb-2">Admin Access Restricted</h1>
+          <p className="text-gray-400 text-sm leading-relaxed mb-6">
+            The admin panel is only accessible on the live hosted version of this site.
+            This static build does not support admin features.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full max-w-xs text-gray-300 border-gray-700 hover:bg-gray-800"
+            onClick={() => navigate("/")}
+          >
+            Back to guide
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -52,7 +84,8 @@ export default function AdminGate({ children }: AdminGateProps) {
   }
 
   if (!isOwner) {
-    const isUnauthenticated = !data && (error as { data?: { code?: string } })?.data?.code === "UNAUTHORIZED";
+    const isUnauthenticated =
+      !data && (error as { data?: { code?: string } })?.data?.code === "UNAUTHORIZED";
 
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">

@@ -155,6 +155,10 @@ export const trpc = {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
     },
     updateFeedbackStatus: { useMutation: () => makeMutation(() => ({ success: true })) },
+    // Lightweight new-feedback count for admin badge
+    getNewCount: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ newCount: 0 }),
+    },
     // New admin procedures
     adminGetAll: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ items: [], total: 0 }),
@@ -309,6 +313,9 @@ export const trpc = {
     blockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
     blockUserWithExpiry: { useMutation: () => makeMutation(() => ({ success: true })) },
     cohortReset: { useMutation: () => makeMutation(() => ({ success: true })) },
+    getUserBlockHistory: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
     listAuditLog: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
     },
@@ -420,6 +427,7 @@ export const trpc = {
     },
     feedback: {
       getAllSiteFeedback: { invalidate: () => {} },
+      getNewCount: { invalidate: () => {} },
       adminStats: { invalidate: () => {} },
       adminGetAll: { invalidate: () => {} },
     },

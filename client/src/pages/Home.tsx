@@ -194,15 +194,21 @@ export default function Home() {
   const isDark = theme === "dark";
   const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
   const { user: authUser } = useAuth();
-  const isAdmin = authUser?.role === "admin";
 
-  // ── Admin badge: poll feedback stats every 5 minutes ────────────────────
-  const { data: adminStats } = trpc.feedback.adminStats.useQuery(undefined, {
-    enabled: isAdmin,
+  // ── Admin badge: check owner status + poll new feedback count every 5 min ──────────────
+  const IS_STANDALONE = import.meta.env.VITE_STANDALONE === "true";
+  const { data: ownerData } = trpc.auth.isOwner.useQuery(undefined, {
+    enabled: !IS_STANDALONE,
+    staleTime: 60_000,
+    retry: false,
+  });
+  const isOwner = !IS_STANDALONE && ownerData?.isOwner === true;
+  const { data: newCountData } = trpc.feedback.getNewCount.useQuery(undefined, {
+    enabled: isOwner,
     refetchInterval: 5 * 60 * 1000, // 5 minutes
     staleTime: 4 * 60 * 1000,
   });
-  const adminNewCount = adminStats?.newCount ?? 0;
+  const adminNewCount = newCountData?.newCount ?? 0;
 
   const [rouletteOpen, setRouletteOpen] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
@@ -718,7 +724,7 @@ export default function Home() {
           >
             <ShieldCheck size={14} />
             <span>Admin</span>
-            {isAdmin && adminNewCount > 0 && (
+            {isOwner && adminNewCount > 0 && (
               <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
                 {adminNewCount > 9 ? "9+" : adminNewCount}
               </span>

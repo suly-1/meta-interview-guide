@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import {
   ArrowLeft, Shield, ShieldOff, Users,
-  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp, AlertCircle, Timer, Infinity,
+  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp, AlertCircle, Timer, Infinity, History,
 } from "lucide-react";
 
 // Duration options for temporary blocks
@@ -25,11 +25,70 @@ function formatTimeLeft(bannedUntil: Date | string): string {
   return `${days}d left`;
 }
 
+// ── Per-user block history row ────────────────────────────────────────────────
+function UserBlockHistory({ userId }: { userId: number }) {
+  const { data: history, isLoading } = trpc.admin.getUserBlockHistory.useQuery({ userId });
+
+  if (isLoading) {
+    return (
+      <tr>
+        <td colSpan={6} className="px-6 py-3 bg-gray-800/40 text-xs text-gray-500 text-center">
+          Loading history…
+        </td>
+      </tr>
+    );
+  }
+
+  if (!history?.length) {
+    return (
+      <tr>
+        <td colSpan={6} className="px-6 py-3 bg-gray-800/40 text-xs text-gray-500 text-center">
+          No block/unblock events recorded for this user.
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <>
+      {history.map(event => (
+        <tr key={event.id} className="bg-gray-800/40 border-b border-gray-700/30 last:border-0">
+          <td className="px-6 py-2 text-[11px] text-gray-500 whitespace-nowrap">
+            {new Date(event.createdAt).toLocaleString()}
+          </td>
+          <td className="px-4 py-2" colSpan={2}>
+            {event.action === "block" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/40 text-red-400 text-[11px] font-semibold">
+                <ShieldOff size={9} /> Blocked
+              </span>
+            ) : event.action === "unblock" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 text-emerald-400 text-[11px] font-semibold">
+                <Shield size={9} /> Unblocked
+              </span>
+            ) : (
+              <span className="text-amber-400 text-[11px] font-semibold">{event.action}</span>
+            )}
+          </td>
+          <td className="px-4 py-2 text-[11px] text-gray-400 hidden md:table-cell">
+            by {event.actorName ?? `Admin #${event.actorId}`}
+          </td>
+          <td className="px-4 py-2 text-[11px] text-gray-500 hidden lg:table-cell max-w-[200px] truncate" title={event.reason ?? ""}>
+            {event.reason ?? "—"}
+          </td>
+          <td />
+        </tr>
+      ))}
+    </>
+  );
+}
+
 export default function AdminUsers() {
   const [confirmBlock, setConfirmBlock] = useState<{ userId: number; name: string } | null>(null);
   const [blockReason, setBlockReason] = useState("");
   const [blockDurationDays, setBlockDurationDays] = useState<number | null>(null); // null = permanent
   const [showAuditLog, setShowAuditLog] = useState(false);
+  // Track which user rows have the history panel expanded
+  const [expandedHistoryUserId, setExpandedHistoryUserId] = useState<number | null>(null);
 
   const { data: userList, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined);
 
@@ -65,17 +124,11 @@ export default function AdminUsers() {
     return new Date(u.lastSignedIn).getTime() > sevenDaysAgo;
   }).length ?? 0;
 
-  // Compute expiryDays for mutation — convert fractional days (hours) to integer minutes via rounding
-  const expiryDaysForMutation = blockDurationDays === null
-    ? undefined
-    : blockDurationDays < 1
-      ? Math.max(1, Math.round(blockDurationDays * 24)) / 24  // keep as fraction for 1h
-      : blockDurationDays;
-
-  // The backend accepts expiryDays as a number — for 1h we pass a small fraction
-  // Actually the backend uses: new Date(Date.now() + input.expiryDays * 86_400_000)
-  // So 1/24 days = 1 hour. We need to pass it as-is.
   const selectedDuration = BLOCK_DURATIONS.find(d => d.days === blockDurationDays) ?? BLOCK_DURATIONS[4];
+
+  const toggleHistory = (userId: number) => {
+    setExpandedHistoryUserId(prev => prev === userId ? null : userId);
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -159,101 +212,127 @@ export default function AdminUsers() {
               </thead>
               <tbody>
                 {userList.map((u, idx) => (
-                  <tr
-                    key={u.id}
-                    className={`border-b border-gray-800/50 last:border-0 transition-colors ${
-                      u.isBanned ? "bg-red-950/20" : idx % 2 === 0 ? "" : "bg-gray-900/50"
-                    }`}
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                          {(u.name ?? "?")[0]?.toUpperCase()}
+                  <>
+                    <tr
+                      key={u.id}
+                      className={`border-b border-gray-800/50 transition-colors ${
+                        expandedHistoryUserId === u.id
+                          ? "bg-gray-800/60"
+                          : u.isBanned
+                            ? "bg-red-950/20"
+                            : idx % 2 === 0 ? "" : "bg-gray-900/50"
+                      }`}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {(u.name ?? "?")[0]?.toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-white text-xs leading-tight">{u.name}</p>
+                            {u.role === "admin" && (
+                              <span className="text-[10px] text-amber-400 font-medium">Admin</span>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-white text-xs leading-tight">{u.name}</p>
-                          {u.role === "admin" && (
-                            <span className="text-[10px] text-amber-400 font-medium">Admin</span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-gray-400 text-xs flex items-center gap-1">
-                        <Mail size={11} />
-                        {u.email}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
-                      <span className="text-gray-500 text-xs flex items-center gap-1">
-                        <Clock size={11} />
-                        {new Date(u.lastSignedIn).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {u.disclaimerAcknowledged ? (
-                        <span className="flex items-center gap-1 text-emerald-400 text-xs">
-                          <CheckCircle size={12} />
-                          Signed
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className="text-gray-400 text-xs flex items-center gap-1">
+                          <Mail size={11} />
+                          {u.email}
                         </span>
-                      ) : (
-                        <span className="text-gray-600 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {u.isBanned ? (
-                        <div className="space-y-1">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/50 text-red-400 text-xs font-medium">
-                            <ShieldOff size={10} />
-                            Blocked
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <span className="text-gray-500 text-xs flex items-center gap-1">
+                          <Clock size={11} />
+                          {new Date(u.lastSignedIn).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.disclaimerAcknowledged ? (
+                          <span className="flex items-center gap-1 text-emerald-400 text-xs">
+                            <CheckCircle size={12} />
+                            Signed
                           </span>
-                          {u.bannedUntil ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
-                              <Timer size={9} />
-                              {formatTimeLeft(u.bannedUntil)}
+                        ) : (
+                          <span className="text-gray-600 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.isBanned ? (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/50 text-red-400 text-xs font-medium">
+                              <ShieldOff size={10} />
+                              Blocked
                             </span>
+                            {u.bannedUntil ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
+                                <Timer size={9} />
+                                {formatTimeLeft(u.bannedUntil)}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 text-[10px] font-medium">
+                                <Infinity size={9} />
+                                Permanent
+                              </span>
+                            )}
+                            {u.bannedReason && (
+                              <p className="text-[10px] text-gray-600 mt-0.5 max-w-[120px] truncate" title={u.bannedReason}>
+                                {u.bannedReason}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 text-emerald-400 text-xs font-medium">
+                            <CheckCircle size={10} />
+                            Active
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Block history toggle */}
+                          <button
+                            onClick={() => toggleHistory(u.id)}
+                            title="View block/unblock history"
+                            className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              expandedHistoryUserId === u.id
+                                ? "bg-indigo-700/60 text-indigo-300 border border-indigo-600"
+                                : "bg-gray-800 hover:bg-gray-700 text-gray-400 border border-gray-700"
+                            }`}
+                          >
+                            <History size={11} />
+                            <span className="hidden sm:inline">History</span>
+                          </button>
+                          {/* Block / Unblock */}
+                          {u.role === "admin" ? (
+                            <span className="text-xs text-gray-600 italic">Protected</span>
+                          ) : u.isBanned ? (
+                            <button
+                              onClick={() => unblockMutation.mutate({ userId: u.id })}
+                              disabled={unblockMutation.isPending}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 text-xs font-medium transition-colors disabled:opacity-50"
+                            >
+                              <Shield size={12} />
+                              Unblock
+                            </button>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 text-[10px] font-medium">
-                              <Infinity size={9} />
-                              Permanent
-                            </span>
-                          )}
-                          {u.bannedReason && (
-                            <p className="text-[10px] text-gray-600 mt-0.5 max-w-[120px] truncate" title={u.bannedReason}>
-                              {u.bannedReason}
-                            </p>
+                            <button
+                              onClick={() => setConfirmBlock({ userId: u.id, name: u.name })}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-900/30 hover:bg-red-800/50 text-red-400 text-xs font-medium transition-colors"
+                            >
+                              <ShieldOff size={12} />
+                              Block
+                            </button>
                           )}
                         </div>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 text-emerald-400 text-xs font-medium">
-                          <CheckCircle size={10} />
-                          Active
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {u.role === "admin" ? (
-                        <span className="text-xs text-gray-600 italic">Protected</span>
-                      ) : u.isBanned ? (
-                        <button
-                          onClick={() => unblockMutation.mutate({ userId: u.id })}
-                          disabled={unblockMutation.isPending}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 text-xs font-medium transition-colors disabled:opacity-50"
-                        >
-                          <Shield size={12} />
-                          Unblock
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setConfirmBlock({ userId: u.id, name: u.name })}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-900/30 hover:bg-red-800/50 text-red-400 text-xs font-medium transition-colors"
-                        >
-                          <ShieldOff size={12} />
-                          Block
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                    {/* Inline block history expansion */}
+                    {expandedHistoryUserId === u.id && (
+                      <UserBlockHistory key={`history-${u.id}`} userId={u.id} />
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>

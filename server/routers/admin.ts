@@ -320,6 +320,25 @@ export const adminRouter = router({
     }),
 
   /**
+   * Get the block/unblock audit trail for a specific user.
+   * Returns all events where targetUserId matches, newest first.
+   * Admin-only.
+   */
+  getUserBlockHistory: tokenAdminProcedure
+    .input(z.object({ userId: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      const rows = await db
+        .select()
+        .from(userEvents)
+        .where(eq(userEvents.targetUserId, input.userId))
+        .orderBy(desc(userEvents.createdAt))
+        .limit(50);
+      return rows;
+    }),
+
+  /**
    * Process expired blocks — auto-unblock users whose bannedUntil has passed.
    * Called by a cron job every hour.
    */

@@ -732,3 +732,12 @@
 - [x] Auto-expiry enforcement in protectedProcedure context — clear expired blocks on each request
 - [x] AdminUsers UI: duration picker when blocking, expiry countdown badge, auto-unblock indicator
 - [x] Add standalone stub updates for blockUser with duration
+
+## CRITICAL: Admin Gate Fix (Mar 25, 2026)
+- [x] CRITICAL: AdminGate not blocking non-owner users — everyone can access /admin/* — fix immediately
+- [x] Deploy AdminGate fix to GitHub Pages (gh-pages branch) — verified live on metaengguide.pro
+
+## Next Features (Mar 25, 2026)
+- [x] Feedback notification badge on Admin button — use auth.isOwner + feedback.adminStats (already implemented but using wrong role check)
+- [x] Page-view event tracker on tab switches for real analytics data
+- [x] Block history audit trail per user (show all block/unblock events in AdminUsers)

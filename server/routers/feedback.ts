@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { publicProcedure, protectedProcedure, tokenAdminProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, tokenAdminProcedure, ownerProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteFeedback, sprintPlanFeedback, sharedSprintPlans } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
@@ -201,6 +201,21 @@ export const feedbackRouter = router({
       if (input.status !== "all") filtered = filtered.filter(i => i.status === input.status);
       return { items: filtered, total: filtered.length };
     }),
+
+  /**
+   * Lightweight new-feedback count for the admin badge in the nav.
+   * Uses ownerProcedure so only the site owner can call it.
+   * Returns { newCount } — the number of feedback items with status "new".
+   */
+  getNewCount: ownerProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return { newCount: 0 };
+    const rows = await db
+      .select({ status: siteFeedback.status })
+      .from(siteFeedback)
+      .where(eq(siteFeedback.status, "new"));
+    return { newCount: rows.length };
+  }),
 
   /** Admin: Summary stats */
   adminStats: tokenAdminProcedure.query(async () => {
