@@ -983,3 +983,16 @@
 - [x] Standalone: AdminPinGate returns locked (no PIN check possible without server)
 - [x] Tests: verifyAdminPin smoke test (68 total tests passing)
 - [x] Deploy and verify PIN gate works
+
+## Admin PIN Enhancements
+
+- [x] Schema: pinAttempts table (id, ip, attemptedAt, succeeded)
+- [x] Server: log failed PIN attempts to pinAttempts table in verifyAdminPin
+- [x] Server: auto-lock after 5 consecutive wrong PINs for 15 minutes (server-side, by IP)
+- [x] Server: verifyAdminPin returns lockoutUntil timestamp when locked
+- [x] Frontend: PIN expiry toast — warn 5 minutes before 55-min token expires
+- [x] Frontend: lockout countdown in PIN modal (shows time remaining when locked)
+- [x] Frontend: Re-lock button (KeyRound icon) in TopNav — clears in-memory token, redirects to PIN gate
+- [x] Standalone mock: getPinStatus stub
+- [x] Tests: pinAttempts logging + lockout smoke tests (68 total tests passing)
+- [x] Deploy and verify all four enhancements work

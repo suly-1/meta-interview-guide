@@ -11,7 +11,9 @@ import {
   AlignJustify,
   Calendar,
   ShieldCheck,
+  KeyRound,
 } from "lucide-react";
+import { clearAdminToken } from "@/components/AdminPinGate";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -896,26 +898,39 @@ export default function TopNav({
 
             {/* Admin Panel — owner only */}
             {isOwner && (
-              <a
-                href={
-                  import.meta.env.VITE_STANDALONE === "true"
-                    ? "#/admin/feedback"
-                    : "/admin/feedback"
-                }
-                title={
-                  newFeedbackCount > 0
-                    ? `Admin Panel · ${newFeedbackCount} new in last 7 days`
-                    : "Admin Panel"
-                }
-                className="relative w-8 h-8 rounded-md flex items-center justify-center text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition-all"
-              >
-                <ShieldCheck size={15} />
-                {newFeedbackCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 ring-1 ring-background flex items-center justify-center text-[9px] font-bold text-white leading-none">
-                    {newFeedbackCount > 99 ? "99+" : newFeedbackCount}
-                  </span>
-                )}
-              </a>
+              <>
+                <a
+                  href={
+                    import.meta.env.VITE_STANDALONE === "true"
+                      ? "#/admin/feedback"
+                      : "/admin/feedback"
+                  }
+                  title={
+                    newFeedbackCount > 0
+                      ? `Admin Panel · ${newFeedbackCount} new in last 7 days`
+                      : "Admin Panel"
+                  }
+                  className="relative w-8 h-8 rounded-md flex items-center justify-center text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition-all"
+                >
+                  <ShieldCheck size={15} />
+                  {newFeedbackCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 ring-1 ring-background flex items-center justify-center text-[9px] font-bold text-white leading-none">
+                      {newFeedbackCount > 99 ? "99+" : newFeedbackCount}
+                    </span>
+                  )}
+                </a>
+                {/* Re-lock admin — clears in-memory token so PIN gate re-appears */}
+                <button
+                  onClick={() => {
+                    clearAdminToken();
+                    window.location.href = "/admin/feedback";
+                  }}
+                  title="Re-lock admin panel (requires PIN re-entry)"
+                  className="w-8 h-8 rounded-md flex items-center justify-center text-violet-400/50 hover:text-violet-300 hover:bg-violet-500/10 transition-all"
+                >
+                  <KeyRound size={13} />
+                </button>
+              </>
             )}
             {/* Dark mode toggle */}
             <button

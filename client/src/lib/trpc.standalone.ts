@@ -95,6 +95,10 @@ export const trpc = {
           throw new Error("Admin panel not available in standalone mode");
         }),
     },
+    getPinStatus: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ lockedUntil: null, attemptsRemaining: 5 }),
+    },
   },
 
   // ── disclaimer ────────────────────────────────────────────────────────────

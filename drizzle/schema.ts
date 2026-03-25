@@ -358,3 +358,16 @@ export const loginEvents = mysqlTable("login_events", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type LoginEvent = typeof loginEvents.$inferSelect;
+
+// ── Admin PIN Attempts (security audit log) ───────────────────────────────────
+// Records every failed PIN attempt so the owner can detect brute-force attacks.
+// Successful unlocks are NOT logged here to avoid storing sensitive timing data.
+export const pinAttempts = mysqlTable("pin_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  /** IP address of the requester (IPv4 or IPv6). Stored for audit purposes only. */
+  ip: varchar("ip", { length: 64 }).notNull(),
+  /** Whether the attempt succeeded (0 = failed, 1 = success). Only failures are inserted. */
+  succeeded: int("succeeded").notNull().default(0),
+  attemptedAt: timestamp("attemptedAt").defaultNow().notNull(),
+});
+export type PinAttempt = typeof pinAttempts.$inferSelect;

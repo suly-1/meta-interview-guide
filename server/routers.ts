@@ -22,6 +22,31 @@ import { favoritesRouter } from "./routers/favorites";
 import { progressRouter } from "./routers/progress";
 import { siteAccessRouter } from "./routers/siteAccess";
 import { adminUsersRouter } from "./routers/adminUsers";
+import { TRPCError } from "@trpc/server";
+import { getDb } from "./db";
+import { pinAttempts } from "../drizzle/schema";
+import { and, gte, count } from "drizzle-orm";
+
+// ── PIN brute-force lockout constants ─────────────────────────────────────────
+const PIN_MAX_ATTEMPTS = 5; // wrong PINs before lockout
+const PIN_LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes in ms
+
+/**
+ * Returns the IP address from an Express request, handling proxies.
+ */
+function getClientIp(req: {
+  ip?: string;
+  headers: Record<string, string | string[] | undefined>;
+}): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) {
+    const first = Array.isArray(forwarded)
+      ? forwarded[0]
+      : forwarded.split(",")[0];
+    return first.trim();
+  }
+  return req.ip ?? "unknown";
+}
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -46,8 +71,10 @@ export const appRouter = router({
     }),
     /**
      * Verifies the admin PIN and returns a short-lived signed token.
-     * The token is stored in memory on the client and passed as a header
-     * to unlock admin UI components. The PIN itself is never logged.
+     * - Logs every failed attempt (IP + timestamp) to pin_attempts table.
+     * - After PIN_MAX_ATTEMPTS failures from the same IP within PIN_LOCKOUT_MS,
+     *   returns a lockoutUntil timestamp and rejects without checking the PIN.
+     * - Successful unlock does NOT log to pin_attempts.
      */
     verifyAdminPin: publicProcedure
       .input((val: unknown) => {
@@ -60,19 +87,83 @@ export const appRouter = router({
         }
         return val as { pin: string };
       })
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         if (!ENV.adminPin) {
-          throw new Error("Admin PIN not configured");
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Admin PIN not configured",
+          });
         }
-        // Constant-time comparison to prevent timing attacks
+
+        const db = await getDb();
+        const ip = getClientIp(ctx.req as Parameters<typeof getClientIp>[0]);
+        const lockoutWindowStart = new Date(Date.now() - PIN_LOCKOUT_MS);
+
+        // ── Check if this IP is currently locked out ──────────────────────────
+        if (db) {
+          const [{ value: recentFailures }] = await db
+            .select({ value: count() })
+            .from(pinAttempts)
+            .where(and(gte(pinAttempts.attemptedAt, lockoutWindowStart)));
+
+          if (recentFailures >= PIN_MAX_ATTEMPTS) {
+            // Find the oldest failure in the window to compute lockout expiry
+            const lockoutUntil = new Date(
+              lockoutWindowStart.getTime() + PIN_LOCKOUT_MS
+            );
+            throw new TRPCError({
+              code: "TOO_MANY_REQUESTS",
+              message: JSON.stringify({
+                locked: true,
+                lockoutUntil: lockoutUntil.toISOString(),
+              }),
+            });
+          }
+        }
+
+        // ── Verify the PIN ────────────────────────────────────────────────────
         const expected = ENV.adminPin;
         const provided = input.pin;
-        if (provided.length !== expected.length || provided !== expected) {
-          // Small delay to slow brute force
+
+        // Constant-time comparison to prevent timing attacks
+        const isCorrect =
+          provided.length === expected.length && provided === expected;
+
+        if (!isCorrect) {
+          // Log the failed attempt
+          if (db) {
+            await db.insert(pinAttempts).values({ ip, succeeded: 0 });
+          }
+
+          // Check if this failure pushed the IP over the limit
+          let lockoutUntil: string | undefined;
+          if (db) {
+            const [{ value: totalFailures }] = await db
+              .select({ value: count() })
+              .from(pinAttempts)
+              .where(gte(pinAttempts.attemptedAt, lockoutWindowStart));
+
+            if (totalFailures >= PIN_MAX_ATTEMPTS) {
+              lockoutUntil = new Date(
+                Date.now() + PIN_LOCKOUT_MS
+              ).toISOString();
+            }
+          }
+
+          // Small delay to slow brute force even before lockout kicks in
           await new Promise(r => setTimeout(r, 500));
-          throw new Error("Incorrect PIN");
+
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: JSON.stringify({
+              locked: !!lockoutUntil,
+              lockoutUntil,
+              message: "Incorrect PIN",
+            }),
+          });
         }
-        // Issue a short-lived signed JWT (1 hour)
+
+        // ── Issue a short-lived signed JWT (1 hour) ───────────────────────────
         const secret = new TextEncoder().encode(
           ENV.cookieSecret || "admin-pin-fallback"
         );
@@ -83,6 +174,33 @@ export const appRouter = router({
           .sign(secret);
         return { token };
       }),
+
+    /**
+     * Returns the current PIN lockout status for the caller's IP.
+     * Used by the frontend to show the lockout countdown on page load.
+     */
+    getPinStatus: publicProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return { locked: false, lockoutUntil: null };
+
+      const ip = getClientIp(ctx.req as Parameters<typeof getClientIp>[0]);
+      const lockoutWindowStart = new Date(Date.now() - PIN_LOCKOUT_MS);
+
+      const [{ value: recentFailures }] = await db
+        .select({ value: count() })
+        .from(pinAttempts)
+        .where(and(gte(pinAttempts.attemptedAt, lockoutWindowStart)));
+
+      if (recentFailures >= PIN_MAX_ATTEMPTS) {
+        const lockoutUntil = new Date(
+          lockoutWindowStart.getTime() + PIN_LOCKOUT_MS
+        ).toISOString();
+        return { locked: true, lockoutUntil };
+      }
+
+      return { locked: false, lockoutUntil: null };
+    }),
+
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
