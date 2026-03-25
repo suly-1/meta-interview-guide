@@ -1,7 +1,7 @@
 // Design: Bold Engineering Dashboard
 // Dark charcoal base, Space Grotesk headings, Inter body
 // Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   usePatternRatings,
@@ -128,6 +128,9 @@ export default function Home() {
   const [focusMode, setFocusMode] = useState(false);
   const [showKeyHelp, setShowKeyHelp] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  // Hidden admin shortcut: track consecutive 'a' presses
+  const adminKeyCount = useRef(0);
+  const adminKeyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Analytics: track page views on every tab switch
   useAnalytics({ page: activeTab });
@@ -148,6 +151,30 @@ export default function Home() {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const tag = (e.target as HTMLElement).tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    // Hidden admin shortcut: press 'a' five times quickly to go to /#/admin
+    if (
+      (e.key === "a" || e.key === "A") &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.metaKey
+    ) {
+      adminKeyCount.current += 1;
+      if (adminKeyTimer.current) clearTimeout(adminKeyTimer.current);
+      adminKeyTimer.current = setTimeout(() => {
+        adminKeyCount.current = 0;
+      }, 1500);
+      if (adminKeyCount.current >= 5) {
+        adminKeyCount.current = 0;
+        if (adminKeyTimer.current) clearTimeout(adminKeyTimer.current);
+        // Navigate to admin route (works with both hash and regular routing)
+        if (import.meta.env.VITE_STANDALONE === "true") {
+          window.location.hash = "/admin";
+        } else {
+          window.location.href = "/admin";
+        }
+        return;
+      }
+    }
     if (e.key === "1") setActiveTabWithUrl("overview");
     if (e.key === "2") setActiveTabWithUrl("coding");
     if (e.key === "3") setActiveTabWithUrl("behavioral");

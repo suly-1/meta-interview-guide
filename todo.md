@@ -996,3 +996,9 @@
 - [x] Standalone mock: getPinStatus stub
 - [x] Tests: pinAttempts logging + lockout smoke tests (68 total tests passing)
 - [x] Deploy and verify all four enhancements work
+
+## New Features — Admin Access
+
+- [ ] Hidden admin shortcut: press A five times on standalone homepage to navigate to /#/admin
+- [ ] Document PIN change process (update ADMIN_PIN secret + redeploy)
+- [ ] Add metaengguide.pro as custom domain on Manus live app
