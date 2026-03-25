@@ -926,3 +926,6 @@
 - [x] Fix hints.get.useMutation TypeError in standalone mock
 - [x] Add unread feedback count badge to admin shield icon
 - [x] Add page-view event tracker on tab switches
+- [ ] Add cohortReset server procedure (clears disclaimerAcknowledgedAt for all users)
+- [ ] Wire Cohort Reset button to AdminAccess UI with confirmation dialog
+- [ ] Add automated stub coverage test for trpc.standalone.ts
