@@ -299,3 +299,36 @@ describe("userScores admin procedures", () => {
     await assertSafeCall(() => caller.userScores.getAggregateStats());
   });
 });
+
+describe("auth.verifyAdminPin procedure", () => {
+  it("rejects with an error when PIN is wrong", async () => {
+    const caller = appRouter.createCaller(anonCtx());
+    await expect(
+      caller.auth.verifyAdminPin({ pin: "wrong-pin-12345" })
+    ).rejects.toThrow();
+  });
+
+  it("rejects with an error when PIN is empty", async () => {
+    const caller = appRouter.createCaller(anonCtx());
+    await expect(caller.auth.verifyAdminPin({ pin: "" })).rejects.toThrow();
+  });
+
+  it("accepts correct PIN and returns a token", async () => {
+    // Set a known PIN for this test
+    const originalPin = process.env.ADMIN_PIN;
+    process.env.ADMIN_PIN = "test-pin-9876";
+    // Re-import ENV to pick up the new value
+    const { ENV } = await import("./_core/env");
+    (ENV as { adminPin: string }).adminPin = "test-pin-9876";
+
+    const caller = appRouter.createCaller(anonCtx());
+    const result = await caller.auth.verifyAdminPin({ pin: "test-pin-9876" });
+    expect(result).toHaveProperty("token");
+    expect(typeof result.token).toBe("string");
+    expect(result.token.length).toBeGreaterThan(10);
+
+    // Restore
+    process.env.ADMIN_PIN = originalPin;
+    (ENV as { adminPin: string }).adminPin = originalPin ?? "";
+  });
+});

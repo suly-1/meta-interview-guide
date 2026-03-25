@@ -973,3 +973,13 @@
 - [x] Standalone: isOwner stub returns false (trpc.standalone.ts)
 - [x] Standalone: removed all admin routes from App.standalone.tsx
 - [x] Deploy and verify admin panel is inaccessible to non-owners — deployed to www.metaguide.blog
+
+## Admin PIN Gate
+
+- [x] Add ADMIN_PIN environment secret
+- [x] Server: verifyAdminPin procedure — checks PIN, returns signed JWT token (1h expiry)
+- [x] Frontend: AdminPinGate component — intercepts all /admin/\* routes, PIN modal, stores token in memory
+- [x] Wire AdminPinGate into App.tsx wrapping all admin routes
+- [x] Standalone: AdminPinGate returns locked (no PIN check possible without server)
+- [x] Tests: verifyAdminPin smoke test (68 total tests passing)
+- [x] Deploy and verify PIN gate works

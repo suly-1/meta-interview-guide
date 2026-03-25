@@ -14,6 +14,7 @@ import AdminAccess from "@/pages/AdminAccess";
 import AccessGate from "@/components/AccessGate";
 import AdminUsers from "@/pages/AdminUsers";
 import BlockedScreen from "@/components/BlockedScreen";
+import AdminPinGate from "@/components/AdminPinGate";
 import { useAuth } from "./_core/hooks/useAuth";
 
 function Router() {
@@ -21,12 +22,36 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/room/:roomId" component={CollabRoom} />
-      <Route path="/admin/disclaimer" component={AdminDisclaimerReport} />
-      <Route path="/admin/feedback" component={AdminFeedback} />
-      <Route path="/admin/stats" component={AdminStats} />
-      <Route path="/admin/analytics" component={AdminAnalytics} />
-      <Route path="/admin/access" component={AdminAccess} />
-      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/disclaimer">
+        <AdminPinGate>
+          <AdminDisclaimerReport />
+        </AdminPinGate>
+      </Route>
+      <Route path="/admin/feedback">
+        <AdminPinGate>
+          <AdminFeedback />
+        </AdminPinGate>
+      </Route>
+      <Route path="/admin/stats">
+        <AdminPinGate>
+          <AdminStats />
+        </AdminPinGate>
+      </Route>
+      <Route path="/admin/analytics">
+        <AdminPinGate>
+          <AdminAnalytics />
+        </AdminPinGate>
+      </Route>
+      <Route path="/admin/access">
+        <AdminPinGate>
+          <AdminAccess />
+        </AdminPinGate>
+      </Route>
+      <Route path="/admin/users">
+        <AdminPinGate>
+          <AdminUsers />
+        </AdminPinGate>
+      </Route>
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

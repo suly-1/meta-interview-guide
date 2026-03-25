@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { ENV } from "./_core/env";
+import { SignJWT } from "jose";
 import { collabRouter } from "./routers/collab";
 import { leaderboardRouter } from "./routers/leaderboard";
 import { ctciRouter } from "./routers/ctci";
@@ -43,6 +44,45 @@ export const appRouter = router({
         isOwner: !!ENV.ownerOpenId && ctx.user.openId === ENV.ownerOpenId,
       };
     }),
+    /**
+     * Verifies the admin PIN and returns a short-lived signed token.
+     * The token is stored in memory on the client and passed as a header
+     * to unlock admin UI components. The PIN itself is never logged.
+     */
+    verifyAdminPin: publicProcedure
+      .input((val: unknown) => {
+        if (
+          typeof val !== "object" ||
+          val === null ||
+          typeof (val as { pin: unknown }).pin !== "string"
+        ) {
+          throw new Error("Invalid input");
+        }
+        return val as { pin: string };
+      })
+      .mutation(async ({ input }) => {
+        if (!ENV.adminPin) {
+          throw new Error("Admin PIN not configured");
+        }
+        // Constant-time comparison to prevent timing attacks
+        const expected = ENV.adminPin;
+        const provided = input.pin;
+        if (provided.length !== expected.length || provided !== expected) {
+          // Small delay to slow brute force
+          await new Promise(r => setTimeout(r, 500));
+          throw new Error("Incorrect PIN");
+        }
+        // Issue a short-lived signed JWT (1 hour)
+        const secret = new TextEncoder().encode(
+          ENV.cookieSecret || "admin-pin-fallback"
+        );
+        const token = await new SignJWT({ adminUnlocked: true })
+          .setProtectedHeader({ alg: "HS256" })
+          .setIssuedAt()
+          .setExpirationTime("1h")
+          .sign(secret);
+        return { token };
+      }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

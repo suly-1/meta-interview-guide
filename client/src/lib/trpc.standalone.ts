@@ -89,6 +89,12 @@ export const trpc = {
     isOwner: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ isOwner: false }),
     },
+    verifyAdminPin: {
+      useMutation: () =>
+        makeMutation(() => {
+          throw new Error("Admin panel not available in standalone mode");
+        }),
+    },
   },
 
   // ── disclaimer ────────────────────────────────────────────────────────────
