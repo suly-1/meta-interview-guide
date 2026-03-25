@@ -28,6 +28,7 @@ import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/F
 import MilestoneNotifications from "@/components/MilestoneNotifications";
 import type { GauntletState } from "@/components/GauntletMode";
 import TabSkeleton from "@/components/TabSkeleton";
+import TabErrorBoundary from "@/components/TabErrorBoundary";
 
 // Heavy tab components — lazy loaded to keep initial bundle small
 const CodingTab = lazy(() => import("@/components/CodingTab"));
@@ -531,20 +532,22 @@ export default function Home() {
                 </h1>
               </div>
 
-              <Suspense fallback={<TabSkeleton tabId={activeTab} />}>
-                {activeTab === "coding"      && <CodingTab />}
-                {activeTab === "mock"        && <MockInterviewSimulator />}
-                {activeTab === "ai-round"    && <AIRoundTab />}
-                {activeTab === "behavioral"  && <BehavioralTab />}
-                {activeTab === "timeline"    && <TimelineTab />}
-                {activeTab === "ctci"        && <CTCITrackerTab />}
-                {activeTab === "readiness"   && <ReadinessTab />}
-                {activeTab === "sysdesign"   && <SystemDesignTab />}
-                {activeTab === "practice"    && <CodePractice />}
-                {activeTab === "ai-tools"    && <AIToolsTab />}
-                {activeTab === "overview"    && <OverviewTab onTabChange={handleTabChange} />}
-                {activeTab === "leaderboard" && <Leaderboard />}
-              </Suspense>
+              <TabErrorBoundary tabName={ALL_TABS.find(t => t.id === activeTab)?.label ?? activeTab}>
+                <Suspense fallback={<TabSkeleton tabId={activeTab} />}>
+                  {activeTab === "coding"      && <CodingTab />}
+                  {activeTab === "mock"        && <MockInterviewSimulator />}
+                  {activeTab === "ai-round"    && <AIRoundTab />}
+                  {activeTab === "behavioral"  && <BehavioralTab />}
+                  {activeTab === "timeline"    && <TimelineTab />}
+                  {activeTab === "ctci"        && <CTCITrackerTab />}
+                  {activeTab === "readiness"   && <ReadinessTab />}
+                  {activeTab === "sysdesign"   && <SystemDesignTab />}
+                  {activeTab === "practice"    && <CodePractice />}
+                  {activeTab === "ai-tools"    && <AIToolsTab />}
+                  {activeTab === "overview"    && <OverviewTab onTabChange={handleTabChange} />}
+                  {activeTab === "leaderboard" && <Leaderboard />}
+                </Suspense>
+              </TabErrorBoundary>
             </div>
           </motion.div>
         </AnimatePresence>

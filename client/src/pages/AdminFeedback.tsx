@@ -599,6 +599,20 @@ export default function AdminFeedback() {
                       {/* Meta row */}
                       <div className="flex flex-wrap items-center gap-3 mt-2">
                         <StarRow rating={item.rating} />
+                        {/* Sentiment badge */}
+                        {(item as { sentiment?: string }).sentiment && (
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+                            (item as { sentiment?: string }).sentiment === "positive"
+                              ? "bg-emerald-900/40 text-emerald-400 border-emerald-700"
+                              : (item as { sentiment?: string }).sentiment === "negative"
+                              ? "bg-rose-900/40 text-rose-400 border-rose-700"
+                              : "bg-gray-700/60 text-gray-400 border-gray-600"
+                          }`}>
+                            {(item as { sentiment?: string }).sentiment === "positive" ? "😊 Positive"
+                              : (item as { sentiment?: string }).sentiment === "negative" ? "😞 Negative"
+                              : "😐 Neutral"}
+                          </span>
+                        )}
                         {item.page && (
                           <span className="text-xs text-gray-500 font-mono bg-gray-800 px-2 py-0.5 rounded-md">
                             {item.page}

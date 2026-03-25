@@ -152,6 +152,7 @@ export const siteFeedback = mysqlTable("site_feedback", {
   status: varchar("status", { length: 20 }).notNull().default("new"),
   statusUpdatedAt: bigint("status_updated_at", { mode: "number" }),
   adminNote: text("admin_note"),
+  sentiment: varchar("sentiment", { length: 16 }), // 'positive' | 'neutral' | 'negative' — auto-tagged by LLM on submit
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type SiteFeedback = typeof siteFeedback.$inferSelect;

@@ -13,6 +13,48 @@ import { notifyOwner } from "../_core/notification";
 import { sendEmail, isSmtpConfigured } from "../email";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
+import { invokeLLMSafe, parseLLMJson } from "../_core/llmSafe";
+
+// ── Sentiment tagging ─────────────────────────────────────────────────────────
+
+type Sentiment = "positive" | "neutral" | "negative";
+
+async function tagSentiment(message: string, rating?: number): Promise<Sentiment> {
+  const ratingHint = rating ? ` The user gave a ${rating}/5 star rating.` : "";
+  const result = await invokeLLMSafe(
+    {
+      messages: [
+        {
+          role: "system",
+          content:
+            'You are a sentiment classifier. Classify the following user feedback as exactly one of: "positive", "neutral", or "negative". Respond with JSON only.',
+        },
+        {
+          role: "user",
+          content: `Feedback: "${message.slice(0, 500)}"${ratingHint}`,
+        },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "sentiment_result",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              sentiment: { type: "string", enum: ["positive", "neutral", "negative"] },
+            },
+            required: ["sentiment"],
+            additionalProperties: false,
+          },
+        },
+      },
+    },
+    { fallback: null, timeoutMs: 10_000, retries: 1, context: "sentiment-tag" }
+  );
+  const parsed = parseLLMJson<{ sentiment: Sentiment }>(result);
+  return parsed?.sentiment ?? "neutral";
+}
 
 // ── Weekly digest helper ──────────────────────────────────────────────────────
 
@@ -74,13 +116,28 @@ export const feedbackRouter = router({
       const db = await getDb();
       if (!db) return { success: false };
       const userId = (ctx as { user?: { id: number } }).user?.id ?? null;
-      await db.insert(siteFeedback).values({
-        userId: userId ?? undefined,
-        category: input.category,
-        rating: input.rating ?? null,
-        message: input.message,
-        page: input.page ?? null,
-      });
+      // Run sentiment tagging in parallel with DB insert — don't block on it
+      const sentimentPromise = tagSentiment(input.message, input.rating);
+      const [insertResult, sentiment] = await Promise.all([
+        db.insert(siteFeedback).values({
+          userId: userId ?? undefined,
+          category: input.category,
+          rating: input.rating ?? null,
+          message: input.message,
+          page: input.page ?? null,
+          sentiment: "neutral", // placeholder; updated below
+        }),
+        sentimentPromise,
+      ]);
+      // Update the row with the real sentiment once the LLM responds
+      const insertId = (insertResult as { insertId?: number }).insertId;
+      if (insertId) {
+        await db
+          .update(siteFeedback)
+          .set({ sentiment })
+          .where(eq(siteFeedback.id, insertId))
+          .catch(() => {}); // non-critical — don't fail the submission
+      }
       // Instant notification — email if SMTP configured, else Manus channel
       const notifTitle = `📨 New ${input.category.toUpperCase()} feedback${input.rating ? ` (${input.rating}★)` : ""} — MetaEngGuide`;
       const notifBody = `Category: ${input.category}\nRating: ${input.rating ? `${input.rating}/5` : "none"}\nPage: ${input.page ?? "unknown"}\n\n${input.message}`;

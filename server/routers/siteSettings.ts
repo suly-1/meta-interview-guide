@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { tokenAdminProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { siteSettings } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { siteSettings, users } from "../../drizzle/schema";
+import { eq, count, isNotNull } from "drizzle-orm";
 
 // Helper: get a setting value by key
 async function getSetting(key: string): Promise<string | null> {
@@ -118,6 +118,41 @@ export const siteSettingsRouter = router({
   unlock: tokenAdminProcedure.mutation(async () => {
     await setSetting("lock_enabled", "0");
     return { success: true };
+  }),
+
+  /**
+   * Admin: Cohort health summary — total users, % acknowledged disclaimer, days remaining.
+   */
+  getCohortHealth: tokenAdminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) {
+      return {
+        totalUsers: 0, acknowledgedCount: 0, acknowledgedPct: 0,
+        daysRemaining: null, daysElapsed: null,
+        lockEnabled: false, lockStartDate: null, lockDurationDays: 60,
+      };
+    }
+    // User counts
+    const [{ total }] = await db.select({ total: count() }).from(users);
+    const [{ acked }] = await db
+      .select({ acked: count() })
+      .from(users)
+      .where(isNotNull(users.disclaimerAcknowledgedAt));
+    const totalUsers = Number(total);
+    const acknowledgedCount = Number(acked);
+    const acknowledgedPct = totalUsers > 0 ? Math.round((acknowledgedCount / totalUsers) * 100) : 0;
+    // Lock / cohort window
+    const lockEnabled = (await getSetting("lock_enabled")) === "1";
+    const lockStartDate = await getSetting("lock_start_date");
+    const lockDurationDays = parseInt((await getSetting("lock_duration_days")) ?? "60", 10);
+    let daysRemaining: number | null = null;
+    let daysElapsed: number | null = null;
+    if (lockEnabled && lockStartDate) {
+      const elapsed = Math.floor((Date.now() - new Date(lockStartDate).getTime()) / (1000 * 60 * 60 * 24));
+      daysElapsed = elapsed;
+      daysRemaining = Math.max(0, lockDurationDays - elapsed);
+    }
+    return { totalUsers, acknowledgedCount, acknowledgedPct, daysRemaining, daysElapsed, lockEnabled, lockStartDate, lockDurationDays };
   }),
 
   /**

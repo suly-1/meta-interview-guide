@@ -295,6 +295,13 @@ export const trpc = {
     updateLockSettings: { useMutation: () => makeMutation(() => ({ success: true })) },
     getDisclaimerEnabled: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ enabled: true }) },
     setDisclaimerEnabled: { useMutation: () => makeMutation(() => ({ success: true, enabled: true })) },
+    getCohortHealth: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({
+        totalUsers: 0, acknowledgedCount: 0, acknowledgedPct: 0,
+        daysRemaining: null, daysElapsed: null,
+        lockEnabled: false, lockStartDate: null, lockDurationDays: 60,
+      }),
+    },
   },
 
   // ── admin ────────────────────────────────────────────────────────────────────────────────────

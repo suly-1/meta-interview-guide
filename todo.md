@@ -711,3 +711,17 @@
 - [x] Automated Vitest test: assert all trpc source calls have correct stubs in trpc.standalone.ts
 - [x] Cohort Reset button on AdminAccess page — clears all disclaimer acknowledgements
 - [x] Security: Lock admin panel to owner-only (OWNER_OPEN_ID) — remove localStorage token bypass, gate all /admin/* routes server-side
+
+## Bulletproofing Strategies
+- [x] Strategy 1: Per-tab Error Boundaries on all 7 main tabs
+- [x] Strategy 2: Feature flag system (useFeatureFlag hook + FeatureFlag component)
+- [x] Strategy 3: Expanded automated tests (procedure smoke tests + page render tests)
+- [x] Strategy 4: Post-deploy smoke test script (scripts/smoke-test.mjs with fetch-based checks)
+- [x] Strategy 5: Strict TypeScript (strict:true already in tsconfig, 0 errors maintained)
+- [x] Strategy 6: Staging environment instructions (STAGING.md)
+- [x] Strategy 7: DB migration safety script (scripts/db-migrate-safe.mjs)
+- [x] Strategy 8: LLM graceful degradation (server/_core/llmSafe.ts withLLMFallback wrapper)
+- [x] Strategy 9: Dependency locking (.npmrc save-exact=true)
+- [x] Strategy 10: RUNBOOK.md rollback playbook
+- [x] LLM sentiment tagging: auto-tag feedback as positive/neutral/negative on submission, show badge in AdminFeedback
+- [x] Cohort Health summary card in AdminStats — total users, % disclaimer acknowledged, days remaining in cohort window

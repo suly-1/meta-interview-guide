@@ -1,0 +1,1 @@
+ALTER TABLE `site_feedback` ADD `sentiment` varchar(16);

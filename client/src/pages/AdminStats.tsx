@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import {
   BarChart2, RefreshCw, ArrowLeft, Send, Bell,
   Bug, Lightbulb, BookOpen, Palette, HelpCircle,
-  CheckCircle2, Clock, XCircle, AlertCircle, TrendingUp
+  CheckCircle2, AlertCircle, TrendingUp, Users, ShieldCheck, Timer
 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ export default function AdminStats() {
   const [alertLoading, setAlertLoading] = useState(false);
 
   const { data: stats, isLoading, refetch } = trpc.feedback.adminStats.useQuery(undefined);
+  const { data: cohortHealth, isLoading: cohortLoading } = trpc.siteSettings.getCohortHealth.useQuery(undefined);
 
   const triggerDigest = trpc.feedback.triggerDigest.useMutation({
     onMutate: () => setDigestLoading(true),
@@ -98,6 +99,85 @@ export default function AdminStats() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+        {/* Cohort Health card */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Users size={15} className="text-indigo-500" />
+            Cohort Health
+          </h2>
+          {cohortLoading ? (
+            <div className="grid grid-cols-3 gap-4">
+              {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Total users */}
+              <div className="flex flex-col gap-1 p-4 bg-indigo-50 dark:bg-indigo-950/30 rounded-lg border border-indigo-100 dark:border-indigo-900">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                  <Users size={13} /> Total Users
+                </div>
+                <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+                  {cohortHealth?.totalUsers ?? 0}
+                </div>
+              </div>
+              {/* Disclaimer acknowledgement */}
+              <div className="flex flex-col gap-1 p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg border border-emerald-100 dark:border-emerald-900">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <ShieldCheck size={13} /> Disclaimer Acknowledged
+                </div>
+                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                  {cohortHealth?.acknowledgedPct ?? 0}%
+                </div>
+                <div className="text-xs text-emerald-600/70 dark:text-emerald-400/70">
+                  {cohortHealth?.acknowledgedCount ?? 0} of {cohortHealth?.totalUsers ?? 0} users
+                </div>
+                {/* Progress bar */}
+                <div className="mt-1 h-1.5 bg-emerald-100 dark:bg-emerald-900 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all"
+                    style={{ width: `${cohortHealth?.acknowledgedPct ?? 0}%` }}
+                  />
+                </div>
+              </div>
+              {/* Days remaining */}
+              <div className={`flex flex-col gap-1 p-4 rounded-lg border ${
+                cohortHealth?.daysRemaining == null
+                  ? "bg-gray-50 dark:bg-gray-800/30 border-gray-100 dark:border-gray-700"
+                  : (cohortHealth.daysRemaining ?? 999) <= 7
+                  ? "bg-red-50 dark:bg-red-950/30 border-red-100 dark:border-red-900"
+                  : (cohortHealth.daysRemaining ?? 999) <= 14
+                  ? "bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-900"
+                  : "bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900"
+              }`}>
+                <div className={`flex items-center gap-1.5 text-xs font-medium ${
+                  cohortHealth?.daysRemaining == null ? "text-gray-500" :
+                  (cohortHealth?.daysRemaining ?? 999) <= 7 ? "text-red-600 dark:text-red-400" :
+                  (cohortHealth?.daysRemaining ?? 999) <= 14 ? "text-amber-600 dark:text-amber-400" :
+                  "text-blue-600 dark:text-blue-400"
+                }`}>
+                  <Timer size={13} /> Days Remaining
+                </div>
+                <div className={`text-2xl font-bold ${
+                  cohortHealth?.daysRemaining == null ? "text-gray-400" :
+                  (cohortHealth?.daysRemaining ?? 999) <= 7 ? "text-red-700 dark:text-red-300" :
+                  (cohortHealth?.daysRemaining ?? 999) <= 14 ? "text-amber-700 dark:text-amber-300" :
+                  "text-blue-700 dark:text-blue-300"
+                }`}>
+                  {cohortHealth?.daysRemaining == null ? "—" : cohortHealth?.daysRemaining}
+                </div>
+                {cohortHealth?.lockStartDate && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Started {new Date(cohortHealth.lockStartDate).toLocaleDateString()}
+                  </div>
+                )}
+                {!cohortHealth?.lockEnabled && (
+                  <div className="text-xs text-gray-400 italic">Cohort window not active</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
