@@ -136,7 +136,7 @@ export const adminUsersRouter = router({
       z.object({
         userId: z.number().int().positive(),
         reason: z.string().max(500).optional(),
-        expiryDays: z.number().int().min(1).max(365).optional(),
+        expiryDays: z.number().positive().max(365).optional(), // fractional days allowed (e.g. 1/24 = 1 hour)
       })
     )
     .mutation(async ({ ctx, input }) => {

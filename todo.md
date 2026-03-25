@@ -725,3 +725,10 @@
 - [x] Strategy 10: RUNBOOK.md rollback playbook
 - [x] LLM sentiment tagging: auto-tag feedback as positive/neutral/negative on submission, show badge in AdminFeedback
 - [x] Cohort Health summary card in AdminStats — total users, % disclaimer acknowledged, days remaining in cohort window
+
+## Temporary Block System (Mar 25, 2026)
+- [x] Add blockedUntil column to users table in schema
+- [x] Update blockUser procedure to accept optional duration (1h, 24h, 7d, 30d, permanent)
+- [x] Auto-expiry enforcement in protectedProcedure context — clear expired blocks on each request
+- [x] AdminUsers UI: duration picker when blocking, expiry countdown badge, auto-unblock indicator
+- [x] Add standalone stub updates for blockUser with duration

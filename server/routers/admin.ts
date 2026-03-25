@@ -53,6 +53,7 @@ export const adminRouter = router({
     .input(z.object({
       userId: z.number().int().positive(),
       reason: z.string().max(500).optional(),
+      expiryDays: z.number().positive().max(365).optional(), // fractional days allowed (e.g. 1/24 = 1 hour)
     }))
     .mutation(async ({ ctx, input }) => {
       if (input.userId === ctx.user.id) {
@@ -80,10 +81,15 @@ export const adminRouter = router({
         .where(eq(users.id, input.userId))
         .limit(1);
 
+      const bannedUntil = input.expiryDays
+        ? new Date(Date.now() + input.expiryDays * 86_400_000)
+        : null;
+
       await db.update(users).set({
         isBanned: 1,
         bannedAt: new Date(),
         bannedReason: input.reason ?? "Blocked by administrator",
+        bannedUntil,
       }).where(eq(users.id, input.userId));
 
       // Notify owner via Manus inbox

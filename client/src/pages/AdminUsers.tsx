@@ -3,12 +3,32 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import {
   ArrowLeft, Shield, ShieldOff, Users,
-  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp, AlertCircle,
+  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp, AlertCircle, Timer, Infinity,
 } from "lucide-react";
+
+// Duration options for temporary blocks
+const BLOCK_DURATIONS: { label: string; shortLabel: string; days: number | null; description: string }[] = [
+  { label: "1 Hour",    shortLabel: "1h",   days: 1 / 24, description: "Auto-unblocks in 1 hour" },
+  { label: "24 Hours",  shortLabel: "24h",  days: 1,      description: "Auto-unblocks tomorrow" },
+  { label: "7 Days",    shortLabel: "7d",   days: 7,      description: "Auto-unblocks in 1 week" },
+  { label: "30 Days",   shortLabel: "30d",  days: 30,     description: "Auto-unblocks in 30 days" },
+  { label: "Permanent", shortLabel: "∞",    days: null,   description: "Must be manually unblocked" },
+];
+
+function formatTimeLeft(bannedUntil: Date | string): string {
+  const ms = new Date(bannedUntil).getTime() - Date.now();
+  if (ms <= 0) return "Expiry pending";
+  const hours = ms / (1000 * 60 * 60);
+  if (hours < 1) return `${Math.ceil(hours * 60)}m left`;
+  if (hours < 24) return `${Math.ceil(hours)}h left`;
+  const days = Math.ceil(hours / 24);
+  return `${days}d left`;
+}
 
 export default function AdminUsers() {
   const [confirmBlock, setConfirmBlock] = useState<{ userId: number; name: string } | null>(null);
   const [blockReason, setBlockReason] = useState("");
+  const [blockDurationDays, setBlockDurationDays] = useState<number | null>(null); // null = permanent
   const [showAuditLog, setShowAuditLog] = useState(false);
 
   const { data: userList, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined);
@@ -22,6 +42,7 @@ export default function AdminUsers() {
       refetch();
       setConfirmBlock(null);
       setBlockReason("");
+      setBlockDurationDays(null);
     },
   });
 
@@ -37,14 +58,24 @@ export default function AdminUsers() {
     },
   });
 
-  // Always accessible via admin token — no auth guard needed
   const bannedCount = userList?.filter(u => u.isBanned).length ?? 0;
-  const adminCount = userList?.filter(u => u.role === "admin").length ?? 0;
   const activeThisWeek = userList?.filter(u => {
     if (!u.lastSignedIn) return false;
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return new Date(u.lastSignedIn).getTime() > sevenDaysAgo;
   }).length ?? 0;
+
+  // Compute expiryDays for mutation — convert fractional days (hours) to integer minutes via rounding
+  const expiryDaysForMutation = blockDurationDays === null
+    ? undefined
+    : blockDurationDays < 1
+      ? Math.max(1, Math.round(blockDurationDays * 24)) / 24  // keep as fraction for 1h
+      : blockDurationDays;
+
+  // The backend accepts expiryDays as a number — for 1h we pass a small fraction
+  // Actually the backend uses: new Date(Date.now() + input.expiryDays * 86_400_000)
+  // So 1/24 days = 1 hour. We need to pass it as-is.
+  const selectedDuration = BLOCK_DURATIONS.find(d => d.days === blockDurationDays) ?? BLOCK_DURATIONS[4];
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -176,21 +207,17 @@ export default function AdminUsers() {
                             <ShieldOff size={10} />
                             Blocked
                           </span>
-                          {u.bannedUntil && (() => {
-                            const msLeft = new Date(u.bannedUntil).getTime() - Date.now();
-                            const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-                            return daysLeft > 0 ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
-                                <Clock size={9} />
-                                Auto-unblocks in {daysLeft}d
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
-                                <Clock size={9} />
-                                Expiry pending
-                              </span>
-                            );
-                          })()}
+                          {u.bannedUntil ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
+                              <Timer size={9} />
+                              {formatTimeLeft(u.bannedUntil)}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 text-[10px] font-medium">
+                              <Infinity size={9} />
+                              Permanent
+                            </span>
+                          )}
                           {u.bannedReason && (
                             <p className="text-[10px] text-gray-600 mt-0.5 max-w-[120px] truncate" title={u.bannedReason}>
                               {u.bannedReason}
@@ -233,7 +260,7 @@ export default function AdminUsers() {
           </div>
         )}
 
-        {/* Audit Log Section */}
+        {/* Audit log */}
         <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
           <button
             onClick={() => setShowAuditLog(prev => !prev)}
@@ -266,7 +293,6 @@ export default function AdminUsers() {
                       <th className="text-left px-5 py-2.5">Target User</th>
                       <th className="text-left px-5 py-2.5 hidden md:table-cell">Performed By</th>
                       <th className="text-left px-5 py-2.5 hidden lg:table-cell">Reason</th>
-                      <th className="px-5 py-2.5"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -312,21 +338,52 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      {/* Block confirmation modal */}
+      {/* Block confirmation modal with duration picker */}
       {confirmBlock && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-red-800/50 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-red-900/50 flex items-center justify-center">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-full bg-red-900/50 flex items-center justify-center flex-shrink-0">
                 <ShieldOff size={18} className="text-red-400" />
               </div>
               <div>
                 <h3 className="font-semibold text-white">Block User</h3>
-                <p className="text-sm text-gray-400">This will immediately revoke access for <strong className="text-white">{confirmBlock.name}</strong></p>
+                <p className="text-sm text-gray-400">
+                  Revoke access for <strong className="text-white">{confirmBlock.name}</strong>
+                </p>
               </div>
             </div>
 
+            {/* Duration picker */}
             <div className="mb-4">
+              <label className="block text-xs text-gray-500 mb-2 flex items-center gap-1">
+                <Timer size={11} /> Block Duration
+              </label>
+              <div className="grid grid-cols-5 gap-1.5">
+                {BLOCK_DURATIONS.map(opt => (
+                  <button
+                    key={opt.label}
+                    onClick={() => setBlockDurationDays(opt.days)}
+                    className={`py-2 rounded-lg text-xs font-semibold transition-all border ${
+                      blockDurationDays === opt.days
+                        ? opt.days === null
+                          ? "bg-red-700 border-red-500 text-white"
+                          : "bg-amber-700 border-amber-500 text-white"
+                        : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                    }`}
+                    title={opt.description}
+                  >
+                    {opt.shortLabel}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-1.5">
+                {selectedDuration.description}
+              </p>
+            </div>
+
+            {/* Reason */}
+            <div className="mb-5">
               <label className="block text-xs text-gray-500 mb-1.5">Reason (optional — recorded in audit log)</label>
               <textarea
                 value={blockReason}
@@ -339,17 +396,29 @@ export default function AdminUsers() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => { setConfirmBlock(null); setBlockReason(""); }}
+                onClick={() => { setConfirmBlock(null); setBlockReason(""); setBlockDurationDays(null); }}
                 className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
-                onClick={() => blockMutation.mutate({ userId: confirmBlock.userId, reason: blockReason || undefined })}
+                onClick={() => blockMutation.mutate({
+                  userId: confirmBlock.userId,
+                  reason: blockReason || undefined,
+                  expiryDays: blockDurationDays ?? undefined,
+                })}
                 disabled={blockMutation.isPending}
-                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors disabled:opacity-50"
+                className={`flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-colors disabled:opacity-50 ${
+                  blockDurationDays === null
+                    ? "bg-red-600 hover:bg-red-500"
+                    : "bg-amber-600 hover:bg-amber-500"
+                }`}
               >
-                {blockMutation.isPending ? "Blocking..." : "Block User"}
+                {blockMutation.isPending
+                  ? "Blocking..."
+                  : blockDurationDays === null
+                    ? "Block Permanently"
+                    : `Block for ${selectedDuration.label}`}
               </button>
             </div>
           </div>
