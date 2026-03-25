@@ -196,6 +196,7 @@ export const trpc = {
     scoreInterruptResponse: { useMutation: () => makeMutation(() => ({ score: 0 })) },
     storyGapAnalysis: { useMutation: () => makeMutation(() => ({ gaps: [] })) },
     upgradeAnswer: { useMutation: () => makeMutation(() => ({ upgraded: "" })) },
+    ic7SignalCoach: { useMutation: () => makeMutation(() => ({ coaching: "", signals: [] })) },
   },
 
   // ── hints ─────────────────────────────────────────────────────────────────
@@ -257,6 +258,7 @@ export const trpc = {
   patternHint: {
     get: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ hint: "" }),
+      useMutation: () => makeMutation(() => ({ hint: "Pattern hints are only available on the live server." })),
     },
   },
 

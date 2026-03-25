@@ -705,3 +705,6 @@
 - [x] Send Digest email preview modal before sending
 - [x] Fix: "Lock Now" button in AdminSettings does not actually lock the site
 - [x] Fix: Lock Now button still not working after first fix attempt — mutation may be silently failing
+- [x] Fix: hints.get.useMutation TypeError on static build — missing hints namespace in trpc.standalone.ts
+- [x] Fix: hints.get.useMutation TypeError on static build — missing hints namespace in trpc.standalone.ts
+- [x] Fix: ReadinessTab TypeError: Cannot read properties of undefined (reading 'useMutation') — missing stub in trpc.standalone.ts
