@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, lockStartDate, lockDays, manualLockEnabled, lockMessage, disclaimerEnabled FROM site_settings;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute SELECT id, lockStartDate, lockDays, manualLockEnabled, lockMessage, disclaimerEnabled FROM site_settings;",
+  "rows": [
+    {
+      "id": "1",
+      "lockStartDate": "NULL",
+      "lockDays": "60",
+      "manualLockEnabled": "0",
+      "lockMessage": "NULL",
+      "disclaimerEnabled": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlockStartDate\tlockDays\tmanualLockEnabled\tlockMessage\tdisclaimerEnabled\n1\tNULL\t60\t0\tNULL\t1\n",
+  "stderr": "",
+  "execution_time_ms": 1047
+}

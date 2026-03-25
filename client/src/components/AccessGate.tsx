@@ -31,7 +31,8 @@ export default function AccessGate({ children }: AccessGateProps) {
   const { data: accessData, isLoading: accessLoading } =
     trpc.siteAccess.checkAccess.useQuery(undefined, {
       retry: false,
-      staleTime: 5 * 60 * 1000, // cache for 5 minutes
+      staleTime: 30 * 1000, // re-check every 30s so lock changes take effect quickly
+      refetchInterval: 60 * 1000, // poll every 60s in background
     });
 
   // While any loading is in progress, render children (fail-open)

@@ -2,6 +2,7 @@
 // Dark charcoal base, Space Grotesk headings, Inter body
 // Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
 import { useState, useEffect, useCallback } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   usePatternRatings,
   useBehavioralRatings,
@@ -29,6 +30,7 @@ import {
   Trash2,
 } from "lucide-react";
 import DisclaimerGate, { useDisclaimerGate } from "@/components/DisclaimerGate";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 // Static imports — dynamic (lazy) imports are incompatible with the standalone
 // CDN build because chunk URLs become absolute CDN paths that cannot be resolved
@@ -104,7 +106,8 @@ export default function Home() {
       }, 300);
     }
   }, []);
-  const [darkMode, setDarkMode] = useState(true);
+  const { theme } = useTheme();
+  const darkMode = theme === "dark";
   const [onboardingDismissed, setOnboardingDismissed] =
     useOnboardingDismissed();
   const [disclaimerDismissed, setDisclaimerDismissed] =
@@ -125,10 +128,8 @@ export default function Home() {
   const [showKeyHelp, setShowKeyHelp] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
-  // Apply dark mode class
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+  // Analytics: track page views on every tab switch
+  useAnalytics({ page: activeTab });
 
   // Confetti check
   useEffect(() => {
@@ -200,9 +201,7 @@ export default function Home() {
   }
 
   return (
-    <div
-      className={`min-h-screen bg-background text-foreground ${darkMode ? "dark" : ""}`}
-    >
+    <div className="min-h-screen bg-background text-foreground">
       {/* Confetti keyframe */}
       <style>{`
         @keyframes confetti-fall {
@@ -257,7 +256,7 @@ export default function Home() {
             activeTab={activeTab}
             onTabChange={setActiveTabWithUrl}
             darkMode={darkMode}
-            onToggleDark={() => setDarkMode(d => !d)}
+            onToggleDark={() => {}}
           />
           <div className="container pb-1 flex justify-end">
             <GlobalSearch onNavigate={setActiveTabWithUrl} />

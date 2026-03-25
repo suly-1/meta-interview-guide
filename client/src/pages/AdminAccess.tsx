@@ -121,6 +121,7 @@ function DisclaimerToggleCard() {
 export default function AdminAccess() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
 
   // Owner check
   const { data: ownerData, isLoading: ownerLoading } =
@@ -169,6 +170,7 @@ export default function AdminAccess() {
       setShowCohortConfirm(false);
       refetch();
       refetchAccess();
+      utils.siteAccess.checkAccess.invalidate();
     },
     onError: err => toast.error(`Cohort reset failed: ${err.message}`),
   });
@@ -179,6 +181,7 @@ export default function AdminAccess() {
       setDirty(false);
       refetch();
       refetchAccess();
+      utils.siteAccess.checkAccess.invalidate();
     },
     onError: err => toast.error(`Failed to save: ${err.message}`),
   });
@@ -190,6 +193,7 @@ export default function AdminAccess() {
       toast.success(locked ? "Site manually locked." : "Site unlocked.");
       refetch();
       refetchAccess();
+      utils.siteAccess.checkAccess.invalidate();
     },
     onError: err => toast.error(`Failed: ${err.message}`),
   });
@@ -272,6 +276,29 @@ export default function AdminAccess() {
           )}
         </div>
       </div>
+
+      {/* Static-build warning — settings cannot be saved on GitHub Pages */}
+      {import.meta.env.VITE_STANDALONE === "true" && (
+        <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <div className="container max-w-2xl flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-300">
+              <span className="font-semibold">Read-only mode.</span> You are
+              viewing the static build (metaguide.blog). Settings cannot be
+              saved here — visit{" "}
+              <a
+                href="https://metaguide.one/admin/access"
+                className="underline font-medium hover:text-amber-200"
+                target="_blank"
+                rel="noreferrer"
+              >
+                metaguide.one/admin/access
+              </a>{" "}
+              to manage the live site lock.
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container py-8 max-w-2xl space-y-6">
         {/* Quick Toggle Card */}

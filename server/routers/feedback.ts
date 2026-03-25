@@ -249,12 +249,20 @@ export const feedbackRouter = router({
   /** Admin: Get feedback summary stats */
   adminStats: adminProcedure.query(async () => {
     const db = await getDb();
-    if (!db) return { byCategory: [], byType: [], total: 0, last7Days: 0 };
+    if (!db)
+      return {
+        byCategory: [],
+        byType: [],
+        total: 0,
+        last7Days: 0,
+        newCount: 0,
+      };
     const all = await db
       .select({
         category: feedbackTable.category,
         feedbackType: feedbackTable.feedbackType,
         createdAt: feedbackTable.createdAt,
+        status: feedbackTable.status,
       })
       .from(feedbackTable);
     const total = all.length;
@@ -262,6 +270,7 @@ export const feedbackRouter = router({
     const last7Days = all.filter(
       r => new Date(r.createdAt) > sevenDaysAgo
     ).length;
+    const newCount = all.filter(r => r.status === "new").length;
     const catMap: Record<string, number> = {};
     for (const r of all) catMap[r.category] = (catMap[r.category] ?? 0) + 1;
     const byCategory = Object.entries(catMap).map(([category, count]) => ({
@@ -275,7 +284,7 @@ export const feedbackRouter = router({
       type,
       count,
     }));
-    return { byCategory, byType, total, last7Days };
+    return { byCategory, byType, total, last7Days, newCount };
   }),
 
   /** Admin: Manually trigger the weekly digest (for testing) */

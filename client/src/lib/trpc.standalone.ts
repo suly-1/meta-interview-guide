@@ -493,6 +493,14 @@ export const trpc = {
           content: "⚠️ AI features require the online version.",
         })),
     },
+    ic7OptimizationChallenge: {
+      useMutation: () =>
+        makeMutation(() => ({
+          challenge: "⚠️ AI features require the online version.",
+          hints: [],
+          optimalApproach: "",
+        })),
+    },
   },
 
   // ── collab (no-op in standalone) ─────────────────────────────────────────

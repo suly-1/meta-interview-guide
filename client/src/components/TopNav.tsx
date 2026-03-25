@@ -738,7 +738,7 @@ export default function TopNav({
     refetchInterval: 5 * 60 * 1000, // re-check every 5 minutes
     staleTime: 2 * 60 * 1000,
   });
-  const newFeedbackCount = feedbackStats?.last7Days ?? 0;
+  const newFeedbackCount = feedbackStats?.newCount ?? 0;
   const {
     codingDue,
     behavioralDue,
@@ -911,7 +911,9 @@ export default function TopNav({
               >
                 <ShieldCheck size={15} />
                 {newFeedbackCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-red-500 ring-1 ring-background" />
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 ring-1 ring-background flex items-center justify-center text-[9px] font-bold text-white leading-none">
+                    {newFeedbackCount > 99 ? "99+" : newFeedbackCount}
+                  </span>
                 )}
               </a>
             )}

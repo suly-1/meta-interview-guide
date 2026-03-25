@@ -914,3 +914,15 @@
 - [x] Re-block shortcut in audit log (AdminUsers) — one-click re-apply last block reason
 - [x] Send Digest button on AdminStats page — reuse triggerDailyAlert mutation
 - [x] useUtils invalidation on disclaimer toggle in AdminAccess — instant UI update on flip
+
+## Phase 29 — Fix site lock not working
+
+- [ ] Add static-build warning banner in AdminAccess (settings cannot be saved on GitHub Pages)
+- [ ] Fix AccessGate staleTime: reduce to 30s and invalidate checkAccess after updateSettings/quickToggle mutations
+
+## Phase 30 — Multiple fixes
+
+- [x] Fix dark/light mode toggle not working
+- [x] Fix hints.get.useMutation TypeError in standalone mock
+- [x] Add unread feedback count badge to admin shield icon
+- [x] Add page-view event tracker on tab switches
