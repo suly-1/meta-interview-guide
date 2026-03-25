@@ -360,6 +360,23 @@ export const trpc = {
     generate: { useMutation: () => makeMutation(() => ({ plan: [] })) },
   },
 
+  // ── analytics ──────────────────────────────────────────────────────────
+  analytics: {
+    getSiteAnalytics: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({
+        sessions: 0,
+        loggedInUsers: 0,
+        pageViews: 0,
+        avgSessionMinutes: 0,
+        totalTimeHours: 0,
+        dailyActive: [] as { date: string; sessions: number }[],
+      }),
+    },
+    getTopUnactionedFeedback: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([] as Array<{ id: number; category: string; message: string; createdAt: Date }>),
+    },
+    sendAnalyticsReport: { useMutation: () => makeMutation(() => ({ success: true })) },
+  },
   // ── systemDesign ──────────────────────────────────────────────────────────
   systemDesign: {
     debrief: { useMutation: () => makeMutation(() => ({ debrief: "" })) },
@@ -409,6 +426,10 @@ export const trpc = {
     adminUsers: {
       listUsers: { invalidate: () => {} },
       listEvents: { invalidate: () => {} },
+    },
+    analytics: {
+      getSiteAnalytics: { invalidate: () => {} },
+      getTopUnactionedFeedback: { invalidate: () => {} },
     },
     siteAccess: {
       checkAccess: { invalidate: () => {} },

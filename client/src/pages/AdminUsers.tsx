@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import {
   ArrowLeft, Shield, ShieldOff, Users,
-  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp,
+  CheckCircle, Clock, Mail, ScrollText, ChevronDown, ChevronUp, AlertCircle,
 } from "lucide-react";
 
 export default function AdminUsers() {
-  const { user } = useAuth();
   const [confirmBlock, setConfirmBlock] = useState<{ userId: number; name: string } | null>(null);
   const [blockReason, setBlockReason] = useState("");
   const [showAuditLog, setShowAuditLog] = useState(false);
@@ -31,10 +29,22 @@ export default function AdminUsers() {
     onSuccess: () => refetch(),
   });
 
-  // Always accessible via admin token — no auth guard needed
+  const [checkInactiveResult, setCheckInactiveResult] = useState<{ notified: boolean; count: number } | null>(null);
+  const checkInactiveMutation = trpc.adminUsers.checkInactiveUsers.useMutation({
+    onSuccess: (result: { notified: boolean; count: number }) => {
+      setCheckInactiveResult(result);
+      setTimeout(() => setCheckInactiveResult(null), 5000);
+    },
+  });
 
+  // Always accessible via admin token — no auth guard needed
   const bannedCount = userList?.filter(u => u.isBanned).length ?? 0;
   const adminCount = userList?.filter(u => u.role === "admin").length ?? 0;
+  const activeThisWeek = userList?.filter(u => {
+    if (!u.lastSignedIn) return false;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return new Date(u.lastSignedIn).getTime() > sevenDaysAgo;
+  }).length ?? 0;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -48,11 +58,26 @@ export default function AdminUsers() {
             <Users size={18} className="text-blue-400" />
             <h1 className="font-semibold text-sm">User Management</h1>
           </div>
-          <div className="ml-auto flex items-center gap-3 text-xs text-gray-500">
-            <span>{userList?.length ?? 0} total</span>
-            {bannedCount > 0 && (
-              <span className="text-red-400 font-medium">{bannedCount} blocked</span>
+          <div className="ml-auto flex items-center gap-2">
+            {checkInactiveResult && (
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                checkInactiveResult.notified
+                  ? "bg-amber-900/50 text-amber-300 border-amber-700"
+                  : "bg-gray-800 text-gray-400 border-gray-700"
+              }`}>
+                {checkInactiveResult.notified
+                  ? `⚠️ ${checkInactiveResult.count} inactive users notified`
+                  : "No inactive users found"}
+              </span>
             )}
+            <button
+              onClick={() => checkInactiveMutation.mutate()}
+              disabled={checkInactiveMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-900/30 hover:bg-amber-900/50 rounded-lg border border-amber-700 transition-all disabled:opacity-50"
+            >
+              <AlertCircle size={13} className={checkInactiveMutation.isPending ? "animate-pulse" : ""} />
+              Check Inactive
+            </button>
           </div>
         </div>
       </div>
@@ -60,17 +85,26 @@ export default function AdminUsers() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <p className="text-xs text-gray-500 mb-1">Total Users</p>
-            <p className="text-2xl font-bold text-white">{userList?.length ?? "—"}</p>
+          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
+            <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+              <Users size={11} /> Total Users
+            </p>
+            <p className="text-3xl font-bold text-white">{userList?.length ?? "—"}</p>
+            <p className="text-xs text-gray-500 mt-1">registered accounts</p>
           </div>
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <p className="text-xs text-gray-500 mb-1">Blocked</p>
-            <p className="text-2xl font-bold text-red-400">{bannedCount}</p>
+          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
+            <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+              <CheckCircle size={11} /> Active This Week
+            </p>
+            <p className="text-3xl font-bold text-blue-400">{activeThisWeek}</p>
+            <p className="text-xs text-gray-500 mt-1">logged in last 7 days</p>
           </div>
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <p className="text-xs text-gray-500 mb-1">Admins</p>
-            <p className="text-2xl font-bold text-amber-400">{adminCount}</p>
+          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
+            <p className="text-xs text-red-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+              <ShieldOff size={11} /> Blocked
+            </p>
+            <p className="text-3xl font-bold text-red-400">{bannedCount}</p>
+            <p className="text-xs text-gray-500 mt-1">access revoked</p>
           </div>
         </div>
 

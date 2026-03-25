@@ -1,15 +1,15 @@
 /**
  * AdminFeedback — owner-only dashboard at /admin/feedback.
- * Shows all site feedback sorted by category and rating.
- * Gated by ctx.user.role === 'admin' on the server.
+ * Shows all site feedback with full admin nav bar matching the design.
+ * Gated by tokenAdminProcedure on the server.
  */
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Bug, Lightbulb, BookOpen, Palette, HelpCircle,
   Star, Filter, ArrowLeft, RefreshCw, BarChart2,
-  TrendingUp, MessageSquare, Clock, Users, Trophy, Zap
+  TrendingUp, MessageSquare, Clock, Users, Trophy, Zap,
+  Download, Bell, Send, Search, Lock, ChevronDown
 } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -67,93 +67,199 @@ function StarRow({ rating }: { rating: number | null }) {
   );
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function exportToCSV(items: Array<Record<string, unknown>>) {
+  if (!items.length) return;
+  const headers = Object.keys(items[0]);
+  const rows = items.map(item =>
+    headers.map(h => {
+      const val = item[h];
+      const str = val == null ? "" : String(val);
+      return str.includes(",") || str.includes('"') || str.includes("\n")
+        ? `"${str.replace(/"/g, '""')}"`
+        : str;
+    }).join(",")
+  );
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `feedback-export-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function StatCard({ icon, label, value, color }: {
+  icon: React.ReactNode; label: string; value: string | number; color: string;
+}) {
+  return (
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-2">
+      <div className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider ${color}`}>
+        {icon}
+        {label}
+      </div>
+      <div className={`text-3xl font-bold ${color}`}>{value}</div>
+    </div>
+  );
+}
+
 export default function AdminFeedback() {
-  const { user } = useAuth();
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<"newest" | "rating_high" | "rating_low">("newest");
+  const [alertSent, setAlertSent] = useState(false);
+  const [digestSent, setDigestSent] = useState(false);
 
-  const { data: feedback, isLoading, refetch } = trpc.feedback.getAllSiteFeedback.useQuery(undefined);
-
+  const { data: feedback, isLoading, refetch, isFetching } = trpc.feedback.getAllSiteFeedback.useQuery(undefined);
+  const { data: stats } = trpc.feedback.adminStats.useQuery(undefined);
   const { data: aggregateStats } = trpc.scores.getAggregate.useQuery(undefined);
-
   const utils = trpc.useUtils();
+
   const updateStatus = trpc.feedback.updateFeedbackStatus.useMutation({
     onSuccess: () => utils.feedback.getAllSiteFeedback.invalidate(),
+  });
+
+  const triggerAlert = trpc.feedback.triggerDailyAlert.useMutation({
+    onSuccess: () => {
+      setAlertSent(true);
+      setTimeout(() => setAlertSent(false), 3000);
+    },
+  });
+
+  const triggerDigest = trpc.feedback.triggerDigest.useMutation({
+    onSuccess: () => {
+      setDigestSent(true);
+      setTimeout(() => setDigestSent(false), 3000);
+    },
   });
 
   const filtered = useMemo(() => {
     if (!feedback?.length) return [];
     let items = [...feedback];
     if (categoryFilter !== "all") items = items.filter(f => f.category === categoryFilter);
+    if (statusFilter !== "all") items = items.filter(f => (f as { status?: string }).status === statusFilter);
+    if (typeFilter !== "all") items = items.filter(f => f.category === typeFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(f =>
+        f.message?.toLowerCase().includes(q) ||
+        f.category?.toLowerCase().includes(q) ||
+        f.page?.toLowerCase().includes(q)
+      );
+    }
     if (sortBy === "rating_high") items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     else if (sortBy === "rating_low") items.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
-    // newest is default (already sorted by createdAt desc from server)
     return items;
-  }, [feedback, categoryFilter, sortBy]);
+  }, [feedback, categoryFilter, typeFilter, statusFilter, searchQuery, sortBy]);
 
-  // Category counts for the summary bar
-  const counts = useMemo(() => {
-    const c: Record<string, number> = { all: 0, bug: 0, feature: 0, content: 0, ux: 0, other: 0 };
-    for (const f of feedback ?? []) {
-      c.all++;
-      c[f.category] = (c[f.category] ?? 0) + 1;
-    }
-    return c;
-  }, [feedback]);
+  const topCategory = useMemo(() => {
+    if (!stats?.byCategory?.length) return "—";
+    const sorted = [...stats.byCategory].sort((a, b) => b.count - a.count);
+    return sorted[0]?.category ?? "—";
+  }, [stats]);
 
-  const avgRating = useMemo(() => {
-    const rated = (feedback ?? []).filter(f => f.rating);
-    if (!rated.length) return null;
-    return (rated.reduce((s, f) => s + (f.rating ?? 0), 0) / rated.length).toFixed(1);
-  }, [feedback]);
-
-  // Always accessible via admin token — no auth guard needed
+  const last7Days = stats?.last7Days ?? 0;
+  const total = stats?.total ?? 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-4">
+    <div className="min-h-screen bg-gray-950 text-white">
+      {/* ── Header Nav ─────────────────────────────────────────────────── */}
+      <div className="sticky top-0 z-50 bg-gray-900 border-b border-gray-800 shadow-lg">
+        <div className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto">
           <Link href="/">
-            <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+            <button className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition-colors flex-shrink-0 mr-1">
               <ArrowLeft size={15} />
-              Back to guide
             </button>
           </Link>
+          <div className="flex-shrink-0 mr-3">
+            <div className="flex items-center gap-2">
+              <BarChart2 size={15} className="text-indigo-400" />
+              <span className="text-sm font-bold text-white whitespace-nowrap">Feedback Dashboard</span>
+            </div>
+            <p className="text-[10px] text-gray-500 hidden sm:block">Admin view · All submitted feedback</p>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Link href="/admin/stats">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+                <BarChart2 size={13} />
+                <span className="hidden sm:inline">Stats</span>
+              </button>
+            </Link>
+            <Link href="/admin/analytics">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+                <TrendingUp size={13} />
+                <span className="hidden sm:inline">Analytics</span>
+              </button>
+            </Link>
+            <Link href="/admin/settings">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+                <Lock size={13} />
+                <span className="hidden sm:inline">Access</span>
+              </button>
+            </Link>
+            <Link href="/admin/users">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+                <Users size={13} />
+                <span className="hidden sm:inline">Users</span>
+              </button>
+            </Link>
+          </div>
           <div className="flex-1" />
-          <h1 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <BarChart2 size={18} className="text-indigo-600" />
-            Feedback Dashboard
-          </h1>
-          <button
-            onClick={() => refetch()}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw size={15} />
-          </button>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all disabled:opacity-50"
+            >
+              <RefreshCw size={13} className={isFetching ? "animate-spin" : ""} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button
+              onClick={() => exportToCSV((feedback ?? []) as Array<Record<string, unknown>>)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all"
+            >
+              <Download size={13} />
+              <span className="hidden sm:inline">Export CSV</span>
+            </button>
+            <button
+              onClick={() => triggerAlert.mutate(undefined)}
+              disabled={triggerAlert.isPending || alertSent}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                alertSent
+                  ? "bg-green-700 border-green-600 text-white"
+                  : "bg-amber-700 hover:bg-amber-600 border-amber-600 text-white"
+              } disabled:opacity-60`}
+            >
+              <Bell size={13} className={triggerAlert.isPending ? "animate-pulse" : ""} />
+              <span className="hidden sm:inline">{alertSent ? "Sent!" : "Test Alert"}</span>
+            </button>
+            <button
+              onClick={() => triggerDigest.mutate(undefined)}
+              disabled={triggerDigest.isPending || digestSent}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                digestSent
+                  ? "bg-green-700 border-green-600 text-white"
+                  : "bg-blue-700 hover:bg-blue-600 border-blue-600 text-white"
+              } disabled:opacity-60`}
+            >
+              <Send size={13} className={triggerDigest.isPending ? "animate-pulse" : ""} />
+              <span className="hidden sm:inline">{digestSent ? "Sent!" : "Send Digest"}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        {/* Stats bar */}
+      <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
+        {/* Stat Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-center">
-            <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{counts.all}</p>
-            <p className="text-xs text-gray-500 mt-0.5 flex items-center justify-center gap-1"><MessageSquare size={11} /> Total</p>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-center">
-            <p className="text-2xl font-black text-amber-500">{avgRating ?? "—"}</p>
-            <p className="text-xs text-gray-500 mt-0.5 flex items-center justify-center gap-1"><Star size={11} /> Avg Rating</p>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-center">
-            <p className="text-2xl font-black text-amber-600">{counts.feature ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-0.5 flex items-center justify-center gap-1"><Lightbulb size={11} /> Features</p>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-center">
-            <p className="text-2xl font-black text-red-500">{counts.bug ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-0.5 flex items-center justify-center gap-1"><Bug size={11} /> Bugs</p>
-          </div>
+          <StatCard icon={<MessageSquare size={12} />} label="Total" value={isLoading ? "…" : total} color="text-gray-300" />
+          <StatCard icon={<Clock size={12} />} label="Last 7 Days" value={isLoading ? "…" : last7Days} color="text-green-400" />
+          <StatCard icon={<Star size={12} />} label="Top Category" value={isLoading ? "…" : topCategory} color="text-amber-400" />
+          <StatCard icon={<TrendingUp size={12} />} label="Showing" value={filtered.length} color="text-blue-400" />
         </div>
 
         {/* Aggregate Anonymous Pass-Rate Stats */}
@@ -223,61 +329,69 @@ export default function AdminFeedback() {
           </div>
         )}
 
-        {/* Filters */}
+        {/* Filters + Search */}
         <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mr-1">
-            <Filter size={13} /> Filter:
+          <Filter size={13} className="text-gray-500 flex-shrink-0" />
+          <div className="relative">
+            <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
+              className="appearance-none text-xs font-semibold bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-3 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              <option value="all">All Categories</option>
+              <option value="bug">Bug</option>
+              <option value="feature">Feature</option>
+              <option value="content">Content</option>
+              <option value="ux">UX</option>
+              <option value="other">Other</option>
+            </select>
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
-          {["all", "bug", "feature", "content", "ux", "other"].map(cat => {
-            const meta = cat === "all" ? null : CATEGORY_META[cat];
-            const count = counts[cat] ?? 0;
-            return (
-              <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                  categoryFilter === cat
-                    ? cat === "all"
-                      ? "bg-indigo-100 text-indigo-700 border-indigo-300 ring-2 ring-indigo-300 ring-offset-1"
-                      : `${meta?.bg} ${meta?.color} ring-2 ring-current ring-offset-1`
-                    : "bg-white dark:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700 hover:border-gray-300"
-                }`}
-              >
-                {meta?.icon}
-                {cat === "all" ? "All" : meta?.label}
-                <span className="ml-0.5 opacity-70">({count})</span>
-              </button>
-            );
-          })}
-
-          <div className="ml-auto flex items-center gap-1.5">
-            <TrendingUp size={13} className="text-gray-400" />
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as typeof sortBy)}
-              className="text-xs border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
+          <div className="relative">
+            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
+              className="appearance-none text-xs font-semibold bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-3 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              <option value="all">All Types</option>
+              <option value="bug">Bug Report</option>
+              <option value="feature">Feature Request</option>
+              <option value="content">Content Issue</option>
+              <option value="ux">UX Feedback</option>
+            </select>
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+          <div className="relative">
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+              className="appearance-none text-xs font-semibold bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-3 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+              <option value="all">All Statuses</option>
+              <option value="new">New</option>
+              <option value="in_progress">In Progress</option>
+              <option value="done">Done</option>
+              <option value="dismissed">Dismissed</option>
+            </select>
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+          <div className="flex-1 min-w-[180px] relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+            <input type="text" placeholder="Search messages..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              className="w-full text-xs bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-600" />
+          </div>
+          <div className="relative ml-auto">
+            <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}
+              className="appearance-none text-xs font-semibold bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-3 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
               <option value="newest">Newest first</option>
               <option value="rating_high">Highest rating</option>
               <option value="rating_low">Lowest rating</option>
             </select>
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
         </div>
-
         {/* Feedback list */}
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-24 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+              <div key={i} className="h-24 rounded-xl bg-gray-800 animate-pulse" />
             ))}
           </div>
         ) : !filtered.length ? (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16 text-gray-500">
             <MessageSquare size={40} className="mx-auto mb-3 opacity-30" />
-            <p className="font-semibold">No feedback yet</p>
-            <p className="text-sm mt-1">
-              {categoryFilter !== "all" ? "No items in this category." : "Feedback will appear here once users submit it."}
-            </p>
+            <p className="font-semibold text-gray-400">No feedback entries yet. They will appear here once users submit feedback.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -289,7 +403,7 @@ export default function AdminFeedback() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.03 }}
-                  className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 shadow-sm"
+                  className="bg-gray-900 rounded-xl border border-gray-800 p-4 shadow-sm"
                 >
                   <div className="flex items-start gap-3">
                     {/* Category badge */}
@@ -300,22 +414,22 @@ export default function AdminFeedback() {
 
                     <div className="flex-1 min-w-0">
                       {/* Message */}
-                      <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{item.message}</p>
+                      <p className="text-sm text-gray-200 leading-relaxed">{item.message}</p>
 
                       {/* Meta row */}
                       <div className="flex flex-wrap items-center gap-3 mt-2">
                         <StarRow rating={item.rating} />
                         {item.page && (
-                          <span className="text-xs text-gray-400 font-mono bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                          <span className="text-xs text-gray-500 font-mono bg-gray-800 px-2 py-0.5 rounded-md">
                             {item.page}
                           </span>
                         )}
-                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
                           <Clock size={11} />
                           {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </span>
                         {item.userId && (
-                          <span className="text-xs text-gray-400">User #{item.userId}</span>
+                          <span className="text-xs text-gray-500">User #{item.userId}</span>
                         )}
                       </div>
                     </div>
@@ -344,6 +458,9 @@ export default function AdminFeedback() {
             })}
           </div>
         )}
+        <p className="text-center text-gray-600 text-xs pb-4">
+          Showing {filtered.length} of {total} entries · Click any row to expand full message
+        </p>
       </div>
     </div>
   );

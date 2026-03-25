@@ -20,6 +20,7 @@ import { adminRouter } from "./routers/admin";
 import { siteSettingsRouter } from "./routers/siteSettings";
 import { siteAccessRouter } from "./routers/siteAccess";
 import { adminUsersRouter } from "./routers/adminUsers";
+import { analyticsRouter } from "./routers/analytics";
 import { ENV } from "./_core/env";
 
 export const appRouter = router({
@@ -1822,5 +1823,6 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   siteSettings: siteSettingsRouter,
   siteAccess: siteAccessRouter,
   adminUsers: adminUsersRouter,
+  analytics: analyticsRouter,
 });
 export type AppRouter = typeof appRouter;

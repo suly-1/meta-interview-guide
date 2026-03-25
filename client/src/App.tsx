@@ -18,6 +18,7 @@ import AdminUsers from "@/pages/AdminUsers";
 import AdminSettings from "@/pages/AdminSettings";
 import AdminStats from "@/pages/AdminStats";
 import AdminDocs from "@/pages/AdminDocs";
+import AdminAnalytics from "@/pages/AdminAnalytics";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -93,6 +94,7 @@ function App() {
         <Route path="/admin/settings" component={AdminSettings} />
         <Route path="/admin/stats" component={AdminStats} />
         <Route path="/admin/docs" component={AdminDocs} />
+        <Route path="/admin/analytics" component={AdminAnalytics} />
                 {/* All other routes go through DisclaimerGate */}
                 <Route>
                   <DisclaimerGateWrapper>
