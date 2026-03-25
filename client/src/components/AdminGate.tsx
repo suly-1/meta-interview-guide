@@ -1,0 +1,96 @@
+/**
+ * AdminGate — enforces that only the site owner (OWNER_OPEN_ID) can access
+ * any /admin/* route. Non-owners are shown a 403 screen and redirected.
+ *
+ * Security model:
+ * - Calls trpc.auth.isOwner (protectedProcedure) on the server.
+ * - The server compares ctx.user.openId === ENV.ownerOpenId.
+ * - If the user is not logged in, the protectedProcedure throws UNAUTHORIZED
+ *   and the query error is treated as "not owner".
+ * - localStorage admin tokens are cleared for non-owners so stale tokens
+ *   cannot be used to bypass the gate on future visits.
+ */
+
+import { trpc } from "@/lib/trpc";
+import { clearAdminToken } from "@/lib/adminToken";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
+import { ShieldAlert, LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getLoginUrl } from "@/const";
+
+interface AdminGateProps {
+  children: React.ReactNode;
+}
+
+export default function AdminGate({ children }: AdminGateProps) {
+  const [, navigate] = useLocation();
+  const { data, isLoading, error } = trpc.auth.isOwner.useQuery(undefined, {
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  const isOwner = data?.isOwner === true;
+  const notLoggedIn = !!error || (!isLoading && !data);
+
+  // Clear stale localStorage token for non-owners
+  useEffect(() => {
+    if (!isLoading && !isOwner) {
+      clearAdminToken();
+    }
+  }, [isLoading, isOwner]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-400">
+          <div className="w-8 h-8 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
+          <span className="text-sm">Verifying access…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isOwner) {
+    const isUnauthenticated = !data && (error as { data?: { code?: string } })?.data?.code === "UNAUTHORIZED";
+
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 rounded-full bg-red-900/30 flex items-center justify-center mx-auto mb-5">
+            <ShieldAlert size={28} className="text-red-400" />
+          </div>
+          <h1 className="text-xl font-bold text-white mb-2">Admin Access Restricted</h1>
+          <p className="text-gray-400 text-sm leading-relaxed mb-6">
+            {isUnauthenticated
+              ? "You must be signed in with the owner account to access the admin panel."
+              : "This area is restricted to the site owner only. Your account does not have admin privileges."}
+          </p>
+          <div className="flex flex-col gap-3 items-center">
+            {isUnauthenticated && (
+              <Button
+                variant="default"
+                className="w-full max-w-xs"
+                onClick={() => {
+                  window.location.href = getLoginUrl();
+                }}
+              >
+                <LogIn size={15} className="mr-2" />
+                Sign in with owner account
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="w-full max-w-xs text-gray-300 border-gray-700 hover:bg-gray-800"
+              onClick={() => navigate("/")}
+            >
+              Back to guide
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}

@@ -19,6 +19,7 @@ import AdminSettings from "@/pages/AdminSettings";
 import AdminStats from "@/pages/AdminStats";
 import AdminDocs from "@/pages/AdminDocs";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AdminGate from "@/components/AdminGate";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -88,13 +89,27 @@ function App() {
                 <Route path="/discover" component={CandidateDiscovery} />
         <Route path="/terms" component={TermsOfUse} />
         <Route path="/shared-plan/:token" component={SharedPlanView} />
-        <Route path="/admin/feedback" component={AdminFeedback} />
-        <Route path="/admin/disclaimer" component={AdminDisclaimerReport} />
-        <Route path="/admin/users" component={AdminUsers} />
-        <Route path="/admin/settings" component={AdminSettings} />
-        <Route path="/admin/stats" component={AdminStats} />
-        <Route path="/admin/docs" component={AdminDocs} />
-        <Route path="/admin/analytics" component={AdminAnalytics} />
+        <Route path="/admin/feedback">
+          <AdminGate><AdminFeedback /></AdminGate>
+        </Route>
+        <Route path="/admin/disclaimer">
+          <AdminGate><AdminDisclaimerReport /></AdminGate>
+        </Route>
+        <Route path="/admin/users">
+          <AdminGate><AdminUsers /></AdminGate>
+        </Route>
+        <Route path="/admin/settings">
+          <AdminGate><AdminSettings /></AdminGate>
+        </Route>
+        <Route path="/admin/stats">
+          <AdminGate><AdminStats /></AdminGate>
+        </Route>
+        <Route path="/admin/docs">
+          <AdminGate><AdminDocs /></AdminGate>
+        </Route>
+        <Route path="/admin/analytics">
+          <AdminGate><AdminAnalytics /></AdminGate>
+        </Route>
                 {/* All other routes go through DisclaimerGate */}
                 <Route>
                   <DisclaimerGateWrapper>

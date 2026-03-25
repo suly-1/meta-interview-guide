@@ -708,3 +708,6 @@
 - [x] Fix: hints.get.useMutation TypeError on static build — missing hints namespace in trpc.standalone.ts
 - [x] Fix: hints.get.useMutation TypeError on static build — missing hints namespace in trpc.standalone.ts
 - [x] Fix: ReadinessTab TypeError: Cannot read properties of undefined (reading 'useMutation') — missing stub in trpc.standalone.ts
+- [x] Automated Vitest test: assert all trpc source calls have correct stubs in trpc.standalone.ts
+- [x] Cohort Reset button on AdminAccess page — clears all disclaimer acknowledgements
+- [x] Security: Lock admin panel to owner-only (OWNER_OPEN_ID) — remove localStorage token bypass, gate all /admin/* routes server-side
