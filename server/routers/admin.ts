@@ -1,10 +1,12 @@
 import { z } from "zod";
-import { tokenAdminProcedure, router } from "../_core/trpc";
+import { tokenAdminProcedure, router, publicProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { users, userEvents, loginEvents, siteSettings } from "../../drizzle/schema";
 import { eq, asc, desc, inArray, lte, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { notifyOwner } from "../_core/notification";
+import { SignJWT, jwtVerify } from "jose";
+import { ENV } from "../_core/env";
 
 export const adminRouter = router({
   /**
@@ -381,4 +383,71 @@ export const adminRouter = router({
 
     return { unblocked: expired.length };
   }),
+
+  /**
+   * verifyPin — public procedure (no OAuth required).
+   * Accepts a PIN, compares it in constant-time to ADMIN_PIN env var,
+   * and returns a short-lived signed JWT on success.
+   * The JWT is stored in React state only (never localStorage).
+   */
+  verifyPin: publicProcedure
+    .input(z.object({ pin: z.string().min(1).max(20) }))
+    .mutation(async ({ input }) => {
+      const storedPin = ENV.adminPin;
+      if (!storedPin) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Admin PIN is not configured on the server.',
+        });
+      }
+      // Constant-time comparison to prevent timing attacks
+      const a = Buffer.from(input.pin.padEnd(32, '\0'));
+      const b = Buffer.from(storedPin.padEnd(32, '\0'));
+      let diff = 0;
+      for (let i = 0; i < 32; i++) diff |= a[i] ^ b[i];
+      if (diff !== 0) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Incorrect PIN.',
+        });
+      }
+      // Issue a short-lived signed JWT (4 hours)
+      const secret = new TextEncoder().encode(
+        ENV.cookieSecret + ':admin-pin-gate'
+      );
+      const token = await new SignJWT({ purpose: 'admin-pin-gate' })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('4h')
+        .sign(secret);
+      return { token };
+    }),
+
+  /**
+   * verifyPinToken — public procedure.
+   * Validates a previously issued admin-pin-gate JWT.
+   * Returns { valid: true } on success, throws FORBIDDEN otherwise.
+   * Used by AdminGate on mount to re-validate a token held in React state.
+   */
+  verifyPinToken: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        const secret = new TextEncoder().encode(
+          ENV.cookieSecret + ':admin-pin-gate'
+        );
+        const { payload } = await jwtVerify(input.token, secret, {
+          algorithms: ['HS256'],
+        });
+        if (payload.purpose !== 'admin-pin-gate') {
+          throw new Error('Invalid purpose');
+        }
+        return { valid: true };
+      } catch {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'PIN token is invalid or expired.',
+        });
+      }
+    }),
 });

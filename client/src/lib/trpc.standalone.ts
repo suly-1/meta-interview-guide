@@ -328,6 +328,11 @@ export const trpc = {
     processExpiredBlocks: { useMutation: () => makeMutation(() => ({ success: true })) },
     reBlockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
     unblockUser: { useMutation: () => makeMutation(() => ({ success: true })) },
+    // PIN gate stubs — standalone build bypasses PIN (admin panel is already blocked by isOwner=false)
+    verifyPin: { useMutation: () => makeMutation(() => ({ token: 'standalone-pin-bypass' })) },
+    verifyPinToken: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ valid: true }),
+    },
   },
 
   // ── adminUsers ─────────────────────────────────────────────────────────────────────────────────

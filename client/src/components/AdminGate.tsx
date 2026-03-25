@@ -15,6 +15,8 @@
 
 import { trpc } from "@/lib/trpc";
 import { clearAdminToken } from "@/lib/adminToken";
+import { usePinGate } from "@/contexts/PinGateContext";
+import PinGateModal from "@/components/PinGateModal";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { ShieldAlert, LogIn } from "lucide-react";
@@ -30,6 +32,7 @@ const IS_STANDALONE = import.meta.env.VITE_STANDALONE === "true";
 
 export default function AdminGate({ children }: AdminGateProps) {
   const [, navigate] = useLocation();
+  const { pinToken } = usePinGate();
 
   const { data, isLoading, error } = trpc.auth.isOwner.useQuery(undefined, {
     retry: false,
@@ -125,5 +128,13 @@ export default function AdminGate({ children }: AdminGateProps) {
     );
   }
 
+  // ── Layer 2: PIN gate ────────────────────────────────────────────────────
+  // Owner is confirmed. Now require a valid PIN token in React state.
+  // PinGateModal handles submission and stores the token via PinGateContext.
+  if (!pinToken) {
+    return <PinGateModal />;
+  }
+
+  // ── Both layers passed — render admin content ────────────────────────────
   return <>{children}</>;
 }

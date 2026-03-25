@@ -741,3 +741,16 @@
 - [x] Feedback notification badge on Admin button — use auth.isOwner + feedback.adminStats (already implemented but using wrong role check)
 - [x] Page-view event tracker on tab switches for real analytics data
 - [x] Block history audit trail per user (show all block/unblock events in AdminUsers)
+
+## Admin PIN Gate (Mar 25, 2026)
+- [x] Add ADMIN_PIN environment variable via secrets manager
+- [x] Add server-side trpc.admin.verifyPin procedure (publicProcedure, constant-time compare, returns signed JWT)
+- [x] Add server-side trpc.admin.verifyPinToken procedure (validates JWT)
+- [x] Add adminPin to ENV in server/_core/env.ts
+- [x] Build PinGateContext (React context storing token in useState, clears on tab close)
+- [x] Build PinGateModal component (6-digit PIN input, auto-submit, shake animation, paste support)
+- [x] Wire PinGateProvider into main.tsx
+- [x] Wire AdminGate to show PinGateModal until valid token is present (Layer 2 after isOwner)
+- [x] Add verifyPin + verifyPinToken stubs to trpc.standalone.ts
+- [x] All 61 tests pass (TypeScript clean)
+- [ ] Save checkpoint and deploy to metaengguide.pro
