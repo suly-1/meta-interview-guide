@@ -447,6 +447,25 @@ export const adminRouter = router({
 
       if (!correct) {
         console.warn(`[PIN GATE] Failed attempt from IP ${ip}`);
+        // Check total failed attempts in window — alert owner at 3 and 5
+        if (db) {
+          const safeIp2 = ip.replace(/'/g, '');
+          const windowStartStr2 = new Date(Date.now() - 15 * 60 * 1000).toISOString().replace('T', ' ').split('.')[0];
+          const [alertRow] = await db.execute(
+            `SELECT COUNT(*) as cnt FROM pin_attempts WHERE ipAddress = '${safeIp2}' AND success = 0 AND createdAt >= '${windowStartStr2}'` as unknown as import('drizzle-orm').SQL
+          ) as unknown as [{ cnt: number }];
+          const totalFailed = Number(alertRow?.cnt ?? 0);
+          if (totalFailed === 3 || totalFailed === 5) {
+            notifyOwner({
+              title: `⚠️ Admin PIN: ${totalFailed} failed attempt${totalFailed > 1 ? 's' : ''} from ${ip}`,
+              content: `**${totalFailed} failed admin PIN attempt${totalFailed > 1 ? 's' : ''}** detected from IP **${ip}** within the last 15 minutes.\n\n${
+                totalFailed >= 5
+                  ? 'This IP is now **locked out for 15 minutes**.'
+                  : 'If this was not you, monitor for further attempts.'
+              }\n\nTimestamp: ${new Date().toISOString()}`,
+            }).catch(() => {});
+          }
+        }
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'Incorrect PIN.',
@@ -540,6 +559,32 @@ export const adminRouter = router({
       console.info('[PIN GATE] Admin PIN changed successfully');
       return { success: true };
     }),
+
+  /**
+   * getPinAttemptHistory — returns the last 10 failed PIN attempts.
+   * Used by Admin Settings to show the audit table.
+   */
+  getPinAttemptHistory: tokenAdminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    const rows = await db
+      .select({
+        id: pinAttempts.id,
+        ipAddress: pinAttempts.ipAddress,
+        success: pinAttempts.success,
+        createdAt: pinAttempts.createdAt,
+      })
+      .from(pinAttempts)
+      .where(eq(pinAttempts.success, 0))
+      .orderBy(desc(pinAttempts.createdAt))
+      .limit(10);
+
+    return rows.map(row => ({
+      id: row.id,
+      ipAddress: row.ipAddress,
+      createdAt: row.createdAt,
+    }));
+  }),
 
   /**
    * verifyPinToken — public procedure.

@@ -337,6 +337,9 @@ export const trpc = {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ locked: false, secondsRemaining: 0, failedAttempts: 0 }),
     },
     changeAdminPin: { useMutation: () => makeMutation(() => ({ success: true })) },
+    getPinAttemptHistory: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
   },
 
   // ── adminUsers ─────────────────────────────────────────────────────────────────────────────────

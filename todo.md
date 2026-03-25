@@ -767,3 +767,12 @@
 - [x] AdminGate wires PinExpiryToast alongside admin content
 - [x] All 61 tests pass, TypeScript clean (0 errors)
 - [x] Checkpoint saved
+
+## PIN Security — Phase 2 (Mar 25, 2026)
+- [x] notifyOwner alert — send push notification when 3+ failed PIN attempts from same IP in 15-min window
+- [x] getPinAttemptHistory procedure — return last 10 failed PIN attempts (timestamp, IP, wasLocked)
+- [x] PIN attempt history table in Admin Settings — show last 10 failed attempts with timestamp, IP, lock indicator
+- [x] Session lock button in admin panel header — clears PIN token from React state, forces re-entry
+- [x] Add getPinAttemptHistory stub to trpc.standalone.ts
+- [x] All 61 tests pass, TypeScript clean (0 errors)
+- [x] Checkpoint saved

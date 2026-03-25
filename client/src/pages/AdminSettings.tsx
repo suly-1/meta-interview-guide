@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
   Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight,
-  AlertTriangle, KeyRound
+  AlertTriangle, KeyRound, AlertOctagon
 } from "lucide-react";
 
 export default function AdminSettings() {
@@ -38,6 +38,10 @@ export default function AdminSettings() {
 
   const { data: lockStatus, isLoading } = trpc.siteSettings.getLockStatus.useQuery(undefined, {
     refetchInterval: 30_000,
+  });
+
+  const { data: pinAttempts, refetch: refetchPinAttempts } = trpc.admin.getPinAttemptHistory.useQuery(undefined, {
+    refetchInterval: 60_000,
   });
 
   const resetClock = trpc.siteSettings.resetClock.useMutation({
@@ -514,6 +518,54 @@ export default function AdminSettings() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* PIN Attempt History */}
+        <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <AlertOctagon size={16} className="text-red-400" />
+              <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Failed PIN Attempts</h4>
+            </div>
+            <button
+              onClick={() => refetchPinAttempts()}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
+            >
+              <RefreshCw size={11} />
+              Refresh
+            </button>
+          </div>
+          {!pinAttempts || pinAttempts.length === 0 ? (
+            <p className="text-xs text-gray-600 text-center py-4">No failed PIN attempts recorded.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-800">
+                    <th className="text-left py-2 pr-4 text-gray-500 font-medium">Time</th>
+                    <th className="text-left py-2 pr-4 text-gray-500 font-medium">IP Address</th>
+                    <th className="text-left py-2 text-gray-500 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pinAttempts.map((attempt: { id: number; ipAddress: string; createdAt: Date }) => (
+                    <tr key={attempt.id} className="border-b border-gray-800/50 last:border-0">
+                      <td className="py-2 pr-4 text-gray-400 whitespace-nowrap">
+                        {new Date(attempt.createdAt).toLocaleString()}
+                      </td>
+                      <td className="py-2 pr-4 font-mono text-red-400">{attempt.ipAddress}</td>
+                      <td className="py-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/40 text-red-400 text-[10px] font-semibold">
+                          Failed
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p className="text-[10px] text-gray-600 mt-3">Shows the last 10 failed attempts. Auto-lock triggers after 5 failures within 15 minutes.</p>
         </div>
 
         {/* How it works */}
