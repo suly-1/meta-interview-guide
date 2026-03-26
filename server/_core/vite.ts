@@ -47,6 +47,26 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+// Build the CSP header value — permissive enough for Google Fonts, inline scripts
+// (SW kill-switch), and the Manus analytics/API endpoints.
+// The Manus platform Cloudflare layer may apply a restrictive default-src 'self'
+// policy; this header overrides it at the Express app level.
+function buildCspHeader(): string {
+  const analyticsEndpoint = process.env.VITE_ANALYTICS_ENDPOINT || "";
+  const connectExtra = analyticsEndpoint ? ` ${analyticsEndpoint}` : "";
+
+  return [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://manus-analytics.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    `connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://*.manus.im https://*.manus.space https://*.manuspre.computer https://*.manus.computer https://*.manuscomputer.ai https://manus-analytics.com wss:${connectExtra}`,
+    "img-src 'self' data: blob: https:",
+    "media-src 'self' blob:",
+    "worker-src 'self' blob:",
+  ].join("; ");
+}
+
 export function serveStatic(app: Express) {
   const distPath =
     process.env.NODE_ENV === "development"
@@ -57,6 +77,13 @@ export function serveStatic(app: Express) {
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
+
+  // Apply CSP before serving static files so every response (HTML, JS, CSS)
+  // carries the correct policy header.
+  app.use((_req, res, next) => {
+    res.setHeader("Content-Security-Policy", buildCspHeader());
+    next();
+  });
 
   app.use(express.static(distPath));
 

@@ -183,10 +183,12 @@ export default defineConfig({
           if (id.includes('jspdf') || id.includes('html2canvas')) {
             return 'vendor-pdf';
           }
-          // Charts / recharts — must be bundled WITH React to avoid TDZ error
-          // (recharts references React.forwardRef at module init time; if React is
-          // in a separate chunk the minifier can produce an invalid execution order)
+          // Charts / recharts / lucide-react — must be bundled WITH React to avoid TDZ error
+          // (these reference React.forwardRef at module init time; if React is
+          // in a separate chunk the minifier can produce an invalid execution order
+          // causing "Cannot read properties of undefined (reading 'forwardRef')")
           if (id.includes('recharts') || id.includes('d3-') ||
+              id.includes('lucide-react') ||
               id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
             return 'vendor-react';
           }
@@ -205,10 +207,6 @@ export default defineConfig({
           // Radix UI
           if (id.includes('@radix-ui')) {
             return 'vendor-radix';
-          }
-          // Lucide icons
-          if (id.includes('lucide-react')) {
-            return 'vendor-icons';
           }
           // Utilities
           if (id.includes('date-fns') || id.includes('nanoid') || id.includes('clsx') || id.includes('class-variance-authority')) {
