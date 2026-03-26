@@ -1045,3 +1045,11 @@
 - [x] Update onboarding modal copy from "L6/L7" to "L4 through L7" — now reads "L4 (SWE), L5 (Senior SWE), L6 (Staff), and L7 (Senior Staff)"
 - [x] Add Debugging History panel to Coding tab — shows hit rate, avg fix time, trend (last 5 vs prev 5), mini-timeline, unsolved problems to retry
 - [x] Add Download Report button to Full Mock Day Simulator — opens print-ready HTML in new tab with scorecard + verdict + coaching + remediation plan
+
+## New Features — Round 37
+
+- [x] Adaptive Study Plan Generator — AI analyzes weak dimensions across all rounds, generates personalized 7-day daily plan, updates dynamically
+- [x] Peer Benchmark Mode — anonymous percentile comparison after scored sessions, distribution chart, top-X% callouts per dimension
+- [x] Live Interview Simulation with Voice — TTS interviewer speaks questions, Whisper transcribes user answers, AI scores spoken response
+- [x] Meta-Specific Question Bank — 200+ verified Meta questions tagged by round/L-level/team/recency/frequency, links to simulators
+- [x] Interview Readiness Certificate — shareable PDF + link when combined mock score ≥4.0/5 with Strong Hire verdict

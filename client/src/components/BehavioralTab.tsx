@@ -19,6 +19,8 @@ import {
 } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
+import { VoiceInterviewSimulator } from "@/components/VoiceInterviewSimulator";
+import { MetaQuestionBank } from "@/components/MetaQuestionBank";
 
 const AREAS = [
   "All",
@@ -834,6 +836,12 @@ export default function BehavioralTab() {
           </div>
         )}
       </div>
+
+      {/* Feature: Voice Interview Simulator */}
+      <VoiceInterviewSimulator />
+
+      {/* Feature: Meta Question Bank */}
+      <MetaQuestionBank />
     </div>
   );
 }

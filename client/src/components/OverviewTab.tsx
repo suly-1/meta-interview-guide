@@ -36,6 +36,9 @@ import {
 } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import { PassFailVerdictEngine } from "@/components/PassFailVerdictEngine";
+import { AdaptiveStudyPlan } from "@/components/AdaptiveStudyPlan";
+import { PeerBenchmark } from "@/components/PeerBenchmark";
+import { ReadinessCertificate } from "@/components/ReadinessCertificate";
 
 function getDaysUntil(dateStr: string): number {
   const target = new Date(dateStr);
@@ -780,6 +783,15 @@ export default function OverviewTab() {
 
       {/* Priority #5: Pass/Fail Verdict Engine */}
       <PassFailVerdictEngine />
+
+      {/* Feature: Adaptive Study Plan Generator */}
+      <AdaptiveStudyPlan />
+
+      {/* Feature: Peer Benchmark Mode */}
+      <PeerBenchmark />
+
+      {/* Feature: Readiness Certificate */}
+      <ReadinessCertificate />
     </div>
   );
 }

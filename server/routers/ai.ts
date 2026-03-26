@@ -3038,4 +3038,484 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
         oneLineCoaching: string;
       };
     }),
+
+  // ─── Transcribe + Score (base64 audio upload) ─────────────────────────────
+  transcribeAndScore: protectedProcedure
+    .input(
+      z.object({
+        audioBase64: z.string(),
+        mimeType: z.string().default("audio/webm"),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // Upload base64 audio to S3 so Whisper can fetch it via URL
+      const { storagePut } = await import("../storage");
+      const buffer = Buffer.from(input.audioBase64, "base64");
+      const key = `voice-answers/${Date.now()}-${Math.random().toString(36).slice(2)}.webm`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      // Transcribe via Whisper
+      const transcription = await transcribeAudio({
+        audioUrl: url,
+        language: "en",
+        prompt: "Transcribe an interview answer.",
+      });
+      if ("error" in transcription) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: transcription.error,
+        });
+      }
+      return { transcript: transcription.text };
+    }),
+
+  // ─── Adaptive Study Plan Generator ───────────────────────────────────────────
+  adaptiveStudyPlan: protectedProcedure
+    .input(
+      z.object({
+        codingScore: z.number().min(0).max(5),
+        systemDesignScore: z.number().min(0).max(5),
+        behavioralScore: z.number().min(0).max(5),
+        xfnScore: z.number().min(0).max(5),
+        targetLevel: z.string(), // e.g. "L6", "L7"
+        daysUntilInterview: z.number().min(1).max(90),
+        weakPatterns: z.array(z.string()).optional(),
+        weakBehavioralAreas: z.array(z.string()).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const res = await invokeLLM({
+        messages: [
+          {
+            role: "system" as const,
+            content:
+              "You are a Meta interview coach. Generate a precise, actionable 7-day study plan based on the candidate's current scores and target level. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Generate a 7-day adaptive study plan for a candidate targeting ${input.targetLevel} at Meta.
+
+Current scores (out of 5):
+- Coding: ${input.codingScore}
+- System Design: ${input.systemDesignScore}
+- Behavioral/XFN: ${input.behavioralScore}
+- XFN: ${input.xfnScore}
+- Days until interview: ${input.daysUntilInterview}
+${input.weakPatterns?.length ? `- Weak coding patterns: ${input.weakPatterns.join(", ")}` : ""}
+${input.weakBehavioralAreas?.length ? `- Weak behavioral areas: ${input.weakBehavioralAreas.join(", ")}` : ""}
+
+Return JSON with this exact shape:
+{
+  "overallReadiness": "<percentage 0-100>",
+  "primaryFocus": "<the single most important area to improve>",
+  "days": [
+    {
+      "day": 1,
+      "theme": "<day theme>",
+      "tasks": [
+        { "type": "coding|sysdesign|behavioral|xfn|review", "title": "<task title>", "duration": "<e.g. 45 min>", "description": "<specific action>" }
+      ],
+      "dailyGoal": "<what success looks like today>"
+    }
+  ],
+  "weekSummary": "<what this week's plan will achieve>",
+  "keyRisk": "<the biggest risk if this plan is not followed>"
+}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "adaptive_study_plan",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                overallReadiness: { type: "string" },
+                primaryFocus: { type: "string" },
+                days: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      day: { type: "number" },
+                      theme: { type: "string" },
+                      tasks: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            type: { type: "string" },
+                            title: { type: "string" },
+                            duration: { type: "string" },
+                            description: { type: "string" },
+                          },
+                          required: [
+                            "type",
+                            "title",
+                            "duration",
+                            "description",
+                          ],
+                          additionalProperties: false,
+                        },
+                      },
+                      dailyGoal: { type: "string" },
+                    },
+                    required: ["day", "theme", "tasks", "dailyGoal"],
+                    additionalProperties: false,
+                  },
+                },
+                weekSummary: { type: "string" },
+                keyRisk: { type: "string" },
+              },
+              required: [
+                "overallReadiness",
+                "primaryFocus",
+                "days",
+                "weekSummary",
+                "keyRisk",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent0 = res.choices[0].message.content;
+      const raw0 =
+        typeof rawContent0 === "string"
+          ? rawContent0
+          : JSON.stringify(rawContent0 ?? {});
+      return JSON.parse(raw0) as {
+        overallReadiness: string;
+        primaryFocus: string;
+        days: {
+          day: number;
+          theme: string;
+          tasks: {
+            type: string;
+            title: string;
+            duration: string;
+            description: string;
+          }[];
+          dailyGoal: string;
+        }[];
+        weekSummary: string;
+        keyRisk: string;
+      };
+    }),
+
+  // ─── Peer Benchmark ───────────────────────────────────────────────────────────
+  // Returns simulated percentile distribution data for a given score + dimension
+  peerBenchmark: protectedProcedure
+    .input(
+      z.object({
+        codingScore: z.number().min(0).max(5),
+        systemDesignScore: z.number().min(0).max(5),
+        behavioralScore: z.number().min(0).max(5),
+        xfnScore: z.number().min(0).max(5),
+        overallScore: z.number().min(0).max(5),
+        targetLevel: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const res = await invokeLLM({
+        messages: [
+          {
+            role: "system" as const,
+            content:
+              "You are a Meta hiring data analyst. Given a candidate's scores, generate realistic anonymized peer benchmark data showing how they compare to other candidates at the same target level. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Generate peer benchmark data for a ${input.targetLevel} candidate with these scores:
+- Coding: ${input.codingScore}/5
+- System Design: ${input.systemDesignScore}/5
+- Behavioral: ${input.behavioralScore}/5
+- XFN: ${input.xfnScore}/5
+- Overall: ${input.overallScore}/5
+
+Return JSON:
+{
+  "overallPercentile": <0-100>,
+  "dimensions": [
+    { "name": "Coding", "userScore": <score>, "percentile": <0-100>, "p25": <score>, "p50": <score>, "p75": <score>, "p90": <score>, "insight": "<one-line insight>" },
+    { "name": "System Design", ... },
+    { "name": "Behavioral", ... },
+    { "name": "XFN", ... }
+  ],
+  "cohortSize": <realistic number like 847>,
+  "topPerformerThreshold": <score needed to be top 10%>,
+  "standoutStrength": "<the dimension where user is strongest vs peers>",
+  "biggestGap": "<the dimension with most room vs peers>"
+}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "peer_benchmark",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                overallPercentile: { type: "number" },
+                dimensions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      userScore: { type: "number" },
+                      percentile: { type: "number" },
+                      p25: { type: "number" },
+                      p50: { type: "number" },
+                      p75: { type: "number" },
+                      p90: { type: "number" },
+                      insight: { type: "string" },
+                    },
+                    required: [
+                      "name",
+                      "userScore",
+                      "percentile",
+                      "p25",
+                      "p50",
+                      "p75",
+                      "p90",
+                      "insight",
+                    ],
+                    additionalProperties: false,
+                  },
+                },
+                cohortSize: { type: "number" },
+                topPerformerThreshold: { type: "number" },
+                standoutStrength: { type: "string" },
+                biggestGap: { type: "string" },
+              },
+              required: [
+                "overallPercentile",
+                "dimensions",
+                "cohortSize",
+                "topPerformerThreshold",
+                "standoutStrength",
+                "biggestGap",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent1 = res.choices[0].message.content;
+      const raw1 =
+        typeof rawContent1 === "string"
+          ? rawContent1
+          : JSON.stringify(rawContent1 ?? {});
+      return JSON.parse(raw1) as {
+        overallPercentile: number;
+        dimensions: {
+          name: string;
+          userScore: number;
+          percentile: number;
+          p25: number;
+          p50: number;
+          p75: number;
+          p90: number;
+          insight: string;
+        }[];
+        cohortSize: number;
+        topPerformerThreshold: number;
+        standoutStrength: string;
+        biggestGap: string;
+      };
+    }),
+
+  // ─── Voice Interview Score ─────────────────────────────────────────────────
+  voiceInterviewScore: protectedProcedure
+    .input(
+      z.object({
+        question: z.string(),
+        transcribedAnswer: z.string(),
+        roundType: z.enum(["coding", "sysdesign", "behavioral", "xfn"]),
+        targetLevel: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const res = await invokeLLM({
+        messages: [
+          {
+            role: "system" as const,
+            content:
+              "You are a Meta interviewer scoring a spoken interview answer. Account for the fact this was transcribed from speech — do not penalize for filler words or minor grammar. Focus on substance, structure, and signal. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Score this spoken ${input.roundType} interview answer for a ${input.targetLevel} candidate.
+
+Question: ${input.question}
+
+Transcribed Answer: ${input.transcribedAnswer}
+
+Return JSON:
+{
+  "overallScore": <1-5>,
+  "clarity": <1-5>,
+  "depth": <1-5>,
+  "structure": <1-5>,
+  "levelSignal": "<L4|L5|L6|L7>",
+  "verdict": "<Strong Hire|Hire|Borderline|No Hire>",
+  "strengths": ["<strength 1>", "<strength 2>"],
+  "improvements": ["<improvement 1>", "<improvement 2>"],
+  "idealAnswerOutline": "<what a perfect answer would cover>",
+  "nextQuestion": "<a natural follow-up question the interviewer would ask>"
+}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "voice_interview_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                overallScore: { type: "number" },
+                clarity: { type: "number" },
+                depth: { type: "number" },
+                structure: { type: "number" },
+                levelSignal: { type: "string" },
+                verdict: { type: "string" },
+                strengths: { type: "array", items: { type: "string" } },
+                improvements: { type: "array", items: { type: "string" } },
+                idealAnswerOutline: { type: "string" },
+                nextQuestion: { type: "string" },
+              },
+              required: [
+                "overallScore",
+                "clarity",
+                "depth",
+                "structure",
+                "levelSignal",
+                "verdict",
+                "strengths",
+                "improvements",
+                "idealAnswerOutline",
+                "nextQuestion",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent2 = res.choices[0].message.content;
+      const raw2 =
+        typeof rawContent2 === "string"
+          ? rawContent2
+          : JSON.stringify(rawContent2 ?? {});
+      return JSON.parse(raw2) as {
+        overallScore: number;
+        clarity: number;
+        depth: number;
+        structure: number;
+        levelSignal: string;
+        verdict: string;
+        strengths: string[];
+        improvements: string[];
+        idealAnswerOutline: string;
+        nextQuestion: string;
+      };
+    }),
+
+  // ─── Readiness Certificate Check ─────────────────────────────────────────────
+  readinessCertificateCheck: protectedProcedure
+    .input(
+      z.object({
+        overallScore: z.number().min(0).max(5),
+        hiringRecommendation: z.string(),
+        codingScore: z.number().min(0).max(5),
+        systemDesignScore: z.number().min(0).max(5),
+        behavioralScore: z.number().min(0).max(5),
+        xfnScore: z.number().min(0).max(5),
+        targetLevel: z.string(),
+        candidateName: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const eligible =
+        input.overallScore >= 4.0 &&
+        (input.hiringRecommendation.toLowerCase().includes("strong") ||
+          input.hiringRecommendation.toLowerCase().includes("hire"));
+      const res = await invokeLLM({
+        messages: [
+          {
+            role: "system" as const,
+            content:
+              "You are a Meta hiring committee chair. Generate a readiness certificate summary for a candidate who has completed mock interview preparation. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Generate a readiness certificate for a ${input.targetLevel} candidate.
+Eligible: ${eligible}
+Overall Score: ${input.overallScore}/5
+Recommendation: ${input.hiringRecommendation}
+Coding: ${input.codingScore}/5 | System Design: ${input.systemDesignScore}/5 | Behavioral: ${input.behavioralScore}/5 | XFN: ${input.xfnScore}/5
+
+Return JSON:
+{
+  "eligible": ${eligible},
+  "certificateTitle": "<title>",
+  "headline": "<one-line achievement statement>",
+  "summary": "<2-3 sentence summary of readiness>",
+  "keyStrengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
+  "remainingGaps": ["<gap 1 if not eligible, else empty array>"],
+  "encouragement": "<motivational closing line>",
+  "badgeLevel": "<Bronze|Silver|Gold|Platinum based on score>"
+}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "readiness_certificate",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                eligible: { type: "boolean" },
+                certificateTitle: { type: "string" },
+                headline: { type: "string" },
+                summary: { type: "string" },
+                keyStrengths: { type: "array", items: { type: "string" } },
+                remainingGaps: { type: "array", items: { type: "string" } },
+                encouragement: { type: "string" },
+                badgeLevel: { type: "string" },
+              },
+              required: [
+                "eligible",
+                "certificateTitle",
+                "headline",
+                "summary",
+                "keyStrengths",
+                "remainingGaps",
+                "encouragement",
+                "badgeLevel",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent3 = res.choices[0].message.content;
+      const raw3 =
+        typeof rawContent3 === "string"
+          ? rawContent3
+          : JSON.stringify(rawContent3 ?? {});
+      return JSON.parse(raw3) as {
+        eligible: boolean;
+        certificateTitle: string;
+        headline: string;
+        summary: string;
+        keyStrengths: string[];
+        remainingGaps: string[];
+        encouragement: string;
+        badgeLevel: string;
+      };
+    }),
 });

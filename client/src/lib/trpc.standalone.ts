@@ -541,6 +541,46 @@ export const trpc = {
           content: "⚠️ AI features require the online version.",
         })),
     },
+    adaptiveStudyPlan: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    peerBenchmark: {
+      useMutation: () =>
+        makeMutation(() => ({
+          percentile: 50,
+          message: "⚠️ Benchmark requires the online version.",
+        })),
+    },
+    voiceInterviewScore: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ Voice scoring requires the online version.",
+        })),
+    },
+    readinessCertificateCheck: {
+      useMutation: () =>
+        makeMutation(() => ({
+          eligible: false,
+          message: "⚠️ Certificate check requires the online version.",
+        })),
+    },
+    metaQuestionHint: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI hints require the online version.",
+        })),
+    },
+    transcribeAndScore: {
+      useMutation: () =>
+        makeMutation(() => ({
+          transcript: "",
+          score: 0,
+          feedback: "⚠️ Voice transcription requires the online version.",
+        })),
+    },
   },
 
   // ── collab (no-op in standalone) ─────────────────────────────────────────
