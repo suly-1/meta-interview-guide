@@ -2577,7 +2577,7 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
           z.object({
             type: z.string(),
             timestampMs: z.number(),
-            data: z.record(z.unknown()).optional(),
+            data: z.record(z.string(), z.unknown()).optional(),
           })
         ),
       })

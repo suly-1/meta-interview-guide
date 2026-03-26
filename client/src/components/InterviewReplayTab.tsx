@@ -40,13 +40,15 @@ import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 export type SessionEventType =
   | "start"
   | "answer_typed"
+  | "answer"
   | "tab_switch"
   | "hint_used"
   | "solution_revealed"
   | "submit"
   | "note"
   | "pause"
-  | "resume";
+  | "resume"
+  | "phase_change";
 
 export interface SessionEvent {
   type: SessionEventType;

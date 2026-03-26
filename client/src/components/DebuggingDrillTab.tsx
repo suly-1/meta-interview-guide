@@ -11,6 +11,7 @@ import {
   Bug,
   Timer,
   CheckCircle2,
+  Circle,
   XCircle,
   RotateCcw,
   ChevronRight,

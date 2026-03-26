@@ -21,7 +21,8 @@ import { ENV } from './_core/env';
 // ---------------------------------------------------------------------------
 
 let _pool: mysql.Pool | null = null;
-let _db: ReturnType<typeof drizzle> | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _db: any = null; // typed as any to avoid Drizzle v0.44 + mysql2 Pool type mismatch
 
 function createPool(): mysql.Pool {
   return mysql.createPool({
