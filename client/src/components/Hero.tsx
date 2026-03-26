@@ -299,6 +299,44 @@ export default function Hero() {
           }}
         />
 
+        {/* ── Screen Interview typographic treatment ── */}
+        {/* Recommendation #9 + #5: split-color bold stack with ghost outline */}
+        <div
+          aria-hidden="true"
+          className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none hidden lg:flex flex-col items-end pr-10 xl:pr-16 gap-0 leading-none"
+        >
+          {/* SCREEN — stroke-only ghost outline, light weight */}
+          <span
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(4rem, 7vw, 7.5rem)",
+              fontWeight: 300,
+              letterSpacing: "-0.02em",
+              WebkitTextStroke: "1.5px rgba(255,255,255,0.35)",
+              color: "transparent",
+              lineHeight: 1,
+              textTransform: "uppercase",
+            }}
+          >
+            SCREEN
+          </span>
+          {/* INTERVIEW — solid Meta blue, heavy weight */}
+          <span
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(4rem, 7vw, 7.5rem)",
+              fontWeight: 800,
+              letterSpacing: "-0.03em",
+              color: "#0864ff",
+              lineHeight: 1,
+              textTransform: "uppercase",
+              textShadow: "0 0 40px rgba(8,100,255,0.45), 0 0 80px rgba(8,100,255,0.2)",
+            }}
+          >
+            INTERVIEW
+          </span>
+        </div>
+
         <div className="container relative z-10 py-16 md:py-20">
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-5">

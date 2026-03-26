@@ -188,9 +188,45 @@ export default function CommunityBanner() {
             </div>
           </div>
 
-          {/* ── Right: mesh grid ─────────────────────────────────────────────── */}
-          <div className="hidden md:flex items-center justify-end w-[380px] shrink-0 py-6">
+          {/* ── Right: mesh grid + Screen Interview typographic treatment ── */}
+          <div className="hidden md:flex items-center justify-end w-[380px] shrink-0 py-6 relative">
             <MeshGrid />
+            {/* Recommendation #9 + #5: split-color bold stack with ghost outline */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 flex flex-col items-end justify-center pointer-events-none select-none pr-2 gap-0"
+            >
+              {/* SCREEN — stroke-only ghost outline, light weight */}
+              <span
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "clamp(2.5rem, 4.5vw, 5rem)",
+                  fontWeight: 300,
+                  letterSpacing: "-0.02em",
+                  WebkitTextStroke: "1.5px rgba(255,255,255,0.30)",
+                  color: "transparent",
+                  lineHeight: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                SCREEN
+              </span>
+              {/* INTERVIEW — solid Meta blue, heavy weight */}
+              <span
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "clamp(2.5rem, 4.5vw, 5rem)",
+                  fontWeight: 800,
+                  letterSpacing: "-0.03em",
+                  color: "#0864ff",
+                  lineHeight: 1,
+                  textTransform: "uppercase",
+                  textShadow: "0 0 30px rgba(8,100,255,0.5), 0 0 60px rgba(8,100,255,0.25)",
+                }}
+              >
+                INTERVIEW
+              </span>
+            </div>
           </div>
         </div>
       </section>
