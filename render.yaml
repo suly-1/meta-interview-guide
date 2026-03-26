@@ -3,7 +3,7 @@ services:
     name: meta-prep-guide
     runtime: node
     plan: free
-    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    buildCommand: pnpm install --frozen-lockfile && pnpm build:render
     startCommand: pnpm start
     healthCheckPath: /api/health
     envVars:
