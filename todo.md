@@ -1027,3 +1027,7 @@
 - [x] Smoke tests for 5 new AI components (AICodingSimulator, DebuggingUnderPressure, ICLevelSignalCalibrator, MetaProductDesignSimulator, PassFailVerdictEngine) in pages.render.test.tsx
 - [x] useDebuggingHistory hook in useLocalStorage + persist scores in DebuggingUnderPressure component
 - [x] Pass/Fail Verdict Engine integrated into Full Mock Day Simulator (auto-feed combined scores after session ends)
+
+## Bug Fix — Round 33
+
+- [x] Fix blank white screen in Management UI preview panel — moved Google Fonts @import to top of index.css before Tailwind imports (CSS ordering violation caused silent stylesheet failure in production build)
