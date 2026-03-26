@@ -1,27 +1,70 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1"
-    />
-    <title>Engineering Interview Prep</title>
-    <meta
-      name="description"
-      content="Comprehensive interview prep guide for Meta Staff (L6) and Senior Staff (L7) engineering roles. Coding patterns, system design, behavioral questions, and progress tracking."
-    />
+      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Independent Study Guide</title>    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-    <meta name="theme-color" content="#1a1d27" />
-    <script type="module" crossorigin src="/assets/app.DbxXjJXH.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index.D5NjCiH_.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/assets/app.CSehb9WS.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index.B_hh3YDz.css">
   </head>
+
   <body>
+    <!-- SW kill-switch: registers sw.js which immediately unregisters itself and clears all caches.
+         This evicts any stale Workbox SW from previous deploys that would serve broken cached files. -->
+    <script>
+      // Chunk-load error recovery: if a JS module fails to load (stale SW cache),
+      // clear all caches and reload once to fetch fresh assets from the network.
+      window.addEventListener('error', function(e) {
+        var src = e.filename || (e.target && e.target.src) || '';
+        if (src.indexOf('/assets/') !== -1 || (e.message && e.message.indexOf('Failed to fetch') !== -1)) {
+          var reloadKey = 'chunk_reload_' + location.pathname;
+          if (!sessionStorage.getItem(reloadKey)) {
+            sessionStorage.setItem(reloadKey, '1');
+            if (window.caches) {
+              caches.keys().then(function(keys) {
+                Promise.all(keys.map(function(k) { return caches.delete(k); })).then(function() {
+                  location.reload(true);
+                });
+              });
+            } else {
+              location.reload(true);
+            }
+          }
+        }
+      }, true);
+
+      if ('serviceWorker' in navigator) {
+        // Register the kill-switch SW - it takes over, clears all caches, and unregisters itself
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function() {});
+        // Also eagerly clear caches in case we already have the new index.html without old SW
+        if (window.caches) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(key) { caches.delete(key); });
+          });
+        }
+        // Listen for the kill-switch SW postMessage and reload once per session
+        navigator.serviceWorker.addEventListener('message', function(event) {
+          if (event.data && event.data.type === 'SW_KILL_SWITCH_ACTIVATED') {
+            var reloadKey = 'sw_kill_reload_' + location.pathname;
+            if (!sessionStorage.getItem(reloadKey)) {
+              sessionStorage.setItem(reloadKey, '1');
+              location.reload(true);
+            }
+          }
+        });
+      }
+    </script>
     <div id="root"></div>
+    <script
+      defer
+      src="https://manus-analytics.com/umami"
+      data-website-id="285c9722-33c6-4eee-a9f6-f8ab87c39f26"></script>
   </body>
+
 </html>
