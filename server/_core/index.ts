@@ -68,36 +68,48 @@ startServer().catch(console.error);
 // Register weekly feedback digest cron (Mondays 08:00 UTC)
 registerFeedbackDigestCron();
 
-// Auto-unblock cron: check every hour for expired blocks and lift them
-import { getDb } from "../db";
+// ---------------------------------------------------------------------------
+// Auto-unblock cron: check every hour for expired bans and lift them.
+//
+// Uses `withDb` so that a stale connection (ECONNRESET after long idle) is
+// automatically detected, the pool is reset, and the query is retried once
+// before giving up — preventing the hourly error spam in the logs.
+// ---------------------------------------------------------------------------
+import { withDb } from "../db";
 import { users, userEvents } from "../../drizzle/schema";
 import { and, eq, lte, inArray } from "drizzle-orm";
 
 async function processExpiredBlocks() {
   try {
-    const db = await getDb();
-    if (!db) return;
-    const now = new Date();
-    const expired = await db
-      .select({ id: users.id, name: users.name, email: users.email })
-      .from(users)
-      .where(and(eq(users.isBanned, 1), lte(users.bannedUntil, now)));
-    if (expired.length === 0) return;
-    const ids = expired.map(u => u.id);
-    await db.update(users).set({ isBanned: 0, bannedAt: null, bannedUntil: null, bannedReason: null })
-      .where(inArray(users.id, ids));
-    for (const u of expired) {
-      await db.insert(userEvents).values({
-        action: 'unblock',
-        actorId: 0,
-        actorName: 'System (auto-expiry)',
-        targetUserId: u.id,
-        targetUserName: u.name ?? `User #${u.id}`,
-        targetUserEmail: u.email ?? 'unknown',
-        reason: 'Block period expired — automatically unblocked',
-      }).catch(() => {});
-    }
-    console.log(`[AutoUnblock] Unblocked ${expired.length} user(s) with expired blocks`);
+    await withDb(async (db) => {
+      const now = new Date();
+      const expired = await db
+        .select({ id: users.id, name: users.name, email: users.email })
+        .from(users)
+        .where(and(eq(users.isBanned, 1), lte(users.bannedUntil, now)));
+
+      if (expired.length === 0) return;
+
+      const ids = expired.map(u => u.id);
+      await db
+        .update(users)
+        .set({ isBanned: 0, bannedAt: null, bannedUntil: null, bannedReason: null })
+        .where(inArray(users.id, ids));
+
+      for (const u of expired) {
+        await db.insert(userEvents).values({
+          action: 'unblock',
+          actorId: 0,
+          actorName: 'System (auto-expiry)',
+          targetUserId: u.id,
+          targetUserName: u.name ?? `User #${u.id}`,
+          targetUserEmail: u.email ?? 'unknown',
+          reason: 'Block period expired — automatically unblocked',
+        }).catch(() => {});
+      }
+
+      console.log(`[AutoUnblock] Unblocked ${expired.length} user(s) with expired blocks`);
+    });
   } catch (err) {
     console.error('[AutoUnblock] Error processing expired blocks:', err);
   }

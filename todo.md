@@ -812,3 +812,8 @@
 - [x] Add 53 missing stubs to trpc.standalone.ts (ai, collab, ctci, ctciProgress, favorites, feedback, progress, ratings, sprintPlan, userScores, analytics)
 - [x] All 79 tests pass, TypeScript clean (0 errors)
 - [x] Save checkpoint and deploy to metaengguide.pro
+
+## Follow-up Tasks (Mar 26, 2026)
+- [x] Fix AutoUnblock ECONNRESET — switched from single connection to mysql2 pool with enableKeepAlive + withDb retry helper; processExpiredBlocks now uses withDb for auto-reconnect
+- [x] Verified service worker kill-switch — sw.js logic is correct: registers → clears caches → unregisters → posts SW_KILL_SWITCH_ACTIVATED → page reloads once (sessionStorage guard prevents loops)
+- [x] Custom domain metaengguide.pro — instructions provided; user must add via Manus Management UI → Settings → Domains
