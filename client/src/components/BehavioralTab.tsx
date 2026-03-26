@@ -37,6 +37,7 @@ import { StoryCoverageMatrix } from "@/components/StoryCoverageMatrix";
 import { InterviewerPersonaStressTest } from "@/components/InterviewerPersonaStressTest";
 import { FeatureHeatmapRow } from "@/components/FeatureHeatmapRow";
 import { ImpactQuantificationCoach } from "@/components/ImpactQuantificationCoach";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 const AREAS = [
   "All",
@@ -3063,7 +3064,9 @@ export default function BehavioralTab() {
   });
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.5rem" opacity={0.11} />
       {/* ═══ HIGH IMPACT FEATURES — TOP OF PAGE ═══════════════════════════════ */}
       <FeatureHeatmapRow
         featureKeys={[

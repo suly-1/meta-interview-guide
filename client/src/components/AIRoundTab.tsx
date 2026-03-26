@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, ExternalLink, Info, Zap, BookOpen, Users, Mic, Target } from "lucide-react";
 import AIMockProblemBank from "@/components/AIMockProblemBank";
 import AIRoundMockSession from "@/components/AIRoundMockSession";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 const LENSES = [
   {
@@ -135,7 +136,9 @@ const FAQ = [
 export default function AIRoundTab() {
   const [view, setView] = useState<"guide" | "mock">("guide");
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.5rem" opacity={0.11} />
       {/* View switcher */}
       <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
         <button

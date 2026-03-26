@@ -82,6 +82,7 @@ import { ComplexityProofTrainer } from "@/components/ComplexityProofTrainer";
 import { GuidedLearningPath } from "@/components/GuidedLearningPath";
 import { InterviewProgressTracker } from "@/components/InterviewProgressTracker";
 import { FavoriteQuestions } from "@/components/FavoriteQuestions";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
 function DisclaimerStatusBadge() {
@@ -2927,7 +2928,9 @@ export default function OverviewTab({ onTabChange }: OverviewTabProps = {}) {
   const [interviewDate] = useInterviewDate();
   const daysLeft = interviewDate ? getDaysUntil(interviewDate) : null;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.6rem" opacity={0.12} />
       {/* ═══ GUIDED LEARNING PATH ══════════════════════════════════════════════════════ */}
       <GuidedLearningPath onTabChange={onTabChange ?? (() => {})} />
       {/* ═══ HIGH IMPACT FEATURES — TOP OF PAGE ═══════════════════════════════════════════════════ */}

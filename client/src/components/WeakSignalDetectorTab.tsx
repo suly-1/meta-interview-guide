@@ -29,6 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { AttemptRecord } from "./DebuggingDrillTab";
 import type { ReplaySession } from "./InterviewReplayTab";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 // ── Signal Definitions ────────────────────────────────────────────────────────
 
@@ -482,7 +483,9 @@ export default function WeakSignalDetectorTab() {
   }, [signalScores]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.4rem" opacity={0.10} />
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>

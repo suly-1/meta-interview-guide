@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 // ── Bug Data ─────────────────────────────────────────────────────────────────
 
@@ -1181,7 +1182,9 @@ export default function DebuggingDrillTab() {
   const elapsed = lastAttempt?.timeSeconds ?? 0;
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-2xl mx-auto relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.4rem" opacity={0.10} />
       <div className={cn(
         "rounded-2xl p-8 text-center border",
         solved

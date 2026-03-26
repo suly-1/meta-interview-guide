@@ -16,6 +16,7 @@ import {
   ChevronDown, ChevronUp, Search, X, RotateCcw, SlidersHorizontal,
   Trophy, Flame, Target, BookOpen
 } from 'lucide-react';
+import ScreenInterviewWatermark from '@/components/ScreenInterviewWatermark';
 
 const PAGE_SIZE = 50;
 
@@ -101,7 +102,9 @@ export default function CTCITrackerTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.5rem" opacity={0.11} />
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 text-white">
         <div className="flex items-start justify-between gap-4 flex-wrap">

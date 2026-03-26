@@ -43,6 +43,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 // ── IC6 Rubric Dimensions ─────────────────────────────────────────────────────
 
@@ -768,7 +769,9 @@ export default function VerdictEngineTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.4rem" opacity={0.10} />
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>

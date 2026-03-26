@@ -2611,6 +2611,7 @@ function AIEnabledRoundSection() {
 
 // ── CTCI 500 Question Tracker ──────────────────────────────────────────────
 import { CTCI_QUESTIONS, CTCI_ALL_TOPICS } from "@/lib/ctciData";
+import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 const PAGE_SIZE = 25;
 
@@ -2840,7 +2841,9 @@ function CTCITracker() {
   ).length;
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0 relative">
+      {/* ── Screen Interview watermark ── */}
+      <ScreenInterviewWatermark className="absolute top-0 right-0" size="1.5rem" opacity={0.11} />
       {/* ═══ HIGH IMPACT FEATURES — TOP OF PAGE ══════════════════════════════ */}
       <FeatureHeatmapRow
         featureKeys={[
