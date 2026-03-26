@@ -1039,3 +1039,9 @@
 ## Rename — Round 35
 
 - [x] Update project title to "Meta L4/L5/L6/L7 Interview Prep Guide" in HTML title, manifest name, AccessGate header, footer text (VITE_APP_TITLE must be updated manually in Settings → General)
+
+## New Features — Round 36
+
+- [x] Update onboarding modal copy from "L6/L7" to "L4 through L7" — now reads "L4 (SWE), L5 (Senior SWE), L6 (Staff), and L7 (Senior Staff)"
+- [x] Add Debugging History panel to Coding tab — shows hit rate, avg fix time, trend (last 5 vs prev 5), mini-timeline, unsolved problems to retry
+- [x] Add Download Report button to Full Mock Day Simulator — opens print-ready HTML in new tab with scorecard + verdict + coaching + remediation plan

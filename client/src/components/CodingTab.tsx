@@ -26,6 +26,7 @@ import {
 import { toast } from "sonner";
 import { AICodingSimulator } from "@/components/AICodingSimulator";
 import { DebuggingUnderPressure } from "@/components/DebuggingUnderPressure";
+import { DebuggingHistoryPanel } from "@/components/DebuggingHistoryPanel";
 
 const DIFF_ORDER: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
 const DIFF_COLOR: Record<string, string> = {
@@ -784,6 +785,9 @@ export default function CodingTab() {
 
       {/* Priority #4: Debugging Under Time Pressure */}
       <DebuggingUnderPressure />
+
+      {/* Debugging History Panel — surfaces localStorage stats */}
+      <DebuggingHistoryPanel />
 
       {/* Meta-specific tips */}
       <div className="prep-card p-5">

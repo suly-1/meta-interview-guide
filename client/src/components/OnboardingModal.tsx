@@ -5,7 +5,7 @@ import { X, ChevronRight, ChevronLeft } from "lucide-react";
 const STEPS = [
   {
     title: "Welcome to Meta Prep",
-    body: "This guide covers everything you need for Meta L6 (Staff) and L7 (Senior Staff) interviews: Coding, System Design, and Behavioral rounds.",
+    body: "This guide covers everything you need for Meta L4 (SWE), L5 (Senior SWE), L6 (Staff), and L7 (Senior Staff) interviews: Coding, System Design, and Behavioral rounds.",
     icon: "🎯",
   },
   {

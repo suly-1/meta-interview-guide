@@ -20,6 +20,7 @@ import {
   RotateCcw,
   Loader2,
   Calendar,
+  Download,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 
@@ -1039,6 +1040,124 @@ export function FullMockDaySimulator() {
                     </>
                   )}
                 </div>
+              )}
+
+              {/* Download Report button */}
+              {scorecard && (
+                <button
+                  onClick={() => {
+                    const date = new Date().toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    });
+                    const verdictSection = verdict
+                      ? `
+                        <div class="section">
+                          <h2>AI Verdict: ${verdict.verdictLabel}</h2>
+                          <p><strong>Confidence:</strong> ${verdict.confidence}</p>
+                          <p><strong>Deciding Factor:</strong> ${verdict.decidingFactor}</p>
+                          <p><strong>Evidence For:</strong> ${verdict.evidenceFor}</p>
+                          <p><strong>Evidence Against:</strong> ${verdict.evidenceAgainst}</p>
+                          <p><strong>What Would Change This:</strong> ${verdict.whatWouldChangeVerdict}</p>
+                          ${verdict.oneLineCoaching ? `<p class="coaching">💡 ${verdict.oneLineCoaching}</p>` : ""}
+                        </div>`
+                      : "";
+                    const roundRows = roundResults
+                      .map(
+                        r =>
+                          `<tr><td>${r.label}</td><td>${r.overallScore.toFixed(1)}/5</td><td>${r.level}</td></tr>`
+                      )
+                      .join("");
+                    const coachingRows = [
+                      { label: "💻 Coding", text: scorecard.codingCoaching },
+                      {
+                        label: "🏗️ System Design",
+                        text: scorecard.sysDesignCoaching,
+                      },
+                      {
+                        label: "🤝 XFN Behavioral",
+                        text: scorecard.xfnCoaching,
+                      },
+                      ...(scorecard.behavioralCoaching
+                        ? [
+                            {
+                              label: "🎯 Behavioral STAR",
+                              text: scorecard.behavioralCoaching,
+                            },
+                          ]
+                        : []),
+                    ]
+                      .map(
+                        c =>
+                          `<div class="coaching-item"><strong>${c.label}:</strong> ${c.text}</div>`
+                      )
+                      .join("");
+                    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meta Mock Day Report — ${date}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #1a1a2e; }
+    h1 { font-size: 22px; border-bottom: 2px solid #7c3aed; padding-bottom: 8px; }
+    h2 { font-size: 16px; color: #7c3aed; margin-top: 24px; }
+    .meta { font-size: 13px; color: #666; margin-bottom: 24px; }
+    .section { margin-bottom: 24px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 12px; border: 1px solid #e5e7eb; text-align: left; }
+    th { background: #f3f4f6; font-weight: 600; }
+    .coaching-item { margin: 8px 0; font-size: 13px; line-height: 1.5; }
+    .coaching { background: #fef3c7; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+    .score-big { font-size: 28px; font-weight: 700; color: #7c3aed; }
+    .rec { font-size: 18px; font-weight: 700; }
+    @media print { body { margin: 20px; } }
+  </style>
+</head>
+<body>
+  <h1>Meta L4–L7 Interview Prep — Mock Day Report</h1>
+  <div class="meta">Generated: ${date}</div>
+  <div class="section">
+    <h2>Overall Result</h2>
+    <div class="score-big">${scorecard.overallScore.toFixed(1)}/5</div>
+    <p><strong>L-Level Verdict:</strong> ${scorecard.levelVerdict}</p>
+    <p class="rec"><strong>Recommendation:</strong> ${scorecard.hiringRecommendation}</p>
+    <p>${scorecard.summary}</p>
+  </div>
+  <div class="section">
+    <h2>Round Scores</h2>
+    <table><thead><tr><th>Round</th><th>Score</th><th>Level</th></tr></thead><tbody>${roundRows}</tbody></table>
+  </div>
+  <div class="section">
+    <h2>Per-Round Coaching</h2>
+    ${coachingRows}
+  </div>
+  ${verdictSection}
+  <div class="section">
+    <h2>Strengths</h2>
+    <ul>${scorecard.strengths.map((s: string) => `<li>${s}</li>`).join("")}</ul>
+  </div>
+  <div class="section">
+    <h2>Areas for Improvement</h2>
+    <ul>${scorecard.improvements.map((s: string) => `<li>${s}</li>`).join("")}</ul>
+  </div>
+  <div class="section">
+    <h2>2-Week Remediation Plan</h2>
+    <p style="white-space:pre-wrap">${scorecard.remediationPlan}</p>
+  </div>
+</body>
+</html>`;
+                    const win = window.open("", "_blank");
+                    if (win) {
+                      win.document.write(html);
+                      win.document.close();
+                      setTimeout(() => win.print(), 400);
+                    }
+                  }}
+                  className="w-full py-2 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-sm font-semibold text-purple-300 transition-all flex items-center justify-center gap-2"
+                >
+                  <Download size={13} /> Download Report (PDF)
+                </button>
               )}
 
               <button
