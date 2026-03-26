@@ -873,3 +873,7 @@
 - [x] Persist Verdict history in localStorage with timestamps (verdict-engine-history)
 - [x] Add IC Level Trajectory chart (recharts LineChart) to VerdictEngineTab
 - [x] Add "View History" toggle button to VerdictEngineTab form view
+
+## Cross-Device Sync & Debug Drill Record (Mar 26 2026)
+- [x] Add interview-replay-sessions, verdict-engine-history, verdict-engine-result, weak-signal-analysis, weak-signal-analysis-date, debug-drill-attempts to CrossDeviceSync SYNC_KEYS
+- [x] Add "Save to Replay Tab" button to DebuggingDrillTab result view (builds ReplaySession from AttemptRecord, saves to interview-replay-sessions localStorage)

@@ -40,6 +40,13 @@ const SYNC_KEYS = [
   "meta_ai_review_history_v1",
   "meta_leaderboard_handle",
   "meta_prep_leaderboard_handle",
+  // Advanced practice features (added Mar 2026)
+  "interview-replay-sessions",
+  "verdict-engine-history",
+  "verdict-engine-result",
+  "weak-signal-analysis",
+  "weak-signal-analysis-date",
+  "debug-drill-attempts",
 ];
 
 const SYNC_CODE_KEY = "meta_sync_code_v1";

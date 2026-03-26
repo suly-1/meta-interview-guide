@@ -2,10 +2,10 @@
 // 20 pre-built buggy codebases, 8-minute countdown, hit rate tracking
 // Bug types: type casting, off-by-one, incorrect conditionals, missing visited set
 // Drawn from real Meta Phase 1 candidate reports
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { ReplaySession } from "@/components/InterviewReplayTab";
 import { toast } from "sonner";
 import {
   Bug,
@@ -755,6 +755,7 @@ function useCountdownTimer(initialSeconds: number, onExpire: () => void) {
 
 export default function DebuggingDrillTab() {
   const [attempts, setAttempts] = useLocalStorage<AttemptRecord[]>("debug-drill-attempts", []);
+  const [replaySessions, setReplaySessions] = useLocalStorage<ReplaySession[]>("interview-replay-sessions", []);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [phase, setPhase] = useState<"select" | "active" | "result">("select");
   const [userCode, setUserCode] = useState("");
@@ -765,6 +766,7 @@ export default function DebuggingDrillTab() {
   const [filter, setFilter] = useState<"All" | "Easy" | "Medium" | "Hard">("All");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [savedToReplay, setSavedToReplay] = useState(false);
 
   const challenge = BUG_CHALLENGES[currentIdx];
 
@@ -782,10 +784,39 @@ export default function DebuggingDrillTab() {
     setShowSolution(false);
     setHintsUsed(0);
     setSessionStart(Date.now());
+    setSavedToReplay(false);
     timer.reset(8 * 60);
     setPhase("active");
     setTimeout(() => timer.start(), 100);
   };
+
+  const saveToReplay = useCallback(() => {
+    if (savedToReplay) return;
+    const lastAttempt = attempts[0];
+    if (!lastAttempt) return;
+    const c = BUG_CHALLENGES[currentIdx];
+    // Build events from the attempt record
+    const events: ReplaySession["events"] = [
+      { type: "start", timestamp: 0 },
+      ...(lastAttempt.hintsUsed > 0
+        ? [{ type: "hint_used" as const, timestamp: Math.round(lastAttempt.timeSeconds * 500), data: { count: lastAttempt.hintsUsed } }]
+        : []),
+      { type: "submit", timestamp: lastAttempt.timeSeconds * 1000, data: { solved: lastAttempt.solved } },
+    ];
+    const session: ReplaySession = {
+      id: `debug-${lastAttempt.timestamp}-${Math.random().toString(36).slice(2, 7)}`,
+      title: `Debug Drill: ${c.title}`,
+      sessionType: "debug",
+      startedAt: lastAttempt.timestamp - lastAttempt.timeSeconds * 1000,
+      durationSeconds: lastAttempt.timeSeconds,
+      events,
+      finalAnswer: userCode,
+      verdict: lastAttempt.solved ? "pass" : "fail",
+    };
+    setReplaySessions((prev) => [session, ...prev].slice(0, 50));
+    setSavedToReplay(true);
+    toast.success("Session saved to Replay tab!");
+  }, [attempts, currentIdx, userCode, savedToReplay, setReplaySessions]);
 
   const handleRevealHint = () => {
     if (!showHint) {
@@ -1206,6 +1237,23 @@ export default function DebuggingDrillTab() {
           >
             <BarChart2 size={14} />
             All Challenges
+          </Button>
+          <Button
+            variant={savedToReplay ? "outline" : "outline"}
+            onClick={saveToReplay}
+            disabled={savedToReplay}
+            className={cn(
+              "gap-1.5",
+              savedToReplay
+                ? "border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400"
+                : "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
+            )}
+          >
+            {savedToReplay ? (
+              <><CheckCircle2 size={14} /> Saved to Replay</>
+            ) : (
+              <><Timer size={14} /> Save to Replay Tab</>
+            )}
           </Button>
         </div>
       </div>
