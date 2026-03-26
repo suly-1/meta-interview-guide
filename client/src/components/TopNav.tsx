@@ -783,6 +783,10 @@ export default function TopNav({
     },
     { id: "collab", label: "Collab", due: 0, pct: null, items: [] },
     { id: "practice", label: "Practice", due: 0, pct: null, items: [] },
+    { id: "debug", label: "Debug Drill", due: 0, pct: null, items: [] },
+    { id: "replay", label: "Replay", due: 0, pct: null, items: [] },
+    { id: "signals", label: "Weak Signals", due: 0, pct: null, items: [] },
+    { id: "verdict", label: "Verdict", due: 0, pct: null, items: [] },
   ];
 
   return (

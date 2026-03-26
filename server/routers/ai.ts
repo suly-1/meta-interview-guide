@@ -2564,4 +2564,234 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
       if (!raw) throw new Error("No response");
       return { content: typeof raw === "string" ? raw : JSON.stringify(raw) };
     }),
+
+  // ── Feature #13: Interview Replay Commentary ────────────────────────────────
+  generateReplayCommentary: protectedProcedure
+    .input(
+      z.object({
+        sessionTitle: z.string(),
+        sessionType: z.enum(["coding", "behavioral", "system_design", "debug"]),
+        answer: z.string(),
+        durationSeconds: z.number(),
+        events: z.array(
+          z.object({
+            type: z.string(),
+            timestampMs: z.number(),
+            data: z.record(z.unknown()).optional(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a senior Meta interviewer reviewing a candidate's practice session recording. Analyze the answer and session events to generate 5-8 timestamped coaching comments. For each comment choose a timestamp in milliseconds from session start (spread them across the session duration of ${input.durationSeconds * 1000}ms). Types: positive (good signal), warning (missing IC6 signal), suggestion (improvement), critical (must fix). Return JSON.`,
+          },
+          {
+            role: "user",
+            content: JSON.stringify({
+              title: input.sessionTitle,
+              type: input.sessionType,
+              durationSeconds: input.durationSeconds,
+              answer: input.answer.slice(0, 3000),
+              events: input.events.slice(0, 30),
+            }),
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "replay_commentary",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                commentary: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      timestampMs: { type: "number" },
+                      comment: { type: "string" },
+                      type: { type: "string" },
+                      signal: { type: "string" },
+                    },
+                    required: ["timestampMs", "comment", "type", "signal"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["commentary"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const raw2 = response?.choices?.[0]?.message?.content;
+      if (!raw2) throw new Error("No response");
+      const parsed = typeof raw2 === "string" ? JSON.parse(raw2) : raw2;
+      return { commentary: parsed.commentary };
+    }),
+
+  // ── Feature #14: Weak Signal Detector ──────────────────────────────────────
+  detectWeakSignals: protectedProcedure
+    .input(
+      z.object({
+        sessions: z.array(
+          z.object({
+            title: z.string(),
+            type: z.string(),
+            durationSeconds: z.number(),
+            answer: z.string(),
+            verdict: z.string().optional(),
+            commentaryTypes: z.array(z.string()),
+          })
+        ),
+        debugStats: z.object({
+          totalAttempted: z.number(),
+          solved: z.number(),
+          hintRate: z.number(),
+          avgTime: z.number(),
+        }),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta interview coach analyzing a candidate's practice history to identify their 3 weakest interview signals. Signal IDs to choose from: nfr, tradeoffs, requirements, complexity, edge_cases, star_specificity, ownership, monitoring, deep_dive, time_management. For each weak signal provide: score 0-100 (lower = weaker), up to 3 evidence strings, and a targeted 15-minute drill. Also provide overallPattern (1-2 sentences) and priorityAction (1 sentence). Return JSON.`,
+          },
+          {
+            role: "user",
+            content: JSON.stringify(input),
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "weak_signal_analysis",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                analysis: {
+                  type: "object",
+                  properties: {
+                    topWeakSignals: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          signalId: { type: "string" },
+                          score: { type: "number" },
+                          evidence: { type: "array", items: { type: "string" } },
+                          targetedDrill: { type: "string" },
+                        },
+                        required: ["signalId", "score", "evidence", "targetedDrill"],
+                        additionalProperties: false,
+                      },
+                    },
+                    overallPattern: { type: "string" },
+                    priorityAction: { type: "string" },
+                  },
+                  required: ["topWeakSignals", "overallPattern", "priorityAction"],
+                  additionalProperties: false,
+                },
+              },
+              required: ["analysis"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const raw3 = response?.choices?.[0]?.message?.content;
+      if (!raw3) throw new Error("No response");
+      const parsed3 = typeof raw3 === "string" ? JSON.parse(raw3) : raw3;
+      return { analysis: parsed3.analysis };
+    }),
+
+  // ── Feature #15: Pass/Fail Verdict Engine ──────────────────────────────────
+  generateVerdict: protectedProcedure
+    .input(
+      z.object({
+        ratings: z.array(
+          z.object({
+            dimensionId: z.string(),
+            dimensionName: z.string(),
+            category: z.string(),
+            weight: z.number(),
+            rating: z.number(),
+            evidence: z.array(z.string()),
+            notes: z.string(),
+            ic5Bar: z.string(),
+            ic6Bar: z.string(),
+            ic7Bar: z.string(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta hiring committee member generating a structured hiring verdict for an IC6 Software Engineer candidate. Analyze the rubric ratings and evidence. Compute weighted overall score 0-100. Determine verdict: strong_pass (>=85), pass (70-84), borderline (55-69), fail (40-54), strong_fail (<40). Determine icLevel: IC7 (>=80), IC6 (60-79), IC5 (<60). For each dimension provide score 0-100, level (IC5/IC6/IC7), gap description, coaching note. List 3 strengths, 3 criticalGaps, hiringRecommendation paragraph, 5 nextSteps. Return JSON.`,
+          },
+          {
+            role: "user",
+            content: JSON.stringify(input.ratings),
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "verdict_result",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                verdict: {
+                  type: "object",
+                  properties: {
+                    overallScore: { type: "number" },
+                    verdict: { type: "string" },
+                    icLevel: { type: "string" },
+                    dimensionScores: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          dimensionId: { type: "string" },
+                          score: { type: "number" },
+                          level: { type: "string" },
+                          gap: { type: "string" },
+                          coachingNote: { type: "string" },
+                        },
+                        required: ["dimensionId", "score", "level", "gap", "coachingNote"],
+                        additionalProperties: false,
+                      },
+                    },
+                    strengths: { type: "array", items: { type: "string" } },
+                    criticalGaps: { type: "array", items: { type: "string" } },
+                    hiringRecommendation: { type: "string" },
+                    nextSteps: { type: "array", items: { type: "string" } },
+                  },
+                  required: ["overallScore", "verdict", "icLevel", "dimensionScores", "strengths", "criticalGaps", "hiringRecommendation", "nextSteps"],
+                  additionalProperties: false,
+                },
+              },
+              required: ["verdict"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const raw4 = response?.choices?.[0]?.message?.content;
+      if (!raw4) throw new Error("No response");
+      const parsed4 = typeof raw4 === "string" ? JSON.parse(raw4) : raw4;
+      return { verdict: parsed4.verdict };
+    }),
 });

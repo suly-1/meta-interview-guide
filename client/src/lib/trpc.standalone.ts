@@ -121,6 +121,9 @@ export const trpc = {
     techRetroCoach: { useMutation: () => makeMutation(() => ({ coaching: "" })) },
     transcribeAndScoreVoice: { useMutation: () => makeMutation(() => ({ transcript: "", score: 0 })) },
     xfnMockScorecard: { useMutation: () => makeMutation(() => ({ scorecard: {} })) },
+    detectWeakSignals: { useMutation: () => makeMutation(() => ({ analysis: { topWeakSignals: [], overallPattern: "", priorityAction: "" } })) },
+    generateReplayCommentary: { useMutation: () => makeMutation(() => ({ commentary: [] })) },
+    generateVerdict: { useMutation: () => makeMutation(() => ({ verdict: { overallScore: 0, verdict: "borderline", icLevel: "IC6", dimensionScores: [], strengths: [], criticalGaps: [], hiringRecommendation: "", nextSteps: [] } })) },
   },
 
   // ── aiRound ───────────────────────────────────────────────────────────────

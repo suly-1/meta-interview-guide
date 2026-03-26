@@ -42,6 +42,10 @@ import CodingTab from "@/components/CodingTab";
 import BehavioralTab from "@/components/BehavioralTab";
 import SystemDesignTab from "@/components/SystemDesignTab";
 import CodePracticeTab from "@/components/CodePracticeTab";
+import DebuggingDrillTab from "@/components/DebuggingDrillTab";
+import InterviewReplayTab from "@/components/InterviewReplayTab";
+import WeakSignalDetectorTab from "@/components/WeakSignalDetectorTab";
+import VerdictEngineTab from "@/components/VerdictEngineTab";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -75,6 +79,10 @@ export default function Home() {
     "design",
     "collab",
     "practice",
+    "debug",
+    "replay",
+    "signals",
+    "verdict",
   ];
   const getTabFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
@@ -392,6 +400,26 @@ export default function Home() {
         {activeTab === "practice" && (
           <SectionErrorBoundary label="Practice tab">
             <CodePracticeTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "debug" && (
+          <SectionErrorBoundary label="Debug Drill tab">
+            <DebuggingDrillTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "replay" && (
+          <SectionErrorBoundary label="Interview Replay tab">
+            <InterviewReplayTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "signals" && (
+          <SectionErrorBoundary label="Weak Signal Detector tab">
+            <WeakSignalDetectorTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "verdict" && (
+          <SectionErrorBoundary label="Verdict Engine tab">
+            <VerdictEngineTab />
           </SectionErrorBoundary>
         )}
       </main>

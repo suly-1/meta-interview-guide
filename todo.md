@@ -817,3 +817,51 @@
 - [x] Fix AutoUnblock ECONNRESET — switched from single connection to mysql2 pool with enableKeepAlive + withDb retry helper; processExpiredBlocks now uses withDb for auto-reconnect
 - [x] Verified service worker kill-switch — sw.js logic is correct: registers → clears caches → unregisters → posts SW_KILL_SWITCH_ACTIVATED → page reloads once (sessionStorage guard prevents loops)
 - [x] Custom domain metaengguide.pro — instructions provided; user must add via Manus Management UI → Settings → Domains
+
+## Restore Original Static Guide to metaengguide.pro (Mar 26, 2026)
+- [x] Install dependencies in meta-prep-guide
+- [x] Build standalone static version from meta-prep-guide source (pnpm deploy:github-pages)
+- [x] Deploy to gh-pages of suly-1/meta-interview-guide (commit db4b40e6, 2026-03-26T16:16:12Z)
+- [x] Also deployed to suly-1/meta-prep-guide gh-pages (www.metaguide.blog)
+- [x] Verified index.html on gh-pages: Space+Grotesk fonts, correct title, app JS/CSS present
+- [x] All 6 tabs available: Overview, Coding, Behavioral, System Design, Collab, Practice
+- [x] No admin PIN or login required for public visitors (standalone localStorage-only build)
+
+## Automated Staging → Production Pipeline (Mar 26, 2026)
+- [x] Create staging branch on suly-1/meta-prep-guide from current main
+- [x] Create GitHub Actions workflow: .github/workflows/staging-to-prod.yml (all 5 gates)
+- [x] Gate 1: TypeScript zero errors (npx tsc --noEmit)
+- [x] Gate 2: All vitest unit tests pass
+- [x] Gate 3: Standalone build succeeds + index.html size check
+- [x] Gate 4: Headless smoke test — all 6 tabs load, no black screen
+- [x] Gate 5: No uncaught JS errors in headless browser
+- [x] Hold-deploy git tag override (create tag 'hold-deploy' to pause auto-promotion)
+- [x] Updated scripts/smoke-test.ts to check all 6 standalone tabs
+- [ ] User must push .github/workflows/staging-to-prod.yml manually (GitHub blocks workflow creation via token without 'workflows' permission)
+
+## Visual Identity Separation (Mar 26, 2026)
+### metaengguide.pro
+- [ ] Apply deep blue (#0A2540) + gold (#F5A623) color palette
+- [ ] Replace favicon with blue MEG badge logo
+- [ ] Update site title/wordmark to bold monogram style
+- [ ] Add 4px deep blue top border as dev environment indicator
+
+### metaguide.blog (meta-prep-guide)
+- [ ] Apply warm green (#1A3C2E) + amber (#F59E0B) color palette
+- [ ] Replace favicon with green circle wordmark logo
+- [ ] Update site title/wordmark to editorial typeface style
+
+### Branch Naming Convention (#5)
+- [ ] Document pro/feature-name convention for metaengguide.pro branches
+- [ ] Document blog/feature-name convention for metaguide.blog branches
+- [ ] Create pro/visual-identity branch on meta-interview-guide
+- [ ] Create blog/visual-identity branch on meta-prep-guide
+
+## Features #12-15: Advanced Practice Tools (Mar 26, 2026)
+- [x] Feature #12: Debugging Under Time Pressure — DebuggingDrillTab.tsx (20 buggy codebases, 8-min timer, hit rate tracking, Monaco editor)
+- [x] Feature #13: Interview Replay & Self-Review — InterviewReplayTab.tsx (session recording, timeline playback, AI commentary via trpc.ai.generateReplayCommentary)
+- [x] Feature #14: Weak Signal Detector — WeakSignalDetectorTab.tsx (cross-session pattern analysis, targeted drills, AI analysis via trpc.ai.detectWeakSignals)
+- [x] Feature #15: Pass/Fail Verdict Engine — VerdictEngineTab.tsx (IC6 rubric scoring, evidence collection, AI verdict via trpc.ai.generateVerdict)
+- [x] Added 3 new tRPC procedures to server/routers/ai.ts: generateReplayCommentary, detectWeakSignals, generateVerdict
+- [x] Wired all 4 tabs into Home.tsx VALID_TABS and tab content switch
+- [x] Added all 4 tabs to TopNav.tsx TABS array (Debug Drill, Replay, Weak Signals, Verdict)
