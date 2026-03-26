@@ -43,10 +43,16 @@ const IGNORED_ERROR_PATTERNS = [
   /Non-Error promise rejection/i,
   /Loading chunk/i,
   /Failed to fetch/i, // Expected when not logged in
+  /Failed to load resource/i, // Expected in standalone (no backend)
+  /400/, // Standalone build has no backend — API calls return 400
   /401/,
   /403/,
+  /404/,
   /UNAUTHORIZED/i,
   /Please login/i,
+  /api\/trpc/i, // tRPC calls not available in standalone
+  /net::ERR/i, // Network errors expected in standalone
+  /ERR_CONNECTION_REFUSED/i,
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

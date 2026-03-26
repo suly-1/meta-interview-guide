@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "deploy:github-pages": "node scripts/deploy-github-pages.mjs",
-    "deploy:staging": "STAGING_ONLY=1 node scripts/deploy-github-pages.mjs"
+    "deploy:staging": "STAGING_ONLY=1 node scripts/deploy-github-pages.mjs",
+    "build:standalone": "node scripts/build-standalone.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
