@@ -29,6 +29,9 @@ import { AIInterviewerInterruptMode } from "@/components/AIInterviewerInterruptM
 import { BackOfEnvelopeCalculator } from "@/components/BackOfEnvelopeCalculator";
 import { TearDownMyDesign } from "@/components/TearDownMyDesign";
 import { FeatureHeatmapRow } from "@/components/FeatureHeatmapRow";
+import SDMetaBlogReader from "@/components/SDMetaBlogReader";
+import SDTradeoffLibrary from "@/components/SDTradeoffLibrary";
+import SystemDesignComparisonTable from "@/components/SystemDesignComparisonTable";
 import {
   GuidedDesignWalkthrough,
   TradeoffDecisionSimulator,
@@ -279,6 +282,12 @@ export default function SystemDesignTab() {
       <AIInterviewerInterruptMode />
       <BackOfEnvelopeCalculator />
       <TearDownMyDesign />
+      {/* ── System Design War Stories Library ── */}
+      <SDMetaBlogReader />
+      {/* ── System Design Tradeoff Library ── */}
+      <SDTradeoffLibrary />
+      {/* ── Google vs Meta Comparison Table ── */}
+      <SystemDesignComparisonTable />
       {/* ═══════════════════════════════════════════════════════════════════════ */}
       {/* Quick Actions sticky row */}
       <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">

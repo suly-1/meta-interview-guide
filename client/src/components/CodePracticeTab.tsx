@@ -22,6 +22,8 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 
 import CodePracticeAIStatic from "@/components/CodePracticeAIStatic";
+import TimedMockSession from "@/components/TimedMockSession";
+import MetaCodingScreenSimulator from "@/components/MetaCodingScreenSimulator";
 
 // ── Problem Data ───────────────────────────────────────────────────────────
 type Difficulty = "Easy" | "Medium" | "Hard";
@@ -1596,6 +1598,14 @@ export default function CodePracticeTab() {
             </button>
           </div>
         )}
+      </div>
+      {/* ── AI-Nerfed Practice Environment (Meta Screen Mode) ── */}
+      <div className="mt-6">
+        <MetaCodingScreenSimulator />
+      </div>
+      {/* ── 40-Min Timed Mock with AI Debrief ── */}
+      <div className="mt-6">
+        <TimedMockSession />
       </div>
     </div>
   );

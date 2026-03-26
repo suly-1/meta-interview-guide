@@ -2794,4 +2794,55 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
       const parsed4 = typeof raw4 === "string" ? JSON.parse(raw4) : raw4;
       return { verdict: parsed4.verdict };
     }),
+
+  analyzePrompt: protectedProcedure
+    .input(
+      z.object({
+        scenario: z.string(),
+        context: z.string(),
+        userPrompt: z.string(),
+        rubric: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const rubricList = input.rubric.map((r, i) => `${i + 1}. ${r}`).join('\n');
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a Meta Staff Engineer evaluating prompt engineering skills for the AI-Enabled Coding Round.
+Score the candidate's prompt on a 0-100 scale based on these 5 criteria (20 pts each):
+${rubricList}
+
+Return JSON with: { score: number, feedback: string }
+The feedback should be 2-3 sentences: what was good, what was missing, one specific improvement.`,
+          },
+          {
+            role: 'user',
+            content: `Scenario: ${input.scenario}
+Context: ${input.context}
+Candidate's prompt: ${input.userPrompt}`,
+          },
+        ],
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'prompt_score',
+            strict: true,
+            schema: {
+              type: 'object',
+              properties: {
+                score: { type: 'number' },
+                feedback: { type: 'string' },
+              },
+              required: ['score', 'feedback'],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const raw = response?.choices?.[0]?.message?.content;
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return { score: Math.round(parsed.score), feedback: parsed.feedback };
+    }),
 });

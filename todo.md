@@ -877,3 +877,58 @@
 ## Cross-Device Sync & Debug Drill Record (Mar 26 2026)
 - [x] Add interview-replay-sessions, verdict-engine-history, verdict-engine-result, weak-signal-analysis, weak-signal-analysis-date, debug-drill-attempts to CrossDeviceSync SYNC_KEYS
 - [x] Add "Save to Replay Tab" button to DebuggingDrillTab result view (builds ReplaySession from AttemptRecord, saves to interview-replay-sessions localStorage)
+
+## 4-Week Roadmap: 22 High-Impact Features (Mar 26, 2026)
+
+### Week 1 — Foundation
+- [ ] #3 Spaced Repetition Engine — wire SpacedRepetitionQueue into Coding tab as persistent daily queue section
+- [ ] #6 Meta Behavioral Question Bank — wire BehavioralFlashcardDeck into Behavioral tab as searchable/filterable bank
+- [ ] #7 Distributed Systems Flashcard Library — create DSFlashcardLibrary tab with CAP, Consistent Hashing, CQRS, Saga, etc.
+- [ ] #11 Candidate Report Archive — build CandidateReportArchive component (save/export session summaries as PDF)
+
+### Week 2 — Core Mechanics
+- [ ] #1 AI-Nerfed Practice Environment — wire MetaCodingScreenSimulator into Practice tab as "Meta Screen Mode"
+- [ ] #2 Level-Calibrated STAR Builder — wire STARStoryBuilder + STARGapAnalyzer into Behavioral tab with IC level rubric
+- [ ] #4 40-Min Timed Mock with AI Debrief — wire TimedMockSession into Practice tab with full debrief scorecard
+- [ ] #5 System Design Rubric Practice — wire SystemDesignMockSession + MetaRubricAssessment into Design tab
+
+### Week 3 — Advanced Features
+- [ ] #8 Prompt Engineering Drill — build PromptEngineeringDrill component (AI-Enabled round prompt quality trainer)
+- [ ] #9 IC7 Differentiation Signal Trainer — wire IC7SignalChecklist + L7AnswerUpgrader into Coding/Design tabs
+- [ ] #10 6-Week Study Plan Generator — wire SprintPlanGenerator + CustomStudyPlan into Overview tab
+- [ ] #12 Whiteboard Communication Trainer — wire ThinkOutLoudCoach into Coding tab as "Narrate Your Approach" section
+- [ ] #17 Complexity Analysis Speed Drill — wire ComplexityEstimator + ComplexityProofTrainer into Coding tab
+- [ ] #18 Multi-Phase Problem Simulator — wire MetaCodingScreenSimulator full 3-phase flow into Practice tab
+- [ ] #19 Behavioral Story Cross-Reference Matrix — wire StoryCoverageMatrix into Behavioral tab
+
+### Week 4 — Differentiators
+- [ ] #13 Google vs Meta Comparison — wire SystemDesignComparisonTable into Design tab as dedicated section
+- [ ] #15 Yandex Algorithm Trainer — build YandexAlgorithmTrainer component (CP-style hard problems, strict time limits)
+- [ ] #16 System Design War Stories Library — wire SDMetaBlogReader + SDTradeoffLibrary into Design tab
+- [ ] #20 Live Peer Mock Matching — wire StudyBuddySync into Collab tab as peer scheduling feature
+- [ ] #23 4-6 Week Transformation Tracker — wire InterviewProgressTracker + ProgressAnalyticsDashboard into Overview tab
+- [ ] #24 Instant Verdict — build InstantVerdictCard component ("Would you get hired today?" single-sentence AI verdict)
+- [ ] #25 Difficulty Predictor — wire InterviewQuestionPredictor into Coding/Design tabs
+
+## 4-Week Roadmap Implementation (Mar 2026)
+- [x] Wire SpacedRepetitionQueue into CodingTab
+- [x] Wire ComplexityEstimator into CodingTab
+- [x] Wire YandexAlgorithmTrainer into CodingTab
+- [x] Wire BehavioralFlashcardDeck into BehavioralTab
+- [x] Wire STARStoryBuilder into BehavioralTab
+- [x] Wire STARGapAnalyzer into BehavioralTab
+- [x] Wire L7AnswerUpgrader into BehavioralTab
+- [x] Wire SDMetaBlogReader into SystemDesignTab
+- [x] Wire SDTradeoffLibrary into SystemDesignTab
+- [x] Wire SystemDesignComparisonTable into SystemDesignTab
+- [x] Wire MetaCodingScreenSimulator into CodePracticeTab
+- [x] Wire TimedMockSession into CodePracticeTab
+- [x] Wire CustomStudyPlan into OverviewTab
+- [x] Wire CandidateReportArchive into OverviewTab
+- [x] Wire InstantVerdictCard into OverviewTab
+- [x] Wire StudyBuddySync into CollabLobby
+- [x] Wire PromptEngineeringDrill into AIRoundTab
+- [x] Build PromptEngineeringDrill from scratch
+- [x] Build CandidateReportArchive from scratch
+- [x] Build YandexAlgorithmTrainer from scratch
+- [x] Build InstantVerdictCard from scratch

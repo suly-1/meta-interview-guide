@@ -48,6 +48,9 @@ import { ThinkOutLoudCoach } from "@/components/ThinkOutLoudCoach";
 import { PatternSpeedDrill } from "@/components/PatternSpeedDrill";
 import { WeakPatternRemediationPlan } from "@/components/WeakPatternRemediationPlan";
 import { FeatureHeatmapRow } from "@/components/FeatureHeatmapRow";
+import SpacedRepetitionQueue from "@/components/SpacedRepetitionQueue";
+import ComplexityEstimator from "@/components/ComplexityEstimator";
+import YandexAlgorithmTrainer from "@/components/YandexAlgorithmTrainer";
 
 const DIFF_ORDER: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
 const DIFF_COLOR: Record<string, string> = {
@@ -2856,6 +2859,12 @@ function CTCITracker() {
         <ThinkOutLoudCoach />
         <PatternSpeedDrill />
         <WeakPatternRemediationPlan />
+        {/* ── Spaced Repetition Engine (SM-2) ── */}
+        <SpacedRepetitionQueue />
+        {/* ── Complexity Analysis Speed Drill ── */}
+        <ComplexityEstimator />
+        {/* ── Yandex-Style Hard Problems (No Hints) ── */}
+        <YandexAlgorithmTrainer />
       </div>
       {/* ════════════════════════════════════════════════════════════════════ */}
       <div

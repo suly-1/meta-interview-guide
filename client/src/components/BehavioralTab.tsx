@@ -37,6 +37,10 @@ import { StoryCoverageMatrix } from "@/components/StoryCoverageMatrix";
 import { InterviewerPersonaStressTest } from "@/components/InterviewerPersonaStressTest";
 import { FeatureHeatmapRow } from "@/components/FeatureHeatmapRow";
 import { ImpactQuantificationCoach } from "@/components/ImpactQuantificationCoach";
+import BehavioralFlashcardDeck from "@/components/BehavioralFlashcardDeck";
+import STARStoryBuilder from "@/components/STARStoryBuilder";
+import STARGapAnalyzer from "@/components/STARGapAnalyzer";
+import L7AnswerUpgrader from "@/components/L7AnswerUpgrader";
 import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 const AREAS = [
@@ -3078,6 +3082,14 @@ export default function BehavioralTab() {
       <StoryCoverageMatrix />
       <InterviewerPersonaStressTest />
       <ImpactQuantificationCoach />
+      {/* ── Meta Behavioral Question Bank (Flashcard Deck) ── */}
+      <BehavioralFlashcardDeck />
+      {/* ── Level-Calibrated STAR Story Builder ── */}
+      <STARStoryBuilder />
+      {/* ── STAR Gap Analyzer ── */}
+      <STARGapAnalyzer />
+      {/* ── IC7 Answer Upgrader ── */}
+      <L7AnswerUpgrader />
       {/* ═══════════════════════════════════════════════════════════════════════ */}
       {/* Quick Actions sticky row */}
       <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">

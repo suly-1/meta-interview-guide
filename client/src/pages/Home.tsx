@@ -46,6 +46,7 @@ import DebuggingDrillTab from "@/components/DebuggingDrillTab";
 import InterviewReplayTab from "@/components/InterviewReplayTab";
 import WeakSignalDetectorTab from "@/components/WeakSignalDetectorTab";
 import VerdictEngineTab from "@/components/VerdictEngineTab";
+import StudyBuddySync from "@/components/StudyBuddySync";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -884,6 +885,8 @@ function CollabLobby() {
           </div>
         </div>
       </div>
+      {/* ── Live Peer Mock Matching ── */}
+      <StudyBuddySync />
     </div>
   );
 }

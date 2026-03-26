@@ -82,6 +82,7 @@ import { ComplexityProofTrainer } from "@/components/ComplexityProofTrainer";
 import { GuidedLearningPath } from "@/components/GuidedLearningPath";
 import { InterviewProgressTracker } from "@/components/InterviewProgressTracker";
 import { FavoriteQuestions } from "@/components/FavoriteQuestions";
+import CustomStudyPlan from "@/components/CustomStudyPlan";
 import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 
 // ── Disclaimer Status Badge ──────────────────────────────────────────────────
@@ -2919,6 +2920,8 @@ import { SevenDaySprintPlan } from "@/components/SevenDaySprintPlan";
 import { ProgressAnalyticsDashboard } from "@/components/ProgressAnalyticsDashboard";
 import { ScoreSyncBanner } from "@/components/ScoreSyncBanner";
 import { FeatureHeatmapRow } from "@/components/FeatureHeatmapRow";
+import CandidateReportArchive from "@/components/CandidateReportArchive";
+import InstantVerdictCard from "@/components/InstantVerdictCard";
 
 interface OverviewTabProps {
   onTabChange?: (tab: string) => void;
@@ -2945,6 +2948,12 @@ export default function OverviewTab({ onTabChange }: OverviewTabProps = {}) {
       <VerdictSummaryCard onNavigate={onTabChange} />
       {/* ═══ PROGRESS TRACKER & FAVORITES ══════════════════════════════════ */}
       <InterviewProgressTracker />
+      {/* ── Custom Study Plan ── */}
+      <CustomStudyPlan />
+      {/* ── Session History & Export ── */}
+      <CandidateReportArchive />
+      {/* ── One-Click Readiness Verdict ── */}
+      <InstantVerdictCard />
       <FavoriteQuestions />
       {/* ═══ OFFER MAXIMIZER TOOLS ═══════════════════════════════════════════ */}
       <div className="space-y-3">

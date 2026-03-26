@@ -124,6 +124,7 @@ export const trpc = {
     detectWeakSignals: { useMutation: () => makeMutation(() => ({ analysis: { topWeakSignals: [], overallPattern: "", priorityAction: "" } })) },
     generateReplayCommentary: { useMutation: () => makeMutation(() => ({ commentary: [] })) },
     generateVerdict: { useMutation: () => makeMutation(() => ({ verdict: { overallScore: 0, verdict: "borderline", icLevel: "IC6", dimensionScores: [], strengths: [], criticalGaps: [], hiringRecommendation: "", nextSteps: [] } })) },
+    analyzePrompt: { useMutation: () => makeMutation(() => ({ score: 0, feedback: "Standalone mode — connect to server for AI scoring" })) },
   },
 
   // ── aiRound ───────────────────────────────────────────────────────────────

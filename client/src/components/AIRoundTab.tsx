@@ -4,6 +4,7 @@ import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, 
 import AIMockProblemBank from "@/components/AIMockProblemBank";
 import AIRoundMockSession from "@/components/AIRoundMockSession";
 import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
+import PromptEngineeringDrill from "@/components/PromptEngineeringDrill";
 
 const LENSES = [
   {
@@ -417,6 +418,8 @@ export default function AIRoundTab() {
       </section>
 
     </div>}
+      {/* ── Prompt Engineering Drill (AI-Enabled Round) ── */}
+      <PromptEngineeringDrill />
     </div>
   );
 }
