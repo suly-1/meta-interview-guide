@@ -1035,3 +1035,7 @@
 ## Rename — Round 34
 
 - [x] Replace all IC4/IC5/IC6/IC7 mentions with L4/L5/L6/L7 across entire codebase (components, data, routers, tests, HTML, CSS, markdown) — 387 occurrences replaced, zero remaining
+
+## Rename — Round 35
+
+- [x] Update project title to "Meta L4/L5/L6/L7 Interview Prep Guide" in HTML title, manifest name, AccessGate header, footer text (VITE_APP_TITLE must be updated manually in Settings → General)

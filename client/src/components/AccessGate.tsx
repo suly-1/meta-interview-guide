@@ -104,7 +104,7 @@ export default function AccessGate({ children }: AccessGateProps) {
 
           {/* Footer */}
           <p className="text-xs text-muted-foreground/60">
-            Meta Interview Prep Guide · L6/L7
+            Meta L4/L5/L6/L7 Interview Prep Guide
           </p>
         </div>
       </div>

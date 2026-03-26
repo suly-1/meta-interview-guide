@@ -153,8 +153,8 @@ export default function Home() {
       <footer className="border-t border-border py-6 mt-8">
         <div className="container text-center text-xs text-muted-foreground space-y-1">
           <div>
-            Meta L6/L7 Interview Prep Guide · All progress saved locally in your
-            browser
+            Meta L4/L5/L6/L7 Interview Prep Guide · All progress saved locally
+            in your browser
           </div>
           <div>
             Press{" "}
