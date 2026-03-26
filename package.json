@@ -10,6 +10,7 @@
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
+    "test": "vitest run",
     "deploy:github-pages": "node scripts/deploy-github-pages.mjs",
     "deploy:staging": "STAGING_ONLY=1 node scripts/deploy-github-pages.mjs"
   },

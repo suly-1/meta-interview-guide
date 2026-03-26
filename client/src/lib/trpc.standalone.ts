@@ -511,6 +511,36 @@ export const trpc = {
           optimalApproach: "",
         })),
     },
+    aiCodingSimulatorScore: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    debuggingScore: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    icLevelSignalCalibrator: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    metaProductDesignScore: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
+    passFailVerdict: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content: "⚠️ AI features require the online version.",
+        })),
+    },
   },
 
   // ── collab (no-op in standalone) ─────────────────────────────────────────

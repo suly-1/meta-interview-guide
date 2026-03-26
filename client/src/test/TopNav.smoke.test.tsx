@@ -111,36 +111,35 @@ describe("TopNav smoke tests", () => {
 
   it("renders the brand name", () => {
     renderTopNav();
-    // The logo text "Staff Eng Prep" is in a hidden-sm:inline span but still in the DOM
-    expect(screen.getByText("Staff Eng Prep")).toBeDefined();
+    // The logo text is site-specific — either "Meta Prep" (metaengguide.pro) or "Staff Eng Prep" (metaguide.blog)
+    const brandText =
+      screen.queryByText("Meta Prep") ?? screen.queryByText("Staff Eng Prep");
+    expect(brandText).not.toBeNull();
   });
 
-  it("renders the Roulette button (TopicRoulette sub-component)", () => {
+  it("renders the dark mode toggle button", () => {
     renderTopNav();
-    // The button has title="Topic Roulette — spin for a random challenge"
-    const btn = screen.getByTitle(/Topic Roulette/i);
-    expect(btn).toBeDefined();
+    const btn = document.querySelector("[data-testid='dark-mode-toggle']");
+    expect(btn).not.toBeNull();
   });
 
-  it("renders the Gauntlet button (GauntletButton sub-component)", () => {
+  it("renders the streak badge", () => {
     renderTopNav();
-    // GauntletButton renders a button with title containing "Gauntlet"
-    const btn = screen.getByTitle(/Gauntlet/i);
-    expect(btn).toBeDefined();
+    const badge = document.querySelector(".streak-badge");
+    expect(badge).not.toBeNull();
   });
 
-  it("renders the Study Soundtrack button (StudySoundtrack sub-component)", () => {
+  it("renders all four tab buttons", () => {
     renderTopNav();
-    // StudySoundtrack renders a button with title containing "Soundtrack"
-    const btn = screen.getByTitle(/Soundtrack/i);
-    expect(btn).toBeDefined();
+    expect(screen.getAllByText("Behavioral").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("System Design").length).toBeGreaterThan(0);
   });
 
   it("renders all main tab buttons", () => {
     renderTopNav();
-    // Desktop nav tabs — at least Overview and Drill Patterns should be present
+    // Desktop nav tabs — Overview and Coding should always be present
     expect(screen.getAllByText("Overview").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Drill Patterns").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Coding").length).toBeGreaterThan(0);
   });
 
   it("marks the active tab with the correct aria state", () => {

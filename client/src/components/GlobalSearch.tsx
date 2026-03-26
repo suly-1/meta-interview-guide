@@ -178,6 +178,7 @@ export default function GlobalSearch({ onNavigate }: GlobalSearchProps) {
     <>
       {/* Trigger button */}
       <button
+        data-testid="global-search-trigger"
         onClick={handleOpen}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-secondary border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-all text-xs"
         title="Global search (⌘K)"
@@ -210,6 +211,7 @@ export default function GlobalSearch({ onNavigate }: GlobalSearchProps) {
                   setQuery(e.target.value);
                   setSelected(0);
                 }}
+                data-testid="global-search-input"
                 placeholder="Search patterns, questions, topics…"
                 className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
               />

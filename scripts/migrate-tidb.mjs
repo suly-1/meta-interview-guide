@@ -27,7 +27,9 @@ const connectionConfig = {
   ssl: { rejectUnauthorized: true },
 };
 
-console.log(`Connecting to ${parsed.hostname}:${parsed.port} / ${parsed.pathname.slice(1)}...`);
+console.log(
+  `Connecting to ${parsed.hostname}:${parsed.port} / ${parsed.pathname.slice(1)}...`
+);
 
 const conn = await mysql.createConnection(connectionConfig);
 
@@ -42,7 +44,7 @@ await conn.execute(`
 
 // Get applied migrations
 const [applied] = await conn.execute("SELECT hash FROM __drizzle_migrations");
-const appliedHashes = new Set(applied.map((r) => r.hash));
+const appliedHashes = new Set(applied.map(r => r.hash));
 
 // Read journal
 const journal = JSON.parse(
@@ -62,14 +64,14 @@ for (const entry of journal.entries) {
     console.log(`  Already applied: ${entry.tag}`);
     continue;
   }
-  
+
   const rawSql = fs.readFileSync(sqlFile, "utf8");
   // Split on drizzle statement-breakpoint comments
   const statements = rawSql
     .split("--> statement-breakpoint")
     .map(s => s.trim())
     .filter(s => s.length > 0);
-  
+
   console.log(`  Applying: ${entry.tag} (${statements.length} statements)`);
   let migrationOk = true;
   for (const stmt of statements) {
@@ -77,15 +79,21 @@ for (const entry of journal.entries) {
       await conn.execute(stmt);
     } catch (err) {
       // Ignore "already exists" errors for idempotency
-      if (err.code === 'ER_TABLE_EXISTS_ERROR' || err.code === 'ER_DUP_FIELDNAME' || err.code === 'ER_DUP_KEYNAME') {
-        console.log(`    Skipped (already exists): ${err.message.substring(0, 80)}`);
+      if (
+        err.code === "ER_TABLE_EXISTS_ERROR" ||
+        err.code === "ER_DUP_FIELDNAME" ||
+        err.code === "ER_DUP_KEYNAME"
+      ) {
+        console.log(
+          `    Skipped (already exists): ${err.message.substring(0, 80)}`
+        );
       } else {
         console.error(`    Error: ${err.message.substring(0, 120)}`);
         migrationOk = false;
       }
     }
   }
-  
+
   if (migrationOk) {
     await conn.execute(
       "INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)",
@@ -103,4 +111,6 @@ for (const entry of journal.entries) {
 }
 
 await conn.end();
-console.log(`\nDone! Applied ${count} migration(s), ${errors} with partial errors.`);
+console.log(
+  `\nDone! Applied ${count} migration(s), ${errors} with partial errors.`
+);

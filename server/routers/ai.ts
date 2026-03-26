@@ -2564,4 +2564,478 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
       if (!raw) throw new Error("No response");
       return { content: typeof raw === "string" ? raw : JSON.stringify(raw) };
     }),
+
+  // ── Feature 8: AI-Enabled Coding Simulator ──────────────────────────────────
+  aiCodingSimulatorScore: protectedProcedure
+    .input(
+      z.object({
+        phase: z.enum(["bug_fix", "feature_extension", "optimization"]),
+        problemTitle: z.string().max(200),
+        problemDescription: z.string().max(2000),
+        originalCode: z.string().max(5000),
+        candidateCode: z.string().max(5000),
+        language: z.string().max(30),
+        aiPromptsUsed: z.array(z.string().max(500)).max(10).optional(),
+        timeSpentSeconds: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const phaseDescriptions: Record<string, string> = {
+        bug_fix:
+          "Phase 1 (Bug Fix): Find and fix bugs in a multi-file codebase.",
+        feature_extension:
+          "Phase 2 (Feature Extension): Add a new feature on top of an existing codebase.",
+        optimization:
+          "Phase 3 (Optimization): Improve the time/space complexity of a working solution.",
+      };
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta senior engineer evaluating a candidate in the AI-enabled coding round. ${phaseDescriptions[input.phase]}\n\nMeta AI-enabled round scoring: bug identification accuracy, code correctness, code quality, AI usage judgment (used AI for boilerplate/syntax, not algorithmic logic), and speed.\n\nReturn JSON: { "score": number (1.0-5.0), "verdict": string, "phase": string, "correctness": number (1-5), "codeQuality": number (1-5), "aiJudgment": number (1-5), "bugsFound": number (0-5), "icLevel": "L5"|"L6"|"L7", "strengths": [string, string], "gaps": [string, string], "coaching": string, "metaSignal": string }`,
+          },
+          {
+            role: "user",
+            content: `Problem: ${input.problemTitle}\nDescription: ${input.problemDescription}\nLanguage: ${input.language}\n\nOriginal code:\n${input.originalCode}\n\nCandidate solution:\n${input.candidateCode}${input.aiPromptsUsed?.length ? `\nAI prompts: ${input.aiPromptsUsed.join("; ")}` : ""}${input.timeSpentSeconds ? `\nTime: ${Math.round(input.timeSpentSeconds / 60)} min` : ""}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "ai_coding_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                score: { type: "number" },
+                verdict: { type: "string" },
+                phase: { type: "string" },
+                correctness: { type: "number" },
+                codeQuality: { type: "number" },
+                aiJudgment: { type: "number" },
+                bugsFound: { type: "number" },
+                icLevel: { type: "string" },
+                strengths: { type: "array", items: { type: "string" } },
+                gaps: { type: "array", items: { type: "string" } },
+                coaching: { type: "string" },
+                metaSignal: { type: "string" },
+              },
+              required: [
+                "score",
+                "verdict",
+                "phase",
+                "correctness",
+                "codeQuality",
+                "aiJudgment",
+                "bugsFound",
+                "icLevel",
+                "strengths",
+                "gaps",
+                "coaching",
+                "metaSignal",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = response?.choices?.[0]?.message?.content;
+      if (!rawContent) throw new Error("No response from AI");
+      const c =
+        typeof rawContent === "string"
+          ? rawContent
+          : JSON.stringify(rawContent);
+      return JSON.parse(c) as {
+        score: number;
+        verdict: string;
+        phase: string;
+        correctness: number;
+        codeQuality: number;
+        aiJudgment: number;
+        bugsFound: number;
+        icLevel: string;
+        strengths: string[];
+        gaps: string[];
+        coaching: string;
+        metaSignal: string;
+      };
+    }),
+
+  // ── Feature 6: IC-Level Signal Calibrator ───────────────────────────────────
+  icLevelSignalCalibrator: protectedProcedure
+    .input(
+      z.object({
+        questionTitle: z.string().max(300),
+        candidateAnswer: z.string().max(5000),
+        targetLevel: z.enum(["IC5", "IC6", "IC7"]),
+        answerType: z
+          .enum(["system_design", "behavioral", "coding"])
+          .default("system_design"),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta principal engineer calibrating interview answers to IC levels. IC5 solves the happy path. IC6 handles scale, failure modes, and makes explicit trade-offs. IC7 drives the problem definition and shows cross-system thinking.\n\nReturn JSON: { "detectedLevel": "IC5"|"IC6"|"IC7", "detectedLevelReasoning": string, "toReachIC6": string, "toReachIC7": string, "strongestSignal": string, "weakestSignal": string, "rewriteExample": string, "metaRubricScores": { "correctness": number (1-5), "tradeoffs": number (1-5), "scalability": number (1-5), "communication": number (1-5) } }`,
+          },
+          {
+            role: "user",
+            content: `Question: ${input.questionTitle}\nAnswer type: ${input.answerType}\nTarget level: ${input.targetLevel}\n\nAnswer:\n${input.candidateAnswer}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "ic_level_calibration",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                detectedLevel: { type: "string" },
+                detectedLevelReasoning: { type: "string" },
+                toReachIC6: { type: "string" },
+                toReachIC7: { type: "string" },
+                strongestSignal: { type: "string" },
+                weakestSignal: { type: "string" },
+                rewriteExample: { type: "string" },
+                metaRubricScores: {
+                  type: "object",
+                  properties: {
+                    correctness: { type: "number" },
+                    tradeoffs: { type: "number" },
+                    scalability: { type: "number" },
+                    communication: { type: "number" },
+                  },
+                  required: [
+                    "correctness",
+                    "tradeoffs",
+                    "scalability",
+                    "communication",
+                  ],
+                  additionalProperties: false,
+                },
+              },
+              required: [
+                "detectedLevel",
+                "detectedLevelReasoning",
+                "toReachIC6",
+                "toReachIC7",
+                "strongestSignal",
+                "weakestSignal",
+                "rewriteExample",
+                "metaRubricScores",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = response?.choices?.[0]?.message?.content;
+      if (!rawContent) throw new Error("No response from AI");
+      const c =
+        typeof rawContent === "string"
+          ? rawContent
+          : JSON.stringify(rawContent);
+      return JSON.parse(c) as {
+        detectedLevel: string;
+        detectedLevelReasoning: string;
+        toReachIC6: string;
+        toReachIC7: string;
+        strongestSignal: string;
+        weakestSignal: string;
+        rewriteExample: string;
+        metaRubricScores: {
+          correctness: number;
+          tradeoffs: number;
+          scalability: number;
+          communication: number;
+        };
+      };
+    }),
+
+  // ── Feature 1: Meta Product Design Simulator ────────────────────────────────
+  metaProductDesignScore: protectedProcedure
+    .input(
+      z.object({
+        productPrompt: z.string().max(300),
+        requirementsAnswer: z.string().max(2000),
+        highLevelAnswer: z.string().max(2000),
+        deepDiveAnswer: z.string().max(2000),
+        tradeoffsAnswer: z.string().max(2000),
+        targetLevel: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+        totalTimeSeconds: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta Staff Engineer evaluating a system design interview for a ${input.targetLevel} candidate designing: "${input.productPrompt}".\n\nMeta rubric: Correctness (technically sound), Trade-offs (explicit comparison of alternatives), Scalability (Meta-scale: billions of users, global, high QPS), Communication (structured, drove the conversation).\n\nReturn JSON: { "correctness": number (1-5), "tradeoffs": number (1-5), "scalability": number (1-5), "communication": number (1-5), "overallScore": number (1-5), "verdict": "Strong Hire"|"Hire"|"Borderline"|"No Hire", "hiringDecision": string, "requirementsFeedback": string, "highLevelFeedback": string, "deepDiveFeedback": string, "tradeoffsFeedback": string, "topStrength": string, "criticalGap": string, "icLevelSignal": string, "toReachNextLevel": string }`,
+          },
+          {
+            role: "user",
+            content: `Product: ${input.productPrompt}\n\nRequirements:\n${input.requirementsAnswer}\n\nHigh-level design:\n${input.highLevelAnswer}\n\nDeep dive:\n${input.deepDiveAnswer}\n\nTrade-offs:\n${input.tradeoffsAnswer}${input.totalTimeSeconds ? `\nTime: ${Math.round(input.totalTimeSeconds / 60)} min` : ""}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "product_design_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                correctness: { type: "number" },
+                tradeoffs: { type: "number" },
+                scalability: { type: "number" },
+                communication: { type: "number" },
+                overallScore: { type: "number" },
+                verdict: { type: "string" },
+                hiringDecision: { type: "string" },
+                requirementsFeedback: { type: "string" },
+                highLevelFeedback: { type: "string" },
+                deepDiveFeedback: { type: "string" },
+                tradeoffsFeedback: { type: "string" },
+                topStrength: { type: "string" },
+                criticalGap: { type: "string" },
+                icLevelSignal: { type: "string" },
+                toReachNextLevel: { type: "string" },
+              },
+              required: [
+                "correctness",
+                "tradeoffs",
+                "scalability",
+                "communication",
+                "overallScore",
+                "verdict",
+                "hiringDecision",
+                "requirementsFeedback",
+                "highLevelFeedback",
+                "deepDiveFeedback",
+                "tradeoffsFeedback",
+                "topStrength",
+                "criticalGap",
+                "icLevelSignal",
+                "toReachNextLevel",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = response?.choices?.[0]?.message?.content;
+      if (!rawContent) throw new Error("No response from AI");
+      const c =
+        typeof rawContent === "string"
+          ? rawContent
+          : JSON.stringify(rawContent);
+      return JSON.parse(c) as {
+        correctness: number;
+        tradeoffs: number;
+        scalability: number;
+        communication: number;
+        overallScore: number;
+        verdict: string;
+        hiringDecision: string;
+        requirementsFeedback: string;
+        highLevelFeedback: string;
+        deepDiveFeedback: string;
+        tradeoffsFeedback: string;
+        topStrength: string;
+        criticalGap: string;
+        icLevelSignal: string;
+        toReachNextLevel: string;
+      };
+    }),
+
+  // ── Feature 12: Debugging Under Time Pressure ───────────────────────────────
+  debuggingScore: protectedProcedure
+    .input(
+      z.object({
+        bugTitle: z.string().max(200),
+        bugDescription: z.string().max(1000),
+        originalCode: z.string().max(3000),
+        candidateFix: z.string().max(3000),
+        expectedBugType: z.string().max(100),
+        timeSpentSeconds: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta senior engineer evaluating a debugging exercise. Candidate had 8 minutes to find and fix a bug. Meta Phase 1 tests: bug identification speed, correct fix without introducing new bugs, understanding of why the bug exists.\n\nReturn JSON: { "bugFound": boolean, "fixCorrect": boolean, "newBugsIntroduced": boolean, "score": number (1-5), "timeRating": "fast"|"on_time"|"slow"|"timeout", "bugExplanation": string, "fixQuality": string, "coaching": string, "metaPhase1Signal": string }`,
+          },
+          {
+            role: "user",
+            content: `Bug: ${input.bugTitle}\nType: ${input.expectedBugType}\nTime: ${Math.round(input.timeSpentSeconds)}s (limit: 480s)\n\nOriginal:\n${input.originalCode}\n\nFix:\n${input.candidateFix}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "debugging_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                bugFound: { type: "boolean" },
+                fixCorrect: { type: "boolean" },
+                newBugsIntroduced: { type: "boolean" },
+                score: { type: "number" },
+                timeRating: { type: "string" },
+                bugExplanation: { type: "string" },
+                fixQuality: { type: "string" },
+                coaching: { type: "string" },
+                metaPhase1Signal: { type: "string" },
+              },
+              required: [
+                "bugFound",
+                "fixCorrect",
+                "newBugsIntroduced",
+                "score",
+                "timeRating",
+                "bugExplanation",
+                "fixQuality",
+                "coaching",
+                "metaPhase1Signal",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = response?.choices?.[0]?.message?.content;
+      if (!rawContent) throw new Error("No response from AI");
+      const c =
+        typeof rawContent === "string"
+          ? rawContent
+          : JSON.stringify(rawContent);
+      return JSON.parse(c) as {
+        bugFound: boolean;
+        fixCorrect: boolean;
+        newBugsIntroduced: boolean;
+        score: number;
+        timeRating: string;
+        bugExplanation: string;
+        fixQuality: string;
+        coaching: string;
+        metaPhase1Signal: string;
+      };
+    }),
+
+  // ── Feature 15: Pass/Fail Verdict Engine ────────────────────────────────────
+  passFailVerdict: protectedProcedure
+    .input(
+      z.object({
+        sessionType: z.enum([
+          "system_design",
+          "behavioral",
+          "coding",
+          "full_loop",
+        ]),
+        questionOrPrompt: z.string().max(500),
+        candidateAnswer: z.string().max(8000),
+        targetLevel: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+        additionalContext: z.string().max(1000).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const rubricByType: Record<string, string> = {
+        system_design:
+          "Correctness, Trade-offs, Scalability (Meta-scale), Communication",
+        behavioral:
+          "Situation clarity, Task ownership (I not we), Action specificity, Result measurability, IC-level signal",
+        coding:
+          "Correctness (all edge cases), Complexity (optimal), Code quality, Problem-solving approach",
+        full_loop:
+          "Technical depth, behavioral ownership, communication clarity, Meta culture fit",
+      };
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta hiring committee member giving a final verdict on a ${input.targetLevel} candidate. Be direct and specific.\n\nRubric for ${input.sessionType}: ${rubricByType[input.sessionType]}\n\nVerdict options: "hire" (clearly meets bar), "borderline" (some signals but gaps), "no_hire" (does not meet bar).\n\nReturn JSON: { "verdict": "hire"|"borderline"|"no_hire", "verdictLabel": string, "confidence": "high"|"medium"|"low", "evidenceFor": [string, string], "evidenceAgainst": [string, string], "decidingFactor": string, "whatWouldChangeVerdict": string, "rubricBreakdown": { "correctness": number (1-5), "tradeoffs": number (1-5), "scalability": number (1-5), "communication": number (1-5) }, "oneLineCoaching": string }`,
+          },
+          {
+            role: "user",
+            content: `Type: ${input.sessionType}\nLevel: ${input.targetLevel}\nQuestion: ${input.questionOrPrompt}\n\nAnswer:\n${input.candidateAnswer}${input.additionalContext ? `\nContext: ${input.additionalContext}` : ""}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "pass_fail_verdict",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                verdict: { type: "string" },
+                verdictLabel: { type: "string" },
+                confidence: { type: "string" },
+                evidenceFor: { type: "array", items: { type: "string" } },
+                evidenceAgainst: { type: "array", items: { type: "string" } },
+                decidingFactor: { type: "string" },
+                whatWouldChangeVerdict: { type: "string" },
+                rubricBreakdown: {
+                  type: "object",
+                  properties: {
+                    correctness: { type: "number" },
+                    tradeoffs: { type: "number" },
+                    scalability: { type: "number" },
+                    communication: { type: "number" },
+                  },
+                  required: [
+                    "correctness",
+                    "tradeoffs",
+                    "scalability",
+                    "communication",
+                  ],
+                  additionalProperties: false,
+                },
+                oneLineCoaching: { type: "string" },
+              },
+              required: [
+                "verdict",
+                "verdictLabel",
+                "confidence",
+                "evidenceFor",
+                "evidenceAgainst",
+                "decidingFactor",
+                "whatWouldChangeVerdict",
+                "rubricBreakdown",
+                "oneLineCoaching",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = response?.choices?.[0]?.message?.content;
+      if (!rawContent) throw new Error("No response from AI");
+      const c =
+        typeof rawContent === "string"
+          ? rawContent
+          : JSON.stringify(rawContent);
+      return JSON.parse(c) as {
+        verdict: string;
+        verdictLabel: string;
+        confidence: string;
+        evidenceFor: string[];
+        evidenceAgainst: string[];
+        decidingFactor: string;
+        whatWouldChangeVerdict: string;
+        rubricBreakdown: {
+          correctness: number;
+          tradeoffs: number;
+          scalability: number;
+          communication: number;
+        };
+        oneLineCoaching: string;
+      };
+    }),
 });

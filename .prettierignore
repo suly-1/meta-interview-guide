@@ -1,5 +1,47 @@
-dist
-node_modules
-.git
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+assets/
+*.dist
+
+# Generated files
+*.tsbuildinfo
+coverage/
+
+# Package files
+package-lock.json
+pnpm-lock.yaml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+
+# Manus internal
+.manus/
+
+# Public generated/minified files
+client/public/__manus__/
 *.min.js
 *.min.css

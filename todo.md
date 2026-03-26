@@ -1002,3 +1002,22 @@
 - [ ] Hidden admin shortcut: press A five times on standalone homepage to navigate to /#/admin
 - [ ] Document PIN change process (update ADMIN_PIN secret + redeploy)
 - [ ] Add metaengguide.pro as custom domain on Manus live app
+
+## Automated Testing & Nightly Health Check
+
+- [ ] Write Playwright interaction tests for all key toggles (dark mode, tabs, mock timer, pattern rating, STAR story expand, streak)
+- [ ] Extend smoke-test.ts with full interaction test suite
+- [ ] Create GitHub Actions nightly cron workflow (.github/workflows/nightly-health.yml)
+- [ ] Configure workflow to email on failure using SMTP secrets
+- [ ] Run tests locally against live site to verify all pass
+- [ ] Push GitHub Actions workflow to both remotes (metaengguide + metaguide)
+
+## New Features — Round 31 (5 High-Impact AI Features)
+
+- [x] AI-Enabled Coding Simulator (Priority #1) — 3-phase Meta format: Bug Fix → Feature Extension → Optimization, AI scoring per phase, in Coding tab
+- [x] IC-Level Signal Calibrator (Priority #2) — paste system design answer, get IC5/IC6/IC7 signal breakdown with gaps, in System Design tab
+- [x] Meta Product Design Simulator (Priority #3) — 45-min timed session, 4 phases, Meta rubric scoring, in System Design tab
+- [x] Debugging Under Time Pressure (Priority #4) — 20 pre-built buggy codebases, 8-min timer, Meta Phase 1 format, in Coding tab
+- [x] Pass/Fail Verdict Engine (Priority #5) — Hire/Borderline/No-Hire verdict with Meta rubric reasoning, in Overview tab
+- [x] Fix tRPC context error (main.tsx missing trpc.Provider + QueryClientProvider wrappers)
+- [x] Add 5 new AI procedure stubs to trpc.standalone.ts (stub coverage test: 68/68 passing)

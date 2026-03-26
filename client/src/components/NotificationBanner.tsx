@@ -42,11 +42,15 @@ export default function NotificationBanner() {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       setSettings({ enabled: true, time, dismissed: true });
-      new Notification("Meta Prep Reminder Set!", { body: `You'll be reminded daily at ${time} 🎯` });
+      new Notification("Meta Prep Reminder Set!", {
+        body: `You'll be reminded daily at ${time} 🎯`,
+      });
       setShow(false);
       toast.success(`Daily reminder set for ${time}`);
     } else {
-      toast.error("Notification permission denied. Enable in browser settings.");
+      toast.error(
+        "Notification permission denied. Enable in browser settings."
+      );
     }
   };
 
@@ -65,8 +69,13 @@ export default function NotificationBanner() {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs">
         <Bell size={11} className="text-emerald-400" />
-        <span className="text-emerald-400 font-medium">Reminder: {settings.time}</span>
-        <button onClick={handleDisable} className="text-muted-foreground hover:text-foreground ml-1">
+        <span className="text-emerald-400 font-medium">
+          Reminder: {settings.time}
+        </span>
+        <button
+          onClick={handleDisable}
+          className="text-muted-foreground hover:text-foreground ml-1"
+        >
           <BellOff size={11} />
         </button>
       </div>
@@ -80,22 +89,39 @@ export default function NotificationBanner() {
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <Bell size={14} className="text-blue-400" />
-          <span className="text-sm font-semibold text-foreground">Set Daily Reminder</span>
+          <span className="text-sm font-semibold text-foreground">
+            Set Daily Reminder
+          </span>
         </div>
-        <button onClick={handleDismiss} className="text-muted-foreground hover:text-foreground">
+        <button
+          onClick={handleDismiss}
+          className="text-muted-foreground hover:text-foreground"
+        >
           <X size={14} />
         </button>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">Get a daily browser notification to complete at least one drill or practice session.</p>
+      <p className="text-xs text-muted-foreground mb-3">
+        Get a daily browser notification to complete at least one drill or
+        practice session.
+      </p>
       <div className="flex items-center gap-2 mb-3">
-        <input type="time" value={time} onChange={e => setTime(e.target.value)}
-          className="flex-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-blue-500/50" />
-        <button onClick={handleEnable}
-          className="px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold transition-all whitespace-nowrap">
+        <input
+          type="time"
+          value={time}
+          onChange={e => setTime(e.target.value)}
+          className="flex-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground focus:outline-none focus:border-blue-500/50"
+        />
+        <button
+          onClick={handleEnable}
+          className="px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold transition-all whitespace-nowrap"
+        >
           Enable
         </button>
       </div>
-      <button onClick={handleDismiss} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+      <button
+        onClick={handleDismiss}
+        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
         No thanks
       </button>
     </div>

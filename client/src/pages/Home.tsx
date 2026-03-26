@@ -2,7 +2,13 @@
 // Dark charcoal base, Space Grotesk headings, Inter body
 // Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
 import { useState, useEffect, useCallback } from "react";
-import { usePatternRatings, useBehavioralRatings, useOnboardingDismissed, useDisclaimerDismissed, useCongratsShown } from "@/hooks/useLocalStorage";
+import {
+  usePatternRatings,
+  useBehavioralRatings,
+  useOnboardingDismissed,
+  useDisclaimerDismissed,
+  useCongratsShown,
+} from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 import TopNav from "@/components/TopNav";
 import HeroSection from "@/components/HeroSection";
@@ -20,12 +26,12 @@ function triggerConfetti() {
   for (let i = 0; i < 80; i++) {
     const el = document.createElement("div");
     el.style.cssText = `
-      position:fixed; top:0; left:${Math.random()*100}vw; width:8px; height:8px;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
+      position:fixed; top:0; left:${Math.random() * 100}vw; width:8px; height:8px;
+      background:${colors[Math.floor(Math.random() * colors.length)]};
       border-radius:${Math.random() > 0.5 ? "50%" : "2px"};
       z-index:9999; pointer-events:none;
       animation: confetti-fall ${1.5 + Math.random()}s ease-in forwards;
-      transform: rotate(${Math.random()*360}deg);
+      transform: rotate(${Math.random() * 360}deg);
     `;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
@@ -35,8 +41,10 @@ function triggerConfetti() {
 export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
   const [darkMode, setDarkMode] = useState(true);
-  const [onboardingDismissed, setOnboardingDismissed] = useOnboardingDismissed();
-  const [disclaimerDismissed, setDisclaimerDismissed] = useDisclaimerDismissed();
+  const [onboardingDismissed, setOnboardingDismissed] =
+    useOnboardingDismissed();
+  const [disclaimerDismissed, setDisclaimerDismissed] =
+    useDisclaimerDismissed();
   const [congratsShown, setCongratsShown] = useCongratsShown();
   const [patternRatings] = usePatternRatings();
   const [bqRatings] = useBehavioralRatings();
@@ -49,7 +57,9 @@ export default function Home() {
   // Confetti check
   useEffect(() => {
     const masteredAll = PATTERNS.every(p => (patternRatings[p.id] ?? 0) >= 4);
-    const readyAll = BEHAVIORAL_QUESTIONS.every(q => (bqRatings[q.id] ?? 0) >= 4);
+    const readyAll = BEHAVIORAL_QUESTIONS.every(
+      q => (bqRatings[q.id] ?? 0) >= 4
+    );
     if ((masteredAll || readyAll) && !congratsShown) {
       triggerConfetti();
       setCongratsShown(true);
@@ -72,7 +82,9 @@ export default function Home() {
   }, [handleKeyDown]);
 
   return (
-    <div className={`min-h-screen bg-background text-foreground ${darkMode ? "dark" : ""}`}>
+    <div
+      className={`min-h-screen bg-background text-foreground ${darkMode ? "dark" : ""}`}
+    >
       {/* Confetti keyframe */}
       <style>{`
         @keyframes confetti-fall {
@@ -85,16 +97,33 @@ export default function Home() {
       {!disclaimerDismissed && (
         <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5">
           <div className="container flex items-start gap-3">
-            <AlertTriangle size={14} className="text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle
+              size={14}
+              className="text-amber-400 shrink-0 mt-0.5"
+            />
             <div className="flex-1 text-xs text-muted-foreground">
               <span className="font-semibold text-amber-400">Disclaimer: </span>
-              This guide is an independent study resource and is not affiliated with, endorsed by, or connected to Meta Platforms, Inc. Interview formats and expectations may change. Always verify current information with your recruiter.
+              This guide is an independent study resource and is not affiliated
+              with, endorsed by, or connected to Meta Platforms, Inc. Interview
+              formats and expectations may change. Always verify current
+              information with your recruiter.
               <label className="ml-3 inline-flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" className="accent-amber-500" onChange={e => e.target.checked && setDisclaimerDismissed(true)} />
-                <span className="text-amber-400 font-medium">I have read the disclaimer</span>
+                <input
+                  type="checkbox"
+                  className="accent-amber-500"
+                  onChange={e =>
+                    e.target.checked && setDisclaimerDismissed(true)
+                  }
+                />
+                <span className="text-amber-400 font-medium">
+                  I have read the disclaimer
+                </span>
               </label>
             </div>
-            <button onClick={() => setDisclaimerDismissed(true)} className="text-muted-foreground hover:text-foreground shrink-0">
+            <button
+              onClick={() => setDisclaimerDismissed(true)}
+              className="text-muted-foreground hover:text-foreground shrink-0"
+            >
               <X size={13} />
             </button>
           </div>
@@ -123,13 +152,28 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border py-6 mt-8">
         <div className="container text-center text-xs text-muted-foreground space-y-1">
-          <div>Meta IC6/IC7 Interview Prep Guide · All progress saved locally in your browser</div>
-          <div>Press <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">1</kbd>–<kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">4</kbd> to switch tabs</div>
+          <div>
+            Meta IC6/IC7 Interview Prep Guide · All progress saved locally in
+            your browser
+          </div>
+          <div>
+            Press{" "}
+            <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+              1
+            </kbd>
+            –
+            <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+              4
+            </kbd>{" "}
+            to switch tabs
+          </div>
         </div>
       </footer>
 
       {/* Onboarding modal */}
-      {!onboardingDismissed && <OnboardingModal onDismiss={() => setOnboardingDismissed(true)} />}
+      {!onboardingDismissed && (
+        <OnboardingModal onDismiss={() => setOnboardingDismissed(true)} />
+      )}
 
       {/* Notification banner */}
       <NotificationBanner />

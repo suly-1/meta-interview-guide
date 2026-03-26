@@ -64,9 +64,7 @@
       "compositePrimaryKeys": {
         "analytics_events_id": {
           "name": "analytics_events_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -124,9 +122,7 @@
       "compositePrimaryKeys": {
         "analytics_page_views_id": {
           "name": "analytics_page_views_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -214,17 +210,13 @@
       "compositePrimaryKeys": {
         "analytics_sessions_id": {
           "name": "analytics_sessions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "analytics_sessions_sessionId_unique": {
           "name": "analytics_sessions_sessionId_unique",
-          "columns": [
-            "sessionId"
-          ]
+          "columns": ["sessionId"]
         }
       },
       "checkConstraint": {}
@@ -291,9 +283,7 @@
       "compositePrimaryKeys": {
         "apex_picks_sets_id": {
           "name": "apex_picks_sets_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -367,17 +357,13 @@
       "compositePrimaryKeys": {
         "collab_rooms_id": {
           "name": "collab_rooms_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "collab_rooms_roomCode_unique": {
           "name": "collab_rooms_roomCode_unique",
-          "columns": [
-            "roomCode"
-          ]
+          "columns": ["roomCode"]
         }
       },
       "checkConstraint": {}
@@ -428,17 +414,13 @@
       "compositePrimaryKeys": {
         "ctci_progress_id": {
           "name": "ctci_progress_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "ctci_progress_userId_unique": {
           "name": "ctci_progress_userId_unique",
-          "columns": [
-            "userId"
-          ]
+          "columns": ["userId"]
         }
       },
       "checkConstraint": {}
@@ -503,9 +485,7 @@
       "compositePrimaryKeys": {
         "favorite_questions_id": {
           "name": "favorite_questions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -604,9 +584,7 @@
       "compositePrimaryKeys": {
         "feedback_id": {
           "name": "feedback_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -684,9 +662,7 @@
       "compositePrimaryKeys": {
         "leaderboard_entries_id": {
           "name": "leaderboard_entries_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -723,9 +699,7 @@
       "compositePrimaryKeys": {
         "login_events_id": {
           "name": "login_events_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -783,9 +757,7 @@
       "compositePrimaryKeys": {
         "mock_sessions_id": {
           "name": "mock_sessions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -838,17 +810,13 @@
       "compositePrimaryKeys": {
         "onboarding_progress_id": {
           "name": "onboarding_progress_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "onboarding_progress_userId_unique": {
           "name": "onboarding_progress_userId_unique",
-          "columns": [
-            "userId"
-          ]
+          "columns": ["userId"]
         }
       },
       "checkConstraint": {}
@@ -939,9 +907,7 @@
       "compositePrimaryKeys": {
         "progress_snapshots_id": {
           "name": "progress_snapshots_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1038,9 +1004,7 @@
       "compositePrimaryKeys": {
         "scorecards_id": {
           "name": "scorecards_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1105,9 +1069,7 @@
       "compositePrimaryKeys": {
         "session_events_id": {
           "name": "session_events_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1168,9 +1130,7 @@
       "compositePrimaryKeys": {
         "site_settings_id": {
           "name": "site_settings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1242,23 +1202,17 @@
       "compositePrimaryKeys": {
         "sprint_plans_id": {
           "name": "sprint_plans_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "sprint_plans_planId_unique": {
           "name": "sprint_plans_planId_unique",
-          "columns": [
-            "planId"
-          ]
+          "columns": ["planId"]
         },
         "sprint_plans_shareToken_unique": {
           "name": "sprint_plans_shareToken_unique",
-          "columns": [
-            "shareToken"
-          ]
+          "columns": ["shareToken"]
         }
       },
       "checkConstraint": {}
@@ -1330,9 +1284,7 @@
       "compositePrimaryKeys": {
         "user_events_id": {
           "name": "user_events_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1384,9 +1336,7 @@
       "compositePrimaryKeys": {
         "user_ratings_id": {
           "name": "user_ratings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1470,17 +1420,13 @@
       "compositePrimaryKeys": {
         "user_scores_id": {
           "name": "user_scores_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "user_scores_userId_unique": {
           "name": "user_scores_userId_unique",
-          "columns": [
-            "userId"
-          ]
+          "columns": ["userId"]
         }
       },
       "checkConstraint": {}
@@ -1591,17 +1537,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ]
+          "columns": ["openId"]
         }
       },
       "checkConstraint": {}

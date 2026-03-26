@@ -10,15 +10,19 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     }
   });
 
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
-    }
-  }, [key, storedValue]);
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [key, storedValue]
+  );
 
   return [storedValue, setValue] as const;
 }
@@ -40,15 +44,20 @@ export function useStreak() {
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
-    setStreak((prev) => {
+    setStreak(prev => {
       if (prev.lastVisit === today) return prev;
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split("T")[0];
-      const newStreak = prev.lastVisit === yesterdayStr ? prev.currentStreak + 1 : 1;
-      return { currentStreak: newStreak, lastVisit: today, longestStreak: Math.max(newStreak, prev.longestStreak) };
+      const newStreak =
+        prev.lastVisit === yesterdayStr ? prev.currentStreak + 1 : 1;
+      return {
+        currentStreak: newStreak,
+        lastVisit: today,
+        longestStreak: Math.max(newStreak, prev.longestStreak),
+      };
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today]);
 
   return streak;
@@ -117,7 +126,11 @@ export interface NotifSettings {
 }
 
 export function useNotifSettings() {
-  return useLocalStorage<NotifSettings>("meta_notif_v1", { enabled: false, time: "09:00", dismissed: false });
+  return useLocalStorage<NotifSettings>("meta_notif_v1", {
+    enabled: false,
+    time: "09:00",
+    dismissed: false,
+  });
 }
 
 // ── Onboarding dismissed ──────────────────────────────────────────────────
