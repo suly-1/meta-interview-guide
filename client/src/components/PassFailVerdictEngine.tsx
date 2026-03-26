@@ -23,7 +23,7 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type SessionType = "coding" | "system_design" | "behavioral" | "full_loop";
-type TargetLevel = "IC5" | "IC6" | "IC7";
+type TargetLevel = "L5" | "L6" | "L7";
 
 interface VerdictResult {
   verdict: string;
@@ -97,13 +97,13 @@ const SAMPLE_SESSIONS: Record<
 > = {
   coding: [
     {
-      label: "Strong IC6 coding",
+      label: "Strong L6 coding",
       question: "Implement an LRU cache with O(1) get and put",
       answer:
         "Used OrderedDict in Python for O(1) get/put. Explained trade-off vs doubly-linked list + hashmap. Handled edge cases: capacity 0, single element, repeated access. Stated O(1) time and O(n) space complexity before coding. Code was clean with meaningful variable names.",
     },
     {
-      label: "Borderline IC5 coding",
+      label: "Borderline L5 coding",
       question: "Implement an LRU cache with O(1) get and put",
       answer:
         "Used a list and dictionary. The get is O(1) but put is O(n) because I need to find and remove from the list. Got the correct answer but didn't optimize. Missed edge case where capacity is 1.",
@@ -111,13 +111,13 @@ const SAMPLE_SESSIONS: Record<
   ],
   system_design: [
     {
-      label: "Strong IC6 design",
+      label: "Strong L6 design",
       question: "Design Instagram Feed",
       answer:
         "Requirements: 500M DAU, 100ms p99 latency, eventual consistency. High-level: CDN → API gateway → feed service → candidate generation (ANN) → ranking service → Redis cache. Deep-dive: two-stage retrieval for ranking, Redis sorted sets for feed cache with TTL. Trade-offs: precomputed vs real-time feed (chose precomputed for p99 latency, real-time for freshness).",
     },
     {
-      label: "Weak IC5 design",
+      label: "Weak L5 design",
       question: "Design Instagram Feed",
       answer:
         "I'd use a database to store posts and query them for each user. Add a cache in front. Use a load balancer. The feed would show the latest posts from people you follow.",
@@ -125,13 +125,13 @@ const SAMPLE_SESSIONS: Record<
   ],
   behavioral: [
     {
-      label: "Strong IC6 behavioral",
+      label: "Strong L6 behavioral",
       question: "Tell me about a time you drove a large technical project",
       answer:
         "Situation: 200ms p99 latency causing 8% user drop-off. Task: reduce to 50ms. Action: I proposed and led a 6-month migration from monolith to microservices, coordinated 3 teams, unblocked 2 critical dependencies by escalating to VP. Result: 60ms p99, 15% engagement increase, $2M ARR impact. I owned the decision to use gRPC over REST despite pushback.",
     },
     {
-      label: "Weak IC5 behavioral",
+      label: "Weak L5 behavioral",
       question: "Tell me about a time you drove a large technical project",
       answer:
         "We worked on a big migration project. The team helped deliver it on time. I was involved in the backend work. It was successful and users were happy.",
@@ -151,7 +151,7 @@ const SAMPLE_SESSIONS: Record<
 export function PassFailVerdictEngine() {
   const [expanded, setExpanded] = useState(false);
   const [sessionType, setSessionType] = useState<SessionType>("coding");
-  const [targetLevel, setTargetLevel] = useState<TargetLevel>("IC6");
+  const [targetLevel, setTargetLevel] = useState<TargetLevel>("L6");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [additionalContext, setAdditionalContext] = useState("");
@@ -313,7 +313,7 @@ export function PassFailVerdictEngine() {
                 Target Level
               </label>
               <div className="flex gap-1">
-                {(["IC5", "IC6", "IC7"] as TargetLevel[]).map(l => (
+                {(["L5", "L6", "L7"] as TargetLevel[]).map(l => (
                   <button
                     key={l}
                     onClick={() => setTargetLevel(l)}
@@ -382,7 +382,7 @@ export function PassFailVerdictEngine() {
             <input
               value={additionalContext}
               onChange={e => setAdditionalContext(e.target.value)}
-              placeholder="e.g. 45-min session, no hints given, interviewer was IC7..."
+              placeholder="e.g. 45-min session, no hints given, interviewer was L7..."
               className="w-full text-sm bg-secondary border border-border rounded-md px-3 py-2 focus:outline-none focus:border-amber-500/50"
             />
           </div>

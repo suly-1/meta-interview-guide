@@ -58,7 +58,7 @@ const FRAMEWORK_STEPS = [
   },
 ];
 
-const IC7_SIGNALS = [
+const L7_SIGNALS = [
   "Proactively identifies constraints the interviewer hasn't mentioned",
   "Discusses operational concerns: deployment, rollback, observability",
   "Quantifies trade-offs with numbers, not just words",
@@ -126,13 +126,13 @@ export default function SystemDesignTab() {
         </div>
       </div>
 
-      {/* IC7 signals */}
+      {/* L7 signals */}
       <div className="prep-card p-5 border-purple-500/20">
         <div className="section-title text-purple-400">
-          IC7 Differentiation Signals
+          L7 Differentiation Signals
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {IC7_SIGNALS.map((s, i) => (
+          {L7_SIGNALS.map((s, i) => (
             <div
               key={i}
               className="flex items-start gap-2 text-xs text-muted-foreground"
@@ -156,8 +156,8 @@ export default function SystemDesignTab() {
             className="px-3 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none"
           >
             <option value="All">All Levels</option>
-            <option value="IC6+">IC6+</option>
-            <option value="IC7+">IC7+</option>
+            <option value="L6+">L6+</option>
+            <option value="L7+">L7+</option>
           </select>
         </div>
         <div className="divide-y divide-border">
@@ -169,7 +169,7 @@ export default function SystemDesignTab() {
                     {q.title}
                   </span>
                   <span
-                    className={`badge ${q.level === "IC7+" ? "badge-purple" : "badge-blue"}`}
+                    className={`badge ${q.level === "L7+" ? "badge-purple" : "badge-blue"}`}
                   >
                     {q.level}
                   </span>

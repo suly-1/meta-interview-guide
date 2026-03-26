@@ -29,7 +29,7 @@ const META_PRODUCTS = [
     title: "Design Instagram Feed",
     description:
       "Design the core feed ranking and delivery system for Instagram. Consider: content sources, ranking signals, delivery at scale, and the trade-off between freshness and relevance.",
-    difficulty: "IC6",
+    difficulty: "L6",
     area: "Feed",
     hints: [
       "Start with functional requirements: what does the feed show?",
@@ -42,7 +42,7 @@ const META_PRODUCTS = [
     title: "Design Facebook Live Comments",
     description:
       "Design the real-time comment system for Facebook Live. A live video can have millions of concurrent viewers all sending and receiving comments simultaneously.",
-    difficulty: "IC6",
+    difficulty: "L6",
     area: "Video",
     hints: [
       "Key challenge: fan-out to millions of viewers in real-time",
@@ -55,7 +55,7 @@ const META_PRODUCTS = [
     title: "Design WhatsApp Delivery Receipts",
     description:
       "Design the message delivery receipt system (sent ✓, delivered ✓✓, read ✓✓ blue). Handle offline users, message ordering, and delivery guarantees.",
-    difficulty: "IC6",
+    difficulty: "L6",
     area: "Messaging",
     hints: [
       "Consider: what happens when the recipient is offline?",
@@ -68,7 +68,7 @@ const META_PRODUCTS = [
     title: "Design Marketplace Search",
     description:
       "Design the search system for Facebook Marketplace. Users search for items by keyword, location, price range, and category. Sellers list items with photos and descriptions.",
-    difficulty: "IC7",
+    difficulty: "L7",
     area: "Search",
     hints: [
       "Consider: how do you index 1B+ listings efficiently?",
@@ -81,7 +81,7 @@ const META_PRODUCTS = [
     title: "Design Instagram Reels Recommendation",
     description:
       "Design the recommendation engine for Instagram Reels. The system must surface relevant short videos to users in real-time, optimizing for engagement while avoiding filter bubbles.",
-    difficulty: "IC7",
+    difficulty: "L7",
     area: "Feed",
     hints: [
       "Consider: two-stage retrieval (candidate generation → ranking)",
@@ -94,7 +94,7 @@ const META_PRODUCTS = [
     title: "Design Meta Ads Targeting",
     description:
       "Design the targeting system for Meta ads. Advertisers specify audience criteria (demographics, interests, behaviors). The system must match ads to users in real-time during feed loading.",
-    difficulty: "IC7",
+    difficulty: "L7",
     area: "Ads",
     hints: [
       "Consider: how do you match ads to users in <100ms?",
@@ -214,7 +214,7 @@ function useTimer() {
 export function MetaProductDesignSimulator() {
   const [expanded, setExpanded] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(META_PRODUCTS[0]);
-  const [targetLevel, setTargetLevel] = useState<"IC5" | "IC6" | "IC7">("IC6");
+  const [targetLevel, setTargetLevel] = useState<"L5" | "L6" | "L7">("L6");
   const [sessionState, setSessionState] = useState<SessionState>("idle");
   const [currentPhaseIdx, setCurrentPhaseIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<PhaseId, string>>({
@@ -419,7 +419,7 @@ export function MetaProductDesignSimulator() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium">{p.title}</span>
                         <span
-                          className={`text-xs px-1.5 py-0.5 rounded font-medium ${p.difficulty === "IC7" ? "bg-purple-500/20 text-purple-300" : "bg-emerald-500/20 text-emerald-300"}`}
+                          className={`text-xs px-1.5 py-0.5 rounded font-medium ${p.difficulty === "L7" ? "bg-purple-500/20 text-purple-300" : "bg-emerald-500/20 text-emerald-300"}`}
                         >
                           {p.difficulty}
                         </span>
@@ -438,7 +438,7 @@ export function MetaProductDesignSimulator() {
                   Target Level
                 </label>
                 <div className="flex gap-2">
-                  {(["IC5", "IC6", "IC7"] as const).map(l => (
+                  {(["L5", "L6", "L7"] as const).map(l => (
                     <button
                       key={l}
                       onClick={() => setTargetLevel(l)}
@@ -618,7 +618,7 @@ export function MetaProductDesignSimulator() {
                 <ScoreBar label="Communication" value={score.communication} />
               </div>
 
-              {/* IC level signal */}
+              {/* L-level signal */}
               <div className="bg-secondary/30 rounded-md p-3 border border-border">
                 <div className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
                   <Target size={11} /> IC Level Signal

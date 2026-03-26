@@ -1,6 +1,6 @@
 // Mock Interview Simulator
 // 45-minute session: 25 min coding + 10 min BQ1 + 10 min BQ2
-// Generates LLM post-session debrief with IC-level assessment
+// Generates LLM post-session debrief with L-level assessment
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Play,
@@ -704,7 +704,7 @@ export default function MockInterviewSimulator() {
                       </div>
                     </div>
 
-                    {/* IC level */}
+                    {/* L-level */}
                     <div className="p-3 rounded-lg bg-secondary border border-border">
                       <div className="text-xs font-bold text-blue-400 mb-1">
                         IC-Level Assessment ({session?.icTarget})

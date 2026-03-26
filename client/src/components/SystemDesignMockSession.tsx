@@ -697,7 +697,7 @@ export function SystemDesignMockSession() {
         <p className="text-sm text-muted-foreground">
           Simulates a real Meta system design round. Work through all 5
           framework phases with a timer, capture your answers, then receive an
-          AI scorecard with IC-level assessment.
+          AI scorecard with L-level assessment.
         </p>
 
         {/* Selected question */}

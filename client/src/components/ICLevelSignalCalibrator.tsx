@@ -1,7 +1,7 @@
 /**
  * IC-Level Signal Calibrator — Priority #2
  * After submitting an answer, tells the candidate exactly:
- * "This reads as IC5. To reach IC6 you need X. To reach IC7 you need Y."
+ * "This reads as L5. To reach L6 you need X. To reach L7 you need Y."
  * Works for system design, behavioral, and coding answers.
  */
 import { useState } from "react";
@@ -22,13 +22,13 @@ import {
 } from "lucide-react";
 
 type AnswerType = "system_design" | "behavioral" | "coding";
-type TargetLevel = "IC5" | "IC6" | "IC7";
+type TargetLevel = "L5" | "L6" | "L7";
 
 interface CalibrationResult {
   detectedLevel: string;
   detectedLevelReasoning: string;
-  toReachIC6: string;
-  toReachIC7: string;
+  toReachL6: string;
+  toReachL7: string;
   strongestSignal: string;
   weakestSignal: string;
   rewriteExample: string;
@@ -44,17 +44,17 @@ const LEVEL_COLORS: Record<
   string,
   { bg: string; text: string; border: string }
 > = {
-  IC5: {
+  L5: {
     bg: "bg-slate-500/20",
     text: "text-slate-300",
     border: "border-slate-500/40",
   },
-  IC6: {
+  L6: {
     bg: "bg-emerald-500/20",
     text: "text-emerald-300",
     border: "border-emerald-500/40",
   },
-  IC7: {
+  L7: {
     bg: "bg-purple-500/20",
     text: "text-purple-300",
     border: "border-purple-500/40",
@@ -106,7 +106,7 @@ const SAMPLE_QUESTIONS: Record<AnswerType, string[]> = {
 export function ICLevelSignalCalibrator() {
   const [expanded, setExpanded] = useState(false);
   const [answerType, setAnswerType] = useState<AnswerType>("system_design");
-  const [targetLevel, setTargetLevel] = useState<TargetLevel>("IC6");
+  const [targetLevel, setTargetLevel] = useState<TargetLevel>("L6");
   const [questionTitle, setQuestionTitle] = useState("");
   const [candidateAnswer, setCandidateAnswer] = useState("");
   const [result, setResult] = useState<CalibrationResult | null>(null);
@@ -142,7 +142,7 @@ export function ICLevelSignalCalibrator() {
   };
 
   const levelColors = result
-    ? (LEVEL_COLORS[result.detectedLevel] ?? LEVEL_COLORS["IC5"])
+    ? (LEVEL_COLORS[result.detectedLevel] ?? LEVEL_COLORS["L5"])
     : null;
 
   const answerTypeConfig: Record<
@@ -184,8 +184,7 @@ export function ICLevelSignalCalibrator() {
             <span className="badge badge-green text-xs">Priority #2</span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            "This reads as IC5. To reach IC6 you need X. To reach IC7 you need
-            Y."
+            "This reads as L5. To reach L6 you need X. To reach L7 you need Y."
           </p>
         </div>
         {expanded ? (
@@ -225,7 +224,7 @@ export function ICLevelSignalCalibrator() {
                 Target Level
               </label>
               <div className="flex gap-1">
-                {(["IC5", "IC6", "IC7"] as TargetLevel[]).map(l => {
+                {(["L5", "L6", "L7"] as TargetLevel[]).map(l => {
                   const lc = LEVEL_COLORS[l];
                   return (
                     <button
@@ -366,22 +365,22 @@ export function ICLevelSignalCalibrator() {
                 </div>
               </div>
 
-              {/* What to add for IC6 / IC7 */}
+              {/* What to add for L6 / L7 */}
               <div className="space-y-2">
                 <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-md p-3">
                   <div className="text-xs font-medium text-emerald-400 flex items-center gap-1 mb-1">
-                    <ArrowUpCircle size={11} /> To reach IC6
+                    <ArrowUpCircle size={11} /> To reach L6
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {result.toReachIC6}
+                    {result.toReachL6}
                   </p>
                 </div>
                 <div className="bg-purple-500/10 border border-purple-500/20 rounded-md p-3">
                   <div className="text-xs font-medium text-purple-400 flex items-center gap-1 mb-1">
-                    <ArrowUpCircle size={11} /> To reach IC7
+                    <ArrowUpCircle size={11} /> To reach L7
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {result.toReachIC7}
+                    {result.toReachL7}
                   </p>
                 </div>
               </div>
@@ -393,7 +392,7 @@ export function ICLevelSignalCalibrator() {
                   className="w-full flex items-center justify-between px-3 py-2 bg-secondary/50 hover:bg-secondary transition-colors text-xs font-medium"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Lightbulb size={11} className="text-amber-400" /> IC6
+                    <Lightbulb size={11} className="text-amber-400" /> L6
                     Rewrite Example (weakest section)
                   </span>
                   {showRewrite ? (

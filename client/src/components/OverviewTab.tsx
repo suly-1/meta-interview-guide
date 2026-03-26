@@ -1,5 +1,5 @@
 // Design: Bold Engineering Dashboard — Overview Tab
-// Features: IC6/IC7 comparison cards, readiness dashboard, pattern heatmap,
+// Features: L6/L7 comparison cards, readiness dashboard, pattern heatmap,
 // weak-spot dashboard, interview countdown, STAR story bank, recruiter card
 // with peer comparison, progress export, interview day checklist
 import { useState } from "react";
@@ -45,17 +45,17 @@ function getDaysUntil(dateStr: string): number {
   return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-// ── IC6/IC7 Level Cards ────────────────────────────────────────────────────
+// ── L6/L7 Level Cards ────────────────────────────────────────────────────
 function LevelCards() {
   return (
     <div className="space-y-4">
-      <div className="section-title">IC6 vs IC7 — What Meta Expects</div>
+      <div className="section-title">L6 vs L7 — What Meta Expects</div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* IC6 */}
+        {/* L6 */}
         <div className="prep-card p-5 border-blue-500/20">
           <div className="flex items-center gap-2 mb-3">
             <span className="badge badge-blue text-sm px-3 py-1">
-              IC6 — Staff Engineer
+              L6 — Staff Engineer
             </span>
           </div>
           <div className="space-y-3 text-sm">
@@ -86,11 +86,11 @@ function LevelCards() {
             ))}
           </div>
         </div>
-        {/* IC7 */}
+        {/* L7 */}
         <div className="prep-card p-5 border-purple-500/20">
           <div className="flex items-center gap-2 mb-3">
             <span className="badge badge-purple text-sm px-3 py-1">
-              IC7 — Senior Staff Engineer
+              L7 — Senior Staff Engineer
             </span>
           </div>
           <div className="space-y-3 text-sm">
@@ -132,10 +132,10 @@ function LevelCards() {
                   Dimension
                 </th>
                 <th className="text-left p-3 text-xs font-semibold text-blue-400">
-                  IC6
+                  L6
                 </th>
                 <th className="text-left p-3 text-xs font-semibold text-purple-400">
-                  IC7
+                  L7
                 </th>
               </tr>
             </thead>

@@ -1,6 +1,6 @@
 // Design: Bold Engineering Dashboard — Behavioral Tab
 // Features: search, practice mode (3-min timer), full mock session (4 questions),
-// IC6/IC7 comparison table, mock history log, meta values, STAR framework
+// L6/L7 comparison table, mock history log, meta values, STAR framework
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Search,
@@ -644,11 +644,11 @@ export default function BehavioralTab() {
         </div>
       </div>
 
-      {/* IC6 vs IC7 Comparison */}
+      {/* L6 vs L7 Comparison */}
       <div className="prep-card overflow-hidden">
         <div className="p-4 border-b border-border">
           <div className="section-title mb-0 pb-0 border-0">
-            IC6 vs IC7 Behavioral Expectations
+            L6 vs L7 Behavioral Expectations
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -659,10 +659,10 @@ export default function BehavioralTab() {
                   Dimension
                 </th>
                 <th className="text-left p-3 text-xs font-semibold text-blue-400 uppercase tracking-wider">
-                  IC6 — Staff
+                  L6 — Staff
                 </th>
                 <th className="text-left p-3 text-xs font-semibold text-purple-400 uppercase tracking-wider">
-                  IC7 — Senior Staff
+                  L7 — Senior Staff
                 </th>
               </tr>
             </thead>

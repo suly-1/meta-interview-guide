@@ -177,7 +177,7 @@ function usePhases(
           id: "seniority_calibrator",
           label: "Run the Seniority Level Calibrator",
           detail:
-            "Submit your best STAR story. Verify your answers signal the right IC level.",
+            "Submit your best STAR story. Verify your answers signal the right L-level.",
           tab: "overview",
           anchor: "seniority-calibrator",
           doneWhen: "Submit 1 STAR story for level analysis",

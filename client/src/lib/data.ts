@@ -257,7 +257,7 @@ export const BEHAVIORAL_QUESTIONS = [
     id: "bq16",
     area: "Scale & Impact",
     q: "Describe a time when your technical decision had org-wide or company-wide impact.",
-    hint: "IC7: show you influenced beyond your immediate team.",
+    hint: "L7: show you influenced beyond your immediate team.",
   },
   {
     id: "bq17",
@@ -361,12 +361,12 @@ export const STAR_STORIES = [
     title: "Grew junior engineer",
     tags: ["Mentorship", "Culture", "Impact"],
     template:
-      "S: Junior engineer struggling with system design\nT: Upskill to IC4 level in 6 months\nA: Weekly 1:1s, design reviews, stretch projects, feedback loops\nR: Promoted to IC4, now leading a feature independently",
+      "S: Junior engineer struggling with system design\nT: Upskill to L4 level in 6 months\nA: Weekly 1:1s, design reviews, stretch projects, feedback loops\nR: Promoted to L4, now leading a feature independently",
   },
   {
     id: "s5",
     title: "Defined technical roadmap",
-    tags: ["Strategy", "Roadmap", "IC7"],
+    tags: ["Strategy", "Roadmap", "L7"],
     template:
       "S: Org lacked 2-year technical vision\nT: Define roadmap aligned to business goals\nA: Stakeholder interviews, competitive analysis, RFC process, OKR alignment\nR: Roadmap adopted, 3 major initiatives launched",
   },
@@ -396,62 +396,62 @@ export const STAR_STORIES = [
 export const SYSTEM_DESIGN_QUESTIONS = [
   {
     title: "Design Facebook News Feed",
-    level: "IC6+",
+    level: "L6+",
     tags: ["Fan-out", "Ranking", "Pagination"],
   },
   {
     title: "Design Facebook Messenger",
-    level: "IC6+",
+    level: "L6+",
     tags: ["WebSockets", "Message Storage", "Presence"],
   },
   {
     title: "Design Instagram",
-    level: "IC6+",
+    level: "L6+",
     tags: ["CDN", "Media Storage", "Feed Generation"],
   },
   {
     title: "Design WhatsApp",
-    level: "IC6+",
+    level: "L6+",
     tags: ["E2E Encryption", "Message Queue", "Delivery Receipts"],
   },
   {
     title: "Design a Distributed Cache",
-    level: "IC7+",
+    level: "L7+",
     tags: ["Consistent Hashing", "Eviction", "Replication"],
   },
   {
     title: "Design Search Autocomplete",
-    level: "IC6+",
+    level: "L6+",
     tags: ["Trie", "Top-K", "Ranking"],
   },
   {
     title: "Design a Notification System",
-    level: "IC6+",
+    level: "L6+",
     tags: ["Push/Pull", "Fanout", "Delivery Guarantees"],
   },
   {
     title: "Design a Rate Limiter",
-    level: "IC6+",
+    level: "L6+",
     tags: ["Token Bucket", "Sliding Window", "Distributed"],
   },
   {
     title: "Design a URL Shortener",
-    level: "IC6+",
+    level: "L6+",
     tags: ["Hashing", "Redirection", "Analytics"],
   },
   {
     title: "Design a Distributed Job Queue",
-    level: "IC7+",
+    level: "L7+",
     tags: ["At-least-once", "Idempotency", "Priority"],
   },
   {
     title: "Design Meta's Ad Targeting",
-    level: "IC7+",
+    level: "L7+",
     tags: ["ML Pipeline", "Real-time Bidding", "Privacy"],
   },
   {
     title: "Design a Distributed File System",
-    level: "IC7+",
+    level: "L7+",
     tags: ["Replication", "Consistency", "Fault Tolerance"],
   },
 ];
@@ -473,7 +473,7 @@ export const RESOURCES = [
     tag: "System Design",
     title: "HelloInterview — Level Expectations",
     url: "https://www.hellointerview.com",
-    desc: "Definitive guide on IC5/IC6/IC7 system design expectations and signals.",
+    desc: "Definitive guide on L5/L6/L7 system design expectations and signals.",
   },
   {
     tag: "Behavioral",
@@ -491,7 +491,7 @@ export const RESOURCES = [
     tag: "System Design",
     title: "Designing Data-Intensive Applications",
     url: "https://dataintensive.net",
-    desc: "The definitive book on distributed systems. Essential for IC6/IC7 design rounds.",
+    desc: "The definitive book on distributed systems. Essential for L6/L7 design rounds.",
   },
   {
     tag: "Behavioral",
@@ -564,7 +564,7 @@ export const INTERVIEW_DAY_CHECKLIST = [
     phase: "Morning Of",
     items: [
       "Light exercise or walk",
-      "Review IC6/IC7 expectations one more time",
+      "Review L6/L7 expectations one more time",
       "Eat a real meal",
       "Test audio/video if remote",
       "Arrive or log in 10 min early",

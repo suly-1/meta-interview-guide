@@ -1,7 +1,7 @@
 /**
  * Full Mock Day Simulator
  * Chains: Coding (45 min) → System Design (45 min) → XFN Behavioral (45 min) → Behavioral STAR (30 min)
- * Ends with a combined AI scorecard (hiring recommendation + IC level verdict + 2-week remediation plan)
+ * Ends with a combined AI scorecard (hiring recommendation + L-level verdict + 2-week remediation plan)
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
@@ -551,11 +551,11 @@ export function FullMockDaySimulator() {
               questionOrPrompt:
                 "Full Meta interview loop: Coding + System Design + XFN + Behavioral",
               candidateAnswer: scoreSummary,
-              targetLevel: (sc.levelVerdict?.includes("IC7")
-                ? "IC7"
-                : sc.levelVerdict?.includes("IC5")
-                  ? "IC5"
-                  : "IC6") as "IC5" | "IC6" | "IC7",
+              targetLevel: (sc.levelVerdict?.includes("L7")
+                ? "L7"
+                : sc.levelVerdict?.includes("L5")
+                  ? "L5"
+                  : "L6") as "L5" | "L6" | "L7",
               additionalContext: `Hiring recommendation from scorecard: ${sc.hiringRecommendation}`,
             })
             .then(v => setVerdict(v as VerdictResult))

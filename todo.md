@@ -26,7 +26,7 @@
 - [x] Replace 8-week timeline with strict 4-week plan
 - [x] Add 2-week fast-track plan with toggle between Standard / Fast-Track views
 - [x] Voice-to-STAR transcription procedure (Whisper API + LLM structuring)
-- [x] Answer Quality Scorer procedure (LLM scoring on Specificity, Impact, IC-level)
+- [x] Answer Quality Scorer procedure (LLM scoring on Specificity, Impact, L-level)
 - [x] Weekly Progress Email Digest procedure (owner notification)
 
 ## Pending — Coding Practice Features
@@ -84,7 +84,7 @@
 ## Pending — Social & Gamification Features
 
 - [x] Anonymous Leaderboard (opt-in, server-side, top streaks/patterns/mocks)
-- [ ] Achievement Badges (First Blood, On Fire, Half-Way There, Mock Veteran, IC7 Ready)
+- [ ] Achievement Badges (First Blood, On Fire, Half-Way There, Mock Veteran, L7 Ready)
 
 ## New Features — Round 6
 
@@ -118,7 +118,7 @@
 ## New Features — Round 11
 
 - [x] CTCI Problem Notes (persistent notes panel per problem, Markdown cheat sheet export)
-- [x] Behavioral Answer Scorer UI (STAR answer text area + LLM rubric: Specificity, Impact, IC-level)
+- [x] Behavioral Answer Scorer UI (STAR answer text area + LLM rubric: Specificity, Impact, L-level)
 - [x] Readiness Goal Setter (target % + date, daily task card with patterns/stories needed per day)
 
 ## New Features — Round 12
@@ -169,7 +169,7 @@
 ## New Features — Round 20
 
 - [x] XFN Question Randomizer — "Surprise Me (XFN)" button picks a random XFN question and starts a 3-min timer (Practice Mode style), teal timer ring
-- [x] AI Coach Answer Evaluator — answer textarea + 📊 Score My Answer button per question, shows Specificity/Impact bars, IC level badge, coaching note, strengths, improvements
+- [x] AI Coach Answer Evaluator — answer textarea + 📊 Score My Answer button per question, shows Specificity/Impact bars, L-level badge, coaching note, strengths, improvements
 
 ## New Features — Round 21
 
@@ -184,19 +184,19 @@
 
 ## New Features — Round 23
 
-- [x] System Design Mock Session — full 5-phase mock round (~38 min) in System Design tab, random question from all 12 SYSTEM_DESIGN_QUESTIONS, per-phase timers (violet ring → amber → red), answer capture, phase hints, AI scorecard (Overall/Requirements/Architecture/Scalability/Communication, IC level, strengths, improvements, follow-up questions)
+- [x] System Design Mock Session — full 5-phase mock round (~38 min) in System Design tab, random question from all 12 SYSTEM_DESIGN_QUESTIONS, per-phase timers (violet ring → amber → red), answer capture, phase hints, AI scorecard (Overall/Requirements/Architecture/Scalability/Communication, L-level, strengths, improvements, follow-up questions)
 
 ## New Features — Round 24
 
 - [x] Mock Session History — persist completed System Design mock sessions to localStorage, review past attempts with scores and answers, delete entries
-- [x] Custom Question Picker — choose specific question or filter by IC level (IC6+/IC7+) before starting mock, 🎲 Random button
-- [x] Behavioral Mock Session (XFN) — 3 XFN questions × 12-min timers, STAR phase tabs, teal timer ring, AI scorecard (Collaboration/Conflict/Alignment/Communication, IC level, strengths, improvements, follow-up questions), history with expand/delete
+- [x] Custom Question Picker — choose specific question or filter by L-level (L6+/L7+) before starting mock, 🎲 Random button
+- [x] Behavioral Mock Session (XFN) — 3 XFN questions × 12-min timers, STAR phase tabs, teal timer ring, AI scorecard (Collaboration/Conflict/Alignment/Communication, L-level, strengths, improvements, follow-up questions), history with expand/delete
 
 ## New Features — Round 25
 
 - [x] Combined Readiness Dashboard — Overview tab aggregates System Design + XFN mock scores into IC readiness gauge with per-dimension breakdown
 - [x] Mock Session Comparison — side-by-side diff view in both System Design and XFN History panels, color-coded deltas per dimension
-- [x] Coding Mock Session — 5-phase 45-min round (Problem Understanding → Approach → Pseudocode → Complexity → Edge Cases), pattern picker with difficulty filter + random, AI scorecard (Correctness/Complexity/Code Quality/Communication, IC level, optimal hint, follow-ups), history with compare mode
+- [x] Coding Mock Session — 5-phase 45-min round (Problem Understanding → Approach → Pseudocode → Complexity → Edge Cases), pattern picker with difficulty filter + random, AI scorecard (Correctness/Complexity/Code Quality/Communication, L-level, optimal hint, follow-ups), history with compare mode
 
 ## New Features — Round 26 (previously planned)
 
@@ -238,13 +238,13 @@
 
 ## New Features — Round 39
 
-- [ ] IC level badge in Coding Mock running session header (next to phase timer)
+- [ ] L-level badge in Coding Mock running session header (next to phase timer)
 - [ ] Onboarding step auto-complete: rate 3 patterns auto-checks step 2, mock completion auto-checks step 5
 - [ ] Onboarding progress DB sync (tRPC mutation + query, merges with localStorage for logged-in users)
 
 ## New Features — Round 38
 
-- [x] Coding Mock IC6/IC7 difficulty selector on entry card with level-specific AI rubric (mirrors XFN mock toggle; blue for IC6, violet for IC7)
+- [x] Coding Mock L6/L7 difficulty selector on entry card with level-specific AI rubric (mirrors XFN mock toggle; blue for L6, violet for L7)
 - [x] Deep-link chips on each Onboarding Checklist step (navigates to correct tab+section via URL params + popstate)
 
 ## New Features — Round 37
@@ -258,7 +258,7 @@
 
 ### Coding Tab
 
-- [x] Explain this pattern AI button (LLM, IC6/IC7 level-aware, expandable panel per card)
+- [x] Explain this pattern AI button (LLM, L6/L7 level-aware, expandable panel per card)
 - [x] Code snippet library — Cheat Sheet already covers Python templates; sprint timer already exists as SprintMode
 - [x] Weak pattern sprint timer — already exists as SprintMode in CodingTab
 
@@ -321,12 +321,12 @@
 - [x] Move AI Study Session Planner and Full Mock Day Simulator to top of Overview tab (above LevelCards)
 - [x] Quick Actions sticky row at top of Overview (Plan Today's Session / Start Full Mock Day scroll buttons)
 - [x] Last Session summary chip on StudySessionPlanner and FullMockDaySimulator
-- [x] Collapse IC6/IC7 comparison cards by default
+- [x] Collapse L6/L7 comparison cards by default
 
 ## New Features — Round 31
 
 - [x] Answer Recording Mode — Voice-to-STAR recorder already implemented in VoiceToStar.tsx (MediaRecorder, S3 upload, Whisper transcription, STAR structuring, AI scoring)
-- [x] Behavioral Mock Difficulty Selector — IC6 vs IC7 toggle added to XFN Behavioral Mock Session entry card; icMode passed to xfnMockScorecard procedure with level-specific rubric
+- [x] Behavioral Mock Difficulty Selector — L6 vs L7 toggle added to XFN Behavioral Mock Session entry card; icMode passed to xfnMockScorecard procedure with level-specific rubric
 - [x] System Design Diagram Templates — 3 pre-built Excalidraw JSON templates (News Feed, Messenger, Instagram) in SystemDesignDiagramTemplates.tsx with Download + Open buttons
 
 ## New Features — Round 40
@@ -375,14 +375,14 @@
 - [ ] Gauntlet Mode — 7-tab timed unbroken run challenge
 - [ ] Topic Roulette — spin for random pattern/BQ/SD challenge
 - [ ] Study Soundtrack — ambient music toggle in toolbar
-- [ ] Flashcard Flip Deck in Behavioral tab (type answer, word count, flip to see probes + IC6/IC7 sample answers)
-- [ ] 8 Key Signals That Distinguish IC7 from IC6 in Behavioral tab
+- [ ] Flashcard Flip Deck in Behavioral tab (type answer, word count, flip to see probes + L6/L7 sample answers)
+- [ ] 8 Key Signals That Distinguish L7 from L6 in Behavioral tab
 - [ ] Share Prep State URL (encode interview date + checklist progress into shareable URL)
 - [ ] 10-Week Study Timeline option (alongside existing 4-week and 2-week plans)
 
 ## New Features — Batch 3 (AI Mock Interviewer, Leaderboard, SR Scheduler)
 
-- [ ] AI Mock Interviewer — tRPC LLM procedure scoring STAR answers against IC7 signals rubric
+- [ ] AI Mock Interviewer — tRPC LLM procedure scoring STAR answers against L7 signals rubric
 - [ ] Peer Comparison Leaderboard — DB schema, opt-in, anonymised leaderboard UI
 - [ ] Spaced Repetition Scheduler — daily "3 cards due today" prompt in Quick Actions row
 
@@ -415,17 +415,17 @@
 ## New Features (Batch 6)
 
 - [ ] System Design Diagram Canvas (React Flow, Meta component nodes, PNG export)
-- [ ] Mock Full Interview Day (4-round chained session, composite IC6/IC7 scorecard)
+- [ ] Mock Full Interview Day (4-round chained session, composite L6/L7 scorecard)
 - [ ] Weak Area Auto-Drill (Drill this now button after AI scorecards)
 
 ## New Features (Batch 7 — Code Practice AI)
 
-- [x] AI Solution Reviewer (IC6/IC7 rubric scoring, verdict, coaching note)
+- [x] AI Solution Reviewer (L6/L7 rubric scoring, verdict, coaching note)
 - [x] 3-Level Hint System (pattern recognition → approach → pseudocode skeleton)
 - [x] Follow-Up Question Generator (2-3 interviewer follow-ups after solution)
 - [x] Complexity Analyzer (actual vs optimal time/space with gap explanation)
 - [x] Pattern Recognition Trainer (hide label, score candidate's pattern guess)
-- [x] IC7 Optimization Challenge (auto-challenge after IC6-level solution)
+- [x] L7 Optimization Challenge (auto-challenge after L6-level solution)
 
 ## New Features (Batch 6)
 
@@ -447,7 +447,7 @@
 
 ## New Features (Batch 7)
 
-- [x] Full Mock Interview Scorecard (4-round timed session, LLM composite IC6/IC7 promotion decision)
+- [x] Full Mock Interview Scorecard (4-round timed session, LLM composite L6/L7 promotion decision)
 - [x] Personalized Weak-Spot Study Plan Generator (7-day plan from actual AI scores)
 
 ## Bug Fixes
@@ -483,8 +483,8 @@
 ## Banner & Content Round 3
 
 - [ ] Add dismiss (×) button to CommunityBanner with localStorage persistence
-- [ ] Add IC4/IC5 entry-level section to Coding tab
-- [ ] Add IC4/IC5 entry-level section to Behavioral tab
+- [ ] Add L4/L5 entry-level section to Coding tab
+- [ ] Add L4/L5 entry-level section to Behavioral tab
 - [ ] Add external link confirmation modal to CommunityBanner official links
 - [ ] Run pnpm build:standalone
 
@@ -545,10 +545,10 @@
 
 ## Level Label + Neutral Language Updates
 
-- [x] Replace all IC4/IC5/IC6/IC7 with L4/L5/L6/L7 across entire codebase
+- [x] Replace all L4/L5/L6/L7 with L4/L5/L6/L7 across entire codebase
 - [x] Fix DisclaimerGate recruiter line: "Always pair it with whatever your recruiter sends you" → "Always pair it with any official guidance you receive"
 - [x] Remove "Technical Screen Guide" and "Full Loop Interview Guide" buttons and their links
-- [x] Fix TypeScript errors from IC→L rename (type union definitions still using IC5/IC6/IC7)
+- [x] Fix TypeScript errors from IC→L rename (type union definitions still using L5/L6/L7)
 - [x] Make DisclaimerGate domain dynamic via window.location.hostname
 
 ## High-Impact Features (Audit Round — 10 Features)
@@ -1015,7 +1015,7 @@
 ## New Features — Round 31 (5 High-Impact AI Features)
 
 - [x] AI-Enabled Coding Simulator (Priority #1) — 3-phase Meta format: Bug Fix → Feature Extension → Optimization, AI scoring per phase, in Coding tab
-- [x] IC-Level Signal Calibrator (Priority #2) — paste system design answer, get IC5/IC6/IC7 signal breakdown with gaps, in System Design tab
+- [x] IC-Level Signal Calibrator (Priority #2) — paste system design answer, get L5/L6/L7 signal breakdown with gaps, in System Design tab
 - [x] Meta Product Design Simulator (Priority #3) — 45-min timed session, 4 phases, Meta rubric scoring, in System Design tab
 - [x] Debugging Under Time Pressure (Priority #4) — 20 pre-built buggy codebases, 8-min timer, Meta Phase 1 format, in Coding tab
 - [x] Pass/Fail Verdict Engine (Priority #5) — Hire/Borderline/No-Hire verdict with Meta rubric reasoning, in Overview tab
@@ -1031,3 +1031,7 @@
 ## Bug Fix — Round 33
 
 - [x] Fix blank white screen in Management UI preview panel — moved Google Fonts @import to top of index.css before Tailwind imports (CSS ordering violation caused silent stylesheet failure in production build)
+
+## Rename — Round 34
+
+- [x] Replace all IC4/IC5/IC6/IC7 mentions with L4/L5/L6/L7 across entire codebase (components, data, routers, tests, HTML, CSS, markdown) — 387 occurrences replaced, zero remaining

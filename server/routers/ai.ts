@@ -255,7 +255,7 @@ Evaluate the candidate's approach, pseudocode, complexity analysis, edge case ha
 
 ${icRubric}
 
-Return a structured JSON scorecard. The level field should reflect what IC level the performance actually signals (L5, L6, or L7), not necessarily the target level.`,
+Return a structured JSON scorecard. The level field should reflect what L-level the performance actually signals (L5, L6, or L7), not necessarily the target level.`,
           },
           {
             role: "user",
@@ -401,7 +401,7 @@ Return a structured JSON scorecard. The level field should reflect what IC level
         messages: [
           {
             role: "system",
-            content: `You are a senior Meta engineering manager conducting an XFN Partnership interview round for a ${input.icMode} candidate.\nEvaluate the candidate's answers to 3 XFN behavioral questions and return a structured JSON scorecard.\nFocus on: collaboration quality, conflict resolution, alignment strategies, stakeholder management, and IC-level signal.\n\n${icRubric}\n\nBe rigorous but constructive. The level field in your response should reflect what IC level the performance actually signals (L5, L6, or L7), not necessarily the target level.`,
+            content: `You are a senior Meta engineering manager conducting an XFN Partnership interview round for a ${input.icMode} candidate.\nEvaluate the candidate's answers to 3 XFN behavioral questions and return a structured JSON scorecard.\nFocus on: collaboration quality, conflict resolution, alignment strategies, stakeholder management, and L-level signal.\n\n${icRubric}\n\nBe rigorous but constructive. The level field in your response should reflect what L-level the performance actually signals (L5, L6, or L7), not necessarily the target level.`,
           },
           {
             role: "user",
@@ -506,7 +506,7 @@ Return a structured JSON scorecard. The level field should reflect what IC level
       return parsed;
     }),
 
-  // Full Mock Day Scorecard: aggregate scores from all 3 rounds into a combined IC-level verdict
+  // Full Mock Day Scorecard: aggregate scores from all 3 rounds into a combined L-level verdict
   fullMockDayScorecard: protectedProcedure
     .input(
       z.object({
@@ -540,7 +540,7 @@ Return a structured JSON scorecard. The level field should reflect what IC level
             role: "system",
             content: `You are a Meta engineering hiring committee member reviewing a candidate's full interview day results.
 You have scores from 3-4 rounds: Coding, System Design, XFN Behavioral, and optionally a Behavioral STAR round.
-Provide an overall IC-level verdict, a hiring recommendation, specific coaching for each round, and a 2-week remediation plan.
+Provide an overall L-level verdict, a hiring recommendation, specific coaching for each round, and a 2-week remediation plan.
 Be direct and honest — this is what a real debrief would look like.`,
           },
           {
@@ -708,7 +708,7 @@ Be direct and honest — this is what a real debrief would look like.`,
           },
           {
             role: "user",
-            content: `Problem: ${input.problem}\n\nCandidate's walkthrough:\n${input.transcript}\n\nProvide: 1) Overall IC level signal (L5/L6/L7) with one-line verdict. 2) Strengths (2-3 specific things done well). 3) Gaps (2-3 specific things missing or weak). 4) L7 differentiators they missed. 5) One concrete suggestion to improve the weakest section. Keep total response under 400 words.`,
+            content: `Problem: ${input.problem}\n\nCandidate's walkthrough:\n${input.transcript}\n\nProvide: 1) Overall L-level signal (L5/L6/L7) with one-line verdict. 2) Strengths (2-3 specific things done well). 3) Gaps (2-3 specific things missing or weak). 4) L7 differentiators they missed. 5) One concrete suggestion to improve the weakest section. Keep total response under 400 words.`,
           },
         ],
       });
@@ -2667,7 +2667,7 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
       z.object({
         questionTitle: z.string().max(300),
         candidateAnswer: z.string().max(5000),
-        targetLevel: z.enum(["IC5", "IC6", "IC7"]),
+        targetLevel: z.enum(["L5", "L6", "L7"]),
         answerType: z
           .enum(["system_design", "behavioral", "coding"])
           .default("system_design"),
@@ -2678,7 +2678,7 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
         messages: [
           {
             role: "system",
-            content: `You are a Meta principal engineer calibrating interview answers to IC levels. IC5 solves the happy path. IC6 handles scale, failure modes, and makes explicit trade-offs. IC7 drives the problem definition and shows cross-system thinking.\n\nReturn JSON: { "detectedLevel": "IC5"|"IC6"|"IC7", "detectedLevelReasoning": string, "toReachIC6": string, "toReachIC7": string, "strongestSignal": string, "weakestSignal": string, "rewriteExample": string, "metaRubricScores": { "correctness": number (1-5), "tradeoffs": number (1-5), "scalability": number (1-5), "communication": number (1-5) } }`,
+            content: `You are a Meta principal engineer calibrating interview answers to L-levels. L5 solves the happy path. L6 handles scale, failure modes, and makes explicit trade-offs. L7 drives the problem definition and shows cross-system thinking.\n\nReturn JSON: { "detectedLevel": "L5"|"L6"|"L7", "detectedLevelReasoning": string, "toReachL6": string, "toReachL7": string, "strongestSignal": string, "weakestSignal": string, "rewriteExample": string, "metaRubricScores": { "correctness": number (1-5), "tradeoffs": number (1-5), "scalability": number (1-5), "communication": number (1-5) } }`,
           },
           {
             role: "user",
@@ -2695,8 +2695,8 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
               properties: {
                 detectedLevel: { type: "string" },
                 detectedLevelReasoning: { type: "string" },
-                toReachIC6: { type: "string" },
-                toReachIC7: { type: "string" },
+                toReachL6: { type: "string" },
+                toReachL7: { type: "string" },
                 strongestSignal: { type: "string" },
                 weakestSignal: { type: "string" },
                 rewriteExample: { type: "string" },
@@ -2720,8 +2720,8 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
               required: [
                 "detectedLevel",
                 "detectedLevelReasoning",
-                "toReachIC6",
-                "toReachIC7",
+                "toReachL6",
+                "toReachL7",
                 "strongestSignal",
                 "weakestSignal",
                 "rewriteExample",
@@ -2741,8 +2741,8 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
       return JSON.parse(c) as {
         detectedLevel: string;
         detectedLevelReasoning: string;
-        toReachIC6: string;
-        toReachIC7: string;
+        toReachL6: string;
+        toReachL7: string;
         strongestSignal: string;
         weakestSignal: string;
         rewriteExample: string;
@@ -2764,7 +2764,7 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
         highLevelAnswer: z.string().max(2000),
         deepDiveAnswer: z.string().max(2000),
         tradeoffsAnswer: z.string().max(2000),
-        targetLevel: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+        targetLevel: z.enum(["L5", "L6", "L7"]).default("L6"),
         totalTimeSeconds: z.number().optional(),
       })
     )
@@ -2940,7 +2940,7 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
         ]),
         questionOrPrompt: z.string().max(500),
         candidateAnswer: z.string().max(8000),
-        targetLevel: z.enum(["IC5", "IC6", "IC7"]).default("IC6"),
+        targetLevel: z.enum(["L5", "L6", "L7"]).default("L6"),
         additionalContext: z.string().max(1000).optional(),
       })
     )
@@ -2949,7 +2949,7 @@ Return JSON: { systemDesign: string[], behavioralFocusAreas: [{area: string, que
         system_design:
           "Correctness, Trade-offs, Scalability (Meta-scale), Communication",
         behavioral:
-          "Situation clarity, Task ownership (I not we), Action specificity, Result measurability, IC-level signal",
+          "Situation clarity, Task ownership (I not we), Action specificity, Result measurability, L-level signal",
         coding:
           "Correctness (all edge cases), Complexity (optimal), Code quality, Problem-solving approach",
         full_loop:

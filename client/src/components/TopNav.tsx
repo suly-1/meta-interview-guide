@@ -20,7 +20,7 @@ const TABS = [
 const SITE_ID = import.meta.env.VITE_SITE_ID ?? "metaengguide-pro";
 const IS_METAGUIDE_BLOG = SITE_ID === "metaguide-blog";
 
-// metaengguide.pro  → deep blue badge, "MEG" monogram, "IC6/IC7" tag
+// metaengguide.pro  → deep blue badge, "MEG" monogram, "L6/L7" tag
 // metaguide.blog    → warm green badge, leaf icon, "L4–L7" tag
 const LOGO_BG = IS_METAGUIDE_BLOG ? "bg-emerald-600" : "bg-blue-500";
 const LOGO_ICON = IS_METAGUIDE_BLOG ? (
@@ -29,7 +29,7 @@ const LOGO_ICON = IS_METAGUIDE_BLOG ? (
   <BookOpen size={14} className="text-white" />
 );
 const WORDMARK = IS_METAGUIDE_BLOG ? "Staff Eng Prep" : "Meta Prep";
-const BADGE_TEXT = IS_METAGUIDE_BLOG ? "L4–L7" : "IC6/IC7";
+const BADGE_TEXT = IS_METAGUIDE_BLOG ? "L4–L7" : "L6/L7";
 const BADGE_CLS = IS_METAGUIDE_BLOG ? "badge-green" : "badge-blue";
 const ACTIVE_TAB_CLS = IS_METAGUIDE_BLOG
   ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"

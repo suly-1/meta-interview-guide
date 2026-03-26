@@ -672,7 +672,7 @@ export function CodingMockSession() {
             <div className="text-xs text-muted-foreground leading-relaxed">
               Pick a pattern, choose a problem, and work through 5 timed phases:
               Problem Understanding → Approach → Pseudocode → Complexity → Edge
-              Cases. Finish to get an AI scorecard with IC-level signal.
+              Cases. Finish to get an AI scorecard with L-level signal.
             </div>
             <button
               onClick={() => setView("picker")}
@@ -1094,7 +1094,7 @@ export function CodingMockSession() {
               ))}
             </div>
 
-            {/* IC level */}
+            {/* L-level */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-secondary border border-border">
               <div className="text-xs text-muted-foreground">
                 IC Level Signal

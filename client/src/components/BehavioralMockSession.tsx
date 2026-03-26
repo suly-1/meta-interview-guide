@@ -848,7 +848,7 @@ export function BehavioralMockSession() {
                 const lines: string[] = [
                   `# XFN Behavioral Mock Transcript`,
                   `**Date:** ${new Date().toLocaleString()}`,
-                  `**IC Mode:** ${icMode}`,
+                  `**L-Mode:** ${icMode}`,
                   `**Overall Score:** ${scorecard.overallScore.toFixed(1)}/5  |  **IC Level:** ${scorecard.level}`,
                   ``,
                   `## Scores`,

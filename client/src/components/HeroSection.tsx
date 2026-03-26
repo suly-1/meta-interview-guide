@@ -61,7 +61,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
               Meta Interview Prep
             </h1>
             <p className="text-sm text-muted-foreground">
-              IC6 (Staff) &amp; IC7 (Senior Staff) — Coding · System Design ·
+              L6 (Staff) &amp; L7 (Senior Staff) — Coding · System Design ·
               Behavioral
             </p>
           </div>
