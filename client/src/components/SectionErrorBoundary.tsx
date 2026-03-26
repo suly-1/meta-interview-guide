@@ -10,7 +10,13 @@
  * - Collapsible technical details for debugging
  * - Retry counter shown after the first failure
  */
-import { AlertTriangle, ChevronDown, ChevronUp, Loader2, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
 import { Component, ReactNode } from "react";
 
 const MAX_RETRIES = 3;
@@ -92,7 +98,10 @@ export class SectionErrorBoundary extends Component<Props, State> {
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 flex flex-col gap-3">
           {/* Header */}
           <div className="flex items-start gap-2">
-            <AlertTriangle size={16} className="shrink-0 text-rose-400 mt-0.5" />
+            <AlertTriangle
+              size={16}
+              className="shrink-0 text-rose-400 mt-0.5"
+            />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-rose-400">
                 {label} encountered an error
@@ -118,7 +127,8 @@ export class SectionErrorBoundary extends Component<Props, State> {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-300 text-xs font-semibold transition-all"
               >
                 <RefreshCw size={12} />
-                Try Again{retryCount > 0 ? ` (${MAX_RETRIES - retryCount} left)` : ""}
+                Try Again
+                {retryCount > 0 ? ` (${MAX_RETRIES - retryCount} left)` : ""}
               </button>
             )}
             {error && (
@@ -126,7 +136,11 @@ export class SectionErrorBoundary extends Component<Props, State> {
                 onClick={this.toggleDetails}
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showDetails ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                {showDetails ? (
+                  <ChevronUp size={12} />
+                ) : (
+                  <ChevronDown size={12} />
+                )}
                 {showDetails ? "Hide" : "Show"} details
               </button>
             )}

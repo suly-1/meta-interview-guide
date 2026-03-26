@@ -1,238 +1,221 @@
 /**
- * ImpactQuantificationCoach — #9 High-Impact Feature
- *
- * Paste a STAR answer, AI highlights every sentence missing a metric
- * and suggests exactly what to add. Shows a rewritten Result section.
+ * #9 — Impact Quantification Coach
+ * Candidate pastes a STAR story. AI identifies every claim that could be
+ * quantified and coaches them to add specific numbers, percentages, and metrics.
+ * Returns a strengthened version of the story.
  */
-
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useScorePersistence } from "@/hooks/useScorePersistence";
-import { Sparkles, AlertCircle, CheckCircle2, TrendingUp, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
-import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
-import { motion, AnimatePresence } from "framer-motion";
+import { Streamdown } from "streamdown";
+import { toast } from "sonner";
+import {
+  TrendingUp,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 
-type Level = "L4" | "L5" | "L6" | "L7";
+export function ImpactQuantificationCoach() {
+  const [expanded, setExpanded] = useState(false);
+  const [story, setStory] = useState("");
+  const [result, setResult] = useState<{
+    weakClaims: Array<{ original: string; suggestion: string }>;
+    strengthenedStory: string;
+    scoreOriginal: number;
+    scoreStrengthened: number;
+    coaching: string;
+  } | null>(null);
 
-const SCORE_LABELS: Record<number, { label: string; color: string }> = {
-  1: { label: "No Metrics", color: "text-red-600 dark:text-red-400" },
-  2: { label: "Weak", color: "text-orange-600 dark:text-orange-400" },
-  3: { label: "Adequate", color: "text-amber-600 dark:text-amber-400" },
-  4: { label: "Good", color: "text-blue-600 dark:text-blue-400" },
-  5: { label: "Excellent", color: "text-emerald-600 dark:text-emerald-400" },
-};
+  const coachMutation = trpc.ai.quantifyImpact.useMutation();
 
-function ScoreRing({ score }: { score: number }) {
-  const pct = ((score - 1) / 4) * 100;
-  const r = 22;
-  const circ = 2 * Math.PI * r;
-  const dash = circ * (pct / 100);
-  const color = score >= 5 ? "#10b981" : score >= 4 ? "#3b82f6" : score >= 3 ? "#f59e0b" : score >= 2 ? "#f97316" : "#ef4444";
-  return (
-    <div className="relative w-14 h-14 flex-shrink-0">
-      <svg width={56} height={56} className="rotate-[-90deg]">
-        <circle cx={28} cy={28} r={r} fill="none" stroke="currentColor" strokeWidth={4} className="text-gray-200 dark:text-gray-700" />
-        <circle cx={28} cy={28} r={r} fill="none" stroke={color} strokeWidth={4} strokeDasharray={`${dash} ${circ - dash}`} strokeLinecap="round" />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-bold" style={{ color }}>{score}/5</span>
-      </div>
-    </div>
-  );
-}
-
-export default function ImpactQuantificationCoach() {
-  const [answer, setAnswer] = useState("");
-  const [targetLevel, setTargetLevel] = useState<Level>("L6");
-  const [showRewrite, setShowRewrite] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const analyze = trpc.highImpact.quantifyImpact.useMutation();
-
-  const handleAnalyze = () => {
-    if (answer.trim().length < 50) return;
-    analyze.mutate({ answer, targetLevel });
-  };
-
-  const copyRewrite = () => {
-    if (analyze.data?.rewrittenResult) {
-      navigator.clipboard.writeText(analyze.data.rewrittenResult);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  async function handleCoach() {
+    if (!story.trim()) {
+      toast.error("Paste your STAR story first");
+      return;
     }
-  };
-
-  const result = analyze.data;
-  const missingSentences = result?.sentences.filter(s => !s.hasMetric && s.suggestion) ?? [];
-  const strongSentences = result?.sentences.filter(s => s.hasMetric && s.praise) ?? [];
+    try {
+      const res = await coachMutation.mutateAsync({ story });
+      setResult(JSON.parse(res.content));
+    } catch {
+      toast.error("Coaching failed — try again");
+    }
+  }
 
   return (
-    <div className="space-y-4">
-      <HighImpactSectionHeader
-        title="Impact Quantification Coach"
-        subtitle="The #1 reason L6+ candidates fail behavioral: answers without numbers. Paste your STAR answer and get every missing metric highlighted instantly."
-        stat="Most Common Failure"
-        variant="orange"
-        icon={<TrendingUp size={20} />}
-      />
-
-      <ImpactCallout variant="red">
-        At Meta L6+, every Result sentence must have a number. "Improved performance" fails. "Reduced p99 latency by 40ms (from 120ms to 80ms), impacting 2M daily active users" passes.
-      </ImpactCallout>
-
-      <HighImpactWrapper variant="orange" className="p-4 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Target Level</label>
-            <div className="flex gap-2">
-              {(["L4", "L5", "L6", "L7"] as Level[]).map(l => (
-                <button
-                  key={l}
-                  onClick={() => setTargetLevel(l)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-orange-300"}`}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-          </div>
-          <HighImpactBadge variant="orange" />
+    <div
+      id="behavioral-impact-coach"
+      className="rounded-xl border-2 border-emerald-500/60 bg-gradient-to-br from-emerald-950/40 to-green-950/30 overflow-hidden"
+      style={{ boxShadow: "0 0 24px rgba(16,185,129,0.12)" }}
+    >
+      {/* HIGH IMPACT header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-500/20 to-green-500/10 border-b border-emerald-500/30">
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black tracking-wider uppercase">
+            ⚡ High Impact
+          </span>
+          <TrendingUp size={16} className="text-emerald-400" />
+          <span className="text-sm font-bold text-emerald-300">
+            Impact Quantification Coach
+          </span>
         </div>
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="text-emerald-400 hover:text-emerald-300 transition-colors"
+        >
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+      </div>
 
-        <div>
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
-            Your STAR Answer
-          </label>
-          <textarea
-            value={answer}
-            onChange={e => setAnswer(e.target.value)}
-            placeholder="Paste your full STAR answer here. Include the Situation, Task, Action, and Result. The more complete, the better the analysis..."
-            rows={8}
-            className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 resize-none"
-          />
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-gray-400">{answer.length} chars</span>
-            <button
-              onClick={handleAnalyze}
-              disabled={analyze.isPending || answer.trim().length < 50}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-all"
-            >
-              {analyze.isPending ? (
-                <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Analyzing...</>
-              ) : (
-                <><Sparkles size={14} />Highlight Missing Metrics</>
-              )}
-            </button>
-          </div>
-        </div>
-      </HighImpactWrapper>
-
-      {/* Results */}
-      <AnimatePresence>
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
+      {!expanded && (
+        <div className="px-4 py-3">
+          <p className="text-xs text-muted-foreground">
+            Paste any STAR story. AI finds every vague claim and coaches you to
+            add specific metrics — the single biggest differentiator between L5
+            and L6 stories.
+          </p>
+          <button
+            onClick={() => setExpanded(true)}
+            className="mt-2 text-xs text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
           >
-            {/* Score */}
-            <HighImpactWrapper variant="orange" className="p-4">
-              <div className="flex items-center gap-4">
-                <ScoreRing score={result.overallScore} />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-lg font-bold ${SCORE_LABELS[result.overallScore]?.color}`}>
-                      {SCORE_LABELS[result.overallScore]?.label}
-                    </span>
-                    <HighImpactBadge size="sm" />
+            Strengthen my story →
+          </button>
+        </div>
+      )}
+
+      {expanded && (
+        <div className="p-4 space-y-4">
+          {/* Why this matters */}
+          <div className="flex gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+            <AlertTriangle
+              size={14}
+              className="text-emerald-400 shrink-0 mt-0.5"
+            />
+            <p className="text-xs text-emerald-200">
+              <strong>Why this matters:</strong> "I improved performance" is an
+              L4 answer. "I reduced P99 latency from 800ms to 120ms, cutting
+              timeout errors by 94% and saving $2M/year in SLA penalties" is an
+              L6 answer. The difference is quantification.
+            </p>
+          </div>
+
+          {/* Input */}
+          {!result && (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Your STAR Story
+                </label>
+                <div className="text-xs text-muted-foreground">
+                  Paste any behavioral answer — rough draft is fine. The coach
+                  will find every place you can add numbers.
+                </div>
+                <textarea
+                  value={story}
+                  onChange={e => setStory(e.target.value)}
+                  rows={10}
+                  placeholder={
+                    'Example (weak):\n"I led a project to improve our checkout flow. The team was struggling with performance issues and I worked with engineers to fix the bottlenecks. We made significant improvements and the business saw better results. Customers were happier and conversion improved."\n\nPaste your story here...'
+                  }
+                  className="w-full text-xs rounded-lg bg-background border border-border px-3 py-2 text-foreground resize-none"
+                />
+              </div>
+
+              <button
+                onClick={handleCoach}
+                disabled={coachMutation.isPending || !story.trim()}
+                className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-bold transition-all"
+              >
+                {coachMutation.isPending
+                  ? "Analyzing story…"
+                  : "Quantify My Impact →"}
+              </button>
+            </div>
+          )}
+
+          {/* Results */}
+          {result && (
+            <div className="space-y-4">
+              {/* Score improvement */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+                  <div className="text-2xl font-black text-red-400">
+                    {result.scoreOriginal}/10
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    <strong className="text-orange-600 dark:text-orange-400">Top fix:</strong> {result.topSuggestion}
-                  </p>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Original Impact Score
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+                  <div className="text-2xl font-black text-emerald-400">
+                    {result.scoreStrengthened}/10
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Strengthened Score
+                  </div>
                 </div>
               </div>
-            </HighImpactWrapper>
 
-            {/* Missing metrics */}
-            {missingSentences.length > 0 && (
-              <HighImpactWrapper variant="orange" className="p-4">
-                <h4 className="font-bold text-sm text-red-600 dark:text-red-400 mb-3 flex items-center gap-2">
-                  <AlertCircle size={15} />
-                  {missingSentences.length} Sentence{missingSentences.length > 1 ? "s" : ""} Missing Metrics
-                </h4>
-                <div className="space-y-3">
-                  {missingSentences.map((s, i) => (
-                    <div key={i} className="rounded-lg border border-red-200 dark:border-red-800/40 overflow-hidden">
-                      <div className="px-3 py-2 bg-red-50 dark:bg-red-950/30">
-                        <p className="text-sm text-gray-800 dark:text-gray-200 italic">"{s.text}"</p>
-                      </div>
-                      <div className="px-3 py-2 bg-white dark:bg-gray-900">
-                        <p className="text-xs text-red-600 dark:text-red-400 font-semibold">
-                          ↳ Add: {s.suggestion}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </HighImpactWrapper>
-            )}
-
-            {/* Strong sentences */}
-            {strongSentences.length > 0 && (
-              <HighImpactWrapper variant="emerald" className="p-4">
-                <h4 className="font-bold text-sm text-emerald-600 dark:text-emerald-400 mb-3 flex items-center gap-2">
-                  <CheckCircle2 size={15} />
-                  {strongSentences.length} Strong Metric{strongSentences.length > 1 ? "s" : ""} Found
-                </h4>
+              {/* Weak claims */}
+              {result.weakClaims.length > 0 && (
                 <div className="space-y-2">
-                  {strongSentences.map((s, i) => (
-                    <div key={i} className="rounded-lg border border-emerald-200 dark:border-emerald-800/40 px-3 py-2 bg-emerald-50/50 dark:bg-emerald-950/20">
-                      <p className="text-sm text-gray-800 dark:text-gray-200 italic mb-1">"{s.text}"</p>
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">✓ {s.praise}</p>
+                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    Vague Claims to Quantify ({result.weakClaims.length})
+                  </div>
+                  {result.weakClaims.map((c, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 space-y-1.5"
+                    >
+                      <div className="text-xs text-red-300 line-through">
+                        "{c.original}"
+                      </div>
+                      <div className="flex items-start gap-1.5">
+                        <Sparkles
+                          size={10}
+                          className="text-emerald-400 shrink-0 mt-0.5"
+                        />
+                        <div className="text-xs text-emerald-300">
+                          {c.suggestion}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </HighImpactWrapper>
-            )}
+              )}
 
-            {/* Rewritten result */}
-            {result.rewrittenResult && (
-              <HighImpactWrapper variant="violet" className="p-4">
-                <button
-                  onClick={() => setShowRewrite(!showRewrite)}
-                  className="w-full flex items-center justify-between text-sm font-bold text-violet-700 dark:text-violet-400"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sparkles size={15} />
-                    AI-Rewritten Result Section (with metrics added)
-                  </span>
-                  {showRewrite ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                </button>
-                <AnimatePresence>
-                  {showRewrite && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-3 pt-3 border-t border-violet-100 dark:border-violet-900/30">
-                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{result.rewrittenResult}</p>
-                        <button
-                          onClick={copyRewrite}
-                          className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
-                        >
-                          {copied ? <><Check size={12} />Copied!</> : <><Copy size={12} />Copy rewritten section</>}
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </HighImpactWrapper>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {/* Coaching */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3 space-y-1">
+                <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                  Coaching Notes
+                </div>
+                <Streamdown>{result.coaching}</Streamdown>
+              </div>
+
+              {/* Strengthened story */}
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                  <Sparkles size={12} />
+                  Strengthened Story (L6 Standard)
+                </div>
+                <Streamdown>{result.strengthenedStory}</Streamdown>
+              </div>
+
+              <button
+                onClick={() => {
+                  setResult(null);
+                  setStory("");
+                }}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <RefreshCw size={12} />
+                Coach another story
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

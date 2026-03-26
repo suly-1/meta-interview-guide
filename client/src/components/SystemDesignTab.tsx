@@ -1,948 +1,2749 @@
-// SystemDesignTab — 8 Meta system design patterns + Meta Engineering Blog Feed
-// Design: clean structured approach cards with expandable sections
+// Design: Bold Engineering Dashboard — System Design Tab
 import { useState } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, BookOpen, Zap, Database, Server, Globe, MessageSquare, Search, Bell, BarChart2, Brain, Eye, EyeOff, Target, Table2, AlertTriangle, Layers, Rss } from "lucide-react";
-import SystemDesignMockSession from "./SystemDesignMockSession";
-import SystemDesignComparisonTable from "./SystemDesignComparisonTable";
-import SDFailureModeDiagnostic from "./SDFailureModeDiagnostic";
-import SDRequirementsTrainer from "./SDRequirementsTrainer";
-import SDTradeoffDrill from "./SDTradeoffDrill";
-import SDMathTrainer from "./SDMathTrainer";
-import SDComponentStressTest from "./SDComponentStressTest";
-import SDTradeoffLibrary from "./SDTradeoffLibrary";
-import SDDeepDiveBank from "./SDDeepDiveBank";
-import SDMetaBlogReader from "./SDMetaBlogReader";
-import SDBoECalculator from "./SDBoECalculator";
-import CollabRoom from "./CollabRoom";
-import AIInterviewerInterrupt from "./AIInterviewerInterrupt";
-import BoECalculatorGrader from "./BoECalculatorGrader";
-import AdversarialDesignReview from "./AdversarialDesignReview";
-import { Calculator, Zap as ZapIcon, Users } from "lucide-react";
+import { SYSTEM_DESIGN_QUESTIONS } from "@/lib/data";
+import {
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Brain,
+  Database,
+  Server,
+  Shield,
+  BarChart3,
+  Zap,
+  GitBranch,
+  Search,
+  HelpCircle,
+} from "lucide-react";
+import { useFlashCardSRDue } from "@/hooks/useLocalStorage";
+import { SystemDesignMockSession } from "@/components/SystemDesignMockSession";
+import {
+  CapacityCalculator,
+  DesignPatternLibrary,
+  FlashCardCSVImport,
+} from "@/components/SystemDesignExtras";
+import { SystemDesignDiagramTemplates } from "@/components/SystemDesignDiagramTemplates";
+import SystemDesignFailureAnalysis from "@/components/SystemDesignFailureAnalysis";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { AIInterviewerInterruptMode } from "@/components/AIInterviewerInterruptMode";
+import { BackOfEnvelopeCalculator } from "@/components/BackOfEnvelopeCalculator";
+import { TearDownMyDesign } from "@/components/TearDownMyDesign";
+import { FeatureHeatmapRow } from "@/components/FeatureHeatmapRow";
+import {
+  GuidedDesignWalkthrough,
+  TradeoffDecisionSimulator,
+  MetaComponentLibrary,
+  ScaleEstimationCalculator,
+  AntiPatternDetector,
+  PeerDesignReview,
+  DesignDocGenerator,
+  ComplexityCheatSheet,
+  ExplainLikeAPM,
+  TimeBoxedPracticeTimer,
+  EnhancedQuestionBank,
+} from "@/components/SystemDesignEnhancements";
 
-interface DesignPattern {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-  tagline: string;
-  difficulty: "Medium" | "Hard" | "Very Hard";
-  metaRelevance: string;
-  requirements: { functional: string[]; nonFunctional: string[] };
-  dataModel: { entities: string[]; keyDecisions: string[] };
-  api: { endpoints: string[] };
-  scaleBottlenecks: string[];
-  metaTips: string[];
-  color: string;
-  bgColor: string;
-  borderColor: string;
-}
-
-const DIFFICULTY_COLORS: Record<string, string> = {
-  Medium: "text-amber-700 bg-amber-50 border-amber-200",
-  Hard: "text-orange-700 bg-orange-50 border-orange-200",
-  "Very Hard": "text-red-700 bg-red-50 border-red-200",
-};
-
-const DESIGN_PATTERNS: DesignPattern[] = [
+const FRAMEWORK_STEPS = [
   {
-    id: "news-feed",
-    title: "News Feed (Facebook Feed)",
-    icon: <Globe size={16} />,
-    tagline: "Fan-out on write vs. fan-out on read",
-    difficulty: "Hard",
-    metaRelevance: "Core Meta product — expect this at L6+. Interviewers probe the fan-out trade-off deeply.",
-    requirements: {
-      functional: ["User can post text/images/videos", "User sees a ranked feed of posts from friends/pages", "Feed updates in near-real-time", "Pagination / infinite scroll"],
-      nonFunctional: ["500M DAU, 100M posts/day", "Feed load < 200ms p99", "High availability (99.99%)", "Eventual consistency acceptable"],
-    },
-    dataModel: {
-      entities: ["User(id, name, follower_count)", "Post(id, author_id, content, media_urls, created_at, like_count)", "FeedItem(user_id, post_id, score, created_at)", "Follow(follower_id, followee_id)"],
-      keyDecisions: ["Separate post store (Cassandra/MySQL) from feed store (Redis sorted set)", "Pre-compute feed for users with <10K followers (fan-out on write)", "Pull feed for celebrities (fan-out on read) to avoid write amplification", "Score = recency * engagement_weight"],
-    },
-    api: {
-      endpoints: ["GET /feed?user_id={id}&cursor={cursor}&limit=20 → {posts[], next_cursor}", "POST /posts {content, media_ids[]} → {post_id}", "POST /posts/{id}/like → {like_count}", "DELETE /posts/{id}"],
-    },
-    scaleBottlenecks: ["Celebrity fan-out: 1 Beyoncé post → 100M writes. Solve with lazy fan-out + pull hybrid.", "Feed ranking: can't rank in real-time at scale. Pre-rank on write, re-rank on read with lightweight model.", "Media storage: CDN + object store (S3-like). Never store blobs in DB.", "Cache invalidation: use TTL + event-driven invalidation on new posts."],
-    metaTips: ["Always ask: 'Should I use fan-out on write or read?' — answer depends on follower distribution.", "Mention TAO (Meta's graph store) for social graph queries.", "Discuss EdgeRank / ML ranking as a follow-up even if not asked.", "Pagination: cursor-based, not offset-based (offset breaks with new inserts)."],
-    color: "#1e3a8a",
-    bgColor: "#eff6ff",
-    borderColor: "#bfdbfe",
+    step: "1. Requirements",
+    time: "5 min",
+    items: [
+      "Functional: what the system must do",
+      "Non-functional: scale, latency, availability, consistency",
+      "Ask: DAU, QPS, data volume, read/write ratio",
+      "Clarify: global vs regional, mobile vs web",
+    ],
   },
   {
-    id: "messaging",
-    title: "Messaging System (Messenger)",
-    icon: <MessageSquare size={16} />,
-    tagline: "Real-time delivery, ordering, and at-least-once guarantees",
-    difficulty: "Very Hard",
-    metaRelevance: "Messenger is a core Meta product. Tests distributed systems depth: ordering, delivery guarantees, presence.",
-    requirements: {
-      functional: ["1:1 and group messaging (up to 256 members)", "Real-time delivery with read receipts", "Message history / search", "Online presence indicator", "Push notifications for offline users"],
-      nonFunctional: ["1B DAU, 100B messages/day", "Message delivery < 100ms p99", "Messages never lost (at-least-once)", "Ordered delivery within a conversation"],
-    },
-    dataModel: {
-      entities: ["Message(id, thread_id, sender_id, content, created_at, client_msg_id)", "Thread(id, type, participants[], last_msg_id)", "UserPresence(user_id, status, last_seen, server_id)", "Inbox(user_id, thread_id, unread_count, last_read_msg_id)"],
-      keyDecisions: ["Use client_msg_id for idempotency (dedup on retry)", "Thread-level sequence numbers for ordering (not global)", "Store messages in Cassandra partitioned by thread_id", "Presence via heartbeat to dedicated presence servers"],
-    },
-    api: {
-      endpoints: ["WebSocket /ws?user_id={id} — bidirectional real-time channel", "POST /messages {thread_id, content, client_msg_id} → {msg_id, seq_no}", "GET /threads/{id}/messages?before={seq_no}&limit=50 → {messages[]}", "GET /threads/{id}/presence → {user_id, status}[]"],
-    },
-    scaleBottlenecks: ["Connection fan-out: 1 message → N recipients on different servers. Use pub/sub (Kafka) + server routing table.", "Group messages: fan-out to 256 recipients. Use async delivery queue.", "Ordering: use Lamport clocks or server-assigned seq_no per thread.", "Offline delivery: push via APNs/FCM with retry + expiry."],
-    metaTips: ["Distinguish 'sent', 'delivered', 'read' receipts — each requires a different mechanism.", "Mention MQTT or custom protocol for mobile (vs WebSocket for web).", "Discuss message retention policy and GDPR deletion.", "For group chats: separate 'fan-out service' from 'message store'."],
-    color: "#065f46",
-    bgColor: "#ecfdf5",
-    borderColor: "#a7f3d0",
+    step: "2. Capacity Estimation",
+    time: "3 min",
+    items: [
+      "Storage: daily writes × record size × retention",
+      "Bandwidth: QPS × avg payload size",
+      "Compute: QPS / requests-per-server",
+      "Cache: 20% of daily reads (Pareto principle)",
+    ],
   },
   {
-    id: "rate-limiter",
-    title: "Distributed Rate Limiter",
-    icon: <Server size={16} />,
-    tagline: "Token bucket vs. sliding window log at distributed scale",
-    difficulty: "Medium",
-    metaRelevance: "Common infrastructure question. Tests understanding of distributed state, consistency trade-offs, and Redis.",
-    requirements: {
-      functional: ["Limit requests per user/IP/API key", "Multiple rate limit rules (per second, per minute, per day)", "Return 429 with Retry-After header", "Admin API to update rules without restart"],
-      nonFunctional: ["< 5ms overhead per request", "Handles 1M RPS", "Eventual consistency acceptable (some over-counting OK)", "No single point of failure"],
-    },
-    dataModel: {
-      entities: ["RateLimitRule(id, key_type, limit, window_seconds, algorithm)", "Counter(key, window_start, count, expires_at)", "TokenBucket(key, tokens, last_refill_ts)"],
-      keyDecisions: ["Token bucket: smooth traffic, allows bursts. Sliding window log: precise but memory-heavy.", "Fixed window counter: simplest, but boundary burst problem.", "Redis INCR + EXPIRE for atomic counter. Lua script for token bucket atomicity.", "Local cache + async sync to Redis for ultra-low latency (accept slight over-counting)."],
-    },
-    api: {
-      endpoints: ["checkLimit(user_id, rule_id) → {allowed: bool, remaining: int, retry_after_ms: int}", "POST /admin/rules {key_type, limit, window_seconds} → {rule_id}", "GET /admin/rules/{key_type} → {rules[]}", "DELETE /admin/rules/{rule_id}"],
-    },
-    scaleBottlenecks: ["Redis single node: shard by key hash. Use Redis Cluster.", "Race condition: use Lua scripts or WATCH/MULTI for atomicity.", "Rule propagation: pub/sub to invalidate local caches across fleet.", "Sliding window at scale: approximate with sliding window counter (hybrid of fixed windows)."],
-    metaTips: ["Always ask: 'What's the acceptable error rate?' — this determines algorithm choice.", "Mention the boundary burst problem with fixed windows and how sliding window solves it.", "Discuss cell-based rate limiting (per datacenter) vs. global rate limiting.", "Redis Lua script is the standard answer for atomic token bucket."],
-    color: "#92400e",
-    bgColor: "#fffbeb",
-    borderColor: "#fde68a",
+    step: "3. High-Level Design",
+    time: "10 min",
+    items: [
+      "Draw core components: clients, LB, API servers, DB, cache",
+      "Define APIs (REST/GraphQL/gRPC)",
+      "Choose SQL vs NoSQL with justification",
+      "Identify the core data flow end-to-end",
+    ],
   },
   {
-    id: "typeahead",
-    title: "Search Typeahead / Autocomplete",
-    icon: <Search size={16} />,
-    tagline: "Trie vs. inverted index, prefix matching at scale",
-    difficulty: "Medium",
-    metaRelevance: "Search bar autocomplete is everywhere at Meta. Tests data structure knowledge and caching strategy.",
-    requirements: {
-      functional: ["Return top 5-10 suggestions for a prefix in < 100ms", "Suggestions ranked by popularity/relevance", "Support for typo tolerance (fuzzy matching)", "Personalized suggestions (recent searches, friends)"],
-      nonFunctional: ["10B queries/day, 100K QPS peak", "< 100ms p99 end-to-end", "Suggestions update within 1 hour of trending changes", "Multi-language support"],
-    },
-    dataModel: {
-      entities: ["TrieNode(prefix, children{}, top_k_suggestions[])", "SearchLog(query, user_id, timestamp, result_clicked)", "SuggestionScore(query, score, updated_at)", "UserRecentSearch(user_id, query, timestamp)"],
-      keyDecisions: ["In-memory trie on each server for O(L) prefix lookup (L = prefix length)", "Pre-compute top-K per prefix offline (Hadoop/Spark job every hour)", "Store trie in Redis as serialized blob, load on server start", "Personalization: merge global suggestions with user's recent searches client-side"],
-    },
-    api: {
-      endpoints: ["GET /suggest?q={prefix}&user_id={id}&limit=10 → {suggestions[]}", "POST /search/log {query, user_id, result_id} — async, fire-and-forget", "GET /suggest/trending?category={cat} → {queries[]}", "DELETE /users/{id}/recent-searches"],
-    },
-    scaleBottlenecks: ["Trie memory: full trie for all queries is too large. Shard by first 2 chars of prefix.", "Update latency: batch updates every 1h via Spark. For trending, use streaming (Flink) with 5-min lag.", "Cold start: new server loads trie from Redis/S3 on startup (< 30s acceptable).", "Typo tolerance: Levenshtein distance is expensive. Use n-gram index or phonetic hashing for approximation."],
-    metaTips: ["Distinguish 'search suggestions' (prefix match) from 'search results' (full-text ranking) — different systems.", "Mention that trie is the classic answer but inverted index scales better for large corpora.", "Discuss how to handle 'did you mean?' separately from autocomplete.", "For Meta specifically: mention social graph signals (friends searched for X) as ranking feature."],
-    color: "#4338ca",
-    bgColor: "#eef2ff",
-    borderColor: "#c7d2fe",
+    step: "4. Deep Dive",
+    time: "15 min",
+    items: [
+      "Pick 2–3 components to deep-dive (interviewer may guide)",
+      "Database schema and indexing strategy",
+      "Caching strategy: what to cache, eviction policy, TTL",
+      "Scalability: sharding, replication, partitioning",
+    ],
   },
   {
-    id: "notification",
-    title: "Notification Service",
-    icon: <Bell size={16} />,
-    tagline: "Multi-channel delivery, deduplication, and user preferences",
-    difficulty: "Medium",
-    metaRelevance: "Meta sends billions of notifications daily. Tests async systems, fan-out, and reliability patterns.",
-    requirements: {
-      functional: ["Send push (iOS/Android), email, and in-app notifications", "User preference management (opt-out per type)", "Deduplication (no duplicate notifications)", "Scheduled and triggered notifications", "Notification history"],
-      nonFunctional: ["1B notifications/day", "Delivery within 5 seconds for real-time events", "At-least-once delivery", "Graceful degradation if push provider is down"],
-    },
-    dataModel: {
-      entities: ["Notification(id, user_id, type, content, channel, status, created_at, sent_at)", "UserPreference(user_id, notification_type, channel, enabled)", "DeviceToken(user_id, platform, token, updated_at)", "NotificationTemplate(type, channel, subject_template, body_template)"],
-      keyDecisions: ["Event-driven: services publish events to Kafka, notification service consumes", "Template rendering: separate service, supports i18n", "Dedup key: hash(user_id + event_id + notification_type) with Redis TTL", "Retry with exponential backoff + dead letter queue for failures"],
-    },
-    api: {
-      endpoints: ["POST /notifications/send {user_id, type, data} → {notification_id}", "GET /notifications?user_id={id}&cursor={cursor} → {notifications[], next_cursor}", "PUT /preferences/{user_id} {type, channel, enabled}", "POST /devices/register {user_id, platform, token}"],
-    },
-    scaleBottlenecks: ["Fan-out: 1 event → millions of users (e.g., breaking news). Use tiered fan-out with priority queues.", "Push provider rate limits: APNs/FCM have per-second limits. Use connection pooling + batching.", "Deduplication at scale: Redis SET with TTL. Shard by user_id.", "Notification fatigue: implement frequency capping per user per type."],
-    metaTips: ["Always separate 'notification generation' from 'notification delivery' — different scaling profiles.", "Mention priority queues: real-time (like/comment) vs. batch (weekly digest).", "Discuss idempotency: what happens if the same event triggers twice?", "For Meta: mention that push tokens expire and need refresh — device token management is a real problem."],
-    color: "#7c3aed",
-    bgColor: "#f5f3ff",
-    borderColor: "#ddd6fe",
-  },
-  {
-    id: "ads-targeting",
-    title: "Ads Targeting System",
-    icon: <BarChart2 size={16} />,
-    tagline: "Real-time bidding, targeting criteria matching, and impression logging",
-    difficulty: "Very Hard",
-    metaRelevance: "Ads is Meta's core revenue engine. L7 questions often involve this. Tests ML systems, real-time bidding, and privacy.",
-    requirements: {
-      functional: ["Advertisers define targeting criteria (demographics, interests, behaviors)", "Real-time ad selection for each page load (< 50ms)", "Impression and click tracking", "Budget management (daily/lifetime caps)", "A/B testing support"],
-      nonFunctional: ["10B ad impressions/day", "Ad selection < 50ms p99", "Budget enforcement within 5% accuracy", "Privacy-preserving (no PII in ad logs)"],
-    },
-    dataModel: {
-      entities: ["Campaign(id, advertiser_id, budget, start_date, end_date, status)", "AdSet(id, campaign_id, targeting_criteria, bid_amount, daily_budget)", "Ad(id, adset_id, creative_url, headline, cta)", "Impression(id, ad_id, user_id_hash, timestamp, placement, cost)", "UserSegment(segment_id, user_ids[], criteria)"],
-      keyDecisions: ["Two-stage retrieval: candidate generation (fast, broad) → ranking (ML model, slow)", "User segments pre-computed offline, stored in Redis for real-time lookup", "Budget pacing: token bucket per campaign, distributed with Redis Lua", "Privacy: hash user IDs in logs, use differential privacy for aggregate reporting"],
-    },
-    api: {
-      endpoints: ["GET /ads/select?user_segment_ids[]={ids}&placement={p}&context={c} → {ad, bid_price}", "POST /impressions {ad_id, user_id_hash, placement, timestamp}", "POST /clicks {impression_id, user_id_hash}", "PUT /campaigns/{id}/budget {daily_budget, total_budget}"],
-    },
-    scaleBottlenecks: ["Candidate retrieval: inverted index on targeting criteria. Shard by targeting dimension.", "Ranking latency: ML model must run in < 10ms. Use ONNX/TensorRT, feature caching.", "Budget enforcement: distributed token bucket. Accept ~5% over-spend for performance.", "Impression logging: write to Kafka, async batch to data warehouse. Never block ad serving on log write."],
-    metaTips: ["Mention the two-stage pipeline explicitly: retrieval → ranking → auction.", "Discuss Vickrey (second-price) auction vs. first-price — Meta uses a modified version.", "Privacy is a key concern: mention GDPR, Apple ATT, and how Meta has adapted.", "For L7: discuss how you'd A/B test the ranking model without biasing the auction."],
-    color: "#065f46",
-    bgColor: "#ecfdf5",
-    borderColor: "#a7f3d0",
-  },
-  {
-    id: "distributed-cache",
-    title: "Distributed Cache (Memcache at Scale)",
-    icon: <Database size={16} />,
-    tagline: "Look-aside caching, thundering herd, and consistency",
-    difficulty: "Hard",
-    metaRelevance: "Meta published the famous Memcache paper. Interviewers expect you to know it. Tests caching patterns and consistency.",
-    requirements: {
-      functional: ["Key-value cache with TTL", "Horizontal scaling (add nodes without downtime)", "Cache invalidation on DB write", "Support for large values (up to 1MB)"],
-      nonFunctional: ["1B QPS read, 100M QPS write", "< 1ms p99 read latency", "99.99% availability", "Eventual consistency acceptable"],
-    },
-    dataModel: {
-      entities: ["CacheEntry(key, value, ttl, version)", "CacheCluster(id, nodes[], hash_ring)", "InvalidationLog(key, timestamp, source_db)"],
-      keyDecisions: ["Consistent hashing for node assignment (minimal rehashing on scale-out)", "Look-aside (cache-aside) pattern: app checks cache, falls back to DB, populates cache", "Lease mechanism to prevent thundering herd on cache miss", "Invalidation via McSqueal (MySQL binlog → invalidation messages)"],
-    },
-    api: {
-      endpoints: ["get(key) → {value, hit: bool}", "set(key, value, ttl_seconds) → {ok}", "delete(key) → {ok}", "get_many(keys[]) → {key: value}[] — batched for efficiency"],
-    },
-    scaleBottlenecks: ["Thundering herd: many requests miss cache simultaneously. Solve with leases (one request fetches, others wait).", "Hot keys: single key gets millions of QPS. Replicate hot keys across multiple nodes.", "Regional consistency: use invalidation pipeline (binlog → Kafka → cache delete) across regions.", "Large values: chunk values > 1MB, store chunks separately with manifest key."],
-    metaTips: ["Reference the 2013 Facebook Memcache paper — interviewers will be impressed.", "Distinguish 'cache invalidation' (delete on write) from 'cache update' (write-through) — Meta uses invalidation.", "Discuss the 'stale set' problem: delayed invalidation can cause stale data to be re-cached.", "For L7: discuss cross-region cache consistency and the trade-off with replication lag."],
-    color: "#1e3a8a",
-    bgColor: "#eff6ff",
-    borderColor: "#bfdbfe",
-  },
-  {
-    id: "video-upload",
-    title: "Video Upload & Processing Pipeline",
-    icon: <Zap size={16} />,
-    tagline: "Chunked upload, async transcoding, and CDN delivery",
-    difficulty: "Hard",
-    metaRelevance: "Instagram Reels and Facebook Video are core products. Tests async pipelines, blob storage, and CDN architecture.",
-    requirements: {
-      functional: ["Upload videos up to 4GB", "Transcode to multiple resolutions (360p, 720p, 1080p, 4K)", "Thumbnail generation", "Video playback with adaptive bitrate streaming (HLS/DASH)", "Content moderation (NSFW detection)"],
-      nonFunctional: ["500M video uploads/day", "Transcode within 5 minutes of upload", "Playback start < 2 seconds", "99.99% durability"],
-    },
-    dataModel: {
-      entities: ["Video(id, uploader_id, title, status, created_at, duration)", "VideoFile(video_id, resolution, codec, storage_url, size_bytes)", "TranscodeJob(id, video_id, status, priority, created_at, completed_at)", "VideoSegment(video_id, resolution, segment_no, storage_url, duration_ms)"],
-      keyDecisions: ["Chunked upload: split into 5MB chunks, upload in parallel, reassemble server-side", "Object storage (S3-like) for raw and transcoded files — never store in DB", "Async transcode pipeline: Kafka → worker pool → status update", "HLS: segment video into 2-10s chunks, serve via CDN with manifest file"],
-    },
-    api: {
-      endpoints: ["POST /videos/init {filename, size, content_type} → {video_id, upload_urls[]}", "PUT /videos/{id}/chunks/{n} {binary_data} — direct to object store", "POST /videos/{id}/complete → triggers transcode pipeline", "GET /videos/{id}/manifest.m3u8 — HLS manifest (served from CDN)"],
-    },
-    scaleBottlenecks: ["Upload bandwidth: chunked parallel upload + resumable uploads (handle network drops).", "Transcode capacity: auto-scale worker pool based on queue depth. Priority queue for premium users.", "Storage cost: tiered storage — hot (SSD), warm (HDD), cold (glacier) based on view count.", "CDN cache hit rate: pre-warm CDN for viral videos. Use geo-distributed POPs."],
-    metaTips: ["Chunked upload is the key insight — never upload a 4GB file in one HTTP request.", "Mention adaptive bitrate streaming (ABR): client switches quality based on bandwidth.", "Content moderation: async, after upload. Don't block playback for moderation.", "For L7: discuss how to handle a viral video that gets 100M views in 1 hour — CDN pre-warming strategy."],
-    color: "#92400e",
-    bgColor: "#fffbeb",
-    borderColor: "#fde68a",
+    step: "5. Bottlenecks & Trade-offs",
+    time: "5 min",
+    items: [
+      "Identify single points of failure",
+      "Discuss consistency vs availability (CAP theorem)",
+      "Address hot spots, thundering herd, cascading failures",
+      "Propose monitoring and alerting strategy",
+    ],
   },
 ];
 
-interface BlogPost {
-  title: string;
-  url: string;
-  summary: string;
-  tags: string[];
-  year: string;
-}
+const L7_SIGNALS = [
+  "Proactively identifies constraints the interviewer hasn't mentioned",
+  "Discusses operational concerns: deployment, rollback, observability",
+  "Quantifies trade-offs with numbers, not just words",
+  "Proposes phased rollout strategy for risky changes",
+  "Connects technical decisions to business impact",
+  "Challenges assumptions and proposes alternatives",
+];
 
-const META_BLOG_POSTS: BlogPost[] = [
+// ML System Design data from systemdesignhandbook.com/guides/ml-system-design/
+const ML_OBJECTIVES = [
   {
-    title: "Scaling Memcache at Facebook",
-    url: "https://research.facebook.com/publications/scaling-memcache-at-facebook/",
-    summary: "The seminal 2013 paper describing how Meta scaled Memcache to handle billions of requests per second. Covers look-aside caching, lease mechanism for thundering herd, regional consistency, and the McSqueal invalidation pipeline. Essential reading for any distributed caching question.",
-    tags: ["Caching", "Distributed Systems", "Infrastructure"],
-    year: "2013",
+    label: "Scalability",
+    desc: "Handle growing data volumes and user requests; often requires horizontal scaling of inference nodes.",
   },
   {
-    title: "TAO: Facebook's Distributed Data Store for the Social Graph",
-    url: "https://research.facebook.com/publications/tao-facebooks-distributed-data-store-for-the-social-graph/",
-    summary: "TAO is Meta's purpose-built graph store that powers the social graph. Covers the object-association data model, read-heavy workload optimization, tiered caching, and eventual consistency. Relevant for any social graph or news feed design question.",
-    tags: ["Graph Store", "Social Graph", "Distributed Systems"],
-    year: "2013",
+    label: "Low Latency",
+    desc: "Fraud detection or search require low tens of milliseconds to keep the user experience seamless.",
   },
   {
-    title: "Cassandra: A Decentralized Structured Storage System",
-    url: "https://research.facebook.com/publications/cassandra-a-decentralized-structured-storage-system/",
-    summary: "The original Cassandra paper from Facebook engineers. Covers consistent hashing, gossip protocol, vector clocks, and the write-optimized LSM-tree storage engine. Foundational for understanding wide-column stores used throughout Meta's infrastructure.",
-    tags: ["Storage", "Distributed Systems", "NoSQL"],
-    year: "2010",
+    label: "Reliability",
+    desc: "Maintain consistent performance even in the presence of hardware failures or network partitions.",
   },
   {
-    title: "React: A JavaScript Library for Building User Interfaces",
-    url: "https://engineering.fb.com/2013/06/05/web/react-a-javascript-library-for-building-user-interfaces/",
-    summary: "The original announcement of React, explaining the motivation behind the virtual DOM and one-way data flow. Shows Meta's approach to solving UI complexity at scale — relevant for demonstrating knowledge of Meta's technical culture and open-source contributions.",
-    tags: ["Frontend", "React", "Open Source"],
-    year: "2013",
+    label: "Adaptability",
+    desc: "Support continuous learning so models evolve as data distributions change over time.",
   },
   {
-    title: "The Technology Behind Inbox by Gmail and Facebook Messenger",
-    url: "https://engineering.fb.com/2014/10/09/production-engineering/the-technology-behind-inbox-by-gmail-and-facebook-messenger/",
-    summary: "Deep dive into the real-time messaging infrastructure: MQTT protocol for mobile, connection management, message ordering, and delivery guarantees. Directly relevant for messaging system design questions.",
-    tags: ["Messaging", "Real-time", "Mobile"],
-    year: "2014",
-  },
-  {
-    title: "Rebuilding our tech stack for the new Facebook.com",
-    url: "https://engineering.fb.com/2020/05/08/web/facebook-redesign/",
-    summary: "How Meta rebuilt Facebook.com using React, GraphQL, and Relay. Covers code splitting, progressive loading, and the architectural decisions behind the 2020 redesign. Shows Meta's approach to large-scale frontend architecture.",
-    tags: ["Frontend", "GraphQL", "Performance"],
-    year: "2020",
-  },
-  {
-    title: "How Facebook Encodes Your Videos",
-    url: "https://engineering.fb.com/2021/04/05/video-engineering/how-facebook-encodes-your-videos/",
-    summary: "Explains Meta's video transcoding pipeline at scale: codec selection, quality optimization, adaptive bitrate streaming, and the infrastructure behind encoding billions of videos. Essential for video system design questions.",
-    tags: ["Video", "Media Processing", "Infrastructure"],
-    year: "2021",
-  },
-  {
-    title: "Introducing the Data Center Fabric, the Next-Generation Facebook Data Center Network",
-    url: "https://engineering.fb.com/2014/11/14/production-engineering/introducing-data-center-fabric-the-next-generation-facebook-data-center-network/",
-    summary: "Meta's custom data center network architecture: fabric topology, equal-cost multi-path routing, and how they achieved 100x bandwidth improvement. Relevant for system design questions involving data center architecture and network topology.",
-    tags: ["Infrastructure", "Networking", "Data Center"],
-    year: "2014",
-  },
-  {
-    title: "Open-sourcing Katran, a scalable network load balancer",
-    url: "https://engineering.fb.com/2018/05/22/open-source/open-sourcing-katran-a-scalable-network-load-balancer/",
-    summary: "Katran is Meta's XDP/eBPF-based L4 load balancer that handles hundreds of millions of packets per second. Covers consistent hashing for backend selection, health checking, and the performance advantages of kernel bypass networking.",
-    tags: ["Load Balancing", "Networking", "Infrastructure"],
-    year: "2018",
-  },
-  {
-    title: "Instagram Engineering: Sharding & IDs at Instagram",
-    url: "https://instagram-engineering.com/sharding-ids-at-instagram-1cf5a71e5a5c",
-    summary: "How Instagram generates globally unique, roughly time-sortable IDs at scale without a single point of failure. The solution uses PostgreSQL schemas as logical shards with a custom ID generation function. Classic distributed ID generation problem.",
-    tags: ["Distributed Systems", "Sharding", "Database"],
-    year: "2012",
-  },
-  {
-    title: "How Instagram Moved to Python 3",
-    url: "https://instagram-engineering.com/instagram-moves-to-python-3-5-ef7a47c8d965",
-    summary: "A large-scale migration story: how Instagram migrated their entire Python 2 codebase to Python 3 while serving hundreds of millions of users. Covers migration strategy, testing, gradual rollout, and lessons learned. Relevant for technical migration and risk management questions.",
-    tags: ["Migration", "Python", "Engineering Culture"],
-    year: "2017",
-  },
-  {
-    title: "Efficient Large-Scale Graph Processing at Facebook",
-    url: "https://research.facebook.com/publications/efficient-large-scale-graph-processing-at-facebook/",
-    summary: "How Meta processes social graph analytics at petabyte scale using custom graph processing frameworks. Covers partitioning strategies, message passing, and the trade-offs between synchronous and asynchronous graph computation.",
-    tags: ["Graph Processing", "Big Data", "Analytics"],
-    year: "2016",
+    label: "Explainability & Fairness",
+    desc: "Enable monitoring for bias and provide transparency into why specific predictions were made.",
   },
 ];
 
-const TAG_COLORS: Record<string, string> = {
-  "Caching": "bg-blue-50 text-blue-700 border-blue-200",
-  "Distributed Systems": "bg-purple-50 text-purple-700 border-purple-200",
-  "Infrastructure": "bg-gray-100 text-gray-700 border-gray-200",
-  "Graph Store": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Social Graph": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Storage": "bg-amber-50 text-amber-700 border-amber-200",
-  "NoSQL": "bg-amber-50 text-amber-700 border-amber-200",
-  "Frontend": "bg-indigo-50 text-indigo-700 border-indigo-200",
-  "React": "bg-indigo-50 text-indigo-700 border-indigo-200",
-  "Open Source": "bg-teal-50 text-teal-700 border-teal-200",
-  "Messaging": "bg-rose-50 text-rose-700 border-rose-200",
-  "Real-time": "bg-rose-50 text-rose-700 border-rose-200",
-  "Mobile": "bg-rose-50 text-rose-700 border-rose-200",
-  "GraphQL": "bg-pink-50 text-pink-700 border-pink-200",
-  "Performance": "bg-orange-50 text-orange-700 border-orange-200",
-  "Video": "bg-red-50 text-red-700 border-red-200",
-  "Media Processing": "bg-red-50 text-red-700 border-red-200",
-  "Networking": "bg-slate-50 text-slate-700 border-slate-200",
-  "Data Center": "bg-slate-50 text-slate-700 border-slate-200",
-  "Load Balancing": "bg-cyan-50 text-cyan-700 border-cyan-200",
-  "Sharding": "bg-yellow-50 text-yellow-700 border-yellow-200",
-  "Database": "bg-yellow-50 text-yellow-700 border-yellow-200",
-  "Migration": "bg-lime-50 text-lime-700 border-lime-200",
-  "Python": "bg-lime-50 text-lime-700 border-lime-200",
-  "Engineering Culture": "bg-violet-50 text-violet-700 border-violet-200",
-  "Big Data": "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
-  "Analytics": "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
-  "Graph Processing": "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
-};
+const ML_ARCH_LAYERS = [
+  {
+    icon: "📥",
+    step: "1. Data Ingestion",
+    desc: "Collect from logs, APIs, IoT sensors. Use streaming platforms (Kafka, Kinesis) for real-time events.",
+  },
+  {
+    icon: "🗄️",
+    step: "2. Data Storage",
+    desc: "Cold (S3) for historical data, operational (Cassandra/Postgres) for recent data, hot (Redis) for low-latency feature access.",
+  },
+  {
+    icon: "⚙️",
+    step: "3. Feature Extraction",
+    desc: "Clean, normalize, transform raw data into numerical features using Spark/Beam. Populate feature store to prevent training-serving skew.",
+  },
+  {
+    icon: "🧠",
+    step: "4. Model Training",
+    desc: "Distributed clusters with TensorFlow/PyTorch/XGBoost. Offline evaluation on historical data using AUC/RMSE before promotion.",
+  },
+  {
+    icon: "📦",
+    step: "5. Model Deployment",
+    desc: "Containerize (Docker), apply quantization to reduce size/latency, run optimization steps before production packaging.",
+  },
+  {
+    icon: "🚀",
+    step: "6. Model Serving",
+    desc: "REST/gRPC inference APIs with load balancing. Hardware acceleration (GPU/TPU) for deep learning models.",
+  },
+  {
+    icon: "📊",
+    step: "7. Monitoring & Feedback",
+    desc: "Track accuracy, latency, concept drift. Capture ground truth labels to trigger retraining and close the loop.",
+  },
+];
 
-function PatternCard({ p }: { p: DesignPattern }) {
-  const [expanded, setExpanded] = useState(false);
-  const [section, setSection] = useState<string>("requirements");
-  const [teachMode, setTeachMode] = useState(false);
-  const [userSketch, setUserSketch] = useState("");
-  const [revealed, setRevealed] = useState(false);
+const ML_COMPONENTS = [
+  {
+    icon: <Database size={14} />,
+    name: "Feature Store",
+    desc: "Centralized repository ensuring identical feature computation in training and inference. Prevents training-serving skew. Tools: Feast, Tecton (backed by Redis).",
+  },
+  {
+    icon: <Server size={14} />,
+    name: "Model Training Service",
+    desc: "Manages distributed training jobs: resource allocation, hyperparameter tuning, checkpointing, data/model parallelism.",
+  },
+  {
+    icon: <GitBranch size={14} />,
+    name: "Model Registry",
+    desc: "Version-control for ML models. Tracks lineage, metadata, performance metrics. Enables governance and rollback. Tools: MLflow, SageMaker Registry.",
+  },
+  {
+    icon: <Zap size={14} />,
+    name: "Inference API",
+    desc: "Exposes model via REST/gRPC. Handles thousands of concurrent requests. Includes A/B testing and canary deployment logic.",
+  },
+  {
+    icon: <BarChart3 size={14} />,
+    name: "Monitoring & Feedback Loop",
+    desc: "Tracks prediction accuracy, latency, and concept drift. Collects new labels to feed back into the training pipeline.",
+  },
+];
 
-  const sections = [
-    { id: "requirements", label: "Requirements" },
-    { id: "datamodel", label: "Data Model" },
-    { id: "api", label: "API" },
-    { id: "bottlenecks", label: "Scale Bottlenecks" },
-    { id: "tips", label: "Meta Tips" },
-  ];
+const ML_TRADEOFFS = [
+  {
+    aspect: "Accuracy vs Latency",
+    traditional: "Higher accuracy",
+    ml: "Simpler/quantized model for speed",
+  },
+  {
+    aspect: "Batch vs Real-time",
+    traditional: "Overnight batch (cheaper)",
+    ml: "Real-time streaming (fresher)",
+  },
+  {
+    aspect: "Model size vs Cost",
+    traditional: "Large deep learning model",
+    ml: "Distilled/pruned model",
+  },
+  {
+    aspect: "Freshness vs Stability",
+    traditional: "Frequent retraining",
+    ml: "Stable but potentially stale",
+  },
+  {
+    aspect: "Explainability vs Power",
+    traditional: "Linear/tree models (interpretable)",
+    ml: "Deep learning (black box)",
+  },
+];
 
-  return (
-    <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: p.borderColor }}>
-      <button
-        className="w-full text-left px-5 py-4 hover:opacity-90 transition-opacity"
-        style={{ background: p.bgColor }}
-        onClick={() => setExpanded((e) => !e)}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <span style={{ color: p.color }}>{p.icon}</span>
-            <div className="min-w-0">
-              <h3 className="text-sm font-bold text-gray-900 leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {p.title}
-              </h3>
-              <p className="text-[11px] text-gray-500 mt-0.5 italic">{p.tagline}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${DIFFICULTY_COLORS[p.difficulty]}`}>
-              {p.difficulty}
-            </span>
-            {expanded ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
-          </div>
-        </div>
-        <div className="mt-2 flex items-start gap-1.5">
-          <Zap size={10} className="flex-shrink-0 mt-0.5" style={{ color: p.color }} />
-          <p className="text-[11px] leading-relaxed" style={{ color: p.color }}>{p.metaRelevance}</p>
-        </div>
-      </button>
-
-      {expanded && (
-        <div className="border-t bg-white" style={{ borderColor: p.borderColor }}>
-          {/* Teach It Back toggle */}
-          <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Brain size={13} className="text-purple-500" />
-              <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wide">Teach It Back Mode</span>
-            </div>
-            <button
-              onClick={() => { setTeachMode((t) => !t); setRevealed(false); setUserSketch(""); }}
-              className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full border transition-all ${
-                teachMode
-                  ? "bg-purple-100 text-purple-700 border-purple-300"
-                  : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200"
-              }`}
-            >
-              {teachMode ? <EyeOff size={11} /> : <Eye size={11} />}
-              {teachMode ? "Exit Teach Mode" : "Activate"}
-            </button>
-          </div>
-
-          {/* Teach It Back panel */}
-          {teachMode && (
-            <div className="px-4 py-4 bg-purple-50/40 border-b border-purple-100 space-y-3">
-              <div className="flex items-start gap-2">
-                <Brain size={14} className="text-purple-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-semibold text-purple-800">
-                  Sketch your approach to <span className="italic">{p.title}</span> from memory before revealing the reference.
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Your Architecture Sketch</p>
-                <p className="text-xs text-gray-500">Cover: requirements you'd clarify, key components, data model decisions, API design, and 2–3 scale bottlenecks.</p>
-                <textarea
-                  value={userSketch}
-                  onChange={(e) => setUserSketch(e.target.value)}
-                  placeholder={`e.g. For ${p.title}:\n\nRequirements: ...\nCore components: ...\nData model: ...\nAPI: ...\nScale bottlenecks: ...`}
-                  rows={6}
-                  className="w-full text-sm text-gray-800 bg-white border border-purple-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-gray-300"
-                />
-              </div>
-              {!revealed ? (
-                <button
-                  onClick={() => setRevealed(true)}
-                  disabled={userSketch.trim().length < 20}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-lg text-sm font-bold transition-all"
-                >
-                  <Eye size={14} />
-                  Reveal Reference Answer
-                  {userSketch.trim().length < 20 && <span className="text-[10px] font-normal">(write at least 20 chars first)</span>}
-                </button>
-              ) : (
-                <div className="flex items-center gap-2 text-emerald-600">
-                  <Brain size={14} />
-                  <span className="text-xs font-bold">Reference revealed below — compare your sketch to the structured approach</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Section tabs — hidden in teach mode until revealed */}
-          {(!teachMode || revealed) && (
-          <>
-          <div className="flex overflow-x-auto border-b border-gray-100 px-1 pt-1">
-            {sections.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSection(s.id)}
-                className={`flex-shrink-0 text-[11px] font-bold px-3 py-2 border-b-2 transition-colors ${
-                  section === s.id
-                    ? "border-indigo-500 text-indigo-700"
-                    : "border-transparent text-gray-400 hover:text-gray-700"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="p-4">
-            {section === "requirements" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Functional</p>
-                  <ul className="space-y-1.5">
-                    {p.requirements.functional.map((r) => (
-                      <li key={r} className="flex items-start gap-1.5 text-xs text-gray-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0 mt-1.5" />
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Non-Functional</p>
-                  <ul className="space-y-1.5">
-                    {p.requirements.nonFunctional.map((r) => (
-                      <li key={r} className="flex items-start gap-1.5 text-xs text-gray-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0 mt-1.5" />
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {section === "datamodel" && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Entities</p>
-                  <div className="space-y-1.5">
-                    {p.dataModel.entities.map((e) => (
-                      <div key={e} className="font-mono text-[11px] bg-gray-950 text-green-300 px-3 py-1.5 rounded-lg">{e}</div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Key Decisions</p>
-                  <ul className="space-y-2">
-                    {p.dataModel.keyDecisions.map((d) => (
-                      <li key={d} className="flex items-start gap-2 text-xs text-gray-700">
-                        <ChevronRight size={11} className="text-indigo-400 flex-shrink-0 mt-0.5" />
-                        {d}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {section === "api" && (
-              <div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Endpoints</p>
-                <div className="space-y-2">
-                  {p.api.endpoints.map((e) => (
-                    <div key={e} className="font-mono text-[11px] bg-gray-950 text-green-300 px-3 py-2 rounded-lg leading-relaxed">{e}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {section === "bottlenecks" && (
-              <div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Scale Bottlenecks & Solutions</p>
-                <div className="space-y-2.5">
-                  {p.scaleBottlenecks.map((b) => {
-                    const [problem, solution] = b.split(". Solve with ").length > 1
-                      ? [b.split(". Solve with ")[0], "Solve with " + b.split(". Solve with ")[1]]
-                      : [b.split(": ")[0], b.split(": ").slice(1).join(": ")];
-                    return (
-                      <div key={b} className="rounded-xl border border-orange-100 bg-orange-50/50 p-3">
-                        <p className="text-xs font-semibold text-orange-800 mb-1">{problem}</p>
-                        {solution && <p className="text-xs text-gray-600">{solution}</p>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {section === "tips" && (
-              <div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Meta-Specific Interview Tips</p>
-                <ul className="space-y-2.5">
-                  {p.metaTips.map((t) => (
-                    <li key={t} className="flex items-start gap-2 text-xs text-gray-700">
-                      <Zap size={11} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-          </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+const ML_INTERVIEW_STEPS = [
+  {
+    step: "1. Clarify the Problem",
+    desc: "Define the business goal (e.g., maximize watch time) and what the system predicts.",
+  },
+  {
+    step: "2. Estimate the Scale",
+    desc: "Discuss data volume, QPS, and latency targets (e.g., <100ms p99).",
+  },
+  {
+    step: "3. Outline Architecture",
+    desc: "Draw the high-level data pipeline, training, and inference layers.",
+  },
+  {
+    step: "4. Deep Dive Components",
+    desc: "Discuss the feature store, model registry, and serving strategy in detail.",
+  },
+  {
+    step: "5. Discuss Trade-offs",
+    desc: "Highlight decisions around accuracy vs cost, batch vs real-time, model size vs latency.",
+  },
+  {
+    step: "6. Reliability & Ethics",
+    desc: "Mention fallback mechanisms, bias detection, differential privacy, and monitoring.",
+  },
+  {
+    step: "7. Conclude with Improvements",
+    desc: "Suggest evolution path (e.g., batch → real-time, single model → ensemble).",
+  },
+];
 
 export default function SystemDesignTab() {
-  const [activeView, setActiveView] = useState<"patterns" | "blog" | "mock" | "compare" | "diagnostic" | "requirements" | "tradeoffs" | "math" | "boe" | "stresstest" | "tradeofflibrary" | "deepdive" | "metablog" | "collab" | "interrupt" | "boegrade" | "adversarial">("patterns");
-  const [blogSearch, setBlogSearch] = useState("");
-  const [selectedTag, setSelectedTag] = useState("All");
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [filterLevel, setFilterLevel] = useState("All");
+  const [mlSection, setMlSection] = useState<string | null>(null);
 
-  const allTags = ["All", ...Array.from(new Set(META_BLOG_POSTS.flatMap((p) => p.tags))).sort()];
-
-  const filteredPosts = META_BLOG_POSTS.filter((post) => {
-    const q = blogSearch.toLowerCase();
-    const matchesSearch = !q || post.title.toLowerCase().includes(q) || post.summary.toLowerCase().includes(q) || post.tags.some((t) => t.toLowerCase().includes(q));
-    const matchesTag = selectedTag === "All" || post.tags.includes(selectedTag);
-    return matchesSearch && matchesTag;
-  });
+  const filtered = SYSTEM_DESIGN_QUESTIONS.filter(
+    q => filterLevel === "All" || q.level === filterLevel
+  );
 
   return (
     <div className="space-y-5">
-
-      {/* Header */}
-      <div>
-        <h2 className="text-lg font-extrabold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          System Design Primer
-        </h2>
-        <p className="text-xs text-gray-500 mt-0.5">
-          8 design patterns · 12 Meta blog posts · Mock session · Pass-rate uplift tools (10% → 60%)
-        </p>
-      </div>
-
-      {/* HIGH IMPACT section header */}
-      <div className="mt-3 rounded-xl border-2 border-orange-400 dark:border-orange-600 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 px-4 py-2.5">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] font-black text-white bg-orange-500 px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse">★ HIGH IMPACT</span>
-          <span className="text-xs font-bold text-orange-700 dark:text-orange-400">These 3 tools address the #1 reason candidates fail system design at Meta</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      {/* ═══ HIGH IMPACT FEATURES — TOP OF PAGE ═══════════════════════════════ */}
+      <FeatureHeatmapRow
+        featureKeys={[
+          "ai_interviewer_interrupt",
+          "back_of_envelope",
+          "tear_down_my_design",
+        ]}
+      />
+      <AIInterviewerInterruptMode />
+      <BackOfEnvelopeCalculator />
+      <TearDownMyDesign />
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* Quick Actions sticky row */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">
+          Quick Actions
+        </span>
+        <div className="flex gap-2 flex-1 flex-wrap">
           <button
-            onClick={() => setActiveView("interrupt")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-              activeView === "interrupt"
-                ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-200 dark:shadow-orange-900/30"
-                : "bg-white dark:bg-gray-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700 hover:border-orange-500 hover:shadow-md"
-            }`}
+            onClick={() => {
+              const el = document.getElementById("sysdesign-diagram-templates");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/30 text-violet-300 text-xs font-semibold transition-all"
           >
-            🤖 AI Interrupt Mode
+            <GitBranch size={12} />
+            Open Diagram Template
+            <kbd className="ml-1 px-1 py-0.5 rounded text-[9px] font-mono bg-violet-900/40 text-violet-400 border border-violet-700/40">
+              ⌥4
+            </kbd>
           </button>
           <button
-            onClick={() => setActiveView("boegrade")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-              activeView === "boegrade"
-                ? "bg-violet-500 text-white border-violet-500 shadow-lg shadow-violet-200 dark:shadow-violet-900/30"
-                : "bg-white dark:bg-gray-900 text-violet-700 dark:text-violet-400 border-violet-300 dark:border-violet-700 hover:border-violet-500 hover:shadow-md"
-            }`}
+            onClick={() => {
+              const el = document.getElementById("sysdesign-mock-session");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 text-xs font-semibold transition-all"
           >
-            🔢 BoE Grader
+            <Brain size={12} />
+            Start SD Mock
           </button>
           <button
-            onClick={() => setActiveView("adversarial")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
-              activeView === "adversarial"
-                ? "bg-red-500 text-white border-red-500 shadow-lg shadow-red-200 dark:shadow-red-900/30"
-                : "bg-white dark:bg-gray-900 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700 hover:border-red-500 hover:shadow-md"
-            }`}
+            onClick={() => {
+              const el = document.getElementById("sysdesign-capacity-calc");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/30 text-cyan-300 text-xs font-semibold transition-all"
           >
-            ⚔️ Adversarial Review
-          </button>
-        </div>
-      </div>
-      {/* View toggle */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={() => setActiveView("patterns")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-            activeView === "patterns"
-              ? "bg-gray-900 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-          }`}
-        >
-          <Server size={12} /> Design Patterns (8)
-        </button>
-        <button
-          onClick={() => setActiveView("blog")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-            activeView === "blog"
-              ? "bg-gray-900 text-white border-gray-900"
-              : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-          }`}
-        >
-          <BookOpen size={12} /> Meta Engineering Blog (12)
-        </button>
-        <button
-          onClick={() => setActiveView("mock")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-            activeView === "mock"
-              ? "bg-indigo-600 text-white border-indigo-600"
-              : "bg-white text-gray-600 border-gray-200 hover:border-indigo-400"
-          }`}
-        >
-          <Target size={12} /> Mock Session
-        </button>
-        <button
-          onClick={() => setActiveView("compare")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-            activeView === "compare"
-              ? "bg-violet-600 text-white border-violet-600"
-              : "bg-white text-gray-600 border-gray-200 hover:border-violet-400"
-          }`}
-        >
-          <Table2 size={12} /> Compare Patterns
-        </button>
-        {/* Score Booster tools */}
-        <div className="w-full flex items-center gap-1.5 mt-1 flex-wrap">
-          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Score Boosters:</span>
-          <button
-            onClick={() => setActiveView("diagnostic")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "diagnostic"
-                ? "bg-red-600 text-white border-red-600"
-                : "bg-white text-red-600 border-red-200 hover:border-red-400"
-            }`}
-          >
-            <AlertTriangle size={11} /> Why High Fail ratio
+            <Database size={12} />
+            Start Capacity Calc
           </button>
           <button
-            onClick={() => setActiveView("requirements")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "requirements"
-                ? "bg-emerald-600 text-white border-emerald-600"
-                : "bg-white text-emerald-700 border-emerald-200 hover:border-emerald-400"
-            }`}
+            onClick={() =>
+              window.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "?", bubbles: true })
+              )
+            }
+            title="Keyboard shortcuts (?)"
+            className="ml-auto p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all shrink-0"
           >
-            <Layers size={11} /> Requirements Trainer
-          </button>
-          <button
-            onClick={() => setActiveView("tradeoffs")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "tradeoffs"
-                ? "bg-violet-600 text-white border-violet-600"
-                : "bg-white text-violet-700 border-violet-200 hover:border-violet-400"
-            }`}
-          >
-            <BarChart2 size={11} /> Trade-off Drill
-          </button>
-          <button
-            onClick={() => setActiveView("math")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "math"
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-blue-700 border-blue-200 hover:border-blue-400"
-            }`}
-          >
-            <Calculator size={11} /> Math Trainer
-          </button>
-          <button
-            onClick={() => setActiveView("boe")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "boe"
-                ? "bg-cyan-600 text-white border-cyan-600"
-                : "bg-white text-cyan-700 border-cyan-200 hover:border-cyan-400"
-            }`}
-          >
-            <Calculator size={11} /> BoE Calculator
-          </button>
-          <button
-            onClick={() => setActiveView("stresstest")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "stresstest"
-                ? "bg-orange-600 text-white border-orange-600"
-                : "bg-white text-orange-700 border-orange-200 hover:border-orange-400"
-            }`}
-          >
-            <ZapIcon size={11} /> Stress Test
-          </button>
-          <button
-            onClick={() => setActiveView("tradeofflibrary")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "tradeofflibrary"
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-indigo-700 border-indigo-200 hover:border-indigo-400"
-            }`}
-          >
-            <BookOpen size={11} /> Trade-off Library
-          </button>
-          <button
-            onClick={() => setActiveView("deepdive")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "deepdive"
-                ? "bg-purple-600 text-white border-purple-600"
-                : "bg-white text-purple-700 border-purple-200 hover:border-purple-400"
-            }`}
-          >
-            <Layers size={11} /> Deep-Dive Bank
-          </button>
-          <button
-            onClick={() => setActiveView("metablog")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "metablog"
-                ? "bg-teal-600 text-white border-teal-600"
-                : "bg-white text-teal-700 border-teal-200 hover:border-teal-400"
-            }`}
-          >
-            <Rss size={11} /> Meta Papers
-          </button>
-          <button
-            onClick={() => setActiveView("collab")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              activeView === "collab"
-                ? "bg-green-600 text-white border-green-600"
-                : "bg-white text-green-700 border-green-200 hover:border-green-400"
-            }`}
-          >
-            <Users size={11} /> Practice with a Partner
+            <HelpCircle size={13} />
           </button>
         </div>
       </div>
 
-      {/* Design Patterns */}
-      {activeView === "patterns" && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3.5">
-            <p className="text-xs text-indigo-800 leading-relaxed">
-              <strong>How to use:</strong> Click any card to expand. Use the section tabs (Requirements → Data Model → API → Scale Bottlenecks → Meta Tips) to work through each design systematically. The Meta Tips section contains interviewer-specific advice based on what Meta engineers actually probe for.
-            </p>
-          </div>
-          <div className="space-y-3">
-            {DESIGN_PATTERNS.map((p) => (
-              <PatternCard key={p.id} p={p} />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ═══════════════════════════════════════════════════════════════
+           🚨 META SYSTEM DESIGN PREP 2026 — MUST READ GUIDE
+          ═══════════════════════════════════════════════════════════════ */}
+      <div
+        className="relative overflow-hidden rounded-xl border-2 border-transparent"
+        style={{
+          background:
+            "linear-gradient(135deg, #1a0533 0%, #0d1f3c 40%, #0a2a1a 100%)",
+          boxShadow:
+            "0 0 40px rgba(168,85,247,0.25), 0 0 80px rgba(59,130,246,0.15)",
+        }}
+      >
+        {/* Animated rainbow border */}
+        <div
+          className="absolute inset-0 rounded-xl pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(90deg, #f59e0b, #ef4444, #8b5cf6, #3b82f6, #10b981, #f59e0b)",
+            backgroundSize: "300% 100%",
+            animation: "borderMarch 3s linear infinite",
+            padding: "2px",
+            WebkitMask:
+              "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+            WebkitMaskComposite: "xor",
+            maskComposite: "exclude",
+          }}
+        />
 
-      {/* Mock Session */}
-      {activeView === "mock" && (
-        <SystemDesignMockSession />
-      )}
-
-      {/* Pattern Comparison Table */}
-      {activeView === "compare" && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-violet-200 bg-violet-50 p-3.5">
-            <p className="text-xs text-violet-800 leading-relaxed">
-              <strong>How to use:</strong> This matrix lets you compare all 8 patterns side-by-side before a mock session. Click any column header to highlight that dimension across all rows. Use this to quickly recall trade-offs — e.g., which patterns use eventual consistency, or which are read-heavy.
-            </p>
-          </div>
-          <SystemDesignComparisonTable />
-        </div>
-      )}
-
-      {/* Failure Mode Diagnostic */}
-      {activeView === "diagnostic" && <SDFailureModeDiagnostic />}
-
-      {/* Requirements Clarification Trainer */}
-      {activeView === "requirements" && <SDRequirementsTrainer />}
-
-      {/* Trade-off Articulation Drill */}
-      {activeView === "tradeoffs" && <SDTradeoffDrill />}
-
-      {/* Back-of-Envelope Math Trainer */}
-      {activeView === "math" && <SDMathTrainer />}
-
-      {/* BoE Calculator with Decision Mapping */}
-      {activeView === "boe" && <SDBoECalculator />}
-
-      {/* Component Stress-Test Quiz */}
-      {activeView === "stresstest" && <SDComponentStressTest />}
-
-      {/* Trade-off Library */}
-      {activeView === "tradeofflibrary" && <SDTradeoffLibrary />}
-
-      {/* Deep-Dive Question Bank */}
-      {activeView === "deepdive" && <SDDeepDiveBank />}
-
-      {/* Meta Engineering Blog — Interview-Annotated */}
-      {activeView === "metablog" && <SDMetaBlogReader />}
-
-      {/* Collab Room — Practice with a partner */}
-      {activeView === "collab" && <CollabRoom />}
-      {/* HIGH IMPACT: AI Interviewer Interrupt Mode */}
-      {activeView === "interrupt" && <AIInterviewerInterrupt />}
-      {/* HIGH IMPACT: Back-of-Envelope Calculator & Grader */}
-      {activeView === "boegrade" && <BoECalculatorGrader />}
-      {/* HIGH IMPACT: Adversarial Design Review */}
-      {activeView === "adversarial" && <AdversarialDesignReview />}
-
-      {/* Blog Feed */}
-      {activeView === "blog" && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5">
-            <p className="text-xs text-amber-800 leading-relaxed">
-              <strong>Why read these:</strong> Referencing specific Meta engineering papers and blog posts in a system design interview signals genuine interest in Meta's technical culture and demonstrates depth beyond generic answers. Even mentioning "I read the Memcache paper" can shift the conversation.
-            </p>
-          </div>
-
-          {/* Search + tag filter */}
-          <div className="space-y-2">
-            <div className="relative">
-              <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search blog posts…"
-                value={blogSearch}
-                onChange={(e) => setBlogSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {allTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setSelectedTag(tag)}
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${
-                    selectedTag === tag
-                      ? "bg-gray-900 text-white border-gray-900"
-                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
-                  }`}
+        {/* Glowing header */}
+        <div className="relative p-5 border-b border-white/10">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="text-2xl"
+                  style={{ animation: "bounce 1s ease-in-out infinite" }}
                 >
-                  {tag}
-                </button>
+                  🚨
+                </span>
+                <span
+                  className="text-lg font-black tracking-tight"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #fbbf24, #f87171, #a78bfa, #60a5fa, #34d399)",
+                    backgroundSize: "200% auto",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    animation: "gradientShift 3s linear infinite",
+                  }}
+                >
+                  META SYSTEM DESIGN PREP 2026
+                </span>
+                <span
+                  className="text-2xl"
+                  style={{ animation: "bounce 1s ease-in-out infinite 0.2s" }}
+                >
+                  🚨
+                </span>
+              </div>
+              <div className="text-xs text-slate-300 font-medium">
+                🎯 L6/L7 Targeted · ML + Backend + Full Stack · All 3 Tracks ·
+                Updated 2026
+              </div>
+            </div>
+            <a
+              href="https://d2xsxph8kpxj0f.cloudfront.net/310519663323723940/cRTBYDQNffnDPa87zbUz9b/meta-system-design-guide-2026_57e76a36.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-black"
+              style={{
+                background: "linear-gradient(90deg, #fbbf24, #f59e0b)",
+                boxShadow: "0 0 15px rgba(251,191,36,0.5)",
+                animation: "pulse 2s ease-in-out infinite",
+              }}
+            >
+              🔗 Open Full Guide <ExternalLink size={11} />
+            </a>
+          </div>
+
+          {/* Challenge banner */}
+          <div
+            className="mt-3 p-3 rounded-lg text-xs font-semibold text-center"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(239,68,68,0.2), rgba(168,85,247,0.2), rgba(59,130,246,0.2))",
+              border: "1px solid rgba(255,255,255,0.1)",
+              animation: "pulse 3s ease-in-out infinite",
+            }}
+          >
+            ⚡ Can you answer all 6 ML questions + 6 SWE questions cold? 💀 Most
+            L5s can't. L6/L7 candidates who pass have practised every single
+            one. 🔥
+          </div>
+        </div>
+
+        {/* Track selector */}
+        <div className="p-5 space-y-4">
+          {/* Interview Loop */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🔄</span>
+                <span className="text-sm font-bold text-white">
+                  Meta's Full Interview Loop Structure
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  MUST KNOW
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 space-y-2 pl-2">
+              {[
+                {
+                  n: "1",
+                  title: "Recruiter Screen",
+                  desc: "Background, motivation, cultural alignment. ~30 min.",
+                  color: "text-slate-300",
+                  bg: "bg-slate-500/10",
+                },
+                {
+                  n: "2",
+                  title: "Technical Phone Screen",
+                  desc: "1 coding round (2 medium LeetCode problems) + optional behavioral. CoderPad. ~45–60 min.",
+                  color: "text-blue-300",
+                  bg: "bg-blue-500/10",
+                  gate: "Must pass to reach onsite",
+                },
+                {
+                  n: "3",
+                  title: "Onsite Full Loop (4–6 Rounds)",
+                  desc: "1–2 Coding, 1–2 System/Product Design, 1 Behavioral, optionally 1 Project Retrospective (E6+). 45 min each.",
+                  color: "text-purple-300",
+                  bg: "bg-purple-500/10",
+                },
+                {
+                  n: "4",
+                  title: "Hiring Committee Review",
+                  desc: "All packets reviewed collectively. Level determination (E5 vs E6) happens here.",
+                  color: "text-amber-300",
+                  bg: "bg-amber-500/10",
+                },
+                {
+                  n: "5",
+                  title: "Team Match & Offer",
+                  desc: "Candidate selects a team and enters offer negotiation.",
+                  color: "text-emerald-300",
+                  bg: "bg-emerald-500/10",
+                },
+              ].map(s => (
+                <div
+                  key={s.n}
+                  className={`flex gap-3 p-3 rounded-lg ${s.bg} border border-white/5`}
+                >
+                  <span
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${s.color} bg-white/10`}
+                  >
+                    {s.n}
+                  </span>
+                  <div>
+                    <div className={`text-xs font-bold ${s.color}`}>
+                      {s.title}
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {s.desc}
+                    </div>
+                    {s.gate && (
+                      <div className="mt-1 text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded inline-block">
+                        🚧 Gate: {s.gate}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+                💡 <strong>Critical:</strong> The design round in the onsite
+                carries more weight than the technical screen design round. It
+                is the{" "}
+                <strong>single most common reason E6+ candidates fail.</strong>
+              </div>
+            </div>
+          </details>
+
+          {/* 3 Tracks */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🛤️</span>
+                <span className="text-sm font-bold text-white">
+                  3 Interview Tracks — Which One Are You?
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  PICK YOURS
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-2 pr-3 text-slate-400 font-semibold">
+                      Track
+                    </th>
+                    <th className="text-left py-2 pr-3 text-slate-400 font-semibold">
+                      Levels
+                    </th>
+                    <th className="text-left py-2 pr-3 text-slate-400 font-semibold">
+                      Interview Type
+                    </th>
+                    <th className="text-left py-2 text-slate-400 font-semibold">
+                      Key Focus
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {[
+                    [
+                      "🤖 ML System Design",
+                      "L6 (E6), L7 (E7)",
+                      "ML System Design (45 min)",
+                      "Ranking, Recommendations, Ads, Feature Engineering, Model Deployment",
+                    ],
+                    [
+                      "⚙️ Back End / System Generalist",
+                      "L5–L7",
+                      "Systems Design (45 min)",
+                      "Distributed systems, Scalability, Availability, Sharding, Caching",
+                    ],
+                    [
+                      "🖥️ Full Stack / Product Generalist",
+                      "L5–L7",
+                      "Product Architecture (45 min)",
+                      "API design, Data models, Client-server, Protocols, Usability",
+                    ],
+                  ].map(([track, levels, type, focus]) => (
+                    <tr key={track as string}>
+                      <td className="py-2 pr-3 font-semibold text-white">
+                        {track}
+                      </td>
+                      <td className="py-2 pr-3 text-slate-300">{levels}</td>
+                      <td className="py-2 pr-3 text-slate-300">{type}</td>
+                      <td className="py-2 text-slate-400">{focus}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          {/* 5 ML Signals */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📡</span>
+                <span className="text-sm font-bold text-white">
+                  5 Signals Meta Evaluates in ML System Design
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  OFFICIAL
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 space-y-2 pl-2">
+              {[
+                {
+                  n: "01",
+                  emoji: "🗺️",
+                  title: "Problem Navigation",
+                  desc: "Visualize and organize the entire problem and solution space. Connect business context and needs to ML decisions.",
+                },
+                {
+                  n: "02",
+                  emoji: "🗄️",
+                  title: "Training Data",
+                  desc: "Identify methods to collect training data. Evaluate constraints and risks with the proposed method.",
+                },
+                {
+                  n: "03",
+                  emoji: "⚙️",
+                  title: "Feature Engineering",
+                  desc: "Come up with relevant ML features. Identify the most important features for the specific task.",
+                },
+                {
+                  n: "04",
+                  emoji: "🧠",
+                  title: "Modeling",
+                  desc: "Explain modeling choices. Justify model selection. Explain the trade-offs between different approaches.",
+                },
+                {
+                  n: "05",
+                  emoji: "📊",
+                  title: "Evaluation",
+                  desc: "Define offline and online metrics. Design A/B testing strategy. Identify feedback loops and data drift.",
+                },
+              ].map(s => (
+                <div
+                  key={s.n}
+                  className="flex gap-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10"
+                >
+                  <span className="text-emerald-400 font-black text-xs w-6 shrink-0 mt-0.5">
+                    {s.n}
+                  </span>
+                  <div>
+                    <div className="text-xs font-bold text-emerald-300">
+                      {s.emoji} {s.title}
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {s.desc}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          {/* 4 SWE Signals */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⚙️</span>
+                <span className="text-sm font-bold text-white">
+                  4 Signals Meta Evaluates in SWE System Design
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  OFFICIAL
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 space-y-2 pl-2">
+              {[
+                {
+                  n: "01",
+                  emoji: "🗺️",
+                  title: "Problem Navigation",
+                  desc: "Organize the problem space, constraints, and potential solutions. Ask questions to reduce ambiguity before designing.",
+                },
+                {
+                  n: "02",
+                  emoji: "🏗️",
+                  title: "Solution Design",
+                  desc: "Design a working solution that addresses the complete problem. Consider the big picture before diving into details.",
+                },
+                {
+                  n: "03",
+                  emoji: "⚡",
+                  title: "Technical Excellence",
+                  desc: "Dive into technical details. Identify dependencies and trade-offs. Mitigate risks proactively.",
+                },
+                {
+                  n: "04",
+                  emoji: "💬",
+                  title: "Technical Communication",
+                  desc: "Articulate your vision and technical ideas clearly. Understand and address feedback from the interviewer.",
+                },
+              ].map(s => (
+                <div
+                  key={s.n}
+                  className="flex gap-3 p-3 rounded-lg bg-blue-500/5 border border-blue-500/10"
+                >
+                  <span className="text-blue-400 font-black text-xs w-6 shrink-0 mt-0.5">
+                    {s.n}
+                  </span>
+                  <div>
+                    <div className="text-xs font-bold text-blue-300">
+                      {s.emoji} {s.title}
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {s.desc}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          {/* L6 vs L7 Pass/Fail */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⚖️</span>
+                <span className="text-sm font-bold text-white">
+                  L4/L5/L6/L7 — What Separates Pass from Fail 💀
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">
+                  CRITICAL
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-2 pr-3 text-slate-400 font-semibold">
+                      Dimension
+                    </th>
+                    <th className="text-left py-2 pr-3 text-emerald-400 font-semibold">
+                      ✅ Passing (E6/E7)
+                    </th>
+                    <th className="text-left py-2 text-red-400 font-semibold">
+                      ❌ Failing / Down-levelled
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {[
+                    [
+                      "Scope Definition",
+                      "Proactively narrows scope, identifies the right problem",
+                      "Jumps into design without clarifying requirements",
+                    ],
+                    [
+                      "Scale Thinking",
+                      "Specific strategies (sharding, CDN, event-driven) at Meta's scale",
+                      "Generic 'add more servers' or 'use a database'",
+                    ],
+                    [
+                      "Trade-off Articulation",
+                      "Identifies trade-offs (consistency vs. availability) and defends choices",
+                      "Presents only one solution without comparing alternatives",
+                    ],
+                    [
+                      "Communication",
+                      "Thinks out loud, incorporates feedback, treats it as a conversation",
+                      "Goes silent, presents a monologue, ignores hints",
+                    ],
+                    [
+                      "Leadership Signal (E6+)",
+                      "Discusses team build plan, milestones, and organizational impact",
+                      "Focuses only on technical architecture without team/org context",
+                    ],
+                  ].map(([dim, pass, fail]) => (
+                    <tr key={dim as string}>
+                      <td className="py-2 pr-3 font-semibold text-white">
+                        {dim}
+                      </td>
+                      <td className="py-2 pr-3 text-emerald-300">{pass}</td>
+                      <td className="py-2 text-red-300">{fail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          {/* Example Questions — ML */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🤖</span>
+                <span className="text-sm font-bold text-white">
+                  ML System Design — Example Questions 🔥
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  PRACTICE THESE
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 space-y-2 pl-2">
+              {[
+                [
+                  "🏆",
+                  "Design a personalised news ranking system",
+                  "Ranking, user signals, real-time feature serving",
+                ],
+                [
+                  "🛍️",
+                  "Design a product recommendation system",
+                  "Collaborative filtering, embeddings, cold-start problem",
+                ],
+                [
+                  "📢",
+                  "Design an evaluation framework for ads ranking",
+                  "Offline/online metrics, A/B testing, feedback loops",
+                ],
+                [
+                  "🛡️",
+                  "Design a content moderation system",
+                  "Multi-label classification, human-in-the-loop, safety",
+                ],
+                [
+                  "👥",
+                  "Design a friend recommendation system",
+                  "Graph-based ML, link prediction, scalability",
+                ],
+                [
+                  "🚨",
+                  "Design a fraud detection system",
+                  "Anomaly detection, imbalanced data, real-time inference",
+                ],
+              ].map(([emoji, q, challenge]) => (
+                <div
+                  key={q as string}
+                  className="flex gap-3 p-3 rounded-lg bg-purple-500/5 border border-purple-500/10 hover:bg-purple-500/10 transition-colors"
+                >
+                  <span className="text-base shrink-0">{emoji}</span>
+                  <div>
+                    <div className="text-xs font-bold text-white">{q}</div>
+                    <div className="text-[10px] text-purple-300 mt-0.5">
+                      Core challenge: {challenge}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          {/* Example Questions — SWE */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⚙️</span>
+                <span className="text-sm font-bold text-white">
+                  SWE System Design — Example Questions 🔥
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  PRACTICE THESE
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 space-y-2 pl-2">
+              {[
+                [
+                  "🔗",
+                  "Design a URL shortener (like bit.ly)",
+                  "Hashing, redirects, analytics at scale",
+                ],
+                [
+                  "📰",
+                  "Design Facebook's News Feed",
+                  "Fan-out on write vs. read, ranking, real-time updates",
+                ],
+                [
+                  "🎬",
+                  "Design a worldwide video distribution system",
+                  "CDN, transcoding pipeline, storage at scale",
+                ],
+                [
+                  "📊",
+                  "Design an ad impressions aggregator",
+                  "Stream processing, approximate counting, data pipelines",
+                ],
+                [
+                  "⚡",
+                  "Design a distributed cache",
+                  "Consistent hashing, eviction policies, replication",
+                ],
+                [
+                  "💬",
+                  "Design a real-time messaging system (like WhatsApp)",
+                  "WebSockets, message ordering, delivery guarantees",
+                ],
+              ].map(([emoji, q, challenge]) => (
+                <div
+                  key={q as string}
+                  className="flex gap-3 p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/10 transition-colors"
+                >
+                  <span className="text-base shrink-0">{emoji}</span>
+                  <div>
+                    <div className="text-xs font-bold text-white">{q}</div>
+                    <div className="text-[10px] text-blue-300 mt-0.5">
+                      Core challenge: {challenge}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          {/* Official Resources */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none p-3 rounded-lg hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📚</span>
+                <span className="text-sm font-bold text-white">
+                  Official Meta Resources + Top Prep Platforms
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  FREE PDFs
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className="text-slate-400 group-open:rotate-180 transition-transform"
+              />
+            </summary>
+            <div className="mt-2 space-y-2 pl-2">
+              {[
+                {
+                  emoji: "📄",
+                  title: "Official Meta ML Onsite Guide (PDF)",
+                  desc: "Covers Coding, ML System Design, Behavioral rounds with exact evaluation criteria",
+                  href: "https://d3no4ktch0fdq4.cloudfront.net/public/course/files/Meta_ML_onsite_interview_prep.pdf",
+                  tag: "FREE",
+                  tagColor: "text-emerald-400",
+                },
+                {
+                  emoji: "📄",
+                  title: "Official Meta ML Initial Screen Guide (PDF)",
+                  desc: "Covers coding and ML design components of the phone screen round",
+                  href: "https://d3no4ktch0fdq4.cloudfront.net/public/course/files/Meta_ML_initial_interview_prep.pdf",
+                  tag: "FREE",
+                  tagColor: "text-emerald-400",
+                },
+                {
+                  emoji: "📄",
+                  title: "Official Meta SWE Full Loop Guide (PDF)",
+                  desc: "System Design, Product Architecture, evaluation criteria for Full Stack / Back End",
+                  href: "https://d3no4ktch0fdq4.cloudfront.net/public/course/files/Meta_SWE_full_loop_guide.pdf",
+                  tag: "FREE",
+                  tagColor: "text-emerald-400",
+                },
+                {
+                  emoji: "🎓",
+                  title: "HelloInterview — System Design in a Hurry",
+                  desc: "Built by FAANG hiring managers. Delivery framework, core concepts, question breakdowns. Updated 2026.",
+                  href: "https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction",
+                  tag: "FREE",
+                  tagColor: "text-emerald-400",
+                },
+                {
+                  emoji: "🚀",
+                  title: "Exponent — 79 Verified Meta Questions",
+                  desc: "79 verified Meta system design questions with answers + ML system design course. Updated March 2026.",
+                  href: "https://www.tryexponent.com/meta",
+                  tag: "PAID",
+                  tagColor: "text-amber-400",
+                },
+                {
+                  emoji: "📦",
+                  title: "ByteByteGo — Alex Xu",
+                  desc: "Visual learners & Back End generalists. Step-by-step breakdowns with animations and diagrams.",
+                  href: "https://bytebytego.com",
+                  tag: "PAID",
+                  tagColor: "text-amber-400",
+                },
+                {
+                  emoji: "📋",
+                  title: "GitHub: System Design Primer",
+                  desc: "Official Meta recommendation. Comprehensive open-source resource on scalability, availability, consistency.",
+                  href: "https://github.com/donnemartin/system-design-primer",
+                  tag: "FREE",
+                  tagColor: "text-emerald-400",
+                },
+              ].map(r => (
+                <a
+                  key={r.title}
+                  href={r.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group/link"
+                >
+                  <span className="text-base shrink-0">{r.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white group-hover/link:text-amber-300 transition-colors">
+                        {r.title}
+                      </span>
+                      <span className={`text-[10px] font-bold ${r.tagColor}`}>
+                        {r.tag}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">
+                      {r.desc}
+                    </div>
+                  </div>
+                  <ExternalLink
+                    size={11}
+                    className="text-slate-500 shrink-0 mt-0.5"
+                  />
+                </a>
+              ))}
+            </div>
+          </details>
+        </div>
+      </div>
+
+      {/* Framework */}
+      <div className="prep-card p-5">
+        <div className="section-title">
+          System Design Framework (38-min Interview)
+        </div>
+        <div className="space-y-2">
+          {FRAMEWORK_STEPS.map((s, i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-border overflow-hidden"
+            >
+              <button
+                className="w-full flex items-center gap-3 p-3 text-left hover:bg-secondary/50 transition-all"
+                onClick={() => setExpanded(expanded === i ? null : i)}
+              >
+                <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center shrink-0">
+                  {i + 1}
+                </span>
+                <span className="flex-1 text-sm font-semibold text-foreground">
+                  {s.step}
+                </span>
+                <span className="badge badge-gray">{s.time}</span>
+                {expanded === i ? (
+                  <ChevronUp size={13} className="text-muted-foreground" />
+                ) : (
+                  <ChevronDown size={13} className="text-muted-foreground" />
+                )}
+              </button>
+              {expanded === i && (
+                <div className="p-3 border-t border-border">
+                  <ul className="space-y-1.5">
+                    {s.items.map((item, j) => (
+                      <li
+                        key={j}
+                        className="flex items-start gap-2 text-xs text-muted-foreground"
+                      >
+                        <span className="text-blue-400 mt-0.5 shrink-0">·</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* L7 signals */}
+      <div className="prep-card p-5 border-purple-500/20">
+        <div className="section-title text-purple-400">
+          L7 Differentiation Signals
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {L7_SIGNALS.map((s, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-2 text-xs text-muted-foreground"
+            >
+              <span className="text-purple-400 mt-0.5 shrink-0">✦</span>
+              {s}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ─── ML System Design Section ─── */}
+      <div className="prep-card overflow-hidden border-emerald-500/20">
+        {/* Header */}
+        <div className="p-4 border-b border-border bg-emerald-500/5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Brain size={16} className="text-emerald-400" />
+            <div>
+              <div className="text-sm font-bold text-foreground">
+                ML System Design Guide
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Complete lifecycle: data pipelines → training → serving →
+                monitoring
+              </div>
+            </div>
+          </div>
+          <a
+            href="https://www.systemdesignhandbook.com/guides/ml-system-design/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            Source <ExternalLink size={11} />
+          </a>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {/* What is ML System Design */}
+          <div className="rounded-lg border border-border p-4 bg-secondary/30">
+            <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5">
+              <span className="text-emerald-400">◆</span> What is ML System
+              Design?
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              ML System Design is the engineering discipline of architecting
+              systems that can{" "}
+              <strong className="text-foreground">
+                train, deploy, and maintain
+              </strong>{" "}
+              machine learning models at production scale. It sits at the
+              intersection of ML (accuracy, feature quality, optimization) and
+              traditional System Design (scalability, latency, reliability).
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-1.5 pr-3 text-muted-foreground font-semibold">
+                      Aspect
+                    </th>
+                    <th className="text-left py-1.5 pr-3 text-muted-foreground font-semibold">
+                      Traditional System
+                    </th>
+                    <th className="text-left py-1.5 text-muted-foreground font-semibold">
+                      ML System
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {[
+                    [
+                      "Core logic",
+                      "Handwritten rules / Business logic",
+                      "Learned probabilistic models",
+                    ],
+                    [
+                      "Data",
+                      "Structured, schema-driven",
+                      "High volume, distribution evolves",
+                    ],
+                    [
+                      "Failure modes",
+                      "Predictable (bugs, crashes)",
+                      "Silent failures (drift, bias)",
+                    ],
+                    [
+                      "Testing",
+                      "Unit / Integration tests",
+                      "A/B testing, offline evaluation",
+                    ],
+                    [
+                      "Maintenance",
+                      "Code updates",
+                      "Continuous retraining & monitoring",
+                    ],
+                  ].map(([a, b, c]) => (
+                    <tr key={a}>
+                      <td className="py-1.5 pr-3 text-foreground font-medium">
+                        {a}
+                      </td>
+                      <td className="py-1.5 pr-3 text-muted-foreground">{b}</td>
+                      <td className="py-1.5 text-muted-foreground">{c}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Core Objectives */}
+          <div>
+            <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5">
+              <span className="text-emerald-400">◆</span> Core Objectives
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {ML_OBJECTIVES.map(o => (
+                <div
+                  key={o.label}
+                  className="p-3 rounded-lg bg-secondary border border-border"
+                >
+                  <div className="text-xs font-bold text-emerald-400 mb-1">
+                    {o.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">
+                    {o.desc}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
 
-          <div className="space-y-3">
-            {filteredPosts.map((post) => (
-              <div key={post.title} className="rounded-xl border border-gray-200 bg-white p-4 hover:shadow-sm transition-shadow">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="min-w-0">
-                    <a
-                      href={post.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors leading-tight flex items-start gap-1.5 group"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                    >
-                      {post.title}
-                      <ExternalLink size={11} className="flex-shrink-0 mt-0.5 text-gray-400 group-hover:text-indigo-400 transition-colors" />
-                    </a>
+          {/* Architecture Layers */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() => setMlSection(mlSection === "arch" ? null : "arch")}
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">◆</span> Step-by-Step
+                Architecture (7 Layers)
+              </span>
+              {mlSection === "arch" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "arch" && (
+              <div className="space-y-2">
+                {ML_ARCH_LAYERS.map(l => (
+                  <div
+                    key={l.step}
+                    className="flex gap-3 p-3 rounded-lg bg-secondary border border-border"
+                  >
+                    <span className="text-base shrink-0 mt-0.5">{l.icon}</span>
+                    <div>
+                      <div className="text-xs font-bold text-foreground mb-0.5">
+                        {l.step}
+                      </div>
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        {l.desc}
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-gray-400 flex-shrink-0 font-semibold">{post.year}</span>
+                ))}
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+                  <strong>Note:</strong> Each layer enforces a contract — data
+                  shape, freshness, latency, and correctness. Most production
+                  issues arise when these contracts are implicit rather than
+                  explicit.
                 </div>
-                <p className="text-xs text-gray-600 leading-relaxed mb-2.5">{post.summary}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Core Components */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() =>
+                setMlSection(mlSection === "components" ? null : "components")
+              }
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">◆</span> Core Components
+              </span>
+              {mlSection === "components" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "components" && (
+              <div className="space-y-2">
+                {ML_COMPONENTS.map(c => (
+                  <div
+                    key={c.name}
+                    className="flex gap-3 p-3 rounded-lg bg-secondary border border-border"
+                  >
+                    <span className="text-emerald-400 shrink-0 mt-0.5">
+                      {c.icon}
+                    </span>
+                    <div>
+                      <div className="text-xs font-bold text-foreground mb-0.5">
+                        {c.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        {c.desc}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Batch vs Real-time + Training + Serving */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() =>
+                setMlSection(mlSection === "serving" ? null : "serving")
+              }
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">◆</span> Batch vs Real-time ·
+                Training · Serving Architecture
+              </span>
+              {mlSection === "serving" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "serving" && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-secondary border border-border">
+                    <div className="text-xs font-bold text-blue-400 mb-2">
+                      Batch Systems
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Process large datasets periodically (daily/weekly).
+                      Suitable for offline analytics, pre-computed
+                      recommendations, forecasting. Example: rebuilding
+                      recommendation embeddings overnight.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-secondary border border-border">
+                    <div className="text-xs font-bold text-orange-400 mb-2">
+                      Real-time Systems
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Respond to live inputs in milliseconds. Essential for
+                      fraud detection, search ranking, dynamic pricing. Example:
+                      blocking a suspicious credit card transaction instantly.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-secondary border border-border">
+                  <div className="text-xs font-bold text-foreground mb-2">
+                    Training Architecture
+                  </div>
+                  <div className="space-y-1.5">
+                    {[
+                      [
+                        "Data Parallelism",
+                        "Split data across workers; each trains a copy and computes gradients that are aggregated.",
+                      ],
+                      [
+                        "Model Parallelism",
+                        "Split large models (LLMs) across multiple GPUs/TPUs when they don't fit in a single device.",
+                      ],
+                      [
+                        "Parameter Servers vs All-Reduce",
+                        "Central node stores weights (param server) vs. ring all-reduce where workers exchange gradients directly.",
+                      ],
+                      [
+                        "Checkpointing",
+                        "Save model state periodically so training can resume from the last checkpoint after node failure.",
+                      ],
+                    ].map(([t, d]) => (
+                      <div key={t as string} className="flex gap-2 text-xs">
+                        <span className="text-emerald-400 shrink-0 font-semibold">
+                          {t}:
+                        </span>
+                        <span className="text-muted-foreground">{d}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-secondary border border-border">
+                  <div className="text-xs font-bold text-foreground mb-2">
+                    Serving Flow
+                  </div>
+                  <div className="font-mono text-xs text-emerald-400 bg-background/50 rounded p-2 mb-2">
+                    Client → Load Balancer → Inference API → Feature Store/Cache
+                    → Inference Cache → Model Server → Logging
+                  </div>
+                  <div className="space-y-1.5">
+                    {[
+                      [
+                        "Feature Cache",
+                        "Redis/Memcached for frequently accessed features (avoid slow DB lookups).",
+                      ],
+                      [
+                        "Inference Cache",
+                        "Cache final model output for identical inputs to avoid redundant computation.",
+                      ],
+                      [
+                        "Model Cache",
+                        "Keep model weights in RAM/GPU memory to avoid disk-load latency per request.",
+                      ],
+                      [
+                        "Edge Inference",
+                        "Deploy lightweight models (TFLite) on-device to eliminate network latency entirely.",
+                      ],
+                    ].map(([t, d]) => (
+                      <div key={t as string} className="flex gap-2 text-xs">
+                        <span className="text-emerald-400 shrink-0 font-semibold">
+                          {t}:
+                        </span>
+                        <span className="text-muted-foreground">{d}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Indexing + Scalability + Fault Tolerance */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() =>
+                setMlSection(mlSection === "scale" ? null : "scale")
+              }
+            >
+              <span className="flex items-center gap-1.5">
+                <Search size={12} className="text-emerald-400" /> Indexing ·
+                Scalability · Fault Tolerance · Monitoring
+              </span>
+              {mlSection === "scale" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "scale" && (
+              <div className="space-y-3">
+                <div className="p-3 rounded-lg bg-secondary border border-border">
+                  <div className="text-xs font-bold text-foreground mb-2">
+                    Indexing for Efficient Retrieval
+                  </div>
+                  <div className="space-y-1.5">
+                    {[
+                      [
+                        "Vector Indexing",
+                        "Semantic search & recommendations. Items → embeddings. HNSW + FAISS/Milvus for Approximate Nearest Neighbor (ANN) search.",
+                      ],
+                      [
+                        "Inverted Indexing",
+                        "Keyword-based search (Elasticsearch). Maps words to documents.",
+                      ],
+                      [
+                        "Hash Indexing",
+                        "Fast exact lookups for classification tasks or feature retrieval.",
+                      ],
+                    ].map(([t, d]) => (
+                      <div key={t as string} className="flex gap-2 text-xs">
+                        <span className="text-emerald-400 shrink-0 font-semibold">
+                          {t}:
+                        </span>
+                        <span className="text-muted-foreground">{d}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-secondary border border-border">
+                    <div className="text-xs font-bold text-foreground mb-2">
+                      Scalability Approaches
+                    </div>
+                    <ul className="space-y-1">
+                      {[
+                        "Horizontal scaling of inference nodes",
+                        "Model partitioning across hardware",
+                        "Async queues (Kafka/RabbitMQ) for traffic spikes",
+                        "Load balancing across healthy nodes",
+                        "Auto-scaling based on real-time metrics",
+                      ].map(s => (
+                        <li
+                          key={s}
+                          className="flex gap-1.5 text-xs text-muted-foreground"
+                        >
+                          <span className="text-emerald-400 shrink-0">·</span>
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="p-3 rounded-lg bg-secondary border border-border">
+                    <div className="text-xs font-bold text-foreground mb-2">
+                      Fault Tolerance
+                    </div>
+                    <ul className="space-y-1">
+                      {[
+                        "Replicate model across availability zones",
+                        "Retry with exponential backoff",
+                        "Fallback to simpler model (logistic regression) on timeout",
+                        "Automated anomaly detection & alerting",
+                      ].map(s => (
+                        <li
+                          key={s}
+                          className="flex gap-1.5 text-xs text-muted-foreground"
+                        >
+                          <span className="text-emerald-400 shrink-0">·</span>
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-secondary border border-border">
+                  <div className="text-xs font-bold text-foreground mb-2">
+                    Data Drift & Monitoring
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Track precision/recall/F1/AUC on labeled data. Monitor
+                    latency/throughput against SLAs. Detect input feature drift
+                    using statistical tests. Tools: Prometheus, Grafana,
+                    Evidently AI.
+                  </p>
+                  <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+                    <strong>Tip:</strong> Use online evaluation (e.g., real-time
+                    click-through rate) as a proxy for model performance when
+                    ground-truth labels are delayed.
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Security */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() =>
+                setMlSection(mlSection === "security" ? null : "security")
+              }
+            >
+              <span className="flex items-center gap-1.5">
+                <Shield size={12} className="text-emerald-400" /> Security &
+                Privacy Considerations
+              </span>
+              {mlSection === "security" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "security" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  ["Encryption", "Encrypt data in transit (TLS) and at rest."],
+                  [
+                    "Access Control",
+                    "RBAC and token-based authentication for APIs.",
+                  ],
+                  [
+                    "Differential Privacy",
+                    "Add noise to training data to prevent models from memorizing sensitive individual details.",
+                  ],
+                  [
+                    "Bias & Fairness",
+                    "Regularly audit models for bias against protected groups using SHAP or LIME.",
+                  ],
+                  [
+                    "Compliance",
+                    "Adhere to GDPR, CCPA, and other data protection regulations.",
+                  ],
+                ].map(([t, d]) => (
+                  <div
+                    key={t as string}
+                    className="p-3 rounded-lg bg-secondary border border-border"
+                  >
+                    <div className="text-xs font-bold text-foreground mb-1">
+                      {t}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{d}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Trade-offs */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() =>
+                setMlSection(mlSection === "tradeoffs" ? null : "tradeoffs")
+              }
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">◆</span> ML System Design
+                Trade-offs
+              </span>
+              {mlSection === "tradeoffs" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "tradeoffs" && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 pr-3 text-muted-foreground font-semibold">
+                        Trade-off
+                      </th>
+                      <th className="text-left py-2 pr-3 text-muted-foreground font-semibold">
+                        Option A
+                      </th>
+                      <th className="text-left py-2 text-muted-foreground font-semibold">
+                        Option B
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {ML_TRADEOFFS.map(t => (
+                      <tr key={t.aspect}>
+                        <td className="py-2 pr-3 text-foreground font-medium">
+                          {t.aspect}
+                        </td>
+                        <td className="py-2 pr-3 text-muted-foreground">
+                          {t.traditional}
+                        </td>
+                        <td className="py-2 text-muted-foreground">{t.ml}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="text-xs text-muted-foreground mt-2 italic">
+                  Acknowledging these trade-offs in interviews demonstrates
+                  maturity in engineering judgment.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Case Study */}
+          <div>
+            <button
+              className="w-full flex items-center justify-between text-xs font-bold text-foreground mb-2 hover:text-emerald-400 transition-colors"
+              onClick={() =>
+                setMlSection(mlSection === "casestudy" ? null : "casestudy")
+              }
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">◆</span> Case Study:
+                ML-Powered Recommendation System
+              </span>
+              {mlSection === "casestudy" ? (
+                <ChevronUp size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+            </button>
+            {mlSection === "casestudy" && (
+              <div className="space-y-3">
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <div className="text-xs font-bold text-blue-400 mb-1">
+                    Problem Statement
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Design a system that provides personalized movie
+                    recommendations, updates based on user activity, and returns
+                    results in under 200ms.
+                  </p>
+                  <div className="flex gap-4 mt-2">
+                    {[
+                      ["Personalization", "Match user history"],
+                      ["Freshness", "Update after each watch"],
+                      ["Latency", "<200ms at p99"],
+                    ].map(([k, v]) => (
+                      <div key={k}>
+                        <div className="text-xs font-bold text-blue-400">
+                          {k}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-secondary border border-border">
+                  <div className="text-xs font-bold text-foreground mb-2">
+                    High-Level Architecture
+                  </div>
+                  <div className="space-y-1.5">
+                    {[
+                      [
+                        "Data Ingestion",
+                        "Stream user viewing history and ratings via Kafka.",
+                      ],
+                      [
+                        "Data Preprocessing",
+                        "Spark jobs compute user/item embeddings. Feature store manages real-time user features.",
+                      ],
+                      [
+                        "Model Training",
+                        "Two-tower neural network trained to predict user-item affinity.",
+                      ],
+                      [
+                        "Candidate Generation",
+                        "FAISS retrieves top 500 relevant movies from millions.",
+                      ],
+                      [
+                        "Ranking",
+                        "Heavy ranking model scores the 500 candidates for precise ordering.",
+                      ],
+                      [
+                        "Model Serving",
+                        "TensorFlow Serving behind a load balancer.",
+                      ],
+                      [
+                        "Caching",
+                        "Top recommendations cached in Redis for subsequent page loads.",
+                      ],
+                    ].map(([t, d]) => (
+                      <div key={t as string} className="flex gap-2 text-xs">
+                        <span className="text-emerald-400 shrink-0 font-semibold w-36">
+                          {t}:
+                        </span>
+                        <span className="text-muted-foreground">{d}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Interview Roadmap */}
+          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
+            <div className="text-xs font-bold text-emerald-400 mb-3">
+              ML System Design Interview Roadmap
+            </div>
+            <div className="space-y-2">
+              {ML_INTERVIEW_STEPS.map((s, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <span className="text-xs font-semibold text-foreground">
+                      {s.step}:{" "}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {s.desc}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Practice questions */}
+      <div className="prep-card overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="section-title mb-0 pb-0 border-0">
+            Practice Questions
+          </div>
+          <select
+            value={filterLevel}
+            onChange={e => setFilterLevel(e.target.value)}
+            className="px-3 py-1.5 rounded-lg bg-secondary border border-border text-xs text-foreground focus:outline-none"
+          >
+            <option value="All">All Levels</option>
+            <option value="L6+">L6+</option>
+            <option value="L7+">L7+</option>
+          </select>
+        </div>
+        <div className="divide-y divide-border">
+          {filtered.map((q, i) => (
+            <div key={i} className="p-4 flex items-center gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className="text-sm font-semibold text-foreground">
+                    {q.title}
+                  </span>
+                  <span
+                    className={`badge ${q.level === "L7+" ? "badge-purple" : "badge-blue"}`}
+                  >
+                    {q.level}
+                  </span>
+                </div>
                 <div className="flex flex-wrap gap-1">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${TAG_COLORS[tag] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
-                      {tag}
+                  {q.tags.map(t => (
+                    <span key={t} className="badge badge-gray text-xs">
+                      {t}
                     </span>
                   ))}
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Key concepts */}
+      <div className="prep-card p-5">
+        <div className="section-title">Key Distributed Systems Concepts</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[
+            [
+              "CAP Theorem",
+              "Consistency, Availability, Partition Tolerance — pick 2",
+            ],
+            [
+              "Consistent Hashing",
+              "Distribute data across nodes with minimal rehashing",
+            ],
+            ["Leader Election", "Raft or Paxos for distributed consensus"],
+            ["Event Sourcing", "Store state changes as immutable events"],
+            ["CQRS", "Separate read and write models for scalability"],
+            [
+              "Circuit Breaker",
+              "Prevent cascading failures in distributed systems",
+            ],
+            ["Saga Pattern", "Distributed transactions without 2PC"],
+            ["Bloom Filter", "Probabilistic set membership with O(1) lookup"],
+            [
+              "Write-Ahead Log",
+              "Durability guarantee before committing changes",
+            ],
+          ].map(([title, desc]) => (
+            <div key={title} className="p-3 rounded-lg bg-secondary">
+              <div className="text-xs font-bold text-foreground mb-1">
+                {title}
+              </div>
+              <div className="text-xs text-muted-foreground">{desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* System Design Diagram Templates */}
+      <div id="sysdesign-diagram-templates">
+        <SystemDesignDiagramTemplates />
+      </div>
+      {/* Capacity Estimation Calculator */}
+      <div id="sysdesign-capacity-calc">
+        <CapacityCalculator />
+      </div>
+
+      {/* Design Pattern Library */}
+      <DesignPatternLibrary />
+
+      {/* Flash Card CSV Import */}
+      <FlashCardCSVImport onImport={() => {}} />
+
+      {/* System Design Mock Session */}
+      <div id="sysdesign-mock-session">
+        <SectionErrorBoundary label="AI Mock Session">
+          <SystemDesignMockSession />
+        </SectionErrorBoundary>
+      </div>
+
+      {/* System Design Flash Cards Drill Mode */}
+      <SystemDesignFlashCards />
+
+      {/* ═══════════════════════════════════════════════════════════════
+           🆕 SYSTEM DESIGN ENHANCEMENTS — BATCH 5
+          ═══════════════════════════════════════════════════════════════ */}
+
+      {/* Time-Boxed Practice Timer */}
+      <div className="prep-card border border-blue-500/20 bg-blue-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-400">⏱</span>
+            <span className="text-sm font-bold text-foreground">
+              Time-Boxed Practice Timer
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold">
+              NEW
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            45/60/30-min interview timer with phase checkpoints and transition
+            alerts.
+          </p>
+        </div>
+        <div className="p-4">
+          <TimeBoxedPracticeTimer />
+        </div>
+      </div>
+
+      {/* Guided Design Walkthrough */}
+      <div className="prep-card border border-blue-500/20 bg-blue-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Brain size={14} className="text-blue-400" />
+            <span className="text-sm font-bold text-foreground">
+              Guided Design Walkthrough Mode
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold">
+              NEW · AI
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Walk through any problem using Meta's 5-step framework. Get AI
+            coaching on your L6/L7 signal.
+          </p>
+        </div>
+        <div className="p-4">
+          <SectionErrorBoundary label="Guided Design Walkthrough">
+            <GuidedDesignWalkthrough />
+          </SectionErrorBoundary>
+        </div>
+      </div>
+
+      {/* Trade-off Decision Simulator */}
+      <div className="prep-card border border-violet-500/20 bg-violet-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Zap size={14} className="text-violet-400" />
+            <span className="text-sm font-bold text-foreground">
+              Trade-off Decision Simulator
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-semibold">
+              NEW · AI
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Pick a strategy, justify it, get L6/L7 scoring. 5 real Meta-scale
+            scenarios.
+          </p>
+        </div>
+        <div className="p-4">
+          <SectionErrorBoundary label="Trade-off Decision Simulator">
+            <TradeoffDecisionSimulator />
+          </SectionErrorBoundary>
+        </div>
+      </div>
+
+      {/* Meta-Specific Component Library */}
+      <div className="prep-card border border-cyan-500/20 bg-cyan-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Database size={14} className="text-cyan-400" />
+            <span className="text-sm font-bold text-foreground">
+              Meta-Specific Component Library
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-semibold">
+              NEW
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            TAO, Memcache, Scuba, ZippyDB, Laser, Tupperware, Haystack, Presto —
+            with L7 interview signals.
+          </p>
+        </div>
+        <div className="p-4">
+          <MetaComponentLibrary />
+        </div>
+      </div>
+
+      {/* Enhanced Scale Estimation Calculator */}
+      <div className="prep-card border border-cyan-500/20 bg-cyan-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <BarChart3 size={14} className="text-cyan-400" />
+            <span className="text-sm font-bold text-foreground">
+              Scale Estimation Calculator
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-semibold">
+              NEW
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Real-time sliders for DAU, writes, reads, record size, retention,
+            media. Instant QPS, storage, and bandwidth estimates with sanity
+            warnings.
+          </p>
+        </div>
+        <div className="p-4">
+          <ScaleEstimationCalculator />
+        </div>
+      </div>
+
+      {/* Architecture Anti-Pattern Detector */}
+      <div className="prep-card border border-rose-500/20 bg-rose-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Shield size={14} className="text-rose-400" />
+            <span className="text-sm font-bold text-foreground">
+              Architecture Anti-Pattern Detector
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold">
+              NEW · AI
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Paste your design. AI scans for SPOFs, missing async processing, no
+            consistency model, and other L6 failure patterns.
+          </p>
+        </div>
+        <div className="p-4">
+          <SectionErrorBoundary label="Anti-Pattern Detector">
+            <AntiPatternDetector />
+          </SectionErrorBoundary>
+        </div>
+      </div>
+
+      {/* Peer Design Review Simulator */}
+      <div className="prep-card border border-emerald-500/20 bg-emerald-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Search size={14} className="text-emerald-400" />
+            <span className="text-sm font-bold text-foreground">
+              Peer Design Review Simulator
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold">
+              NEW · AI
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Describe your design. A skeptical senior engineer asks 3 adversarial
+            questions to probe it under pressure.
+          </p>
+        </div>
+        <div className="p-4">
+          <SectionErrorBoundary label="Peer Design Review">
+            <PeerDesignReview />
+          </SectionErrorBoundary>
+        </div>
+      </div>
+
+      {/* Complexity Cheat Sheet */}
+      <div className="prep-card border border-amber-500/20 bg-amber-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-400">📊</span>
+            <span className="text-sm font-bold text-foreground">
+              Complexity Cheat Sheet
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">
+              NEW
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Latency numbers every engineer should know, CAP theorem quick
+            reference, and read/write patterns.
+          </p>
+        </div>
+        <div className="p-4">
+          <ComplexityCheatSheet />
+        </div>
+      </div>
+
+      {/* Design Doc Template Generator */}
+      <div className="prep-card border border-violet-500/20 bg-violet-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-violet-400">📄</span>
+            <span className="text-sm font-bold text-foreground">
+              Design Doc Template Generator
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-semibold">
+              NEW
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Fill in each section to generate a Meta-style design doc. Export as
+            Markdown or PDF.
+          </p>
+        </div>
+        <div className="p-4">
+          <DesignDocGenerator />
+        </div>
+      </div>
+
+      {/* Explain Like a PM */}
+      <div className="prep-card border border-orange-500/20 bg-orange-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Zap size={14} className="text-orange-400" />
+            <span className="text-sm font-bold text-foreground">
+              Explain Like a PM Mode
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 font-semibold">
+              NEW · AI
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Paste your technical design. AI rewrites it in PM-friendly language
+            — practicing the L7 communication skill.
+          </p>
+        </div>
+        <div className="p-4">
+          <SectionErrorBoundary label="Explain Like a PM">
+            <ExplainLikeAPM />
+          </SectionErrorBoundary>
+        </div>
+      </div>
+
+      {/* Enhanced Question Bank */}
+      <div className="prep-card border border-blue-500/20 bg-blue-500/5">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-400">📚</span>
+            <span className="text-sm font-bold text-foreground">
+              Question Bank with Difficulty Tiers
+            </span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold">
+              NEW
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            20 questions categorised by tier (Coding-Adjacent / Full System
+            Design / Deep Dive) and Meta relevance.
+          </p>
+        </div>
+        <div className="p-4">
+          <EnhancedQuestionBank />
+        </div>
+      </div>
+      {/* ═══════════════════════════════════════════════════════════════
+           📊 WHY CANDIDATES FAIL — Research-backed failure analysis
+          ═══════════════════════════════════════════════════════════════ */}
+      <div
+        id="sd-failure-analysis"
+        className="prep-card border border-red-500/20 bg-red-500/5"
+      >
+        <div className="p-4">
+          <SectionErrorBoundary label="Failure Analysis">
+            <SystemDesignFailureAnalysis />
+          </SectionErrorBoundary>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── System Design Flash Cards ─────────────────────────────────────────────────
+const FLASH_CARDS = [
+  {
+    q: "What is the CAP theorem?",
+    a: "A distributed system can guarantee at most 2 of: Consistency (every read gets the latest write), Availability (every request gets a response), Partition Tolerance (system works despite network splits). In practice, P is unavoidable, so you choose CP or AP.",
+    tag: "Fundamentals",
+  },
+  {
+    q: "When would you use consistent hashing?",
+    a: "When distributing data across nodes where nodes can join/leave frequently (e.g., distributed caches, DHTs). It minimizes key remapping when topology changes — only K/N keys move on average (K=keys, N=nodes). Used in Cassandra, DynamoDB, Memcached.",
+    tag: "Fundamentals",
+  },
+  {
+    q: "Explain the difference between SQL and NoSQL. When do you choose each?",
+    a: "SQL: ACID, structured schema, strong consistency, vertical scaling, great for relational data and complex queries. NoSQL: flexible schema, horizontal scaling, eventual consistency, great for high-throughput unstructured/semi-structured data. Choose SQL for financial/transactional systems; NoSQL for social feeds, logs, catalogs.",
+    tag: "Databases",
+  },
+  {
+    q: "What is a write-ahead log (WAL) and why is it important?",
+    a: "WAL records every change to a log before applying it to the database. Ensures durability: if the system crashes mid-write, the log can replay the operation. Used in PostgreSQL, Kafka (commit log), and most ACID databases. Key for crash recovery and replication.",
+    tag: "Databases",
+  },
+  {
+    q: "How does a CDN work and when should you use one?",
+    a: "CDN caches static assets (images, JS, CSS, video) at edge nodes geographically close to users. Reduces latency, offloads origin servers, improves availability. Use for: static assets, media streaming, API acceleration. Key concepts: cache-control headers, TTL, cache invalidation, origin pull vs push.",
+    tag: "Scalability",
+  },
+  {
+    q: "What is the difference between horizontal and vertical scaling?",
+    a: "Vertical (scale-up): add more CPU/RAM to existing machine. Simple but has limits and single point of failure. Horizontal (scale-out): add more machines. Enables near-infinite scale, better fault tolerance. Requires stateless services, load balancing, and distributed data management.",
+    tag: "Scalability",
+  },
+  {
+    q: "Explain the fan-out problem in social networks.",
+    a: "When a user with millions of followers posts, you need to update millions of feeds. Push model (write-time fan-out): write to all follower feeds on post — fast reads, slow writes. Pull model (read-time fan-out): compute feed on read — slow reads, fast writes. Hybrid: push for normal users, pull for celebrities (>threshold followers).",
+    tag: "Meta-Specific",
+  },
+  {
+    q: "What is a circuit breaker pattern?",
+    a: "Prevents cascading failures: wraps calls to a service and tracks failure rate. States: Closed (normal), Open (failing — fast-fail all requests), Half-Open (probe with limited traffic). When failure rate exceeds threshold, opens circuit. After timeout, tries half-open. Used in Netflix Hystrix, resilience4j.",
+    tag: "Reliability",
+  },
+  {
+    q: "How do you design a rate limiter?",
+    a: "Algorithms: Token Bucket (smooth, allows bursts), Leaky Bucket (strict rate), Fixed Window Counter (simple, boundary spikes), Sliding Window Log (accurate, memory-heavy), Sliding Window Counter (balanced). For distributed: use Redis with atomic operations (INCR + EXPIRE or Lua scripts). Store per user/IP/API key.",
+    tag: "Meta-Specific",
+  },
+  {
+    q: "What is eventual consistency and when is it acceptable?",
+    a: "Eventual consistency: all replicas converge to the same value given no new updates. Acceptable for: social media likes/views, shopping cart (resolve on checkout), DNS, product catalogs. NOT acceptable for: financial transactions, inventory (overselling), authentication. Tradeoff: availability and performance vs strong consistency.",
+    tag: "Fundamentals",
+  },
+  {
+    q: "How would you design a distributed job queue?",
+    a: "Components: Producer (enqueues jobs), Queue (Kafka/SQS/RabbitMQ), Workers (consume and process), Dead Letter Queue (failed jobs), Scheduler (delayed/recurring jobs). Key concerns: at-least-once delivery, idempotency (dedup by job ID), priority queues, visibility timeout, backpressure, monitoring lag.",
+    tag: "Meta-Specific",
+  },
+  {
+    q: "Explain the Saga pattern for distributed transactions.",
+    a: "Manages distributed transactions without 2PC. Two types: Choreography (services emit events, react to each other — decoupled but hard to track) and Orchestration (central coordinator calls each service — easier to reason about). Each step has a compensating transaction for rollback. Used when ACID across services is infeasible.",
+    tag: "Reliability",
+  },
+  {
+    q: "What is CQRS and when should you use it?",
+    a: "Command Query Responsibility Segregation: separate read (Query) and write (Command) models. Write model optimizes for consistency and business rules; read model optimizes for query performance (denormalized, pre-computed). Use when read/write patterns differ significantly, need high read throughput, or want event sourcing. Adds complexity — don't use for simple CRUD.",
+    tag: "Databases",
+  },
+  {
+    q: "How do you handle hot spots in a distributed database?",
+    a: "Hot spots occur when one shard/partition gets disproportionate traffic. Solutions: (1) Add random suffix to hot keys to spread across shards, (2) Pre-split hot partitions, (3) Caching layer in front of hot data, (4) Read replicas for hot reads, (5) Application-level sharding with consistent hashing, (6) Adaptive load balancing.",
+    tag: "Scalability",
+  },
+  {
+    q: "What is the difference between a message queue and a stream?",
+    a: "Message Queue (RabbitMQ, SQS): each message consumed by one consumer, deleted after processing. Good for task distribution, work queues. Stream (Kafka, Kinesis): messages retained for a period, multiple consumers can read independently at their own offset. Good for event sourcing, audit logs, analytics, replay. Kafka is both.",
+    tag: "Fundamentals",
+  },
+];
+
+interface CustomCard {
+  id: string;
+  q: string;
+  a: string;
+  tag: string;
+}
+
+function SystemDesignFlashCards() {
+  const [mode, setMode] = useState<"browse" | "drill" | "manage">("browse");
+  const [cardIdx, setCardIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [filterTag, setFilterTag] = useState("All");
+  const [knownCards, setKnownCards] = useState<Set<number>>(() => {
+    try {
+      return new Set(
+        JSON.parse(localStorage.getItem("sd_known_cards") ?? "[]") as number[]
+      );
+    } catch {
+      return new Set();
+    }
+  });
+  const [sessionScore, setSessionScore] = useState({ known: 0, review: 0 });
+  const [sessionDone, setSessionDone] = useState(false);
+  const [srDue, setSrDue] = useFlashCardSRDue();
+
+  // Custom cards
+  const [customCards, setCustomCards] = useState<CustomCard[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("sd_custom_cards_v1") ?? "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [newCard, setNewCard] = useState({ q: "", a: "", tag: "Custom" });
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+
+  const saveCustomCards = (cards: CustomCard[]) => {
+    setCustomCards(cards);
+    localStorage.setItem("sd_custom_cards_v1", JSON.stringify(cards));
+  };
+
+  const addCustomCard = () => {
+    if (!newCard.q.trim() || !newCard.a.trim()) return;
+    const card: CustomCard = { id: `custom_${Date.now()}`, ...newCard };
+    saveCustomCards([...customCards, card]);
+    setNewCard({ q: "", a: "", tag: "Custom" });
+  };
+
+  const deleteCustomCard = (id: string) =>
+    saveCustomCards(customCards.filter(c => c.id !== id));
+
+  const updateCustomCard = (id: string, updates: Partial<CustomCard>) => {
+    saveCustomCards(
+      customCards.map(c => (c.id === id ? { ...c, ...updates } : c))
+    );
+  };
+
+  // Merge built-in + custom cards for display
+  const ALL_CARDS = [
+    ...FLASH_CARDS,
+    ...customCards.map(c => ({ q: c.q, a: c.a, tag: c.tag })),
+  ];
+
+  const tags = ["All", ...Array.from(new Set(ALL_CARDS.map(c => c.tag)))];
+  const deck =
+    filterTag === "All"
+      ? ALL_CARDS
+      : ALL_CARDS.filter(c => c.tag === filterTag);
+  // In drill mode, show cards that are NOT mastered OR are due for SR review today
+  const today = new Date().toISOString().split("T")[0];
+  const drillDeck = deck.filter(c => {
+    const globalIdx = ALL_CARDS.indexOf(c);
+    const isKnown = knownCards.has(globalIdx);
+    const isDue = srDue[String(globalIdx)] && srDue[String(globalIdx)] <= today;
+    return !isKnown || isDue;
+  });
+
+  // SR interval: 1 day after first review, 3 days, 7 days, 14 days (SM-2 simplified)
+  const getNextSRDate = (globalIdx: number): string => {
+    const existing = srDue[String(globalIdx)];
+    const lastDate = existing ? new Date(existing) : new Date();
+    const daysSince = existing
+      ? Math.round((Date.now() - lastDate.getTime()) / 86400000)
+      : 0;
+    const interval =
+      daysSince < 1 ? 1 : daysSince < 3 ? 3 : daysSince < 7 ? 7 : 14;
+    const next = new Date();
+    next.setDate(next.getDate() + interval);
+    return next.toISOString().split("T")[0];
+  };
+
+  const saveKnown = (set: Set<number>) => {
+    localStorage.setItem("sd_known_cards", JSON.stringify(Array.from(set)));
+  };
+
+  const markKnown = () => {
+    const globalIdx = ALL_CARDS.indexOf(deck[cardIdx]);
+    const next = new Set(knownCards);
+    next.add(globalIdx);
+    setKnownCards(next);
+    saveKnown(next);
+    // Remove from SR due (mastered, no need to review)
+    setSrDue(d => {
+      const n = { ...d };
+      delete n[String(globalIdx)];
+      return n;
+    });
+    setSessionScore(s => ({ ...s, known: s.known + 1 }));
+    nextCard();
+  };
+
+  const markReview = () => {
+    const globalIdx = ALL_CARDS.indexOf(deck[cardIdx]);
+    // Remove from known (needs more practice) and schedule SR review
+    const next = new Set(knownCards);
+    next.delete(globalIdx);
+    setKnownCards(next);
+    saveKnown(next);
+    setSrDue(d => ({ ...d, [String(globalIdx)]: getNextSRDate(globalIdx) }));
+    setSessionScore(s => ({ ...s, review: s.review + 1 }));
+    nextCard();
+  };
+
+  const nextCard = () => {
+    setFlipped(false);
+    const activeDeck = mode === "drill" ? drillDeck : deck;
+    if (cardIdx + 1 >= activeDeck.length) {
+      setSessionDone(true);
+    } else {
+      setCardIdx(i => i + 1);
+    }
+  };
+
+  const startDrill = () => {
+    setMode("drill");
+    setCardIdx(0);
+    setFlipped(false);
+    setSessionScore({ known: 0, review: 0 });
+    setSessionDone(false);
+  };
+
+  const resetSession = () => {
+    setCardIdx(0);
+    setFlipped(false);
+    setSessionScore({ known: 0, review: 0 });
+    setSessionDone(false);
+  };
+
+  const resetAll = () => {
+    const next = new Set<number>();
+    setKnownCards(next);
+    saveKnown(next);
+    resetSession();
+    setMode("browse");
+  };
+
+  const activeDeck = mode === "drill" ? drillDeck : deck;
+  const currentCard = activeDeck[cardIdx];
+
+  const TAG_COLORS: Record<string, string> = {
+    Fundamentals: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+    Databases: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    Scalability: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+    Reliability: "text-red-400 bg-red-500/10 border-red-500/30",
+    "Meta-Specific": "text-purple-400 bg-purple-500/10 border-purple-500/30",
+  };
+
+  return (
+    <div className="prep-card overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-yellow-400 text-lg">🃏</span>
+          <div>
+            <div className="text-sm font-bold text-foreground">
+              System Design Flash Cards
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {ALL_CARDS.length} cards ({FLASH_CARDS.length} built-in
+              {customCards.length > 0 ? ` + ${customCards.length} custom` : ""})
+              · {knownCards.size} mastered
+              {Object.values(srDue).filter(d => d <= today).length > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold">
+                  ⏰ {Object.values(srDue).filter(d => d <= today).length} due
+                  today
+                </span>
+              )}
+            </div>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setMode(m => (m === "manage" ? "browse" : "manage"))}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+              mode === "manage"
+                ? "bg-blue-500/20 border-blue-500/40 text-blue-400"
+                : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            ➕ My Cards
+          </button>
+          <button
+            onClick={startDrill}
+            className="px-3 py-1.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 text-xs font-bold transition-all"
+          >
+            ⚡ Drill Mode
+          </button>
+          {knownCards.size > 0 && (
+            <button
+              onClick={resetAll}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ↺ Reset
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tag filter */}
+      <div className="p-3 border-b border-border flex gap-2 flex-wrap">
+        {tags.map(t => (
+          <button
+            key={t}
+            onClick={() => {
+              setFilterTag(t);
+              setCardIdx(0);
+              setFlipped(false);
+              setSessionDone(false);
+            }}
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+              filterTag === t
+                ? (TAG_COLORS[t] ??
+                  "bg-secondary border-border text-foreground")
+                : "bg-transparent border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Manage Custom Cards panel */}
+      {mode === "manage" && (
+        <div className="p-4 border-b border-border space-y-4 bg-blue-500/5">
+          <div className="text-xs font-bold text-blue-400">
+            Add your own flash card
+          </div>
+          <div className="space-y-2">
+            <textarea
+              value={newCard.q}
+              onChange={e => setNewCard(c => ({ ...c, q: e.target.value }))}
+              placeholder="Question (e.g. How does Kafka guarantee ordering within a partition?)"
+              rows={2}
+              className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-blue-500/50 resize-none placeholder:text-muted-foreground/50"
+            />
+            <textarea
+              value={newCard.a}
+              onChange={e => setNewCard(c => ({ ...c, a: e.target.value }))}
+              placeholder="Answer (e.g. Kafka guarantees ordering within a single partition by assigning sequential offsets…)"
+              rows={3}
+              className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-blue-500/50 resize-none placeholder:text-muted-foreground/50"
+            />
+            <div className="flex items-center gap-2">
+              <input
+                value={newCard.tag}
+                onChange={e => setNewCard(c => ({ ...c, tag: e.target.value }))}
+                placeholder="Tag (e.g. Kafka, Custom)"
+                className="flex-1 text-xs text-foreground bg-background border border-border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500/50 placeholder:text-muted-foreground/50"
+              />
+              <button
+                onClick={addCustomCard}
+                disabled={!newCard.q.trim() || !newCard.a.trim()}
+                className="px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Add Card
+              </button>
+            </div>
+          </div>
+
+          {customCards.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-muted-foreground">
+                Your cards ({customCards.length})
+              </div>
+              {customCards.map(c => (
+                <div
+                  key={c.id}
+                  className="p-3 rounded-lg bg-secondary border border-border"
+                >
+                  {editingCardId === c.id ? (
+                    <div className="space-y-2">
+                      <textarea
+                        defaultValue={c.q}
+                        id={`eq-${c.id}`}
+                        rows={2}
+                        className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2 focus:outline-none resize-none"
+                      />
+                      <textarea
+                        defaultValue={c.a}
+                        id={`ea-${c.id}`}
+                        rows={3}
+                        className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2 focus:outline-none resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const q =
+                              (
+                                document.getElementById(
+                                  `eq-${c.id}`
+                                ) as HTMLTextAreaElement
+                              )?.value ?? c.q;
+                            const a =
+                              (
+                                document.getElementById(
+                                  `ea-${c.id}`
+                                ) as HTMLTextAreaElement
+                              )?.value ?? c.a;
+                            updateCustomCard(c.id, { q, a });
+                            setEditingCardId(null);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingCardId(null)}
+                          className="px-2.5 py-1 rounded-lg bg-secondary border border-border text-muted-foreground text-xs"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-foreground truncate">
+                          {c.q}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">
+                          {c.a}
+                        </div>
+                        <span className="text-[10px] text-blue-400 mt-1 inline-block">
+                          {c.tag}
+                        </span>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <button
+                          onClick={() => setEditingCardId(c.id)}
+                          className="text-muted-foreground hover:text-foreground text-xs px-1"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => deleteCustomCard(c.id)}
+                          className="text-muted-foreground hover:text-red-400 text-xs px-1"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
+
+      {/* Card area */}
+      <div className="p-5">
+        {sessionDone ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-3">🎉</div>
+            <div className="text-lg font-black text-foreground mb-1">
+              Session Complete!
+            </div>
+            <div className="flex justify-center gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-black text-emerald-400">
+                  {sessionScore.known}
+                </div>
+                <div className="text-xs text-muted-foreground">Got it</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-black text-orange-400">
+                  {sessionScore.review}
+                </div>
+                <div className="text-xs text-muted-foreground">Review</div>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={resetSession}
+                className="px-4 py-2 rounded-lg bg-secondary hover:bg-accent border border-border text-sm font-semibold text-foreground transition-all"
+              >
+                Restart
+              </button>
+              <button
+                onClick={() => {
+                  setMode("browse");
+                  resetSession();
+                }}
+                className="px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-sm font-semibold transition-all"
+              >
+                Browse All
+              </button>
+            </div>
+          </div>
+        ) : currentCard ? (
+          <div className="space-y-4">
+            {/* Progress */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                {mode === "drill" ? "⚡ Drill" : "📖 Browse"} · Card{" "}
+                {cardIdx + 1} of {activeDeck.length}
+              </span>
+              <span
+                className={`px-2 py-0.5 rounded border text-[10px] font-bold ${TAG_COLORS[currentCard.tag] ?? "text-muted-foreground border-border"}`}
+              >
+                {currentCard.tag}
+              </span>
+            </div>
+            <div className="h-1 rounded-full bg-secondary overflow-hidden">
+              <div
+                className="h-full rounded-full bg-yellow-500/60 transition-all duration-300"
+                style={{
+                  width: `${((cardIdx + 1) / activeDeck.length) * 100}%`,
+                }}
+              />
+            </div>
+
+            {/* Flash card */}
+            <div
+              onClick={() => setFlipped(f => !f)}
+              className={`relative rounded-xl border cursor-pointer transition-all duration-300 min-h-36 p-5 flex flex-col justify-center ${
+                flipped
+                  ? "bg-emerald-500/5 border-emerald-500/30"
+                  : "bg-secondary border-border hover:border-yellow-500/30"
+              }`}
+            >
+              {!flipped ? (
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold text-yellow-400 uppercase tracking-wider">
+                    Question
+                  </div>
+                  <div className="text-sm font-semibold text-foreground leading-relaxed">
+                    {currentCard.q}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-3">
+                    Click to reveal answer
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                    Answer
+                  </div>
+                  <div className="text-xs text-foreground leading-relaxed">
+                    {currentCard.a}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            {flipped && (
+              <div className="flex gap-3">
+                <button
+                  onClick={markKnown}
+                  className="flex-1 py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-sm font-bold transition-all"
+                >
+                  ✅ Got it!
+                </button>
+                <div className="flex-1 flex flex-col gap-1">
+                  <button
+                    onClick={markReview}
+                    className="w-full py-2.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 text-sm font-bold transition-all"
+                  >
+                    🔄 Review Again
+                  </button>
+                  <div className="text-[10px] text-center text-muted-foreground">
+                    ⏰ Scheduled for SR review in{" "}
+                    {(() => {
+                      const globalIdx = ALL_CARDS.indexOf(deck[cardIdx]);
+                      const existing = srDue[String(globalIdx)];
+                      const daysSince = existing
+                        ? Math.round(
+                            (Date.now() - new Date(existing).getTime()) /
+                              86400000
+                          )
+                        : 0;
+                      return daysSince < 1
+                        ? 1
+                        : daysSince < 3
+                          ? 3
+                          : daysSince < 7
+                            ? 7
+                            : 14;
+                    })()}{" "}
+                    day(s)
+                  </div>
+                </div>
+              </div>
+            )}
+            {!flipped && (
+              <button
+                onClick={() => setFlipped(true)}
+                className="w-full py-2.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 text-sm font-bold transition-all"
+              >
+                Reveal Answer
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <div className="text-3xl mb-2">🎉</div>
+            <div className="text-sm">All cards mastered in this category!</div>
+            <button
+              onClick={resetAll}
+              className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Reset and start over
+            </button>
+          </div>
+        )}
+      </div>
+      {/* High impact features moved to top of page */}
     </div>
   );
 }

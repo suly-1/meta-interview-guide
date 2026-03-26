@@ -50,7 +50,7 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
 
 // ── MiniBarChart ─────────────────────────────────────────────────────────────
 
-function MiniBarChart({ data }: { data: { date: string; sessions: number }[] }) {
+function MiniBarChart({ data }: { data: { date: string; sessions?: number; count?: number }[] }) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-gray-500 text-sm">
@@ -59,12 +59,12 @@ function MiniBarChart({ data }: { data: { date: string; sessions: number }[] }) 
     );
   }
 
-  const max = Math.max(...data.map(d => d.sessions), 1);
+  const max = Math.max(...data.map(d => (d.count ?? d.sessions ?? 0)), 1);
 
   return (
     <div className="flex items-end gap-1 h-32 w-full">
       {data.map((d, i) => {
-        const pct = (d.sessions / max) * 100;
+        const val = d.count ?? d.sessions ?? 0; const pct = (val / max) * 100;
         const isToday = i === data.length - 1;
         return (
           <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group relative">

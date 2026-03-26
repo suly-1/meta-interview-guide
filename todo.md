@@ -788,3 +788,20 @@
 - [x] SMTP email alert — send email via SMTP when 3+ failed PIN attempts from same IP in 15-min window
 - [x] PIN attempt bar chart — show failed attempts per day over last 7 days in Admin Settings
 - [x] Run tests (79 tests pass), save checkpoint, deploy
+
+## TypeScript Fix Session (Mar 26, 2026)
+- [x] Fix all 42 TypeScript errors from web-db-user template upgrade
+- [x] Fix icMode type mismatches (L6/L7 vs IC6/IC7) across ai.ts and all components
+- [x] Fix DeployStatusBadge to use only fields present in server response (remove conclusion/commitSha/runUrl)
+- [x] Fix SiteFeedbackModal to use feedback.submitGeneral instead of submitSiteFeedback
+- [x] Fix SprintPlanShare to use sprintPlan.save instead of feedback.shareSprintPlan
+- [x] Add viewCount/focusPriority/weakAreas columns to sprintPlans table and run db:push
+- [x] Fix AdminFeedback.tsx rating type (undefined -> null)
+- [x] Fix AdminStats.tsx data.sent -> data.success
+- [x] Fix AdminAnalytics.tsx MiniBarChart to use count field
+- [x] Fix AdminPinGate.tsx to use secondsRemaining instead of lockoutUntil
+- [x] Fix App.tsx initializing -> dbLoading in useDisclaimerGate
+- [x] Fix useAnalytics.ts userId undefined -> null
+- [x] Add 53 missing stubs to trpc.standalone.ts (ai, collab, ctci, ctciProgress, favorites, feedback, progress, ratings, sprintPlan, userScores, analytics)
+- [x] All 79 tests pass, TypeScript clean (0 errors)
+- [x] Save checkpoint and deploy to metaengguide.pro

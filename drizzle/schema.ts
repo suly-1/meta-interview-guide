@@ -133,10 +133,17 @@ export type HighImpactScore = typeof highImpactScores.$inferSelect;
 export const sprintPlans = mysqlTable("sprint_plans", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  targetLevel: varchar("targetLevel", { length: 8 }).notNull().default("L6"),
+  planId: varchar("planId", { length: 64 }).unique(),
+  targetLevel: varchar("targetLevel", { length: 8 }).notNull().default("IC6"),
+  timeline: varchar("timeline", { length: 32 }),
   daysUntilInterview: int("daysUntilInterview"),
   plan: json("plan").notNull().$type<Record<string, unknown>[]>(),
+  planData: json("planData").$type<Record<string, unknown>>(),
+  shareToken: varchar("shareToken", { length: 64 }).unique(),
   readinessScore: int("readinessScore").notNull().default(0),
+  focusPriority: varchar("focusPriority", { length: 32 }),
+  weakAreas: json("weakAreas").$type<string[]>(),
+  viewCount: int("viewCount").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type SprintPlan = typeof sprintPlans.$inferSelect;
@@ -235,3 +242,115 @@ export const pageViews = mysqlTable("page_views", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type PageView = typeof pageViews.$inferSelect;
+
+// Favorite questions — user-saved interview questions for quick review
+export const favoriteQuestions = mysqlTable("favorite_questions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  questionId: varchar("questionId", { length: 128 }).notNull(),
+  questionType: mysqlEnum("questionType", [
+    "coding",
+    "behavioral",
+    "design",
+    "ctci",
+  ])
+    .notNull()
+    .default("coding"),
+  questionText: text("questionText").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FavoriteQuestion = typeof favoriteQuestions.$inferSelect;
+
+// Progress snapshots — daily readiness snapshots for trend charts
+export const progressSnapshots = mysqlTable("progress_snapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  snapshotDate: varchar("snapshotDate", { length: 16 }).notNull(), // YYYY-MM-DD
+  codingPct: int("codingPct").notNull().default(0),
+  behavioralPct: int("behavioralPct").notNull().default(0),
+  overallPct: int("overallPct").notNull().default(0),
+  streakDays: int("streakDays").notNull().default(0),
+  mockSessionCount: int("mockSessionCount").notNull().default(0),
+  patternsMastered: int("patternsMastered").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProgressSnapshot = typeof progressSnapshots.$inferSelect;
+
+// Analytics tables — page views, sessions, and feature events
+export const analyticsPageViews = mysqlTable("analytics_page_views", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  userId: int("userId"),
+  page: varchar("page", { length: 128 }).notNull(),
+  referrer: varchar("referrer", { length: 256 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AnalyticsPageView = typeof analyticsPageViews.$inferSelect;
+
+export const analyticsSessions = mysqlTable("analytics_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull().unique(),
+  userId: int("userId"),
+  deviceType: mysqlEnum("deviceType", ["desktop", "tablet", "mobile"]).default("desktop"),
+  browser: varchar("browser", { length: 64 }),
+  os: varchar("os", { length: 64 }),
+  country: varchar("country", { length: 64 }),
+  durationSeconds: int("durationSeconds").default(0),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  endedAt: timestamp("endedAt"),
+});
+export type AnalyticsSession = typeof analyticsSessions.$inferSelect;
+
+export const analyticsEvents = mysqlTable("analytics_events", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  userId: int("userId"),
+  eventName: varchar("eventName", { length: 128 }).notNull(),
+  page: varchar("page", { length: 128 }),
+  metadata: json("metadata").$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+
+// Feedback table — user feedback submissions
+export const feedback = mysqlTable("feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  feedbackType: mysqlEnum("feedbackType", ["general", "sprint_plan"])
+    .notNull()
+    .default("general"),
+  category: mysqlEnum("category", [
+    "bug",
+    "feature_request",
+    "content",
+    "ux",
+    "other",
+  ])
+    .notNull()
+    .default("other"),
+  message: text("message").notNull(),
+  page: varchar("page", { length: 64 }),
+  status: mysqlEnum("status", ["new", "in_progress", "done", "dismissed"])
+    .notNull()
+    .default("new"),
+  metadata: json("metadata").$type<Record<string, unknown>>().default({}),
+  adminNote: text("admin_note"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Feedback = typeof feedback.$inferSelect;
+
+// User scores — per-user pattern ratings, behavioral ratings, and notes
+export const userScores = mysqlTable("user_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  patternRatings: json("patternRatings").notNull().$type<Record<string, number>>().default({}),
+  behavioralRatings: json("behavioralRatings").notNull().$type<Record<string, number>>().default({}),
+  starNotes: json("starNotes").notNull().$type<Record<string, string>>().default({}),
+  patternTime: json("patternTime").notNull().$type<Record<string, number>>().default({}),
+  interviewDate: varchar("interviewDate", { length: 16 }),
+  targetLevel: varchar("targetLevel", { length: 8 }),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type UserScores = typeof userScores.$inferSelect;

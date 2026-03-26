@@ -330,3 +330,42 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   return (await response.json()) as InvokeResult;
 }
+
+// withLLMFallback wraps any async function that calls invokeLLM and:
+//   1. Enforces a configurable timeout (default 15 seconds)
+//   2. Returns a fallback value if the LLM call times out or throws
+//   3. Logs the error to stderr so it appears in server logs without crashing
+export type LLMFallbackOptions = {
+  timeoutMs?: number;
+  label?: string;
+};
+
+export async function withLLMFallback<T>(
+  fn: () => Promise<T>,
+  fallback: T,
+  options: LLMFallbackOptions = {}
+): Promise<T> {
+  const { timeoutMs = 15_000, label = "LLM call" } = options;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    if (timer.unref) timer.unref();
+  });
+  try {
+    return await Promise.race([fn(), timeoutPromise]);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[withLLMFallback] ${label} failed — using fallback. Reason: ${message}`);
+    return fallback;
+  }
+}
+
+export async function withLLMJsonFallback<T extends Record<string, unknown>>(
+  fn: () => Promise<T>,
+  fallback: T,
+  options: LLMFallbackOptions = {}
+): Promise<T> {
+  return withLLMFallback(fn, fallback, { label: "LLM JSON call", ...options });
+}
+

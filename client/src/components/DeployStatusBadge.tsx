@@ -1,87 +1,95 @@
-import { trpc } from "@/lib/trpc";
-import { CheckCircle2, Loader2, XCircle, HelpCircle, RefreshCw } from "lucide-react";
+// DeployStatusBadge — shows the live GitHub Actions deployment status
+// in the footer. Polls every 30 seconds.
+//
+// Visual states:
+//   ✅ green  — status=success
+//   🟡 yellow — status=in_progress
+//   ❌ red    — status=failure
+//   ⬜ grey   — unknown / API error
 
-function timeAgo(iso: string | null): string {
-  if (!iso) return "";
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
+import { trpc } from "@/lib/trpc";
+import { CheckCircle2, Loader2, XCircle, HelpCircle } from "lucide-react";
 
 export default function DeployStatusBadge() {
-  const utils = trpc.useUtils();
+  const { data, isLoading, isError } = trpc.deployStatus.get.useQuery(
+    undefined,
+    {
+      refetchInterval: 30_000, // poll every 30 s
+      staleTime: 20_000,
+    }
+  );
 
-  const { data, isLoading, isFetching } = trpc.deployStatus.get.useQuery(undefined, {
-    refetchInterval: 30_000,   // poll every 30 seconds
-    staleTime: 20_000,
-  });
+  if (isLoading) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
+        <Loader2 size={10} className="animate-spin" />
+        Checking deploy…
+      </span>
+    );
+  }
 
-  const status = data?.status ?? "unknown";
+  if (isError || !data || data.status === "unknown") {
+    return (
+      <a
+        href="https://metaengguide.pro"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+        title="Deploy status unknown"
+      >
+        <HelpCircle size={10} />
+        Deploy status unknown
+      </a>
+    );
+  }
 
   const config = {
     success: {
-      icon: <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" />,
+      icon: <CheckCircle2 size={11} className="text-emerald-400 shrink-0" />,
       label: "Deployed",
-      pill: "bg-emerald-900/40 border-emerald-700/50 text-emerald-300",
-      dot: "bg-emerald-400",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/20",
+      title: "Last deploy succeeded",
     },
     in_progress: {
-      icon: <Loader2 size={13} className="text-yellow-400 animate-spin flex-shrink-0" />,
+      icon: (
+        <Loader2 size={11} className="animate-spin text-amber-400 shrink-0" />
+      ),
       label: "Deploying…",
-      pill: "bg-yellow-900/40 border-yellow-700/50 text-yellow-300",
-      dot: "bg-yellow-400 animate-pulse",
+      color: "text-amber-400",
+      bg: "bg-amber-500/10 border-amber-500/20",
+      title: "Deployment in progress",
     },
     failure: {
-      icon: <XCircle size={13} className="text-red-400 flex-shrink-0" />,
+      icon: <XCircle size={11} className="text-rose-400 shrink-0" />,
       label: "Deploy failed",
-      pill: "bg-red-900/40 border-red-700/50 text-red-300",
-      dot: "bg-red-400",
+      color: "text-rose-400",
+      bg: "bg-rose-500/10 border-rose-500/20",
+      title: "Last deploy failed",
     },
     unknown: {
-      icon: <HelpCircle size={13} className="text-gray-400 flex-shrink-0" />,
-      label: "Status unknown",
-      pill: "bg-gray-800/40 border-gray-600/50 text-gray-400",
-      dot: "bg-gray-500",
+      icon: (
+        <HelpCircle size={11} className="text-muted-foreground/40 shrink-0" />
+      ),
+      label: "Unknown",
+      color: "text-muted-foreground/40",
+      bg: "bg-muted/10 border-border/30",
+      title: "Deploy status unknown",
     },
   } as const;
 
-  const cfg = config[status as keyof typeof config] ?? config.unknown;
-  const ago = timeAgo(data?.updatedAt ?? null);
+  const c = config[data.status as keyof typeof config] ?? config.unknown;
 
   return (
     <a
-      href={data?.url ?? "https://github.com/the-architect/meta-interview-guide/actions"}
+      href={data.url ?? "https://metaengguide.pro"}
       target="_blank"
       rel="noopener noreferrer"
-      title={`GitHub Actions: ${status}${ago ? ` · ${ago}` : ""}\nClick to view workflow runs`}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-opacity hover:opacity-80 select-none ${cfg.pill}`}
-      onClick={(e) => e.stopPropagation()}
+      title={c.title}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-medium transition-opacity hover:opacity-80 ${c.bg} ${c.color}`}
     >
-      {isLoading ? (
-        <Loader2 size={13} className="text-gray-400 animate-spin flex-shrink-0" />
-      ) : (
-        cfg.icon
-      )}
-      <span>
-        {isLoading ? "Checking…" : cfg.label}
-        {ago && !isLoading && (
-          <span className="opacity-60 ml-1">· {ago}</span>
-        )}
-      </span>
-      {/* Manual refresh button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void utils.deployStatus.get.invalidate();
-        }}
-        title="Refresh status"
-        className="ml-0.5 opacity-50 hover:opacity-100 transition-opacity"
-      >
-        <RefreshCw size={10} className={isFetching ? "animate-spin" : ""} />
-      </button>
+      {c.icon}
+      {c.label}
     </a>
   );
 }

@@ -17,3 +17,7 @@ export const CTCI_QUESTIONS: CTCIQuestion[] = CTCI_PROBLEMS.map(p => ({
 }));
 
 export type { CTCIProblem };
+
+export const CTCI_ALL_TOPICS = Array.from(
+  new Set(CTCI_QUESTIONS.flatMap(q => q.topics))
+).sort();

@@ -411,4 +411,52 @@ export const collabRouter = router({
       });
       return { sent: true };
     }),
+
+  scoreAnswer: publicProcedure
+    .input(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const res = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a senior Meta interviewer evaluating a STAR behavioral answer for an IC6/IC7 role. Score on three axes (1-5) and give a coaching note. Return JSON only.`,
+          },
+          {
+            role: "user",
+            content: `Question: "${input.question}"\nAnswer: "${input.answer}"\nScore this answer.`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "answer_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                specificity: { type: "number", description: "1-5: how specific and concrete the answer is" },
+                impactClarity: { type: "number", description: "1-5: how clearly the impact/result is communicated" },
+                level: { type: "string", description: "IC5, IC6, or IC7 — the level this answer signals" },
+                coachingNote: { type: "string", description: "One paragraph of actionable coaching feedback" },
+                strengths: { type: "string", description: "What the candidate did well" },
+                improvements: { type: "string", description: "Key areas to improve" },
+              },
+              required: ["specificity", "impactClarity", "level", "coachingNote", "strengths", "improvements"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const content = res.choices?.[0]?.message?.content ?? "{}";
+      try {
+        return JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+      } catch {
+        return { specificity: 3, impactClarity: 3, level: "IC6", coachingNote: "Unable to score at this time.", strengths: "", improvements: "" };
+      }
+    }),
 });

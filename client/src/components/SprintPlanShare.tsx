@@ -35,9 +35,9 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const shareMutation = trpc.feedback.shareSprintPlan.useMutation({
+  const shareMutation = trpc.sprintPlan.save.useMutation({
     onSuccess: (data) => {
-      if (data.token) setShareToken(data.token);
+      if (data.shareToken) setShareToken(data.shareToken);
     },
   });
 
@@ -47,7 +47,7 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
 
   const handleShare = () => {
     if (shareToken) { setOpen(true); return; }
-    shareMutation.mutate({ planData, targetLevel, focusPriority, weakAreas });
+    shareMutation.mutate({ planData: { days: planData as unknown[], focusPriority, weakAreas }, targetLevel });
     setOpen(true);
   };
 

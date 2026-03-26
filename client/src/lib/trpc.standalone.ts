@@ -83,17 +83,42 @@ export const trpc = {
 
   // ── ai ────────────────────────────────────────────────────────────────────
   ai: {
+    analyzeComplexity: { useMutation: () => makeMutation(() => ({ analysis: "" })) },
+    analyzeDebrief: { useMutation: () => makeMutation(() => ({ debrief: "" })) },
+    buildWhyCompanyStory: { useMutation: () => makeMutation(() => ({ story: "" })) },
+    calibrateSeniorityLevel: { useMutation: () => makeMutation(() => ({ level: "" })) },
+    challengeComplexity: { useMutation: () => makeMutation(() => ({ challenge: "" })) },
     chat: { useMutation: () => makeMutation(() => ({ reply: "" })) },
     codingMockScorecard: { useMutation: () => makeMutation(() => ({ scorecard: {} })) },
     detectAntiPatterns: { useMutation: () => makeMutation(() => ({ patterns: [] })) },
     explainLikeAPM: { useMutation: () => makeMutation(() => ({ explanation: "" })) },
+    explainPattern: { useMutation: () => makeMutation(() => ({ explanation: "" })) },
     fullMockDayScorecard: { useMutation: () => makeMutation(() => ({ scorecard: {} })) },
+    generateFollowUps: { useMutation: () => makeMutation(() => ({ followUps: [] })) },
+    generateReadinessReport: { useMutation: () => makeMutation(() => ({ report: "" })) },
+    generateRemediationPlan: { useMutation: () => makeMutation(() => ({ plan: "" })) },
+    generateTenDaySprint: { useMutation: () => makeMutation(() => ({ sprint: [] })) },
+    getProgressiveHint: { useMutation: () => makeMutation(() => ({ hint: "" })) },
     guidedWalkthroughFeedback: { useMutation: () => makeMutation(() => ({ feedback: "" })) },
+    ic7OptimizationChallenge: { useMutation: () => makeMutation(() => ({ challenge: "" })) },
+    interruptModeScore: { useMutation: () => makeMutation(() => ({ score: 0 })) },
+    interruptModeStart: { useMutation: () => makeMutation(() => ({ prompt: "" })) },
     interviewerPerspective: { useMutation: () => makeMutation(() => ({ perspective: "" })) },
     peerDesignReview: { useMutation: () => makeMutation(() => ({ review: "" })) },
+    personaStressTestRespond: { useMutation: () => makeMutation(() => ({ reply: "" })) },
+    personaStressTestScore: { useMutation: () => makeMutation(() => ({ score: 0 })) },
+    personaStressTestStart: { useMutation: () => makeMutation(() => ({ prompt: "" })) },
+    predictInterviewQuestions: { useMutation: () => makeMutation(() => ({ questions: [] })) },
+    quantifyImpact: { useMutation: () => makeMutation(() => ({ impact: "" })) },
+    reviewSolution: { useMutation: () => makeMutation(() => ({ review: "" })) },
+    scoreBoECalculation: { useMutation: () => makeMutation(() => ({ score: 0 })) },
+    scorePatternGuess: { useMutation: () => makeMutation(() => ({ score: 0 })) },
+    scoreThinkOutLoud: { useMutation: () => makeMutation(() => ({ score: 0 })) },
     scorePeerReviewAnswers: { useMutation: () => makeMutation(() => ({ score: 0 })) },
     scoreTradeoff: { useMutation: () => makeMutation(() => ({ score: 0 })) },
     sysDesignMockScorecard: { useMutation: () => makeMutation(() => ({ scorecard: {} })) },
+    tearDownDesign: { useMutation: () => makeMutation(() => ({ teardown: "" })) },
+    techRetroCoach: { useMutation: () => makeMutation(() => ({ coaching: "" })) },
     transcribeAndScoreVoice: { useMutation: () => makeMutation(() => ({ transcript: "", score: 0 })) },
     xfnMockScorecard: { useMutation: () => makeMutation(() => ({ scorecard: {} })) },
   },
@@ -115,12 +140,32 @@ export const trpc = {
     aiFollowUp: { useMutation: () => makeMutation(() => ({ reply: "" })) },
     createRoom: { useMutation: () => makeMutation(() => ({ roomId: "" })) },
     saveScorecard: { useMutation: () => makeMutation(() => ({ success: true })) },
+    scoreAnswer: { useMutation: () => makeMutation(() => ({ score: 0 })) },
+    transcribeAndStructure: { useMutation: () => makeMutation(() => ({ transcript: "", structured: {} })) },
     uploadAudio: { useMutation: () => makeMutation(() => ({ url: "" })) },
   },
 
   // ── ctci ──────────────────────────────────────────────────────────────────
   ctci: {
+    generateDebrief: { useMutation: () => makeMutation(() => ({ debrief: "" })) },
+    getHint: { useMutation: () => makeMutation(() => ({ hint: "" })) },
+    patternHint: { useMutation: () => makeMutation(() => ({ hint: "" })) },
+    scoreAnswer: { useMutation: () => makeMutation(() => ({ icLevelFit: 0, feedback: "" })) },
     studyPlan: { useMutation: () => makeMutation(() => ({ plan: "" })) },
+  },
+
+  // ── ctciProgress ──────────────────────────────────────────────────────────
+  ctciProgress: {
+    get: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null) },
+    save: { useMutation: () => makeMutation(() => ({ success: true })) },
+  },
+
+  // ── favorites ─────────────────────────────────────────────────────────────
+  favorites: {
+    list: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    remove: { useMutation: () => makeMutation(() => ({ success: true })) },
+    toggle: { useMutation: () => makeMutation(() => ({ favorited: false })) },
+    updateNotes: { useMutation: () => makeMutation(() => ({ success: true })) },
   },
 
   // ── deployStatus ──────────────────────────────────────────────────────────
@@ -145,6 +190,7 @@ export const trpc = {
 
   // ── feedback ──────────────────────────────────────────────────────────────
   feedback: {
+    submitGeneral: { useMutation: () => makeMutation(() => ({ success: true })) },
     submitSiteFeedback: { useMutation: () => makeMutation(() => ({ success: true })) },
     submitSprintFeedback: { useMutation: () => makeMutation(() => ({ success: true })) },
     shareSprintPlan: { useMutation: () => makeMutation(() => ({ token: null })) },
@@ -414,8 +460,39 @@ export const trpc = {
     generate: { useMutation: () => makeMutation(() => ({ plan: [] })) },
   },
 
+  // ── progress ──────────────────────────────────────────────────────────────
+  progress: {
+    list: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    save: { useMutation: () => makeMutation(() => ({ success: true })) },
+  },
+
+  // ── ratings ───────────────────────────────────────────────────────────────
+  ratings: {
+    getAll: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ patternRatings: {}, bqRatings: {} }) },
+    saveBqRatings: { useMutation: () => makeMutation(() => ({ success: true })) },
+    savePatternRatings: { useMutation: () => makeMutation(() => ({ success: true })) },
+  },
+
+  // ── sprintPlan ────────────────────────────────────────────────────────────
+  sprintPlan: {
+    generate: { useMutation: () => makeMutation(() => ({ plan: null })) },
+    getByShareToken: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null) },
+    save: { useMutation: () => makeMutation(() => ({ success: true, token: null })) },
+  },
+
+  // ── userScores ────────────────────────────────────────────────────────────
+  userScores: {
+    getAggregateStats: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ totalSessions: 0, avgScore: 0 }) },
+    load: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null) },
+    save: { useMutation: () => makeMutation(() => ({ success: true })) },
+  },
+
   // ── analytics ──────────────────────────────────────────────────────────
   analytics: {
+    endSession: { useMutation: () => makeMutation(() => ({ success: true })) },
+    featureClicksToday: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    startSession: { useMutation: () => makeMutation(() => ({ sessionId: 0 })) },
+    trackEvent: { useMutation: () => makeMutation(() => ({ success: true })) },
     getSiteAnalytics: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({
         sessions: 0,

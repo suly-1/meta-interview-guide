@@ -43,7 +43,7 @@ export default function AdminStats() {
   const triggerAlert = trpc.feedback.triggerDailyAlert.useMutation({
     onMutate: () => setAlertLoading(true),
     onSuccess: (data) => {
-      if (data.sent) {
+      if (data.success) {
         toast.success("Daily alert sent — unactioned items threshold met.");
       } else {
         toast.info("No alert sent — below threshold or no unactioned items.");

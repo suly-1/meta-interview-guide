@@ -22,6 +22,10 @@ import { siteSettingsRouter } from "./routers/siteSettings";
 import { siteAccessRouter } from "./routers/siteAccess";
 import { adminUsersRouter } from "./routers/adminUsers";
 import { analyticsRouter } from "./routers/analytics";
+import { favoritesRouter } from "./routers/favorites";
+import { progressRouter } from "./routers/progress";
+import { sprintPlanRouter } from "./routers/sprintPlan";
+import { userScoresRouter } from "./routers/userScores";
 import { ENV } from "./_core/env";
 
 export const appRouter = router({
@@ -1826,5 +1830,9 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   siteAccess: siteAccessRouter,
   adminUsers: adminUsersRouter,
   analytics: analyticsRouter,
+  favorites: favoritesRouter,
+  progress: progressRouter,
+  sprintPlan: sprintPlanRouter,
+  userScores: userScoresRouter,
 });
 export type AppRouter = typeof appRouter;

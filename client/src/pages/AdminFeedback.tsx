@@ -315,8 +315,8 @@ export default function AdminFeedback() {
         f.page?.toLowerCase().includes(q)
       );
     }
-    if (sortBy === "rating_high") items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-    else if (sortBy === "rating_low") items.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
+    if (sortBy === "rating_high") items.sort((a, b) => ((b as { rating?: number }).rating ?? 0) - ((a as { rating?: number }).rating ?? 0));
+    else if (sortBy === "rating_low") items.sort((a, b) => ((a as { rating?: number }).rating ?? 0) - ((b as { rating?: number }).rating ?? 0));
     return items;
   }, [feedback, categoryFilter, typeFilter, statusFilter, searchQuery, sortBy]);
 
@@ -343,7 +343,7 @@ export default function AdminFeedback() {
             </div>
           ) : digestPreview ? (
             <DigestPreviewModal
-              data={digestPreview as DigestPreviewData}
+              data={digestPreview as unknown as DigestPreviewData}
               onClose={() => { setShowPreviewModal(false); setDigestSent(false); }}
               onSend={() => triggerDigest.mutate(undefined)}
               isSending={triggerDigest.isPending}
@@ -598,7 +598,7 @@ export default function AdminFeedback() {
                       <p className="text-sm text-gray-200 leading-relaxed">{item.message}</p>
                       {/* Meta row */}
                       <div className="flex flex-wrap items-center gap-3 mt-2">
-                        <StarRow rating={item.rating} />
+                        <StarRow rating={(item as { rating?: number }).rating ?? null} />
                         {/* Sentiment badge */}
                         {(item as { sentiment?: string }).sentiment && (
                           <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${

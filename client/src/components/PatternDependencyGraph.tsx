@@ -1,321 +1,462 @@
-/**
- * PatternDependencyGraph — SVG-based interactive dependency graph
- * Shows which patterns are prerequisites for others, helping candidates
- * understand the optimal learning order and identify foundational gaps.
- */
-import { useState, useCallback } from "react";
-import { Info } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
+import { PATTERNS } from "@/lib/data";
+import { usePatternRatings } from "@/hooks/useLocalStorage";
+import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
-interface PatternNode {
+// ── Graph data ────────────────────────────────────────────────────────────────
+const NODES = PATTERNS.map(p => ({
+  id: p.id,
+  name: p.name,
+  diff: p.diff,
+  freq: p.freq,
+  desc: p.desc,
+  examples: p.examples,
+  keyIdea: p.keyIdea,
+}));
+
+const LINKS: { source: string; target: string; label: string }[] = [
+  // Sliding Window family
+  { source: "two-pointers", target: "sliding-window", label: "extends" },
+  {
+    source: "sliding-window",
+    target: "monotonic-stack",
+    label: "combines with",
+  },
+  // Pointer family
+  { source: "two-pointers", target: "fast-slow", label: "variant" },
+  { source: "two-pointers", target: "intervals", label: "used in" },
+  // Search family
+  { source: "binary-search", target: "two-pointers", label: "pairs with" },
+  { source: "binary-search", target: "greedy", label: "combines with" },
+  // Graph family
+  { source: "bfs", target: "dfs-backtrack", label: "complement" },
+  { source: "bfs", target: "union-find", label: "alternative" },
+  { source: "dfs-backtrack", target: "trie", label: "uses" },
+  { source: "dfs-backtrack", target: "dynamic-prog", label: "memoize →" },
+  { source: "dfs-backtrack", target: "graph-advanced", label: "used in" },
+  // DP family
+  { source: "dynamic-prog", target: "greedy", label: "vs." },
+  { source: "dynamic-prog", target: "binary-search", label: "optimise with" },
+  // Heap / Priority Queue
+  { source: "heap-priority", target: "bfs", label: "Dijkstra →" },
+  { source: "heap-priority", target: "greedy", label: "implements" },
+  // Stack / Monotonic
+  { source: "monotonic-stack", target: "dynamic-prog", label: "optimise" },
+  // Union-Find
+  { source: "union-find", target: "graph-advanced", label: "alternative" },
+  // Trie
+  { source: "trie", target: "binary-search", label: "replaces" },
+];
+
+const DIFF_COLOR: Record<string, string> = {
+  Easy: "#10b981",
+  Medium: "#3b82f6",
+  Hard: "#ef4444",
+};
+
+interface NodeDatum extends d3.SimulationNodeDatum {
   id: string;
+  name: string;
+  diff: string;
+  freq: number;
+  desc: string;
+  examples: string[];
+  keyIdea: string;
+}
+interface LinkDatum extends d3.SimulationLinkDatum<NodeDatum> {
   label: string;
-  x: number;
-  y: number;
-  tier: number; // 0=foundation, 1=core, 2=advanced, 3=expert
-  description: string;
-}
-
-interface Edge {
-  from: string;
-  to: string;
-  label?: string;
-}
-
-const NODES: PatternNode[] = [
-  // Tier 0 — Foundation (must learn first)
-  { id: "arrays",    label: "Arrays &\nHashing",    x: 200, y: 60,  tier: 0, description: "The bedrock of all coding patterns. Hash maps, sets, and array manipulation are used in virtually every other pattern." },
-  { id: "twoptr",    label: "Two\nPointers",        x: 480, y: 60,  tier: 0, description: "Requires understanding of sorted arrays and basic array traversal. Foundation for Sliding Window and Linked Lists." },
-  { id: "prefix",    label: "Prefix\nSums",         x: 760, y: 60,  tier: 0, description: "Simple but powerful preprocessing technique. Required for many range-query problems and some DP optimizations." },
-
-  // Tier 1 — Core (build on foundation)
-  { id: "sliding",   label: "Sliding\nWindow",      x: 120, y: 200, tier: 1, description: "Extends Two Pointers with a dynamic window. Requires Two Pointers and Arrays/Hashing fundamentals." },
-  { id: "stack",     label: "Monotonic\nStack",     x: 340, y: 200, tier: 1, description: "Requires Arrays/Hashing. Used for next greater/smaller element problems. Prerequisite for some Tree and DP problems." },
-  { id: "binary",    label: "Binary\nSearch",       x: 560, y: 200, tier: 1, description: "Requires sorted arrays (Arrays/Hashing). Extends to search on answer space and rotated arrays." },
-  { id: "linked",    label: "Linked\nLists",        x: 760, y: 200, tier: 1, description: "Requires Two Pointers (fast/slow pointer technique). Foundation for understanding Trees and Graphs." },
-
-  // Tier 2 — Advanced (build on core)
-  { id: "trees",     label: "Trees\n(BFS/DFS)",     x: 120, y: 340, tier: 2, description: "Requires Linked Lists (node structure) and Recursion (DFS). One of the highest-frequency Meta patterns." },
-  { id: "heaps",     label: "Heaps /\nPriority Q",  x: 340, y: 340, tier: 2, description: "Requires Arrays/Hashing. Used for top-K problems, median finding, and scheduling. Often combined with BFS." },
-  { id: "intervals", label: "Intervals",            x: 560, y: 340, tier: 2, description: "Requires sorting (Arrays/Hashing) and understanding of ranges. Often combined with Heaps for scheduling." },
-  { id: "tries",     label: "Tries",                x: 760, y: 340, tier: 2, description: "Requires Trees (node structure) and Hashing. Used for prefix matching and word search problems." },
-
-  // Tier 3 — Expert (build on advanced)
-  { id: "graphs",    label: "Graphs\n(BFS/DFS)",    x: 120, y: 480, tier: 3, description: "Requires Trees (traversal concepts) and Union-Find. The most complex pattern — covers shortest path, topological sort, connected components." },
-  { id: "backtrack", label: "Backtracking",         x: 340, y: 480, tier: 3, description: "Requires Trees (DFS) and Recursion. Used for permutations, combinations, and constraint satisfaction problems." },
-  { id: "dp",        label: "Dynamic\nProgramming", x: 560, y: 480, tier: 3, description: "Requires Prefix Sums, Recursion, and often Binary Search. The deepest pattern — builds on memoization and optimal substructure." },
-  { id: "unionfind", label: "Union\nFind",          x: 760, y: 480, tier: 3, description: "Requires Arrays/Hashing (parent array). Used for connected components, cycle detection, and Kruskal's MST." },
-];
-
-const EDGES: Edge[] = [
-  // Arrays/Hashing → many
-  { from: "arrays",    to: "sliding"   },
-  { from: "arrays",    to: "stack"     },
-  { from: "arrays",    to: "binary"    },
-  { from: "arrays",    to: "heaps"     },
-  { from: "arrays",    to: "unionfind" },
-  // Two Pointers → Sliding Window, Linked Lists
-  { from: "twoptr",    to: "sliding"   },
-  { from: "twoptr",    to: "linked"    },
-  // Prefix Sums → DP
-  { from: "prefix",    to: "dp"        },
-  // Sliding Window → (no further deps shown)
-  // Stack → Trees (some DFS patterns)
-  { from: "stack",     to: "trees"     },
-  // Binary Search → DP (binary search optimization)
-  { from: "binary",    to: "dp"        },
-  // Linked Lists → Trees
-  { from: "linked",    to: "trees"     },
-  // Trees → Graphs, Backtracking, Tries
-  { from: "trees",     to: "graphs"    },
-  { from: "trees",     to: "backtrack" },
-  { from: "trees",     to: "tries"     },
-  // Heaps → Intervals (heap-based scheduling)
-  { from: "heaps",     to: "intervals" },
-  // Intervals → DP (interval DP)
-  { from: "intervals", to: "dp"        },
-  // Graphs → (terminal for this graph)
-  // Union-Find → Graphs
-  { from: "unionfind", to: "graphs"    },
-];
-
-const TIER_COLORS = [
-  { bg: "#dbeafe", border: "#3b82f6", text: "#1e40af", label: "Foundation" },
-  { bg: "#d1fae5", border: "#10b981", text: "#065f46", label: "Core" },
-  { bg: "#fef3c7", border: "#f59e0b", text: "#92400e", label: "Advanced" },
-  { bg: "#fce7f3", border: "#ec4899", text: "#9d174d", label: "Expert" },
-];
-
-const NODE_W = 88;
-const NODE_H = 52;
-const VIEWBOX_W = 920;
-const VIEWBOX_H = 580;
-
-function getNodeCenter(node: PatternNode) {
-  return { cx: node.x + NODE_W / 2, cy: node.y + NODE_H / 2 };
 }
 
 export default function PatternDependencyGraph() {
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<NodeDatum | null>(null);
+  const [patternRatings] = usePatternRatings();
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
-  const activeId = selected ?? hovered;
-  const activeNode = NODES.find(n => n.id === activeId);
+  useEffect(() => {
+    if (!svgRef.current || !containerRef.current) return;
+    const W = containerRef.current.clientWidth || 700;
+    const H = 480;
 
-  // Determine which edges involve the active node
-  const activeEdges = activeId
-    ? EDGES.filter(e => e.from === activeId || e.to === activeId)
-    : [];
-  const activeNeighbors = new Set(activeEdges.flatMap(e => [e.from, e.to]));
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+    svg.attr("width", W).attr("height", H).attr("viewBox", `0 0 ${W} ${H}`);
 
-  const handleNodeClick = useCallback((id: string) => {
-    setSelected(prev => prev === id ? null : id);
-  }, []);
+    // Defs
+    const defs = svg.append("defs");
+    defs
+      .append("marker")
+      .attr("id", "arrowhead")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 22)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "rgba(148,163,184,0.5)");
+
+    const g = svg.append("g");
+
+    // Zoom
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.4, 2.5])
+      .on("zoom", event => g.attr("transform", event.transform));
+    svg.call(zoom);
+    zoomRef.current = zoom;
+
+    // Simulation
+    const nodes: NodeDatum[] = NODES.map(n => ({ ...n }));
+    const links: LinkDatum[] = LINKS.map(l => ({ ...l }));
+
+    const sim = d3
+      .forceSimulation<NodeDatum>(nodes)
+      .force(
+        "link",
+        d3
+          .forceLink<NodeDatum, LinkDatum>(links)
+          .id(d => d.id)
+          .distance(110)
+          .strength(0.5)
+      )
+      .force("charge", d3.forceManyBody().strength(-320))
+      .force("center", d3.forceCenter(W / 2, H / 2))
+      .force("collision", d3.forceCollide(38));
+
+    // Links
+    const link = g
+      .append("g")
+      .selectAll("line")
+      .data(links)
+      .join("line")
+      .attr("stroke", "rgba(148,163,184,0.25)")
+      .attr("stroke-width", 1.5)
+      .attr("marker-end", "url(#arrowhead)");
+
+    // Link labels
+    const linkLabel = g
+      .append("g")
+      .selectAll("text")
+      .data(links)
+      .join("text")
+      .attr("font-size", 9)
+      .attr("fill", "rgba(148,163,184,0.5)")
+      .attr("text-anchor", "middle")
+      .text(d => d.label);
+
+    // Nodes
+    const node = g
+      .append("g")
+      .selectAll<SVGGElement, NodeDatum>("g")
+      .data(nodes)
+      .join("g")
+      .style("cursor", "pointer")
+      .call(
+        d3
+          .drag<SVGGElement, NodeDatum>()
+          .on("start", (event, d) => {
+            if (!event.active) sim.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on("drag", (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on("end", (event, d) => {
+            if (!event.active) sim.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          })
+      )
+      .on("click", (_event, d) => setSelected(d));
+
+    // Node circle
+    node
+      .append("circle")
+      .attr("r", d => 14 + d.freq * 2)
+      .attr("fill", d => {
+        const rating = patternRatings[d.id] ?? 0;
+        if (rating >= 4) return "rgba(16,185,129,0.18)";
+        if (rating >= 2) return "rgba(59,130,246,0.14)";
+        return "rgba(30,41,59,0.9)";
+      })
+      .attr("stroke", d => {
+        const rating = patternRatings[d.id] ?? 0;
+        if (rating >= 4) return "#10b981";
+        return DIFF_COLOR[d.diff] ?? "#3b82f6";
+      })
+      .attr("stroke-width", d => ((patternRatings[d.id] ?? 0) >= 4 ? 2.5 : 1.5))
+      .attr("filter", d =>
+        (patternRatings[d.id] ?? 0) >= 4
+          ? "drop-shadow(0 0 8px rgba(16,185,129,0.6))"
+          : "none"
+      );
+
+    // Node label
+    node
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "0.35em")
+      .attr("font-size", 9.5)
+      .attr("font-weight", "600")
+      .attr("fill", d =>
+        (patternRatings[d.id] ?? 0) >= 4 ? "#6ee7b7" : "#e2e8f0"
+      )
+      .attr("pointer-events", "none")
+      .each(function (d) {
+        const words = d.name.split(" ");
+        const el = d3.select(this);
+        if (words.length <= 2) {
+          el.text(d.name);
+        } else {
+          el.append("tspan")
+            .attr("x", 0)
+            .attr("dy", "-0.6em")
+            .text(words.slice(0, 2).join(" "));
+          el.append("tspan")
+            .attr("x", 0)
+            .attr("dy", "1.2em")
+            .text(words.slice(2).join(" "));
+        }
+      });
+
+    // Freq badge
+    node
+      .append("circle")
+      .attr("cx", d => 14 + d.freq * 2 - 4)
+      .attr("cy", d => -(14 + d.freq * 2 - 4))
+      .attr("r", 6)
+      .attr("fill", "#1e293b")
+      .attr("stroke", "#475569")
+      .attr("stroke-width", 1);
+    node
+      .append("text")
+      .attr("x", d => 14 + d.freq * 2 - 4)
+      .attr("y", d => -(14 + d.freq * 2 - 4))
+      .attr("text-anchor", "middle")
+      .attr("dy", "0.35em")
+      .attr("font-size", 7)
+      .attr("font-weight", "700")
+      .attr("fill", "#94a3b8")
+      .attr("pointer-events", "none")
+      .text(d => `★${d.freq}`);
+
+    // Tick
+    sim.on("tick", () => {
+      link
+        .attr("x1", d => (d.source as NodeDatum).x!)
+        .attr("y1", d => (d.source as NodeDatum).y!)
+        .attr("x2", d => (d.target as NodeDatum).x!)
+        .attr("y2", d => (d.target as NodeDatum).y!);
+      linkLabel
+        .attr(
+          "x",
+          d => ((d.source as NodeDatum).x! + (d.target as NodeDatum).x!) / 2
+        )
+        .attr(
+          "y",
+          d => ((d.source as NodeDatum).y! + (d.target as NodeDatum).y!) / 2 - 6
+        );
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    return () => {
+      sim.stop();
+    };
+  }, [patternRatings]);
+
+  const handleZoom = (factor: number) => {
+    if (!svgRef.current || !zoomRef.current) return;
+    d3.select(svgRef.current)
+      .transition()
+      .duration(300)
+      .call(zoomRef.current.scaleBy, factor);
+  };
+  const handleReset = () => {
+    if (!svgRef.current || !zoomRef.current) return;
+    d3.select(svgRef.current)
+      .transition()
+      .duration(400)
+      .call(zoomRef.current.transform, d3.zoomIdentity);
+  };
+
+  const rating = selected ? (patternRatings[selected.id] ?? 0) : 0;
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div>
-        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          Pattern Dependency Graph
-        </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Click any pattern to see its prerequisites and dependents. Learn patterns in tier order to avoid gaps.
-        </p>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="section-title">Pattern Dependency Graph</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Click any node to view the pattern card. Drag to reposition. Scroll
+            to zoom.
+            <span className="ml-2 text-emerald-400">
+              Green glow = mastered (★4+)
+            </span>
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => handleZoom(1.3)}
+            className="p-1.5 rounded-md bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+            title="Zoom in"
+          >
+            <ZoomIn size={14} />
+          </button>
+          <button
+            onClick={() => handleZoom(0.77)}
+            className="p-1.5 rounded-md bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+            title="Zoom out"
+          >
+            <ZoomOut size={14} />
+          </button>
+          <button
+            onClick={handleReset}
+            className="p-1.5 rounded-md bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+            title="Reset view"
+          >
+            <RotateCcw size={14} />
+          </button>
+        </div>
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-3">
-        {TIER_COLORS.map((t, i) => (
-          <div key={i} className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm border" style={{ background: t.bg, borderColor: t.border }} />
-            <span className="text-[11px] text-gray-500 font-medium">Tier {i}: {t.label}</span>
-          </div>
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        {[
+          ["Easy", "#10b981"],
+          ["Medium", "#3b82f6"],
+          ["Hard", "#ef4444"],
+        ].map(([label, color]) => (
+          <span key={label} className="flex items-center gap-1.5">
+            <span
+              className="w-2.5 h-2.5 rounded-full inline-block"
+              style={{ background: color }}
+            />
+            {label}
+          </span>
         ))}
+        <span className="flex items-center gap-1.5 ml-2">
+          <span
+            className="w-2.5 h-2.5 rounded-full inline-block bg-emerald-500/30 border border-emerald-500"
+            style={{ boxShadow: "0 0 6px rgba(16,185,129,0.6)" }}
+          />
+          Mastered
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-slate-400">★N</span> = Meta frequency
+        </span>
       </div>
 
-      {/* SVG Graph */}
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
-        <svg
-          viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
-          className="w-full"
-          style={{ maxHeight: 560 }}
-        >
-          <defs>
-            <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8" />
-            </marker>
-            <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6" />
-            </marker>
-          </defs>
-
-          {/* Tier labels */}
-          {[0, 1, 2, 3].map(tier => (
-            <text
-              key={tier}
-              x={16}
-              y={tier === 0 ? 88 : tier === 1 ? 228 : tier === 2 ? 368 : 508}
-              fontSize={10}
-              fill="#94a3b8"
-              fontWeight="600"
-              fontFamily="'Space Grotesk', sans-serif"
-            >
-              T{tier}
-            </text>
-          ))}
-
-          {/* Horizontal tier dividers */}
-          {[140, 280, 420].map(y => (
-            <line key={y} x1={36} y1={y} x2={VIEWBOX_W - 20} y2={y} stroke="#e2e8f0" strokeWidth={1} strokeDasharray="4 4" />
-          ))}
-
-          {/* Edges */}
-          {EDGES.map((edge, i) => {
-            const from = NODES.find(n => n.id === edge.from)!;
-            const to   = NODES.find(n => n.id === edge.to)!;
-            const fc   = getNodeCenter(from);
-            const tc   = getNodeCenter(to);
-
-            // Offset endpoint to edge of node box
-            const dx = tc.cx - fc.cx;
-            const dy = tc.cy - fc.cy;
-            const len = Math.sqrt(dx * dx + dy * dy);
-            const ux = dx / len;
-            const uy = dy / len;
-
-            const x1 = fc.cx + ux * (NODE_W / 2 + 2);
-            const y1 = fc.cy + uy * (NODE_H / 2 + 2);
-            const x2 = tc.cx - ux * (NODE_W / 2 + 10);
-            const y2 = tc.cy - uy * (NODE_H / 2 + 10);
-
-            const isActive = activeId && (edge.from === activeId || edge.to === activeId);
-            const isPrereq = activeId && edge.to === activeId;
-
-            return (
-              <line
-                key={i}
-                x1={x1} y1={y1} x2={x2} y2={y2}
-                stroke={isActive ? (isPrereq ? "#f59e0b" : "#3b82f6") : "#cbd5e1"}
-                strokeWidth={isActive ? 2 : 1}
-                strokeOpacity={activeId && !isActive ? 0.2 : 1}
-                markerEnd={isActive ? "url(#arrow-active)" : "url(#arrow)"}
-                style={{ transition: "all 0.2s" }}
-              />
-            );
-          })}
-
-          {/* Nodes */}
-          {NODES.map(node => {
-            const color = TIER_COLORS[node.tier];
-            const isActive = node.id === activeId;
-            const isNeighbor = activeNeighbors.has(node.id) && node.id !== activeId;
-            const isDimmed = activeId && !isActive && !isNeighbor;
-
-            return (
-              <g
-                key={node.id}
-                transform={`translate(${node.x}, ${node.y})`}
-                onClick={() => handleNodeClick(node.id)}
-                onMouseEnter={() => setHovered(node.id)}
-                onMouseLeave={() => setHovered(null)}
-                style={{ cursor: "pointer", opacity: isDimmed ? 0.25 : 1, transition: "opacity 0.2s" }}
-              >
-                <rect
-                  width={NODE_W}
-                  height={NODE_H}
-                  rx={8}
-                  fill={isActive ? color.border : color.bg}
-                  stroke={color.border}
-                  strokeWidth={isActive ? 2.5 : 1.5}
-                  style={{ filter: isActive ? "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" : "none", transition: "all 0.2s" }}
-                />
-                {node.label.split("\n").map((line, li) => (
-                  <text
-                    key={li}
-                    x={NODE_W / 2}
-                    y={li === 0 ? (node.label.includes("\n") ? 18 : 30) : 34}
-                    textAnchor="middle"
-                    fontSize={10.5}
-                    fontWeight="700"
-                    fontFamily="'Space Grotesk', sans-serif"
-                    fill={isActive ? "#fff" : color.text}
-                    style={{ transition: "fill 0.2s" }}
-                  >
-                    {line}
-                  </text>
-                ))}
-              </g>
-            );
-          })}
-        </svg>
+      {/* SVG graph */}
+      <div
+        ref={containerRef}
+        className="relative rounded-xl border border-border bg-card overflow-hidden"
+        style={{ height: 480 }}
+      >
+        <svg ref={svgRef} className="w-full h-full" />
       </div>
 
-      {/* Info panel */}
-      {activeNode ? (
-        <div
-          className="p-4 rounded-xl border transition-all"
-          style={{
-            background: TIER_COLORS[activeNode.tier].bg,
-            borderColor: TIER_COLORS[activeNode.tier].border,
-          }}
-        >
+      {/* Inline pattern card */}
+      {selected && (
+        <div className="relative rounded-xl border border-border bg-card p-5 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <button
+            onClick={() => setSelected(null)}
+            className="absolute top-3 right-3 p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X size={14} />
+          </button>
           <div className="flex items-start gap-3">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-extrabold text-white"
-              style={{ background: TIER_COLORS[activeNode.tier].border, fontFamily: "'Space Grotesk', sans-serif" }}
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold shrink-0"
+              style={{
+                background: `${DIFF_COLOR[selected.diff]}22`,
+                border: `1px solid ${DIFF_COLOR[selected.diff]}44`,
+                color: DIFF_COLOR[selected.diff],
+              }}
             >
-              T{activeNode.tier}
+              {selected.diff[0]}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold" style={{ color: TIER_COLORS[activeNode.tier].text, fontFamily: "'Space Grotesk', sans-serif" }}>
-                {activeNode.label.replace("\n", " ")}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="font-bold text-foreground">{selected.name}</h4>
+                <span
+                  className="badge"
+                  style={{
+                    background: `${DIFF_COLOR[selected.diff]}22`,
+                    color: DIFF_COLOR[selected.diff],
+                    border: `1px solid ${DIFF_COLOR[selected.diff]}44`,
+                  }}
+                >
+                  {selected.diff}
+                </span>
+                <span className="badge badge-blue">
+                  ★{selected.freq} Meta freq
+                </span>
+                {rating >= 4 && (
+                  <span
+                    className="badge"
+                    style={{
+                      background: "rgba(16,185,129,0.15)",
+                      color: "#10b981",
+                      border: "1px solid rgba(16,185,129,0.3)",
+                    }}
+                  >
+                    ✓ Mastered
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {selected.desc}
               </p>
-              <p className="text-xs text-gray-600 mt-1 leading-relaxed">{activeNode.description}</p>
-
-              {/* Prerequisites */}
-              {activeEdges.filter(e => e.to === activeNode.id).length > 0 && (
-                <div className="mt-2">
-                  <span className="text-[11px] font-bold text-amber-700">Prerequisites: </span>
-                  {activeEdges.filter(e => e.to === activeNode.id).map(e => {
-                    const prereq = NODES.find(n => n.id === e.from)!;
-                    return (
-                      <button
-                        key={e.from}
-                        onClick={() => handleNodeClick(e.from)}
-                        className="text-[11px] font-semibold text-amber-700 hover:underline mr-2"
-                      >
-                        {prereq.label.replace("\n", " ")}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Unlocks */}
-              {activeEdges.filter(e => e.from === activeNode.id).length > 0 && (
-                <div className="mt-1">
-                  <span className="text-[11px] font-bold text-blue-700">Unlocks: </span>
-                  {activeEdges.filter(e => e.from === activeNode.id).map(e => {
-                    const next = NODES.find(n => n.id === e.to)!;
-                    return (
-                      <button
-                        key={e.to}
-                        onClick={() => handleNodeClick(e.to)}
-                        className="text-[11px] font-semibold text-blue-700 hover:underline mr-2"
-                      >
-                        {next.label.replace("\n", " ")}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-500">
-          <Info size={13} className="text-gray-400 flex-shrink-0" />
-          Click any pattern node to see its prerequisites, what it unlocks, and why it matters in the learning sequence.
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-lg bg-secondary/50 p-3">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Key Idea
+              </div>
+              <p className="text-sm text-foreground font-medium">
+                {selected.keyIdea}
+              </p>
+            </div>
+            <div className="rounded-lg bg-secondary/50 p-3">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Classic Examples
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {selected.examples.map(ex => (
+                  <span
+                    key={ex}
+                    className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
+                  >
+                    {ex}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Mastery rating display */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Your mastery:</span>
+            {[1, 2, 3, 4, 5].map(s => (
+              <span
+                key={s}
+                className={`text-base ${s <= rating ? "text-amber-400" : "text-muted-foreground/30"}`}
+              >
+                ★
+              </span>
+            ))}
+            {rating === 0 && (
+              <span className="text-xs text-muted-foreground">
+                Not rated yet — go to the Patterns section to rate
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

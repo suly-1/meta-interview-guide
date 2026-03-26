@@ -9,7 +9,7 @@ import { MessageSquarePlus, X, Star, Send, CheckCircle2, Bug, Lightbulb, BookOpe
 
 const CATEGORIES = [
   { id: "bug",     label: "Bug Report",      icon: <Bug size={14} />,        color: "text-red-600 bg-red-50 border-red-200" },
-  { id: "feature", label: "Feature Request", icon: <Lightbulb size={14} />,  color: "text-amber-600 bg-amber-50 border-amber-200" },
+  { id: "feature_request", label: "Feature Request", icon: <Lightbulb size={14} />,  color: "text-amber-600 bg-amber-50 border-amber-200" },
   { id: "content", label: "Content Issue",   icon: <BookOpen size={14} />,   color: "text-blue-600 bg-blue-50 border-blue-200" },
   { id: "ux",      label: "UX Feedback",     icon: <Palette size={14} />,    color: "text-violet-600 bg-violet-50 border-violet-200" },
   { id: "other",   label: "Other",           icon: <HelpCircle size={14} />, color: "text-gray-600 bg-gray-50 border-gray-200" },
@@ -23,13 +23,13 @@ interface Props {
 
 export default function SiteFeedbackModal({ currentPage }: Props) {
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<Category>("feature");
+  const [category, setCategory] = useState<Category>("feature_request");
   const [rating, setRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const submitMutation = trpc.feedback.submitSiteFeedback.useMutation({
+  const submitMutation = trpc.feedback.submitGeneral.useMutation({
     onSuccess: () => {
       setSubmitted(true);
       setTimeout(() => {
@@ -37,7 +37,7 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
         setSubmitted(false);
         setMessage("");
         setRating(0);
-        setCategory("feature");
+        setCategory("feature_request");
       }, 2500);
     },
   });
@@ -46,9 +46,9 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
     if (!message.trim() || message.length < 10) return;
     submitMutation.mutate({
       category,
-      rating: rating > 0 ? rating : undefined,
       message: message.trim(),
       page: currentPage,
+      userAgent: navigator.userAgent,
     });
   };
 
@@ -163,7 +163,7 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={
                         category === "bug" ? "Describe what happened and what you expected..." :
-                        category === "feature" ? "What feature would help candidates most?" :
+                        category === "feature_request" ? "What feature would help candidates most?" :
                         category === "content" ? "Which section needs improvement and why?" :
                         category === "ux" ? "What was confusing or hard to use?" :
                         "Share your thoughts..."

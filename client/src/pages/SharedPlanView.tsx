@@ -17,8 +17,8 @@ export default function SharedPlanView() {
   const [, params] = useRoute("/shared-plan/:token");
   const token = params?.token ?? "";
 
-  const { data: plan, isLoading, error } = trpc.feedback.getSharedPlan.useQuery(
-    { token },
+  const { data: plan, isLoading, error } = trpc.sprintPlan.getByShareToken.useQuery(
+    { shareToken: token },
     { enabled: !!token }
   );
 
@@ -49,7 +49,7 @@ export default function SharedPlanView() {
     );
   }
 
-  const days = (plan.planData as Record<string, unknown>[]) ?? [];
+  const days = (plan.planData as unknown as Record<string, unknown>[]) ?? [];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">

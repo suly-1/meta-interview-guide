@@ -4,8 +4,8 @@
 // Gating logic:
 //   - Anonymous users: localStorage key "meta_prep_disclaimer_v2" === "true"
 //   - Logged-in users: DB record (disclaimerAcknowledgedAt IS NOT NULL) is the
-//     authoritative source. localStorage is still written as a fast-path cache,
-//     but if the DB says "not acknowledged" the gate is shown regardless.
+//     authoritative source. If DB says acknowledged, gate is skipped instantly
+//     and localStorage is synced — no loading spinner shown to returning users.
 //
 // On confirm:
 //   1. Write localStorage (instant local gate release)
@@ -13,25 +13,27 @@
 //   3. Invalidate disclaimer.status query so the badge in OverviewTab refreshes
 
 import { useState } from "react";
-import { CheckSquare, Square, BookOpen } from "lucide-react";
+import { CheckSquare, Square, Loader2, BookOpen } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const STORAGE_KEY = "meta_prep_disclaimer_v2";
 
 /**
- * Returns [isGateOpen, confirmFn].
+ * Returns { gateOpen, dbLoading, confirm }.
  *
- * isGateOpen === true  → show the gate (block content)
- * isGateOpen === false → content is accessible
+ * gateOpen === true  → show the gate (block content)
+ * gateOpen === false → content is accessible
  *
  * For anonymous users the gate is driven purely by localStorage.
- * For logged-in users the gate stays open until the DB record confirms
- * acknowledgment (with a loading state while the query is in-flight).
+ * For logged-in users:
+ *   - If localStorage already confirmed → gate is open=false immediately (no spinner)
+ *   - If DB says acknowledged → gate is released instantly and localStorage synced
+ *   - Only shows loading state if DB hasn't responded yet AND localStorage is unset
  */
 export function useDisclaimerGate(): {
   gateOpen: boolean;
-  initializing: boolean;
+  dbLoading: boolean;
   confirm: () => void;
 } {
   const { user, loading: authLoading } = useAuth();
@@ -44,7 +46,33 @@ export function useDisclaimerGate(): {
 
   const [localConfirmed, setLocalConfirmed] = useState(localAck);
 
-  // DB status query — only runs for logged-in users
+  // Server flag — owner can disable the disclaimer gate globally.
+  // Guard: trpc.siteAccess may be undefined in standalone/mock builds that
+  // haven't yet defined this namespace. We call useQuery unconditionally
+  // (rules of hooks) but wrap the access in a safe getter.
+  const getDisclaimerEnabledQuery =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (trpc as any)?.siteAccess?.getDisclaimerEnabled?.useQuery;
+
+  // Always call a hook at the top level — if the procedure exists use it,
+  // otherwise fall back to a no-op query that returns enabled=true.
+  // This satisfies React’s rules-of-hooks because the branch is determined
+  // before render (it’s a stable property check, not a runtime condition).
+  const safeUseQuery =
+    typeof getDisclaimerEnabledQuery === "function"
+      ? getDisclaimerEnabledQuery
+      : (_input: undefined, _opts: unknown) => ({
+          data: { enabled: true },
+          isLoading: false,
+        });
+
+  const { data: disclaimerEnabledData, isLoading: enabledLoading } =
+    safeUseQuery(undefined, {
+      staleTime: 30_000,
+      retry: false,
+    });
+
+  // DB status query — only runs for logged-in users who haven't confirmed locally
   const utils = trpc.useUtils();
   const acknowledgeMutation = trpc.disclaimer.acknowledge.useMutation({
     onSuccess: () => {
@@ -54,7 +82,6 @@ export function useDisclaimerGate(): {
 
   const { data: dbStatus, isLoading: dbLoading } =
     trpc.disclaimer.status.useQuery(undefined, {
-      // Only fetch when user is logged in and hasn't already confirmed locally
       enabled: !!user && !localConfirmed,
       staleTime: 0,
     });
@@ -68,27 +95,31 @@ export function useDisclaimerGate(): {
     });
   };
 
-  // While auth is still loading — render nothing (no gate, no spinner)
-  if (authLoading) return { gateOpen: false, initializing: true, confirm };
+  // While auth is loading, keep gate closed to avoid flash
+  if (authLoading) return { gateOpen: false, dbLoading: true, confirm };
 
-  // Anonymous user: gate driven by localStorage only — no DB check needed
-  if (!user) return { gateOpen: !localConfirmed, initializing: false, confirm };
-
-  // Logged-in + already confirmed locally — skip gate immediately
-  if (localConfirmed) return { gateOpen: false, initializing: false, confirm };
-
-  // Logged-in, not locally confirmed: DB query is in-flight
-  // → render nothing until we know the answer (no spinner, no gate flash)
-  if (dbLoading) return { gateOpen: false, initializing: true, confirm };
-
-  // DB says acknowledged → sync localStorage and skip gate
-  if (dbStatus?.acknowledged) {
-    localStorage.setItem(STORAGE_KEY, "true");
-    return { gateOpen: false, initializing: false, confirm };
+  // Owner has disabled the disclaimer globally — skip for everyone
+  if (!enabledLoading && disclaimerEnabledData?.enabled === false) {
+    return { gateOpen: false, dbLoading: false, confirm };
   }
 
-  // DB says not acknowledged → show gate (no spinner needed — we have the answer)
-  return { gateOpen: true, initializing: false, confirm };
+  // Anonymous user: gate driven by localStorage only
+  if (!user) return { gateOpen: !localConfirmed, dbLoading: false, confirm };
+
+  // Locally confirmed → always open immediately, no spinner
+  if (localConfirmed) return { gateOpen: false, dbLoading: false, confirm };
+
+  // DB says acknowledged → auto-skip: sync localStorage and release gate instantly
+  if (dbStatus?.acknowledged) {
+    localStorage.setItem(STORAGE_KEY, "true");
+    return { gateOpen: false, dbLoading: false, confirm };
+  }
+
+  // DB still loading (first visit, logged-in, no local cache) → show gate with spinner
+  if (dbLoading) return { gateOpen: true, dbLoading: true, confirm };
+
+  // DB says not acknowledged → keep gate open
+  return { gateOpen: true, dbLoading: false, confirm };
 }
 
 // Legacy hook kept for backward compatibility (used in Home.tsx)
@@ -99,9 +130,10 @@ export function useDisclaimerAcknowledged(): [boolean, () => void] {
 
 interface Props {
   onConfirm: () => void;
+  loading?: boolean;
 }
 
-export default function DisclaimerGate({ onConfirm }: Props) {
+export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
   const [checked, setChecked] = useState(false);
 
   const handleConfirm = () => {
@@ -128,6 +160,14 @@ export default function DisclaimerGate({ onConfirm }: Props) {
         }}
       />
 
+      {/* DB-loading spinner overlay — only shown on first visit for logged-in users */}
+      {loading && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40">
+          <Loader2 size={28} className="animate-spin text-blue-400" />
+          <p className="text-xs text-zinc-400">Just a moment…</p>
+        </div>
+      )}
+
       <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[oklch(0.13_0.02_264)] shadow-2xl shadow-black/60 overflow-hidden my-8">
         {/* Blue top accent bar */}
         <div className="h-1 w-full bg-gradient-to-r from-blue-700 via-blue-400 to-blue-700" />
@@ -145,24 +185,26 @@ export default function DisclaimerGate({ onConfirm }: Props) {
               >
                 Quick note before you start
               </h1>
+              {/* Improvement #2: warmer subtitle */}
               <p className="text-sm text-blue-300/70 mt-0.5">
-                A note from The Architect
+                A note from the community
               </p>
             </div>
           </div>
 
-          {/* Main body */}
+          {/* Main body — Improvement #1: softer, no named companies */}
           <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
             <p>
-              This guide was designed by{" "}
-              <strong className="text-white">The Architect</strong> — a Meta
-              engineer who wanted candidates to succeed. It's{" "}
-              <strong className="text-white">not affiliated with any company</strong>{" "}
-              — just hard-won knowledge shared openly.
+              This guide was built by the community, for candidates doing their
+              own research. It's{" "}
+              <strong className="text-white">
+                not affiliated with any company
+              </strong>{" "}
+              — just engineers sharing what they learned the hard way.
             </p>
             <p>
               Always pair it with any official guidance you receive. Interview
-              formats evolve, and official sources are the source of truth.
+              formats evolve, and that guidance is the source of truth.
             </p>
           </div>
 
@@ -172,10 +214,11 @@ export default function DisclaimerGate({ onConfirm }: Props) {
               The legal bit, in plain English:
             </p>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              This is a free resource provided as-is by The Architect. It is
-              not responsible for your interview outcomes or any decisions you
-              make based on it. No warranties, no guarantees — just good faith
-              effort from someone who has been through it.
+              This is a free community resource provided as-is. The people who
+              built it aren't responsible for your interview outcomes or any
+              decisions you make based on it. This is a best-effort resource
+              from engineers who've been through the process — treat it as a
+              recommendation, not a promise.
             </p>
           </div>
 
@@ -186,8 +229,12 @@ export default function DisclaimerGate({ onConfirm }: Props) {
             </p>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Openly available at{" "}
-              <span className="text-blue-400">{window.location.hostname}</span>{" "}
-              — designed and shared by The Architect, for engineers.
+              <span className="text-blue-400">
+                {typeof window !== "undefined"
+                  ? window.location.hostname
+                  : "www.metaguide.blog"}
+              </span>{" "}
+              — built and shared by engineers, for engineers.
             </p>
           </div>
 
@@ -214,31 +261,34 @@ export default function DisclaimerGate({ onConfirm }: Props) {
                   : "text-zinc-400 group-hover:text-zinc-200"
               }`}
             >
-              I'm using this guide for my own interview prep and understand
-              it's a free resource from The Architect with no guarantees.
+              I'm using this guide for my own interview prep and understand it's
+              a free community resource with recommendations, not promises.
             </span>
           </button>
 
           {/* Confirm button */}
           <button
             onClick={handleConfirm}
-            disabled={!checked}
+            disabled={!checked || loading}
             className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 ${
-              checked
+              checked && !loading
                 ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25 cursor-pointer"
                 : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
             }`}
           >
-            {checked ? (
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={14} className="animate-spin" /> Just a moment…
+              </span>
+            ) : checked ? (
               "Sounds good — enter the guide →"
             ) : (
               "Check the box above to continue"
             )}
           </button>
 
-          {/* Fix #9: Removed skip button — users must check the box to acknowledge the disclaimer */}
           <p className="text-center text-xs text-zinc-600">
-            Your acknowledgment is saved. You won't see this screen again on
+            Your choice is saved locally. You won't see this screen again on
             this device.
           </p>
         </div>

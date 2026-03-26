@@ -1,422 +1,291 @@
 /**
- * StoryCoverageMatrix — #7 High-Impact Feature
+ * #7 — Story Coverage Matrix
+ * Shows which Meta values each STAR story covers.
+ * Highlights gaps (values with no story) and overlaps (stories covering the same value).
+ * Helps candidates ensure full coverage before the interview.
  *
- * Visual grid showing which STAR stories cover which Meta focus areas × core values.
- * Red cells = gaps. Candidates can add/edit their stories and see coverage in real time.
+ * Data shape:
+ *   BEHAVIORAL_QUESTIONS: { id, area, tier, q, hint }
+ *   META_VALUES: { name, desc }
+ *   useStarNotes: Record<questionId, string>  (plain text notes)
+ *   useBehavioralRatings: Record<questionId, number>
  */
-
 import { useState } from "react";
-import { useScorePersistence } from "@/hooks/useScorePersistence";
-import { Plus, X, CheckCircle2, AlertCircle, Edit2, Save, Sparkles, Loader2, ChevronDown, ChevronRight } from "lucide-react";
-import { HighImpactBadge, HighImpactWrapper, HighImpactSectionHeader, ImpactCallout } from "@/components/HighImpactBadge";
-import { motion, AnimatePresence } from "framer-motion";
-import { trpc } from "@/lib/trpc";
+import { useStarNotes, useBehavioralRatings } from "@/hooks/useLocalStorage";
+import { BEHAVIORAL_QUESTIONS, META_VALUES } from "@/lib/data";
+import {
+  Grid3X3,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle,
+  XCircle,
+  Info,
+} from "lucide-react";
 
-const FOCUS_AREAS = [
-  { id: "xfn", label: "XFN Collaboration", short: "XFN" },
-  { id: "problem", label: "Problem Solving", short: "Problem" },
-  { id: "communication", label: "Communication", short: "Comms" },
-  { id: "conflict", label: "Conflict Resolution", short: "Conflict" },
-];
+// Map question areas → Meta value names (META_VALUES has no id field)
+const AREA_TO_VALUE: Record<string, string> = {
+  "Conflict & Influence": "Be Open",
+  "Ownership & Accountability": "Focus on Impact",
+  "Ambiguity & Complexity": "Move Fast",
+  "Cross-functional Leadership": "Build Social Value",
+  "Technical Judgment": "Focus on Impact",
+  "Failure & Learning": "Move Fast",
+  "Mentorship & Growth": "Build Social Value",
+  "Strategy & Vision": "Be Bold",
+};
 
-const META_VALUES = [
-  { id: "move_fast", label: "Move Fast", short: "Move Fast" },
-  { id: "long_term", label: "Long-Term Impact", short: "LT Impact" },
-  { id: "build_awesome", label: "Build Awesome Things", short: "Build ★" },
-  { id: "live_future", label: "Live in the Future", short: "Future" },
-  { id: "be_direct", label: "Be Direct", short: "Direct" },
-  { id: "metamates", label: "Meta/Metamates/Me", short: "Metamates" },
-];
+export function StoryCoverageMatrix() {
+  const [expanded, setExpanded] = useState(false);
+  const [hoveredCell, setHoveredCell] = useState<{
+    valueName: string;
+    qId: string;
+  } | null>(null);
+  const [starNotes] = useStarNotes();
+  const [bqRatings] = useBehavioralRatings();
 
-interface Story {
-  id: string;
-  title: string;
-  focusAreas: string[];
-  values: string[];
-  hasMetric: boolean;
-}
-
-const DEFAULT_STORIES: Story[] = [
-  { id: "1", title: "High-Impact Technical Project", focusAreas: ["xfn", "communication"], values: ["build_awesome", "long_term"], hasMetric: true },
-  { id: "2", title: "Cross-Functional Alignment Win", focusAreas: ["xfn", "conflict"], values: ["move_fast", "metamates"], hasMetric: false },
-  { id: "3", title: "Technical Conflict / Disagreement", focusAreas: ["conflict", "problem"], values: ["be_direct", "metamates"], hasMetric: false },
-  { id: "4", title: "Project Failure / Postmortem", focusAreas: ["problem", "communication"], values: ["move_fast", "long_term"], hasMetric: false },
-  { id: "5", title: "Decision Under Ambiguity", focusAreas: ["problem", "xfn"], values: ["move_fast", "live_future"], hasMetric: false },
-  { id: "6", title: "Mentoring / Growing a Junior", focusAreas: ["communication", "xfn"], values: ["metamates", "build_awesome"], hasMetric: false },
-  { id: "7", title: "Proactive Risk Identification", focusAreas: ["problem", "communication"], values: ["long_term", "live_future"], hasMetric: false },
-  { id: "8", title: "Technical/Cultural Change I Drove", focusAreas: ["xfn", "communication"], values: ["live_future", "long_term"], hasMetric: false },
-];
-
-const STORAGE_KEY = "meta_story_coverage_v1";
-
-function loadStories(): Story[] {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  return DEFAULT_STORIES;
-}
-
-function saveStories(stories: Story[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stories));
-}
-
-function ScoreBar({ value, max }: { value: number; max: number }) {
-  const pct = Math.round((value / max) * 100);
-  const color = pct >= 80 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-red-500";
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-xs font-bold text-gray-600 dark:text-gray-400 w-8 text-right">{value}/{max}</span>
-    </div>
-  );
-}
-
-export default function StoryCoverageMatrix() {
-  const [stories, setStories] = useState<Story[]>(loadStories);
-  const { saveScore } = useScorePersistence("story_coverage");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showAIPanel, setShowAIPanel] = useState(false);
-  const gapAnalysis = trpc.highImpact.storyGapAnalysis.useMutation();
-  const [newStory, setNewStory] = useState<Omit<Story, "id">>({
-    title: "", focusAreas: [], values: [], hasMetric: false,
+  // Build coverage map: valueName → { qId: hasStory }
+  const coverageMap: Record<string, Record<string, boolean>> = {};
+  META_VALUES.forEach(v => {
+    coverageMap[v.name] = {};
+    BEHAVIORAL_QUESTIONS.filter(q => AREA_TO_VALUE[q.area] === v.name).forEach(
+      q => {
+        coverageMap[v.name][q.id] = !!starNotes[q.id]?.trim();
+      }
+    );
   });
 
-  const updateStories = (updated: Story[]) => {
-    setStories(updated);
-    saveStories(updated);
-  };
+  // Coverage stats per value
+  const valueCoverage = META_VALUES.map(v => {
+    const questions = BEHAVIORAL_QUESTIONS.filter(
+      q => AREA_TO_VALUE[q.area] === v.name
+    );
+    const covered = questions.filter(q => coverageMap[v.name][q.id]).length;
+    return { value: v, questions, total: questions.length, covered };
+  });
 
-  const toggleFocusArea = (storyId: string, areaId: string) => {
-    updateStories(stories.map(s => s.id === storyId
-      ? { ...s, focusAreas: s.focusAreas.includes(areaId) ? s.focusAreas.filter(a => a !== areaId) : [...s.focusAreas, areaId] }
-      : s
-    ));
-  };
+  const totalQuestions = BEHAVIORAL_QUESTIONS.length;
+  const totalCovered = BEHAVIORAL_QUESTIONS.filter(q =>
+    starNotes[q.id]?.trim()
+  ).length;
+  const coveragePct =
+    totalQuestions > 0 ? Math.round((totalCovered / totalQuestions) * 100) : 0;
 
-  const toggleValue = (storyId: string, valueId: string) => {
-    updateStories(stories.map(s => s.id === storyId
-      ? { ...s, values: s.values.includes(valueId) ? s.values.filter(v => v !== valueId) : [...s.values, valueId] }
-      : s
-    ));
-  };
-
-  const toggleMetric = (storyId: string) => {
-    updateStories(stories.map(s => s.id === storyId ? { ...s, hasMetric: !s.hasMetric } : s));
-  };
-
-  const addStory = () => {
-    if (!newStory.title.trim()) return;
-    const story: Story = { ...newStory, id: Date.now().toString() };
-    updateStories([...stories, story]);
-    setNewStory({ title: "", focusAreas: [], values: [], hasMetric: false });
-    setShowAddForm(false);
-  };
-
-  const removeStory = (id: string) => updateStories(stories.filter(s => s.id !== id));
-
-  // Coverage stats
-  const focusCoverage = FOCUS_AREAS.map(fa => ({
-    ...fa,
-    count: stories.filter(s => s.focusAreas.includes(fa.id)).length,
-  }));
-  const valueCoverage = META_VALUES.map(v => ({
-    ...v,
-    count: stories.filter(s => s.values.includes(v.id)).length,
-  }));
-  const storiesWithMetrics = stories.filter(s => s.hasMetric).length;
-  const uncoveredFocus = focusCoverage.filter(f => f.count === 0);
-  const uncoveredValues = valueCoverage.filter(v => v.count === 0);
-  const totalGaps = uncoveredFocus.length + uncoveredValues.length;
+  const gapValues = valueCoverage.filter(
+    vc => vc.total > 0 && vc.covered === 0
+  );
+  const weakValues = valueCoverage.filter(
+    vc => vc.covered > 0 && vc.covered < vc.total
+  );
 
   return (
-    <div className="space-y-4">
-      <HighImpactSectionHeader
-        title="Story Coverage Matrix"
-        subtitle="See exactly which Meta focus areas and core values your STAR stories cover. Red cells are gaps that will hurt you in the interview."
-        stat={totalGaps === 0 ? "Full Coverage ✓" : `${totalGaps} Gap${totalGaps > 1 ? "s" : ""} Found`}
-        variant="orange"
-      />
-
-      {totalGaps > 0 && (
-        <ImpactCallout variant="red">
-          You have {totalGaps} coverage gap{totalGaps > 1 ? "s" : ""}. Interviewers rotate through all focus areas — an uncovered area means you'll be caught without a story.
-          {uncoveredFocus.length > 0 && ` Missing focus areas: ${uncoveredFocus.map(f => f.label).join(", ")}.`}
-          {uncoveredValues.length > 0 && ` Missing values: ${uncoveredValues.map(v => v.label).join(", ")}.`}
-        </ImpactCallout>
-      )}
-
-      {totalGaps === 0 && (
-        <ImpactCallout variant="emerald">
-          Full coverage across all focus areas and values. Now make sure every story has a quantified metric — {storiesWithMetrics}/{stories.length} do.
-        </ImpactCallout>
-      )}
-
-      {/* Coverage grid */}
-      <HighImpactWrapper variant="orange" className="overflow-hidden">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-          <div className="flex items-center justify-between">
-            <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200">Your STAR Stories</h4>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">{stories.length} stories</span>
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="flex items-center gap-1 text-xs font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 transition-colors"
-              >
-                <Plus size={13} /> Add Story
-              </button>
-            </div>
-          </div>
+    <div
+      id="behavioral-story-matrix"
+      className="rounded-xl border-2 border-indigo-500/60 bg-gradient-to-br from-indigo-950/40 to-blue-950/30 overflow-hidden"
+      style={{ boxShadow: "0 0 24px rgba(99,102,241,0.12)" }}
+    >
+      {/* HIGH IMPACT header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-500/20 to-blue-500/10 border-b border-indigo-500/30">
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-black tracking-wider uppercase">
+            ⚡ High Impact
+          </span>
+          <Grid3X3 size={16} className="text-indigo-400" />
+          <span className="text-sm font-bold text-indigo-300">
+            Story Coverage Matrix
+          </span>
         </div>
-
-        {/* Add story form */}
-        <AnimatePresence>
-          {showAddForm && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="p-4 bg-orange-50/50 dark:bg-orange-950/20 border-b border-orange-100 dark:border-orange-900/30 space-y-3">
-                <input
-                  value={newStory.title}
-                  onChange={e => setNewStory(s => ({ ...s, title: e.target.value }))}
-                  placeholder="Story title (e.g., 'Reduced checkout latency by 40%')"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-orange-400"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 mb-1.5">Focus Areas</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {FOCUS_AREAS.map(fa => (
-                        <button
-                          key={fa.id}
-                          onClick={() => setNewStory(s => ({
-                            ...s,
-                            focusAreas: s.focusAreas.includes(fa.id) ? s.focusAreas.filter(a => a !== fa.id) : [...s.focusAreas, fa.id],
-                          }))}
-                          className={`text-[10px] px-2 py-1 rounded-full border font-semibold transition-all ${newStory.focusAreas.includes(fa.id) ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-orange-300"}`}
-                        >
-                          {fa.short}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 mb-1.5">Meta Values</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {META_VALUES.map(v => (
-                        <button
-                          key={v.id}
-                          onClick={() => setNewStory(s => ({
-                            ...s,
-                            values: s.values.includes(v.id) ? s.values.filter(x => x !== v.id) : [...s.values, v.id],
-                          }))}
-                          className={`text-[10px] px-2 py-1 rounded-full border font-semibold transition-all ${newStory.values.includes(v.id) ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-orange-300"}`}
-                        >
-                          {v.short}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input type="checkbox" checked={newStory.hasMetric} onChange={e => setNewStory(s => ({ ...s, hasMetric: e.target.checked }))} className="rounded" />
-                    Has quantified metric (e.g., "reduced latency by 40%")
-                  </label>
-                  <div className="flex gap-2">
-                    <button onClick={() => setShowAddForm(false)} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">Cancel</button>
-                    <button onClick={addStory} className="text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                      <Save size={11} /> Add Story
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Story list with inline coverage toggles */}
-        <div className="divide-y divide-gray-100 dark:divide-gray-800">
-          {stories.map(story => (
-            <div key={story.id} className="p-3 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{story.title}</span>
-                  {story.hasMetric
-                    ? <CheckCircle2 size={13} className="text-emerald-500 flex-shrink-0" aria-label="Has metric" />
-                    : <AlertCircle size={13} className="text-amber-500 flex-shrink-0" aria-label="Missing metric" />
-                  }
-                </div>
-                <button onClick={() => removeStory(story.id)} className="text-gray-300 hover:text-red-400 dark:text-gray-600 dark:hover:text-red-500 transition-colors flex-shrink-0">
-                  <X size={13} />
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {FOCUS_AREAS.map(fa => (
-                  <button
-                    key={fa.id}
-                    onClick={() => toggleFocusArea(story.id, fa.id)}
-                    className={`text-[9px] px-1.5 py-0.5 rounded-full border font-bold transition-all ${story.focusAreas.includes(fa.id) ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 dark:border-gray-700 text-gray-400 hover:border-blue-300"}`}
-                    title={`Toggle: ${fa.label}`}
-                  >
-                    {fa.short}
-                  </button>
-                ))}
-                <span className="text-[9px] text-gray-300 dark:text-gray-600 px-1">|</span>
-                {META_VALUES.map(v => (
-                  <button
-                    key={v.id}
-                    onClick={() => toggleValue(story.id, v.id)}
-                    className={`text-[9px] px-1.5 py-0.5 rounded-full border font-bold transition-all ${story.values.includes(v.id) ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-400 hover:border-violet-300"}`}
-                    title={`Toggle: ${v.label}`}
-                  >
-                    {v.short}
-                  </button>
-                ))}
-                <button
-                  onClick={() => toggleMetric(story.id)}
-                  className={`text-[9px] px-1.5 py-0.5 rounded-full border font-bold transition-all ${story.hasMetric ? "bg-emerald-500 text-white border-emerald-500" : "border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400"}`}
-                >
-                  {story.hasMetric ? "✓ Metric" : "No Metric"}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </HighImpactWrapper>
-
-      {/* AI Gap Analysis */}
-      <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <h4 className="text-sm font-bold text-indigo-800 flex items-center gap-1.5">
-              <Sparkles size={14} className="text-indigo-600" /> AI Gap Analysis
-            </h4>
-            <p className="text-xs text-indigo-600 mt-0.5">Get AI-powered suggestions for missing story angles and example questions</p>
-          </div>
-          <button
-            onClick={() => {
-              setShowAIPanel(true);
-              gapAnalysis.mutate({
-                stories: stories.map(s => ({
-                  title: s.title,
-                  focusAreas: s.focusAreas,
-                  values: s.values,
-                  hasMetric: s.hasMetric,
-                })),
-                targetLevel: "L7",
-              });
-            }}
-            disabled={gapAnalysis.isPending || stories.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-sm font-bold rounded-lg transition-colors"
-          >
-            {gapAnalysis.isPending ? (
-              <><Loader2 size={13} className="animate-spin" /> Analyzing…</>
-            ) : (
-              <><Sparkles size={13} /> Analyze My Gaps</>
-            )}
-          </button>
-        </div>
-
-        {showAIPanel && gapAnalysis.data && (
-          <div className="mt-4 space-y-3 border-t border-indigo-200 pt-4">
-            {/* Score + verdict */}
-            <div className="flex items-center gap-3">
-              <div className={`text-2xl font-extrabold ${
-                gapAnalysis.data.overallCoverage >= 80 ? "text-emerald-600" :
-                gapAnalysis.data.overallCoverage >= 60 ? "text-amber-600" : "text-red-600"
-              }`}>
-                {gapAnalysis.data.overallCoverage}<span className="text-sm text-gray-400">/100</span>
-              </div>
-              <p className="text-sm text-indigo-800 font-medium">{gapAnalysis.data.verdict}</p>
-            </div>
-
-            {/* Top priority */}
-            {gapAnalysis.data.topPriority && (
-              <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">Top Priority: </span>
-                <span className="text-xs text-amber-900">{gapAnalysis.data.topPriority}</span>
-              </div>
-            )}
-
-            {/* Critical gaps */}
-            {gapAnalysis.data.criticalGaps.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">Critical Gaps</p>
-                {gapAnalysis.data.criticalGaps.map((gap, i) => (
-                  <div key={i} className="rounded-lg border border-red-200 bg-red-50 p-3">
-                    <p className="text-xs font-bold text-red-800 mb-1">{gap.area}</p>
-                    <p className="text-xs text-red-700 mb-1.5">{gap.gap}</p>
-                    <p className="text-xs text-gray-700"><span className="font-semibold">Story angle: </span>{gap.suggestedStoryAngle}</p>
-                    <p className="text-xs text-gray-500 mt-1 italic">Q: {gap.exampleQuestion}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Strengths */}
-            {gapAnalysis.data.strengths.length > 0 && (
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">Strengths</p>
-                {gapAnalysis.data.strengths.map((s, i) => (
-                  <div key={i} className="flex items-start gap-1.5 text-xs text-emerald-800">
-                    <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0 mt-0.5" />{s}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="text-indigo-400 hover:text-indigo-300 transition-colors"
+        >
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
       </div>
 
-      {/* Coverage summary bars */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <HighImpactWrapper variant="orange" className="p-4">
-          <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Focus Area Coverage</h4>
-          <div className="space-y-2.5">
-            {focusCoverage.map(fa => (
-              <div key={fa.id}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`text-xs font-semibold ${fa.count === 0 ? "text-red-600 dark:text-red-400" : "text-gray-700 dark:text-gray-300"}`}>
-                    {fa.label} {fa.count === 0 && "⚠ GAP"}
-                  </span>
-                </div>
-                <ScoreBar value={fa.count} max={stories.length} />
+      {!expanded && (
+        <div className="px-4 py-3">
+          <p className="text-xs text-muted-foreground">
+            Visual map of which Meta values your STAR stories cover. Instantly
+            spots gaps before your interview.
+          </p>
+          <div className="flex items-center gap-3 mt-2">
+            <div
+              className={`text-xs font-bold ${coveragePct >= 80 ? "text-emerald-400" : coveragePct >= 50 ? "text-amber-400" : "text-red-400"}`}
+            >
+              {coveragePct}% covered
+            </div>
+            {gapValues.length > 0 && (
+              <div className="text-xs text-red-400">
+                {gapValues.length} value{gapValues.length > 1 ? "s" : ""} with
+                no story
               </div>
-            ))}
+            )}
+            <button
+              onClick={() => setExpanded(true)}
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+            >
+              View matrix →
+            </button>
           </div>
-        </HighImpactWrapper>
+        </div>
+      )}
 
-        <HighImpactWrapper variant="violet" className="p-4">
-          <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Meta Values Coverage</h4>
-          <div className="space-y-2.5">
-            {valueCoverage.map(v => (
-              <div key={v.id}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`text-xs font-semibold ${v.count === 0 ? "text-red-600 dark:text-red-400" : "text-gray-700 dark:text-gray-300"}`}>
-                    {v.label} {v.count === 0 && "⚠ GAP"}
-                  </span>
-                </div>
-                <ScoreBar value={v.count} max={stories.length} />
-              </div>
-            ))}
+      {expanded && (
+        <div className="p-4 space-y-4">
+          {/* Why this matters */}
+          <div className="flex gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+            <AlertTriangle
+              size={14}
+              className="text-indigo-400 shrink-0 mt-0.5"
+            />
+            <p className="text-xs text-indigo-200">
+              <strong>Why this matters:</strong> Candidates who walk in with a
+              story for every Meta value never get caught flat-footed. This
+              matrix shows your gaps at a glance — fix them before interview
+              day.
+            </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <div className="flex items-center justify-between mb-1">
-              <span className={`text-xs font-semibold ${storiesWithMetrics < stories.length ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
-                Stories with Metrics
+
+          {/* Overall progress */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                Overall story coverage
+              </span>
+              <span
+                className={`font-bold ${coveragePct >= 80 ? "text-emerald-400" : coveragePct >= 50 ? "text-amber-400" : "text-red-400"}`}
+              >
+                {totalCovered}/{totalQuestions} ({coveragePct}%)
               </span>
             </div>
-            <ScoreBar value={storiesWithMetrics} max={stories.length} />
+            <div className="w-full h-2 rounded-full bg-white/10">
+              <div
+                className={`h-full rounded-full transition-all ${coveragePct >= 80 ? "bg-emerald-500" : coveragePct >= 50 ? "bg-amber-500" : "bg-red-500"}`}
+                style={{ width: `${coveragePct}%` }}
+              />
+            </div>
           </div>
-        </HighImpactWrapper>
-      </div>
+
+          {/* Gap alerts */}
+          {gapValues.length > 0 && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-red-400">
+                <XCircle size={12} />
+                Critical Gaps — No Story Written
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {gapValues.map(vc => (
+                  <span
+                    key={vc.value.name}
+                    className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 text-[10px] font-semibold border border-red-500/30"
+                  >
+                    {vc.value.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {weakValues.length > 0 && (
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                <Info size={12} />
+                Partial Coverage — More Stories Recommended
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {weakValues.map(vc => (
+                  <span
+                    key={vc.value.name}
+                    className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-semibold border border-amber-500/30"
+                  >
+                    {vc.value.name} ({vc.covered}/{vc.total})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {gapValues.length === 0 && weakValues.length === 0 && (
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                <CheckCircle size={12} />
+                Full coverage — you have at least one story for every Meta value
+              </div>
+            </div>
+          )}
+
+          {/* Coverage matrix */}
+          <div className="space-y-3">
+            {valueCoverage.map(vc => {
+              const pct =
+                vc.total > 0 ? Math.round((vc.covered / vc.total) * 100) : 0;
+              return (
+                <div key={vc.value.name} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-foreground">
+                        {vc.value.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {vc.covered}/{vc.total} stories
+                      </span>
+                    </div>
+                    <span
+                      className={`text-xs font-bold ${pct === 100 ? "text-emerald-400" : pct > 0 ? "text-amber-400" : "text-red-400"}`}
+                    >
+                      {pct}%
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {vc.questions.map(q => {
+                      const hasCoverage = coverageMap[vc.value.name][q.id];
+                      return (
+                        <div
+                          key={q.id}
+                          className="relative"
+                          onMouseEnter={() =>
+                            setHoveredCell({
+                              valueName: vc.value.name,
+                              qId: q.id,
+                            })
+                          }
+                          onMouseLeave={() => setHoveredCell(null)}
+                        >
+                          <div
+                            className={`w-7 h-7 rounded flex items-center justify-center cursor-default transition-all ${hasCoverage ? "bg-emerald-500/30 border border-emerald-500/50" : "bg-red-500/10 border border-red-500/20 border-dashed"}`}
+                          >
+                            {hasCoverage ? (
+                              <CheckCircle
+                                size={12}
+                                className="text-emerald-400"
+                              />
+                            ) : (
+                              <XCircle size={12} className="text-red-400/50" />
+                            )}
+                          </div>
+                          {/* Tooltip */}
+                          {hoveredCell?.valueName === vc.value.name &&
+                            hoveredCell?.qId === q.id && (
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-10 w-48 p-2 rounded-lg bg-popover border border-border text-[10px] text-foreground shadow-lg">
+                                {q.q}
+                              </div>
+                            )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="text-[10px] text-muted-foreground">
+            Stories are counted from your STAR notes in the Behavioral tab.
+            Hover any cell to see the question.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

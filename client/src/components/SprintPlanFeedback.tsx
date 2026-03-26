@@ -29,10 +29,9 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
   const handleSubmit = () => {
     if (rating === 0) return;
     submitMutation.mutate({
-      dayNumber,
       rating,
-      suggestion: suggestion.trim() || undefined,
-      helpful: helpful !== null ? helpful : undefined,
+      message: suggestion.trim() || (helpful === true ? "Helpful" : helpful === false ? "Not helpful" : "Feedback submitted"),
+      dayFeedback: dayNumber ? [{ day: dayNumber, comment: suggestion.trim() || "" }] : undefined,
     });
   };
 
@@ -54,7 +53,7 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
           {dayNumber ? `Day ${dayNumber} helpful?` : "Was this plan helpful?"}
         </span>
         <button
-          onClick={() => { setHelpful(true); setRating(5); submitMutation.mutate({ dayNumber, rating: 5, helpful: true }); }}
+          onClick={() => { setHelpful(true); setRating(5); submitMutation.mutate({ rating: 5, message: 'Helpful', dayFeedback: dayNumber ? [{ day: dayNumber, comment: 'Helpful' }] : undefined }); }}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all border ${helpful === true ? "bg-emerald-100 text-emerald-700 border-emerald-300" : "bg-gray-50 text-gray-500 border-gray-200 hover:border-emerald-300 hover:text-emerald-600"}`}
         >
           <ThumbsUp size={12} /> Yes
@@ -81,7 +80,7 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
                 className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
               />
               <button
-                onClick={() => submitMutation.mutate({ dayNumber, rating: 2, helpful: false, suggestion: suggestion.trim() || undefined })}
+                onClick={() => submitMutation.mutate({ rating: 2, message: suggestion.trim() || 'Not helpful', dayFeedback: dayNumber ? [{ day: dayNumber, comment: suggestion.trim() || 'Not helpful' }] : undefined })}
                 disabled={submitMutation.isPending}
                 className="mt-1 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-all disabled:opacity-50"
               >

@@ -20,6 +20,8 @@ import AdminStats from "@/pages/AdminStats";
 import AdminDocs from "@/pages/AdminDocs";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminGate from "@/components/AdminGate";
+import CollabRoom from "@/pages/CollabRoom";
+import AdminAccess from "@/pages/AdminAccess";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -49,7 +51,7 @@ function BannedGate({ children }: { children: React.ReactNode }) {
 }
 
 function DisclaimerGateWrapper({ children }: { children: React.ReactNode }) {
-  const { gateOpen, initializing, confirm } = useDisclaimerGate();
+  const { gateOpen, dbLoading: initializing, confirm } = useDisclaimerGate();
   // While auth/DB check is in-flight, render nothing — no gate, no spinner
   if (initializing) return null;
   if (gateOpen) return <DisclaimerGate onConfirm={confirm} />;
@@ -60,6 +62,7 @@ function AppRouter() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/room/:roomId"} component={CollabRoom} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={Home} />
@@ -109,6 +112,9 @@ function App() {
         </Route>
         <Route path="/admin/analytics">
           <AdminGate><AdminAnalytics /></AdminGate>
+        </Route>
+        <Route path="/admin/access">
+          <AdminGate><AdminAccess /></AdminGate>
         </Route>
                 {/* All other routes go through DisclaimerGate */}
                 <Route>

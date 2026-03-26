@@ -1,737 +1,861 @@
-import { useState, lazy, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Code2, Cpu, MessageSquare, Calendar, Flame, Sun, Moon,
-  ListChecks, BarChart2, Layers, ClipboardList, Terminal,
-  HelpCircle, Dices, Sword, TrendingUp, Bookmark, Search, Wrench,
-  LayoutDashboard, Trophy, Shield, ShieldCheck,
-} from "lucide-react";
-import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getAdminToken } from "@/lib/adminToken";
-import { Link } from "wouter";
+// Design: Bold Engineering Dashboard
+// Dark charcoal base, Space Grotesk headings, Inter body
+// Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { emitKeyEvent } from "@/lib/keyEvents";
+import {
+  usePatternRatings,
+  useBehavioralRatings,
+  useOnboardingDismissed,
+  useDisclaimerDismissed,
+  useCongratsShown,
+  useInterviewDate,
+} from "@/hooks/useLocalStorage";
+import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
+import TopNav, { CountdownBar } from "@/components/TopNav";
+import HeroSection from "@/components/HeroSection";
+import CommunityBanner from "@/components/CommunityBanner";
 import OnboardingModal from "@/components/OnboardingModal";
-import OnboardingTour, { useOnboardingTour } from "@/components/OnboardingTour";
-import SiteFeedbackModal from "@/components/SiteFeedbackModal";
-import { useDensity, type Density } from "@/contexts/DensityContext";
-import Hero from "@/components/Hero";
-import ArchitectPicks from "@/components/ArchitectPicks";
-import { useStreak } from "@/hooks/useStreak";
-import XPLevelBar from "@/components/XPLevelBar";
-import NavCountdownChip from "@/components/NavCountdownChip";
-import { useXPContext } from "@/contexts/useXPContext";
-import { useKeyboardShortcutOverlay } from "@/components/KeyboardShortcutOverlay";
-import { FocusModeProvider, FocusModeToggle, useFocusMode } from "@/components/FocusMode";
-import MilestoneNotifications from "@/components/MilestoneNotifications";
-import type { GauntletState } from "@/components/GauntletMode";
-import TabSkeleton from "@/components/TabSkeleton";
-import TabErrorBoundary from "@/components/TabErrorBoundary";
+import { StartHereOnboarding } from "@/components/StartHereOnboarding";
+import { GeneralFeedback } from "@/components/GeneralFeedback";
+import NotificationBanner from "@/components/NotificationBanner";
+import GlobalSearch from "@/components/GlobalSearch";
+import {
+  AlertTriangle,
+  X,
+  Maximize2,
+  Minimize2,
+  Keyboard,
+  HelpCircle,
+  Trash2,
+} from "lucide-react";
+import DisclaimerGate, { useDisclaimerGate } from "@/components/DisclaimerGate";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
-// Heavy tab components — lazy loaded to keep initial bundle small
-const CodingTab = lazy(() => import("@/components/CodingTab"));
-const AIRoundTab = lazy(() => import("@/components/AIRoundTab"));
-const BehavioralTab = lazy(() => import("@/components/BehavioralTab"));
-const TimelineTab = lazy(() => import("@/components/TimelineTab"));
-const CTCITrackerTab = lazy(() => import("@/components/CTCITrackerTab"));
-const ReadinessTab = lazy(() => import("@/components/ReadinessTab"));
-const SystemDesignTab = lazy(() => import("@/components/SystemDesignTab"));
-const MockInterviewSimulator = lazy(() => import("@/components/MockInterviewSimulator"));
-const CodePractice = lazy(() => import("@/pages/CodePractice"));
-const SoundtrackPlayer = lazy(() => import("@/components/SoundtrackPlayer"));
-const TopicRoulette = lazy(() => import("@/components/TopicRoulette"));
-const KeyboardShortcutOverlay = lazy(() => import("@/components/KeyboardShortcutOverlay").then(m => ({ default: m.KeyboardShortcutOverlay })));
-const GauntletMode = lazy(() => import("@/components/GauntletMode"));
-const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
-const BookmarksPanel = lazy(() => import("@/components/BookmarksPanel"));
-const GlobalSearch = lazy(() => import("@/components/GlobalSearch"));
-const AIToolsTab = lazy(() => import("@/components/AIToolsTab"));
-const OverviewTab = lazy(() => import("@/components/OverviewTab"));
-const Leaderboard = lazy(() => import("@/components/Leaderboard"));
-const DeployStatusBadge = lazy(() => import("@/components/DeployStatusBadge"));
+// Static imports — dynamic (lazy) imports are incompatible with the standalone
+// CDN build because chunk URLs become absolute CDN paths that cannot be resolved
+// at runtime. Keep static imports here; bundle splitting is handled by manualChunks
+// in vite.config.ts which still produces separate vendor chunks for caching.
+import OverviewTab from "@/components/OverviewTab";
+import CodingTab from "@/components/CodingTab";
+import BehavioralTab from "@/components/BehavioralTab";
+import SystemDesignTab from "@/components/SystemDesignTab";
+import CodePracticeTab from "@/components/CodePracticeTab";
 
-// ── Tab Groups ─────────────────────────────────────────────────────────────────
-// Tabs are split into two rows for better visibility:
-//   Row 1 (primary): The most-used practice tabs — large, colourful, icon + label
-//   Row 2 (secondary): Supporting tabs — slightly smaller but still prominent
-
-const PRIMARY_TABS = [
-  {
-    id: "coding",
-    label: "Coding Interview",
-    shortLabel: "Coding",
-    icon: <Code2 size={18} />,
-    color: "blue",
-    emoji: "💻",
-    description: "Simulator + patterns",
-  },
-  {
-    id: "practice",
-    label: "Code Practice",
-    shortLabel: "Practice",
-    icon: <Terminal size={18} />,
-    color: "green",
-    emoji: "⌨️",
-    description: "LeetCode problems",
-  },
-  {
-    id: "mock",
-    label: "Mock Interview",
-    shortLabel: "Mock",
-    icon: <ClipboardList size={18} />,
-    color: "indigo",
-    emoji: "🎯",
-    description: "Full simulation",
-  },
-  {
-    id: "behavioral",
-    label: "Behavioral",
-    shortLabel: "Behavioral",
-    icon: <MessageSquare size={18} />,
-    color: "amber",
-    emoji: "🗣️",
-    description: "STAR framework",
-  },
-  {
-    id: "ctci",
-    label: "Practice Tracker",
-    shortLabel: "Tracker",
-    icon: <ListChecks size={18} />,
-    color: "violet",
-    emoji: "📋",
-    description: "CTCI progress",
-  },
-];
-
-const SECONDARY_TABS = [
-  {
-    id: "ai-round",
-    label: "AI-Enabled Round",
-    shortLabel: "AI Round",
-    icon: <Cpu size={15} />,
-    color: "teal",
-    emoji: "🤖",
-  },
-  {
-    id: "timeline",
-    label: "Study Timeline",
-    shortLabel: "Timeline",
-    icon: <Calendar size={15} />,
-    color: "emerald",
-    emoji: "📅",
-  },
-  {
-    id: "readiness",
-    label: "Readiness",
-    shortLabel: "Readiness",
-    icon: <BarChart2 size={15} />,
-    color: "rose",
-    emoji: "📊",
-  },
-  {
-    id: "sysdesign",
-    label: "System Design",
-    shortLabel: "Sys Design",
-    icon: <Layers size={15} />,
-    color: "slate",
-    emoji: "🏗️",
-  },
-  {
-    id: "ai-tools",
-    label: "AI Tools",
-    shortLabel: "AI Tools",
-    icon: <Wrench size={15} />,
-    color: "violet",
-    emoji: "🛠️",
-  },
-  {
-    id: "overview",
-    label: "Overview",
-    shortLabel: "Overview",
-    icon: <LayoutDashboard size={15} />,
-    color: "sky",
-    emoji: "📌",
-  },
-  {
-    id: "leaderboard",
-    label: "Leaderboard",
-    shortLabel: "Leaderboard",
-    icon: <Trophy size={15} />,
-    color: "yellow",
-    emoji: "🏆",
-  },
-];
-
-// Flat list for keyboard shortcut indexing
-const ALL_TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
-
-const PRIMARY_ACTIVE: Record<string, string> = {
-  blue:   "bg-blue-600 text-white border-blue-600 shadow-blue-200 dark:shadow-blue-900/40",
-  green:  "bg-green-600 text-white border-green-600 shadow-green-200 dark:shadow-green-900/40",
-  indigo: "bg-indigo-600 text-white border-indigo-600 shadow-indigo-200 dark:shadow-indigo-900/40",
-  amber:  "bg-amber-500 text-white border-amber-500 shadow-amber-200 dark:shadow-amber-900/40",
-  violet: "bg-violet-600 text-white border-violet-600 shadow-violet-200 dark:shadow-violet-900/40",
-};
-
-const SECONDARY_ACTIVE: Record<string, string> = {
-  teal:    "text-teal-600 border-teal-500 bg-teal-50 dark:bg-teal-900/20",
-  emerald: "text-emerald-600 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20",
-  rose:    "text-rose-600 border-rose-500 bg-rose-50 dark:bg-rose-900/20",
-  slate:   "text-slate-600 border-slate-500 bg-slate-50 dark:bg-slate-900/20",
-  violet:  "text-violet-600 border-violet-500 bg-violet-50 dark:bg-violet-900/20",
-};
+// Simple confetti burst
+function triggerConfetti() {
+  const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement("div");
+    el.style.cssText = `
+      position:fixed; top:0; left:${Math.random() * 100}vw; width:8px; height:8px;
+      background:${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius:${Math.random() > 0.5 ? "50%" : "2px"};
+      z-index:9999; pointer-events:none;
+      animation: confetti-fall ${1.5 + Math.random()}s ease-in forwards;
+      transform: rotate(${Math.random() * 360}deg);
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+}
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("coding");
-  const { shouldShow: showTour, dismiss: dismissTour } = useOnboardingTour();
-  const [direction, setDirection] = useState(1);
-  const { streak, activatedToday } = useStreak();
-  const { totalXP, events } = useXPContext();
-  const { theme, toggleTheme } = useTheme();
-  const { density, setDensity } = useDensity();
-  const isDark = theme === "dark";
-  const { open: shortcutOpen, setOpen: setShortcutOpen } = useKeyboardShortcutOverlay();
-  const { user: authUser } = useAuth();
-
-  // ── Admin badge: check owner status + poll new feedback count every 5 min ──────────────
-  const IS_STANDALONE = import.meta.env.VITE_STANDALONE === "true";
-  const { data: ownerData } = trpc.auth.isOwner.useQuery(undefined, {
-    enabled: !IS_STANDALONE,
-    staleTime: 60_000,
-    retry: false,
-  });
-  const isOwner = !IS_STANDALONE && ownerData?.isOwner === true;
-  const { data: newCountData } = trpc.feedback.getNewCount.useQuery(undefined, {
-    enabled: isOwner,
-    refetchInterval: 5 * 60 * 1000, // 5 minutes
-    staleTime: 4 * 60 * 1000,
-  });
-  const adminNewCount = newCountData?.newCount ?? 0;
-
-  const [rouletteOpen, setRouletteOpen] = useState(false);
-  const [progressOpen, setProgressOpen] = useState(false);
-  const [bookmarksOpen, setBookmarksOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-
-  // ── Gauntlet Mode state ──────────────────────────────────────────────────
-  const GAUNTLET_CHALLENGES = ["ctci","coding","ai-round","behavioral","timeline","readiness","sysdesign"];
-  const CHALLENGE_LABELS: Record<string,string> = {
-    ctci: "Practice Tracker", coding: "Coding Interview", "ai-round": "AI-Enabled Round",
-    behavioral: "Behavioral Interview", timeline: "Study Timeline",
-    readiness: "Readiness", sysdesign: "System Design",
+  const {
+    gateOpen,
+    dbLoading,
+    confirm: confirmDisclaimer,
+  } = useDisclaimerGate();
+  // Deep-link URL routing: ?tab=coding&section=mock
+  const VALID_TABS = [
+    "overview",
+    "coding",
+    "behavioral",
+    "design",
+    "collab",
+    "practice",
+  ];
+  const getTabFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("tab");
+    return t && VALID_TABS.includes(t) ? t : "overview";
   };
-  const CHALLENGE_EMOJIS: Record<string,string> = {
-    ctci: "📋", coding: "💻", "ai-round": "🤖", behavioral: "🗣️",
-    timeline: "📅", readiness: "📊", sysdesign: "🏗️",
+  const [activeTab, setActiveTab] = useState(getTabFromUrl);
+  const setActiveTabWithUrl = (tab: string, section?: string) => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", tab);
+    if (section) params.set("section", section);
+    else params.delete("section");
+    window.history.replaceState(null, "", "?" + params.toString());
+    if (section) {
+      setTimeout(() => {
+        const el = document.getElementById(section);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
+    }
   };
-  const GAUNTLET_HISTORY_KEY = "gauntlet_history";
-  const GAUNTLET_BADGE_KEY = "gauntlet_cleared_badge";
+  // On mount: scroll to section from URL if present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get("section");
+    if (section) {
+      setTimeout(() => {
+        const el = document.getElementById(section);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, []);
+  const { theme } = useTheme();
+  const darkMode = theme === "dark";
+  const [onboardingDismissed, setOnboardingDismissed] =
+    useOnboardingDismissed();
+  const [disclaimerDismissed, setDisclaimerDismissed] =
+    useDisclaimerDismissed();
+  const [congratsShown, setCongratsShown] = useCongratsShown();
+  const [interviewDate] = useInterviewDate();
+  const daysUntilInterview = interviewDate
+    ? Math.ceil(
+        (new Date(interviewDate).setHours(0, 0, 0, 0) -
+          new Date().setHours(0, 0, 0, 0)) /
+          86400000
+      )
+    : null;
+  const [countdownDismissed, setCountdownDismissed] = useState(false);
+  const [patternRatings] = usePatternRatings();
+  const [bqRatings] = useBehavioralRatings();
+  const [focusMode, setFocusMode] = useState(false);
+  const [showKeyHelp, setShowKeyHelp] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  // Hidden admin shortcut: track consecutive 'a' presses
+  const adminKeyCount = useRef(0);
+  const adminKeyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const emptyGauntlet = (): GauntletState => ({
-    active: false, currentIdx: 0, rounds: [], done: false, failed: false, startTime: 0, totalSec: 0,
-  });
-  const [gauntlet, setGauntlet] = useState<GauntletState>(emptyGauntlet);
-  const [gauntletOpen, setGauntletOpen] = useState(false);
+  // Analytics: track page views on every tab switch
+  useAnalytics({ page: activeTab });
 
-  const startGauntlet = () => {
-    setGauntlet({ active: true, currentIdx: 0, rounds: [], done: false, failed: false, startTime: Date.now(), totalSec: 0 });
-    setGauntletOpen(true);
-  };
-
-  const advanceGauntlet = (completed: boolean) => {
-    setGauntlet(g => {
-      const elapsed = Math.round((Date.now() - g.startTime) / 1000);
-      const newRound = {
-        tabId: GAUNTLET_CHALLENGES[g.currentIdx] as any,
-        tabLabel: CHALLENGE_LABELS[GAUNTLET_CHALLENGES[g.currentIdx]],
-        emoji: CHALLENGE_EMOJIS[GAUNTLET_CHALLENGES[g.currentIdx]],
-        completed, failed: !completed, timeSec: elapsed,
-      };
-      const newRounds = [...g.rounds, newRound];
-      if (!completed) {
-        const rec = { id: Date.now().toString(), date: Date.now(), cleared: false, failedAt: newRound.tabLabel, totalSec: elapsed };
-        const hist = JSON.parse(localStorage.getItem(GAUNTLET_HISTORY_KEY) ?? "[]");
-        localStorage.setItem(GAUNTLET_HISTORY_KEY, JSON.stringify([rec, ...hist].slice(0, 20)));
-        return { ...g, active: false, failed: true, rounds: newRounds, totalSec: elapsed };
-      }
-      const nextIdx = g.currentIdx + 1;
-      if (nextIdx >= GAUNTLET_CHALLENGES.length) {
-        localStorage.setItem(GAUNTLET_BADGE_KEY, "true");
-        const rec = { id: Date.now().toString(), date: Date.now(), cleared: true, totalSec: elapsed };
-        const hist = JSON.parse(localStorage.getItem(GAUNTLET_HISTORY_KEY) ?? "[]");
-        localStorage.setItem(GAUNTLET_HISTORY_KEY, JSON.stringify([rec, ...hist].slice(0, 20)));
-        return { ...g, active: false, done: true, rounds: newRounds, totalSec: elapsed };
-      }
-      return { ...g, currentIdx: nextIdx, rounds: newRounds };
-    });
-  };
-
-  const stopGauntlet = () => setGauntlet(emptyGauntlet());
+  // Confetti check
+  useEffect(() => {
+    const masteredAll = PATTERNS.every(p => (patternRatings[p.id] ?? 0) >= 4);
+    const readyAll = BEHAVIORAL_QUESTIONS.every(
+      q => (bqRatings[q.id] ?? 0) >= 4
+    );
+    if ((masteredAll || readyAll) && !congratsShown) {
+      triggerConfetti();
+      setCongratsShown(true);
+    }
+  }, [patternRatings, bqRatings, congratsShown, setCongratsShown]);
 
   // Keyboard shortcuts
-  useKeyboardShortcuts({
-    onTabSwitch: (i) => {
-      const tab = ALL_TABS[i];
-      if (tab) handleTabChange(tab.id);
-    },
-    onTimerToggle: () => emitKeyEvent("timer:toggle"),
-    onReveal:      () => emitKeyEvent("drill:reveal"),
-  });
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const tag = (e.target as HTMLElement).tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    // Hidden admin shortcut: press 'a' five times quickly to go to /#/admin
+    if (
+      (e.key === "a" || e.key === "A") &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.metaKey
+    ) {
+      adminKeyCount.current += 1;
+      if (adminKeyTimer.current) clearTimeout(adminKeyTimer.current);
+      adminKeyTimer.current = setTimeout(() => {
+        adminKeyCount.current = 0;
+      }, 1500);
+      if (adminKeyCount.current >= 5) {
+        adminKeyCount.current = 0;
+        if (adminKeyTimer.current) clearTimeout(adminKeyTimer.current);
+        // Navigate to admin route (works with both hash and regular routing)
+        if (import.meta.env.VITE_STANDALONE === "true") {
+          window.location.hash = "/admin";
+        } else {
+          window.location.href = "/admin";
+        }
+        return;
+      }
+    }
+    if (e.key === "1") setActiveTabWithUrl("overview");
+    if (e.key === "2") setActiveTabWithUrl("coding");
+    if (e.key === "3") setActiveTabWithUrl("behavioral");
+    if (e.key === "4") setActiveTabWithUrl("design");
+    if (e.key === "5") setActiveTabWithUrl("collab");
+    if (e.key === "f" || e.key === "F") setFocusMode(m => !m);
+    if (e.key === "?") setShowKeyHelp(m => !m);
+    if (e.key === "Escape") {
+      setFocusMode(false);
+      setShowKeyHelp(false);
+    }
+    // Alt+1–4: trigger primary Quick Action for the current tab
+    if (e.altKey && e.key === "1") {
+      e.preventDefault();
+      const el = document.getElementById("study-session-planner");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "2") {
+      e.preventDefault();
+      const el = document.getElementById("coding-mock-session");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "3") {
+      e.preventDefault();
+      const el = document.getElementById("behavioral-voice-star");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "4") {
+      e.preventDefault();
+      const el = document.getElementById("sysdesign-diagram-templates");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.altKey && e.key === "5") {
+      e.preventDefault();
+      setActiveTabWithUrl("collab");
+      setTimeout(() => {
+        const el = document.getElementById("collab-create-room");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, []);
 
-  const currentIndex = ALL_TABS.findIndex((t) => t.id === activeTab);
-  const trackPageView = trpc.analytics.trackPageView.useMutation();
-  const handleTabChange = (id: string) => {
-    const newIndex = ALL_TABS.findIndex((t) => t.id === id);
-    setDirection(newIndex > currentIndex ? 1 : -1);
-    setActiveTab(id);
-    // Track real page view for analytics
-    trackPageView.mutate({ tabName: id });
-  };
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
-  const { isFocused } = useFocusMode();
-
-  const isPrimary = (id: string) => PRIMARY_TABS.some(t => t.id === id);
+  // Show full-screen disclaimer gate until explicitly acknowledged
+  // For logged-in users, the DB record is the authoritative source.
+  if (gateOpen) {
+    return <DisclaimerGate onConfirm={confirmDisclaimer} loading={dbLoading} />;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-       {!isFocused && <Hero />}
-      {!isFocused && <ArchitectPicks onTabChange={handleTabChange} />}
-      {/* ── Sticky Navigation ─────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-md">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Confetti keyframe */}
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
 
-        {/* ── Top utility bar ─────────────────────────────────────────────── */}
-        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80">
-          <div className="container">
-            <div className="flex items-center justify-between h-10 gap-2">
-              {/* Left: app title */}
-              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 hidden sm:block tracking-wide uppercase">
-                Independent Study Guide
+      {/* Disclaimer banner */}
+      {!disclaimerDismissed && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3">
+          <div className="container flex items-start gap-3">
+            <AlertTriangle
+              size={14}
+              className="text-amber-400 shrink-0 mt-0.5"
+            />
+            <div className="flex-1 text-xs text-muted-foreground">
+              <span className="font-semibold text-amber-400">
+                Public Community Resource:{" "}
               </span>
-
-              {/* Right: utility buttons */}
-              <div className="flex items-center gap-0.5 ml-auto">
-                {/* Density toggle */}
-                <div className="hidden sm:flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-0.5 gap-0.5 mr-1" title="Font size / density">
-                  {(["compact", "comfortable", "spacious"] as Density[]).map(d => {
-                    const labels: Record<Density, string> = { compact: "S", comfortable: "M", spacious: "L" };
-                    const titles: Record<Density, string> = { compact: "Compact", comfortable: "Comfortable", spacious: "Spacious" };
-                    return (
-                      <button
-                        key={d}
-                        onClick={() => setDensity(d)}
-                        title={titles[d]}
-                        className={`w-6 h-6 rounded-full text-[10px] font-bold transition-all ${
-                          density === d
-                            ? "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm"
-                            : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                        }`}
-                      >{labels[d]}</button>
-                    );
-                  })}
-                </div>
-
-                {/* Gauntlet */}
-                <button
-                  onClick={() => setGauntletOpen(true)}
-                  title={gauntlet.active ? "Gauntlet in progress" : "Gauntlet Mode — 7-tab unbroken run"}
-                  className={`flex items-center justify-center w-8 h-8 rounded-full transition-all ${
-                    gauntlet.active
-                      ? "text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
-                      : "text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  <Sword size={14} />
-                </button>
-
-                {/* Roulette */}
-                <button
-                  onClick={() => setRouletteOpen(true)}
-                  title="Topic Roulette — spin for a random challenge"
-                  className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  <Dices size={14} />
-                </button>
-
-                {/* Soundtrack */}
-                <span className="hidden sm:contents"><Suspense fallback={null}><SoundtrackPlayer /></Suspense></span>
-
-                {/* Search */}
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  title="Search (Ctrl+K)"
-                  className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  <Search size={14} />
-                </button>
-
-                {/* Bookmarks */}
-                <button
-                  onClick={() => setBookmarksOpen(true)}
-                  title="Bookmarks"
-                  className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  <Bookmark size={14} />
-                </button>
-
-                {/* Progress */}
-                <button
-                  onClick={() => setProgressOpen(true)}
-                  title="Progress Dashboard"
-                  className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  <TrendingUp size={14} />
-                </button>
-
-                {/* Dark mode */}
-                <button
-                  onClick={() => toggleTheme?.()}
-                  title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                  className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  {isDark ? <Sun size={14} /> : <Moon size={14} />}
-                </button>
-
-                {/* Focus mode */}
-                <FocusModeToggle />
-
-                {/* Shortcuts */}
-                <button
-                  onClick={() => setShortcutOpen(true)}
-                  title="Keyboard shortcuts (?)"
-                  className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  <HelpCircle size={14} />
-                </button>
-
-                {/* XP bar */}
-                <div className="hidden md:block ml-1">
-                  <XPLevelBar totalXP={totalXP} events={events} />
-                </div>
-
-                {/* Interview countdown */}
-                <NavCountdownChip />
-
-                {/* Streak badge */}
-                <motion.div
-                  key={streak}
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ml-1 ${
-                    streak >= 3
-                      ? "bg-orange-100 text-orange-700 border border-orange-200"
-                      : streak >= 1
-                      ? "bg-amber-50 text-amber-600 border border-amber-200"
-                      : "bg-gray-100 text-gray-400 border border-gray-200"
-                  }`}
-                  title={
-                    streak === 0
-                      ? "Complete a Quick Drill or Practice Mode session to start your streak"
-                      : `${streak}-day streak${activatedToday ? " — active today ✓" : " — practice today to keep it going!"}`
+              This is an independent, publicly available study guide at{" "}
+              <span className="text-blue-400">www.metaguide.blog</span> — not
+              affiliated with, endorsed by, or distributed by Meta, Google,
+              Amazon, or any FAANG company. It was not provided to you by any
+              interviewer or recruiter. Always verify interview details with
+              your recruiter.
+              <label className="ml-3 inline-flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-amber-500"
+                  onChange={e =>
+                    e.target.checked && setDisclaimerDismissed(true)
                   }
-                >
-                  <Flame
-                    size={12}
-                    className={streak >= 1 ? "text-orange-500" : "text-gray-300"}
-                    fill={streak >= 3 ? "currentColor" : "none"}
-                  />
-                  <span className="hidden sm:inline">
-                    {streak === 0 ? "No streak" : `${streak}d`}
-                  </span>
-                  <span className="sm:hidden">{streak > 0 ? streak : "—"}</span>
-                  {activatedToday && streak > 0 && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" title="Active today" />
-                  )}
-                </motion.div>
-
-              </div>
+                />
+                <span className="text-amber-400 font-medium">I understand</span>
+              </label>
             </div>
+            <button
+              onClick={() => setDisclaimerDismissed(true)}
+              className="text-muted-foreground hover:text-foreground shrink-0"
+            >
+              <X size={13} />
+            </button>
           </div>
         </div>
+      )}
 
-        {/* ── Primary Tab Row ─────────────────────────────────────────────── */}
-        <div className="container">
-          <div className="flex items-stretch gap-1 pt-2 pb-0 overflow-x-auto scrollbar-hide">
-            {PRIMARY_TABS.map((tab) => {
-              const isActive = tab.id === activeTab;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`
-                    group flex flex-col items-center justify-center gap-1 px-4 py-2.5 rounded-t-xl
-                    text-sm font-bold border-2 border-b-0 whitespace-nowrap transition-all flex-shrink-0
-                    min-w-[100px] shadow-sm
-                    ${isActive
-                      ? PRIMARY_ACTIVE[tab.color] + " shadow-md"
-                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-750"
-                    }
-                  `}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className={isActive ? "opacity-100" : "opacity-60 group-hover:opacity-80"}>{tab.icon}</span>
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    <span className="sm:hidden">{tab.shortLabel}</span>
-                  </div>
-                  <span className={`text-[10px] font-normal hidden sm:block ${isActive ? "opacity-80" : "opacity-50 group-hover:opacity-70"}`}>
-                    {tab.description}
-                  </span>
-                </button>
-              );
-            })}
-
-            {/* Spacer */}
-            <div className="flex-1" />
+      {/* Top navigation — hidden in focus mode */}
+      {!focusMode && (
+        <>
+          <TopNav
+            activeTab={activeTab}
+            onTabChange={setActiveTabWithUrl}
+            darkMode={darkMode}
+            onToggleDark={() => {}}
+          />
+          <div className="container pb-1 flex justify-end">
+            <GlobalSearch onNavigate={setActiveTabWithUrl} />
           </div>
-        </div>
+        </>
+      )}
 
-        {/* ── Secondary Tab Row ────────────────────────────────────────────── */}
-        <div className="container border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-900/60">
-          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-hide py-1">
-            <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider mr-2 shrink-0 hidden sm:block">
-              More:
+      {/* Community resource banner — always visible (not hidden in focus mode) */}
+      <CountdownBar onTabChange={setActiveTabWithUrl} />
+      <CommunityBanner />
+      {/* Hero section — hidden in focus mode */}
+      {!focusMode && <HeroSection onTabChange={setActiveTabWithUrl} />}
+
+      {/* Focus Mode bar */}
+      {focusMode && (
+        <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-2 bg-background/90 backdrop-blur border-b border-border">
+          <div className="flex items-center gap-2">
+            <Maximize2 size={13} className="text-blue-400" />
+            <span className="text-xs font-semibold text-blue-400">
+              Focus Mode
             </span>
-            {SECONDARY_TABS.map((tab) => {
-              const isActive = tab.id === activeTab;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`
-                    flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                    border whitespace-nowrap transition-all flex-shrink-0
-                    ${isActive
-                      ? SECONDARY_ACTIVE[tab.color] + " border-current"
-                      : "bg-transparent border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200"
-                    }
-                  `}
-                >
-                  <span className={isActive ? "opacity-100" : "opacity-60"}>{tab.icon}</span>
-                  <span className="hidden sm:inline">{tab.label}</span>
-                  <span className="sm:hidden">{tab.shortLabel}</span>
-                </button>
-              );
-            })}
+            <span className="text-xs text-muted-foreground">
+              — Press{" "}
+              <kbd className="px-1 py-0.5 rounded bg-secondary border border-border font-mono text-xs">
+                F
+              </kbd>{" "}
+              or{" "}
+              <kbd className="px-1 py-0.5 rounded bg-secondary border border-border font-mono text-xs">
+                Esc
+              </kbd>{" "}
+              to exit
+            </span>
           </div>
-        </div>
-      </div>
-
-      {/* ── Tab Content ───────────────────────────────────────────────────── */}
-      <div className="container py-6 md:py-8">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: direction * 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction * -24 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+          <button
+            onClick={() => setFocusMode(false)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            {/* PDF capture target */}
-            <div id="pdf-content" className="bg-white dark:bg-gray-900 rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-              {/* PDF header — visible only in PDF via print, hidden on screen */}
-              <div className="hidden print:block mb-6 pb-4 border-b border-gray-200">
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Independent Study Guide</p>
-                <h1 className="text-xl font-bold text-gray-900">
-                  {ALL_TABS.find((t) => t.id === activeTab)?.label}
-                </h1>
-              </div>
+            <Minimize2 size={13} /> Exit Focus
+          </button>
+        </div>
+      )}
 
-              <TabErrorBoundary tabName={ALL_TABS.find(t => t.id === activeTab)?.label ?? activeTab}>
-                <Suspense fallback={<TabSkeleton tabId={activeTab} />}>
-                  {activeTab === "coding"      && <CodingTab />}
-                  {activeTab === "mock"        && <MockInterviewSimulator />}
-                  {activeTab === "ai-round"    && <AIRoundTab />}
-                  {activeTab === "behavioral"  && <BehavioralTab />}
-                  {activeTab === "timeline"    && <TimelineTab />}
-                  {activeTab === "ctci"        && <CTCITrackerTab />}
-                  {activeTab === "readiness"   && <ReadinessTab />}
-                  {activeTab === "sysdesign"   && <SystemDesignTab />}
-                  {activeTab === "practice"    && <CodePractice />}
-                  {activeTab === "ai-tools"    && <AIToolsTab />}
-                  {activeTab === "overview"    && <OverviewTab onTabChange={handleTabChange} />}
-                  {activeTab === "leaderboard" && <Leaderboard />}
-                </Suspense>
-              </TabErrorBoundary>
+      {/* Global interview countdown banner — shows on non-Overview tabs when ≤7 days away */}
+      {daysUntilInterview !== null &&
+        daysUntilInterview <= 7 &&
+        daysUntilInterview >= 0 &&
+        !countdownDismissed &&
+        activeTab !== "overview" && (
+          <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5">
+            <div className="container flex items-center gap-3">
+              <AlertTriangle size={13} className="text-amber-400 shrink-0" />
+              <span className="text-xs text-amber-300 flex-1">
+                <span className="font-bold">
+                  Interview in{" "}
+                  {daysUntilInterview === 0
+                    ? "today"
+                    : `${daysUntilInterview} day${daysUntilInterview !== 1 ? "s" : ""}`}
+                  !
+                </span>{" "}
+                Focus on your weakest areas. Check the{" "}
+                <button
+                  onClick={() => setActiveTabWithUrl("overview")}
+                  className="underline hover:text-amber-200 transition-colors"
+                >
+                  Interview Day Checklist
+                </button>
+                .
+              </span>
+              <button
+                onClick={() => setCountdownDismissed(true)}
+                className="text-amber-400/60 hover:text-amber-300 transition-colors shrink-0"
+              >
+                <X size={13} />
+              </button>
             </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+          </div>
+        )}
+      {/* Main content */}
+      <main className={`container ${focusMode ? "py-4" : "py-6"}`}>
+        {activeTab === "overview" && (
+          <SectionErrorBoundary label="Overview tab">
+            <OverviewTab onTabChange={setActiveTabWithUrl} />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "coding" && (
+          <SectionErrorBoundary label="Coding tab">
+            <CodingTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "behavioral" && (
+          <SectionErrorBoundary label="Behavioral tab">
+            <BehavioralTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "design" && (
+          <SectionErrorBoundary label="System Design tab">
+            <SystemDesignTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "collab" && (
+          <SectionErrorBoundary label="Collab tab">
+            <CollabLobby />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "practice" && (
+          <SectionErrorBoundary label="Practice tab">
+            <CodePracticeTab />
+          </SectionErrorBoundary>
+        )}
+      </main>
 
-      <OnboardingModal />
-      {showTour && (
-        <OnboardingTour
-          onComplete={(goToReadiness) => {
-            dismissTour();
-            if (goToReadiness) setActiveTab("readiness");
-          }}
+      {/* Footer — hidden in focus mode */}
+      {!focusMode && (
+        <footer className="border-t border-border py-6 mt-8">
+          <div className="container text-center text-xs text-muted-foreground space-y-2">
+            {/* #2 — Author byline */}
+            <div className="font-medium text-foreground/70">
+              Engineering Interview Prep
+            </div>
+            <div>
+              By{" "}
+              <span className="text-foreground/80 font-medium">
+                Community Contributors
+              </span>{" "}
+              · Published March 2026 · All progress saved locally in your
+              browser
+            </div>
+            {/* #5 — Version E relaxed distribution note */}
+            <div className="max-w-xl mx-auto text-[11px] text-muted-foreground/70 leading-relaxed border-t border-border/50 pt-2 mt-1">
+              This is a community guide for self-directed learners. If you're a
+              recruiter or hiring manager thinking about sharing it — totally
+              your call, but it's worth checking your company's guidelines on
+              external resources first. This guide works best when candidates
+              discover it on their own anyway.
+            </div>
+            {/* Keyboard shortcuts + Terms link */}
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1">
+              <span>
+                Press{" "}
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                  1
+                </kbd>
+                –
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                  5
+                </kbd>{" "}
+                to switch tabs ·{" "}
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                  F
+                </kbd>{" "}
+                Focus Mode
+              </span>
+              <span className="text-border">·</span>
+              {/* #7 — Terms of Use link */}
+              <button
+                onClick={() => setShowTerms(true)}
+                className="text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+              >
+                Terms of Use
+              </button>
+            </div>
+            <div className="pt-1">
+              <button
+                onClick={async () => {
+                  // Unregister service workers
+                  if ("serviceWorker" in navigator) {
+                    const registrations =
+                      await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(r => r.unregister()));
+                  }
+                  // Clear all caches
+                  if ("caches" in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                  }
+                  window.location.reload();
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-medium text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
+                title="Unregisters the service worker and clears all cached bundles — fixes stale UI issues"
+              >
+                <Trash2 size={10} />
+                Clear site cache &amp; reload
+              </button>
+            </div>
+          </div>
+        </footer>
+      )}
+
+      {/* Start Here Onboarding Flow */}
+      {!onboardingDismissed && (
+        <StartHereOnboarding
+          onDismiss={() => setOnboardingDismissed(true)}
+          onNavigate={setActiveTabWithUrl}
         />
       )}
-      <Suspense fallback={null}><KeyboardShortcutOverlay open={shortcutOpen} onClose={() => setShortcutOpen(false)} /></Suspense>
 
-      {/* Gauntlet Mode Modal */}
-      {gauntletOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setGauntletOpen(false)}>
-          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="text-base font-bold text-foreground flex items-center gap-2"><Sword size={16} className="text-orange-500" /> Gauntlet Mode</div>
-                <div className="text-xs text-muted-foreground">7-tab unbroken challenge run</div>
-              </div>
-              <button onClick={() => setGauntletOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <span className="text-lg leading-none">&times;</span>
-              </button>
-            </div>
-            <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>}><GauntletMode
-              gauntlet={gauntlet}
-              onStart={startGauntlet}
-              onAdvance={advanceGauntlet}
-              onStop={() => { stopGauntlet(); setGauntletOpen(false); }}
-              onNavigateTab={(tabId) => { handleTabChange(tabId); setGauntletOpen(false); }}
-            /></Suspense>
-          </div>
-        </div>
-      )}
+      {/* General Feedback floating button */}
+      <GeneralFeedback />
+      {/* Notification banner */}
+      <NotificationBanner />
 
-      {/* Topic Roulette Modal */}
-      {rouletteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setRouletteOpen(false)}>
-          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="text-base font-bold text-foreground flex items-center gap-2"><Dices size={16} className="text-violet-500" /> Topic Roulette</div>
-                <div className="text-xs text-muted-foreground">Spin for a random challenge across all tabs</div>
-              </div>
-              <button onClick={() => setRouletteOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <span className="text-lg leading-none">&times;</span>
-              </button>
-            </div>
-            <Suspense fallback={null}><TopicRoulette
-              onSelect={(tabId, _problem, _seg) => {
-                handleTabChange(tabId);
-                setRouletteOpen(false);
-              }}
-            /></Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Progress Dashboard */}
-      <Suspense fallback={null}><ProgressDashboard
-        open={progressOpen}
-        onClose={() => setProgressOpen(false)}
-        onRetrySession={(problemIds) => {
-          // Navigate to coding tab — the simulator will pick up the retry via localStorage
-          handleTabChange("coding");
-          setProgressOpen(false);
-        }}
-      /></Suspense>
-
-      {/* Bookmarks Panel */}
-      <Suspense fallback={null}><BookmarksPanel open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} onNavigate={(tabId) => handleTabChange(tabId)} /></Suspense>
-
-      {/* Global Search */}
-      <Suspense fallback={null}><GlobalSearch
-        open={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        onNavigate={(tabId) => {
-          if (tabId === "__open_search__") { setSearchOpen(true); return; }
-          handleTabChange(tabId);
-        }}
-      /></Suspense>
-
-      {/* Footer */}
-      <SiteFeedbackModal currentPage={activeTab} />
-      <footer className="bg-[#0d1b2a] text-white/60 text-center py-8 px-4 text-sm mb-16 sm:mb-0">
-        <p className="font-semibold text-white/90 mb-1">Independent Study Guide</p>
-        <p className="text-white/40 text-xs mb-1">Designed by <span className="text-blue-400 font-semibold">The Architect</span> · Not affiliated with any company</p>
-        <p>Updated March 2026 · Content synthesized from candidate reports, NeetCode, Coditioning, HelloInterview, igotanoffer, and Taro.</p>
-        <p className="mt-2 text-white/40 text-xs max-w-xl mx-auto">
-          This is a community guide for self-directed learners. If you're a recruiter or hiring manager thinking about sharing it — totally your call, but it's worth checking your company's guidelines on external resources first. This guide works best when candidates discover it on their own anyway.
-        </p>
-        {/* Live deployment status badge */}
-        <div className="mt-3 flex justify-center">
-          <Suspense fallback={null}><DeployStatusBadge /></Suspense>
-        </div>
-        <p className="mt-2 flex items-center justify-center gap-4">
-          <button
-            onClick={() => {
-              try { localStorage.removeItem("meta-guide-banner-dismissed-v1"); } catch { /* ignore */ }
-              window.location.reload();
-            }}
-            className="text-white/30 hover:text-white/70 text-xs underline underline-offset-2 transition-colors"
+      {/* Keyboard Navigation Overlay */}
+      {showKeyHelp && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowKeyHelp(false)}
+        >
+          <div
+            className="bg-background border border-border rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4"
+            onClick={e => e.stopPropagation()}
           >
-            Show disclaimer again
-          </button>
-          <span className="text-white/20">·</span>
-          <a
-            href="#/terms"
-            className="text-white/30 hover:text-white/70 text-xs underline underline-offset-2 transition-colors"
-          >
-            Terms of Use
-          </a>
-        </p>
-      </footer>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-        <div className="flex items-stretch overflow-x-auto scrollbar-hide">
-          {[...PRIMARY_TABS, ...SECONDARY_TABS].map((tab) => {
-            const isActive = tab.id === activeTab;
-            const colorMap: Record<string, string> = {
-              blue: "text-blue-600", green: "text-green-600", indigo: "text-indigo-600",
-              amber: "text-amber-500", violet: "text-violet-600",
-              teal: "text-teal-600", emerald: "text-emerald-600", rose: "text-rose-600", slate: "text-slate-600",
-            };
-            return (
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Keyboard size={16} className="text-blue-400" />
+                <span className="font-bold text-foreground">
+                  Keyboard Shortcuts
+                </span>
+              </div>
               <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`flex flex-col items-center justify-center flex-shrink-0 w-16 py-2 gap-0.5 text-[9px] font-semibold transition-all relative ${
-                  isActive ? colorMap[tab.color] : "text-gray-400 dark:text-gray-500"
-                }`}
+                onClick={() => setShowKeyHelp(false)}
+                className="text-muted-foreground hover:text-foreground"
               >
-                {isActive && (
-                  <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full ${
-                    tab.color === "blue"    ? "bg-blue-600"    :
-                    tab.color === "green"   ? "bg-green-600"   :
-                    tab.color === "indigo"  ? "bg-indigo-600"  :
-                    tab.color === "amber"   ? "bg-amber-500"   :
-                    tab.color === "violet"  ? "bg-violet-600"  :
-                    tab.color === "teal"    ? "bg-teal-600"    :
-                    tab.color === "emerald" ? "bg-emerald-600" :
-                    tab.color === "rose"    ? "bg-rose-600"    : "bg-slate-600"
-                  }`} />
-                )}
-                <span className={`text-base leading-none ${isActive ? "" : "opacity-50"}`}>{tab.emoji}</span>
-                <span className="leading-none text-center">{tab.shortLabel}</span>
+                <X size={16} />
               </button>
-            );
-          })}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                {
+                  section: "Navigation",
+                  shortcuts: [
+                    { key: "1", desc: "Overview tab" },
+                    { key: "2", desc: "Coding tab" },
+                    { key: "3", desc: "Behavioral tab" },
+                    { key: "4", desc: "System Design tab" },
+                    { key: "5", desc: "Collab tab" },
+                  ],
+                },
+                {
+                  section: "Modes & UI",
+                  shortcuts: [
+                    { key: "F", desc: "Toggle Focus Mode" },
+                    { key: "?", desc: "Show / hide this overlay" },
+                    { key: "Esc", desc: "Exit Focus Mode / close overlay" },
+                  ],
+                },
+                {
+                  section: "Quick Actions",
+                  shortcuts: [
+                    { key: "⌥1", desc: "Plan / Resume Today's Session" },
+                    { key: "⌥2", desc: "Start Coding Mock" },
+                    { key: "⌥3", desc: "Record STAR Answer" },
+                    { key: "⌥4", desc: "Open Diagram Template" },
+                    { key: "⌥5", desc: "Start Collab Session" },
+                  ],
+                },
+                {
+                  section: "Pattern Cards",
+                  shortcuts: [
+                    { key: "J / K", desc: "Move down / up through patterns" },
+                    { key: "Enter", desc: "Expand / collapse pattern" },
+                    { key: "R", desc: "Reveal key idea" },
+                    { key: "1–5", desc: "Rate current pattern" },
+                  ],
+                },
+                {
+                  section: "Drill & Sprint",
+                  shortcuts: [
+                    { key: "Tab", desc: "Indent in code editor" },
+                    { key: "Esc", desc: "Close inline code editor" },
+                  ],
+                },
+              ].map(group => (
+                <div key={group.section}>
+                  <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
+                    {group.section}
+                  </div>
+                  <div className="space-y-1.5">
+                    {group.shortcuts.map(s => (
+                      <div key={s.key} className="flex items-center gap-2">
+                        <kbd className="px-2 py-0.5 rounded bg-secondary border border-border font-mono text-xs text-foreground shrink-0 min-w-[2.5rem] text-center">
+                          {s.key}
+                        </kbd>
+                        <span className="text-xs text-muted-foreground">
+                          {s.desc}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 pt-3 border-t border-border text-xs text-muted-foreground text-center">
+              Press{" "}
+              <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                ?
+              </kbd>{" "}
+              or{" "}
+              <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border font-mono">
+                Esc
+              </kbd>{" "}
+              to close
+            </div>
+          </div>
         </div>
-      </nav>
+      )}
 
-      {/* Fixed Admin button — always visible in bottom-left corner */}
-      {(() => {
-        const tok = getAdminToken();
-        const adminHref = tok ? `/#/admin/feedback?key=${encodeURIComponent(tok)}` : "/#/admin/feedback";
-        return (
-          <a
-            href={adminHref}
-            title="Admin Panel"
-            className="fixed bottom-20 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 transition-all border border-indigo-500"
+      {/* Terms of Use Modal (#7) */}
+      {showTerms && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowTerms(false)}
+        >
+          <div
+            className="bg-background border border-border rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
           >
-            <ShieldCheck size={14} />
-            <span>Admin</span>
-            {isOwner && adminNewCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
-                {adminNewCount > 9 ? "9+" : adminNewCount}
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                className="text-base font-bold text-foreground"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Terms of Use
+              </h2>
+              <button
+                onClick={() => setShowTerms(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  What this guide is
+                </p>
+                <p>
+                  Engineering Interview Prep is a free, community-created study
+                  resource. It was built by engineers who went through the
+                  process and wanted to share what they learned. It is not
+                  affiliated with Meta, Google, Amazon, Apple, Netflix, or any
+                  other company.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  Who it's for
+                </p>
+                <p>
+                  This guide is designed for self-directed learners — people who
+                  found it on their own and are using it for their own interview
+                  preparation. It works best when candidates discover it
+                  independently and use it alongside the official materials
+                  their recruiter has shared.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  A note for recruiters and hiring managers
+                </p>
+                <p>
+                  This is a community guide for self-directed learners. If
+                  you're a recruiter or hiring manager thinking about sharing it
+                  — totally your call, but it's worth checking your company's
+                  guidelines on external resources first. This guide works best
+                  when candidates discover it on their own anyway.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">
+                  Recommendations only
+                </p>
+                <p>
+                  Interview formats change. This guide reflects community
+                  knowledge as of March 2026. Always verify current expectations
+                  with your recruiter. All content is provided as best-effort
+                  recommendations, not promises of any outcome.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-foreground font-semibold mb-1">Your data</p>
+                <p>
+                  All your progress (ratings, stories, mock history) is stored
+                  locally in your browser. Nothing is sent to any server without
+                  your explicit action. The optional leaderboard and
+                  cross-device sync features use Supabase and are entirely
+                  opt-in.
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-border text-[10px] text-muted-foreground/60">
+                By Community Contributors · Published March 2026 ·
+                www.metaguide.blog
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Inline lobby component — redirects to /room/:id
+function CollabLobby() {
+  const [roomId, setRoomId] = useState("");
+  const [name, setName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const generateId = () => Math.random().toString(36).slice(2, 8).toUpperCase();
+  const handleCreate = () => {
+    if (!name.trim()) return;
+    const id = generateId();
+    window.location.href = `/room/${id}?name=${encodeURIComponent(name.trim())}`;
+  };
+  const handleJoin = () => {
+    if (!name.trim() || !roomId.trim()) return;
+    window.location.href = `/room/${roomId.trim().toUpperCase()}?name=${encodeURIComponent(name.trim())}`;
+  };
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  return (
+    <div className="space-y-4">
+      {/* Quick Actions sticky row */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border flex items-center gap-3">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">
+          Quick Actions
+        </span>
+        <div className="flex gap-2 flex-1 flex-wrap">
+          <button
+            onClick={() => scrollTo("collab-create-room")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 text-xs font-semibold transition-all"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Start Collab Session
+          </button>
+          <button
+            onClick={() => scrollTo("hero-leaderboard")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            View Leaderboard
+          </button>
+        </div>
+        <button
+          onClick={() =>
+            window.dispatchEvent(
+              new KeyboardEvent("keydown", { key: "?", bubbles: true })
+            )
+          }
+          title="Keyboard shortcuts (?)"
+          className="ml-auto p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all shrink-0"
+        >
+          <HelpCircle size={13} />
+        </button>
+      </div>
+      <div id="collab-create-room" className="max-w-md mx-auto space-y-4">
+        <div className="prep-card p-6">
+          <div className="section-title text-blue-400 mb-4">
+            🤝 Collaborative Mock Interview
+          </div>
+          <p className="text-sm text-muted-foreground mb-5">
+            Practice system design interviews with a partner in real-time. One
+            person acts as the interviewer, the other as the candidate. Share a
+            whiteboard, chat, and score each other's performance.
+          </p>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
+                Your display name
+              </label>
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="e.g. Alice"
+                className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50"
+              />
+            </div>
+            <button
+              onClick={handleCreate}
+              disabled={!name.trim()}
+              className="w-full py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-sm font-semibold transition-all"
+            >
+              Create New Room
+            </button>
+            <div className="relative flex items-center gap-3">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">
+                or join existing
               </span>
-            )}
-          </a>
-        );
-      })()}
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={roomId}
+                onChange={e => setRoomId(e.target.value.toUpperCase())}
+                placeholder="Room code (e.g. AB12CD)"
+                className="flex-1 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 font-mono tracking-widest"
+              />
+              <button
+                onClick={handleJoin}
+                disabled={!name.trim() || !roomId.trim()}
+                className="px-4 py-2 rounded-lg bg-secondary hover:bg-accent border border-border disabled:opacity-40 text-sm font-semibold text-foreground transition-all"
+              >
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="prep-card p-4">
+          <div className="text-xs font-semibold text-muted-foreground mb-2">
+            How it works
+          </div>
+          <div className="space-y-2">
+            {[
+              [
+                "1",
+                "Create a room and share the 6-character code with your partner",
+              ],
+              [
+                "2",
+                "One person picks a system design question; the other answers",
+              ],
+              ["3", "Use the shared whiteboard to draw diagrams together"],
+              ["4", "Chat in real-time and score each other at the end"],
+            ].map(([n, t]) => (
+              <div
+                key={n}
+                className="flex items-start gap-2 text-xs text-muted-foreground"
+              >
+                <span className="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  {n}
+                </span>
+                {t}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

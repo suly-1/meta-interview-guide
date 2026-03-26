@@ -9,7 +9,12 @@ import {
   Code2,
   Layers,
 } from "lucide-react";
-import { getLeaderboard, upsertLeaderboard, removeFromLeaderboard, type LeaderboardEntry } from "@/lib/supabase";
+import {
+  getLeaderboard,
+  upsertLeaderboard,
+  removeFromLeaderboard,
+  type LeaderboardEntry,
+} from "@/lib/supabase";
 import { toast } from "sonner";
 import {
   usePatternRatings,
@@ -31,7 +36,7 @@ function getBadges(
   if (streakDays >= 7) badges.push("On Fire 🔥");
   if (patternsMastered >= 10) badges.push("Half-Way There");
   if (mockSessions >= 5) badges.push("Mock Veteran");
-  if (patternsMastered >= 20) badges.push("IC7 Ready ⭐");
+  if (patternsMastered >= 20) badges.push("L7 Ready ⭐");
   return badges;
 }
 
@@ -270,7 +275,6 @@ export default function Leaderboard() {
                           you
                         </span>
                       )}
-
                     </div>
                     <span className="text-emerald-400 font-semibold text-xs tabular-nums text-right">
                       {entry.patterns_mastered}/20
