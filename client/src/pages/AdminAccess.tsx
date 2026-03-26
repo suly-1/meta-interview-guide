@@ -287,12 +287,12 @@ export default function AdminAccess() {
               viewing the static build (metaguide.blog). Settings cannot be
               saved here — visit{" "}
               <a
-                href="https://metaguide.one/admin/access"
+                href="https://metaguide.blog/#/admin/access"
                 className="underline font-medium hover:text-amber-200"
                 target="_blank"
                 rel="noreferrer"
               >
-                metaguide.one/admin/access
+                metaguide.blog/admin/access
               </a>{" "}
               to manage the live site lock.
             </div>

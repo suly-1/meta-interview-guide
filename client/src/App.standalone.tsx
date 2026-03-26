@@ -15,7 +15,7 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      {/* Admin routes: PIN gate that redirects to metaguide.one on correct PIN */}
+      {/* Admin routes: PIN gate that redirects to metaguide.blog on correct PIN */}
       <Route path="/admin" component={StandaloneAdminGate} />
       <Route path="/admin/:rest*" component={StandaloneAdminGate} />
       {/* Fallback */}

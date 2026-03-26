@@ -6,7 +6,7 @@
  * the admin panel is completely inaccessible to all visitors on the
  * static build at metaguide.blog.
  *
- * Only the live Manus-hosted app (metaguide.one) performs real OAuth
+ * Only the live Manus-hosted app (metaguide.blog) performs real OAuth
  * and grants admin access to the owner.
  */
 
