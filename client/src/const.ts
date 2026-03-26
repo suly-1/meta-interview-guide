@@ -15,15 +15,3 @@ export const getLoginUrl = () => {
 
   return url.toString();
 };
-
-/**
- * Returns a navigation href that works in both server (path) and standalone (hash) modes.
- * In standalone mode (GitHub Pages), all routes use hash routing: #/path
- * Usage: <a href={route("/admin/feedback")}>Admin</a>
- */
-export const route = (path: string): string => {
-  if (import.meta.env.VITE_STANDALONE === "true") {
-    return `#${path}`;
-  }
-  return path;
-};
