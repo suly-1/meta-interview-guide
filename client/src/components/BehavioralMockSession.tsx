@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { BEHAVIORAL_QUESTIONS } from "@/lib/data";
+import { SessionRecorder } from "./InterviewReplayTab";
+import type { ReplaySession } from "./InterviewReplayTab";
 import {
   Brain,
   Play,
@@ -418,6 +420,8 @@ export function BehavioralMockSession() {
   const [scorecard, setScorecard] = useState<XFNScorecardResult | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [icMode, setIcMode] = useState<"IC6" | "IC7">("IC7"); // Difficulty selector
+  const recorderRef = useRef<SessionRecorder | null>(null);
+  const [sessionSaved, setSessionSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Pick 3 random XFN questions once per session
@@ -528,8 +532,24 @@ export function BehavioralMockSession() {
     setScorecard(null);
     setShowHint(false);
     setStarPhase(0);
+    setSessionSaved(false);
+    recorderRef.current = null;
     // Keep icMode as-is so user doesn't need to re-select
   };
+
+  const saveToReplay = useCallback(() => {
+    if (!recorderRef.current || sessionSaved) return;
+    const combinedAnswer = questions.map((q, i) =>
+      `## Question ${i + 1}: ${q.q}\n${answers[i] || "(no answer)"}`
+    ).join("\n\n");
+    const session: ReplaySession = recorderRef.current.finish(combinedAnswer);
+    const existing: ReplaySession[] = JSON.parse(
+      localStorage.getItem("interview-replay-sessions") ?? "[]"
+    );
+    localStorage.setItem("interview-replay-sessions", JSON.stringify([session, ...existing]));
+    setSessionSaved(true);
+    recorderRef.current = null;
+  }, [answers, questions, sessionSaved]);
 
   const historyCount = loadHistory().length;
 
@@ -680,7 +700,15 @@ export function BehavioralMockSession() {
 
         <div className="flex gap-3">
           <button
-            onClick={() => setView("running")}
+            onClick={() => {
+              // Start a new replay recorder for this behavioral session
+              recorderRef.current = new SessionRecorder(
+                `Behavioral Mock — XFN Round`,
+                "behavioral"
+              );
+              recorderRef.current.record("phase_change", { round: 0, question: questions[0]?.q });
+              setView("running");
+            }}
             className="px-5 py-2.5 rounded-lg bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold transition-all"
           >
             🚀 Start Mock Session
@@ -830,6 +858,18 @@ export function BehavioralMockSession() {
         )}
 
         <div className="flex flex-wrap gap-2">
+          {!sessionSaved ? (
+            <button
+              onClick={saveToReplay}
+              className="px-4 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-sm font-semibold transition-all"
+            >
+              🎬 Save to Replay Tab
+            </button>
+          ) : (
+            <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm font-semibold">
+              ✓ Saved to Replay tab
+            </div>
+          )}
           <button
             onClick={resetAll}
             className="px-4 py-2 rounded-lg bg-secondary hover:bg-accent border border-border text-sm font-semibold text-foreground transition-all"

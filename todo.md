@@ -865,3 +865,11 @@
 - [x] Added 3 new tRPC procedures to server/routers/ai.ts: generateReplayCommentary, detectWeakSignals, generateVerdict
 - [x] Wired all 4 tabs into Home.tsx VALID_TABS and tab content switch
 - [x] Added all 4 tabs to TopNav.tsx TABS array (Debug Drill, Replay, Weak Signals, Verdict)
+
+## Follow-up Improvements (Mar 26 2026)
+- [x] Add "Save to Replay Tab" button to Coding Mock session done view
+- [x] Add "Save to Replay Tab" button to Behavioral Mock session done view
+- [x] Add VerdictSummaryCard to Overview tab (IC level + top weak signal widget)
+- [x] Persist Verdict history in localStorage with timestamps (verdict-engine-history)
+- [x] Add IC Level Trajectory chart (recharts LineChart) to VerdictEngineTab
+- [x] Add "View History" toggle button to VerdictEngineTab form view

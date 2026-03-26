@@ -69,6 +69,7 @@ import {
 import { WeakPatternHeatmap } from "@/components/WeakPatternHeatmap";
 import { WeakSpotStudyPlan } from "@/components/WeakSpotStudyPlan";
 import { InterviewReadinessReport } from "@/components/InterviewReadinessReport";
+import { VerdictSummaryCard } from "@/components/VerdictSummaryCard";
 import { OfferProbabilityDashboard } from "@/components/OfferProbabilityDashboard";
 import { DailyWarmupRoutine } from "@/components/DailyWarmupRoutine";
 import { DayBeforeChecklist } from "@/components/DayBeforeChecklist";
@@ -2938,6 +2939,7 @@ export default function OverviewTab({ onTabChange }: OverviewTabProps = {}) {
         ]}
       />
       <InterviewReadinessReport />
+      <VerdictSummaryCard onNavigate={onTabChange} />
       {/* ═══ PROGRESS TRACKER & FAVORITES ══════════════════════════════════ */}
       <InterviewProgressTracker />
       <FavoriteQuestions />

@@ -5,6 +5,15 @@
 
 import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
@@ -561,6 +570,88 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
   );
 }
 
+// ── Verdict History ──────────────────────────────────────────────────────────
+
+interface VerdictHistoryEntry {
+  id: string;
+  timestamp: number;
+  overallScore: number;
+  verdict: VerdictResult["verdict"];
+  icLevel: VerdictResult["icLevel"];
+}
+
+const VERDICT_LABELS: Record<VerdictResult["verdict"], string> = {
+  strong_pass: "Strong Pass",
+  pass: "Pass",
+  borderline: "Borderline",
+  fail: "Fail",
+  strong_fail: "Strong Fail",
+};
+
+function VerdictTrajectoryChart({ history }: { history: VerdictHistoryEntry[] }) {
+  if (history.length < 2) {
+    return (
+      <div className="text-center py-6 text-muted-foreground text-xs">
+        Run at least 2 assessments to see your trajectory.
+      </div>
+    );
+  }
+  const data = history
+    .slice()
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .map((e, i) => ({
+      run: `Run ${i + 1}`,
+      score: e.overallScore,
+      date: new Date(e.timestamp).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      verdict: VERDICT_LABELS[e.verdict],
+      icLevel: e.icLevel,
+    }));
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-semibold text-foreground">Score Trajectory</div>
+      <ResponsiveContainer width="100%" height={140}>
+        <LineChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+          <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+          <Tooltip
+            contentStyle={{
+              background: "hsl(var(--popover))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "8px",
+              fontSize: 11,
+            }}
+            formatter={(value: number, _: string, entry) => [
+              `${value}/100 — ${entry.payload.verdict} (${entry.payload.icLevel})`,
+              "Score",
+            ]}
+          />
+          <ReferenceLine y={60} stroke="#60a5fa" strokeDasharray="4 2" strokeWidth={1} label={{ value: "IC6 Bar", position: "insideTopRight", fontSize: 9, fill: "#60a5fa" }} />
+          <ReferenceLine y={80} stroke="#a78bfa" strokeDasharray="4 2" strokeWidth={1} label={{ value: "IC7 Bar", position: "insideTopRight", fontSize: 9, fill: "#a78bfa" }} />
+          <Line
+            type="monotone"
+            dataKey="score"
+            stroke="#34d399"
+            strokeWidth={2}
+            dot={{ fill: "#34d399", r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      {/* Run list */}
+      <div className="space-y-1">
+        {data.slice().reverse().map((d, i) => (
+          <div key={i} className="flex items-center justify-between text-[10px] text-muted-foreground">
+            <span>{d.date}</span>
+            <span className="font-semibold text-foreground">{d.score}/100</span>
+            <span>{d.verdict}</span>
+            <span className={d.icLevel === "IC7" ? "text-violet-400" : d.icLevel === "IC6" ? "text-blue-400" : ""}>{d.icLevel}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 function initRatings(): DimensionRating[] {
@@ -575,11 +666,22 @@ function initRatings(): DimensionRating[] {
 export default function VerdictEngineTab() {
   const [ratings, setRatings] = useLocalStorage<DimensionRating[]>("verdict-engine-ratings", initRatings());
   const [verdict, setVerdict] = useLocalStorage<VerdictResult | null>("verdict-engine-result", null);
+  const [history, setHistory] = useLocalStorage<VerdictHistoryEntry[]>("verdict-engine-history", []);
   const [selectedCategory, setSelectedCategory] = useState<"all" | RubricDimension["category"]>("all");
+  const [showHistory, setShowHistory] = useState(false);
 
   const generateVerdict = trpc.ai.generateVerdict.useMutation({
     onSuccess: (data) => {
       setVerdict(data.verdict);
+      // Persist this run to history (cap at 30 entries)
+      const entry: VerdictHistoryEntry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        timestamp: Date.now(),
+        overallScore: data.verdict.overallScore,
+        verdict: data.verdict.verdict,
+        icLevel: data.verdict.icLevel,
+      };
+      setHistory((prev) => [entry, ...prev].slice(0, 30));
       toast.success("Verdict generated!");
     },
     onError: () => toast.error("Failed to generate verdict. Please try again."),
@@ -643,10 +745,25 @@ export default function VerdictEngineTab() {
 
   if (verdict) {
     return (
-      <VerdictDisplay
-        result={verdict}
-        onReset={() => { setVerdict(null); setRatings(initRatings()); }}
-      />
+      <div className="space-y-5">
+        <VerdictDisplay
+          result={verdict}
+          onReset={() => { setVerdict(null); setRatings(initRatings()); }}
+        />
+        {/* Trajectory chart shown after verdict */}
+        {history.length >= 1 && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BarChart2 size={14} className="text-blue-500" />
+                <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">IC Level Trajectory</span>
+                <span className="text-xs text-muted-foreground">({history.length} run{history.length !== 1 ? "s" : ""})</span>
+              </div>
+            </div>
+            <VerdictTrajectoryChart history={history} />
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -736,10 +853,33 @@ export default function VerdictEngineTab() {
             <><Gavel size={14} /> Generate IC6 Verdict</>
           )}
         </Button>
+        {history.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowHistory((p) => !p)}
+            className="gap-1.5 text-xs"
+          >
+            <BarChart2 size={13} />
+            {showHistory ? "Hide" : "View"} History ({history.length})
+          </Button>
+        )}
         <p className="text-xs text-gray-400">
           Rate all {RUBRIC.length} dimensions and add evidence for the most accurate verdict.
         </p>
       </div>
+
+      {/* History Panel */}
+      {showHistory && history.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart2 size={14} className="text-blue-500" />
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">IC Level Trajectory</span>
+            <span className="text-xs text-muted-foreground">({history.length} run{history.length !== 1 ? "s" : ""})</span>
+          </div>
+          <VerdictTrajectoryChart history={history} />
+        </div>
+      )}
 
       {/* Legend */}
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 p-4">

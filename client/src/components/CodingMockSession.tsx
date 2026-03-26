@@ -1,5 +1,7 @@
 // CodingMockSession — 45-min coding mock with pattern picker, timed phases, and AI scorecard
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { SessionRecorder } from "./InterviewReplayTab";
+import type { ReplaySession } from "./InterviewReplayTab";
 import { trpc } from "@/lib/trpc";
 import { PATTERNS } from "@/lib/data";
 import {
@@ -473,6 +475,8 @@ export function CodingMockSession() {
   const [showHint, setShowHint] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [icMode, setIcMode] = useState<"IC6" | "IC7">("IC6");
+  const recorderRef = useRef<SessionRecorder | null>(null);
+  const [sessionSaved, setSessionSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const historyCount = loadHistory().length;
 
@@ -527,19 +531,42 @@ export function CodingMockSession() {
     setTimeLeft(CODING_PHASES[0].time);
     setAnswers(Array(CODING_PHASES.length).fill(""));
     setScorecard(null);
+    setSessionSaved(false);
     setRunning(true);
     setShowHint(false);
+    // Start a new replay recorder
+    recorderRef.current = new SessionRecorder(
+      `Coding Mock — ${selectedPattern.name}`,
+      "coding"
+    );
+    recorderRef.current.record("phase_change", { phase: CODING_PHASES[0].phase, step: 0 });
     setView("running");
   };
 
   const nextPhase = () => {
     if (step < CODING_PHASES.length - 1) {
       const next = step + 1;
+      recorderRef.current?.record("answer", { phase: CODING_PHASES[step].phase, answer: answers[step] });
+      recorderRef.current?.record("phase_change", { phase: CODING_PHASES[next].phase, step: next });
       setStep(next);
       setTimeLeft(CODING_PHASES[next].time);
       setShowHint(false);
     }
   };
+
+  const saveToReplay = useCallback(() => {
+    if (!recorderRef.current || sessionSaved) return;
+    const combinedAnswer = CODING_PHASES.map((p, i) =>
+      `## ${p.phase}\n${answers[i] || "(no answer)"}`
+    ).join("\n\n");
+    const session: ReplaySession = recorderRef.current.finish(combinedAnswer);
+    const existing: ReplaySession[] = JSON.parse(
+      localStorage.getItem("interview-replay-sessions") ?? "[]"
+    );
+    localStorage.setItem("interview-replay-sessions", JSON.stringify([session, ...existing]));
+    setSessionSaved(true);
+    recorderRef.current = null;
+  }, [answers, sessionSaved]);
 
   const finishSession = async () => {
     setRunning(false);
@@ -1177,12 +1204,26 @@ export function CodingMockSession() {
               </ul>
             </div>
 
-            <button
-              onClick={() => setView("entry")}
-              className="w-full py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm font-bold hover:bg-blue-500/30 transition-all"
-            >
-              🔄 Start New Session
-            </button>
+            <div className="flex flex-col gap-2">
+              {!sessionSaved ? (
+                <button
+                  onClick={saveToReplay}
+                  className="w-full py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-bold hover:bg-emerald-500/30 transition-all"
+                >
+                  🎬 Save to Replay Tab
+                </button>
+              ) : (
+                <div className="w-full py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm font-semibold text-center">
+                  ✓ Session saved — view it in the Replay tab
+                </div>
+              )}
+              <button
+                onClick={() => setView("entry")}
+                className="w-full py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm font-bold hover:bg-blue-500/30 transition-all"
+              >
+                🔄 Start New Session
+              </button>
+            </div>
           </div>
         )}
       </div>
