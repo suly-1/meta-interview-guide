@@ -1,5 +1,5 @@
 // Design: Bold Engineering Dashboard — dark charcoal, Space Grotesk, blue accent
-import { Sun, Moon, BookOpen } from "lucide-react";
+import { Sun, Moon, BookOpen, Leaf } from "lucide-react";
 import { useStreak } from "@/hooks/useLocalStorage";
 
 interface TopNavProps {
@@ -16,6 +16,21 @@ const TABS = [
   { id: "design",     label: "System Design" },
 ];
 
+// Site identity — injected at build time via VITE_SITE_ID
+const SITE_ID = import.meta.env.VITE_SITE_ID ?? "metaengguide-pro";
+const IS_METAGUIDE_BLOG = SITE_ID === "metaguide-blog";
+
+// metaengguide.pro  → deep blue badge, "MEG" monogram, "IC6/IC7" tag
+// metaguide.blog    → warm green badge, leaf icon, "L4–L7" tag
+const LOGO_BG    = IS_METAGUIDE_BLOG ? "bg-emerald-600"  : "bg-blue-500";
+const LOGO_ICON  = IS_METAGUIDE_BLOG ? <Leaf size={14} className="text-white" /> : <BookOpen size={14} className="text-white" />;
+const WORDMARK   = IS_METAGUIDE_BLOG ? "Staff Eng Prep"  : "Meta Prep";
+const BADGE_TEXT = IS_METAGUIDE_BLOG ? "L4–L7"           : "IC6/IC7";
+const BADGE_CLS  = IS_METAGUIDE_BLOG ? "badge-green"     : "badge-blue";
+const ACTIVE_TAB_CLS = IS_METAGUIDE_BLOG
+  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+  : "bg-blue-500/15 text-blue-400 border border-blue-500/30";
+
 export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark }: TopNavProps) {
   const streak = useStreak();
 
@@ -25,13 +40,13 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
         <div className="flex items-center justify-between h-14 gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center">
-              <BookOpen size={14} className="text-white" />
+            <div className={`w-7 h-7 rounded-lg ${LOGO_BG} flex items-center justify-center`}>
+              {LOGO_ICON}
             </div>
             <span className="font-bold text-sm text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Meta Prep
+              {WORDMARK}
             </span>
-            <span className="badge badge-blue hidden sm:inline-flex">IC6/IC7</span>
+            <span className={`badge ${BADGE_CLS} hidden sm:inline-flex`}>{BADGE_TEXT}</span>
           </div>
 
           {/* Tabs — desktop */}
@@ -42,7 +57,7 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
                 onClick={() => onTabChange(tab.id)}
                 className={`px-3.5 py-1.5 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                    ? ACTIVE_TAB_CLS
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
               >
@@ -81,7 +96,7 @@ export default function TopNav({ activeTab, onTabChange, darkMode, onToggleDark 
               onClick={() => onTabChange(tab.id)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all ${
                 activeTab === tab.id
-                  ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                  ? ACTIVE_TAB_CLS
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >

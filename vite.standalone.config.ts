@@ -32,6 +32,9 @@ export default defineConfig({
     "import.meta.env.VITE_STANDALONE": JSON.stringify("true"),
     // SHA-256 hash of ADMIN_PIN — safe to embed (one-way hash, raw PIN never exposed)
     __ADMIN_PIN_HASH__: JSON.stringify(computeAdminPinHash()),
+    // Site identity — read by TopNav/index.css to apply site-specific branding
+    // Override at build time: VITE_SITE_ID=metaguide-blog pnpm deploy:github-pages
+    "import.meta.env.VITE_SITE_ID": JSON.stringify(process.env.VITE_SITE_ID ?? "metaengguide-pro"),
   },
   resolve: {
     alias: {

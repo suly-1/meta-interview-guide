@@ -118,6 +118,56 @@
   --sidebar-ring: oklch(0.62 0.19 258);
 }
 
+/* ── metaguide.blog identity: warm green + amber ─────────────────────────── */
+/* Applied when body has data-site="metaguide-blog" (set in App.tsx at runtime) */
+body[data-site="metaguide-blog"] {
+  /* Light theme overrides */
+  --background: oklch(0.97 0.008 155);
+  --foreground: oklch(0.15 0.025 155);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.025 155);
+  --primary: oklch(0.45 0.14 155);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.92 0.012 155);
+  --secondary-foreground: oklch(0.3 0.02 155);
+  --muted: oklch(0.92 0.012 155);
+  --muted-foreground: oklch(0.5 0.015 155);
+  --accent: oklch(0.88 0.018 155);
+  --accent-foreground: oklch(0.15 0.025 155);
+  --border: oklch(0.85 0.012 155);
+  --input: oklch(0.85 0.012 155);
+  --ring: oklch(0.45 0.14 155);
+  --chart-1: oklch(0.45 0.14 155);
+  --chart-2: oklch(0.65 0.18 75);
+  --chart-3: oklch(0.7 0.17 55);
+  --sidebar: oklch(0.94 0.012 155);
+  --sidebar-primary: oklch(0.45 0.14 155);
+  --sidebar-ring: oklch(0.45 0.14 155);
+}
+body[data-site="metaguide-blog"].dark {
+  /* Dark theme overrides */
+  --background: oklch(0.12 0.02 155);
+  --foreground: oklch(0.92 0.006 155);
+  --card: oklch(0.16 0.022 155);
+  --card-foreground: oklch(0.92 0.006 155);
+  --primary: oklch(0.55 0.16 155);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.21 0.018 155);
+  --secondary-foreground: oklch(0.75 0.01 155);
+  --muted: oklch(0.21 0.018 155);
+  --muted-foreground: oklch(0.57 0.014 155);
+  --accent: oklch(0.25 0.022 155);
+  --accent-foreground: oklch(0.92 0.006 155);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.55 0.16 155);
+  --chart-1: oklch(0.55 0.16 155);
+  --chart-2: oklch(0.68 0.18 75);
+  --sidebar: oklch(0.16 0.022 155);
+  --sidebar-primary: oklch(0.55 0.16 155);
+  --sidebar-ring: oklch(0.55 0.16 155);
+}
+
 @layer base {
   * { @apply border-border outline-ring/50; }
   body {
