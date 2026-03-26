@@ -932,3 +932,10 @@
 - [x] Build CandidateReportArchive from scratch
 - [x] Build YandexAlgorithmTrainer from scratch
 - [x] Build InstantVerdictCard from scratch
+
+## Yandex Trainer Expansion (Mar 2026)
+- [x] Add Range Sum Query (Fenwick Tree / BIT) — D difficulty
+- [x] Add Range Minimum Query with Point Updates (Segment Tree) — D difficulty
+- [x] Add Longest Common Substring (Suffix Array + LCP) — E difficulty
+- [x] Add Count Distinct in Range (Offline + BIT) — E difficulty
+- [x] Add K-th Smallest in BST Range (Augmented BST / Merge Sort Tree) — D difficulty

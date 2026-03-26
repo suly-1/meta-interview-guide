@@ -298,6 +298,319 @@ s1 and s2 consist of lowercase English letters`,
     keyInsight: "Forward pass finds a valid window end, backward pass shrinks it to minimal start. Advance start by 1 and repeat. O(n*m) time.",
     metaRelevance: "Tests two-pointer mastery with subsequence (not substring) constraint. Common in Meta E5 follow-up rounds.",
   },
+  // ── NEW: Fenwick Tree, Segment Tree, Suffix Array, Offline BIT, Augmented BST ──
+  {
+    id: "range-sum-fenwick",
+    title: "Range Sum Query with Point Updates (Fenwick Tree)",
+    difficulty: "D",
+    timeLimit: 1800,
+    memoryLimit: "256 MB",
+    tags: ["Fenwick Tree", "BIT", "Prefix Sum", "Range Query"],
+    statement: `Design a data structure that supports two operations on an integer array nums:
+
+1. update(i, delta): Add delta to nums[i].
+2. sumRange(left, right): Return the sum of nums[left..right] inclusive.
+
+Both operations must run in O(log n) time. Implement the NumArray class:
+- NumArray(int[] nums): Initializes the object with nums.
+- void update(int i, int delta): Adds delta to nums[i].
+- int sumRange(int left, int right): Returns sum of nums[left..right].`,
+    constraints: `1 ≤ nums.length ≤ 3 × 10⁴
+-100 ≤ nums[i] ≤ 100
+0 ≤ i < nums.length
+-100 ≤ delta ≤ 100
+0 ≤ left ≤ right < nums.length
+At most 3 × 10⁴ calls to update and sumRange`,
+    examples: [
+      {
+        input: "nums = [1,3,5], sumRange(0,2)",
+        output: "9",
+        explanation: "No updates. Sum = 1+3+5 = 9.",
+      },
+      {
+        input: "nums = [1,3,5], update(1,2), sumRange(0,2)",
+        output: "11",
+        explanation: "After update(1,2): nums[1] becomes 3+2=5. Sum = 1+5+5 = 11.",
+      },
+    ],
+    solution: `class NumArray:
+    def __init__(self, nums):
+        n = len(nums)
+        self.n = n
+        self.bit = [0] * (n + 1)  # 1-indexed
+        for i, v in enumerate(nums):
+            self._update(i + 1, v)  # build BIT
+    
+    def _update(self, i, delta):
+        while i <= self.n:
+            self.bit[i] += delta
+            i += i & (-i)  # move to parent
+    
+    def _prefix(self, i):
+        s = 0
+        while i > 0:
+            s += self.bit[i]
+            i -= i & (-i)  # move to responsible ancestor
+        return s
+    
+    def update(self, i, delta):
+        self._update(i + 1, delta)  # convert to 1-indexed
+    
+    def sumRange(self, left, right):
+        return self._prefix(right + 1) - self._prefix(left)`,
+    keyInsight: "BIT stores partial sums. i & (-i) isolates the lowest set bit — it's the 'responsibility range' of index i. Update propagates up; prefix query propagates down. O(log n) both ways.",
+    metaRelevance: "Fenwick trees appear in Meta E6 interviews as the 'optimal' follow-up to naive prefix sum when updates are required. Interviewers expect you to derive the bit manipulation from first principles.",
+  },
+  {
+    id: "range-min-segment-tree",
+    title: "Range Minimum Query with Point Updates (Segment Tree)",
+    difficulty: "D",
+    timeLimit: 1800,
+    memoryLimit: "256 MB",
+    tags: ["Segment Tree", "Range Query", "Point Update"],
+    statement: `Design a data structure for an integer array nums that supports:
+
+1. update(i, val): Set nums[i] = val.
+2. queryMin(left, right): Return the minimum of nums[left..right].
+
+Both operations must run in O(log n). Implement the SegTree class:
+- SegTree(int[] nums): Builds the segment tree.
+- void update(int i, int val): Updates index i to val.
+- int queryMin(int left, int right): Returns minimum in range.`,
+    constraints: `1 ≤ nums.length ≤ 10⁵
+-10⁹ ≤ nums[i] ≤ 10⁹
+0 ≤ i < nums.length
+0 ≤ left ≤ right < nums.length
+At most 10⁵ calls to update and queryMin`,
+    examples: [
+      {
+        input: "nums = [1,3,2,7,9,11], queryMin(1,5)",
+        output: "2",
+        explanation: "Min of [3,2,7,9,11] = 2.",
+      },
+      {
+        input: "nums = [1,3,2,7,9,11], update(2,6), queryMin(1,5)",
+        output: "3",
+        explanation: "After update(2,6): nums=[1,3,6,7,9,11]. Min of [3,6,7,9,11] = 3.",
+      },
+    ],
+    solution: `class SegTree:
+    def __init__(self, nums):
+        n = len(nums)
+        self.n = n
+        self.tree = [float('inf')] * (4 * n)
+        self._build(nums, 0, 0, n - 1)
+    
+    def _build(self, nums, node, start, end):
+        if start == end:
+            self.tree[node] = nums[start]
+        else:
+            mid = (start + end) // 2
+            self._build(nums, 2*node+1, start, mid)
+            self._build(nums, 2*node+2, mid+1, end)
+            self.tree[node] = min(self.tree[2*node+1], self.tree[2*node+2])
+    
+    def update(self, i, val, node=0, start=0, end=None):
+        if end is None: end = self.n - 1
+        if start == end:
+            self.tree[node] = val
+        else:
+            mid = (start + end) // 2
+            if i <= mid:
+                self.update(i, val, 2*node+1, start, mid)
+            else:
+                self.update(i, val, 2*node+2, mid+1, end)
+            self.tree[node] = min(self.tree[2*node+1], self.tree[2*node+2])
+    
+    def queryMin(self, l, r, node=0, start=0, end=None):
+        if end is None: end = self.n - 1
+        if r < start or end < l: return float('inf')  # out of range
+        if l <= start and end <= r: return self.tree[node]  # fully covered
+        mid = (start + end) // 2
+        return min(
+            self.queryMin(l, r, 2*node+1, start, mid),
+            self.queryMin(l, r, 2*node+2, mid+1, end)
+        )`,
+    keyInsight: "Segment tree stores aggregate per range. Build bottom-up. Query: skip out-of-range, return if fully covered, else recurse both halves. Update: recurse to leaf, propagate up. O(log n) both.",
+    metaRelevance: "Segment trees are the canonical answer to 'range query + point update' in Meta E6/E7 interviews. Interviewers test whether you can implement it from scratch in 25 minutes.",
+  },
+  {
+    id: "longest-common-substring-suffix-array",
+    title: "Longest Common Substring (Suffix Array + LCP)",
+    difficulty: "E",
+    timeLimit: 2400,
+    memoryLimit: "256 MB",
+    tags: ["Suffix Array", "LCP Array", "Kasai's Algorithm", "String"],
+    statement: `Given two strings s and t, return the length of their longest common substring.
+
+A substring is a contiguous sequence of characters within a string.
+
+You must solve this in O((n+m) log(n+m)) or better using a suffix array approach. The naive O(n²) DP solution is not accepted (TLE for large inputs).`,
+    constraints: `1 ≤ s.length, t.length ≤ 10⁵
+s and t consist of lowercase English letters`,
+    examples: [
+      { input: 's = "abcde", t = "abfce"', output: "2", explanation: '"ab" and "ce" are both common substrings of length 2.' },
+      { input: 's = "zxabcdezy", t = "yzabcdezx"', output: "6", explanation: '"abcdez" is the longest common substring.' },
+    ],
+    solution: `def longestCommonSubstring(s, t):
+    # Concatenate with sentinel characters
+    # s$t# where $ < # < 'a' prevents cross-boundary matches
+    combined = s + '$' + t + '#'
+    n = len(combined)
+    ns = len(s)
+    
+    # Build suffix array (simplified O(n log²n) for clarity)
+    sa = sorted(range(n), key=lambda i: combined[i:])
+    
+    # Build LCP array using Kasai's O(n) algorithm
+    rank = [0] * n
+    for i, s_idx in enumerate(sa):
+        rank[s_idx] = i
+    
+    lcp = [0] * n
+    h = 0
+    for i in range(n):
+        if rank[i] > 0:
+            j = sa[rank[i] - 1]
+            while i + h < n and j + h < n and combined[i+h] == combined[j+h]:
+                h += 1
+            lcp[rank[i]] = h
+            if h > 0: h -= 1
+    
+    # Max LCP between adjacent SA entries from different strings
+    best = 0
+    for i in range(1, n):
+        a, b = sa[i-1], sa[i]
+        from_s_a = a < ns
+        from_s_b = b < ns
+        if from_s_a != from_s_b:  # different strings
+            best = max(best, lcp[i])
+    return best`,
+    keyInsight: "Concatenate s+'$'+t+'#', build suffix array + LCP (Kasai). The answer is max LCP[i] where SA[i-1] and SA[i] come from different strings. Sentinel chars prevent cross-boundary matches.",
+    metaRelevance: "Suffix array + LCP is the gold standard for string problems at Meta E7. Tests whether you can implement Kasai's O(n) LCP construction and understand the sentinel trick.",
+  },
+  {
+    id: "count-distinct-offline-bit",
+    title: "Count Distinct Values in Ranges (Offline + BIT)",
+    difficulty: "E",
+    timeLimit: 2400,
+    memoryLimit: "256 MB",
+    tags: ["Fenwick Tree", "Offline Queries", "Sweep Line", "Coordinate Compression"],
+    statement: `Given an integer array nums and q queries, each query (l, r) asks: how many distinct values are in nums[l..r]?
+
+Process all queries offline to achieve O((n + q) log n) time.
+
+Return an array of answers for each query in the original order.`,
+    constraints: `1 ≤ nums.length ≤ 10⁵
+1 ≤ q ≤ 10⁵
+0 ≤ l ≤ r < nums.length
+1 ≤ nums[i] ≤ 10⁵`,
+    examples: [
+      {
+        input: "nums = [1,2,1,3,2], queries = [(0,4),(0,2),(1,3)]",
+        output: "[3, 2, 3]",
+        explanation: "Range [0,4]={1,2,3}=3 distinct. Range [0,2]={1,2}=2. Range [1,3]={2,1,3}=3.",
+      },
+    ],
+    solution: `def countDistinct(nums, queries):
+    n = len(nums)
+    
+    # BIT for point update, prefix sum query
+    bit = [0] * (n + 1)
+    def update(i, delta):
+        i += 1  # 1-indexed
+        while i <= n:
+            bit[i] += delta
+            i += i & (-i)
+    def prefix(i):
+        i += 1
+        s = 0
+        while i > 0:
+            s += bit[i]
+            i -= i & (-i)
+        return s
+    def query(l, r):
+        return prefix(r) - (prefix(l-1) if l > 0 else 0)
+    
+    # Sort queries by right endpoint
+    indexed_queries = sorted(enumerate(queries), key=lambda x: x[1][1])
+    
+    last_occ = {}  # last_occurrence[v] = last index where value v appeared
+    answers = [0] * len(queries)
+    j = 0  # pointer into nums
+    
+    for qi, (l, r) in indexed_queries:
+        while j <= r:
+            v = nums[j]
+            if v in last_occ:
+                update(last_occ[v], -1)  # remove old occurrence
+            update(j, +1)               # add new occurrence
+            last_occ[v] = j
+            j += 1
+        answers[qi] = query(l, r)
+    
+    return answers`,
+    keyInsight: "Sort queries by right endpoint. Sweep right; for each value, remove its previous occurrence from BIT and add current position. Query BIT for [l,r] counts only the rightmost occurrence of each distinct value in the range.",
+    metaRelevance: "Offline query processing + BIT is a canonical Meta E7 pattern. Tests whether you can combine sweep line, lazy deletion, and Fenwick trees — a combination that appears in real Meta infrastructure problems.",
+  },
+  {
+    id: "kth-smallest-bst-range",
+    title: "K-th Smallest in BST within Range",
+    difficulty: "D",
+    timeLimit: 1800,
+    memoryLimit: "256 MB",
+    tags: ["BST", "Order Statistics", "Augmented Tree", "In-order Traversal"],
+    statement: `Given the root of a Binary Search Tree (BST) and two integers lo and hi, find the k-th smallest value among all nodes with values in the inclusive range [lo, hi].
+
+If fewer than k nodes exist in the range, return -1.
+
+You must solve this in O(h + k) time where h is the height of the BST, without collecting all range elements first.`,
+    constraints: `The number of nodes in the tree is in the range [1, 10⁴].
+1 ≤ Node.val ≤ 10⁵
+1 ≤ lo ≤ hi ≤ 10⁵
+1 ≤ k ≤ 10⁴`,
+    examples: [
+      {
+        input: "BST: [5,3,7,2,4,6,8], lo=3, hi=7, k=2",
+        output: "4",
+        explanation: "Nodes in [3,7]: {3,4,5,6,7}. 2nd smallest = 4.",
+      },
+      {
+        input: "BST: [5,3,7,2,4,6,8], lo=6, hi=8, k=4",
+        output: "-1",
+        explanation: "Only 3 nodes in [6,8]: {6,7,8}. k=4 exceeds count.",
+      },
+    ],
+    solution: `def kthSmallestInRange(root, lo, hi, k):
+    # Generator-based in-order with BST pruning
+    def inorder(node):
+        if not node:
+            return
+        # Prune left if node.val <= lo (no smaller valid nodes there)
+        if node.val > lo:
+            yield from inorder(node.left)
+        if lo <= node.val <= hi:
+            yield node.val
+        # Prune right if node.val >= hi
+        if node.val < hi:
+            yield from inorder(node.right)
+    
+    count = 0
+    for val in inorder(root):
+        count += 1
+        if count == k:
+            return val
+    return -1
+
+# Augmented BST approach (O(h) per query after O(n) build):
+# Each node stores left_size = count of nodes in left subtree.
+# rank_of_lo = count_less_than(root, lo)
+# total_in_range = count_leq(root, hi) - rank_of_lo
+# if k > total_in_range: return -1
+# else: find (rank_of_lo + k)-th smallest in full BST`,
+    keyInsight: "Generator-based in-order with BST pruning: skip left subtree if node.val <= lo, skip right if node.val >= hi. For O(h) per query: augment each node with subtree count, use rank arithmetic.",
+    metaRelevance: "Order-statistics trees appear in Meta E6/E7 system design follow-ups (e.g., 'find the median of a stream in a range'). Tests BST augmentation — a pattern Meta interviewers use to distinguish IC6 from IC7.",
+  },
 ];
 
 const DIFF_COLORS: Record<string, string> = {
