@@ -124,33 +124,21 @@ export function PeerBenchmark() {
   return (
     <div className="prep-card p-5 space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <Users size={16} className="text-purple-400" />
           <span className="section-title text-sm mb-0 pb-0 border-0">
             Peer Benchmark
           </span>
         </div>
-        <button
-          onClick={() => setIsOpen(o => !o)}
-          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-        >
-          {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-          {isOpen ? "Collapse" : "Configure"}
-        </button>
-      </div>
-
-      {/* Config */}
-      {isOpen && (
-        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4 space-y-3">
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">
-              Target Level
-            </label>
+        <div className="flex items-center gap-3 ml-auto">
+          {/* Always-visible L-level selector */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Level:</span>
             <select
               value={targetLevel}
               onChange={e => setTargetLevel(e.target.value)}
-              className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-foreground"
+              className="text-xs rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500"
             >
               {["L4", "L5", "L6", "L7"].map(l => (
                 <option key={l} value={l}>
@@ -159,7 +147,19 @@ export function PeerBenchmark() {
               ))}
             </select>
           </div>
+          <button
+            onClick={() => setIsOpen(o => !o)}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            {isOpen ? "Collapse" : "More options"}
+          </button>
+        </div>
+      </div>
 
+      {/* Config */}
+      {isOpen && (
+        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4 space-y-3">
           {!latestScores && (
             <div className="space-y-2">
               <p className="text-xs text-amber-400">

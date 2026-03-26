@@ -1053,3 +1053,10 @@
 - [x] Live Interview Simulation with Voice — TTS interviewer speaks questions, Whisper transcribes user answers, AI scores spoken response
 - [x] Meta-Specific Question Bank — 200+ verified Meta questions tagged by round/L-level/team/recency/frequency, links to simulators
 - [x] Interview Readiness Certificate — shareable PDF + link when combined mock score ≥4.0/5 with Strong Hire verdict
+
+## Fix + New Features — Round 38
+
+- [ ] Force fresh deploy to GitHub Pages with all Round 37 features included
+- [ ] Add L-level selector to Peer Benchmark Mode (filter percentile by L4/L5/L6/L7)
+- [ ] Add "Practice This Question" button to Meta Question Bank (links to relevant simulator)
+- [ ] Add streak-based unlock to Readiness Certificate (require 5-day streak + Strong Hire verdict)

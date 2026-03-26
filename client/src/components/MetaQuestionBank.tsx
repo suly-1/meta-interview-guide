@@ -1039,8 +1039,9 @@ export function MetaQuestionBank() {
                 </div>
                 <div className="flex gap-2 pt-1">
                   <a
-                    href={`/?tab=${q.roundType === "coding" ? "coding" : q.roundType === "sysdesign" ? "design" : "behavioral"}`}
+                    href={`/?tab=${q.roundType === "coding" ? "coding" : q.roundType === "sysdesign" ? "design" : "behavioral"}&q=${encodeURIComponent(q.question)}`}
                     className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center gap-1 transition-colors"
+                    title={`Open in ${q.roundType === "coding" ? "Coding" : q.roundType === "sysdesign" ? "System Design" : "Behavioral"} simulator with this question pre-filled`}
                   >
                     <ExternalLink size={11} /> Practice Now
                   </a>

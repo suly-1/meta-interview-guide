@@ -4,9 +4,10 @@
  * a combined mock score of ≥ 4.0/5 with a "Strong Hire" verdict.
  * Opens a print-ready certificate in a new tab.
  */
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useStreak } from "@/hooks/useLocalStorage";
 import {
   Award,
   CheckCircle2,
@@ -190,6 +191,8 @@ function generateCertificateHTML(params: {
 </html>`;
 }
 
+const STREAK_REQUIRED = 5;
+
 // ── component ─────────────────────────────────────────────────────────────────
 
 export function ReadinessCertificate() {
@@ -198,8 +201,11 @@ export function ReadinessCertificate() {
   const [certGenerated, setCertGenerated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const streak = useStreak();
+  const streakMet = streak.currentStreak >= STREAK_REQUIRED;
+
   const bestSession = loadBestSession();
-  const eligible = isEligible(bestSession);
+  const eligible = isEligible(bestSession) && streakMet;
 
   const handleGenerate = () => {
     if (!bestSession) return;
@@ -286,9 +292,39 @@ export function ReadinessCertificate() {
               style={{ width: `${progress}%` }}
             />
           </div>
+          {/* Streak requirement indicator */}
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex gap-0.5">
+              {Array.from({ length: STREAK_REQUIRED }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-sm text-center text-[9px] leading-4 font-bold ${
+                    i < streak.currentStreak
+                      ? "bg-amber-500 text-white"
+                      : "bg-slate-700 text-slate-500"
+                  }`}
+                >
+                  🔥
+                </div>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {streakMet ? (
+                <span className="text-amber-400 font-semibold">
+                  5-day streak achieved ✓
+                </span>
+              ) : (
+                <>
+                  {streak.currentStreak}/{STREAK_REQUIRED} day streak — visit
+                  daily to unlock
+                </>
+              )}
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground">
-            Complete a Full Mock Day with ≥ 4.0/5 overall and a "Strong Hire"
-            verdict to unlock your certificate.
+            Complete a Full Mock Day with ≥ 4.0/5 overall, a "Strong Hire"
+            verdict, <strong>and a 5-day practice streak</strong> to unlock your
+            certificate.
           </p>
         </div>
       )}
@@ -389,11 +425,11 @@ export function ReadinessCertificate() {
                 Certificate Locked
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Complete a Full Mock Day with ≥ 4.0/5 overall score and a
-                "Strong Hire" verdict to unlock your personalized readiness
-                certificate.
+                Complete a Full Mock Day with ≥ 4.0/5 overall score, a "Strong
+                Hire" verdict, and a 5-day consecutive practice streak to unlock
+                your personalized readiness certificate.
               </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="rounded-lg bg-slate-900/60 border border-slate-700/50 p-2">
                   <div className="text-muted-foreground mb-0.5">
                     Required Score
@@ -405,6 +441,14 @@ export function ReadinessCertificate() {
                     Required Verdict
                   </div>
                   <div className="font-bold text-emerald-400">Strong Hire</div>
+                </div>
+                <div className="rounded-lg bg-slate-900/60 border border-slate-700/50 p-2">
+                  <div className="text-muted-foreground mb-0.5">
+                    Practice Streak
+                  </div>
+                  <div className="font-bold text-amber-400">
+                    {streak.currentStreak}/{STREAK_REQUIRED} days 🔥
+                  </div>
                 </div>
               </div>
             </div>

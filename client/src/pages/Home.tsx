@@ -39,7 +39,19 @@ function triggerConfetti() {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    // Support deep-linking from MetaQuestionBank via ?tab= URL param
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("tab");
+    if (
+      t === "coding" ||
+      t === "behavioral" ||
+      t === "design" ||
+      t === "overview"
+    )
+      return t;
+    return "overview";
+  });
   const [darkMode, setDarkMode] = useState(true);
   const [onboardingDismissed, setOnboardingDismissed] =
     useOnboardingDismissed();
@@ -53,6 +65,18 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
+
+  // Store ?q= URL param in sessionStorage so simulators can pre-fill the question
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q) {
+      sessionStorage.setItem("meta_practice_question", decodeURIComponent(q));
+      // Clean the URL without reloading
+      const clean = window.location.pathname;
+      window.history.replaceState({}, "", clean);
+    }
+  }, []);
 
   // Confetti check
   useEffect(() => {

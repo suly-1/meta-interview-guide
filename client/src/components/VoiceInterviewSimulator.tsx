@@ -4,7 +4,7 @@
  * - User speaks their answer (MediaRecorder → Blob → upload → Whisper transcription)
  * - AI scores the transcribed answer via voiceInterviewScore procedure
  */
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
@@ -143,13 +143,32 @@ export function VoiceInterviewSimulator() {
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  // Custom question override from deep-link (MetaQuestionBank "Practice Now")
+  const [customQuestion, setCustomQuestion] = useState<string | null>(null);
+
+  // Auto-populate question from deep-link
+  useEffect(() => {
+    const q = sessionStorage.getItem("meta_practice_question");
+    if (q) {
+      setCustomQuestion(q);
+      setIsOpen(true);
+      sessionStorage.removeItem("meta_practice_question");
+    }
+  }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const questions = VOICE_QUESTIONS[category] ?? ALL_QUESTIONS;
-  const currentQ = questions[selectedIdx % questions.length];
+  const baseQ = questions[selectedIdx % questions.length];
+  // If a question was passed via deep-link, override the current question
+  const currentQ = customQuestion
+    ? {
+        question: customQuestion,
+        roundType: category as "behavioral" | "xfn" | "sysdesign" | "coding",
+      }
+    : baseQ;
 
   const transcribeMutation = trpc.ai.transcribeAndScore.useMutation({
     onSuccess: data => {

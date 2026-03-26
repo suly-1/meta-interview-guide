@@ -4,7 +4,7 @@
  * "This reads as L5. To reach L6 you need X. To reach L7 you need Y."
  * Works for system design, behavioral, and coding answers.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
@@ -108,6 +108,16 @@ export function ICLevelSignalCalibrator() {
   const [answerType, setAnswerType] = useState<AnswerType>("system_design");
   const [targetLevel, setTargetLevel] = useState<TargetLevel>("L6");
   const [questionTitle, setQuestionTitle] = useState("");
+
+  // Auto-populate question from deep-link (MetaQuestionBank "Practice Now")
+  useEffect(() => {
+    const q = sessionStorage.getItem("meta_practice_question");
+    if (q) {
+      setQuestionTitle(q);
+      setExpanded(true);
+      sessionStorage.removeItem("meta_practice_question");
+    }
+  }, []);
   const [candidateAnswer, setCandidateAnswer] = useState("");
   const [result, setResult] = useState<CalibrationResult | null>(null);
   const [showRewrite, setShowRewrite] = useState(false);
