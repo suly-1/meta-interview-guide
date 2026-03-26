@@ -939,3 +939,9 @@
 - [x] Add Longest Common Substring (Suffix Array + LCP) — E difficulty
 - [x] Add Count Distinct in Range (Offline + BIT) — E difficulty
 - [x] Add K-th Smallest in BST Range (Augmented BST / Merge Sort Tree) — D difficulty
+
+## Deployment Fix + Yandex Trainer Follow-ups (Mar 2026)
+- [ ] Fix deployment gap: ensure metaguide.one reflects latest checkpoint after publish
+- [ ] Add hint unlock threshold toggle (configurable: 25%, 50%, 75%, or timer-end)
+- [ ] Add per-problem attempt history with pass/fail streak badges in localStorage
+- [ ] Add leaderboard mode with personal best solve times per problem

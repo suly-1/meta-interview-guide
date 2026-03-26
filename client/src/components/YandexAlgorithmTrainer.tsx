@@ -19,6 +19,11 @@ import {
   Trophy,
   Flame,
   Lock,
+  Unlock,
+  Settings,
+  Medal,
+  BarChart2,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +40,32 @@ interface YandexProblem {
   solution: string; // hidden until reveal
   keyInsight: string;
   metaRelevance: string;
+}
+
+// Enhancement types and constants
+type HintThreshold = 25 | 50 | 75 | 100;
+const HINT_THRESHOLD_LABELS: Record<HintThreshold, string> = {
+  25: "25% elapsed",
+  50: "50% elapsed",
+  75: "75% elapsed",
+  100: "timer ends",
+};
+const LS_COMPLETED = "yandex-trainer-completed";
+const LS_HISTORY = "yandex-trainer-history-v2";
+const LS_HINT_THRESHOLD = "yandex-trainer-hint-threshold";
+interface ProblemAttempt { verdict: "pass" | "fail"; elapsed: number; ts: number; }
+interface ProblemHistory { attempts: ProblemAttempt[]; bestTime: number | null; }
+type HistoryMap = Record<string, ProblemHistory>;
+function loadHistory(): HistoryMap {
+  try { return JSON.parse(localStorage.getItem(LS_HISTORY) || "{}"); } catch { return {}; }
+}
+function saveHistory(h: HistoryMap) { localStorage.setItem(LS_HISTORY, JSON.stringify(h)); }
+function loadHintThreshold(): HintThreshold {
+  try {
+    const v = Number(localStorage.getItem(LS_HINT_THRESHOLD));
+    if ([25, 50, 75, 100].includes(v)) return v as HintThreshold;
+  } catch {}
+  return 100;
 }
 
 const PROBLEMS: YandexProblem[] = [
@@ -634,12 +665,12 @@ export default function YandexAlgorithmTrainer() {
   const [showExamples, setShowExamples] = useState(true);
   const [verdict, setVerdict] = useState<"pass" | "fail" | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem("yandex-trainer-completed") || "[]"));
-    } catch {
-      return new Set();
-    }
+    try { return new Set(JSON.parse(localStorage.getItem(LS_COMPLETED) || "[]")); } catch { return new Set(); }
   });
+  const [history, setHistory] = useState<HistoryMap>(() => loadHistory());
+  const [hintThreshold, setHintThreshold] = useState<HintThreshold>(() => loadHintThreshold());
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const problem = PROBLEMS[problemIdx];
@@ -686,14 +717,27 @@ export default function YandexAlgorithmTrainer() {
     const newCompleted = new Set(completedIds);
     newCompleted.add(problem.id);
     setCompletedIds(newCompleted);
-    localStorage.setItem("yandex-trainer-completed", JSON.stringify([...newCompleted]));
-    toast.success(`✓ Solved in ${formatTime(elapsed)}!`);
+    localStorage.setItem(LS_COMPLETED, JSON.stringify([...newCompleted]));
+    const newHistory = { ...history };
+    const prev = newHistory[problem.id] ?? { attempts: [], bestTime: null };
+    const attempt: ProblemAttempt = { verdict: "pass", elapsed, ts: Date.now() };
+    const newBest = prev.bestTime === null ? elapsed : Math.min(prev.bestTime, elapsed);
+    newHistory[problem.id] = { attempts: [...prev.attempts, attempt], bestTime: newBest };
+    setHistory(newHistory);
+    saveHistory(newHistory);
+    toast.success(`Solved in ${formatTime(elapsed)}!${newBest === elapsed ? " New personal best!" : ""}`);
   };
 
   const handleFail = () => {
     stopTimer();
     setVerdict("fail");
     setShowSolution(true);
+    const newHistory = { ...history };
+    const prev = newHistory[problem.id] ?? { attempts: [], bestTime: null };
+    const attempt: ProblemAttempt = { verdict: "fail", elapsed, ts: Date.now() };
+    newHistory[problem.id] = { attempts: [...prev.attempts, attempt], bestTime: prev.bestTime };
+    setHistory(newHistory);
+    saveHistory(newHistory);
     toast.error("Study the solution carefully.");
   };
 
@@ -716,62 +760,154 @@ export default function YandexAlgorithmTrainer() {
     : remaining <= 300
     ? "text-amber-400"
     : "text-emerald-400";
+  const hintUnlocked = !timerRunning || pct >= hintThreshold;
+  const getProblemStreak = (id: string): number => {
+    const attempts = history[id]?.attempts ?? [];
+    let streak = 0;
+    for (let i = attempts.length - 1; i >= 0; i--) {
+      if (attempts[i].verdict === "pass") streak++;
+      else break;
+    }
+    return streak;
+  };
+  const getProblemBestTime = (id: string): number | null => history[id]?.bestTime ?? null;
+  const handleHintThresholdChange = (t: HintThreshold) => {
+    setHintThreshold(t);
+    localStorage.setItem(LS_HINT_THRESHOLD, String(t));
+    toast.success("Hint threshold updated.");
+  };
 
   if (!active) {
+    if (showLeaderboard) {
+      const ranked = PROBLEMS
+        .map((p) => ({ ...p, bestTime: getProblemBestTime(p.id), streak: getProblemStreak(p.id), attempts: history[p.id]?.attempts.length ?? 0 }))
+        .filter((p) => p.bestTime !== null)
+        .sort((a, b) => (a.bestTime ?? Infinity) - (b.bestTime ?? Infinity));
+      const attempted = PROBLEMS.filter((p) => (history[p.id]?.attempts.length ?? 0) > 0 && !completedIds.has(p.id));
+      const unstarted = PROBLEMS.filter((p) => !history[p.id] || history[p.id].attempts.length === 0);
+      return (
+        <div className="prep-card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2"><BarChart2 size={16} className="text-amber-400" /><span className="font-bold text-sm text-foreground">Personal Leaderboard</span></div>
+            <button onClick={() => setShowLeaderboard(false)} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
+          </div>
+          {ranked.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground text-xs"><Trophy size={28} className="mx-auto mb-2 opacity-30" />No solved problems yet.</div>
+          ) : (
+            <div className="space-y-1.5">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Solved by best time</p>
+              {ranked.map((p, rank) => (
+                <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/30 border border-border">
+                  <span className={`text-xs font-black w-5 shrink-0 ${rank === 0 ? "text-amber-400" : rank === 1 ? "text-slate-300" : "text-muted-foreground"}`}>#{rank + 1}</span>
+                  <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground truncate">{p.title}</p><p className="text-[10px] text-muted-foreground">{p.attempts} attempt{p.attempts !== 1 ? "s" : ""}</p></div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {p.streak >= 2 && <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-bold"><Flame size={10} />{p.streak}x</span>}
+                    <span className="flex items-center gap-1 text-xs font-mono font-bold text-emerald-400"><Clock size={10} />{formatTime(p.bestTime!)}</span>
+                    <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${DIFF_COLORS[p.difficulty]}`}>{p.difficulty}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {attempted.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Attempted, not solved</p>
+              {attempted.map((p) => {
+                const failCount = history[p.id]?.attempts.filter((a) => a.verdict === "fail").length ?? 0;
+                return (
+                  <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/5 border border-red-500/20">
+                    <XCircle size={12} className="text-red-400 shrink-0" />
+                    <span className="flex-1 text-xs text-muted-foreground truncate">{p.title}</span>
+                    <span className="text-[10px] text-red-400">{failCount} fail{failCount !== 1 ? "s" : ""}</span>
+                    <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${DIFF_COLORS[p.difficulty]}`}>{p.difficulty}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {unstarted.length > 0 && <p className="text-[10px] text-muted-foreground">{unstarted.length} problem{unstarted.length !== 1 ? "s" : ""} not yet attempted.</p>}
+        </div>
+      );
+    }
+    if (showSettings) {
+      return (
+        <div className="prep-card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2"><Settings size={16} className="text-muted-foreground" /><span className="font-bold text-sm text-foreground">Trainer Settings</span></div>
+            <button onClick={() => setShowSettings(false)} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
+          </div>
+          <div className="rounded-lg bg-secondary/30 border border-border p-4 space-y-3">
+            <div className="flex items-center gap-2"><Unlock size={14} className="text-amber-400" /><span className="text-sm font-semibold text-foreground">Hint Unlock Threshold</span></div>
+            <p className="text-xs text-muted-foreground">Controls when the solution can be revealed during a session.</p>
+            <div className="grid grid-cols-2 gap-2">
+              {([25, 50, 75, 100] as HintThreshold[]).map((t) => (
+                <button key={t} onClick={() => handleHintThresholdChange(t)}
+                  className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-all ${hintThreshold === t ? "bg-amber-500/20 border-amber-500/50 text-amber-300" : "bg-secondary/40 border-border text-muted-foreground hover:text-foreground"}`}>
+                  {t === 100 ? <span className="flex items-center justify-center gap-1.5"><Lock size={11} /> Timer ends (strict)</span>
+                    : <span className="flex items-center justify-center gap-1.5"><Unlock size={11} /> {HINT_THRESHOLD_LABELS[t]}</span>}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground">Current: <span className="text-amber-300 font-semibold">{HINT_THRESHOLD_LABELS[hintThreshold]}</span></p>
+          </div>
+          <div className="rounded-lg bg-secondary/30 border border-border p-4 space-y-2">
+            <span className="text-sm font-semibold text-foreground">Reset Progress</span>
+            <p className="text-xs text-muted-foreground">Clears all attempt history and solved status.</p>
+            <button onClick={() => { if (confirm("Reset all progress?")) { localStorage.removeItem(LS_COMPLETED); localStorage.removeItem(LS_HISTORY); setCompletedIds(new Set()); setHistory({}); toast.success("Progress reset."); setShowSettings(false); } }}
+              className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-all">Reset All Progress</button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="prep-card p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-red-500/15 flex items-center justify-center shrink-0">
-              <Swords size={18} className="text-red-400" />
-            </div>
+            <div className="w-9 h-9 rounded-lg bg-red-500/15 flex items-center justify-center shrink-0"><Swords size={18} className="text-red-400" /></div>
             <div>
               <h3 className="font-bold text-sm text-foreground">Yandex Algorithm Trainer</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Hard problems · No hints · Strict time limits · Binary pass/fail
-              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">Hard problems · Strict time limits · Binary pass/fail</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-muted-foreground">
-              {completedIds.size}/{PROBLEMS.length} solved
-            </span>
-            <button
-              onClick={() => setActive(true)}
-              className="px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-all"
-            >
-              Enter Arena
-            </button>
+            <span className="text-xs text-muted-foreground">{completedIds.size}/{PROBLEMS.length} solved</span>
+            <button onClick={() => setShowLeaderboard(true)} title="Personal leaderboard" className="p-1.5 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-amber-400 transition-all"><Medal size={13} /></button>
+            <button onClick={() => setShowSettings(true)} title="Settings" className="p-1.5 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-foreground transition-all"><Settings size={13} /></button>
+            <button onClick={() => setActive(true)} className="px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-all">Enter Arena</button>
           </div>
         </div>
-
-        {/* Problem list */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {PROBLEMS.map((p, i) => (
-            <div
-              key={p.id}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs ${
-                completedIds.has(p.id)
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-                  : "bg-secondary/30 border-border text-muted-foreground"
-              }`}
-            >
-              {completedIds.has(p.id) ? (
-                <Trophy size={12} className="text-emerald-400 shrink-0" />
-              ) : (
-                <Lock size={12} className="opacity-40 shrink-0" />
-              )}
-              <span className="truncate">{p.title}</span>
-              <span className={`ml-auto shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-semibold ${DIFF_COLORS[p.difficulty]}`}>
-                {p.difficulty}
-              </span>
-            </div>
-          ))}
+          {PROBLEMS.map((p) => {
+            const streak = getProblemStreak(p.id);
+            const best = getProblemBestTime(p.id);
+            const attempts = history[p.id]?.attempts.length ?? 0;
+            return (
+              <div key={p.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs ${
+                completedIds.has(p.id) ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                : attempts > 0 ? "bg-red-500/5 border-red-500/20 text-muted-foreground"
+                : "bg-secondary/30 border-border text-muted-foreground"}`}>
+                {completedIds.has(p.id) ? <Trophy size={12} className="text-emerald-400 shrink-0" />
+                  : attempts > 0 ? <XCircle size={12} className="text-red-400/60 shrink-0" />
+                  : <Lock size={12} className="opacity-40 shrink-0" />}
+                <span className="truncate flex-1">{p.title}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {streak >= 2 && <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-bold"><Flame size={9} />{streak}</span>}
+                  {best !== null && <span className="flex items-center gap-0.5 text-[10px] text-emerald-400 font-mono"><Clock size={9} />{formatTime(best)}</span>}
+                  <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${DIFF_COLORS[p.difficulty]}`}>{p.difficulty}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          {hintThreshold === 100
+            ? <><Lock size={9} /> Hints locked until timer ends (strict mode)</>
+            : <><Unlock size={9} /> Hints unlock at {HINT_THRESHOLD_LABELS[hintThreshold]} — <button onClick={() => setShowSettings(true)} className="text-amber-400 hover:underline">change</button></>
+          }
         </div>
       </div>
     );
   }
-
   return (
     <div className="prep-card p-5 space-y-4">
       {/* Header */}
