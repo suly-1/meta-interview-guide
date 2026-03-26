@@ -72,8 +72,27 @@ async function startServer() {
   // Security headers (helmet)
   app.use(
     helmet({
-      // Allow Vite HMR in development
-      contentSecurityPolicy: process.env.NODE_ENV === "production",
+      // Custom CSP that allows Google Fonts, inline scripts, and external connections
+      contentSecurityPolicy:
+        process.env.NODE_ENV === "production"
+          ? {
+              directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+                styleSrc: [
+                  "'self'",
+                  "'unsafe-inline'",
+                  "https://fonts.googleapis.com",
+                ],
+                fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+                imgSrc: ["'self'", "data:", "https:", "blob:"],
+                connectSrc: ["'self'", "https:", "wss:"],
+                frameSrc: ["'self'"],
+                objectSrc: ["'none'"],
+                upgradeInsecureRequests: [],
+              },
+            }
+          : false,
       crossOriginEmbedderPolicy: false, // needed for OAuth iframe flows
     })
   );
