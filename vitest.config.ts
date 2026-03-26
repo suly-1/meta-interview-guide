@@ -17,6 +17,9 @@ export default defineConfig({
   test: {
     // Default environment for server tests
     environment: "node",
+    // Enable CSS processing so third-party packages (e.g. katex via streamdown)
+    // don't crash the Node/jsdom environment with ERR_UNKNOWN_FILE_EXTENSION.
+    css: true,
     include: [
       "server/**/*.test.ts",
       "server/**/*.spec.ts",
@@ -29,5 +32,13 @@ export default defineConfig({
     globals: true,
     // Per-file environment override: client tests run in jsdom
     environmentMatchGlobs: [["client/**", "jsdom"]],
+    // Mock CSS files from node_modules that are imported as ESM side-effects
+    // (e.g. katex/dist/katex.min.css imported by streamdown). These cannot be
+    // processed by Vitest's css:true option because they come from raw ESM bundles.
+    server: {
+      deps: {
+        inline: ["streamdown"],
+      },
+    },
   },
 });

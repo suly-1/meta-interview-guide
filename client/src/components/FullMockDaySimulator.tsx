@@ -27,6 +27,23 @@ import Editor from "@monaco-editor/react";
 type Round = "coding" | "sysdesign" | "xfn" | "behavioral";
 type Phase = "idle" | "running" | "between" | "scoring" | "done";
 
+interface VerdictResult {
+  verdict: "hire" | "borderline" | "no_hire";
+  verdictLabel: string;
+  confidence: "high" | "medium" | "low";
+  evidenceFor: string[];
+  evidenceAgainst: string[];
+  decidingFactor: string;
+  whatWouldChangeVerdict: string;
+  rubricBreakdown: {
+    correctness: number;
+    tradeoffs: number;
+    scalability: number;
+    communication: number;
+  };
+  oneLineCoaching: string;
+}
+
 interface RoundResult {
   round: Round;
   overallScore: number;
@@ -374,10 +391,14 @@ export function FullMockDaySimulator() {
     return h.length ? h[h.length - 1] : null;
   })();
 
+  const [verdict, setVerdict] = useState<VerdictResult | null>(null);
+  const [verdictLoading, setVerdictLoading] = useState(false);
+
   const codingScoreMutation = trpc.ai.codingMockScorecard.useMutation();
   const sysDesignScoreMutation = trpc.ai.sysDesignMockScorecard.useMutation();
   const xfnScoreMutation = trpc.ai.xfnMockScorecard.useMutation();
   const fullScorecardMutation = trpc.ai.fullMockDayScorecard.useMutation();
+  const verdictMutation = trpc.ai.passFailVerdict.useMutation();
 
   const startDay = useCallback(() => {
     const codingPattern = pick(PATTERNS);
@@ -399,6 +420,8 @@ export function FullMockDaySimulator() {
     setAnswers({ coding: "", sysdesign: "", xfn: "", behavioral: "" });
     setRoundResults([]);
     setScorecard(null);
+    setVerdict(null);
+    setVerdictLoading(false);
     setRoundIndex(0);
     setPhase("running");
   }, []);
@@ -508,6 +531,38 @@ export function FullMockDaySimulator() {
             behavioralIcLevel: bqR?.level ?? "L6",
           });
           setScorecard(sc);
+          // Auto-call the Pass/Fail Verdict Engine with the full-loop summary
+          setVerdictLoading(true);
+          const scoreSummary = [
+            `Coding: ${codingR.overallScore.toFixed(1)}/5 (${codingR.level}) — ${codingR.label}`,
+            `System Design: ${sdR.overallScore.toFixed(1)}/5 (${sdR.level}) — ${sdR.label}`,
+            `XFN Behavioral: ${xfnR.overallScore.toFixed(1)}/5 (${xfnR.level})`,
+            bqR
+              ? `Behavioral STAR: ${bqR.overallScore.toFixed(1)}/5 (${bqR.level})`
+              : null,
+            `Overall: ${sc.overallScore.toFixed(1)}/5 · ${sc.levelVerdict}`,
+            `Summary: ${sc.summary}`,
+          ]
+            .filter(Boolean)
+            .join("\n");
+          verdictMutation
+            .mutateAsync({
+              sessionType: "full_loop",
+              questionOrPrompt:
+                "Full Meta interview loop: Coding + System Design + XFN + Behavioral",
+              candidateAnswer: scoreSummary,
+              targetLevel: (sc.levelVerdict?.includes("IC7")
+                ? "IC7"
+                : sc.levelVerdict?.includes("IC5")
+                  ? "IC5"
+                  : "IC6") as "IC5" | "IC6" | "IC7",
+              additionalContext: `Hiring recommendation from scorecard: ${sc.hiringRecommendation}`,
+            })
+            .then(v => setVerdict(v as VerdictResult))
+            .catch(() => {
+              /* verdict is optional, don't block the UI */
+            })
+            .finally(() => setVerdictLoading(false));
           try {
             const history = loadFullMockHistory();
             history.push({
@@ -834,6 +889,157 @@ export function FullMockDaySimulator() {
                 scorecard.remediationPlan.length > 0 && (
                   <RemediationPlan plan={scorecard.remediationPlan} />
                 )}
+
+              {/* Pass/Fail Verdict Engine — auto-populated after scorecard */}
+              {(verdict || verdictLoading) && (
+                <div
+                  className={`rounded-xl border p-4 space-y-3 ${
+                    verdict?.verdict === "hire"
+                      ? "border-emerald-500/40 bg-emerald-950/30"
+                      : verdict?.verdict === "borderline"
+                        ? "border-amber-500/40 bg-amber-950/30"
+                        : verdict?.verdict === "no_hire"
+                          ? "border-red-500/40 bg-red-950/30"
+                          : "border-slate-600/40 bg-slate-900/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      Hiring Committee Verdict
+                    </div>
+                    {verdictLoading && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Loader2 size={12} className="animate-spin" />
+                        Generating verdict…
+                      </div>
+                    )}
+                  </div>
+
+                  {verdict && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div
+                          className={`text-xl font-black ${
+                            verdict.verdict === "hire"
+                              ? "text-emerald-400"
+                              : verdict.verdict === "borderline"
+                                ? "text-amber-400"
+                                : "text-red-400"
+                          }`}
+                        >
+                          {verdict.verdict === "hire"
+                            ? "✅ HIRE"
+                            : verdict.verdict === "borderline"
+                              ? "⚠️ BORDERLINE"
+                              : "❌ NO HIRE"}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">
+                            Confidence
+                          </div>
+                          <div className="text-sm font-bold text-foreground capitalize">
+                            {verdict.confidence}
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground">
+                        {verdict.verdictLabel}
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-lg bg-emerald-950/40 border border-emerald-500/20 p-2">
+                          <div className="text-xs font-bold text-emerald-400 mb-1">
+                            Evidence For
+                          </div>
+                          {verdict.evidenceFor.map((e, i) => (
+                            <div
+                              key={i}
+                              className="text-xs text-muted-foreground flex gap-1"
+                            >
+                              <span className="text-emerald-400 shrink-0">
+                                +
+                              </span>
+                              {e}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="rounded-lg bg-red-950/40 border border-red-500/20 p-2">
+                          <div className="text-xs font-bold text-red-400 mb-1">
+                            Evidence Against
+                          </div>
+                          {verdict.evidenceAgainst.map((e, i) => (
+                            <div
+                              key={i}
+                              className="text-xs text-muted-foreground flex gap-1"
+                            >
+                              <span className="text-red-400 shrink-0">−</span>
+                              {e}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-2.5 space-y-1">
+                        <div className="text-xs font-bold text-foreground">
+                          Deciding Factor
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {verdict.decidingFactor}
+                        </p>
+                      </div>
+
+                      <div className="rounded-lg bg-blue-950/30 border border-blue-500/20 p-2.5">
+                        <div className="text-xs font-bold text-blue-400 mb-0.5">
+                          What Would Change This Verdict
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {verdict.whatWouldChangeVerdict}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {(
+                          [
+                            [
+                              "Correctness",
+                              verdict.rubricBreakdown.correctness,
+                            ],
+                            ["Trade-offs", verdict.rubricBreakdown.tradeoffs],
+                            [
+                              "Scalability",
+                              verdict.rubricBreakdown.scalability,
+                            ],
+                            [
+                              "Communication",
+                              verdict.rubricBreakdown.communication,
+                            ],
+                          ] as [string, number][]
+                        ).map(([label, score]) => (
+                          <div
+                            key={label}
+                            className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-2 text-center"
+                          >
+                            <div className="text-xs text-muted-foreground mb-0.5 truncate">
+                              {label}
+                            </div>
+                            <div className="text-base font-bold text-foreground">
+                              {score}
+                              <span className="text-xs text-muted-foreground">
+                                /5
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="text-xs text-amber-300 font-medium border-t border-slate-700/50 pt-2">
+                        💡 {verdict.oneLineCoaching}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               <button
                 onClick={() => {

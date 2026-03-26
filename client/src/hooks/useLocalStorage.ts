@@ -147,3 +147,19 @@ export function useDisclaimerDismissed() {
 export function useCongratsShown() {
   return useLocalStorage<boolean>("meta_congrats_v1", false);
 }
+
+// ── Debugging Under Pressure history ─────────────────────────────────────
+export interface DebuggingSession {
+  id: string;
+  date: string; // ISO timestamp
+  problemId: string;
+  problemTitle: string;
+  language: string;
+  solved: boolean;
+  timeUsedSeconds: number; // seconds taken (0 if timed out)
+  attempts: number; // run attempts before solving
+  feedback: string; // AI feedback text
+}
+export function useDebuggingHistory() {
+  return useLocalStorage<DebuggingSession[]>("meta_debugging_history_v1", []);
+}

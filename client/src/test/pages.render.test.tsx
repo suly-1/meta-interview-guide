@@ -144,3 +144,76 @@ describe("Page render smoke tests", () => {
     expect(() => renderPage(AdminDisclaimerReport)).not.toThrow();
   });
 });
+
+// ── New AI component smoke tests ─────────────────────────────────────────────
+describe("New AI component smoke tests", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  it("AICodingSimulator renders without throwing", async () => {
+    const { AICodingSimulator } = await import(
+      "@/components/AICodingSimulator"
+    );
+    expect(() =>
+      render(
+        <Wrapper>
+          <AICodingSimulator />
+        </Wrapper>
+      )
+    ).not.toThrow();
+  });
+
+  it("DebuggingUnderPressure renders without throwing", async () => {
+    const { DebuggingUnderPressure } = await import(
+      "@/components/DebuggingUnderPressure"
+    );
+    expect(() =>
+      render(
+        <Wrapper>
+          <DebuggingUnderPressure />
+        </Wrapper>
+      )
+    ).not.toThrow();
+  });
+
+  it("ICLevelSignalCalibrator renders without throwing", async () => {
+    const { ICLevelSignalCalibrator } = await import(
+      "@/components/ICLevelSignalCalibrator"
+    );
+    expect(() =>
+      render(
+        <Wrapper>
+          <ICLevelSignalCalibrator />
+        </Wrapper>
+      )
+    ).not.toThrow();
+  });
+
+  it("MetaProductDesignSimulator renders without throwing", async () => {
+    const { MetaProductDesignSimulator } = await import(
+      "@/components/MetaProductDesignSimulator"
+    );
+    expect(() =>
+      render(
+        <Wrapper>
+          <MetaProductDesignSimulator />
+        </Wrapper>
+      )
+    ).not.toThrow();
+  });
+
+  it("PassFailVerdictEngine renders without throwing", async () => {
+    const { PassFailVerdictEngine } = await import(
+      "@/components/PassFailVerdictEngine"
+    );
+    expect(() =>
+      render(
+        <Wrapper>
+          <PassFailVerdictEngine />
+        </Wrapper>
+      )
+    ).not.toThrow();
+  });
+});

@@ -8,6 +8,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
+  useDebuggingHistory,
+  type DebuggingSession,
+} from "@/hooks/useLocalStorage";
+import {
   Bug,
   ChevronDown,
   ChevronUp,
@@ -506,6 +510,7 @@ export function DebuggingUnderPressure() {
   const [attempts, setAttempts] = useState<
     { title: string; correct: boolean; time: number; score: number }[]
   >([]);
+  const [, setDebugHistory] = useDebuggingHistory();
 
   const LIMIT = 8 * 60; // 8 minutes
   const timer = useTimer(LIMIT);
@@ -536,6 +541,19 @@ export function DebuggingUnderPressure() {
           fastCount: newFast,
         };
       });
+      // Persist this attempt to localStorage history
+      const session: DebuggingSession = {
+        id: `debug-${Date.now()}`,
+        date: new Date().toISOString(),
+        problemId: challenge.id,
+        problemTitle: challenge.title,
+        language: "python",
+        solved: correct,
+        timeUsedSeconds: timeSpent,
+        attempts: 1,
+        feedback: data.bugExplanation ?? data.coaching ?? "",
+      };
+      setDebugHistory(h => [session, ...h].slice(0, 50)); // keep last 50
     },
     onError: () => {
       toast.error("Scoring failed. Please try again.");

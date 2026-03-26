@@ -1021,3 +1021,9 @@
 - [x] Pass/Fail Verdict Engine (Priority #5) — Hire/Borderline/No-Hire verdict with Meta rubric reasoning, in Overview tab
 - [x] Fix tRPC context error (main.tsx missing trpc.Provider + QueryClientProvider wrappers)
 - [x] Add 5 new AI procedure stubs to trpc.standalone.ts (stub coverage test: 68/68 passing)
+
+## New Features — Round 32
+
+- [x] Smoke tests for 5 new AI components (AICodingSimulator, DebuggingUnderPressure, ICLevelSignalCalibrator, MetaProductDesignSimulator, PassFailVerdictEngine) in pages.render.test.tsx
+- [x] useDebuggingHistory hook in useLocalStorage + persist scores in DebuggingUnderPressure component
+- [x] Pass/Fail Verdict Engine integrated into Full Mock Day Simulator (auto-feed combined scores after session ends)
