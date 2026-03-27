@@ -39,6 +39,7 @@ import { PassFailVerdictEngine } from "@/components/PassFailVerdictEngine";
 import { AdaptiveStudyPlan } from "@/components/AdaptiveStudyPlan";
 import { PeerBenchmark } from "@/components/PeerBenchmark";
 import { ReadinessCertificate } from "@/components/ReadinessCertificate";
+import { AINativeRadarChart } from "@/components/AINativeRadarChart";
 
 function getDaysUntil(dateStr: string): number {
   const target = new Date(dateStr);
@@ -772,6 +773,7 @@ export default function OverviewTab() {
     <div className="space-y-6">
       <LevelCards />
       <ReadinessDashboard />
+      <AINativeRadarChart />
       <InterviewCountdown />
       <PrepTimeline />
       <StarStoryBank />

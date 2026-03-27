@@ -47,10 +47,19 @@ export default function HumanInLoopChallenge() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreHumanInLoop.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const handleSubmit = async () => {
     const res = await score.mutateAsync({ systemType, designAnswer });
     setResult(res);
+    save.mutate({
+      drillId: "human-in-loop",
+      drillLabel: "Human-in-the-Loop Challenge",
+      coreSkill: "Responsible AI Use",
+      overallScore: Math.round(res.overall * 2),
+      scores: { overall: res.overall },
+      feedback: res.feedback,
+    });
   };
 
   const reset = () => {

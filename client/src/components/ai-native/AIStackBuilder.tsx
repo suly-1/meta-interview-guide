@@ -63,6 +63,7 @@ export default function AIStackBuilder() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreAIStack.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const allFilled = LAYERS.every(l => values[l.id].trim().length >= 20);
 
@@ -74,6 +75,19 @@ export default function AIStackBuilder() {
       lessonsLearned: values.lessonsLearned,
     });
     setResult(res);
+    save.mutate({
+      drillId: "ai-stack-builder",
+      drillLabel: "AI Stack Builder",
+      coreSkill: "AI Fluency and Tool Orchestration",
+      overallScore: Math.round(res.overall * 2),
+      scores: {
+        modelLayer: res.modelLayer,
+        toolingLayer: res.toolingLayer,
+        workflowLayer: res.workflowLayer,
+        lessonsLearned: res.lessonsLearned,
+      },
+      feedback: res.feedback,
+    });
   };
 
   const reset = () => {

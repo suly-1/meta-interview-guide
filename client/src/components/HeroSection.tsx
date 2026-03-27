@@ -7,7 +7,15 @@ import {
   useInterviewDate,
 } from "@/hooks/useLocalStorage";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
-import { Flame, Target, Brain, Calendar, TrendingUp } from "lucide-react";
+import {
+  Flame,
+  Target,
+  Brain,
+  Calendar,
+  TrendingUp,
+  Sparkles,
+} from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 interface HeroSectionProps {
   onTabChange: (tab: string) => void;
@@ -21,12 +29,30 @@ function getDaysUntil(dateStr: string): number {
   return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+const MATURITY_LEVEL_COLORS: Record<string, string> = {
+  Traditionalist: "#6b7280",
+  "AI Aware": "#3b82f6",
+  "AI Enabled": "#8b5cf6",
+  "AI First": "#a855f7",
+  "AI Native": "#7c3aed",
+};
+
+const MATURITY_LEVEL_INDICES = [
+  "Traditionalist",
+  "AI Aware",
+  "AI Enabled",
+  "AI First",
+  "AI Native",
+];
+
 export default function HeroSection({ onTabChange }: HeroSectionProps) {
   const streak = useStreak();
   const [patternRatings] = usePatternRatings();
   const [bqRatings] = useBehavioralRatings();
   const [mockHistory] = useMockHistory();
   const [interviewDate] = useInterviewDate();
+  const { data: maturityLevel } =
+    trpc.aiNativeHistory.getMaturityLevel.useQuery();
 
   const masteredPatterns = PATTERNS.filter(
     p => (patternRatings[p.id] ?? 0) >= 4
@@ -242,6 +268,57 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
             </div>
           </button>
         </div>
+
+        {/* AI-Native Level badge — shown only after MaturitySelfClassifier is completed */}
+        {maturityLevel && (
+          <button
+            onClick={() => onTabChange("ai-native")}
+            className="mt-4 w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all hover:opacity-90"
+            style={{
+              borderColor: `${MATURITY_LEVEL_COLORS[maturityLevel.level] ?? "#7c3aed"}40`,
+              background: `${MATURITY_LEVEL_COLORS[maturityLevel.level] ?? "#7c3aed"}08`,
+            }}
+          >
+            <Sparkles
+              size={16}
+              style={{
+                color: MATURITY_LEVEL_COLORS[maturityLevel.level] ?? "#7c3aed",
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-xs font-bold"
+                  style={{
+                    color:
+                      MATURITY_LEVEL_COLORS[maturityLevel.level] ?? "#7c3aed",
+                  }}
+                >
+                  ✦ AI-Native Level: {maturityLevel.level}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  · tap to continue training
+                </span>
+              </div>
+              {/* 5-step progress pip bar */}
+              <div className="flex gap-1 mt-1.5">
+                {MATURITY_LEVEL_INDICES.map((lvl, i) => (
+                  <div
+                    key={lvl}
+                    className="h-1 flex-1 rounded-full transition-all"
+                    style={{
+                      background:
+                        i <= maturityLevel.levelIndex
+                          ? (MATURITY_LEVEL_COLORS[maturityLevel.level] ??
+                            "#7c3aed")
+                          : "rgba(139,92,246,0.15)",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );

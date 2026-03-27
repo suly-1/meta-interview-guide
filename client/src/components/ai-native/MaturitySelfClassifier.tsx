@@ -90,6 +90,8 @@ export default function MaturitySelfClassifier() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreMaturityClassification.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
+  const saveLevel = trpc.aiNativeHistory.saveMaturityLevel.useMutation();
 
   const allFilled = SKILLS.every(s => examples[s.id].trim().length >= 30);
 
@@ -103,6 +105,27 @@ export default function MaturitySelfClassifier() {
     });
     setResult(res);
     setPhase("result");
+    const levelToScore: Record<string, number> = {
+      Traditionalist: 2,
+      "AI Aware": 4,
+      "AI Enabled": 6,
+      "AI First": 8,
+      "AI Native": 10,
+    };
+    save.mutate({
+      drillId: "maturity-classifier",
+      drillLabel: "Maturity Self-Classifier",
+      coreSkill: "Continuous AI Learning",
+      overallScore: levelToScore[res.overallAssessedLevel] ?? 5,
+      scores: {
+        fluency: res.fluencyAssessedLevel,
+        impact: res.impactAssessedLevel,
+        responsibleAI: res.responsibleAIAssessedLevel,
+        continuousLearning: res.continuousLearningAssessedLevel,
+      },
+      feedback: res.gapAnalysis,
+    });
+    saveLevel.mutate({ level: res.overallAssessedLevel });
   };
 
   const reset = () => {

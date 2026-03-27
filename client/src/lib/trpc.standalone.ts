@@ -1209,6 +1209,31 @@ export const trpc = {
     },
   },
 
+  // ── aiNativeHistory ──────────────────────────────────────────────────────────────────────────────────
+  aiNativeHistory: {
+    saveDrillScore: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ id: 1 })),
+    },
+    saveMaturityLevel: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    saveMockSession: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ id: 1 })),
+    },
+    getMockHistory: {
+      useQuery: (_?: unknown) => makeQuery([]),
+    },
+    deleteMockSession: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    getBestScoresByDrill: {
+      useQuery: (_?: unknown) => makeQuery([]),
+    },
+    getMaturityLevel: {
+      useQuery: (_?: unknown) => makeQuery(null),
+    },
+  },
+
   // ── system ──────────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {

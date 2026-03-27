@@ -1146,3 +1146,28 @@
 - [x] Create server/checkpointNotifier.ts — fires notifyOwner on every production cold-start
 - [x] Wire fireCheckpointPublishedNotification() into server/\_core/index.ts startup
 - [x] 85/85 tests pass, prettier clean
+
+## AI-Native Persistence & History — Round 46
+
+- [x] Add aiNativeDrillScores, aiNativeMockSessions, aiNativeMaturityLevels tables to drizzle/schema.ts
+- [x] Create tables directly via SQL (drizzle-kit migration had env issue)
+- [x] Create server/routers/aiNativeHistory.ts with 7 procedures
+- [x] Wire aiNativeHistory router into server/routers.ts
+- [x] Build AINativeRadarChart component for OverviewTab (4-axis: Fluency, Impact, Responsible, Continuous)
+- [x] Add AI-Native Level badge to HeroSection (persisted from MaturitySelfClassifier result)
+- [x] Inject AINativeRadarChart into OverviewTab
+- [x] Rewrite FullMockScreeningCall with DB persistence and history panel
+- [x] Wire saveDrillScore into all 9 drill components (fixed duplicate save declarations)
+- [x] Add 7 aiNativeHistory stubs to trpc.standalone.ts
+- [x] Add disclaimer banner to TopNav (dark blue bg, white/blue/amber text, dismissible, localStorage)
+- [x] 85/85 tests pass, build clean
+- [ ] Save checkpoint
+
+## Silent Version Toast — Round 47
+
+- [ ] Remove Manus inbox notification (checkpointNotifier.ts)
+- [ ] Add build hash endpoint to server (GET /api/version)
+- [ ] Build VersionUpdateToast component (top-right, 5s auto-dismiss, ✦ Updated badge)
+- [ ] Wire version polling into App.tsx (check every 60s, show toast on hash change)
+- [ ] Run pnpm test — all pass
+- [ ] Save checkpoint

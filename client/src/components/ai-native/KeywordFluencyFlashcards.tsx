@@ -1,6 +1,7 @@
 // AI-Native Drill #19 — Keyword Fluency Flashcards
 // Candidate is shown an AI-Native term and must explain it in plain English in 30 seconds
 import { useState, useEffect, useRef } from "react";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, RefreshCw, ChevronRight, Check, X } from "lucide-react";
@@ -138,7 +139,9 @@ export default function KeywordFluencyFlashcards() {
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<{ term: string; knew: boolean }[]>([]);
   const [done, setDone] = useState(false);
+  const [saved, setSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const card = deck[idx];
 
@@ -171,6 +174,17 @@ export default function KeywordFluencyFlashcards() {
     setResults(newResults);
     if (idx + 1 >= deck.length) {
       setDone(true);
+      if (!saved) {
+        const correct = newResults.filter(r => r.knew).length;
+        save.mutate({
+          drillId: "keyword-flashcards",
+          drillLabel: "Keyword Fluency Flashcards",
+          coreSkill: "AI Fluency and Tool Orchestration",
+          overallScore: Math.round((correct / newResults.length) * 10),
+          scores: { correct, total: newResults.length },
+        });
+        setSaved(true);
+      }
     } else {
       setIdx(i => i + 1);
       setFlipped(false);

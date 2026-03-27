@@ -41,10 +41,19 @@ export default function AgentEvalDesigner() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreAgentEvalDesign.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const handleSubmit = async () => {
     const res = await score.mutateAsync({ agentType, evalFramework });
     setResult(res);
+    save.mutate({
+      drillId: "agent-eval-designer",
+      drillLabel: "Agent Eval Designer",
+      coreSkill: "AI Fluency and Tool Orchestration",
+      overallScore: Math.round(res.overallRigor * 2),
+      scores: { overallRigor: res.overallRigor },
+      feedback: res.feedback,
+    });
   };
 
   const reset = () => {

@@ -371,3 +371,46 @@ export const pinAttempts = mysqlTable("pin_attempts", {
   attemptedAt: timestamp("attemptedAt").defaultNow().notNull(),
 });
 export type PinAttempt = typeof pinAttempts.$inferSelect;
+
+// ── AI-Native Drill Scores ────────────────────────────────────────────────────
+// Persists per-drill scores for the 9 AI-Native practice drills.
+// drillId maps to the drill slug (e.g. 'rag-explainer', 'ai-stack-builder').
+// scores is a JSON object with per-dimension scores (0-10) returned by the LLM.
+export const aiNativeDrillScores = mysqlTable("ai_native_drill_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  drillId: varchar("drillId", { length: 64 }).notNull(),
+  drillLabel: varchar("drillLabel", { length: 128 }).notNull(),
+  coreSkill: varchar("coreSkill", { length: 64 }).notNull(), // 'fluency' | 'impact' | 'responsible' | 'continuous'
+  overallScore: int("overallScore").notNull(), // 0-10
+  scores: json("scores").notNull().$type<Record<string, number>>(), // per-dimension breakdown
+  feedback: text("feedback"), // LLM coaching note
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AiNativeDrillScore = typeof aiNativeDrillScores.$inferSelect;
+
+// ── AI-Native Mock Screening Sessions ─────────────────────────────────────────
+// Persists full 4-phase mock screening call sessions for the FullMockScreeningCall drill.
+// sessionData stores per-phase answers, scores, and the final AI scorecard.
+export const aiNativeMockSessions = mysqlTable("ai_native_mock_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sessionId: varchar("sessionId", { length: 64 }).notNull().unique(), // client-generated nanoid
+  overallScore: int("overallScore").notNull().default(0), // 0-10 composite
+  maturityLevel: varchar("maturityLevel", { length: 32 }), // e.g. 'AI First'
+  sessionData: json("sessionData").notNull().$type<Record<string, unknown>>(), // full phase data
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AiNativeMockSession = typeof aiNativeMockSessions.$inferSelect;
+
+// ── AI-Native Maturity Level (persisted from MaturitySelfClassifier) ──────────
+// Stores the most recent assessed maturity level per user.
+export const aiNativeMaturityLevels = mysqlTable("ai_native_maturity_levels", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(), // one row per user
+  level: varchar("level", { length: 32 }).notNull(), // 'Traditionalist' | 'AI Aware' | 'AI Enabled' | 'AI First' | 'AI Native'
+  levelIndex: int("levelIndex").notNull().default(0), // 0-4 for progress bar
+  scores: json("scores").notNull().$type<Record<string, number>>(), // per-dimension breakdown
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AiNativeMaturityLevel = typeof aiNativeMaturityLevels.$inferSelect;

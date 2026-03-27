@@ -1,5 +1,6 @@
 // Design: Bold Engineering Dashboard — dark charcoal, Space Grotesk, blue accent
-import { Sun, Moon, BookOpen, Leaf } from "lucide-react";
+import { useState } from "react";
+import { Sun, Moon, BookOpen, Leaf, X } from "lucide-react";
 import { useStreak } from "@/hooks/useLocalStorage";
 
 interface TopNavProps {
@@ -48,36 +49,129 @@ export default function TopNav({
 }: TopNavProps) {
   const streak = useStreak();
 
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try {
+      return localStorage.getItem("disclaimer-banner-dismissed") === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  const dismissBanner = () => {
+    try {
+      localStorage.setItem("disclaimer-banner-dismissed", "1");
+    } catch {}
+    setBannerDismissed(true);
+  };
+
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="container">
-        <div className="flex items-center justify-between h-14 gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div
-              className={`w-7 h-7 rounded-lg ${LOGO_BG} flex items-center justify-center`}
-            >
-              {LOGO_ICON}
+    <>
+      {/* Disclaimer banner */}
+      {!bannerDismissed && (
+        <div className="w-full bg-[#1a2540] border-b border-blue-500/20 text-xs">
+          <div className="container flex items-start gap-3 py-2">
+            <div className="flex-1 space-y-0.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span className="text-white font-medium">
+                  A community-sourced, independent study resource — not
+                  affiliated with Meta.
+                </span>
+                <span className="text-blue-300">
+                  Covers L4–L7 Behavioral &amp; Coding rounds, including the
+                  AI-Enabled Coding Round.
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                <span className="text-amber-300 font-semibold">
+                  Always refer first to any official preparation materials you
+                  have received.
+                </span>
+                <span className="text-blue-400/70">
+                  No affiliation with Meta · Updated March 2026
+                </span>
+              </div>
             </div>
-            <span
-              className="font-bold text-sm text-foreground"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            <button
+              onClick={dismissBanner}
+              className="text-blue-400/60 hover:text-white transition-colors shrink-0 mt-0.5"
+              aria-label="Dismiss banner"
             >
-              {WORDMARK}
-            </span>
-            <span className={`badge ${BADGE_CLS} hidden sm:inline-flex`}>
-              {BADGE_TEXT}
-            </span>
+              <X size={13} />
+            </button>
+          </div>
+        </div>
+      )}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="container">
+          <div className="flex items-center justify-between h-14 gap-4">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div
+                className={`w-7 h-7 rounded-lg ${LOGO_BG} flex items-center justify-center`}
+              >
+                {LOGO_ICON}
+              </div>
+              <span
+                className="font-bold text-sm text-foreground"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                {WORDMARK}
+              </span>
+              <span className={`badge ${BADGE_CLS} hidden sm:inline-flex`}>
+                {BADGE_TEXT}
+              </span>
+            </div>
+
+            {/* Tabs — desktop */}
+            <nav className="hidden md:flex items-center gap-1">
+              {TABS.map(tab => (
+                <button
+                  key={tab.id}
+                  data-testid={`tab-${tab.id}`}
+                  onClick={() => onTabChange(tab.id)}
+                  className={`px-3.5 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    activeTab === tab.id
+                      ? ACTIVE_TAB_CLS
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+
+            {/* Right: streak + dark toggle */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Streak */}
+              <div
+                className={`streak-badge text-sm ${streak.currentStreak === 0 ? "broken" : ""}`}
+                title={`Longest streak: ${streak.longestStreak} days`}
+              >
+                <span>{streak.currentStreak > 0 ? "🔥" : "💤"}</span>
+                <span>{streak.currentStreak}d</span>
+              </div>
+
+              {/* Dark mode toggle */}
+              <button
+                onClick={onToggleDark}
+                data-testid="dark-mode-toggle"
+                className="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                title={
+                  darkMode ? "Switch to light mode" : "Switch to dark mode"
+                }
+              >
+                {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+            </div>
           </div>
 
-          {/* Tabs — desktop */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Mobile tabs */}
+          <div className="flex md:hidden gap-1 pb-2 overflow-x-auto">
             {TABS.map(tab => (
               <button
                 key={tab.id}
-                data-testid={`tab-${tab.id}`}
                 onClick={() => onTabChange(tab.id)}
-                className={`px-3.5 py-1.5 rounded-md text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all ${
                   activeTab === tab.id
                     ? ACTIVE_TAB_CLS
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
@@ -86,48 +180,9 @@ export default function TopNav({
                 {tab.label}
               </button>
             ))}
-          </nav>
-
-          {/* Right: streak + dark toggle */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Streak */}
-            <div
-              className={`streak-badge text-sm ${streak.currentStreak === 0 ? "broken" : ""}`}
-              title={`Longest streak: ${streak.longestStreak} days`}
-            >
-              <span>{streak.currentStreak > 0 ? "🔥" : "💤"}</span>
-              <span>{streak.currentStreak}d</span>
-            </div>
-
-            {/* Dark mode toggle */}
-            <button
-              onClick={onToggleDark}
-              data-testid="dark-mode-toggle"
-              className="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile tabs */}
-        <div className="flex md:hidden gap-1 pb-2 overflow-x-auto">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? ACTIVE_TAB_CLS
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

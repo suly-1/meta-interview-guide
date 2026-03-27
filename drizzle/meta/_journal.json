@@ -141,6 +141,13 @@
       "when": 1774461653549,
       "tag": "0019_wandering_ironclad",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1774632192908,
+      "tag": "0020_stiff_felicia_hardy",
+      "breakpoints": true
     }
   ]
 }

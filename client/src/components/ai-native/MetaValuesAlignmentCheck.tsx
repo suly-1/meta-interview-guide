@@ -79,6 +79,7 @@ export default function MetaValuesAlignmentCheck() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreMetaValuesAlignment.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const current = VALUES[currentIdx];
   const allAnswered = VALUES.every(v => answers[v.id].trim().length >= 30);
@@ -86,6 +87,14 @@ export default function MetaValuesAlignmentCheck() {
   const handleSubmit = async () => {
     const res = await score.mutateAsync({ answers });
     setResult(res);
+    save.mutate({
+      drillId: "meta-values-alignment",
+      drillLabel: "Meta Values Alignment Check",
+      coreSkill: "Responsible AI Use",
+      overallScore: Math.round(res.overall * 2),
+      scores: { overall: res.overall },
+      feedback: res.overallVerdict,
+    });
   };
 
   const reset = () => {

@@ -24,6 +24,7 @@ import { favoritesRouter } from "./routers/favorites";
 import { progressRouter } from "./routers/progress";
 import { siteAccessRouter } from "./routers/siteAccess";
 import { adminUsersRouter } from "./routers/adminUsers";
+import { aiNativeHistoryRouter } from "./routers/aiNativeHistory";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "./db";
 import { pinAttempts } from "../drizzle/schema";
@@ -230,6 +231,7 @@ export const appRouter = router({
   progress: progressRouter,
   siteAccess: siteAccessRouter,
   adminUsers: adminUsersRouter,
+  aiNativeHistory: aiNativeHistoryRouter,
 });
 
 export type AppRouter = typeof appRouter;

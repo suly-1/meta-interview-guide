@@ -68,6 +68,7 @@ export default function EpistemicHumilityCoach() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreEpistemicHumility.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const handleSubmit = async () => {
     if (!selectedQ) return;
@@ -76,6 +77,14 @@ export default function EpistemicHumilityCoach() {
       questionPrompt: selectedQ.prompt,
     });
     setResult(res);
+    save.mutate({
+      drillId: "epistemic-humility",
+      drillLabel: "Epistemic Humility Coach",
+      coreSkill: "Continuous AI Learning",
+      overallScore: Math.round(res.overall * 2),
+      scores: { overall: res.overall },
+      feedback: res.feedback,
+    });
   };
 
   const reset = () => {

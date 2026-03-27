@@ -51,6 +51,7 @@ export default function EnterpriseBottleneckCase() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreBottleneckAnalysis.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const handleSubmit = async () => {
     if (!selectedScenario) return;
@@ -59,6 +60,20 @@ export default function EnterpriseBottleneckCase() {
       analysis,
     });
     setResult(res);
+    save.mutate({
+      drillId: "enterprise-bottleneck",
+      drillLabel: "Enterprise Bottleneck Case",
+      coreSkill: "AI-Driven Impact",
+      overallScore: Math.round(res.systemsThinking * 2),
+      scores: {
+        dataLayer: res.dataLayer,
+        governanceLayer: res.governanceLayer,
+        peopleLayer: res.peopleLayer,
+        infraLayer: res.infraLayer,
+        systemsThinking: res.systemsThinking,
+      },
+      feedback: res.feedback,
+    });
   };
 
   const reset = () => {

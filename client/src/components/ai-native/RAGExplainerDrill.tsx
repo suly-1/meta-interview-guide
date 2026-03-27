@@ -31,11 +31,25 @@ export default function RAGExplainerDrill() {
   } | null>(null);
 
   const score = trpc.aiTraining.scoreRAGExplanation.useMutation();
+  const save = trpc.aiNativeHistory.saveDrillScore.useMutation();
 
   const handleSubmit = async () => {
     const res = await score.mutateAsync({ explanation, followUp });
     setResult(res);
     setPhase("result");
+    save.mutate({
+      drillId: "rag-explainer",
+      drillLabel: "RAG Explainer",
+      coreSkill: "AI Fluency and Tool Orchestration",
+      overallScore: Math.round(res.overall * 2),
+      scores: {
+        correctness: res.correctness,
+        succinctness: res.succinctness,
+        caveats: res.caveats,
+        followUpDepth: res.followUpDepth,
+      },
+      feedback: res.feedback,
+    });
   };
 
   const reset = () => {
