@@ -254,10 +254,10 @@ export default function Home() {
           <div className="container flex items-start gap-3">
             <AlertTriangle
               size={14}
-              className="text-amber-900 shrink-0 mt-0.5"
+              className="shrink-0 mt-0.5" style={{color: '#f2d307'}}
             />
             <div className="flex-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-amber-900">
+              <span className="font-semibold" style={{color: '#fbb904'}}>
                 Public Community Resource:{" "}
               </span>
               This is an independent, publicly available study guide at{" "}
@@ -274,7 +274,7 @@ export default function Home() {
                     e.target.checked && setDisclaimerDismissed(true)
                   }
                 />
-                <span className="text-amber-900 font-medium">I understand</span>
+                <span className="font-medium" style={{color: '#f5d505'}}>I understand</span>
               </label>
             </div>
             <button
