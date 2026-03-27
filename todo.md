@@ -979,3 +979,8 @@
 - [x] Fix low-contrast text across entire site — all cards, labels, progress bars, expanded panels
 - [x] Fix WeakSignalDetectorTab: light text on light background
 - [x] Fix global CSS theme variables for better contrast in light mode
+
+## Dark Mode Toggle + Font Size + Deploy (Mar 27 2026)
+- [x] Add dark mode toggle button to TopNav
+- [x] Increase base font size to 17px in index.css
+- [x] Sync to meta-prep-guide and deploy to metaengguide.pro and metaguide.blog

@@ -81,6 +81,41 @@
   --sidebar-ring: oklch(0.49 0.22 264);
 }
 
+.dark {
+  --background: oklch(0.13 0.01 250);
+  --foreground: oklch(0.95 0.005 250);
+  --card: oklch(0.17 0.01 250);
+  --card-foreground: oklch(0.95 0.005 250);
+  --popover: oklch(0.17 0.01 250);
+  --popover-foreground: oklch(0.95 0.005 250);
+  --primary: oklch(0.62 0.22 264);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0.01 250);
+  --secondary-foreground: oklch(0.88 0.005 250);
+  --muted: oklch(0.22 0.01 250);
+  --muted-foreground: oklch(0.65 0.015 250);
+  --accent: oklch(0.25 0.015 250);
+  --accent-foreground: oklch(0.95 0.005 250);
+  --destructive: oklch(0.65 0.22 27);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.28 0.01 250);
+  --input: oklch(0.28 0.01 250);
+  --ring: oklch(0.62 0.22 264);
+  --chart-1: oklch(0.62 0.22 264);
+  --chart-2: oklch(0.65 0.18 180);
+  --chart-3: oklch(0.72 0.18 85);
+  --chart-4: oklch(0.65 0.18 30);
+  --chart-5: oklch(0.65 0.2 310);
+  --sidebar: oklch(0.15 0.01 250);
+  --sidebar-foreground: oklch(0.88 0.005 250);
+  --sidebar-primary: oklch(0.62 0.22 264);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.22 0.01 250);
+  --sidebar-accent-foreground: oklch(0.88 0.005 250);
+  --sidebar-border: oklch(0.28 0.01 250);
+  --sidebar-ring: oklch(0.62 0.22 264);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -88,6 +123,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    font-size: 17px;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
@@ -115,19 +151,19 @@
 html.density-compact {
   --density-font-scale: 0.875;
   --density-space-scale: 0.8;
-  font-size: calc(16px * 0.875);
+  font-size: calc(17px * 0.875);
 }
 
 html.density-comfortable {
   --density-font-scale: 1;
   --density-space-scale: 1;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 html.density-spacious {
   --density-font-scale: 1.125;
   --density-space-scale: 1.2;
-  font-size: calc(16px * 1.125);
+  font-size: calc(17px * 1.125);
 }
 
 /* Compact: tighter spacing on containers */
