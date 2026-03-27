@@ -58,7 +58,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
               className="text-2xl font-bold text-foreground mb-1"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Meta Interview Prep
+              Screen Interview Prep for Leading Tech Companies (Meta Style)
             </h1>
             <p className="text-sm text-muted-foreground">
               L6 (Staff) &amp; L7 (Senior Staff) — Coding · System Design ·
