@@ -5,12 +5,14 @@ import { Link } from "wouter";
 import {
   ArrowLeft, Settings, Lock, Unlock, RotateCcw, Calendar,
   Clock, CheckCircle, Shield, Users, FileText, RefreshCw, ToggleLeft, ToggleRight,
-  AlertTriangle, KeyRound, AlertOctagon, Plus, Trash2, Wifi
+  AlertTriangle, KeyRound, AlertOctagon, Plus, Trash2, Wifi, Bell, BellOff
 } from "lucide-react";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 export default function AdminSettings() {
   const { user } = useAuth();
+  const push = usePushNotifications();
   const [durationInput, setDurationInput] = useState("");
   const [startDateInput, setStartDateInput] = useState("");
   const [confirmLock, setConfirmLock] = useState(false);
@@ -680,6 +682,50 @@ export default function AdminSettings() {
           {setIpAllowlistMutation.isError && (
             <p className="text-xs text-red-400 mt-2">Failed to save: {setIpAllowlistMutation.error?.message}</p>
           )}
+        </div>
+
+        {/* Push Notifications */}
+        <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Bell size={16} className="text-violet-400" />
+            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Deployment Push Notifications</h4>
+          </div>
+          <p className="text-[11px] text-gray-700 mb-4">
+            Receive a silent browser notification whenever a new version is deployed — no email required.
+            Works on Chrome, Edge, and Firefox (not Safari Private Browsing).
+          </p>
+          {!push.supported ? (
+            <p className="text-xs text-amber-900">Push notifications are not supported in this browser.</p>
+          ) : push.permission === "denied" ? (
+            <p className="text-xs text-red-400">Notifications are blocked. Open browser settings to allow them for this site.</p>
+          ) : (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={push.subscribed ? push.disable : push.enable}
+                disabled={push.loading}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-50 ${
+                  push.subscribed
+                    ? "bg-violet-500/20 text-violet-300 border border-violet-500/30 hover:bg-violet-500/30"
+                    : "bg-violet-600 text-white hover:bg-violet-500"
+                }`}
+              >
+                {push.loading ? (
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : push.subscribed ? (
+                  <BellOff size={14} />
+                ) : (
+                  <Bell size={14} />
+                )}
+                {push.loading ? "Working…" : push.subscribed ? "Disable push" : "Enable push"}
+              </button>
+              {push.subscribed && (
+                <span className="text-xs text-emerald-400 flex items-center gap-1">
+                  <CheckCircle size={12} /> Active on this browser
+                </span>
+              )}
+            </div>
+          )}
+          {push.error && <p className="text-xs text-red-400 mt-2">{push.error}</p>}
         </div>
 
         {/* How it works */}

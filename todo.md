@@ -989,3 +989,15 @@
 - [x] Amber close button (tint X button to match golden amber)
 - [x] Amber left-border accent (border-l-4 border-amber-400 on banner)
 - [x] Server-side disclaimer persistence (DB column + tRPC + frontend sync — already wired; updated footer note to reflect cross-device persistence)
+
+## Disclaimer UX Polish (Mar 27 2026)
+- [ ] Re-read disclaimer link in page footer
+- [ ] Relative timestamps in admin disclaimer report
+- [ ] Framer-motion exit animation on disclaimer banner dismissal
+
+## Browser Push Notifications for Deployments (Mar 27 2026)
+- [x] Generate VAPID keys and store as secrets
+- [x] Add push_subscriptions DB table and server-side tRPC endpoints (subscribe/unsubscribe/send)
+- [x] Register service worker (push-sw.js) in client/public
+- [x] Add push subscription UI in admin panel (Enable/Disable push button)
+- [x] Wire push notification call into GitHub Pages deploy script

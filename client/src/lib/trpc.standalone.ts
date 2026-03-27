@@ -532,6 +532,14 @@ export const trpc = {
     score: { useMutation: () => makeMutation(() => ({ score: 0 })) },
   },
 
+  // ── push ─────────────────────────────────────────────────────────────────
+  push: {
+    getVapidPublicKey: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null) },
+    status: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ subscribed: false, count: 0 }) },
+    subscribe: { useMutation: () => makeMutation(() => ({ success: true })) },
+    unsubscribe: { useMutation: () => makeMutation(() => ({ success: true })) },
+  },
+
   // ── useUtils (no-op cache invalidation) ──────────────────────────────────
   useUtils: () => ({
     auth: {
