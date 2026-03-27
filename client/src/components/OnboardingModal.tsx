@@ -4,8 +4,8 @@ import { X, ChevronRight, ChevronLeft } from "lucide-react";
 
 const STEPS = [
   {
-    title: "Welcome to Meta Prep",
-    body: "This guide covers everything you need for Meta L4 (SWE), L5 (Senior SWE), L6 (Staff), and L7 (Senior Staff) interviews: Coding, System Design, and Behavioral rounds.",
+    title: "Screen Interview Guide: Meta Style",
+    body: "A community-sourced, independent study resource for Meta L4–L7 loops. Covers Coding, System Design, Behavioral, and the AI-Enabled Coding Round. Always refer first to any official preparation materials you have received.",
     icon: "🎯",
   },
   {
@@ -19,13 +19,18 @@ const STEPS = [
     icon: "🧠",
   },
   {
+    title: "✦ AI Native Tab",
+    body: "10 hands-on drills calibrated to Meta's AI-Native hiring framework: RAG Explainer, AI Stack Builder, Agent Eval Designer, and more. Complete the Maturity Self-Classifier to get your AI-Native level badge.",
+    icon: "🤖",
+  },
+  {
     title: "Overview Tab",
-    body: "Track your overall readiness, set your interview date, manage your STAR story bank, and print a recruiter-ready summary card.",
+    body: "Track your overall readiness across Coding, Behavioral, and AI-Native. Set your interview date, manage your STAR story bank, and print a recruiter-ready summary card.",
     icon: "📊",
   },
   {
     title: "Keyboard Shortcuts",
-    body: "Press 1–4 to switch tabs. Space to start/pause the timer. R to reveal a drill answer. Your progress is auto-saved to localStorage — no account needed.",
+    body: "Press 1–5 to switch tabs. Space to start/pause the timer. R to reveal a drill answer. Your progress is auto-saved — no account needed.",
     icon: "⌨️",
   },
 ];

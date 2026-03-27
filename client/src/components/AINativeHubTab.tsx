@@ -3,6 +3,7 @@
 // Violet/indigo identity, Practice Drills / Maturity Assessment toggle,
 // 5-level maturity spectrum bar, 10 candidate-focused drills.
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import RAGExplainerDrill from "@/components/ai-native/RAGExplainerDrill";
@@ -196,6 +197,15 @@ export default function AINativeHubTab() {
   const [toggle, setToggle] = useState<"drills" | "assessment">("drills");
   const [activeDrill, setActiveDrill] = useState<string | null>(null);
 
+  // Best scores for badge display on drill cards
+  const bestScoresQuery = trpc.aiNativeHistory.getBestScoresByDrill.useQuery(
+    undefined,
+    { retry: false }
+  );
+  const bestScoresMap = Object.fromEntries(
+    (bestScoresQuery.data ?? []).map(s => [s.drillId, s.bestScore])
+  );
+
   const allDrills =
     toggle === "drills" ? PRACTICE_DRILLS : [MATURITY_ASSESSMENT_DRILL];
   const drill = [...PRACTICE_DRILLS, MATURITY_ASSESSMENT_DRILL].find(
@@ -337,32 +347,48 @@ export default function AINativeHubTab() {
                   Featured
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {PRACTICE_DRILLS.filter(d => d.featured).map(d => (
-                    <button
-                      key={d.id}
-                      onClick={() => setActiveDrill(d.id)}
-                      className="text-left p-4 rounded-xl border border-violet-500/40 bg-gradient-to-br from-violet-500/10 to-indigo-500/10 hover:border-violet-500/70 transition-all group"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">{d.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="text-sm font-semibold text-foreground">
-                              {d.label}
-                            </span>
-                            <Badge
-                              className={`text-xs border ${SKILL_COLOR[d.coreSkill] || ""}`}
-                            >
-                              {d.coreSkill}
-                            </Badge>
+                  {PRACTICE_DRILLS.filter(d => d.featured).map(d => {
+                    const best = bestScoresMap[d.id];
+                    return (
+                      <button
+                        key={d.id}
+                        onClick={() => setActiveDrill(d.id)}
+                        className="text-left p-4 rounded-xl border border-violet-500/40 bg-gradient-to-br from-violet-500/10 to-indigo-500/10 hover:border-violet-500/70 transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">{d.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-sm font-semibold text-foreground">
+                                {d.label}
+                              </span>
+                              <Badge
+                                className={`text-xs border ${SKILL_COLOR[d.coreSkill] || ""}`}
+                              >
+                                {d.coreSkill}
+                              </Badge>
+                              {best !== undefined && (
+                                <span
+                                  className={`text-xs px-1.5 py-0.5 rounded font-semibold ${
+                                    best >= 8
+                                      ? "bg-emerald-500/15 text-emerald-400"
+                                      : best >= 6
+                                        ? "bg-amber-500/15 text-amber-400"
+                                        : "bg-red-500/15 text-red-400"
+                                  }`}
+                                >
+                                  Best {best}/10
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {d.description}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {d.description}
-                          </p>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -372,37 +398,53 @@ export default function AINativeHubTab() {
                   All Drills
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {PRACTICE_DRILLS.filter(d => !d.featured).map(d => (
-                    <button
-                      key={d.id}
-                      onClick={() => setActiveDrill(d.id)}
-                      className="text-left p-4 rounded-lg border border-violet-500/20 bg-violet-500/5 hover:border-violet-500/50 transition-all group"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="text-xl">{d.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="text-sm font-semibold text-foreground">
-                              {d.label}
-                            </span>
-                            <Badge
-                              className={`text-xs border ${SKILL_COLOR[d.coreSkill] || ""}`}
-                            >
-                              {d.coreSkill}
-                            </Badge>
-                            <span
-                              className={`text-xs px-1.5 py-0.5 rounded ${PHASE_COLOR[d.phase] || "bg-muted text-muted-foreground"}`}
-                            >
-                              {d.phase}
-                            </span>
+                  {PRACTICE_DRILLS.filter(d => !d.featured).map(d => {
+                    const best = bestScoresMap[d.id];
+                    return (
+                      <button
+                        key={d.id}
+                        onClick={() => setActiveDrill(d.id)}
+                        className="text-left p-4 rounded-lg border border-violet-500/20 bg-violet-500/5 hover:border-violet-500/50 transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="text-xl">{d.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-sm font-semibold text-foreground">
+                                {d.label}
+                              </span>
+                              <Badge
+                                className={`text-xs border ${SKILL_COLOR[d.coreSkill] || ""}`}
+                              >
+                                {d.coreSkill}
+                              </Badge>
+                              <span
+                                className={`text-xs px-1.5 py-0.5 rounded ${PHASE_COLOR[d.phase] || "bg-muted text-muted-foreground"}`}
+                              >
+                                {d.phase}
+                              </span>
+                              {best !== undefined && (
+                                <span
+                                  className={`text-xs px-1.5 py-0.5 rounded font-semibold ${
+                                    best >= 8
+                                      ? "bg-emerald-500/15 text-emerald-400"
+                                      : best >= 6
+                                        ? "bg-amber-500/15 text-amber-400"
+                                        : "bg-red-500/15 text-red-400"
+                                  }`}
+                                >
+                                  Best {best}/10
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {d.description}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {d.description}
-                          </p>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </>

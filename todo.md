@@ -1171,3 +1171,16 @@
 - [x] Wire VersionUpdateToast into App.tsx (polls every 60s, shows on hash change)
 - [x] 85/85 tests pass, prettier clean
 - [ ] Save checkpoint
+
+## Round 48 — Follow-ups + Learning Path Tab
+
+- [x] Update onboarding modal slide 1 title to "Screen Interview Guide: Meta Style"
+- [x] Update onboarding modal slide 1 body copy to reflect new brand and AI-Native tab
+- [x] Add AI-Native axis to OverviewTab readiness gauge (coding 50%, behavioral 30%, AI-Native 20%)
+- [x] Add AI-Native drills ready count to OverviewTab stats grid (4th column)
+- [x] Add best-score badges to featured and all-drills grid cards in AINativeHubTab
+- [x] Build LearningPathTab with rejection stats, weak signal catalogue, 4-week path, Apex Picks, High Impact features
+- [x] Add 📚 Learning Path tab to TopNav TABS array
+- [x] Wire LearningPathTab in Home.tsx
+- [x] 85/85 tests pass, build clean
+- [ ] Save checkpoint

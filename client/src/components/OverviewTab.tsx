@@ -40,6 +40,7 @@ import { AdaptiveStudyPlan } from "@/components/AdaptiveStudyPlan";
 import { PeerBenchmark } from "@/components/PeerBenchmark";
 import { ReadinessCertificate } from "@/components/ReadinessCertificate";
 import { AINativeRadarChart } from "@/components/AINativeRadarChart";
+import { trpc } from "@/lib/trpc";
 
 function getDaysUntil(dateStr: string): number {
   const target = new Date(dateStr);
@@ -172,6 +173,12 @@ function ReadinessDashboard() {
   const [mockHistory] = useMockHistory();
   const streak = useStreak();
 
+  // AI-Native best scores from DB
+  const aiNativeBestScores = trpc.aiNativeHistory.getBestScoresByDrill.useQuery(
+    undefined,
+    { retry: false }
+  );
+
   const masteredPatterns = PATTERNS.filter(
     p => (patternRatings[p.id] ?? 0) >= 4
   ).length;
@@ -181,9 +188,19 @@ function ReadinessDashboard() {
   const avgMock = mockHistory.length
     ? mockHistory.reduce((s, m) => s + m.avgScore, 0) / mockHistory.length
     : 0;
+
+  // AI-Native readiness: average of best scores across all drills, normalised to 0–1
+  // A score of 7+/10 counts as "ready" for a drill
+  const bestScores = aiNativeBestScores.data ?? [];
+  const AI_NATIVE_DRILL_COUNT = 9; // 9 scored drills (excluding flashcards)
+  const aiNativeReadyDrills = bestScores.filter(s => s.bestScore >= 7).length;
+  const aiNativePct = aiNativeReadyDrills / AI_NATIVE_DRILL_COUNT;
+
+  // Rebalanced weights: coding 50%, behavioral 30%, AI-Native 20%
   const overallPct = Math.round(
-    ((masteredPatterns / PATTERNS.length) * 0.6 +
-      (readyStories / BEHAVIORAL_QUESTIONS.length) * 0.4) *
+    ((masteredPatterns / PATTERNS.length) * 0.5 +
+      (readyStories / BEHAVIORAL_QUESTIONS.length) * 0.3 +
+      aiNativePct * 0.2) *
       100
   );
 
@@ -218,26 +235,33 @@ function ReadinessDashboard() {
             style={{ width: `${overallPct}%` }}
           />
         </div>
-        <div className="grid grid-cols-3 gap-3 mt-4">
+        <div className="text-xs text-muted-foreground mb-3">
+          Coding 50% · Behavioral 30% · AI-Native 20%
+        </div>
+        <div className="grid grid-cols-4 gap-3 mt-4">
           <div className="text-center">
             <div className="stat-num text-lg text-blue-400">
               {masteredPatterns}/{PATTERNS.length}
             </div>
-            <div className="text-xs text-muted-foreground">
-              Patterns mastered
-            </div>
+            <div className="text-xs text-muted-foreground">Patterns</div>
           </div>
           <div className="text-center">
             <div className="stat-num text-lg text-purple-400">
               {readyStories}/{BEHAVIORAL_QUESTIONS.length}
             </div>
-            <div className="text-xs text-muted-foreground">Stories ready</div>
+            <div className="text-xs text-muted-foreground">Stories</div>
           </div>
           <div className="text-center">
             <div className="stat-num text-lg text-emerald-400">
               {avgMock > 0 ? avgMock.toFixed(1) : "—"}
             </div>
             <div className="text-xs text-muted-foreground">Mock avg</div>
+          </div>
+          <div className="text-center">
+            <div className="stat-num text-lg text-violet-400">
+              {aiNativeReadyDrills}/{AI_NATIVE_DRILL_COUNT}
+            </div>
+            <div className="text-xs text-muted-foreground">AI-Native</div>
           </div>
         </div>
       </div>
