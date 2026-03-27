@@ -963,3 +963,14 @@
 - [x] Drill 16: Time Pressure Mock (Coding) — 20-min timer, AI interrupts at 10 min and 18 min for status update
 - [x] Drill 17: XFN Conflict Simulator (Behavioral) — PM disagrees with your tech recommendation, 5-exchange roleplay
 - [x] Drill 18: The Gotcha Follow-Up (All) — AI fires one targeted gotcha after every answer, score pre-emption quality
+
+## Follow-up: Drill History + Recommended Badge + Deploy (Mar 27 2026)
+- [ ] Drill History panel — persist each drill attempt (score, date, drill name) in localStorage, show history table in AdvancedDrillsPanel
+- [ ] Recommended Drill badge — highlight 1-2 drills based on Weak Signal Detector scores
+- [ ] Deploy Advanced Drills to metaengguide.pro and metaguide.blog
+
+## In-App "How to Use This Guide" Page (Mar 27 2026)
+- [x] Build GuideHowToUse page with 4 dynamic sections: Quick Start, Feature Map, 4-Week Checklist, Advanced Drills Guide
+- [x] Wire into navigation as "Guide" tab
+- [x] Standalone stubs added for 8 new drills in trpc.standalone.ts
+- [x] 102/102 tests passing

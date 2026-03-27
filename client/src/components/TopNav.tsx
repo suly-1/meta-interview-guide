@@ -787,6 +787,7 @@ export default function TopNav({
     { id: "replay", label: "Replay", due: 0, pct: null, items: [] },
     { id: "signals", label: "Weak Signals", due: 0, pct: null, items: [] },
     { id: "verdict", label: "Verdict", due: 0, pct: null, items: [] },
+    { id: "guide", label: "📖 Guide", due: 0, pct: null, items: [] },
   ];
 
   return (

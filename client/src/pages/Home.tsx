@@ -46,6 +46,7 @@ import InterviewReplayTab from "@/components/InterviewReplayTab";
 import WeakSignalDetectorTab from "@/components/WeakSignalDetectorTab";
 import VerdictEngineTab from "@/components/VerdictEngineTab";
 import StudyBuddySync from "@/components/StudyBuddySync";
+import GuideHowToUse from "@/components/GuideHowToUse";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -83,6 +84,7 @@ export default function Home() {
     "replay",
     "signals",
     "verdict",
+    "guide",
   ];
   const getTabFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
@@ -420,6 +422,13 @@ export default function Home() {
         {activeTab === "verdict" && (
           <SectionErrorBoundary label="Verdict Engine tab">
             <VerdictEngineTab />
+          </SectionErrorBoundary>
+        )}
+        {activeTab === "guide" && (
+          <SectionErrorBoundary label="How to Use Guide">
+            <div className="container py-8">
+              <GuideHowToUse onNavigate={setActiveTabWithUrl} />
+            </div>
           </SectionErrorBoundary>
         )}
       </main>
