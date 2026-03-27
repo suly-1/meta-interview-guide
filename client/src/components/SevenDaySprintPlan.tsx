@@ -179,7 +179,7 @@ function SprintFeedbackModal({
               key={s}
               onClick={() => setRating(s)}
               className={`text-2xl transition-all ${
-                s <= rating ? "text-amber-400" : "text-muted-foreground/30"
+                s <= rating ? "text-amber-400" : "text-muted-foreground"
               }`}
             >
               ★
@@ -197,7 +197,7 @@ function SprintFeedbackModal({
           value={message}
           onChange={e => setMessage(e.target.value)}
           placeholder="What would make this sprint plan more useful? (e.g., 'Day 3 had too many tasks', 'Need more system design time')"
-          className="w-full h-24 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-blue-500/50 transition-colors"
+          className="w-full h-24 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-blue-500/50 transition-colors"
         />
 
         <div className="flex gap-2 mt-3">
@@ -910,7 +910,7 @@ export function SevenDaySprintPlan() {
               >
                 Expand all
               </button>
-              <span className="text-muted-foreground/30">·</span>
+              <span className="text-muted-foreground">·</span>
               <button
                 onClick={collapseAll}
                 className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"

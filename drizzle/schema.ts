@@ -7,6 +7,7 @@ import {
   varchar,
   json,
   bigint,
+  boolean,
 } from "drizzle-orm/mysql-core";
 
 /**
@@ -468,3 +469,116 @@ export const failureDrillSessions = mysqlTable("failure_drill_sessions", {
   completedAt: timestamp("completedAt").defaultNow().notNull(),
 });
 export type FailureDrillSession = typeof failureDrillSessions.$inferSelect;
+
+// ── Daily Interview Challenge ─────────────────────────────────────────────────
+export const dailyChallengeSubmissions = mysqlTable(
+  "daily_challenge_submissions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    dateKey: varchar("dateKey", { length: 10 }).notNull(),
+    category: varchar("category", { length: 32 }).notNull(),
+    questionId: varchar("questionId", { length: 64 }).notNull(),
+    answer: text("answer").notNull(),
+    score: int("score").notNull().default(0),
+    feedback: text("feedback"),
+    submittedAt: timestamp("submittedAt").defaultNow().notNull(),
+  }
+);
+export type DailyChallengeSubmission =
+  typeof dailyChallengeSubmissions.$inferSelect;
+
+// ── User Streaks ──────────────────────────────────────────────────────────────
+export const userStreaks = mysqlTable("user_streaks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  currentStreak: int("currentStreak").notNull().default(0),
+  longestStreak: int("longestStreak").notNull().default(0),
+  lastActivityDate: varchar("lastActivityDate", { length: 10 }),
+  hardModeUnlocked: boolean("hardModeUnlocked").notNull().default(false),
+  bossFightUnlocked: boolean("bossFightUnlocked").notNull().default(false),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type UserStreak = typeof userStreaks.$inferSelect;
+
+// ── Boss Fight Sessions ───────────────────────────────────────────────────────
+export const bossFightSessions = mysqlTable("boss_fight_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  verdict: varchar("verdict", { length: 16 }).notNull(),
+  overallScore: int("overallScore").notNull().default(0),
+  transcript: json("transcript").notNull().$type<
+    Array<{
+      role: "architect" | "candidate";
+      content: string;
+      timestamp: number;
+      personaMode?: string;
+      score?: number;
+    }>
+  >(),
+  scoreBreakdown: json("scoreBreakdown").$type<{
+    systemDesign: number;
+    coding: number;
+    behavioral: number;
+    resilience: number;
+    communication: number;
+  }>(),
+  completedAt: timestamp("completedAt").defaultNow().notNull(),
+});
+export type BossFightSession = typeof bossFightSessions.$inferSelect;
+
+// ── Comeback Arc Plans ────────────────────────────────────────────────────────
+export const comebackArcPlans = mysqlTable("comeback_arc_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  drillId: varchar("drillId", { length: 64 }).notNull(),
+  triggerScore: int("triggerScore").notNull(),
+  steps: json("steps").notNull().$type<
+    Array<{
+      title: string;
+      description: string;
+      drillToRun?: string;
+    }>
+  >(),
+  predictedScore: int("predictedScore"),
+  retryScore: int("retryScore"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ComebackArcPlan = typeof comebackArcPlans.$inferSelect;
+
+// ── Adaptive Difficulty State ─────────────────────────────────────────────────
+export const adaptiveDifficultyState = mysqlTable("adaptive_difficulty_state", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  drillId: varchar("drillId", { length: 64 }).notNull(),
+  difficulty: varchar("difficulty", { length: 8 }).notNull().default("normal"),
+  recentScores: json("recentScores").notNull().$type<number[]>().default([]),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AdaptiveDifficultyState =
+  typeof adaptiveDifficultyState.$inferSelect;
+
+// ── Interview Seasons ─────────────────────────────────────────────────────────
+export const interviewSeasons = mysqlTable("interview_seasons", {
+  id: int("id").autoincrement().primaryKey(),
+  seasonNumber: int("seasonNumber").notNull().unique(),
+  theme: varchar("theme", { length: 128 }).notNull(),
+  description: text("description"),
+  drillIds: json("drillIds").notNull().$type<string[]>(),
+  startDate: varchar("startDate", { length: 10 }).notNull(),
+  endDate: varchar("endDate", { length: 10 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InterviewSeason = typeof interviewSeasons.$inferSelect;
+
+// ── Season Scores ─────────────────────────────────────────────────────────────
+export const seasonScores = mysqlTable("season_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  seasonId: int("seasonId").notNull(),
+  totalScore: int("totalScore").notNull().default(0),
+  drillsCompleted: int("drillsCompleted").notNull().default(0),
+  isChampion: boolean("isChampion").notNull().default(false),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SeasonScore = typeof seasonScores.$inferSelect;

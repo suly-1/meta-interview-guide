@@ -260,7 +260,7 @@ export default function VerbalExplanationScorer() {
                             className={
                               s <= val
                                 ? "text-teal-400 fill-teal-400"
-                                : "text-muted-foreground/30"
+                                : "text-muted-foreground"
                             }
                           />
                         ))}

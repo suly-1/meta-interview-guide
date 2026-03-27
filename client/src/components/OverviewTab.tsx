@@ -150,12 +150,8 @@ function LevelCards() {
                   <td className="p-3 text-xs font-semibold text-foreground">
                     {row.dimension}
                   </td>
-                  <td className="p-3 text-xs text-muted-foreground">
-                    {row.ic6}
-                  </td>
-                  <td className="p-3 text-xs text-muted-foreground">
-                    {row.ic7}
-                  </td>
+                  <td className="p-3 text-xs text-foreground/85">{row.ic6}</td>
+                  <td className="p-3 text-xs text-foreground/85">{row.ic7}</td>
                 </tr>
               ))}
             </tbody>
@@ -850,7 +846,7 @@ function InterviewDayChecklist() {
                       className="mt-0.5 accent-blue-500 shrink-0"
                     />
                     <span
-                      className={`text-xs transition-colors ${checked[key] ? "line-through text-muted-foreground/50" : "text-muted-foreground group-hover:text-foreground"}`}
+                      className={`text-xs transition-colors ${checked[key] ? "line-through text-muted-foreground" : "text-muted-foreground group-hover:text-foreground"}`}
                     >
                       {item}
                     </span>

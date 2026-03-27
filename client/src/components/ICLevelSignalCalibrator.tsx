@@ -46,7 +46,7 @@ const LEVEL_COLORS: Record<
 > = {
   L5: {
     bg: "bg-slate-500/20",
-    text: "text-slate-300",
+    text: "text-foreground/80",
     border: "border-slate-500/40",
   },
   L6: {

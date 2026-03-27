@@ -164,7 +164,7 @@ export function GeneralFeedback({ inline = false }: Props) {
                     className={`text-xl transition-all ${
                       s <= rating
                         ? "text-amber-400"
-                        : "text-muted-foreground/30 hover:text-muted-foreground/60"
+                        : "text-muted-foreground hover:text-muted-foreground"
                     }`}
                   >
                     ★
@@ -186,11 +186,11 @@ export function GeneralFeedback({ inline = false }: Props) {
                       ? "What content is incorrect, outdated, or missing?"
                       : "What would make this guide more useful for your Meta interview prep?"
               }
-              className="w-full h-28 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-blue-500/50 transition-colors"
+              className="w-full h-28 px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-blue-500/50 transition-colors"
             />
             <div className="flex items-center justify-between mt-1 mb-3">
               <span
-                className={`text-[10px] ${message.length < 10 ? "text-muted-foreground/40" : "text-muted-foreground"}`}
+                className={`text-[10px] ${message.length < 10 ? "text-muted-foreground" : "text-muted-foreground"}`}
               >
                 {message.length} chars {message.length < 10 && `(min 10)`}
               </span>

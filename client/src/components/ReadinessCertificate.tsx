@@ -286,7 +286,7 @@ export function ReadinessCertificate() {
               {currentScore.toFixed(1)}/{thresholdScore.toFixed(1)} required
             </span>
           </div>
-          <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+          <div className="h-2 bg-secondary rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
@@ -301,7 +301,7 @@ export function ReadinessCertificate() {
                   className={`w-4 h-4 rounded-sm text-center text-[9px] leading-4 font-bold ${
                     i < streak.currentStreak
                       ? "bg-amber-500 text-white"
-                      : "bg-slate-700 text-slate-500"
+                      : "bg-secondary text-muted-foreground"
                   }`}
                 >
                   🔥
@@ -360,7 +360,7 @@ export function ReadinessCertificate() {
                   <select
                     value={targetLevel}
                     onChange={e => setTargetLevel(e.target.value)}
-                    className="text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-1.5 text-foreground"
+                    className="text-xs rounded-lg bg-background border border-border px-3 py-1.5 text-foreground"
                   >
                     {["L4", "L5", "L6", "L7"].map(l => (
                       <option key={l} value={l}>
@@ -392,7 +392,7 @@ export function ReadinessCertificate() {
                           .writeText(url)
                           .then(() => toast.success("Link copied!"));
                       }}
-                      className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm font-semibold text-foreground transition-all flex items-center gap-2"
+                      className="px-4 py-2 rounded-lg bg-secondary hover:bg-slate-600 text-sm font-semibold text-foreground transition-all flex items-center gap-2"
                     >
                       <Share2 size={13} /> Share
                     </button>
@@ -403,11 +403,11 @@ export function ReadinessCertificate() {
               {certGenerated && (
                 <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-xs text-blue-300">
                   ✓ Certificate opened in new tab. Use{" "}
-                  <kbd className="px-1 py-0.5 rounded bg-slate-700 font-mono text-foreground">
+                  <kbd className="px-1 py-0.5 rounded bg-secondary font-mono text-foreground">
                     Ctrl+P
                   </kbd>{" "}
                   /{" "}
-                  <kbd className="px-1 py-0.5 rounded bg-slate-700 font-mono text-foreground">
+                  <kbd className="px-1 py-0.5 rounded bg-secondary font-mono text-foreground">
                     Cmd+P
                   </kbd>{" "}
                   and select "Save as PDF" to download.
@@ -416,10 +416,10 @@ export function ReadinessCertificate() {
             </>
           ) : (
             /* Locked state */
-            <div className="rounded-xl bg-slate-800/60 border border-slate-700/50 p-4 text-center">
+            <div className="rounded-xl bg-secondary border border-border p-4 text-center">
               <Lock
                 size={28}
-                className="text-muted-foreground mx-auto mb-2 opacity-40"
+                className="text-muted-foreground mx-auto mb-2 opacity-70"
               />
               <div className="text-sm font-bold text-muted-foreground mb-1">
                 Certificate Locked
@@ -430,19 +430,19 @@ export function ReadinessCertificate() {
                 your personalized readiness certificate.
               </p>
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="rounded-lg bg-slate-900/60 border border-slate-700/50 p-2">
+                <div className="rounded-lg bg-background border border-border p-2">
                   <div className="text-muted-foreground mb-0.5">
                     Required Score
                   </div>
                   <div className="font-bold text-foreground">≥ 4.0 / 5</div>
                 </div>
-                <div className="rounded-lg bg-slate-900/60 border border-slate-700/50 p-2">
+                <div className="rounded-lg bg-background border border-border p-2">
                   <div className="text-muted-foreground mb-0.5">
                     Required Verdict
                   </div>
                   <div className="font-bold text-emerald-400">Strong Hire</div>
                 </div>
-                <div className="rounded-lg bg-slate-900/60 border border-slate-700/50 p-2">
+                <div className="rounded-lg bg-background border border-border p-2">
                   <div className="text-muted-foreground mb-0.5">
                     Practice Streak
                   </div>

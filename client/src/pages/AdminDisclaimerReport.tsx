@@ -360,7 +360,7 @@ export default function AdminDisclaimerReport() {
                             className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                               row.role === "admin"
                                 ? "text-violet-400 bg-violet-500/10 border-violet-500/20"
-                                : "text-zinc-400 bg-zinc-500/10 border-zinc-500/20"
+                                : "text-muted-foreground bg-zinc-500/10 border-zinc-500/20"
                             }`}
                           >
                             {row.role}

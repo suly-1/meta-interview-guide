@@ -640,14 +640,14 @@ export function FullMockDaySimulator() {
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {lastMock && phase === "idle" && (
-            <span className="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-600/50 text-slate-300 font-medium whitespace-nowrap">
+            <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary border border-border text-foreground/80 font-medium whitespace-nowrap">
               Last mock: {lastMock.date.slice(5).replace("-", "/")} ·{" "}
               {lastMock.overallScore.toFixed(1)}/5 {lastMock.levelVerdict}
             </span>
           )}
           {phase === "done" && scorecard && (
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600 ${recColor(scorecard.hiringRecommendation)}`}
+              className={`text-xs font-bold px-2 py-0.5 rounded-full bg-secondary border border-border ${recColor(scorecard.hiringRecommendation)}`}
             >
               {scorecard.hiringRecommendation}
             </span>
@@ -669,7 +669,7 @@ export function FullMockDaySimulator() {
                 {ROUNDS.map((r, i) => (
                   <div
                     key={r}
-                    className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3 text-center"
+                    className="rounded-lg bg-secondary border border-border p-3 text-center"
                   >
                     <div className="text-lg mb-1">{roundEmoji[r]}</div>
                     <div className="text-xs font-bold text-foreground">
@@ -708,7 +708,7 @@ export function FullMockDaySimulator() {
                           ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
                           : i === roundIndex
                             ? "bg-purple-500/20 border-purple-500/40 text-purple-300"
-                            : "bg-slate-800/60 border-slate-700/50 text-muted-foreground"
+                            : "bg-secondary border-border text-muted-foreground"
                       }`}
                     >
                       {i < roundIndex ? "✓" : i + 1} {roundLabel[r]}
@@ -754,7 +754,7 @@ export function FullMockDaySimulator() {
                 {roundResults.map(r => (
                   <div
                     key={r.round}
-                    className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3 text-center"
+                    className="rounded-lg bg-secondary border border-border p-3 text-center"
                   >
                     <div className="text-lg mb-1">{roundEmoji[r.round]}</div>
                     <div className="text-xs text-muted-foreground mb-1 truncate">
@@ -773,7 +773,7 @@ export function FullMockDaySimulator() {
 
               {/* Full scorecard */}
               {scorecard && (
-                <div className="rounded-xl bg-slate-900/80 border border-purple-500/30 p-4 space-y-4">
+                <div className="rounded-xl bg-background border border-purple-500/30 p-4 space-y-4">
                   {/* Verdict */}
                   <div className="flex items-center justify-between">
                     <div>
@@ -808,7 +808,7 @@ export function FullMockDaySimulator() {
                   </div>
 
                   {/* Summary */}
-                  <p className="text-xs text-muted-foreground leading-relaxed border-t border-slate-700/50 pt-3">
+                  <p className="text-xs text-muted-foreground leading-relaxed border-t border-border pt-3">
                     {scorecard.summary}
                   </p>
 
@@ -835,7 +835,7 @@ export function FullMockDaySimulator() {
                     ].map(({ label, text }) => (
                       <div
                         key={label}
-                        className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-2.5"
+                        className="rounded-lg bg-secondary border border-border p-2.5"
                       >
                         <div className="text-xs font-bold text-foreground mb-0.5">
                           {label}
@@ -901,7 +901,7 @@ export function FullMockDaySimulator() {
                         ? "border-amber-500/40 bg-amber-950/30"
                         : verdict?.verdict === "no_hire"
                           ? "border-red-500/40 bg-red-950/30"
-                          : "border-slate-600/40 bg-slate-900/40"
+                          : "border-border bg-background"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -981,7 +981,7 @@ export function FullMockDaySimulator() {
                         </div>
                       </div>
 
-                      <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-2.5 space-y-1">
+                      <div className="rounded-lg bg-secondary border border-border p-2.5 space-y-1">
                         <div className="text-xs font-bold text-foreground">
                           Deciding Factor
                         </div>
@@ -1019,7 +1019,7 @@ export function FullMockDaySimulator() {
                         ).map(([label, score]) => (
                           <div
                             key={label}
-                            className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-2 text-center"
+                            className="rounded-lg bg-secondary border border-border p-2 text-center"
                           >
                             <div className="text-xs text-muted-foreground mb-0.5 truncate">
                               {label}
@@ -1034,7 +1034,7 @@ export function FullMockDaySimulator() {
                         ))}
                       </div>
 
-                      <div className="text-xs text-amber-300 font-medium border-t border-slate-700/50 pt-2">
+                      <div className="text-xs text-amber-300 font-medium border-t border-border pt-2">
                         💡 {verdict.oneLineCoaching}
                       </div>
                     </>
@@ -1165,7 +1165,7 @@ export function FullMockDaySimulator() {
                   setPhase("idle");
                   setRoundIndex(0);
                 }}
-                className="w-full py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm font-semibold text-foreground transition-all flex items-center justify-center gap-2"
+                className="w-full py-2 rounded-lg bg-secondary hover:bg-slate-600 text-sm font-semibold text-foreground transition-all flex items-center justify-center gap-2"
               >
                 <RotateCcw size={13} /> Start New Mock Day
               </button>

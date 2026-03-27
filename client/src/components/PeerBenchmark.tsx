@@ -138,7 +138,7 @@ export function PeerBenchmark() {
             <select
               value={targetLevel}
               onChange={e => setTargetLevel(e.target.value)}
-              className="text-xs rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="text-xs rounded-md bg-secondary border border-border px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500"
             >
               {["L4", "L5", "L6", "L7"].map(l => (
                 <option key={l} value={l}>
@@ -159,7 +159,7 @@ export function PeerBenchmark() {
 
       {/* Config */}
       {isOpen && (
-        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4 space-y-3">
+        <div className="rounded-lg bg-secondary border border-border p-4 space-y-3">
           {!latestScores && (
             <div className="space-y-2">
               <p className="text-xs text-amber-400">
@@ -268,7 +268,7 @@ export function PeerBenchmark() {
               return (
                 <div
                   key={dim.name}
-                  className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3"
+                  className="rounded-lg bg-secondary border border-border p-3"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -288,7 +288,7 @@ export function PeerBenchmark() {
                   </div>
 
                   {/* Distribution bar */}
-                  <div className="relative h-3 bg-slate-700 rounded-full overflow-visible mb-2">
+                  <div className="relative h-3 bg-secondary rounded-full overflow-visible mb-2">
                     {/* p25-p75 band */}
                     <div
                       className="absolute top-0 h-full bg-slate-600 rounded-full"
@@ -314,7 +314,7 @@ export function PeerBenchmark() {
                     />
                   </div>
 
-                  <div className="flex justify-between text-xs text-muted-foreground/60 mb-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
                     <span>p25: {dim.p25}</span>
                     <span>p50: {dim.p50}</span>
                     <span>p75: {dim.p75}</span>
@@ -349,7 +349,7 @@ export function PeerBenchmark() {
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground/50 text-center">
+          <div className="text-xs text-muted-foreground text-center">
             Top performer threshold for {targetLevel}:{" "}
             {result.topPerformerThreshold}/5
           </div>

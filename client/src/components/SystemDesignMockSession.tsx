@@ -1066,7 +1066,7 @@ export function SystemDesignMockSession() {
             }
             placeholder={`Write your ${currentPhase.phase} answer here… (bullet points, notes, design decisions)`}
             rows={5}
-            className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-violet-500/50 resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+            className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-violet-500/50 resize-none placeholder:text-muted-foreground leading-relaxed"
           />
 
           <div className="flex gap-2 flex-wrap">

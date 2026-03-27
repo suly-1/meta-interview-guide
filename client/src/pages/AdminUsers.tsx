@@ -205,7 +205,7 @@ function DurationPicker({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs text-zinc-400 block">Duration</label>
+      <label className="text-xs text-muted-foreground block">Duration</label>
       {/* Preset buttons */}
       <div className="flex flex-wrap gap-1.5">
         {DURATION_PRESETS.map(p => {
@@ -222,7 +222,7 @@ function DurationPicker({
               className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${
                 isActive
                   ? "bg-red-500/20 border-red-500/40 text-red-300 font-medium"
-                  : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+                  : "bg-secondary border-border text-muted-foreground hover:border-zinc-500 hover:text-foreground/90"
               }`}
             >
               {p.label}
@@ -244,9 +244,11 @@ function DurationPicker({
             const n = parseFloat(v);
             if (!isNaN(n) && n >= 0) onChange(n);
           }}
-          className="w-32 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-red-500/50"
+          className="w-32 bg-secondary border border-border rounded-lg px-3 py-1.5 text-xs text-foreground/90 placeholder-zinc-600 focus:outline-none focus:border-red-500/50"
         />
-        <span className="text-xs text-zinc-500">days (0 = permanent)</span>
+        <span className="text-xs text-muted-foreground">
+          days (0 = permanent)
+        </span>
       </div>
       {/* Preview */}
       {value > 0 && (
@@ -255,7 +257,9 @@ function DurationPicker({
         </p>
       )}
       {value === 0 && (
-        <p className="text-[10px] text-zinc-600">No auto-unblock scheduled.</p>
+        <p className="text-[10px] text-muted-foreground">
+          No auto-unblock scheduled.
+        </p>
       )}
     </div>
   );
@@ -277,21 +281,21 @@ function BlockDialog({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-md p-5 space-y-4">
+      <div className="bg-background border border-border rounded-xl w-full max-w-md p-5 space-y-4">
         <div className="flex items-center gap-2">
           <ShieldOff size={16} className="text-red-400" />
           <h2 className="text-sm font-semibold text-zinc-100">
             Block {userName}?
           </h2>
         </div>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-muted-foreground">
           This user will immediately lose access. Set a duration for a temporary
           block that auto-expires, or leave as Permanent.
         </p>
 
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-zinc-400 mb-1 block">
+            <label className="text-xs text-muted-foreground mb-1 block">
               Reason (optional, max 500 chars)
             </label>
             <textarea
@@ -301,7 +305,7 @@ function BlockDialog({
               value={reason}
               onChange={e => setReason(e.target.value)}
               rows={2}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-red-500/50 resize-none"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground/90 placeholder-zinc-600 focus:outline-none focus:border-red-500/50 resize-none"
             />
           </div>
 
@@ -311,7 +315,7 @@ function BlockDialog({
         <div className="flex gap-2 justify-end">
           <button
             onClick={onCancel}
-            className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-700 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground/90 border border-border rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -352,7 +356,7 @@ function ExtendDialog({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-md p-5 space-y-4">
+      <div className="bg-background border border-border rounded-xl w-full max-w-md p-5 space-y-4">
         <div className="flex items-center gap-2">
           <CalendarClock size={16} className="text-amber-400" />
           <h2 className="text-sm font-semibold text-zinc-100">
@@ -360,7 +364,7 @@ function ExtendDialog({
           </h2>
         </div>
 
-        <div className="bg-zinc-800/50 rounded-lg px-3 py-2 text-xs text-zinc-400 space-y-0.5">
+        <div className="bg-secondary rounded-lg px-3 py-2 text-xs text-muted-foreground space-y-0.5">
           <div>
             Current expiry:{" "}
             <span className="text-amber-400 font-medium">{currentExpiry}</span>
@@ -368,12 +372,12 @@ function ExtendDialog({
           {user.blockReason && (
             <div>
               Current reason:{" "}
-              <span className="text-zinc-300">{user.blockReason}</span>
+              <span className="text-foreground/80">{user.blockReason}</span>
             </div>
           )}
         </div>
 
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-muted-foreground">
           Set a new expiry from now. This will update the auto-unblock time
           without unblocking the user. Use 0 days to make the block permanent.
         </p>
@@ -382,7 +386,7 @@ function ExtendDialog({
           <DurationPicker value={expiryDays} onChange={setExpiryDays} />
 
           <div>
-            <label className="text-xs text-zinc-400 mb-1 block">
+            <label className="text-xs text-muted-foreground mb-1 block">
               Update reason (optional)
             </label>
             <input
@@ -391,7 +395,7 @@ function ExtendDialog({
               maxLength={500}
               value={reason}
               onChange={e => setReason(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground/90 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50"
             />
           </div>
         </div>
@@ -399,7 +403,7 @@ function ExtendDialog({
         <div className="flex gap-2 justify-end">
           <button
             onClick={onCancel}
-            className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-700 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground/90 border border-border rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -533,7 +537,9 @@ export default function AdminUsers() {
   if (authLoading || isOwnerQuery.isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="text-zinc-500 text-sm animate-pulse">Loading…</div>
+        <div className="text-muted-foreground text-sm animate-pulse">
+          Loading…
+        </div>
       </div>
     );
   }
@@ -544,7 +550,7 @@ export default function AdminUsers() {
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="text-center space-y-3">
           <ShieldOff size={40} className="text-red-400 mx-auto" />
-          <p className="text-zinc-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Owner access required to view this page.
           </p>
           <button
@@ -628,11 +634,11 @@ export default function AdminUsers() {
       )}
 
       {/* Header */}
-      <div className="border-b border-zinc-800 bg-zinc-900/50 sticky top-0 z-10">
+      <div className="border-b border-zinc-800 bg-background sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
-            className="text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="text-muted-foreground hover:text-foreground/90 transition-colors"
           >
             <ArrowLeft size={18} />
           </button>
@@ -642,7 +648,7 @@ export default function AdminUsers() {
               User Management
             </h1>
           </div>
-          <div className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
+          <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
             <span>{totalCount} users</span>
             {blockedCount > 0 && (
               <span className="text-red-400 font-medium">
@@ -670,36 +676,36 @@ export default function AdminUsers() {
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
         {/* Cohort health summary row */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
-            <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
+          <div className="bg-background border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               Total Users
             </span>
             <span className="text-2xl font-bold text-zinc-100">
               {statsData?.total ?? totalCount}
             </span>
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-[10px] text-muted-foreground">
               registered accounts
             </span>
           </div>
-          <div className="bg-zinc-900 border border-blue-500/20 rounded-xl p-4 flex flex-col gap-1">
+          <div className="bg-background border border-blue-500/20 rounded-xl p-4 flex flex-col gap-1">
             <span className="text-xs text-blue-400/70 font-medium uppercase tracking-wider">
               Active This Week
             </span>
             <span className="text-2xl font-bold text-blue-400">
               {statsData?.weeklyActive ?? "—"}
             </span>
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-[10px] text-muted-foreground">
               logged in last 7 days
             </span>
           </div>
-          <div className="bg-zinc-900 border border-red-500/20 rounded-xl p-4 flex flex-col gap-1">
+          <div className="bg-background border border-red-500/20 rounded-xl p-4 flex flex-col gap-1">
             <span className="text-xs text-red-400/70 font-medium uppercase tracking-wider">
               Blocked
             </span>
             <span className="text-2xl font-bold text-red-400">
               {statsData?.blocked ?? blockedCount}
             </span>
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-[10px] text-muted-foreground">
               {temporaryBlockCount > 0
                 ? `${temporaryBlockCount} temporary`
                 : "access revoked"}
@@ -723,47 +729,47 @@ export default function AdminUsers() {
         <div className="relative">
           <Search
             size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
             placeholder="Search by name, email, or ID…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
+            className="w-full bg-background border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-foreground/90 placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
           />
         </div>
 
         {/* User Table */}
         {isLoading ? (
-          <div className="text-center py-12 text-zinc-600 text-sm animate-pulse">
+          <div className="text-center py-12 text-muted-foreground text-sm animate-pulse">
             Loading users…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-zinc-600 text-sm">
+          <div className="text-center py-12 text-muted-foreground text-sm">
             No users found.
           </div>
         ) : (
           <div className="rounded-xl border border-zinc-800 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-zinc-900 border-b border-zinc-800">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wide">
+                <tr className="bg-background border-b border-zinc-800">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     User
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden md:table-cell">
                     Role
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden lg:table-cell">
                     Joined
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden lg:table-cell">
                     Last Seen
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wide">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Status
                   </th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wide">
+                  <th className="text-right px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Action
                   </th>
                 </tr>
@@ -787,7 +793,7 @@ export default function AdminUsers() {
                     <React.Fragment key={u.id}>
                       <tr
                         className={`transition-colors ${
-                          isBlocked ? "bg-red-500/5" : "hover:bg-zinc-900/50"
+                          isBlocked ? "bg-red-500/5" : "hover:bg-background"
                         }`}
                       >
                         {/* User info */}
@@ -804,7 +810,7 @@ export default function AdminUsers() {
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-medium text-zinc-200 text-sm">
+                                <span className="font-medium text-foreground/90 text-sm">
                                   {u.name ?? "Unknown"}
                                 </span>
                                 {isCurrentUser && (
@@ -818,7 +824,7 @@ export default function AdminUsers() {
                                   </span>
                                 )}
                               </div>
-                              <div className="text-xs text-zinc-500">
+                              <div className="text-xs text-muted-foreground">
                                 {u.email ?? `ID #${u.id}`}
                               </div>
                               {isBlocked && u.blockReason && (
@@ -834,7 +840,7 @@ export default function AdminUsers() {
                                       isLoginExpanded ? null : u.id
                                     )
                                   }
-                                  className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300 mt-0.5 transition-colors"
+                                  className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground/80 mt-0.5 transition-colors"
                                 >
                                   <Clock size={9} />
                                   {logins.length} login
@@ -856,7 +862,7 @@ export default function AdminUsers() {
                             className={`text-xs px-2 py-0.5 rounded font-medium ${
                               u.role === "admin"
                                 ? "bg-amber-500/20 text-amber-400"
-                                : "bg-zinc-800 text-zinc-400"
+                                : "bg-secondary text-muted-foreground"
                             }`}
                           >
                             {u.role}
@@ -864,12 +870,12 @@ export default function AdminUsers() {
                         </td>
 
                         {/* Joined */}
-                        <td className="px-4 py-3 text-xs text-zinc-500 hidden lg:table-cell">
+                        <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                           {formatDate(u.createdAt)}
                         </td>
 
                         {/* Last seen */}
-                        <td className="px-4 py-3 text-xs text-zinc-500 hidden lg:table-cell">
+                        <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                           {formatDate(u.lastSignedIn)}
                         </td>
 
@@ -894,7 +900,7 @@ export default function AdminUsers() {
                         {/* Action */}
                         <td className="px-4 py-3 text-right">
                           {isCurrentUser ? (
-                            <span className="text-xs text-zinc-600 italic">
+                            <span className="text-xs text-muted-foreground italic">
                               —
                             </span>
                           ) : isBlocked ? (
@@ -936,21 +942,21 @@ export default function AdminUsers() {
 
                       {/* Login history expansion row */}
                       {isLoginExpanded && logins.length > 0 && (
-                        <tr key={`${u.id}-logins`} className="bg-zinc-900/60">
+                        <tr key={`${u.id}-logins`} className="bg-background">
                           <td colSpan={6} className="px-4 py-2">
                             <div className="flex items-center gap-2 flex-wrap">
                               <Clock
                                 size={11}
-                                className="text-zinc-500 shrink-0"
+                                className="text-muted-foreground shrink-0"
                               />
-                              <span className="text-[10px] text-zinc-500 font-medium mr-1">
+                              <span className="text-[10px] text-muted-foreground font-medium mr-1">
                                 Last {logins.length} login
                                 {logins.length !== 1 ? "s:" : ":"}
                               </span>
                               {logins.map((d, i) => (
                                 <span
                                   key={i}
-                                  className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded"
+                                  className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded"
                                 >
                                   {formatDateTime(d)}
                                 </span>
@@ -969,10 +975,10 @@ export default function AdminUsers() {
 
         {/* Audit Log */}
         <div className="rounded-xl border border-zinc-800 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 bg-zinc-900">
+          <div className="flex items-center justify-between px-4 py-3 bg-background">
             <button
               onClick={() => setShowAuditLog(v => !v)}
-              className="flex items-center gap-2 text-sm text-zinc-300 font-medium hover:text-zinc-100 transition-colors"
+              className="flex items-center gap-2 text-sm text-foreground/80 font-medium hover:text-zinc-100 transition-colors"
             >
               <ClipboardList size={15} className="text-violet-400" />
               Admin Audit Log
@@ -982,16 +988,16 @@ export default function AdminUsers() {
                 </span>
               )}
               {showAuditLog ? (
-                <ChevronUp size={14} className="text-zinc-500" />
+                <ChevronUp size={14} className="text-muted-foreground" />
               ) : (
-                <ChevronDown size={14} className="text-zinc-500" />
+                <ChevronDown size={14} className="text-muted-foreground" />
               )}
             </button>
 
             {/* Export CSV */}
             <button
               onClick={handleExportCsv}
-              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:border-zinc-500 px-2.5 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground/90 border border-border hover:border-zinc-500 px-2.5 py-1.5 rounded-lg transition-colors"
             >
               <Download size={12} />
               Export CSV
@@ -1001,7 +1007,7 @@ export default function AdminUsers() {
           {showAuditLog && (
             <div className="divide-y divide-zinc-800/50">
               {!auditEvents || auditEvents.length === 0 ? (
-                <div className="px-4 py-8 text-center text-xs text-zinc-600">
+                <div className="px-4 py-8 text-center text-xs text-muted-foreground">
                   No events recorded yet.
                 </div>
               ) : (
@@ -1069,7 +1075,7 @@ export default function AdminUsers() {
                   return (
                     <div
                       key={ev.id}
-                      className="px-4 py-3 flex items-start gap-3 hover:bg-zinc-900/40 transition-colors"
+                      className="px-4 py-3 flex items-start gap-3 hover:bg-background transition-colors"
                     >
                       <div
                         className={`mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${iconBg}`}
@@ -1077,7 +1083,7 @@ export default function AdminUsers() {
                         {eventIcon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs text-zinc-300">
+                        <div className="text-xs text-foreground/80">
                           <span className="font-medium text-zinc-100">
                             {ev.actorName ?? `Actor #${ev.actorId}`}
                           </span>{" "}
@@ -1087,7 +1093,7 @@ export default function AdminUsers() {
                           </span>
                         </div>
                         {reason && !isExtended && (
-                          <div className="text-[10px] text-zinc-500 mt-0.5">
+                          <div className="text-[10px] text-muted-foreground mt-0.5">
                             Reason: {reason}
                           </div>
                         )}
@@ -1106,7 +1112,7 @@ export default function AdminUsers() {
                           <div className="text-[10px] text-amber-400/70 mt-0.5 space-y-0.5">
                             <div>
                               Previous:{" "}
-                              <span className="text-zinc-400">
+                              <span className="text-muted-foreground">
                                 {prevExpiry === "permanent"
                                   ? "Permanent"
                                   : new Date(prevExpiry).toLocaleString(
@@ -1137,7 +1143,7 @@ export default function AdminUsers() {
                               </span>
                             </div>
                             {reason && (
-                              <div className="text-zinc-500">
+                              <div className="text-muted-foreground">
                                 Reason: {reason}
                               </div>
                             )}
@@ -1160,7 +1166,7 @@ export default function AdminUsers() {
                             Re-block
                           </button>
                         )}
-                        <div className="text-[10px] text-zinc-600 whitespace-nowrap">
+                        <div className="text-[10px] text-muted-foreground whitespace-nowrap">
                           {formatDateTime(ev.createdAt)}
                         </div>
                       </div>

@@ -146,7 +146,7 @@ export default function CommunityBanner() {
         {/* Dismiss button */}
         <button
           onClick={handleDismiss}
-          className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+          className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white transition-colors"
           aria-label="Dismiss banner"
           title="Dismiss — won't show again"
         >
@@ -162,7 +162,7 @@ export default function CommunityBanner() {
               <span className="text-white">2026 interviews.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-400 leading-relaxed mb-4">
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
               A community-sourced, independent study resource — not affiliated
               with Meta. Covers L4–L7 Behavioral &amp; Coding rounds, including
               the{" "}
@@ -179,10 +179,10 @@ export default function CommunityBanner() {
 
             {/* Footer badges */}
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center px-2.5 py-1 rounded bg-white/5 border border-white/10 text-xs text-slate-400">
+              <span className="inline-flex items-center px-2.5 py-1 rounded bg-white/5 border border-white/10 text-xs text-muted-foreground">
                 No affiliation with Meta
               </span>
-              <span className="inline-flex items-center px-2.5 py-1 rounded bg-white/5 border border-white/10 text-xs text-slate-400">
+              <span className="inline-flex items-center px-2.5 py-1 rounded bg-white/5 border border-white/10 text-xs text-muted-foreground">
                 Updated March 2026
               </span>
             </div>

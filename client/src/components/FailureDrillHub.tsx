@@ -253,7 +253,7 @@ const DRILLS: DrillMeta[] = [
     description:
       "Interpret what the interviewer's silence means and respond to break it correctly.",
     icon: <Eye size={16} />,
-    color: "text-slate-400",
+    color: "text-muted-foreground",
     bgColor: "bg-slate-500/10 border-slate-500/30",
     difficulty: "Core",
     isLiveMock: true,

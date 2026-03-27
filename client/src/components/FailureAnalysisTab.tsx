@@ -1724,7 +1724,7 @@ export default function FailureAnalysisTab() {
                         Signal: {q.signal}
                       </p>
                       {bqFilter === "All" && (
-                        <p className="text-xs text-muted-foreground/60 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {q.area}
                         </p>
                       )}

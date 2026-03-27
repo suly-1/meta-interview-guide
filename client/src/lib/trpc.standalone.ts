@@ -1530,6 +1530,121 @@ export const trpc = {
         })),
     },
   },
+  // ── engagement ────────────────────────────────────────────────────────────────────────────────
+  engagement: {
+    getDailyChallenge: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({
+          dateKey: "2026-03-27",
+          questions: {
+            "system-design": {
+              id: "sd-1",
+              title: "Design a notification system",
+              prompt: "Design a scalable notification system for 500M users.",
+            },
+            coding: {
+              id: "c-1",
+              title: "Longest palindrome",
+              prompt: "Find the longest palindromic substring.",
+            },
+            behavioral: {
+              id: "b-1",
+              title: "Ownership story",
+              prompt: "Tell me about a time you owned a project end-to-end.",
+            },
+          },
+          submitted: {},
+          leaderboard: [],
+        }),
+    },
+    getDailyLeaderboard: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({}),
+    },
+    submitDailyChallenge: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({ score: 75, feedback: "Good answer.", rank: 5 })),
+    },
+    getStreak: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({
+          currentStreak: 3,
+          longestStreak: 7,
+          lastActivityDate: "2026-03-27",
+          hardModeUnlocked: false,
+          bossFightUnlocked: false,
+        }),
+    },
+    startBossFight: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          unlocked: true,
+          opening: "Welcome to the Boss Fight.",
+          sessionStarted: true,
+        })),
+    },
+    continueBossFight: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          architectResponse: "Interesting. Go on.",
+          personaMode: "skeptic",
+          turnNumber: 2,
+        })),
+    },
+    finishBossFight: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          verdict: "L6",
+          overallScore: 72,
+          scoreBreakdown: {
+            systemDesign: 70,
+            coding: 75,
+            behavioral: 68,
+            resilience: 72,
+            communication: 74,
+          },
+          summaryFeedback:
+            "Solid performance with room to improve on edge cases.",
+        })),
+    },
+    getBossFightHistory: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    generateComebackPlan: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          planId: 1,
+          steps: [
+            {
+              title: "Review fundamentals",
+              description: "Go back to basics.",
+              drillToRun: null,
+            },
+          ],
+          predictedScore: 65,
+          coachNote: "Focus on the fundamentals first.",
+        })),
+    },
+    getActiveComebackPlan: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null),
+    },
+    recordRetryScore: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    getDifficulty: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ difficulty: "normal", recentScores: [] }),
+    },
+    updateDifficulty: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({ difficulty: "normal", recentScores: [] })),
+    },
+    getActiveSeason: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null),
+    },
+    getAllSeasons: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+  },
   // ── system ───────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {

@@ -140,7 +140,7 @@ export function ScoreSyncBanner() {
       </div>
 
       {/* Device icons */}
-      <div className="flex items-center gap-1 text-muted-foreground/40 shrink-0">
+      <div className="flex items-center gap-1 text-muted-foreground shrink-0">
         <Monitor size={10} />
         <span className="text-[9px]">↔</span>
         <Smartphone size={10} />
@@ -176,7 +176,7 @@ export function ScoreSyncBanner() {
         )}
         <button
           onClick={() => setDismissed(true)}
-          className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+          className="text-muted-foreground hover:text-muted-foreground transition-colors"
         >
           <X size={11} />
         </button>

@@ -270,7 +270,7 @@ export default function HeatmapCalendar() {
           />
         ))}
         <span>More</span>
-        <span className="ml-auto text-xs text-muted-foreground/60">
+        <span className="ml-auto text-xs text-muted-foreground">
           Hover a cell for details
         </span>
       </div>

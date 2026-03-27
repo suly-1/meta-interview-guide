@@ -42,7 +42,7 @@ function getBadges(
 
 function getRankIcon(rank: number) {
   if (rank === 1) return <Crown size={14} className="text-yellow-400" />;
-  if (rank === 2) return <Crown size={14} className="text-slate-300" />;
+  if (rank === 2) return <Crown size={14} className="text-foreground/80" />;
   if (rank === 3) return <Crown size={14} className="text-amber-600" />;
   return (
     <span className="text-xs text-muted-foreground font-mono w-3.5 text-center">
@@ -232,14 +232,14 @@ export default function Leaderboard() {
           ) : entries.length === 0 ? (
             <div className="text-xs text-muted-foreground text-center py-6">
               <p>No entries yet — be the first!</p>
-              <p className="mt-1 text-muted-foreground/60">
+              <p className="mt-1 text-muted-foreground">
                 Click "Add me" to join the leaderboard anonymously.
               </p>
             </div>
           ) : (
             <>
               {/* Column headers */}
-              <div className="grid grid-cols-[1.5rem_1fr_auto_auto_auto] gap-x-3 px-2 py-1 text-xs text-muted-foreground/60 uppercase tracking-wide">
+              <div className="grid grid-cols-[1.5rem_1fr_auto_auto_auto] gap-x-3 px-2 py-1 text-xs text-muted-foreground uppercase tracking-wide">
                 <span>#</span>
                 <span>Handle</span>
                 <span className="flex items-center gap-1">
@@ -289,7 +289,7 @@ export default function Leaderboard() {
                 );
               })}
 
-              <div className="text-xs text-muted-foreground/50 text-center pt-2">
+              <div className="text-xs text-muted-foreground text-center pt-2">
                 Top 20 · Sorted by patterns mastered · Anonymous handles only
               </div>
             </>
@@ -380,7 +380,7 @@ export default function Leaderboard() {
               {joining ? "Joining…" : "Join Leaderboard"}
             </button>
 
-            <p className="text-xs text-muted-foreground/60 text-center">
+            <p className="text-xs text-muted-foreground text-center">
               You can remove yourself at any time. No account required.
             </p>
           </div>

@@ -270,11 +270,11 @@ export default function CheckpointPacer() {
                         ? "text-emerald-400"
                         : passed
                           ? "text-amber-400"
-                          : "text-muted-foreground/40"
+                          : "text-muted-foreground"
                     }
                   />
                   <span className="flex-1">{cp.label}</span>
-                  <span className="font-mono text-muted-foreground/60">
+                  <span className="font-mono text-muted-foreground">
                     {Math.floor(cp.at / 60)}:
                     {(cp.at % 60).toString().padStart(2, "0")}
                   </span>

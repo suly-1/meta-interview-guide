@@ -158,7 +158,7 @@ export function AdaptiveStudyPlan() {
 
       {/* Config panel */}
       {isOpen && (
-        <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4 space-y-4">
+        <div className="rounded-lg bg-secondary border border-border p-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">
@@ -167,7 +167,7 @@ export function AdaptiveStudyPlan() {
               <select
                 value={targetLevel}
                 onChange={e => setTargetLevel(e.target.value)}
-                className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-foreground"
+                className="w-full text-xs rounded-lg bg-background border border-border px-3 py-2 text-foreground"
               >
                 {["L4", "L5", "L6", "L7"].map(l => (
                   <option key={l} value={l}>
@@ -186,7 +186,7 @@ export function AdaptiveStudyPlan() {
                 max={90}
                 value={daysUntil}
                 onChange={e => setDaysUntil(Number(e.target.value))}
-                className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-foreground"
+                className="w-full text-xs rounded-lg bg-background border border-border px-3 py-2 text-foreground"
               />
             </div>
           </div>
@@ -228,7 +228,7 @@ export function AdaptiveStudyPlan() {
         <div className="space-y-3">
           {/* Summary bar */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3 text-center">
+            <div className="rounded-lg bg-secondary border border-border p-3 text-center">
               <div className="text-xs text-muted-foreground mb-0.5">
                 Readiness
               </div>
@@ -244,7 +244,7 @@ export function AdaptiveStudyPlan() {
                 {plan.overallReadiness}%
               </div>
             </div>
-            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3 col-span-2">
+            <div className="rounded-lg bg-secondary border border-border p-3 col-span-2">
               <div className="text-xs text-muted-foreground mb-0.5">
                 Primary Focus
               </div>
@@ -269,11 +269,11 @@ export function AdaptiveStudyPlan() {
             {plan.days.map((day, i) => (
               <div
                 key={day.day}
-                className="rounded-lg border border-slate-700/50 overflow-hidden"
+                className="rounded-lg border border-border overflow-hidden"
               >
                 <button
                   onClick={() => setExpanded(expanded === i ? null : i)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/60 hover:bg-slate-800/80 transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2.5 bg-secondary hover:bg-secondary transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-blue-400 w-12">
@@ -296,7 +296,7 @@ export function AdaptiveStudyPlan() {
                 </button>
 
                 {expanded === i && (
-                  <div className="p-3 space-y-2 bg-slate-900/40">
+                  <div className="p-3 space-y-2 bg-background">
                     {day.tasks.map((task, j) => (
                       <div
                         key={j}
@@ -341,7 +341,7 @@ export function AdaptiveStudyPlan() {
           <button
             onClick={handleGenerate}
             disabled={mutation.isPending}
-            className="w-full py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-xs text-muted-foreground transition-all flex items-center justify-center gap-1.5"
+            className="w-full py-1.5 rounded-lg bg-secondary hover:bg-slate-600 disabled:opacity-50 text-xs text-muted-foreground transition-all flex items-center justify-center gap-1.5"
           >
             <RefreshCw size={11} /> Regenerate Plan
           </button>

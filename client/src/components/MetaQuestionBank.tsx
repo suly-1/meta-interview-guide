@@ -803,7 +803,7 @@ export function MetaQuestionBank() {
             className={`text-xs flex items-center gap-1 px-2 py-1 rounded-lg border transition-colors ${
               showSavedOnly
                 ? "bg-amber-500/20 border-amber-500/30 text-amber-300"
-                : "border-slate-700 text-muted-foreground hover:text-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             <Star size={11} />
@@ -830,13 +830,13 @@ export function MetaQuestionBank() {
           placeholder="Search questions, tags, teams..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-slate-900 border border-slate-700 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-500/50"
+          className="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-500/50"
         />
       </div>
 
       {/* Filters */}
       {showFilters && (
-        <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-800/60 border border-slate-700/50 p-3">
+        <div className="grid grid-cols-2 gap-2 rounded-lg bg-secondary border border-border p-3">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">
               Round
@@ -846,7 +846,7 @@ export function MetaQuestionBank() {
               onChange={e =>
                 setFilterRound(e.target.value as RoundType | "all")
               }
-              className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+              className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
             >
               <option value="all">All Rounds</option>
               {ALL_ROUNDS.map(r => (
@@ -863,7 +863,7 @@ export function MetaQuestionBank() {
             <select
               value={filterLevel}
               onChange={e => setFilterLevel(e.target.value)}
-              className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+              className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
             >
               <option value="all">All Levels</option>
               {ALL_LEVELS.map(l => (
@@ -880,7 +880,7 @@ export function MetaQuestionBank() {
             <select
               value={filterTeam}
               onChange={e => setFilterTeam(e.target.value)}
-              className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+              className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
             >
               <option value="all">All Teams</option>
               {ALL_TEAMS.filter(t => t !== "All").map(t => (
@@ -897,7 +897,7 @@ export function MetaQuestionBank() {
             <select
               value={filterFreq}
               onChange={e => setFilterFreq(e.target.value as Frequency | "all")}
-              className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+              className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
             >
               <option value="all">All Frequencies</option>
               <option value="very_high">Very High</option>
@@ -916,7 +916,7 @@ export function MetaQuestionBank() {
           className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
             filterRound === "all"
               ? "bg-foreground text-background border-foreground"
-              : "border-slate-700 text-muted-foreground hover:text-foreground"
+              : "border-border text-muted-foreground hover:text-foreground"
           }`}
         >
           All
@@ -928,7 +928,7 @@ export function MetaQuestionBank() {
             className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
               filterRound === r
                 ? ROUND_COLORS[r]
-                : "border-slate-700 text-muted-foreground hover:text-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             {ROUND_LABELS[r]}
@@ -946,7 +946,7 @@ export function MetaQuestionBank() {
         {filtered.map(q => (
           <div
             key={q.id}
-            className="rounded-lg bg-slate-800/60 border border-slate-700/50 overflow-hidden"
+            className="rounded-lg bg-secondary border border-border overflow-hidden"
           >
             {/* Question row */}
             <div className="flex items-start gap-2 p-3">
@@ -982,13 +982,13 @@ export function MetaQuestionBank() {
                   {q.levels.map(l => (
                     <span
                       key={l}
-                      className="text-xs text-muted-foreground bg-slate-700/50 px-1.5 py-0.5 rounded"
+                      className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded"
                     >
                       {l}
                     </span>
                   ))}
                   {q.tags.slice(0, 2).map(t => (
-                    <span key={t} className="text-xs text-muted-foreground/60">
+                    <span key={t} className="text-xs text-muted-foreground">
                       #{t}
                     </span>
                   ))}
@@ -1008,7 +1008,7 @@ export function MetaQuestionBank() {
 
             {/* Expanded detail */}
             {expandedId === q.id && (
-              <div className="border-t border-slate-700/50 p-3 space-y-2 bg-slate-900/40">
+              <div className="border-t border-border p-3 space-y-2 bg-background">
                 {q.hint && (
                   <div className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded px-2 py-1.5">
                     💡 Hint: {q.hint}
@@ -1019,7 +1019,7 @@ export function MetaQuestionBank() {
                   {q.teams.map(t => (
                     <span
                       key={t}
-                      className="text-xs text-muted-foreground bg-slate-700/50 px-1.5 py-0.5 rounded"
+                      className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded"
                     >
                       {t}
                     </span>
@@ -1033,7 +1033,7 @@ export function MetaQuestionBank() {
                     </span>
                   ))}
                 </div>
-                <div className="text-xs text-muted-foreground/50">
+                <div className="text-xs text-muted-foreground">
                   Last seen: {q.year} · Frequency:{" "}
                   {FREQ_LABELS[q.frequency].label}
                 </div>

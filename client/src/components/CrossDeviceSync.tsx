@@ -330,7 +330,7 @@ export default function CrossDeviceSync() {
                     )}
                     {pulling ? "Restoring…" : "Restore Progress"}
                   </button>
-                  <p className="text-xs text-muted-foreground/60 text-center">
+                  <p className="text-xs text-muted-foreground text-center">
                     ⚠️ This will replace your current local progress with the
                     saved version.
                   </p>

@@ -20,6 +20,8 @@ const TABS = [
   { id: "ai-native", label: "✦ AI Native" },
   { id: "learning-path", label: "📚 Learning Path" },
   { id: "failure-analysis", label: "⚠️ Failure Analysis" },
+  { id: "guide", label: "📖 Guide" },
+  { id: "challenges", label: "🎮 Challenges" },
 ];
 
 // Site identity — injected at build time via VITE_SITE_ID
@@ -40,8 +42,8 @@ const WORDMARK = IS_METAGUIDE_BLOG
 const BADGE_TEXT = IS_METAGUIDE_BLOG ? "L4–L7" : "L6/L7";
 const BADGE_CLS = IS_METAGUIDE_BLOG ? "badge-green" : "badge-blue";
 const ACTIVE_TAB_CLS = IS_METAGUIDE_BLOG
-  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-  : "bg-blue-500/15 text-blue-400 border border-blue-500/30";
+  ? "bg-emerald-500/18 text-emerald-300 border border-emerald-500/35 font-semibold"
+  : "bg-blue-500/18 text-blue-300 border border-blue-500/35 font-semibold";
 
 export default function TopNav({
   activeTab,
@@ -88,7 +90,7 @@ export default function TopNav({
                   Always refer first to any official preparation materials you
                   have received.
                 </span>
-                <span className="text-blue-400/70">
+                <span className="text-blue-300/90">
                   No affiliation with Meta · Updated March 2026
                 </span>
               </div>

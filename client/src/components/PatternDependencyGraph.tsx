@@ -348,7 +348,7 @@ export default function PatternDependencyGraph() {
           Mastered
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="text-slate-400">★N</span> = Meta frequency
+          <span className="text-muted-foreground">★N</span> = Meta frequency
         </span>
       </div>
 
@@ -446,7 +446,7 @@ export default function PatternDependencyGraph() {
             {[1, 2, 3, 4, 5].map(s => (
               <span
                 key={s}
-                className={`text-base ${s <= rating ? "text-amber-400" : "text-muted-foreground/30"}`}
+                className={`text-base ${s <= rating ? "text-amber-400" : "text-muted-foreground"}`}
               >
                 ★
               </span>

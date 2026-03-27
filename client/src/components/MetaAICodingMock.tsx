@@ -271,7 +271,7 @@ function CodeEditor({
       {/* Editor area */}
       <div className="flex-1 overflow-hidden flex">
         {/* Line numbers */}
-        <div className="select-none text-right pr-3 pt-3 text-[11px] text-muted-foreground/40 leading-5 min-w-[3rem] overflow-hidden">
+        <div className="select-none text-right pr-3 pt-3 text-[11px] text-muted-foreground leading-5 min-w-[3rem] overflow-hidden">
           {Array.from({ length: lineCount }, (_, i) => (
             <div key={i}>{i + 1}</div>
           ))}
@@ -1099,7 +1099,7 @@ export function MetaAICodingMock() {
                     ? `bg-secondary ${p.color}`
                     : i < currentPhaseIdx
                       ? "text-emerald-400"
-                      : "text-muted-foreground/40"
+                      : "text-muted-foreground"
                 }`}
               >
                 {i < currentPhaseIdx ? (
@@ -1320,7 +1320,7 @@ export function MetaAICodingMock() {
                 <div className="text-center space-y-2">
                   <FileCode
                     size={32}
-                    className="mx-auto text-muted-foreground/30"
+                    className="mx-auto text-muted-foreground"
                   />
                   <p>No starter files for this phase.</p>
                   <p className="text-xs">

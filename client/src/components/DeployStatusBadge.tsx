@@ -41,7 +41,7 @@ export default function DeployStatusBadge() {
 
   if (isLoading) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
+      <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
         <Loader2 size={10} className="animate-spin" />
         Checking deploy…
       </span>
@@ -54,7 +54,7 @@ export default function DeployStatusBadge() {
         href="https://www.metaguide.blog"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+        className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-muted-foreground/70 transition-colors"
         title="GitHub Actions — status unknown"
       >
         <HelpCircle size={10} />
@@ -90,18 +90,16 @@ export default function DeployStatusBadge() {
       title: `Last deploy failed${data.commitSha ? ` · ${data.commitSha}` : ""}`,
     },
     cancelled: {
-      icon: <XCircle size={11} className="text-zinc-500 shrink-0" />,
+      icon: <XCircle size={11} className="text-muted-foreground shrink-0" />,
       label: "Deploy cancelled",
-      color: "text-zinc-500",
+      color: "text-muted-foreground",
       bg: "bg-zinc-500/10 border-zinc-500/20",
       title: "Last deploy was cancelled",
     },
     unknown: {
-      icon: (
-        <HelpCircle size={11} className="text-muted-foreground/40 shrink-0" />
-      ),
+      icon: <HelpCircle size={11} className="text-muted-foreground shrink-0" />,
       label: "Unknown",
-      color: "text-muted-foreground/40",
+      color: "text-muted-foreground",
       bg: "bg-muted/10 border-border/30",
       title: "Deploy status unknown",
     },

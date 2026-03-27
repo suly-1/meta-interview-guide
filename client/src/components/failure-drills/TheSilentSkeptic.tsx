@@ -75,8 +75,8 @@ export default function TheSilentSkeptic({ onComplete }: Props) {
       <div className="space-y-4">
         <div className="bg-slate-500/10 border border-slate-500/30 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Eye size={16} className="text-slate-400" />
-            <span className="font-semibold text-slate-400 text-sm">
+            <Eye size={16} className="text-muted-foreground" />
+            <span className="font-semibold text-muted-foreground text-sm">
               The Silent Skeptic
             </span>
           </div>
@@ -112,7 +112,7 @@ export default function TheSilentSkeptic({ onComplete }: Props) {
     return (
       <div className="space-y-4">
         <div className="bg-slate-500/10 border border-slate-500/30 rounded-lg p-4">
-          <p className="text-xs text-slate-400 font-medium uppercase tracking-wide mb-2">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2">
             Interview Scenario
           </p>
           <p className="text-sm text-foreground">{scenario.context}</p>
@@ -126,7 +126,9 @@ export default function TheSilentSkeptic({ onComplete }: Props) {
                 />
               ))}
             </div>
-            <span className="text-xs text-slate-400 italic">...silence...</span>
+            <span className="text-xs text-muted-foreground italic">
+              ...silence...
+            </span>
           </div>
         </div>
         <Button
@@ -143,7 +145,7 @@ export default function TheSilentSkeptic({ onComplete }: Props) {
     return (
       <div className="space-y-4">
         <div className="bg-slate-500/10 border border-slate-500/30 rounded-lg p-3">
-          <p className="text-xs text-slate-400 font-medium mb-1">
+          <p className="text-xs text-muted-foreground font-medium mb-1">
             What does this silence mean?
           </p>
           <p className="text-xs text-muted-foreground">{scenario.context}</p>

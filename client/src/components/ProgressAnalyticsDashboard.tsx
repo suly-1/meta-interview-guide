@@ -146,7 +146,7 @@ function PatternMasteryGrid({
     if (r >= 3) return "text-blue-400";
     if (r >= 2) return "text-amber-400";
     if (r >= 1) return "text-red-400";
-    return "text-muted-foreground/40";
+    return "text-muted-foreground";
   };
 
   const ratingBg = (r: number) => {
@@ -189,7 +189,7 @@ function PatternMasteryGrid({
                       style={{ width: `${(avgRating / 5) * 100}%` }}
                     />
                   </div>
-                  <span className="text-[9px] text-muted-foreground/50 w-4">
+                  <span className="text-[9px] text-muted-foreground w-4">
                     {avgRating.toFixed(1)}
                   </span>
                 </div>

@@ -197,7 +197,7 @@ export default function RubberDuckExplainer() {
                             className={
                               s <= val
                                 ? "text-pink-400 fill-pink-400"
-                                : "text-muted-foreground/30"
+                                : "text-muted-foreground"
                             }
                           />
                         ))}

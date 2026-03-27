@@ -85,7 +85,7 @@ function ScoreBar({
 // ── IC Level badge ────────────────────────────────────────────────────────────
 function ICBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
-    L5: "bg-slate-500/20 border-slate-500/40 text-slate-300",
+    L5: "bg-slate-500/20 border-slate-500/40 text-foreground/80",
     L6: "bg-blue-500/20 border-blue-500/40 text-blue-300",
     L7: "bg-purple-500/20 border-purple-500/40 text-purple-300",
   };
@@ -121,7 +121,7 @@ export function SessionHistoryPanel({ problem }: { problem: Problem }) {
           ? "text-amber-400"
           : "text-red-400";
   const icColors: Record<string, string> = {
-    L5: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+    L5: "bg-slate-500/20 text-foreground/80 border-slate-500/30",
     L6: "bg-blue-500/20 text-blue-300 border-blue-500/30",
     L7: "bg-purple-500/20 text-purple-300 border-purple-500/30",
   };
@@ -133,7 +133,7 @@ export function SessionHistoryPanel({ problem }: { problem: Problem }) {
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-500/5 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <History size={14} className="text-slate-400" />
+          <History size={14} className="text-muted-foreground" />
           <span className="text-sm font-semibold text-foreground">
             Session History
           </span>

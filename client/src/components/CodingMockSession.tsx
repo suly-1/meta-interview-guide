@@ -656,7 +656,7 @@ export function CodingMockSession() {
                       ? "L6 — Staff Engineer"
                       : "L7 — Senior Staff Engineer"}
                     {icMode === level && (
-                      <span className="ml-1.5 text-[9px] opacity-70">
+                      <span className="ml-1.5 text-[9px] text-muted-foreground">
                         {level === "L7" ? "(stricter)" : "(standard)"}
                       </span>
                     )}
@@ -957,7 +957,7 @@ export function CodingMockSession() {
         {/* Answer area — Monaco for pseudocode phase, textarea for others */}
         {step === 2 ? (
           <div className="rounded-lg overflow-hidden border border-blue-500/30">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1e1e1e] border-b border-slate-700/50">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1e1e1e] border-b border-border">
               <span className="text-xs text-muted-foreground">Language:</span>
               <span className="text-xs font-semibold text-blue-400">
                 Python

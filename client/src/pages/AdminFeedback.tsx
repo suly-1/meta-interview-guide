@@ -59,7 +59,7 @@ const STATUS_META: Record<
   },
   dismissed: {
     label: "Dismissed",
-    color: "text-slate-400",
+    color: "text-muted-foreground",
     bg: "bg-slate-500/10 border-slate-500/20",
   },
 };
@@ -144,7 +144,7 @@ function TypeBadge({ type }: { type: string }) {
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${
         type === "sprint_plan"
           ? "bg-orange-500/10 border-orange-500/20 text-orange-400"
-          : "bg-slate-500/10 border-slate-500/20 text-slate-400"
+          : "bg-slate-500/10 border-slate-500/20 text-muted-foreground"
       }`}
     >
       {type === "sprint_plan" ? "Sprint" : "General"}
@@ -180,7 +180,7 @@ const SENTIMENT_META: Record<
 
 function SentimentBadge({ sentiment }: { sentiment?: string | null }) {
   if (!sentiment)
-    return <span className="text-muted-foreground/40 text-[10px]">—</span>;
+    return <span className="text-muted-foreground text-[10px]">—</span>;
   const m = SENTIMENT_META[sentiment as Sentiment] ?? SENTIMENT_META["neutral"];
   return (
     <span
@@ -653,7 +653,7 @@ export default function AdminFeedback() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search messages…"
-            className="flex-1 min-w-40 px-3 py-1.5 rounded-lg border border-border bg-secondary text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-500/50"
+            className="flex-1 min-w-40 px-3 py-1.5 rounded-lg border border-border bg-secondary text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50"
           />
         </div>
 
@@ -731,7 +731,7 @@ export default function AdminFeedback() {
                         }
                         className="border-b border-border/50 hover:bg-secondary/30 cursor-pointer transition-colors"
                       >
-                        <td className="px-3 py-2.5 text-muted-foreground/50">
+                        <td className="px-3 py-2.5 text-muted-foreground">
                           {idx + 1}
                         </td>
                         <td className="px-3 py-2.5">
@@ -809,7 +809,7 @@ export default function AdminFeedback() {
                                     }))
                                   }
                                   onClick={e => e.stopPropagation()}
-                                  className="w-full px-3 py-2 rounded-lg border border-border bg-secondary text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-500/50 resize-none"
+                                  className="w-full px-3 py-2 rounded-lg border border-border bg-secondary text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue-500/50 resize-none"
                                 />
                                 <button
                                   onClick={e => {

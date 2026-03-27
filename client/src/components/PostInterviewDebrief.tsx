@@ -111,7 +111,7 @@ export function PostInterviewDebrief() {
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-slate-500/20 flex items-center justify-center">
-            <ClipboardList size={16} className="text-slate-300" />
+            <ClipboardList size={16} className="text-foreground/80" />
           </div>
           <div className="text-left">
             <div className="font-semibold text-sm text-foreground">
@@ -124,7 +124,7 @@ export function PostInterviewDebrief() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300 font-medium">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-500/20 text-foreground/80 font-medium">
             Close the Loop
           </span>
           {expanded ? (

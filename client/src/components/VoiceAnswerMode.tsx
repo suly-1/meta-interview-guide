@@ -66,7 +66,7 @@ function ScoreBar({
 
 function ICBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
-    L5: "bg-slate-500/20 border-slate-500/40 text-slate-300",
+    L5: "bg-slate-500/20 border-slate-500/40 text-foreground/80",
     L6: "bg-blue-500/20 border-blue-500/40 text-blue-300",
     L7: "bg-purple-500/20 border-purple-500/40 text-purple-300",
   };

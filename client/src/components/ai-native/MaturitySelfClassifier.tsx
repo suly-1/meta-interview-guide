@@ -13,7 +13,7 @@ const LEVELS = [
     id: "Traditionalist",
     label: "Traditionalist",
     desc: "Relies on traditional (non-AI) methods, missing opportunities for AI-driven impact",
-    color: "text-slate-400 border-slate-500/30 bg-slate-500/5",
+    color: "text-muted-foreground border-slate-500/30 bg-slate-500/5",
   },
   {
     id: "AI Aware",
@@ -141,7 +141,7 @@ export default function MaturitySelfClassifier() {
   };
 
   const LEVEL_COLOR: Record<string, string> = {
-    Traditionalist: "text-slate-400",
+    Traditionalist: "text-muted-foreground",
     "AI Aware": "text-blue-400",
     "AI Enabled": "text-cyan-400",
     "AI First": "text-indigo-400",

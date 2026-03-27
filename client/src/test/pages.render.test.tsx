@@ -216,4 +216,15 @@ describe("New AI component smoke tests", () => {
       )
     ).not.toThrow();
   });
+
+  it("HowToUseTab renders without throwing", async () => {
+    const { default: HowToUseTab } = await import("@/components/HowToUseTab");
+    expect(() =>
+      render(
+        <Wrapper>
+          <HowToUseTab />
+        </Wrapper>
+      )
+    ).not.toThrow();
+  });
 });

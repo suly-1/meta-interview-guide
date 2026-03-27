@@ -315,7 +315,7 @@ export function VoiceInterviewSimulator() {
                   setSelectedIdx(0);
                   handleReset();
                 }}
-                className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+                className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
               >
                 <option value="behavioral">Behavioral</option>
                 <option value="xfn">XFN</option>
@@ -329,7 +329,7 @@ export function VoiceInterviewSimulator() {
               <select
                 value={targetLevel}
                 onChange={e => setTargetLevel(e.target.value)}
-                className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+                className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
               >
                 {["L4", "L5", "L6", "L7"].map(l => (
                   <option key={l} value={l}>
@@ -348,7 +348,7 @@ export function VoiceInterviewSimulator() {
                   setSelectedIdx(Number(e.target.value));
                   handleReset();
                 }}
-                className="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5 text-foreground"
+                className="w-full text-xs rounded-lg bg-background border border-border px-2 py-1.5 text-foreground"
               >
                 {questions.map((_, i) => (
                   <option key={i} value={i}>
@@ -360,7 +360,7 @@ export function VoiceInterviewSimulator() {
           </div>
 
           {/* Question card */}
-          <div className="rounded-xl bg-slate-800/60 border border-slate-700/50 p-4">
+          <div className="rounded-xl bg-secondary border border-border p-4">
             <div className="flex items-start justify-between gap-3 mb-3">
               <p className="text-sm font-medium text-foreground leading-relaxed">
                 {currentQ.question}
@@ -402,7 +402,7 @@ export function VoiceInterviewSimulator() {
             )}
             {(recordingState === "uploading" ||
               recordingState === "scoring") && (
-              <div className="flex-1 py-3 rounded-xl bg-slate-700 text-muted-foreground text-sm flex items-center justify-center gap-2">
+              <div className="flex-1 py-3 rounded-xl bg-secondary text-muted-foreground text-sm flex items-center justify-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
                 {recordingState === "uploading"
                   ? "Transcribing..."
@@ -412,7 +412,7 @@ export function VoiceInterviewSimulator() {
             {scoreResult && (
               <button
                 onClick={handleReset}
-                className="p-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-muted-foreground transition-all"
+                className="p-3 rounded-xl bg-secondary hover:bg-slate-600 text-muted-foreground transition-all"
                 title="Reset"
               >
                 <RotateCcw size={16} />
@@ -422,7 +422,7 @@ export function VoiceInterviewSimulator() {
 
           {/* Transcript */}
           {transcript && (
-            <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3">
+            <div className="rounded-lg bg-secondary border border-border p-3">
               <div className="text-xs text-muted-foreground mb-1.5 font-semibold">
                 Transcription
               </div>
@@ -437,7 +437,7 @@ export function VoiceInterviewSimulator() {
             <div className="space-y-3">
               {/* Verdict + overall */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3 text-center">
+                <div className="rounded-lg bg-secondary border border-border p-3 text-center">
                   <div className="text-xs text-muted-foreground mb-1">
                     Overall Score
                   </div>
@@ -471,7 +471,7 @@ export function VoiceInterviewSimulator() {
                 ].map(([label, val]) => (
                   <div
                     key={label as string}
-                    className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-2 text-center"
+                    className="rounded-lg bg-secondary border border-border p-2 text-center"
                   >
                     <div className="text-xs text-muted-foreground mb-0.5">
                       {label}
@@ -538,7 +538,7 @@ export function VoiceInterviewSimulator() {
               </div>
 
               {/* Follow-up + next */}
-              <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-3">
+              <div className="rounded-lg bg-secondary border border-border p-3">
                 <div className="text-xs text-muted-foreground font-semibold mb-1">
                   Follow-up Question
                 </div>
@@ -549,7 +549,7 @@ export function VoiceInterviewSimulator() {
 
               <button
                 onClick={handleNextQuestion}
-                className="w-full py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-semibold text-foreground transition-all flex items-center justify-center gap-2"
+                className="w-full py-2 rounded-lg bg-secondary hover:bg-slate-600 text-xs font-semibold text-foreground transition-all flex items-center justify-center gap-2"
               >
                 <Play size={12} /> Next Question
               </button>

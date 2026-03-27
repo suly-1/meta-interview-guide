@@ -162,6 +162,13 @@
       "when": 1774641943647,
       "tag": "0022_slimy_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1774647558594,
+      "tag": "0023_sad_gideon",
+      "breakpoints": true
     }
   ]
 }

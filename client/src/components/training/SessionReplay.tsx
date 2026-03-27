@@ -393,7 +393,7 @@ export default function SessionReplay() {
             <span className={EVENT_COLORS[ev.type].split(" ")[0]}>
               {EVENT_ICONS[ev.type]}
             </span>
-            <span className="font-mono text-muted-foreground/60 w-10 shrink-0">
+            <span className="font-mono text-muted-foreground w-10 shrink-0">
               {formatTime(ev.time)}
             </span>
             <span className="flex-1 text-muted-foreground truncate">

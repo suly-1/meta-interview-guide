@@ -164,7 +164,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
       {loading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40">
           <Loader2 size={28} className="animate-spin text-blue-400" />
-          <p className="text-xs text-zinc-400">Just a moment…</p>
+          <p className="text-xs text-muted-foreground">Just a moment…</p>
         </div>
       )}
 
@@ -193,7 +193,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
           </div>
 
           {/* Main body — Improvement #1: softer, no named companies */}
-          <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
+          <div className="space-y-3 text-sm text-foreground/80 leading-relaxed">
             <p>
               This guide was built by the community, for candidates doing their
               own research. It's{" "}
@@ -210,10 +210,10 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
 
           {/* "The legal bit" plain-talk card */}
           <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
-            <p className="text-xs font-semibold text-zinc-300">
+            <p className="text-xs font-semibold text-foreground/80">
               The legal bit, in plain English:
             </p>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               This is a free community resource provided as-is. The people who
               built it aren't responsible for your interview outcomes or any
               decisions you make based on it. This is a best-effort resource
@@ -227,7 +227,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
             <p className="text-xs font-semibold text-blue-400">
               🌐 Free community resource
             </p>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Openly available at{" "}
               <span className="text-blue-400">
                 {typeof window !== "undefined"
@@ -250,7 +250,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
               ) : (
                 <Square
                   size={20}
-                  className="text-zinc-500 group-hover:text-zinc-300"
+                  className="text-muted-foreground group-hover:text-foreground/80"
                 />
               )}
             </span>
@@ -258,7 +258,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
               className={`text-sm transition-colors ${
                 checked
                   ? "text-emerald-300"
-                  : "text-zinc-400 group-hover:text-zinc-200"
+                  : "text-muted-foreground group-hover:text-foreground/90"
               }`}
             >
               I'm using this guide for my own interview prep and understand it's
@@ -273,7 +273,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
             className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 ${
               checked && !loading
                 ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25 cursor-pointer"
-                : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+                : "bg-secondary text-muted-foreground cursor-not-allowed"
             }`}
           >
             {loading ? (
@@ -287,7 +287,7 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
             )}
           </button>
 
-          <p className="text-center text-xs text-zinc-600">
+          <p className="text-center text-xs text-muted-foreground">
             Your choice is saved locally. You won't see this screen again on
             this device.
           </p>

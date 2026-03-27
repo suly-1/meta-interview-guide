@@ -37,7 +37,7 @@ const LEVEL_COLORS: Record<
 > = {
   L4: {
     bg: "bg-slate-500/20",
-    text: "text-slate-300",
+    text: "text-foreground/80",
     border: "border-slate-500/40",
   },
   L5: {
@@ -230,7 +230,7 @@ export function SeniorityLevelCalibrator() {
                     Detected Level
                   </div>
                   <div
-                    className={`text-2xl font-bold px-4 py-2 rounded-xl border ${LEVEL_COLORS[result.detectedLevel]?.bg ?? "bg-slate-500/20"} ${LEVEL_COLORS[result.detectedLevel]?.text ?? "text-slate-300"} ${LEVEL_COLORS[result.detectedLevel]?.border ?? "border-slate-500/40"}`}
+                    className={`text-2xl font-bold px-4 py-2 rounded-xl border ${LEVEL_COLORS[result.detectedLevel]?.bg ?? "bg-slate-500/20"} ${LEVEL_COLORS[result.detectedLevel]?.text ?? "text-foreground/80"} ${LEVEL_COLORS[result.detectedLevel]?.border ?? "border-slate-500/40"}`}
                   >
                     {result.detectedLevel}
                   </div>

@@ -1248,3 +1248,57 @@
 - [ ] Drill 18: The Gotcha Follow-Up (weakest assumption challenge)
 - [ ] DrillHub component with category tabs, progress tracker, best-score badges
 - [ ] Embed DrillHub in FailureAnalysisTab
+
+## Round 51 — Replay, Weekly Challenge, PDF Export
+
+- [ ] Drill replay mode with fresh AI seed and per-drill score history in FailureDrillHub
+- [ ] Weekly drill challenge banner with rotating drills and streak counter in FailureAnalysisTab
+- [ ] Export Progress Report PDF generator with drill scores, best times, and weak areas
+
+## Round 52 — How to Use This Guide Tab
+
+- [ ] HowToUseTab component with 12 collapsible sections including Customizing Your Learning Path
+- [ ] Register Guide tab in TopNav and Home.tsx
+- [ ] Smoke test for HowToUseTab
+
+## Round 51 — Engagement & Addictiveness Features
+
+- [ ] Daily Interview Challenge — daily question + AI scoring + leaderboard
+- [ ] Streak System with Stakes — streak badge, Hard Mode unlock, Boss Fight unlock
+- [ ] The Boss Fight — 45-min Architect mock, L5-L7+ verdict
+- [ ] Comeback Arc — post-drill recovery plan + retry delta celebration
+- [ ] Adaptive Difficulty Engine — per-user per-drill difficulty tracking and scenario calibration
+- [ ] Live Typing Pressure Mode — real-time interruption events during typing with response-time scoring
+- [ ] Interview Seasons — 4-week rotating seasons, season leaderboard, champion badges
+
+## Round 53 — Engagement Features + Contrast Overhaul
+
+- [x] Engagement router (server/routers/engagement.ts) — 16 procedures across 7 gamification features
+- [x] DailyChallengeCard component — 3 categories, AI scoring, anonymous leaderboard
+- [x] StreakDisplay component — streak counter, milestones, Hard Mode / Boss Fight unlock indicators
+- [x] BossFightLauncher component — 45-min Architect mock with multi-turn AI persona
+- [x] ComebackPlanCard component — post-low-score recovery plan with step-by-step drills
+- [x] AdaptiveDifficultyIndicator component — per-drill difficulty tracking with visual level indicator
+- [x] LiveTypingPressureDrill component — real-time AI interruptions while typing under time pressure
+- [x] SeasonBanner component — active interview season display with leaderboard
+- [x] GamificationHub tab — consolidates all 7 engagement features in one view
+- [x] Register Challenges tab in TopNav and Home.tsx
+- [x] Add engagement stubs to trpc.standalone.ts (stub coverage test passes)
+- [x] All 103 tests passing
+- [x] Site-wide contrast and readability overhaul:
+  - Raised dark-mode muted-foreground from oklch(0.58) → oklch(0.68) — affects every label, hint, caption
+  - Raised dark-mode card background from oklch(0.17) → oklch(0.185) for clearer card separation
+  - Raised dark-mode border opacity from 8% → 10% for clearer card edges
+  - Upgraded light-mode muted-foreground from oklch(0.52) → oklch(0.42) for better contrast on white
+  - Replaced all text-zinc-400/slate-400/gray-400 with text-muted-foreground (23 files)
+  - Replaced all text-zinc-300/slate-300/gray-300 with text-foreground/80
+  - Removed text-muted-foreground/60, /50, /40 opacity variants — raised to full muted-foreground
+  - Replaced hardcoded bg-slate-800/700/900 with semantic bg-secondary/bg-background
+  - Fixed active tab labels: blue-400 → blue-300, emerald-400 → emerald-300 (more readable on dark)
+  - Added kbd styling with border-bottom-width: 2px for clear keyboard shortcut legibility
+  - Added code:not([class]) styling for inline code readability
+  - Raised base font-size from 14px → 14.5px and line-height from 1.6 → 1.65
+  - Fixed OverviewTab comparison table cells: text-muted-foreground → text-foreground/85
+  - Fixed Leaderboard opacity variants: /60, /50 → full muted-foreground
+  - Added selection highlight color for text selection visibility
+  - Added dark-mode scrollbar styling for better usability

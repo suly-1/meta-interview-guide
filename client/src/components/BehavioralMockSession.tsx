@@ -592,7 +592,7 @@ export function BehavioralMockSession() {
               }`}
             >
               <div className="text-sm mb-0.5">🎯 L6</div>
-              <div className="text-[10px] font-normal opacity-80">
+              <div className="text-[10px] font-normal text-foreground/80">
                 Project-level XFN impact
               </div>
             </button>
@@ -605,7 +605,7 @@ export function BehavioralMockSession() {
               }`}
             >
               <div className="text-sm mb-0.5">🚀 L7</div>
-              <div className="text-[10px] font-normal opacity-80">
+              <div className="text-[10px] font-normal text-foreground/80">
                 Org-level strategic influence
               </div>
             </button>
@@ -1017,7 +1017,7 @@ export function BehavioralMockSession() {
             }
             placeholder={`Write your STAR answer here… (use the S/T/A/R tabs above to guide your structure)`}
             rows={5}
-            className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-teal-500/50 resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+            className="w-full text-xs text-foreground bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:border-teal-500/50 resize-none placeholder:text-muted-foreground leading-relaxed"
           />
 
           <div className="flex gap-2 flex-wrap">

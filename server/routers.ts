@@ -27,6 +27,7 @@ import { adminUsersRouter } from "./routers/adminUsers";
 import { aiNativeHistoryRouter } from "./routers/aiNativeHistory";
 import { drillSessionsRouter } from "./routers/drillSessions";
 import { failureDrillsRouter } from "./routers/failureDrills";
+import { engagementRouter } from "./routers/engagement";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "./db";
 import { pinAttempts } from "../drizzle/schema";
@@ -221,6 +222,7 @@ export const appRouter = router({
   leaderboard: leaderboardRouter,
   drillSessions: drillSessionsRouter,
   failureDrills: failureDrillsRouter,
+  engagement: engagementRouter,
   onboarding: onboardingRouter,
   ratings: ratingsRouter,
   ctciProgress: ctciProgressRouter,

@@ -118,7 +118,7 @@ function scoreBar(score: number) {
     score >= 4 ? "bg-emerald-500" : score >= 3 ? "bg-amber-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 rounded-full bg-slate-700">
+      <div className="flex-1 h-1.5 rounded-full bg-secondary">
         <div
           className={`h-1.5 rounded-full ${color} transition-all`}
           style={{ width: `${pct}%` }}
@@ -464,12 +464,12 @@ export function WeakSpotStudyPlan() {
                 return (
                   <div
                     key={day.day}
-                    className={`rounded-lg border transition-all ${done ? "bg-emerald-500/5 border-emerald-500/20 opacity-70" : "bg-slate-800/40 border-slate-700/50"}`}
+                    className={`rounded-lg border transition-all ${done ? "bg-emerald-500/5 border-emerald-500/20 opacity-70" : "bg-secondary border-border"}`}
                   >
                     <div className="flex items-start gap-3 p-3">
                       {/* Day badge */}
                       <div
-                        className={`shrink-0 w-10 h-10 rounded-lg flex flex-col items-center justify-center border ${done ? "bg-emerald-500/20 border-emerald-500/40" : "bg-slate-700/60 border-slate-600/50"}`}
+                        className={`shrink-0 w-10 h-10 rounded-lg flex flex-col items-center justify-center border ${done ? "bg-emerald-500/20 border-emerald-500/40" : "bg-secondary border-border"}`}
                       >
                         <span className="text-[10px] font-bold text-muted-foreground">
                           {day.label}
@@ -541,7 +541,7 @@ export function WeakSpotStudyPlan() {
                   ? "🎉 Week complete! Run a Full Mock Day to measure your improvement."
                   : `${7 - completedCount} day${7 - completedCount !== 1 ? "s" : ""} remaining — keep going!`}
               </div>
-              <div className="mt-2 h-2 rounded-full bg-slate-700 overflow-hidden">
+              <div className="mt-2 h-2 rounded-full bg-secondary overflow-hidden">
                 <div
                   className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all"
                   style={{ width: `${(completedCount / 7) * 100}%` }}

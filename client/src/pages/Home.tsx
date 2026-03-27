@@ -21,6 +21,8 @@ import AITrainingTab from "@/components/AITrainingTab";
 import AINativeHubTab from "@/components/AINativeHubTab";
 import LearningPathTab from "@/components/LearningPathTab";
 import FailureAnalysisTab from "@/components/FailureAnalysisTab";
+import HowToUseTab from "@/components/HowToUseTab";
+import { GamificationHub } from "@/components/GamificationHub";
 import OnboardingModal from "@/components/OnboardingModal";
 import NotificationBanner from "@/components/NotificationBanner";
 import { AlertTriangle, X } from "lucide-react";
@@ -181,6 +183,8 @@ export default function Home() {
         {activeTab === "ai-native" && <AINativeHubTab />}
         {activeTab === "learning-path" && <LearningPathTab />}
         {activeTab === "failure-analysis" && <FailureAnalysisTab />}
+        {activeTab === "guide" && <HowToUseTab />}
+        {activeTab === "challenges" && <GamificationHub />}
       </main>
 
       {/* Footer */}

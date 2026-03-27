@@ -66,7 +66,7 @@ export function FeatureHeatmapRow({ featureKeys }: FeatureHeatmapRowProps) {
               ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
               : count >= 5
                 ? "bg-amber-500/15 text-amber-300 border-amber-500/25"
-                : "bg-slate-500/15 text-slate-300 border-slate-500/25";
+                : "bg-slate-500/15 text-foreground/80 border-slate-500/25";
         return (
           <span
             key={key}

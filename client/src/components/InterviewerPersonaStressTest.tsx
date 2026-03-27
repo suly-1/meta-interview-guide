@@ -61,7 +61,7 @@ const PERSONAS = [
     name: "The Silent Starer",
     description: "Responds with 'Interesting. Tell me more.' to everything",
     icon: "😶",
-    color: "text-gray-400",
+    color: "text-muted-foreground",
     bgColor: "bg-gray-500/10",
     borderColor: "border-gray-500/20",
     openingChallenge: "Interesting. Tell me more.",

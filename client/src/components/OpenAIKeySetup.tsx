@@ -121,7 +121,7 @@ export default function OpenAIKeySetup({
         >
           Get a free key at platform.openai.com
         </a>
-        <span className="text-muted-foreground/50">
+        <span className="text-muted-foreground">
           · New accounts get $5 free credits
         </span>
       </div>

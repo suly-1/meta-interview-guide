@@ -286,7 +286,7 @@ export default function AITrainingTab() {
                       {d.rubricDimension}
                     </p>
                   </div>
-                  <span className="text-muted-foreground/40 text-xs font-mono shrink-0">
+                  <span className="text-muted-foreground text-xs font-mono shrink-0">
                     #{i + 1}
                   </span>
                 </div>
@@ -327,7 +327,7 @@ export default function AITrainingTab() {
       )}
 
       {/* Source attribution */}
-      <div className="text-xs text-muted-foreground/50 text-center space-y-0.5">
+      <div className="text-xs text-muted-foreground text-center space-y-0.5">
         <div>
           Sources: hellointerview.com · interviewing.io · Reddit candidate
           reports · Meta's official rubric

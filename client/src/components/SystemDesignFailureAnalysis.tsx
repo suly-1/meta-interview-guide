@@ -944,7 +944,7 @@ function FrameworkGuide() {
                   key={j}
                   className="text-xs text-muted-foreground flex items-start gap-1"
                 >
-                  <span className="text-muted-foreground/50 shrink-0 mt-0.5">
+                  <span className="text-muted-foreground shrink-0 mt-0.5">
                     ·
                   </span>
                   {step}
