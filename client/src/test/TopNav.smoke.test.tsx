@@ -111,9 +111,11 @@ describe("TopNav smoke tests", () => {
 
   it("renders the brand name", () => {
     renderTopNav();
-    // The logo text is site-specific — either "Meta Prep" (metaengguide.pro) or "Staff Eng Prep" (metaguide.blog)
+    // The logo text is site-specific — either "Screen Interview Prep Guide" (metaengguide.pro) or "Staff Eng Prep" (metaguide.blog)
     const brandText =
-      screen.queryByText("Meta Prep") ?? screen.queryByText("Staff Eng Prep");
+      screen.queryByText("Screen Interview Prep Guide") ??
+      screen.queryByText("Meta Prep") ??
+      screen.queryByText("Staff Eng Prep");
     expect(brandText).not.toBeNull();
   });
 

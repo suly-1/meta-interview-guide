@@ -31,7 +31,9 @@ const LOGO_ICON = IS_METAGUIDE_BLOG ? (
 ) : (
   <BookOpen size={14} className="text-white" />
 );
-const WORDMARK = IS_METAGUIDE_BLOG ? "Staff Eng Prep" : "Meta Prep";
+const WORDMARK = IS_METAGUIDE_BLOG
+  ? "Staff Eng Prep"
+  : "Screen Interview Prep Guide";
 const BADGE_TEXT = IS_METAGUIDE_BLOG ? "L4–L7" : "L6/L7";
 const BADGE_CLS = IS_METAGUIDE_BLOG ? "badge-green" : "badge-blue";
 const ACTIVE_TAB_CLS = IS_METAGUIDE_BLOG
