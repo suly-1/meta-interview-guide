@@ -9,6 +9,7 @@ import { leaderboardRouter } from "./routers/leaderboard";
 import { ctciRouter } from "./routers/ctci";
 import { aiRouter } from "./routers/ai";
 import { aiCodingMockRouter } from "./routers/aiCodingMock";
+import { aiTrainingRouter } from "./routers/aiTraining";
 import { onboardingRouter } from "./routers/onboarding";
 import { ratingsRouter } from "./routers/ratings";
 import { ctciProgressRouter } from "./routers/ctciProgress";
@@ -55,6 +56,7 @@ export const appRouter = router({
   ctci: ctciRouter,
   ai: aiRouter,
   aiCodingMock: aiCodingMockRouter,
+  aiTraining: aiTrainingRouter,
   auth: router({
     me: publicProcedure.query(opts => {
       const u = opts.ctx.user;
