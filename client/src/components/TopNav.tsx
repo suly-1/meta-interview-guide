@@ -915,7 +915,7 @@ export default function TopNav({
             {/* Admin Panel — always visible in live app; PIN gate protects the actual panel */}
             {!import.meta.env.VITE_STANDALONE && (
               <a
-                href="/admin/feedback"
+                href="/#/admin/feedback"
                 title={
                   newFeedbackCount > 0
                     ? `Admin Panel · ${newFeedbackCount} new in last 7 days`
