@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { tokenAdminProcedure, router, publicProcedure } from "../_core/trpc";
+import { ownerProcedure, router, publicProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings, pinAttempts } from "../../drizzle/schema";
 import { eq, desc, gte } from "drizzle-orm";
@@ -183,7 +183,7 @@ export const adminPinRouter = router({
    * Updates ADMIN_PIN in siteSettings (runtime override) and in ENV.
    * Takes effect immediately without server restart.
    */
-  changeAdminPin: tokenAdminProcedure
+  changeAdminPin: ownerProcedure
     .input(z.object({
       currentPin: z.string().min(1).max(20),
       newPin: z.string().min(4).max(20),
@@ -221,7 +221,7 @@ export const adminPinRouter = router({
    * getPinAttemptHistory — returns the last 10 failed PIN attempts.
    * Used by Admin Settings to show the audit table.
    */
-  getPinAttemptHistory: tokenAdminProcedure.query(async () => {
+  getPinAttemptHistory: ownerProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db
@@ -245,7 +245,7 @@ export const adminPinRouter = router({
   /**
    * getIpAllowlist — returns the current IP allowlist.
    */
-  getIpAllowlist: tokenAdminProcedure.query(async () => {
+  getIpAllowlist: ownerProcedure.query(async () => {
     const db = await getDb();
     if (!db) return { ips: [] };
     const [row] = await db
@@ -261,7 +261,7 @@ export const adminPinRouter = router({
    * setIpAllowlist — replaces the entire IP allowlist.
    * Accepts an array of IP strings (IPv4 exact or /24 CIDR).
    */
-  setIpAllowlist: tokenAdminProcedure
+  setIpAllowlist: ownerProcedure
     .input(z.object({ ips: z.array(z.string().max(50)).max(50) }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -279,7 +279,7 @@ export const adminPinRouter = router({
    * getPinAttemptChart — returns failed attempt counts per day for the last 7 days.
    * Used by Admin Settings to render a bar chart.
    */
-  getPinAttemptChart: tokenAdminProcedure.query(async () => {
+  getPinAttemptChart: ownerProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000);

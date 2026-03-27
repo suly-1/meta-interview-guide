@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, tokenAdminProcedure, router } from "../_core/trpc";
+import { protectedProcedure, publicProcedure, ownerProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
 import { eq, asc } from "drizzle-orm";
@@ -43,7 +43,7 @@ export const disclaimerRouter = router({
    * Admin-only: return all users with their disclaimer acknowledgment status.
    * Sorted by acknowledgedAt desc (acknowledged first), then by createdAt asc.
    */
-  adminReport: tokenAdminProcedure.query(async () => {
+  adminReport: ownerProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db

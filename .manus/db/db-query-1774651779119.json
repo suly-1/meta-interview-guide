@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, openId, name, email, role, createdAt FROM users ORDER BY createdAt ASC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute SELECT id, openId, name, email, role, createdAt FROM users ORDER BY createdAt ASC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "dNZfdGaEeGtXYHVWuEWxNA",
+      "name": "Suly Kamara",
+      "email": "suly@meta.com",
+      "role": "admin",
+      "createdAt": "2026-03-22 04:24:33"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\trole\tcreatedAt\n1\tdNZfdGaEeGtXYHVWuEWxNA\tSuly Kamara\tsuly@meta.com\tadmin\t2026-03-22 04:24:33\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

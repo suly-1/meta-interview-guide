@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { tokenAdminProcedure, publicProcedure, router } from "../_core/trpc";
+import { ownerProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings, users } from "../../drizzle/schema";
 import { eq, count, isNotNull } from "drizzle-orm";
@@ -72,7 +72,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Update lock settings.
    */
-  updateLockSettings: tokenAdminProcedure
+  updateLockSettings: ownerProcedure
     .input(z.object({
       lockEnabled: z.boolean().optional(),
       lockStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD").optional(),
@@ -94,7 +94,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Reset the 60-day clock to today (start a new cohort).
    */
-  resetClock: tokenAdminProcedure.mutation(async () => {
+  resetClock: ownerProcedure.mutation(async () => {
     const today = new Date().toISOString().slice(0, 10);
     await setSetting("lock_start_date", today);
     await setSetting("lock_enabled", "1");
@@ -105,7 +105,7 @@ export const siteSettingsRouter = router({
    * Admin: Immediately lock the site (manual override).
    * Sets the start date 61 days in the past so the cohort is immediately expired.
    */
-  lockNow: tokenAdminProcedure.mutation(async () => {
+  lockNow: ownerProcedure.mutation(async () => {
     const pastDate = new Date(Date.now() - 61 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     await setSetting("lock_start_date", pastDate);
     await setSetting("lock_enabled", "1");
@@ -115,7 +115,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Unlock the site immediately.
    */
-  unlock: tokenAdminProcedure.mutation(async () => {
+  unlock: ownerProcedure.mutation(async () => {
     await setSetting("lock_enabled", "0");
     return { success: true };
   }),
@@ -123,7 +123,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Cohort health summary — total users, % acknowledged disclaimer, days remaining.
    */
-  getCohortHealth: tokenAdminProcedure.query(async () => {
+  getCohortHealth: ownerProcedure.query(async () => {
     const db = await getDb();
     if (!db) {
       return {
@@ -167,7 +167,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Enable or disable the disclaimer gate.
    */
-  setDisclaimerEnabled: tokenAdminProcedure
+  setDisclaimerEnabled: ownerProcedure
     .input(z.object({ enabled: z.boolean() }))
     .mutation(async ({ input }) => {
       await setSetting("disclaimer_enabled", input.enabled ? "1" : "0");

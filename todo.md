@@ -1001,3 +1001,34 @@
 - [x] Register service worker (push-sw.js) in client/public
 - [x] Add push subscription UI in admin panel (Enable/Disable push button)
 - [x] Wire push notification call into GitHub Pages deploy script
+
+## Domain Fix + Deploy Sync (Mar 27 2026)
+- [x] Remove metaguide.one domain from Manus-hosted app, bind metaguide.blog instead
+- [x] Sync latest code from meta-interview-guide to meta-prep-guide
+- [x] Deploy both GitHub Pages sites with latest checkpoint
+
+## www.metaguide.blog CNAME + Disclaimer UX (Mar 27 2026)
+- [ ] Add www.metaguide.blog CNAME in Porkbun DNS (point to metaguide-hsv5ymgb.manus.space)
+- [ ] Add re-read disclaimer link in page footer
+- [ ] Add relative timestamps in admin disclaimer report
+- [ ] Add framer-motion exit animation on disclaimer banner dismissal
+
+## Backend Expansion — Five Features (Mar 27 2026)
+- [ ] DB schema: user_progress, leaderboard_entries, page_events, candidate_profiles, candidate_notes tables
+- [ ] tRPC router: user progress sync (save/load CTCI, streak, drill scores, readiness to DB)
+- [ ] tRPC router: leaderboard (Speed Run + Sprint scores, public ranking endpoint)
+- [ ] tRPC router: admin analytics (page views, active users, drill completions, readiness distributions)
+- [ ] Admin analytics dashboard UI page
+- [ ] Scheduled weekly digest job (cron, compute per-user progress, send push notification)
+- [ ] tRPC router: candidate CRM (profiles, interview notes, readiness snapshots)
+- [ ] Candidate CRM UI page (list, detail, notes editor, readiness snapshot viewer)
+- [ ] Frontend: progress sync hooks (auto-save to DB on change, load on login)
+- [ ] Frontend: leaderboard UI (Speed Run + Sprint tabs, personal rank highlight)
+
+## Owner-Only Admin Access — Option 1+5 (Mar 27 2026)
+- [x] Add adminProcedure middleware: check ctx.user.role === "admin" AND ctx.user.openId === ENV.ownerOpenId
+- [x] Replace tokenAdminProcedure with ownerProcedure in all admin routers
+- [x] Remove PIN gate from frontend — admin nav/badge only renders when isOwner (Manus OAuth check)
+- [x] Set owner DB record to role=admin (Suly Kamara, id=1 — already admin)
+- [x] Remove admin PIN entry modal from AdminGate.tsx entirely
+- [x] Remove KeyRound re-lock button and clearAdminToken from TopNav

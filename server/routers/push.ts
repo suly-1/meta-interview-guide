@@ -11,7 +11,7 @@
 import { z } from "zod";
 import webpush from "web-push";
 import { eq, and } from "drizzle-orm";
-import { publicProcedure, protectedProcedure, tokenAdminProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, ownerProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { pushSubscriptions, users } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
@@ -127,7 +127,7 @@ export const pushRouter = router({
    * Admin-only: send a deploy notification to all owner push subscriptions.
    * Called by the deploy script via the admin secret token.
    */
-  sendDeploy: tokenAdminProcedure
+  sendDeploy: ownerProcedure
     .input(
       z.object({
         title: z.string().default("🚀 New version deployed"),
