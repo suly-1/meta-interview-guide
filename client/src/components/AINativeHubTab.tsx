@@ -202,9 +202,18 @@ export default function AINativeHubTab() {
     undefined,
     { retry: false }
   );
-  const bestScoresMap = Object.fromEntries(
-    (bestScoresQuery.data ?? []).map(s => [s.drillId, s.bestScore])
-  );
+  // getBestScoresByDrill returns Record<drillId, {overallScore, coreSkill, drillLabel}>
+  // Use it directly — no .map() needed
+  const bestScoresMap: Record<
+    string,
+    { overallScore: number; coreSkill: string; drillLabel: string }
+  > =
+    bestScoresQuery.data && !Array.isArray(bestScoresQuery.data)
+      ? (bestScoresQuery.data as Record<
+          string,
+          { overallScore: number; coreSkill: string; drillLabel: string }
+        >)
+      : {};
 
   const allDrills =
     toggle === "drills" ? PRACTICE_DRILLS : [MATURITY_ASSESSMENT_DRILL];
@@ -348,7 +357,8 @@ export default function AINativeHubTab() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {PRACTICE_DRILLS.filter(d => d.featured).map(d => {
-                    const best = bestScoresMap[d.id];
+                    const bestEntry = bestScoresMap[d.id];
+                    const best = bestEntry?.overallScore;
                     return (
                       <button
                         key={d.id}
@@ -399,7 +409,8 @@ export default function AINativeHubTab() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {PRACTICE_DRILLS.filter(d => !d.featured).map(d => {
-                    const best = bestScoresMap[d.id];
+                    const bestEntry = bestScoresMap[d.id];
+                    const best = bestEntry?.overallScore;
                     return (
                       <button
                         key={d.id}

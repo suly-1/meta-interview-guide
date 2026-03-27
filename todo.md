@@ -1302,3 +1302,7 @@
   - Fixed Leaderboard opacity variants: /60, /50 → full muted-foreground
   - Added selection highlight color for text selection visibility
   - Added dark-mode scrollbar styling for better usability
+
+## Bug Fix — Round 53b
+
+- [x] Fix TypeError: (a.data ?? []).map is not a function — getBestScoresByDrill returns a Record object; AINativeHubTab.tsx now uses bestEntry?.overallScore instead of calling .map() on the result
