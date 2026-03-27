@@ -808,6 +808,724 @@ class AggregatingWindowProcessor(SlidingWindowProcessor):
       },
     },
   },
+
+  // ─── Problem 6: Distributed Cache ──────────────────────────────────────────
+  {
+    id: "distributed-cache",
+    title: "Distributed LRU Cache",
+    difficulty: "L6",
+    topic: "LRU / Distributed Systems",
+    description:
+      "You are working on Meta's distributed caching layer. The LRU cache has several bugs causing cache corruption and the eviction policy is broken under concurrent access.",
+    phases: {
+      bugFix: {
+        label: "Phase 1 — Bug Fix",
+        minutes: 15,
+        instructions:
+          "The test suite is failing. Find and fix all bugs in the LRU cache. Do NOT rewrite — make targeted fixes only.",
+        failingTests: [
+          "test_lru_eviction — FAIL: Most-recently-used item evicted instead of least-recently-used",
+          "test_capacity_limit — FAIL: Cache grows beyond max_size",
+          "test_concurrent_get_put — FAIL: Race condition on dict access",
+        ],
+        files: {
+          "lru_cache.py": `from collections import OrderedDict
+import threading
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+        self.lock = threading.Lock()
+
+    def get(self, key: str) -> int:
+        # BUG 1: no lock held during read — race condition
+        if key not in self.cache:
+            return -1
+        # BUG 2: move_to_end(last=False) moves to FRONT (LRU end), should be last=True
+        self.cache.move_to_end(key, last=False)
+        return self.cache[key]
+
+    def put(self, key: str, value: int) -> None:
+        with self.lock:
+            if key in self.cache:
+                self.cache.move_to_end(key)
+            self.cache[key] = value
+            # BUG 3: > should be >= to enforce capacity limit
+            if len(self.cache) > self.capacity + 1:
+                # BUG 4: popitem(last=True) removes MRU, should be last=False for LRU
+                self.cache.popitem(last=True)
+`,
+          "test_lru_cache.py": `import pytest
+import threading
+from lru_cache import LRUCache
+
+def test_lru_eviction():
+    cache = LRUCache(2)
+    cache.put("a", 1)
+    cache.put("b", 2)
+    cache.get("a")  # access a — b should be LRU now
+    cache.put("c", 3)  # evict b
+    assert cache.get("b") == -1  # b should be gone
+    assert cache.get("a") == 1
+
+def test_capacity_limit():
+    cache = LRUCache(3)
+    for i in range(5):
+        cache.put(str(i), i)
+    assert len(cache.cache) <= 3
+
+def test_concurrent_get_put():
+    cache = LRUCache(100)
+    errors = []
+    def worker(i):
+        try:
+            cache.put(str(i), i)
+            cache.get(str(i))
+        except Exception as e:
+            errors.append(e)
+    threads = [threading.Thread(target=worker, args=(i,)) for i in range(50)]
+    for t in threads: t.start()
+    for t in threads: t.join()
+    assert len(errors) == 0
+`,
+          "README.md": `# Distributed LRU Cache\n\nThread-safe LRU cache with O(1) get/put.\nRun tests: pytest test_lru_cache.py -v\n`,
+        },
+      },
+      featureImpl: {
+        label: "Phase 2 — Feature Implementation",
+        minutes: 25,
+        instructions:
+          "Implement a `ShardedLRUCache` that partitions keys across N shards (each an `LRUCache`) using consistent hashing. It must: (1) accept num_shards and per_shard_capacity, (2) route get/put to the correct shard via hash(key) % num_shards, (3) expose a `stats()` method returning {shard_id: {size, hits, misses}} for each shard.",
+        files: {
+          "lru_cache.py": `from collections import OrderedDict
+import threading
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+        self.lock = threading.Lock()
+        self.hits = 0
+        self.misses = 0
+
+    def get(self, key: str) -> int:
+        with self.lock:
+            if key not in self.cache:
+                self.misses += 1
+                return -1
+            self.cache.move_to_end(key, last=True)
+            self.hits += 1
+            return self.cache[key]
+
+    def put(self, key: str, value: int) -> None:
+        with self.lock:
+            if key in self.cache:
+                self.cache.move_to_end(key)
+            self.cache[key] = value
+            if len(self.cache) > self.capacity:
+                self.cache.popitem(last=False)
+
+
+# TODO: Implement ShardedLRUCache below
+class ShardedLRUCache:
+    pass  # YOUR IMPLEMENTATION HERE
+`,
+        },
+      },
+      optimize: {
+        label: "Phase 3 — Optimization",
+        minutes: 15,
+        instructions:
+          "Your `ShardedLRUCache` currently uses Python's built-in `hash()` which is not stable across processes. Replace with a consistent hash ring (sorted list of virtual nodes) so that adding/removing shards minimizes key remapping. Also add a `rebalance(new_num_shards)` method that migrates keys to their new correct shards.",
+        files: {},
+      },
+    },
+  },
+
+  // ─── Problem 7: News Feed Ranking ──────────────────────────────────────────
+  {
+    id: "news-feed-ranking",
+    title: "News Feed Ranking Engine",
+    difficulty: "L6",
+    topic: "Heap / Scoring / Ranking",
+    description:
+      "You are working on Meta's news feed ranking service. The ranking algorithm has bugs causing stale posts to appear at the top and the engagement score calculation is incorrect.",
+    phases: {
+      bugFix: {
+        label: "Phase 1 — Bug Fix",
+        minutes: 15,
+        instructions:
+          "The test suite is failing. Find and fix all bugs in the feed ranker. Do NOT rewrite — make targeted fixes only.",
+        failingTests: [
+          "test_recency_decay — FAIL: Old posts score higher than new posts",
+          "test_engagement_score — FAIL: ZeroDivisionError on posts with no views",
+          "test_top_k_feed — FAIL: Returns more items than requested K",
+        ],
+        files: {
+          "feed_ranker.py": `import heapq
+import time
+from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class Post:
+    id: str
+    author_id: str
+    timestamp: float  # unix epoch
+    likes: int
+    comments: int
+    shares: int
+    views: int
+
+class FeedRanker:
+    RECENCY_WEIGHT = 0.4
+    ENGAGEMENT_WEIGHT = 0.6
+    DECAY_HALF_LIFE_HOURS = 6.0
+
+    def engagement_score(self, post: Post) -> float:
+        # BUG 1: division by zero when views == 0
+        return (post.likes * 3 + post.comments * 5 + post.shares * 7) / post.views
+
+    def recency_score(self, post: Post) -> float:
+        hours_old = (time.time() - post.timestamp) / 3600
+        # BUG 2: should be negative exponent — older posts should score LOWER
+        return 2 ** (hours_old / self.DECAY_HALF_LIFE_HOURS)
+
+    def rank_score(self, post: Post) -> float:
+        return (
+            self.RECENCY_WEIGHT * self.recency_score(post) +
+            self.ENGAGEMENT_WEIGHT * self.engagement_score(post)
+        )
+
+    def top_k_feed(self, posts: List[Post], k: int) -> List[Post]:
+        # BUG 3: nlargest returns k+1 items
+        return heapq.nlargest(k + 1, posts, key=self.rank_score)
+`,
+          "test_feed_ranker.py": `import pytest
+import time
+from feed_ranker import Post, FeedRanker
+
+def test_recency_decay():
+    ranker = FeedRanker()
+    new_post = Post("1", "u1", time.time(), 10, 2, 1, 100)
+    old_post = Post("2", "u2", time.time() - 86400, 10, 2, 1, 100)
+    assert ranker.recency_score(new_post) > ranker.recency_score(old_post)
+
+def test_engagement_score():
+    ranker = FeedRanker()
+    post = Post("1", "u1", time.time(), 5, 2, 1, 0)  # 0 views
+    score = ranker.engagement_score(post)  # should not raise
+    assert score >= 0
+
+def test_top_k_feed():
+    ranker = FeedRanker()
+    posts = [Post(str(i), "u1", time.time(), i, 0, 0, max(i,1)) for i in range(10)]
+    result = ranker.top_k_feed(posts, 3)
+    assert len(result) == 3
+`,
+          "README.md": `# News Feed Ranking Engine\n\nScores posts by recency decay + engagement rate.\nRun tests: pytest test_feed_ranker.py -v\n`,
+        },
+      },
+      featureImpl: {
+        label: "Phase 2 — Feature Implementation",
+        minutes: 25,
+        instructions:
+          "Implement a `PersonalizedFeedRanker` that extends `FeedRanker` with: (1) a `user_affinity` dict mapping author_id → float (0–1 friendship strength), (2) a `topic_interests` dict mapping topic → float (0–1 interest score), (3) a `post_topics` dict mapping post_id → List[str], (4) a `personalized_score()` method that multiplies rank_score by (1 + affinity_boost + topic_boost). Also implement a `diversity_rerank()` method that ensures no single author appears more than twice in the top-K feed.",
+        files: {
+          "feed_ranker.py": `import heapq
+import time
+from dataclasses import dataclass
+from typing import List, Dict
+
+@dataclass
+class Post:
+    id: str
+    author_id: str
+    timestamp: float
+    likes: int
+    comments: int
+    shares: int
+    views: int
+
+class FeedRanker:
+    RECENCY_WEIGHT = 0.4
+    ENGAGEMENT_WEIGHT = 0.6
+    DECAY_HALF_LIFE_HOURS = 6.0
+
+    def engagement_score(self, post: Post) -> float:
+        return (post.likes * 3 + post.comments * 5 + post.shares * 7) / max(post.views, 1)
+
+    def recency_score(self, post: Post) -> float:
+        hours_old = (time.time() - post.timestamp) / 3600
+        return 2 ** (-hours_old / self.DECAY_HALF_LIFE_HOURS)
+
+    def rank_score(self, post: Post) -> float:
+        return (
+            self.RECENCY_WEIGHT * self.recency_score(post) +
+            self.ENGAGEMENT_WEIGHT * self.engagement_score(post)
+        )
+
+    def top_k_feed(self, posts: List[Post], k: int) -> List[Post]:
+        return heapq.nlargest(k, posts, key=self.rank_score)
+
+
+# TODO: Implement PersonalizedFeedRanker below
+class PersonalizedFeedRanker(FeedRanker):
+    pass  # YOUR IMPLEMENTATION HERE
+`,
+        },
+      },
+      optimize: {
+        label: "Phase 3 — Optimization",
+        minutes: 15,
+        instructions:
+          "The `top_k_feed` currently scores ALL posts before selecting top-K. For a user with 50,000 candidate posts this is too slow. Implement a `lazy_top_k()` method using a min-heap of size K that processes posts in a single pass O(n log k). Also add a `batch_rank()` method that ranks feeds for multiple users in parallel using ThreadPoolExecutor.",
+        files: {},
+      },
+    },
+  },
+
+  // ─── Problem 8: Rate Limiter with Burst Capacity ───────────────────────────
+  {
+    id: "rate-limiter-burst",
+    title: "Rate Limiter with Burst Capacity",
+    difficulty: "L7",
+    topic: "Concurrency / Token Bucket / Burst",
+    description:
+      "You are working on Meta's API gateway rate limiter that must support burst traffic. The burst capacity logic has critical bugs causing legitimate burst requests to be rejected and the quota reset is broken.",
+    phases: {
+      bugFix: {
+        label: "Phase 1 — Bug Fix",
+        minutes: 15,
+        instructions:
+          "The test suite is failing. Find and fix all bugs in the burst rate limiter. Do NOT rewrite — make targeted fixes only.",
+        failingTests: [
+          "test_burst_allowed — FAIL: Burst requests rejected even when burst_capacity available",
+          "test_sustained_rate — FAIL: Sustained requests above rate_per_second always allowed",
+          "test_quota_reset — FAIL: Quota not reset after window expires",
+        ],
+        files: {
+          "burst_limiter.py": `import time
+import threading
+from typing import Dict
+
+class BurstRateLimiter:
+    """
+    Supports two tiers:
+      - sustained_rate: requests/sec allowed continuously
+      - burst_capacity: extra requests allowed in a burst window
+    """
+    def __init__(self, sustained_rate: float, burst_capacity: int, burst_window: float = 1.0):
+        self.sustained_rate = sustained_rate
+        self.burst_capacity = burst_capacity
+        self.burst_window = burst_window
+        self.lock = threading.Lock()
+        # Per-user state
+        self._tokens: Dict[str, float] = {}
+        self._burst_used: Dict[str, int] = {}
+        self._window_start: Dict[str, float] = {}
+        self._last_refill: Dict[str, float] = {}
+
+    def allow(self, user_id: str) -> bool:
+        with self.lock:
+            now = time.time()
+            # Initialize user state
+            if user_id not in self._tokens:
+                self._tokens[user_id] = self.sustained_rate
+                self._burst_used[user_id] = 0
+                self._window_start[user_id] = now
+                self._last_refill[user_id] = now
+
+            # Refill sustained tokens
+            elapsed = now - self._last_refill[user_id]
+            self._tokens[user_id] += elapsed * self.sustained_rate
+            # BUG 1: should cap at sustained_rate (1 second worth), not burst_capacity
+            self._tokens[user_id] = min(self._tokens[user_id], self.burst_capacity)
+            self._last_refill[user_id] = now
+
+            # Reset burst window
+            if now - self._window_start[user_id] >= self.burst_window:
+                self._burst_used[user_id] = 0
+                # BUG 2: should update window_start to now, not add burst_window
+                self._window_start[user_id] += self.burst_window
+
+            # Check sustained token
+            if self._tokens[user_id] >= 1:
+                self._tokens[user_id] -= 1
+                return True
+
+            # Check burst capacity
+            # BUG 3: condition is inverted — should allow when burst_used < burst_capacity
+            if self._burst_used[user_id] >= self.burst_capacity:
+                self._burst_used[user_id] += 1
+                return True
+
+            return False
+`,
+          "test_burst_limiter.py": `import pytest
+import time
+from burst_limiter import BurstRateLimiter
+
+def test_burst_allowed():
+    limiter = BurstRateLimiter(sustained_rate=1.0, burst_capacity=5)
+    results = [limiter.allow("user1") for _ in range(6)]
+    assert results.count(True) >= 5  # at least 5 should be allowed (1 sustained + 5 burst)
+
+def test_sustained_rate():
+    limiter = BurstRateLimiter(sustained_rate=2.0, burst_capacity=0)
+    # Drain tokens
+    limiter.allow("user1")
+    limiter.allow("user1")
+    # 3rd should be rejected (no burst capacity)
+    assert limiter.allow("user1") == False
+
+def test_quota_reset():
+    limiter = BurstRateLimiter(sustained_rate=1.0, burst_capacity=3, burst_window=0.1)
+    for _ in range(4): limiter.allow("user1")  # exhaust
+    time.sleep(0.15)  # wait for window reset
+    assert limiter.allow("user1") == True  # should be allowed after reset
+`,
+          "README.md": `# Burst Rate Limiter\n\nTwo-tier rate limiting: sustained token bucket + burst capacity window.\nRun tests: pytest test_burst_limiter.py -v\n`,
+        },
+      },
+      featureImpl: {
+        label: "Phase 2 — Feature Implementation",
+        minutes: 25,
+        instructions:
+          "Implement a `TieredRateLimiter` that supports three tiers of users: 'free' (10 req/s, burst 20), 'pro' (100 req/s, burst 200), 'enterprise' (1000 req/s, burst 5000). It must: (1) accept a `user_tier` dict mapping user_id → tier, (2) apply the correct limits per tier, (3) expose a `usage_report(user_id)` method returning {tokens_remaining, burst_remaining, window_resets_in_seconds}, (4) support dynamic tier upgrades via `upgrade_tier(user_id, new_tier)` without resetting existing tokens.",
+        files: {
+          "burst_limiter.py": `import time
+import threading
+from typing import Dict
+
+TIERS = {
+    'free':       {'sustained_rate': 10,   'burst_capacity': 20},
+    'pro':        {'sustained_rate': 100,  'burst_capacity': 200},
+    'enterprise': {'sustained_rate': 1000, 'burst_capacity': 5000},
+}
+
+class BurstRateLimiter:
+    def __init__(self, sustained_rate: float, burst_capacity: int, burst_window: float = 1.0):
+        self.sustained_rate = sustained_rate
+        self.burst_capacity = burst_capacity
+        self.burst_window = burst_window
+        self.lock = threading.Lock()
+        self._tokens: Dict[str, float] = {}
+        self._burst_used: Dict[str, int] = {}
+        self._window_start: Dict[str, float] = {}
+        self._last_refill: Dict[str, float] = {}
+
+    def allow(self, user_id: str) -> bool:
+        with self.lock:
+            now = time.time()
+            if user_id not in self._tokens:
+                self._tokens[user_id] = self.sustained_rate
+                self._burst_used[user_id] = 0
+                self._window_start[user_id] = now
+                self._last_refill[user_id] = now
+            elapsed = now - self._last_refill[user_id]
+            self._tokens[user_id] = min(
+                self._tokens[user_id] + elapsed * self.sustained_rate,
+                self.sustained_rate
+            )
+            self._last_refill[user_id] = now
+            if now - self._window_start[user_id] >= self.burst_window:
+                self._burst_used[user_id] = 0
+                self._window_start[user_id] = now
+            if self._tokens[user_id] >= 1:
+                self._tokens[user_id] -= 1
+                return True
+            if self._burst_used[user_id] < self.burst_capacity:
+                self._burst_used[user_id] += 1
+                return True
+            return False
+
+
+# TODO: Implement TieredRateLimiter below
+class TieredRateLimiter:
+    pass  # YOUR IMPLEMENTATION HERE
+`,
+        },
+      },
+      optimize: {
+        label: "Phase 3 — Optimization",
+        minutes: 15,
+        instructions:
+          "Your `TieredRateLimiter` stores per-user state in memory. For 100M users this is infeasible. Redesign using a `StorageBackend` interface (with `get(key)` and `set(key, value, ttl)` methods) that can be backed by Redis. Implement a `MemoryBackend` for testing and a `RedisBackend` stub. Ensure all state operations are atomic (use a Lua script pattern in the Redis stub — just define the script string, no real Redis needed).",
+        files: {},
+      },
+    },
+  },
+
+  // ─── Problem 9: Graph Friend Recommendations ───────────────────────────────
+  {
+    id: "graph-friend-recommendations",
+    title: "Graph-Based Friend Recommender",
+    difficulty: "L6",
+    topic: "BFS / Graph / Mutual Connections",
+    description:
+      "You are working on Meta's People You May Know feature. The graph traversal has bugs causing incorrect mutual friend counts and the recommendation ranking is broken for users with large friend networks.",
+    phases: {
+      bugFix: {
+        label: "Phase 1 — Bug Fix",
+        minutes: 15,
+        instructions:
+          "The test suite is failing. Find and fix all bugs in the friend recommender. Do NOT rewrite — make targeted fixes only.",
+        failingTests: [
+          "test_mutual_friends_count — FAIL: Returns 0 mutuals for users with shared connections",
+          "test_no_self_recommendation — FAIL: User appears in their own recommendations",
+          "test_no_existing_friends — FAIL: Existing friends appear in recommendations",
+        ],
+        files: {
+          "friend_recommender.py": `from collections import defaultdict, deque
+from typing import Dict, List, Set
+
+class SocialGraph:
+    def __init__(self):
+        # adjacency list: user_id -> set of friend_ids
+        self.friends: Dict[str, Set[str]] = defaultdict(set)
+
+    def add_friendship(self, u: str, v: str) -> None:
+        self.friends[u].add(v)
+        self.friends[v].add(u)
+
+    def mutual_friends(self, u: str, v: str) -> Set[str]:
+        # BUG 1: intersection uses | (union) instead of & (intersection)
+        return self.friends[u] | self.friends[v]
+
+    def recommend(self, user_id: str, top_k: int = 10) -> List[str]:
+        if user_id not in self.friends:
+            return []
+
+        mutual_count: Dict[str, int] = defaultdict(int)
+        # BFS to depth 2
+        visited = {user_id}
+        queue = deque([(user_id, 0)])
+        while queue:
+            node, depth = queue.popleft()
+            for neighbor in self.friends[node]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    if depth < 2:
+                        queue.append((neighbor, depth + 1))
+                    # BUG 2: should only count depth-2 nodes (friends-of-friends)
+                    # Currently counts direct friends too
+                    mutual_count[neighbor] += len(
+                        self.mutual_friends(user_id, neighbor)
+                    )
+
+        # BUG 3: does not exclude user_id itself from recommendations
+        # BUG 4: does not exclude existing friends from recommendations
+        candidates = sorted(mutual_count.keys(), key=lambda x: -mutual_count[x])
+        return candidates[:top_k]
+`,
+          "test_friend_recommender.py": `import pytest
+from friend_recommender import SocialGraph
+
+def test_mutual_friends_count():
+    g = SocialGraph()
+    g.add_friendship("alice", "charlie")
+    g.add_friendship("bob", "charlie")
+    mutuals = g.mutual_friends("alice", "bob")
+    assert "charlie" in mutuals
+    assert "alice" not in mutuals
+    assert "bob" not in mutuals
+
+def test_no_self_recommendation():
+    g = SocialGraph()
+    g.add_friendship("alice", "bob")
+    g.add_friendship("bob", "charlie")
+    recs = g.recommend("alice")
+    assert "alice" not in recs
+
+def test_no_existing_friends():
+    g = SocialGraph()
+    g.add_friendship("alice", "bob")
+    g.add_friendship("bob", "charlie")
+    recs = g.recommend("alice")
+    assert "bob" not in recs  # bob is already alice's friend
+`,
+          "README.md": `# Friend Recommender\n\nBFS-based People You May Know using mutual friend count scoring.\nRun tests: pytest test_friend_recommender.py -v\n`,
+        },
+      },
+      featureImpl: {
+        label: "Phase 2 — Feature Implementation",
+        minutes: 25,
+        instructions:
+          "Implement a `WeightedFriendRecommender` that extends `SocialGraph` with: (1) interaction weights — `record_interaction(u, v, weight)` adds to an interaction_weights dict, (2) a `weighted_score(user_id, candidate)` that combines mutual_count * 2 + interaction_weight, (3) a `trending_recommendations(user_id, hours=24)` method that boosts candidates who have been active (had interactions recorded) in the last N hours, (4) a `explain_recommendation(user_id, candidate)` method returning a human-readable string like 'You both know Alice, Bob (+3 mutual friends)'.",
+        files: {
+          "friend_recommender.py": `from collections import defaultdict, deque
+from typing import Dict, List, Set, Tuple
+import time
+
+class SocialGraph:
+    def __init__(self):
+        self.friends: Dict[str, Set[str]] = defaultdict(set)
+
+    def add_friendship(self, u: str, v: str) -> None:
+        self.friends[u].add(v)
+        self.friends[v].add(u)
+
+    def mutual_friends(self, u: str, v: str) -> Set[str]:
+        return self.friends[u] & self.friends[v]
+
+    def recommend(self, user_id: str, top_k: int = 10) -> List[str]:
+        if user_id not in self.friends:
+            return []
+        mutual_count: Dict[str, int] = defaultdict(int)
+        direct = self.friends[user_id]
+        for friend in direct:
+            for fof in self.friends[friend]:
+                if fof != user_id and fof not in direct:
+                    mutual_count[fof] += 1
+        return sorted(mutual_count, key=lambda x: -mutual_count[x])[:top_k]
+
+
+# TODO: Implement WeightedFriendRecommender below
+class WeightedFriendRecommender(SocialGraph):
+    pass  # YOUR IMPLEMENTATION HERE
+`,
+        },
+      },
+      optimize: {
+        label: "Phase 3 — Optimization",
+        minutes: 15,
+        instructions:
+          "For a graph with 1 billion users, BFS to depth-2 is too slow. Implement a `SampledRecommender` that: (1) limits BFS to a random sample of 500 friends when a user has >500 friends (reservoir sampling), (2) uses a bloom filter (implement a simple bit-array version) to skip already-seen candidates, (3) adds a `precompute_top_k(user_id)` method that caches results with a 1-hour TTL using a simple dict-based cache.",
+        files: {},
+      },
+    },
+  },
+
+  // ─── Problem 10: Distributed Counter ──────────────────────────────────────
+  {
+    id: "distributed-counter",
+    title: "Distributed Event Counter",
+    difficulty: "L7",
+    topic: "Distributed Systems / CRDT / Consistency",
+    description:
+      "You are working on Meta's real-time like counter service. The distributed counter has bugs causing double-counting under concurrent updates and the merge operation for eventual consistency is broken.",
+    phases: {
+      bugFix: {
+        label: "Phase 1 — Bug Fix",
+        minutes: 15,
+        instructions:
+          "The test suite is failing. Find and fix all bugs in the distributed counter. Do NOT rewrite — make targeted fixes only.",
+        failingTests: [
+          "test_increment_idempotent — FAIL: Same event counted twice",
+          "test_merge_counters — FAIL: Merge loses counts from one replica",
+          "test_total_count — FAIL: Returns negative count after merge",
+        ],
+        files: {
+          "distributed_counter.py": `from typing import Dict, Set
+import threading
+
+class GCounter:
+    """
+    Grow-only CRDT counter. Each node tracks its own increments.
+    Merge takes the max per node (not sum) to handle re-delivered updates.
+    """
+    def __init__(self, node_id: str):
+        self.node_id = node_id
+        self.counts: Dict[str, int] = {node_id: 0}
+        self.seen_events: Set[str] = set()
+        self.lock = threading.Lock()
+
+    def increment(self, event_id: str, amount: int = 1) -> None:
+        with self.lock:
+            # BUG 1: idempotency check missing — same event_id counted multiple times
+            self.counts[self.node_id] = self.counts.get(self.node_id, 0) + amount
+
+    def merge(self, other: 'GCounter') -> None:
+        with self.lock:
+            for node, count in other.counts.items():
+                # BUG 2: should take max, not add — adding causes double-counting
+                self.counts[node] = self.counts.get(node, 0) + count
+
+    def value(self) -> int:
+        with self.lock:
+            # BUG 3: should sum all node counts, not subtract
+            counts = list(self.counts.values())
+            return counts[0] - sum(counts[1:]) if len(counts) > 1 else counts[0]
+`,
+          "test_distributed_counter.py": `import pytest
+from distributed_counter import GCounter
+
+def test_increment_idempotent():
+    c = GCounter("node1")
+    c.increment("evt_001")
+    c.increment("evt_001")  # same event — should not double count
+    assert c.value() == 1
+
+def test_merge_counters():
+    c1 = GCounter("node1")
+    c2 = GCounter("node2")
+    c1.increment("evt_001")
+    c1.increment("evt_002")
+    c2.increment("evt_003")
+    c1.merge(c2)
+    assert c1.value() == 3
+
+def test_total_count():
+    c1 = GCounter("node1")
+    c2 = GCounter("node2")
+    for i in range(5): c1.increment(f"e{i}")
+    for i in range(3): c2.increment(f"f{i}")
+    c1.merge(c2)
+    assert c1.value() == 8
+`,
+          "README.md": `# Distributed Event Counter\n\nGrow-only CRDT counter for eventual consistency across replicas.\nRun tests: pytest test_distributed_counter.py -v\n`,
+        },
+      },
+      featureImpl: {
+        label: "Phase 2 — Feature Implementation",
+        minutes: 25,
+        instructions:
+          "Implement a `PNCounter` (Positive-Negative CRDT counter) that supports both increments and decrements: (1) maintain two GCounters internally — `p_counter` (increments) and `n_counter` (decrements), (2) `increment(event_id, amount)` adds to p_counter, (3) `decrement(event_id, amount)` adds to n_counter (for un-likes), (4) `value()` returns p_counter.value() - n_counter.value(), (5) `merge(other)` merges both sub-counters, (6) ensure value() never goes below 0 (likes can't be negative).",
+        files: {
+          "distributed_counter.py": `from typing import Dict, Set
+import threading
+
+class GCounter:
+    def __init__(self, node_id: str):
+        self.node_id = node_id
+        self.counts: Dict[str, int] = {node_id: 0}
+        self.seen_events: Set[str] = set()
+        self.lock = threading.Lock()
+
+    def increment(self, event_id: str, amount: int = 1) -> None:
+        with self.lock:
+            if event_id in self.seen_events:
+                return
+            self.seen_events.add(event_id)
+            self.counts[self.node_id] = self.counts.get(self.node_id, 0) + amount
+
+    def merge(self, other: 'GCounter') -> None:
+        with self.lock:
+            for node, count in other.counts.items():
+                self.counts[node] = max(self.counts.get(node, 0), count)
+
+    def value(self) -> int:
+        with self.lock:
+            return sum(self.counts.values())
+
+
+# TODO: Implement PNCounter below
+class PNCounter:
+    pass  # YOUR IMPLEMENTATION HERE
+`,
+        },
+      },
+      optimize: {
+        label: "Phase 3 — Optimization",
+        minutes: 15,
+        instructions:
+          "Your `PNCounter` stores full event history in `seen_events` sets, which grows unbounded. Implement a `CompactedPNCounter` that: (1) periodically compacts seen_events into a single snapshot count (call `compact()` when seen_events exceeds 10,000 entries), (2) uses a Bloom filter (simple bit-array) instead of a set for deduplication to reduce memory by 10x, (3) adds a `delta_merge(delta)` method that only transmits changed node counts (not the full state) to reduce network bandwidth.",
+        files: {},
+      },
+    },
+  },
 ];
 
 // ─── Router ──────────────────────────────────────────────────────────────────

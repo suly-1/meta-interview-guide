@@ -1071,3 +1071,20 @@
 - [x] Add "🤖 AI Mock" tab to TopNav and wire in Home.tsx
 - [x] Write vitest tests for new AI procedures (12 tests passing)
 - [x] Add aiCodingMock stubs to trpc.standalone.ts (v25)
+
+## AI Mock Enhancements — Round 41
+
+- [ ] AI Token Budget Trainer: 5-message hard cap per phase, live counter badge, budget-exhausted lockout
+- [ ] TDD Mode toggle for Phase 1: hide code, show only failing tests, reveal code button after attempt
+- [ ] Add 5 new problems: distributed caching, news feed ranking, rate limiting with burst capacity, graph-based friend recommendations, + distributed counter
+
+## AI Mock Enhancements — Round 41
+
+- [ ] AI Token Budget Trainer: 5-message hard cap per phase, live counter badge, budget-exhausted lockout
+- [ ] TDD Mode toggle for Phase 1: hide code, show only failing tests, reveal code button after attempt
+- [ ] Add 5 new problems: distributed caching, news feed ranking, rate limiting with burst capacity, graph-based friend recommendations, distributed counter
+
+## 10 New High-Impact Features — Round 42 (to be researched and implemented)
+
+- [ ] Research 10 more features from primary sources (hellointerview, interviewing.io, Reddit)
+- [ ] Implement all 10 researched features

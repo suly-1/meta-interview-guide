@@ -34,6 +34,9 @@ import {
   Bot,
   User,
   Info,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -288,6 +291,8 @@ function CodeEditor({
 
 // ─── AI Chat Panel ────────────────────────────────────────────────────────────
 
+const AI_BUDGET_PER_PHASE = 5; // Hard cap matching Meta's real interview AI budget
+
 function AIChatPanel({
   problemId,
   phase,
@@ -295,6 +300,8 @@ function AIChatPanel({
   messages,
   onMessage,
   disabled,
+  phaseMessageCount,
+  onBudgetExhausted,
 }: {
   problemId: string;
   phase: PhaseKey;
@@ -302,6 +309,8 @@ function AIChatPanel({
   messages: ChatMessage[];
   onMessage: (msg: ChatMessage) => void;
   disabled?: boolean;
+  phaseMessageCount: number;
+  onBudgetExhausted?: () => void;
 }) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -313,8 +322,12 @@ function AIChatPanel({
     }
   }, [messages]);
 
+  const budgetRemaining = AI_BUDGET_PER_PHASE - phaseMessageCount;
+  const budgetExhausted = budgetRemaining <= 0;
+
   const send = async () => {
-    if (!input.trim() || chatMutation.isPending || disabled) return;
+    if (!input.trim() || chatMutation.isPending || disabled || budgetExhausted)
+      return;
     const userMsg: ChatMessage = {
       role: "user",
       content: input.trim(),
@@ -322,6 +335,11 @@ function AIChatPanel({
     };
     onMessage(userMsg);
     setInput("");
+
+    // Check if this message exhausts the budget
+    if (phaseMessageCount + 1 >= AI_BUDGET_PER_PHASE) {
+      onBudgetExhausted?.();
+    }
 
     try {
       const res = await chatMutation.mutateAsync({
@@ -352,21 +370,66 @@ function AIChatPanel({
         <span className="text-xs font-semibold text-blue-300">
           AI Assistant
         </span>
-        <Badge
-          variant="outline"
-          className="ml-auto text-[9px] px-1.5 py-0 border-amber-500/40 text-amber-400"
-        >
-          Limited Mode
-        </Badge>
+        {/* Token Budget Counter */}
+        <div className="ml-auto flex items-center gap-1.5">
+          {budgetExhausted ? (
+            <Badge
+              variant="outline"
+              className="text-[9px] px-1.5 py-0 border-red-500/60 text-red-400 gap-1"
+            >
+              <Lock size={8} />
+              Budget Exhausted
+            </Badge>
+          ) : (
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: AI_BUDGET_PER_PHASE }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-3 h-3 rounded-sm transition-colors ${
+                    i < phaseMessageCount
+                      ? "bg-red-500/70"
+                      : i === phaseMessageCount
+                        ? "bg-amber-400 animate-pulse"
+                        : "bg-secondary"
+                  }`}
+                  title={`Message ${i + 1} of ${AI_BUDGET_PER_PHASE}`}
+                />
+              ))}
+              <span className="text-[9px] text-muted-foreground ml-1">
+                {budgetRemaining} left
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-      {/* Disclaimer */}
-      <div className="px-3 py-2 text-[10px] text-muted-foreground bg-amber-500/5 border-b border-amber-500/20 flex gap-1.5">
-        <AlertTriangle size={10} className="text-amber-400 shrink-0 mt-0.5" />
-        <span>
-          AI will hint and explain — it won't write full solutions. This mirrors
-          Meta's real interview AI.
-        </span>
-      </div>
+      {/* Disclaimer / Budget Exhausted Banner */}
+      {budgetExhausted ? (
+        <div className="px-3 py-3 text-[11px] bg-red-500/10 border-b border-red-500/30 space-y-1.5">
+          <div className="flex items-center gap-1.5 text-red-400 font-semibold">
+            <Lock size={11} />
+            AI Budget Exhausted
+          </div>
+          <p className="text-muted-foreground leading-relaxed">
+            You've used all {AI_BUDGET_PER_PHASE} AI messages for this phase —
+            just like the real Meta interview. Continue solving without AI.
+          </p>
+          <p className="text-amber-400/80 text-[10px]">
+            💡 This is intentional training. Meta interviewers flag candidates
+            who over-rely on AI.
+          </p>
+        </div>
+      ) : (
+        <div className="px-3 py-2 text-[10px] text-muted-foreground bg-amber-500/5 border-b border-amber-500/20 flex gap-1.5">
+          <AlertTriangle size={10} className="text-amber-400 shrink-0 mt-0.5" />
+          <span>
+            AI will hint and explain — it won't write full solutions.{" "}
+            <span className="text-amber-400 font-medium">
+              {budgetRemaining} message{budgetRemaining !== 1 ? "s" : ""}{" "}
+              remaining this phase.
+            </span>
+          </span>
+        </div>
+      )}
       {/* Messages */}
       <ScrollArea
         className="flex-1 px-3 py-2"
@@ -439,9 +502,13 @@ function AIChatPanel({
               }
             }}
             placeholder={
-              disabled ? "Session ended" : "Ask the AI... (Enter to send)"
+              budgetExhausted
+                ? "AI budget exhausted — continue without AI"
+                : disabled
+                  ? "Session ended"
+                  : `Ask the AI... (${budgetRemaining} message${budgetRemaining !== 1 ? "s" : ""} left)`
             }
-            disabled={disabled || chatMutation.isPending}
+            disabled={disabled || chatMutation.isPending || budgetExhausted}
             className="resize-none text-xs min-h-[60px] max-h-[120px] bg-secondary/50"
             rows={2}
           />
@@ -449,7 +516,12 @@ function AIChatPanel({
             size="icon"
             variant="ghost"
             onClick={send}
-            disabled={!input.trim() || chatMutation.isPending || disabled}
+            disabled={
+              !input.trim() ||
+              chatMutation.isPending ||
+              disabled ||
+              budgetExhausted
+            }
             className="shrink-0 self-end h-8 w-8"
           >
             <Send size={13} />
@@ -736,6 +808,10 @@ export function MetaAICodingMock() {
   const [fileContents, setFileContents] = useState<Record<string, string>>({});
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [totalAiMessages, setTotalAiMessages] = useState(0);
+  const [phaseMessageCount, setPhaseMessageCount] = useState(0); // per-phase AI budget tracker
+  const [budgetExhaustedNotified, setBudgetExhaustedNotified] = useState(false);
+  const [tddMode, setTddMode] = useState(false); // TDD Mode: hide code, show only failing tests
+  const [tddCodeRevealed, setTddCodeRevealed] = useState(false); // whether user revealed code in TDD mode
   const [phaseScores, setPhaseScores] = useState<(PhaseScore | null)[]>([
     null,
     null,
@@ -782,6 +858,10 @@ export function MetaAICodingMock() {
     setTotalElapsed(0);
     setChatMessages([]);
     setTotalAiMessages(0);
+    setPhaseMessageCount(0);
+    setBudgetExhaustedNotified(false);
+    setTddMode(false);
+    setTddCodeRevealed(false);
     setPhaseScores([null, null, null]);
     setSessionDebrief(null);
     setSelfAssessment("");
@@ -790,7 +870,20 @@ export function MetaAICodingMock() {
 
   const handleAddMessage = (msg: ChatMessage) => {
     setChatMessages(prev => [...prev, msg]);
-    if (msg.role === "user") setTotalAiMessages(n => n + 1);
+    if (msg.role === "user") {
+      setTotalAiMessages(n => n + 1);
+      setPhaseMessageCount(n => n + 1);
+    }
+  };
+
+  const handleBudgetExhausted = () => {
+    if (!budgetExhaustedNotified) {
+      setBudgetExhaustedNotified(true);
+      toast.warning(
+        `🔒 AI budget exhausted for this phase (${AI_BUDGET_PER_PHASE} messages used). Continue without AI — just like the real Meta interview.`,
+        { duration: 6000 }
+      );
+    }
   };
 
   const handleEndPhase = async () => {
@@ -823,6 +916,10 @@ export function MetaAICodingMock() {
       setCurrentPhaseIdx(i => i + 1);
       setPhaseElapsed(0);
       setChatMessages([]);
+      setPhaseMessageCount(0);
+      setBudgetExhaustedNotified(false);
+      setTddMode(false);
+      setTddCodeRevealed(false);
       setSelfAssessment("");
       setTimeout(() => setTimerRunning(true), 500);
     } else {
@@ -1032,6 +1129,32 @@ export function MetaAICodingMock() {
               onTick={handleTick}
             />
 
+            {/* TDD Mode toggle — Phase 1 only */}
+            {currentPhaseIdx === 0 && (
+              <Button
+                variant={tddMode ? "default" : "outline"}
+                size="sm"
+                className={`text-xs h-7 gap-1 hidden sm:flex ${
+                  tddMode
+                    ? "bg-violet-600 hover:bg-violet-700 text-white border-0"
+                    : ""
+                }`}
+                onClick={() => {
+                  setTddMode(m => !m);
+                  setTddCodeRevealed(false);
+                  if (!tddMode)
+                    toast.info(
+                      "TDD Mode ON — code is hidden. Diagnose the bug from failing tests only.",
+                      { duration: 4000 }
+                    );
+                }}
+                title="TDD Mode: hide code, diagnose from failing tests only"
+              >
+                {tddMode ? <EyeOff size={11} /> : <Eye size={11} />}
+                TDD
+              </Button>
+            )}
+
             {/* Self-assessment */}
             <Button
               variant="outline"
@@ -1114,16 +1237,84 @@ export function MetaAICodingMock() {
           <div
             className={`flex-1 overflow-hidden ${!hasFiles ? "opacity-60" : ""}`}
           >
-            {hasFiles && activeFile ? (
-              <CodeEditor
-                key={activeFile}
-                filename={activeFile}
-                value={fileContents[activeFile] ?? ""}
-                onChange={val =>
-                  setFileContents(prev => ({ ...prev, [activeFile]: val }))
-                }
-                readOnly={activeFile.startsWith("test_")}
-              />
+            {/* TDD Mode overlay: hide code, show only failing tests */}
+            {tddMode && !tddCodeRevealed && currentPhaseIdx === 0 ? (
+              <div className="h-full flex flex-col bg-[#1e1e2e]">
+                <div className="px-4 py-3 border-b border-violet-500/30 bg-violet-500/10 flex items-center gap-2">
+                  <EyeOff size={13} className="text-violet-400" />
+                  <span className="text-xs font-semibold text-violet-300">
+                    TDD Mode — Code Hidden
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="ml-auto text-xs h-6 gap-1 border-violet-500/40 text-violet-300 hover:text-violet-200"
+                    onClick={() => setTddCodeRevealed(true)}
+                  >
+                    <Eye size={10} />
+                    Reveal Code
+                  </Button>
+                </div>
+                <div className="flex-1 overflow-auto p-4 space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Diagnose the bug from the failing tests below. Write your
+                    hypothesis in the AI chat before revealing the code.
+                  </p>
+                  {(
+                    currentPhaseData as { failingTests?: string[] }
+                  ).failingTests?.map((t, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 font-mono text-[11px] text-red-300"
+                    >
+                      <div className="text-red-400 font-bold mb-1">✕ FAIL</div>
+                      {t}
+                    </div>
+                  )) ?? (
+                    <p className="text-muted-foreground text-xs">
+                      No failing tests available for this phase.
+                    </p>
+                  )}
+                  <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3 text-[11px] text-muted-foreground">
+                    <p className="font-semibold text-violet-300 mb-1">
+                      💡 TDD Challenge
+                    </p>
+                    <p>
+                      Before revealing the code, ask the AI: "Based on these
+                      failing tests, what type of bug am I likely looking for?"
+                      Then form your hypothesis and reveal the code to confirm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : hasFiles && activeFile ? (
+              <>
+                {tddMode && tddCodeRevealed && (
+                  <div className="px-3 py-1.5 bg-violet-500/10 border-b border-violet-500/20 flex items-center gap-2">
+                    <Eye size={10} className="text-violet-400" />
+                    <span className="text-[10px] text-violet-300">
+                      TDD Mode — Code Revealed
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="ml-auto text-[10px] h-5 px-2 text-violet-400 hover:text-violet-300"
+                      onClick={() => setTddCodeRevealed(false)}
+                    >
+                      Hide again
+                    </Button>
+                  </div>
+                )}
+                <CodeEditor
+                  key={activeFile}
+                  filename={activeFile}
+                  value={fileContents[activeFile] ?? ""}
+                  onChange={val =>
+                    setFileContents(prev => ({ ...prev, [activeFile]: val }))
+                  }
+                  readOnly={activeFile.startsWith("test_")}
+                />
+              </>
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm bg-[#1e1e2e]">
                 <div className="text-center space-y-2">
@@ -1148,6 +1339,8 @@ export function MetaAICodingMock() {
               codeContext={fileContents[activeFile] ?? ""}
               messages={chatMessages}
               onMessage={handleAddMessage}
+              phaseMessageCount={phaseMessageCount}
+              onBudgetExhausted={handleBudgetExhausted}
             />
           </div>
         </div>
