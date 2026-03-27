@@ -250,7 +250,7 @@ export default function Home() {
 
       {/* Disclaimer banner */}
       {!disclaimerDismissed && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3">
+        <div className="bg-amber-500/10 border-b border-amber-500/20 border-l-4 px-4 py-3" style={{borderLeftColor: '#fbb904'}}>
           <div className="container flex items-start gap-3">
             <AlertTriangle
               size={14}
@@ -279,7 +279,8 @@ export default function Home() {
             </div>
             <button
               onClick={() => setDisclaimerDismissed(true)}
-              className="text-muted-foreground hover:text-foreground shrink-0"
+              className="shrink-0 hover:opacity-70 transition-opacity"
+              style={{color: '#fbb904'}}
             >
               <X size={13} />
             </button>

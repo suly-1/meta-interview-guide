@@ -288,8 +288,8 @@ export default function DisclaimerGate({ onConfirm, loading = false }: Props) {
           </button>
 
           <p className="text-center text-xs text-zinc-600">
-            Your choice is saved locally. You won't see this screen again on
-            this device.
+            Your choice is saved to your account — you won't see this screen
+            again on any device once you're signed in.
           </p>
         </div>
       </div>

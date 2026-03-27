@@ -984,3 +984,8 @@
 - [x] Add dark mode toggle button to TopNav
 - [x] Increase base font size to 17px in index.css
 - [x] Sync to meta-prep-guide and deploy to metaengguide.pro and metaguide.blog
+
+## Disclaimer Banner Polish (Mar 27 2026)
+- [x] Amber close button (tint X button to match golden amber)
+- [x] Amber left-border accent (border-l-4 border-amber-400 on banner)
+- [x] Server-side disclaimer persistence (DB column + tRPC + frontend sync — already wired; updated footer note to reflect cross-device persistence)
