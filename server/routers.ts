@@ -35,7 +35,9 @@ export const appRouter = router({
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     isOwner: protectedProcedure.query(({ ctx }) => ({
-      isOwner: !!ENV.ownerOpenId && ctx.user.openId === ENV.ownerOpenId,
+      // Use role-based check: admin role is set in DB for the owner account.
+      // Also accept openId match as fallback if OWNER_OPEN_ID env is set and matches.
+      isOwner: ctx.user.role === 'admin' || (!!ENV.ownerOpenId && ctx.user.openId === ENV.ownerOpenId),
     })),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
