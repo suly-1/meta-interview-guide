@@ -2845,4 +2845,283 @@ Candidate's prompt: ${input.userPrompt}`,
       const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
       return { score: Math.round(parsed.score), feedback: parsed.feedback };
     }),
+
+  // ── Drill 11: The Interruptor ──────────────────────────────────────────────
+  drillInterruptor: protectedProcedure
+    .input(z.object({
+      designText: z.string().max(3000),
+      interruptionsSoFar: z.number().int().min(0).max(10),
+      previousInterruptions: z.array(z.object({ question: z.string(), answer: z.string() })).max(10),
+      isScoring: z.boolean().default(false),
+    }))
+    .mutation(async ({ input }) => {
+      if (input.isScoring) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `You are a senior Meta interviewer scoring an Interruptor drill. Score 3 dimensions (1-5 each): recoveryScore (how cleanly did they resume after each interruption?), technicalScore (were their interruption answers correct?), threadScore (did they maintain overall coherence?). Also provide overallScore (1-10), topStrength, topWeakness, coachingNote. Return JSON matching the schema.` },
+            { role: 'user', content: `Design: ${input.designText}\n\nInterruptions: ${JSON.stringify(input.previousInterruptions)}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'interruptor_score', strict: true, schema: { type: 'object', properties: { recoveryScore: { type: 'number' }, technicalScore: { type: 'number' }, threadScore: { type: 'number' }, overallScore: { type: 'number' }, topStrength: { type: 'string' }, topWeakness: { type: 'string' }, coachingNote: { type: 'string' } }, required: ['recoveryScore','technicalScore','threadScore','overallScore','topStrength','topWeakness','coachingNote'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `You are a Meta interviewer in an Interruptor drill. The candidate is explaining their system design. Fire ONE sharp, realistic interruption targeting a specific decision they just made. Return JSON with interruption (string) and targetedDecision (string).` },
+          { role: 'user', content: `Design so far:\n${input.designText}\n\nPrevious interruptions (${input.interruptionsSoFar}): ${JSON.stringify(input.previousInterruptions.map(i => i.question))}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'interruption', strict: true, schema: { type: 'object', properties: { interruption: { type: 'string' }, targetedDecision: { type: 'string' } }, required: ['interruption','targetedDecision'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
+
+  // ── Drill 12: Clarification Interrogator ──────────────────────────────────
+  drillClarificationInterrogator: protectedProcedure
+    .input(z.object({
+      phase: z.enum(['get_prompt','answer_question','score_design']),
+      prompt: z.string().max(500).optional(),
+      question: z.string().max(500).optional(),
+      questionsAsked: z.number().int().min(0).max(10).optional(),
+      allQuestions: z.array(z.string()).max(10).optional(),
+      allAnswers: z.array(z.string()).max(10).optional(),
+      candidateDesign: z.string().max(3000).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      if (input.phase === 'get_prompt') {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `You are a Meta interviewer. Generate ONE deliberately underspecified system design prompt (1-2 sentences, critical ambiguities unresolved). Return JSON with prompt (string), hiddenConstraints (string[]), criticalAmbiguities (string[]).` },
+            { role: 'user', content: 'Generate a new underspecified system design prompt.' },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'clarification_prompt', strict: true, schema: { type: 'object', properties: { prompt: { type: 'string' }, hiddenConstraints: { type: 'array', items: { type: 'string' } }, criticalAmbiguities: { type: 'array', items: { type: 'string' } } }, required: ['prompt','hiddenConstraints','criticalAmbiguities'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      if (input.phase === 'answer_question') {
+        const questionsLeft = 3 - (input.questionsAsked ?? 0);
+        if (questionsLeft <= 0) return { answer: 'Use your best judgment.', questionsLeft: 0 };
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `You are a terse Meta interviewer. Answer the clarifying question briefly (1-2 sentences). Return JSON with answer (string) and questionsLeft (number = ${questionsLeft - 1}).` },
+            { role: 'user', content: `Prompt: ${input.prompt}\nQuestion: ${input.question}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'clarification_answer', strict: true, schema: { type: 'object', properties: { answer: { type: 'string' }, questionsLeft: { type: 'number' } }, required: ['answer','questionsLeft'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `You are a Meta interviewer scoring a Clarification Interrogator drill. Reveal which assumptions were wrong/correct and score ambiguityScore (1-5), overallScore (1-10), feedback, keyLesson. Return JSON.` },
+          { role: 'user', content: `Prompt: ${input.prompt}\nQuestions: ${JSON.stringify(input.allQuestions)}\nAnswers: ${JSON.stringify(input.allAnswers)}\nDesign: ${input.candidateDesign}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'clarification_score', strict: true, schema: { type: 'object', properties: { wrongAssumptions: { type: 'array', items: { type: 'string' } }, correctAssumptions: { type: 'array', items: { type: 'string' } }, ambiguityScore: { type: 'number' }, overallScore: { type: 'number' }, feedback: { type: 'string' }, keyLesson: { type: 'string' } }, required: ['wrongAssumptions','correctAssumptions','ambiguityScore','overallScore','feedback','keyLesson'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
+
+  // ── Drill 13: Devil's Advocate Interviewer ────────────────────────────────
+  drillDevilsAdvocate: protectedProcedure
+    .input(z.object({
+      decision: z.string().max(1000),
+      defenses: z.array(z.object({ challenge: z.string(), response: z.string() })).max(10),
+      isScoring: z.boolean().default(false),
+    }))
+    .mutation(async ({ input }) => {
+      if (input.isScoring) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `Score a Devil's Advocate drill. Dimensions (1-5 each): holdingScore (held correct positions under pressure?), pivotScore (graceful when they changed position?), depthScore (technically substantive defenses?). Also overallScore (1-10), verdict (held_correctly|pivoted_correctly|capitulated_incorrectly), feedback. Return JSON.` },
+            { role: 'user', content: `Decision: ${input.decision}\nExchanges: ${JSON.stringify(input.defenses)}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'devils_score', strict: true, schema: { type: 'object', properties: { holdingScore: { type: 'number' }, pivotScore: { type: 'number' }, depthScore: { type: 'number' }, overallScore: { type: 'number' }, verdict: { type: 'string' }, feedback: { type: 'string' } }, required: ['holdingScore','pivotScore','depthScore','overallScore','verdict','feedback'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `You are a Devil's Advocate Meta interviewer. Take the OPPOSITE position on the candidate's decision. Fire a sharp, specific challenge. After 2+ defenses, you may concede if their position is technically correct. Return JSON with challenge (string) and challengeAngle (string).` },
+          { role: 'user', content: `Decision: ${input.decision}\nPrevious exchanges: ${JSON.stringify(input.defenses)}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'devils_challenge', strict: true, schema: { type: 'object', properties: { challenge: { type: 'string' }, challengeAngle: { type: 'string' } }, required: ['challenge','challengeAngle'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
+
+  // ── Drill 14: The Silent Skeptic ──────────────────────────────────────────
+  drillSilentSkeptic: protectedProcedure
+    .input(z.object({
+      starAnswer: z.string().max(3000),
+      exchanges: z.array(z.object({ candidateResponse: z.string(), aiReaction: z.string() })).max(5),
+      isRevealing: z.boolean().default(false),
+    }))
+    .mutation(async ({ input }) => {
+      if (input.isRevealing) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `You are a Meta interviewer revealing your Silent Skeptic assessment. Return JSON with whatYouWanted (string), elaborationInstinct (correct|over_explained|under_explained), strongestPart (string), weakestPart (string), overallScore (1-10), keyLesson (string).` },
+            { role: 'user', content: `STAR answer: ${input.starAnswer}\nExchanges: ${JSON.stringify(input.exchanges)}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'silent_reveal', strict: true, schema: { type: 'object', properties: { whatYouWanted: { type: 'string' }, elaborationInstinct: { type: 'string' }, strongestPart: { type: 'string' }, weakestPart: { type: 'string' }, overallScore: { type: 'number' }, keyLesson: { type: 'string' } }, required: ['whatYouWanted','elaborationInstinct','strongestPart','weakestPart','overallScore','keyLesson'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const reactions = ['Hmm.', 'Okay.', 'I see.', 'Right.', 'Mm-hmm.'];
+      const reaction = reactions[Math.floor(Math.random() * reactions.length)];
+      return { reaction, exchangeCount: input.exchanges.length + 1 };
+    }),
+
+  // ── Drill 15: Scope Creep Challenger ─────────────────────────────────────
+  drillScopeCreep: protectedProcedure
+    .input(z.object({
+      originalDesign: z.string().max(3000),
+      candidateResponse: z.string().max(2000).optional(),
+      isScoring: z.boolean().default(false),
+    }))
+    .mutation(async ({ input }) => {
+      if (!input.candidateResponse && !input.isScoring) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `You are a Meta interviewer. Mid-design, add 3 new requirements that significantly expand scope. Return JSON with scopeAddition (string), requirements (string[3]), complexityImpact (string).` },
+            { role: 'user', content: `Current design: ${input.originalDesign}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'scope_creep', strict: true, schema: { type: 'object', properties: { scopeAddition: { type: 'string' }, requirements: { type: 'array', items: { type: 'string' } }, complexityImpact: { type: 'string' } }, required: ['scopeAddition','requirements','complexityImpact'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `Score a Scope Creep Challenger response. Dimensions (1-5 each): pushbackScore, reestimationScore, reprioritizationScore. Also overallScore (1-10), feedback, modelResponse. Return JSON.` },
+          { role: 'user', content: `Original design: ${input.originalDesign}\nCandidate response: ${input.candidateResponse}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'scope_score', strict: true, schema: { type: 'object', properties: { pushbackScore: { type: 'number' }, reestimationScore: { type: 'number' }, reprioritizationScore: { type: 'number' }, overallScore: { type: 'number' }, feedback: { type: 'string' }, modelResponse: { type: 'string' } }, required: ['pushbackScore','reestimationScore','reprioritizationScore','overallScore','feedback','modelResponse'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
+
+  // ── Drill 16: Time Pressure Mock ──────────────────────────────────────────
+  drillTimePressure: protectedProcedure
+    .input(z.object({
+      phase: z.enum(['get_problem','status_update_10','status_update_18','final_score']),
+      code: z.string().max(5000).optional(),
+      statusUpdate: z.string().max(1000).optional(),
+      problem: z.string().max(1000).optional(),
+      allStatusUpdates: z.array(z.object({ minute: z.number(), update: z.string() })).max(5).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      if (input.phase === 'get_problem') {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `Generate ONE Medium-difficulty coding problem solvable in 20 minutes. Return JSON with title, problem, examples (array of {input, output, explanation}), constraints (string[]), hint, optimalApproach, timeComplexity.` },
+            { role: 'user', content: 'Generate a 20-minute coding problem for the Time Pressure Mock drill.' },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'time_problem', strict: true, schema: { type: 'object', properties: { title: { type: 'string' }, problem: { type: 'string' }, examples: { type: 'array', items: { type: 'object', properties: { input: { type: 'string' }, output: { type: 'string' }, explanation: { type: 'string' } }, required: ['input','output','explanation'], additionalProperties: false } }, constraints: { type: 'array', items: { type: 'string' } }, hint: { type: 'string' }, optimalApproach: { type: 'string' }, timeComplexity: { type: 'string' } }, required: ['title','problem','examples','constraints','hint','optimalApproach','timeComplexity'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      if (input.phase === 'status_update_10' || input.phase === 'status_update_18') {
+        const minuteLabel = input.phase === 'status_update_10' ? '10-minute' : '2-minute';
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `Score a candidate's ${minuteLabel} status update. Dimensions (1-5): clarityScore, prioritizationScore, confidenceScore. Also feedback and coachingNote. Return JSON.` },
+            { role: 'user', content: `Problem: ${input.problem}\nCode: ${input.code}\nStatus update: ${input.statusUpdate}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'status_score', strict: true, schema: { type: 'object', properties: { clarityScore: { type: 'number' }, prioritizationScore: { type: 'number' }, confidenceScore: { type: 'number' }, feedback: { type: 'string' }, coachingNote: { type: 'string' } }, required: ['clarityScore','prioritizationScore','confidenceScore','feedback','coachingNote'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `Score a Time Pressure Mock final submission. Dimensions (1-5): codeScore, timeScore, communicationScore. Also overallScore (1-10), verdict (strong|acceptable|needs_work), feedback. Return JSON.` },
+          { role: 'user', content: `Problem: ${input.problem}\nFinal code: ${input.code}\nStatus updates: ${JSON.stringify(input.allStatusUpdates)}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'time_final', strict: true, schema: { type: 'object', properties: { codeScore: { type: 'number' }, timeScore: { type: 'number' }, communicationScore: { type: 'number' }, overallScore: { type: 'number' }, verdict: { type: 'string' }, feedback: { type: 'string' } }, required: ['codeScore','timeScore','communicationScore','overallScore','verdict','feedback'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
+
+  // ── Drill 17: XFN Conflict Simulator ─────────────────────────────────────
+  drillXFNConflict: protectedProcedure
+    .input(z.object({
+      scenario: z.string().max(500).optional(),
+      exchanges: z.array(z.object({ pmMessage: z.string(), candidateResponse: z.string() })).max(10),
+      isScoring: z.boolean().default(false),
+      isStarting: z.boolean().default(false),
+    }))
+    .mutation(async ({ input }) => {
+      if (input.isStarting) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `Generate a realistic XFN conflict scenario. A PM disagrees with an engineering recommendation. Return JSON with scenario (string), pmOpeningMessage (string), techRecommendation (string), pmConcern (string).` },
+            { role: 'user', content: 'Generate a new XFN conflict scenario.' },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'xfn_scenario', strict: true, schema: { type: 'object', properties: { scenario: { type: 'string' }, pmOpeningMessage: { type: 'string' }, techRecommendation: { type: 'string' }, pmConcern: { type: 'string' } }, required: ['scenario','pmOpeningMessage','techRecommendation','pmConcern'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      if (input.isScoring) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `Score an XFN Conflict Simulator. Dimensions (1-5): technicalGroundScore, alternativeScore, alignmentScore. Also overallScore (1-10), verdict (strong|acceptable|needs_work), feedback, keyLesson. Return JSON.` },
+            { role: 'user', content: `Scenario: ${input.scenario}\nExchanges: ${JSON.stringify(input.exchanges)}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'xfn_score', strict: true, schema: { type: 'object', properties: { technicalGroundScore: { type: 'number' }, alternativeScore: { type: 'number' }, alignmentScore: { type: 'number' }, overallScore: { type: 'number' }, verdict: { type: 'string' }, feedback: { type: 'string' }, keyLesson: { type: 'string' } }, required: ['technicalGroundScore','alternativeScore','alignmentScore','overallScore','verdict','feedback','keyLesson'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `You are a PM at Meta in an XFN conflict roleplay. Respond to the engineer's message in character (2-3 sentences). Acknowledge good points, push back on weak ones. After 4-5 exchanges move toward resolution. Return JSON with pmResponse (string), exchangeCount (number), isResolved (boolean).` },
+          { role: 'user', content: `Scenario: ${input.scenario}\nConversation: ${JSON.stringify(input.exchanges)}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'pm_response', strict: true, schema: { type: 'object', properties: { pmResponse: { type: 'string' }, exchangeCount: { type: 'number' }, isResolved: { type: 'boolean' } }, required: ['pmResponse','exchangeCount','isResolved'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
+
+  // ── Drill 18: The Gotcha Follow-Up ────────────────────────────────────────
+  drillGotchaFollowUp: protectedProcedure
+    .input(z.object({
+      originalAnswer: z.string().max(3000),
+      category: z.enum(['system_design','coding','behavioral']),
+      gotchaResponse: z.string().max(2000).optional(),
+      gotchaQuestion: z.string().max(500).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      if (!input.gotchaResponse) {
+        const res = await invokeLLM({
+          messages: [
+            { role: 'system', content: `You are a Meta interviewer. Find the SINGLE weakest assumption in the candidate's answer and fire a targeted gotcha follow-up question. Return JSON with gotchaQuestion (string), weakAssumption (string), category (string).` },
+            { role: 'user', content: `Category: ${input.category}\nAnswer: ${input.originalAnswer}` },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'gotcha_q', strict: true, schema: { type: 'object', properties: { gotchaQuestion: { type: 'string' }, weakAssumption: { type: 'string' }, category: { type: 'string' } }, required: ['gotchaQuestion','weakAssumption','category'], additionalProperties: false } } },
+        });
+        const r = res?.choices?.[0]?.message?.content;
+        return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+      }
+      const res = await invokeLLM({
+        messages: [
+          { role: 'system', content: `Score a Gotcha Follow-Up response. Dimensions (1-5): followUpScore, improvementScore, preemptionScore. Also overallScore (1-10), comparison (stronger|same|weaker), feedback, idealResponse. Return JSON.` },
+          { role: 'user', content: `Category: ${input.category}\nOriginal: ${input.originalAnswer}\nGotcha: ${input.gotchaQuestion}\nResponse: ${input.gotchaResponse}` },
+        ],
+        response_format: { type: 'json_schema', json_schema: { name: 'gotcha_score', strict: true, schema: { type: 'object', properties: { followUpScore: { type: 'number' }, improvementScore: { type: 'number' }, preemptionScore: { type: 'number' }, overallScore: { type: 'number' }, comparison: { type: 'string' }, feedback: { type: 'string' }, idealResponse: { type: 'string' } }, required: ['followUpScore','improvementScore','preemptionScore','overallScore','comparison','feedback','idealResponse'], additionalProperties: false } } },
+      });
+      const r = res?.choices?.[0]?.message?.content;
+      return JSON.parse(typeof r === 'string' ? r : JSON.stringify(r));
+    }),
 });

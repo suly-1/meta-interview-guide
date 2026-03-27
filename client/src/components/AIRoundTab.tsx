@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Brain, Code2, ShieldCheck, MessageSquare, AlertTriangle, CheckCircle2, ExternalLink, Info, Zap, BookOpen, Users, Mic, Target } from "lucide-react";
 import AIMockProblemBank from "@/components/AIMockProblemBank";
 import AIRoundMockSession from "@/components/AIRoundMockSession";
+import AdvancedDrillsPanel from "@/components/AdvancedDrillsPanel";
 import ScreenInterviewWatermark from "@/components/ScreenInterviewWatermark";
 import PromptEngineeringDrill from "@/components/PromptEngineeringDrill";
 
@@ -135,7 +136,7 @@ const FAQ = [
 ];
 
 export default function AIRoundTab() {
-  const [view, setView] = useState<"guide" | "mock">("guide");
+  const [view, setView] = useState<"guide" | "mock" | "drills">("guide");
   return (
     <div className="space-y-6 relative">
       {/* ── Screen Interview watermark ── */}
@@ -158,8 +159,21 @@ export default function AIRoundTab() {
         >
           <Target size={14} /> Mock Session
         </button>
+        <button
+          onClick={() => setView("drills")}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+            view === "drills" ? "bg-white text-rose-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Zap size={14} /> Advanced Drills
+        </button>
       </div>
 
+      {view === "drills" && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <AdvancedDrillsPanel />
+        </div>
+      )}
       {view === "mock" && (
         <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <AIRoundMockSession />

@@ -953,3 +953,13 @@
 - [ ] Add tag filter control to YandexAlgorithmTrainer lobby
 - [ ] Connect InstantVerdictCard to real VerdictEngine rubric scores
 - [ ] Add GitHub Actions workflow to meta-prep-guide for metaguide.blog auto-deploy
+
+## Drills 11–18 (Advanced AI Drill Modes)
+- [x] Drill 11: The Interruptor (System Design) — AI cuts you off mid-explanation, score recovery + thread maintenance
+- [x] Drill 12: Clarification Interrogator (SD + Coding) — underspecified prompt, 3 answers, reveal wrong assumptions
+- [x] Drill 13: Devil's Advocate Interviewer (System Design) — AI takes opposite position every time, score defense quality
+- [x] Drill 14: The Silent Skeptic (Behavioral) — AI responds with "Hmm." / "Okay.", score silence-reading instinct
+- [x] Drill 15: Scope Creep Challenger (System Design) — mid-design scope expansion, score pushback quality
+- [x] Drill 16: Time Pressure Mock (Coding) — 20-min timer, AI interrupts at 10 min and 18 min for status update
+- [x] Drill 17: XFN Conflict Simulator (Behavioral) — PM disagrees with your tech recommendation, 5-exchange roleplay
+- [x] Drill 18: The Gotcha Follow-Up (All) — AI fires one targeted gotcha after every answer, score pre-emption quality
