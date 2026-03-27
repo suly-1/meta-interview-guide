@@ -11,10 +11,12 @@ import {
   AlignJustify,
   Calendar,
   ShieldCheck,
+  LogIn,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 import {
   useStreak,
   useInterviewDate,
@@ -899,6 +901,17 @@ export default function TopNav({
               <span>{streak.currentStreak}d</span>
             </div>
 
+            {/* Sign-in button — shown only when not authenticated with app server */}
+            {!user && !import.meta.env.VITE_STANDALONE && (
+              <a
+                href={getLoginUrl()}
+                title="Sign in to sync progress & access admin features"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              >
+                <LogIn size={13} />
+                <span className="hidden sm:inline">Sign in</span>
+              </a>
+            )}
             {/* Admin Panel — owner only, live app only (hidden in standalone static build) */}
             {isOwner && !import.meta.env.VITE_STANDALONE && (
               <a
