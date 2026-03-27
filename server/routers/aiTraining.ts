@@ -882,6 +882,388 @@ Return JSON: { "clarity": number, "structure": number, "correctness": number, "o
       };
     }),
 
+  // ─── Feature 7: Incremental Feature Builder ────────────────────────────
+  getIncrementalChallenges: publicProcedure.query(() => {
+    return [
+      {
+        id: "inc1",
+        title: "Rate Limiter: Add Sliding Window",
+        difficulty: "L5",
+        baseCode: `class TokenBucket:
+    def __init__(self, capacity, refill_rate):
+        self.capacity = capacity
+        self.tokens = capacity
+        self.refill_rate = refill_rate
+        self.last_refill = time.time()
+
+    def consume(self, tokens=1):
+        self._refill()
+        if self.tokens >= tokens:
+            self.tokens -= tokens
+            return True
+        return False
+
+    def _refill(self):
+        now = time.time()
+        elapsed = now - self.last_refill
+        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+        self.last_refill = now`,
+        steps: [
+          {
+            id: "s1",
+            instruction:
+              "Add a method `get_token_count()` that returns the current token count after refilling.",
+            testCase:
+              "bucket = TokenBucket(10, 1); assert bucket.get_token_count() == 10",
+          },
+          {
+            id: "s2",
+            instruction:
+              "Add a `reset()` method that resets tokens to full capacity.",
+            testCase:
+              "bucket.consume(5); bucket.reset(); assert bucket.get_token_count() == 10",
+          },
+          {
+            id: "s3",
+            instruction:
+              "Add a `peek()` method that checks if N tokens are available without consuming them.",
+            testCase:
+              "assert bucket.peek(5) == True; assert bucket.peek(15) == False",
+          },
+        ],
+      },
+      {
+        id: "inc2",
+        title: "LRU Cache: Add TTL Expiry",
+        difficulty: "L6",
+        baseCode: `from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)`,
+        steps: [
+          {
+            id: "s1",
+            instruction:
+              "Modify `put()` to accept an optional `ttl` parameter (seconds). Store the expiry time alongside the value.",
+            testCase:
+              "cache.put('k', 'v', ttl=60); assert cache.get('k') == 'v'",
+          },
+          {
+            id: "s2",
+            instruction: "Modify `get()` to return -1 if the key has expired.",
+            testCase:
+              "cache.put('k', 'v', ttl=0); time.sleep(0.01); assert cache.get('k') == -1",
+          },
+          {
+            id: "s3",
+            instruction:
+              "Add a `cleanup()` method that removes all expired entries.",
+            testCase: "cache.cleanup(); assert len(cache.cache) == 0",
+          },
+        ],
+      },
+    ];
+  }),
+
+  submitIncrementalStep: publicProcedure
+    .input(
+      z.object({
+        challengeId: z.string(),
+        stepId: z.string(),
+        code: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta Staff Engineer evaluating incremental code additions.
+Evaluate if the submitted code correctly implements the requested step.
+Be strict but fair — the code should work correctly and not break existing functionality.`,
+          },
+          {
+            role: "user",
+            content: `Challenge: ${input.challengeId}, Step: ${input.stepId}
+Submitted code:
+${input.code}
+
+Does this correctly implement the step? Return JSON: { "passed": boolean, "score": 1-10, "feedback": "...", "issues": ["..."] }`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "incremental_result",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                passed: { type: "boolean" },
+                score: { type: "number" },
+                feedback: { type: "string" },
+                issues: { type: "array", items: { type: "string" } },
+              },
+              required: ["passed", "score", "feedback", "issues"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        passed: boolean;
+        score: number;
+        feedback: string;
+        issues: string[];
+      };
+    }),
+
+  // ─── Feature 8: Test-First Debugger ──────────────────────────────────────
+  getTestFirstChallenges: publicProcedure.query(() => {
+    return [
+      {
+        id: "tf1",
+        title: "Fix the BFS Cycle Bug",
+        description:
+          "A BFS function is failing 3 tests. Given only the test output, write the fix.",
+        difficulty: "L5",
+        failingTestOutput: `FAILED test_bfs_cycle_graph - RecursionError: maximum recursion depth exceeded
+FAILED test_bfs_disconnected - AssertionError: expected 3 nodes, got 7
+FAILED test_bfs_self_loop - RecursionError: maximum recursion depth exceeded
+
+Test details:
+  test_bfs_cycle_graph: bfs(graph={'A':['B'],'B':['A']}, start='A') should return ['A','B']
+  test_bfs_disconnected: bfs(graph={'A':['B'],'B':['A','C'],'C':['B']}, start='A') should return ['A','B','C']
+  test_bfs_self_loop: bfs(graph={'A':['A','B'],'B':[]}, start='A') should return ['A','B']`,
+        buggyCode: `from collections import deque
+def bfs(graph, start):
+    queue = deque([start])
+    result = []
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+        for neighbor in graph[node]:
+            queue.append(neighbor)  # Missing visited set
+    return result`,
+      },
+      {
+        id: "tf2",
+        title: "Fix the Binary Search",
+        description:
+          "A binary search is failing edge case tests. Write the fix from test output only.",
+        difficulty: "L4",
+        failingTestOutput: `FAILED test_empty_array - IndexError: list index out of range
+FAILED test_single_element_not_found - Expected -1, got 0
+FAILED test_target_at_end - Expected 4, got -1
+
+Test details:
+  test_empty_array: binary_search([], 5) should return -1
+  test_single_element_not_found: binary_search([3], 5) should return -1
+  test_target_at_end: binary_search([1,2,3,4,5], 5) should return 4`,
+        buggyCode: `def binary_search(nums, target):
+    left, right = 0, len(nums)  # Bug: should be len(nums)-1
+    while left <= right:
+        mid = (left + right) // 2
+        if nums[mid] == target: return mid
+        elif nums[mid] < target: left = mid + 1
+        else: right = mid - 1
+    return -1`,
+      },
+      {
+        id: "tf3",
+        title: "Fix the Merge Intervals",
+        description:
+          "Merge intervals function fails on touching intervals. Fix from test output.",
+        difficulty: "L5",
+        failingTestOutput: `FAILED test_touching_intervals - Expected [[1,3]], got [[1,2],[2,3]]
+FAILED test_all_overlapping - Expected [[1,6]], got [[1,4],[3,6]]
+PASSED test_no_overlap
+PASSED test_single_interval
+
+Test details:
+  test_touching_intervals: merge([[1,2],[2,3]]) should return [[1,3]]
+  test_all_overlapping: merge([[1,4],[3,6]]) should return [[1,6]]`,
+        buggyCode: `def merge(intervals):
+    intervals.sort(key=lambda x: x[0])
+    merged = [intervals[0]]
+    for start, end in intervals[1:]:
+        if start < merged[-1][1]:  # Bug: should be <=
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    return merged`,
+      },
+    ];
+  }),
+
+  submitTestFirstFix: publicProcedure
+    .input(
+      z.object({
+        challengeId: z.string(),
+        fix: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const challenges = [
+        {
+          id: "tf1",
+          bugFix:
+            "Add a visited set: visited = {start}; check if neighbor not in visited before appending",
+        },
+        {
+          id: "tf2",
+          bugFix:
+            "Change right = len(nums) to right = len(nums) - 1; add guard for empty array",
+        },
+        {
+          id: "tf3",
+          bugFix:
+            "Change < to <= in the merge condition: if start <= merged[-1][1]",
+        },
+      ];
+      const challenge = challenges.find(c => c.id === input.challengeId);
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are evaluating a test-first debugging fix. The correct fix approach: "${challenge?.bugFix}"
+Evaluate if the candidate's fix addresses the root cause shown in the failing tests.`,
+          },
+          {
+            role: "user",
+            content: `Candidate's fix:
+${input.fix}
+
+Return JSON: { "passed": boolean, "score": 1-10, "feedback": "...", "testResults": [{"test": "test name", "passed": boolean}] }`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "test_first_result",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                passed: { type: "boolean" },
+                score: { type: "number" },
+                feedback: { type: "string" },
+                testResults: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      test: { type: "string" },
+                      passed: { type: "boolean" },
+                    },
+                    required: ["test", "passed"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["passed", "score", "feedback", "testResults"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        passed: boolean;
+        score: number;
+        feedback: string;
+        testResults: { test: string; passed: boolean }[];
+      };
+    }),
+
+  // ─── Feature 9: Verbal Explanation Scorer (Technical Communication) ──────
+  scoreVerbalExplanation: publicProcedure
+    .input(
+      z.object({
+        scenarioId: z.string(),
+        explanation: z.string(),
+        timeSpent: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta Staff Engineer scoring Technical Communication for the AI-enabled coding round.
+Scenario: ${input.scenarioId}
+Time spent: ${input.timeSpent} seconds (target: 60-90 seconds)
+Evaluate on Meta's 4 rubric dimensions with focus on Technical Communication.`,
+          },
+          {
+            role: "user",
+            content: `Candidate's verbal explanation:
+"${input.explanation}"
+
+Score on: overall (1-10), clarity (1-5), conciseness (1-5), technicalDepth (1-5), structureScore (1-5).
+Also provide metaRubricAlignment (one sentence on how this maps to Meta's rubric) and improvements list.
+Return JSON: { "overall": number, "clarity": number, "conciseness": number, "technicalDepth": number, "structureScore": number, "feedback": "...", "metaRubricAlignment": "...", "improvements": ["..."] }`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "verbal_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                overall: { type: "number" },
+                clarity: { type: "number" },
+                conciseness: { type: "number" },
+                technicalDepth: { type: "number" },
+                structureScore: { type: "number" },
+                feedback: { type: "string" },
+                metaRubricAlignment: { type: "string" },
+                improvements: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "overall",
+                "clarity",
+                "conciseness",
+                "technicalDepth",
+                "structureScore",
+                "feedback",
+                "metaRubricAlignment",
+                "improvements",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        overall: number;
+        clarity: number;
+        conciseness: number;
+        technicalDepth: number;
+        structureScore: number;
+        feedback: string;
+        metaRubricAlignment: string;
+        improvements: string[];
+      };
+    }),
+
   // ─── Feature 9: Verbal Explanation Scorer (Technical Communication) ──────
   scoreTechnicalCommunication: publicProcedure
     .input(

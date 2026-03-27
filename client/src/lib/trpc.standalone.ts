@@ -969,7 +969,125 @@ export const trpc = {
     },
   },
 
-  // ── system ─────────────────────────────────────────────────────────────────────────────────────
+  // ── aiTraining ────────────────────────────────────────────────────────────────────────────────────
+  aiTraining: {
+    getHallucinationScenarios: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    checkHallucinationAnswer: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          correct: false,
+          score: 1,
+          feedback: "",
+          hint: "",
+        })),
+    },
+    getClarificationScenarios: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    scoreClarificationQuestions: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          score: 1,
+          coverage: 1,
+          prioritization: 1,
+          missedQuestions: [],
+          feedback: "",
+          strongPoints: [],
+        })),
+    },
+    getComplexityFlashcards: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    checkComplexityAnswer: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          timeCorrect: false,
+          spaceCorrect: false,
+          correctTimeComplexity: "",
+          correctSpaceComplexity: "",
+          explanation: "",
+          score: 1,
+        })),
+    },
+    getNavigationChallenges: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    checkNavigationAnswer: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          correct: false,
+          feedback: "",
+          correctAnswer: "",
+          fileHint: "",
+          lineHint: 0,
+        })),
+    },
+    scoreExplanation: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          clarity: 1,
+          structure: 1,
+          correctness: 1,
+          overall: 1,
+          feedback: "",
+          improvements: [],
+          strongPoints: [],
+        })),
+    },
+    scoreTechnicalCommunication: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          score: 1,
+          levelSignal: "",
+          proactiveCommunication: 1,
+          tradeoffExplanation: 1,
+          complexityExplanation: 1,
+          feedback: "",
+          improvements: [],
+        })),
+    },
+    getIncrementalChallenges: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    submitIncrementalStep: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          passed: false,
+          score: 1,
+          feedback: "",
+          issues: [],
+        })),
+    },
+    getTestFirstChallenges: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    submitTestFirstFix: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          passed: false,
+          score: 1,
+          feedback: "",
+          testResults: [],
+        })),
+    },
+    scoreVerbalExplanation: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          overall: 1,
+          clarity: 1,
+          conciseness: 1,
+          technicalDepth: 1,
+          structureScore: 1,
+          feedback: "",
+          metaRubricAlignment: "",
+          improvements: [],
+        })),
+    },
+  },
+
+  // ── system ──────────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {
       useMutation: () => makeMutation(() => ({ success: true })),

@@ -1101,3 +1101,22 @@
 - [ ] Feature 8: Test-First Debugger — given only failing test output, write the fix (no code shown)
 - [ ] Feature 9: Verbal Explanation Scorer — type 90-sec explanation, AI scores Technical Communication
 - [ ] Feature 10: Full Session Replay — replay code changes + AI messages on a timeline with annotations
+
+## AI Training Tab — Round 43
+
+- [x] Feature 1: AI Hallucination Spotter — 6 scenarios, AI scores answer, reveals correct explanation
+- [x] Feature 2: Requirements Clarification Drill — 3 scenarios, AI scores coverage/prioritization/anti-patterns
+- [x] Feature 3: Checkpoint Pacer — 60-min visual timeline, phase bands, pacing alerts, real-time countdown
+- [x] Feature 4: Complexity Flashcard Trainer — 8 cards, instant time/space check, explanation reveal
+- [x] Feature 5: Code Navigation Speed Test — 3-file codebase, timed Q&A, AI scores answers
+- [x] Feature 6: Rubber Duck Explainer — type explanation, AI scores clarity/structure/correctness
+- [x] Feature 7: Incremental Feature Builder — step-by-step feature additions, AI evaluates each step
+- [x] Feature 8: Test-First Debugger — failing test output only, write fix, AI runs tests
+- [x] Feature 9: Verbal Explanation Scorer — 90-sec timed explanation, AI scores 4 sub-dimensions
+- [x] Feature 10: Full Session Replay — timeline scrubber with event log, demo session pre-loaded
+- [x] Wire all 10 drills into new AITrainingTab component with drill grid + back navigation
+- [x] Add "🏋️ Training" tab to TopNav
+- [x] Mount AITrainingTab in Home.tsx
+- [x] Add 5 missing tRPC procedures to aiTraining router (getIncrementalChallenges, submitIncrementalStep, getTestFirstChallenges, submitTestFirstFix, scoreVerbalExplanation)
+- [x] Add all aiTraining stubs to trpc.standalone.ts
+- [x] All 85 tests passing
