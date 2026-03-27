@@ -203,13 +203,13 @@ function RatingSelector({ value, onChange }: RatingSelectorProps) {
             "w-8 h-8 rounded-lg text-sm font-bold transition-all border-2",
             value === r
               ? colors[r] + " border-transparent scale-110"
-              : "bg-gray-100 dark:bg-gray-700 text-gray-500 border-transparent hover:border-gray-300"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 border-transparent hover:border-gray-300"
           )}
         >
           {r}
         </button>
       ))}
-      <span className="text-xs text-gray-400 self-center ml-1">{labels[value]}</span>
+      <span className="text-xs text-gray-600 self-center ml-1">{labels[value]}</span>
     </div>
   );
 }
@@ -239,7 +239,7 @@ function DimensionCard({
   const categoryColors: Record<RubricDimension["category"], string> = {
     coding: "border-blue-200 text-blue-600",
     system_design: "border-purple-200 text-purple-600",
-    behavioral: "border-amber-200 text-amber-600",
+    behavioral: "border-amber-200 text-amber-800",
     leadership: "border-emerald-200 text-emerald-600",
   };
 
@@ -259,7 +259,7 @@ function DimensionCard({
           "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
           dim.category === "coding" && "bg-blue-50 dark:bg-blue-900/30 text-blue-600",
           dim.category === "system_design" && "bg-purple-50 dark:bg-purple-900/30 text-purple-600",
-          dim.category === "behavioral" && "bg-amber-50 dark:bg-amber-900/30 text-amber-600",
+          dim.category === "behavioral" && "bg-amber-100 dark:bg-amber-900/30 text-amber-800",
           dim.category === "leadership" && "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600"
         )}>
           {dim.icon}
@@ -271,7 +271,7 @@ function DimensionCard({
               {dim.category.replace("_", " ")}
             </Badge>
             {"★".repeat(dim.weight).padEnd(3, "☆").split("").map((s, i) => (
-              <span key={i} className={s === "★" ? "text-amber-400 text-xs" : "text-gray-200 text-xs"}>{s}</span>
+              <span key={i} className={s === "★" ? "text-amber-900 text-xs" : "text-gray-200 text-xs"}>{s}</span>
             ))}
           </div>
           <div className="flex items-center gap-2 mt-1">
@@ -288,15 +288,15 @@ function DimensionCard({
                 />
               ))}
             </div>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-600">
               {rating.rating <= 2 ? "Below IC6" : rating.rating === 3 ? "At IC6" : "Above IC6"}
             </span>
             {rating.evidence.length > 0 && (
-              <span className="text-xs text-gray-400">· {rating.evidence.length} evidence</span>
+              <span className="text-xs text-gray-600">· {rating.evidence.length} evidence</span>
             )}
           </div>
         </div>
-        <div className="flex-shrink-0 text-gray-400">
+        <div className="flex-shrink-0 text-gray-600">
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </div>
       </button>
@@ -305,7 +305,7 @@ function DimensionCard({
         <div className="px-4 pb-4 space-y-4 border-t border-gray-100 dark:border-gray-700 pt-4">
           {/* Rating */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-2">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-2">
               Your Rating
             </label>
             <RatingSelector value={rating.rating} onChange={onRatingChange} />
@@ -314,8 +314,8 @@ function DimensionCard({
           {/* IC Bar Reference */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[
-              { label: "IC5 Bar", text: dim.ic5Bar, color: "border-red-200 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300" },
-              { label: "IC6 Bar", text: dim.ic6Bar, color: "border-amber-200 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300" },
+              { label: "IC5 Bar", text: dim.ic5Bar, color: "border-red-200 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300" },
+              { label: "IC6 Bar", text: dim.ic6Bar, color: "border-amber-200 bg-amber-100 dark:bg-amber-900/20 text-amber-900 dark:text-amber-800" },
               { label: "IC7 Bar", text: dim.ic7Bar, color: "border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300" },
             ].map(({ label, text, color }) => (
               <div key={label} className={cn("rounded-lg border p-2.5 text-xs", color)}>
@@ -327,16 +327,16 @@ function DimensionCard({
 
           {/* Evidence */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-2">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-2">
               Evidence (specific examples from your practice)
             </label>
             <div className="space-y-1.5 mb-2">
               {rating.evidence.map((ev, i) => (
                 <div key={i} className="flex items-start gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2">
-                  <span className="text-xs text-gray-600 dark:text-gray-300 flex-1">{ev}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-200 flex-1">{ev}</span>
                   <button
                     onClick={() => onEvidenceRemove(i)}
-                    className="text-gray-300 hover:text-red-400 transition-all flex-shrink-0"
+                    className="text-gray-700 hover:text-red-400 transition-all flex-shrink-0"
                   >
                     <Trash2 size={11} />
                   </button>
@@ -375,7 +375,7 @@ function DimensionCard({
 
           {/* Notes */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-1.5">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">
               Notes
             </label>
             <Textarea
@@ -419,20 +419,20 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
     },
     borderline: {
       label: "Borderline",
-      color: "text-amber-700 dark:text-amber-300",
-      bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800",
+      color: "text-amber-900 dark:text-amber-800",
+      bg: "bg-amber-100 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800",
       icon: <AlertCircle size={32} className="text-amber-500" />,
     },
     fail: {
       label: "Fail",
       color: "text-red-600 dark:text-red-400",
-      bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
+      bg: "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800",
       icon: <XCircle size={32} className="text-red-400" />,
     },
     strong_fail: {
       label: "Strong Fail",
       color: "text-red-700 dark:text-red-300",
-      bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
+      bg: "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800",
       icon: <XCircle size={32} className="text-red-500" />,
     },
   };
@@ -445,22 +445,22 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
       <div className={cn("rounded-2xl border p-6 text-center", cfg.bg)}>
         <div className="flex justify-center mb-3">{cfg.icon}</div>
         <div className={cn("text-3xl font-black mb-1", cfg.color)}>{cfg.label}</div>
-        <div className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+        <div className="text-gray-700 dark:text-gray-300 text-sm mb-3">
           Projected IC Level: <span className="font-bold text-gray-800 dark:text-gray-200">{result.icLevel}</span>
         </div>
         <div className="flex items-center justify-center gap-3">
           <Progress value={result.overallScore} className="w-48 h-2.5" />
-          <span className="font-bold text-gray-700 dark:text-gray-300">{result.overallScore}/100</span>
+          <span className="font-bold text-gray-700 dark:text-gray-200">{result.overallScore}/100</span>
         </div>
       </div>
 
       {/* Hiring Recommendation */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
         <div className="flex items-center gap-2 mb-2">
-          <Gavel size={14} className="text-gray-500" />
-          <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Hiring Recommendation</span>
+          <Gavel size={14} className="text-gray-700" />
+          <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Hiring Recommendation</span>
         </div>
-        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{result.hiringRecommendation}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">{result.hiringRecommendation}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -468,11 +468,11 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Star size={14} className="text-amber-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Strengths</span>
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Strengths</span>
           </div>
           <ul className="space-y-1.5">
             {result.strengths.map((s, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300">
+              <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-200">
                 <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0 mt-0.5" />
                 {s}
               </li>
@@ -484,11 +484,11 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle size={14} className="text-red-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Critical Gaps</span>
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Critical Gaps</span>
           </div>
           <ul className="space-y-1.5">
             {result.criticalGaps.map((g, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300">
+              <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-200">
                 <XCircle size={11} className="text-red-400 flex-shrink-0 mt-0.5" />
                 {g}
               </li>
@@ -500,8 +500,8 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
       {/* Dimension Scores */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <BarChart2 size={14} className="text-gray-500" />
-          <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Dimension Breakdown</span>
+          <BarChart2 size={14} className="text-gray-700" />
+          <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Dimension Breakdown</span>
         </div>
         <div className="space-y-3">
           {result.dimensionScores.map((ds) => {
@@ -510,20 +510,20 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
             return (
               <div key={ds.dimensionId}>
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{dim.name}</span>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{dim.name}</span>
                   <div className="flex items-center gap-2">
                     <Badge
                       variant="outline"
                       className={cn(
                         "text-xs",
                         ds.level === "IC7" && "border-emerald-200 text-emerald-600",
-                        ds.level === "IC6" && "border-amber-200 text-amber-600",
+                        ds.level === "IC6" && "border-amber-200 text-amber-800",
                         ds.level === "IC5" && "border-red-200 text-red-600"
                       )}
                     >
                       {ds.level}
                     </Badge>
-                    <span className="text-xs font-bold text-gray-500">{ds.score}%</span>
+                    <span className="text-xs font-bold text-gray-700">{ds.score}%</span>
                   </div>
                 </div>
                 <Progress
@@ -534,7 +534,7 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
                   )}
                 />
                 {ds.gap && (
-                  <p className="text-xs text-gray-400 mt-0.5">{ds.gap}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">{ds.gap}</p>
                 )}
                 {ds.coachingNote && (
                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5 italic">{ds.coachingNote}</p>
@@ -549,11 +549,11 @@ function VerdictDisplay({ result, onReset }: VerdictDisplayProps) {
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
         <div className="flex items-center gap-2 mb-2">
           <ArrowRight size={14} className="text-blue-500" />
-          <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Next Steps</span>
+          <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Next Steps</span>
         </div>
         <ol className="space-y-1.5">
           {result.nextSteps.map((step, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300">
+            <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-200">
               <span className="w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
                 {i + 1}
               </span>
@@ -757,7 +757,7 @@ export default function VerdictEngineTab() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <BarChart2 size={14} className="text-blue-500" />
-                <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">IC Level Trajectory</span>
+                <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">IC Level Trajectory</span>
                 <span className="text-xs text-muted-foreground">({history.length} run{history.length !== 1 ? "s" : ""})</span>
               </div>
             </div>
@@ -776,12 +776,12 @@ export default function VerdictEngineTab() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Gavel size={20} className="text-gray-700 dark:text-gray-300" />
+            <Gavel size={20} className="text-gray-700 dark:text-gray-200" />
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Pass/Fail Verdict Engine
             </h2>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             Rate yourself on each IC6 rubric dimension, add evidence from your practice sessions,
             and get an AI-generated hiring verdict with coaching notes.
           </p>
@@ -793,11 +793,11 @@ export default function VerdictEngineTab() {
           <div>
             <div className={cn(
               "text-xl font-bold leading-tight",
-              avgRating >= 4 ? "text-emerald-600" : avgRating >= 3 ? "text-amber-600" : "text-red-600"
+              avgRating >= 4 ? "text-emerald-600" : avgRating >= 3 ? "text-amber-800" : "text-red-600"
             )}>
               {avgRating.toFixed(1)}/5
             </div>
-            <div className="text-xs text-gray-400">Avg Rating</div>
+            <div className="text-xs text-gray-600">Avg Rating</div>
           </div>
         </div>
       </div>
@@ -812,7 +812,7 @@ export default function VerdictEngineTab() {
               "px-3 py-1.5 rounded-full text-xs font-semibold transition-all capitalize",
               selectedCategory === cat
                 ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
             )}
           >
             {cat.replace("_", " ")}
@@ -867,7 +867,7 @@ export default function VerdictEngineTab() {
             {showHistory ? "Hide" : "View"} History ({history.length})
           </Button>
         )}
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-600">
           Rate all {RUBRIC.length} dimensions and add evidence for the most accurate verdict.
         </p>
       </div>
@@ -877,7 +877,7 @@ export default function VerdictEngineTab() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-3">
             <BarChart2 size={14} className="text-blue-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">IC Level Trajectory</span>
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">IC Level Trajectory</span>
             <span className="text-xs text-muted-foreground">({history.length} run{history.length !== 1 ? "s" : ""})</span>
           </div>
           <VerdictTrajectoryChart history={history} />
@@ -887,21 +887,21 @@ export default function VerdictEngineTab() {
       {/* Legend */}
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
         <div className="flex items-center gap-2 mb-2">
-          <BookOpen size={13} className="text-gray-400" />
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Rating Scale</span>
+          <BookOpen size={13} className="text-gray-600" />
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Rating Scale</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
           {[
             { r: 1, label: "Far Below IC6", desc: "Needs significant work", color: "text-red-600" },
             { r: 2, label: "Below IC6", desc: "Close but missing key signals", color: "text-orange-500" },
-            { r: 3, label: "At IC6 Bar", desc: "Meets expectations", color: "text-amber-600" },
+            { r: 3, label: "At IC6 Bar", desc: "Meets expectations", color: "text-amber-800" },
             { r: 4, label: "Above IC6", desc: "Consistently exceeds bar", color: "text-emerald-600" },
             { r: 5, label: "IC7 Level", desc: "Exceptional, rare signal", color: "text-blue-600" },
           ].map(({ r, label, desc, color }) => (
             <div key={r} className="text-center">
               <div className={cn("text-lg font-black", color)}>{r}</div>
-              <div className="text-xs font-semibold text-gray-600 dark:text-gray-300">{label}</div>
-              <div className="text-xs text-gray-400">{desc}</div>
+              <div className="text-xs font-semibold text-gray-600 dark:text-gray-200">{label}</div>
+              <div className="text-xs text-gray-600">{desc}</div>
             </div>
           ))}
         </div>

@@ -141,13 +141,13 @@ export default function PatternMasteryTree() {
             <Zap size={16} className="text-amber-500" />
             Pattern Mastery Tree
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">
             Earn 3× rating of 4+/5 in Quick Drill to unlock a node. Hover for details.
           </p>
         </div>
         <div className="flex items-center gap-3">
           {/* Progress pill */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200">
             <Star size={12} className="text-amber-500" />
             {unlockedCount} / {NODES.length} unlocked
           </div>
@@ -164,13 +164,13 @@ export default function PatternMasteryTree() {
       {/* Tier legend */}
       <div className="flex flex-wrap gap-3 mb-3">
         {TIER_COLORS.map((tc, i) => (
-          <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+          <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300">
             <span className="w-3 h-3 rounded-full inline-block" style={{ background: tc.fill }} />
             Tier {i}: {tc.label}
           </div>
         ))}
-        <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
-          <Lock size={10} className="text-gray-400" />
+        <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300">
+          <Lock size={10} className="text-gray-600" />
           Locked (grey)
         </div>
       </div>
@@ -338,21 +338,21 @@ export default function PatternMasteryTree() {
           <div className="flex items-center gap-2 mb-1">
             {tooltip.unlocked
               ? <span className="text-emerald-500 font-bold text-base">✓</span>
-              : <Lock size={13} className="text-gray-400" />}
+              : <Lock size={13} className="text-gray-600" />}
             <span className="font-bold text-gray-900 dark:text-white">
               {tooltip.node.label.replace("\n", " ")}
             </span>
             <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
               tooltip.unlocked
                 ? "bg-emerald-100 text-emerald-700"
-                : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
             }`}>
               {tooltip.unlocked ? "Unlocked" : `${tooltip.progress}/3 ratings ≥4`}
             </span>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-xs">{tooltip.node.description}</p>
+          <p className="text-gray-600 dark:text-gray-300 text-xs">{tooltip.node.description}</p>
           {!tooltip.unlocked && tooltip.node.prereqs.length > 0 && (
-            <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+            <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
               <Info size={10} />
               Prerequisites: {tooltip.node.prereqs.map(p => NODES.find(n => n.id === p)?.label.replace("\n", " ")).join(", ")}
             </p>
@@ -367,7 +367,7 @@ export default function PatternMasteryTree() {
 
       {/* Pattern Master progress bar */}
       <div className="mt-4">
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+        <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300 mb-1">
           <span>Overall mastery progress</span>
           <span>{Math.round((unlockedCount / NODES.length) * 100)}%</span>
         </div>
@@ -383,7 +383,7 @@ export default function PatternMasteryTree() {
           />
         </div>
         {allUnlocked && (
-          <p className="text-center text-xs font-bold text-amber-600 mt-1.5 flex items-center justify-center gap-1">
+          <p className="text-center text-xs font-bold text-amber-800 mt-1.5 flex items-center justify-center gap-1">
             <Trophy size={12} /> Congratulations — you are a Pattern Master!
           </p>
         )}

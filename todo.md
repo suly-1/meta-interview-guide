@@ -974,3 +974,8 @@
 - [x] Wire into navigation as "Guide" tab
 - [x] Standalone stubs added for 8 new drills in trpc.standalone.ts
 - [x] 102/102 tests passing
+
+## Readability & Contrast Fix (Mar 27 2026)
+- [x] Fix low-contrast text across entire site — all cards, labels, progress bars, expanded panels
+- [x] Fix WeakSignalDetectorTab: light text on light background
+- [x] Fix global CSS theme variables for better contrast in light mode

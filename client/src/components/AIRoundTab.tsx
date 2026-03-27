@@ -32,7 +32,7 @@ const LENSES = [
   {
     icon: <MessageSquare size={18} />,
     bg: "bg-amber-100",
-    iconColor: "text-amber-600",
+    iconColor: "text-amber-800",
     title: "4. Technical Communication",
     desc: "How well can you communicate reasoning, discuss technical ideas, ask thoughtful questions, and incorporate feedback? Narrate your high-level plan every 60–90 seconds. Be ready for non-coding discussion: runtime analysis, trade-offs, contract changes, data reasoning.",
   },
@@ -146,7 +146,7 @@ export default function AIRoundTab() {
         <button
           onClick={() => setView("guide")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-            view === "guide" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+            view === "guide" ? "bg-white text-gray-900 shadow-sm" : "text-gray-700 hover:text-gray-700"
           }`}
         >
           <BookOpen size={14} /> Guide
@@ -154,7 +154,7 @@ export default function AIRoundTab() {
         <button
           onClick={() => setView("mock")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-            view === "mock" ? "bg-white text-violet-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+            view === "mock" ? "bg-white text-violet-700 shadow-sm" : "text-gray-700 hover:text-gray-700"
           }`}
         >
           <Target size={14} /> Mock Session
@@ -162,7 +162,7 @@ export default function AIRoundTab() {
         <button
           onClick={() => setView("drills")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-            view === "drills" ? "bg-white text-rose-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+            view === "drills" ? "bg-white text-rose-700 shadow-sm" : "text-gray-700 hover:text-gray-700"
           }`}
         >
           <Zap size={14} /> Advanced Drills
@@ -187,22 +187,22 @@ export default function AIRoundTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             The AI-Enabled Coding Round
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Meta's newest interview format — introduced October 2025</p>
+          <p className="text-sm text-gray-700 mt-1">Meta's newest interview format — introduced October 2025</p>
         </div>
 
         {/* Source credit + Practice links */}
         <div className="space-y-3 mb-5">
-          <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-500 flex-wrap">
-            <Info size={13} className="text-gray-400 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 flex-wrap">
+            <Info size={13} className="text-gray-600 flex-shrink-0" />
             <span>Content enriched with insights from:</span>
             <a href="https://www.coditioning.com/blog/13/meta-ai-enabled-coding-interview-guide" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
               Coditioning Guide <ExternalLink size={11} />
             </a>
-            <span className="text-gray-300">·</span>
+            <span className="text-gray-700">·</span>
             <a href="https://www.hellointerview.com/blog/meta-ai-enabled-coding" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
               HelloInterview Guide <ExternalLink size={11} />
             </a>
-            <span className="text-gray-300">·</span>
+            <span className="text-gray-700">·</span>
             <a href="https://www.hellointerview.com/learn/ai-coding/overview/introduction" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
               HelloInterview AI Coding Overview <ExternalLink size={11} />
             </a>
@@ -289,7 +289,7 @@ export default function AIRoundTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             The 4 Evaluation Lenses
           </h2>
-          <p className="text-sm text-gray-500 mt-1">What your interviewer is scoring you on throughout the session</p>
+          <p className="text-sm text-gray-700 mt-1">What your interviewer is scoring you on throughout the session</p>
         </div>
         <div className="space-y-3">
           {LENSES.map((l) => (
@@ -312,7 +312,7 @@ export default function AIRoundTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             The 6-Step Workflow
           </h2>
-          <p className="text-sm text-gray-500 mt-1">A repeatable process to clear checkpoints efficiently and demonstrate all 4 evaluation lenses</p>
+          <p className="text-sm text-gray-700 mt-1">A repeatable process to clear checkpoints efficiently and demonstrate all 4 evaluation lenses</p>
         </div>
         <div className="space-y-3">
           {WORKFLOW_STEPS.map((s, i) => (
@@ -332,7 +332,7 @@ export default function AIRoundTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             7 Anti-Patterns That Sink Candidates
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Common mistakes observed in the AI-enabled round — and how to avoid them</p>
+          <p className="text-sm text-gray-700 mt-1">Common mistakes observed in the AI-enabled round — and how to avoid them</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {ANTI_PATTERNS.map((a) => (
@@ -371,7 +371,7 @@ export default function AIRoundTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             How to Prepare: 6 Actionable Steps
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Concrete preparation moves that directly map to the evaluation criteria</p>
+          <p className="text-sm text-gray-700 mt-1">Concrete preparation moves that directly map to the evaluation criteria</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {PREP_STEPS.map((s, i) => (
@@ -394,7 +394,7 @@ export default function AIRoundTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Common Questions
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Frequently asked questions from candidates preparing for this round</p>
+          <p className="text-sm text-gray-700 mt-1">Frequently asked questions from candidates preparing for this round</p>
         </div>
         <div className="space-y-3">
           {FAQ.map((f, i) => (

@@ -145,7 +145,7 @@ export default function AdminSettings() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur border-b border-gray-800">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/admin/disclaimer" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/admin/disclaimer" className="text-gray-600 hover:text-white transition-colors">
             <ArrowLeft size={18} />
           </Link>
           <div className="flex items-center gap-2">
@@ -153,11 +153,11 @@ export default function AdminSettings() {
             <h1 className="font-semibold text-sm">Site Settings</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <Link href="/admin/users" className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors">
+            <Link href="/admin/users" className="text-xs text-gray-700 hover:text-gray-700 flex items-center gap-1 transition-colors">
               <Users size={13} />
               Users
             </Link>
-            <Link href="/admin/disclaimer" className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors">
+            <Link href="/admin/disclaimer" className="text-xs text-gray-700 hover:text-gray-700 flex items-center gap-1 transition-colors">
               <FileText size={13} />
               Reports
             </Link>
@@ -192,16 +192,16 @@ export default function AdminSettings() {
                 {lockStatus?.isLocked ? (
                   <><Lock size={16} className="text-red-400" /> Site is Locked</>
                 ) : lockStatus?.lockEnabled ? (
-                  <><Clock size={16} className="text-amber-400" /> Time-Lock Active</>
+                  <><Clock size={16} className="text-amber-900" /> Time-Lock Active</>
                 ) : (
                   <><Unlock size={16} className="text-emerald-400" /> Site is Open</>
                 )}
               </h2>
               <p className="text-xs mt-0.5">
                 {lockStatus?.isOwner && lockStatus?.isLocked ? (
-                  <span className="text-amber-400 font-medium">Non-admin visitors are locked out. You bypass the gate as admin.</span>
+                  <span className="text-amber-900 font-medium">Non-admin visitors are locked out. You bypass the gate as admin.</span>
                 ) : lockStatus?.isOwner ? (
-                  <span className="text-gray-500">You (admin) always have access regardless of lock status.</span>
+                  <span className="text-gray-700">You (admin) always have access regardless of lock status.</span>
                 ) : null}
               </p>
             </div>
@@ -209,7 +209,7 @@ export default function AdminSettings() {
               lockStatus?.isLocked
                 ? "bg-red-900/50 text-red-300"
                 : lockStatus?.lockEnabled
-                ? "bg-amber-900/50 text-amber-300"
+                ? "bg-amber-900/50 text-amber-800"
                 : "bg-emerald-900/50 text-emerald-300"
             }`}>
               {lockStatus?.isLocked ? "LOCKED" : lockStatus?.lockEnabled ? "COUNTING" : "OPEN"}
@@ -220,7 +220,7 @@ export default function AdminSettings() {
             <>
               {/* Progress bar */}
               <div className="mb-3">
-                <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                <div className="flex justify-between text-xs text-gray-700 mb-1.5">
                   <span>Day {lockStatus.daysElapsed ?? 0} of {lockStatus.lockDurationDays}</span>
                   <span>{lockStatus.isLocked ? "Expired" : `${lockStatus.daysRemaining} days remaining`}</span>
                 </div>
@@ -236,7 +236,7 @@ export default function AdminSettings() {
 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="bg-gray-900/60 rounded-lg p-3">
-                  <p className="text-gray-500 mb-0.5">Started</p>
+                  <p className="text-gray-700 mb-0.5">Started</p>
                   <p className="text-white font-medium">
                     {lockStatus.lockStartDate
                       ? new Date(lockStatus.lockStartDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
@@ -244,7 +244,7 @@ export default function AdminSettings() {
                   </p>
                 </div>
                 <div className="bg-gray-900/60 rounded-lg p-3">
-                  <p className="text-gray-500 mb-0.5">Locks / Locked at</p>
+                  <p className="text-gray-700 mb-0.5">Locks / Locked at</p>
                   <p className="text-white font-medium">
                     {lockStatus.lockStartDate
                       ? new Date(
@@ -310,7 +310,7 @@ export default function AdminSettings() {
               disabled={updateSettings.isPending}
               className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-colors disabled:opacity-50 ${
                 lockStatus?.lockEnabled
-                  ? "bg-gray-800/40 border-gray-700 hover:bg-gray-800/60 text-gray-300"
+                  ? "bg-gray-800/40 border-gray-700 hover:bg-gray-800/60 text-gray-700"
                   : "bg-emerald-900/20 border-emerald-800/40 hover:bg-emerald-900/40 text-emerald-300"
               }`}
             >
@@ -326,13 +326,13 @@ export default function AdminSettings() {
         {/* Advanced Settings */}
         <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-            <Calendar size={15} className="text-gray-400" />
+            <Calendar size={15} className="text-gray-600" />
             Advanced Settings
           </h3>
           <div className="space-y-4">
             {/* Custom start date */}
             <div>
-              <label className="block text-xs text-gray-500 mb-1.5">Custom Start Date</label>
+              <label className="block text-xs text-gray-700 mb-1.5">Custom Start Date</label>
               <div className="flex gap-2">
                 <input
                   type="date"
@@ -358,7 +358,7 @@ export default function AdminSettings() {
 
             {/* Custom duration */}
             <div>
-              <label className="block text-xs text-gray-500 mb-1.5">
+              <label className="block text-xs text-gray-700 mb-1.5">
                 Lock Duration (days) — current: {lockStatus?.lockDurationDays ?? 60}
               </label>
               <div className="flex gap-2">
@@ -396,7 +396,7 @@ export default function AdminSettings() {
             <FileText size={15} className="text-blue-400" />
             Disclaimer Gate
           </h3>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-gray-700 mb-4">
             When enabled, all users must acknowledge the disclaimer before accessing the guide. Disable to let users in without the acknowledgment screen.
           </p>
           <div className="flex items-center justify-between">
@@ -404,7 +404,7 @@ export default function AdminSettings() {
               <p className="text-sm text-white font-medium">
                 {disclaimerStatus?.enabled ? "Gate is enabled" : "Gate is disabled"}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-700 mt-0.5">
                 {disclaimerStatus?.enabled
                   ? "Users must acknowledge before accessing content"
                   : "Users can access content without acknowledgment"}
@@ -416,7 +416,7 @@ export default function AdminSettings() {
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 ${
                 disclaimerStatus?.enabled
                   ? "bg-blue-900/30 text-blue-300 border border-blue-800/40 hover:bg-blue-900/50"
-                  : "bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700"
+                  : "bg-gray-800 text-gray-600 border border-gray-700 hover:bg-gray-700"
               }`}
             >
               {disclaimerStatus?.enabled
@@ -429,10 +429,10 @@ export default function AdminSettings() {
         {/* Cohort Reset */}
         <div className="bg-gray-900 rounded-2xl border border-amber-800/30 p-6">
           <h3 className="font-semibold text-white mb-1 flex items-center gap-2">
-            <RefreshCw size={15} className="text-amber-400" />
+            <RefreshCw size={15} className="text-amber-900" />
             Cohort Reset
           </h3>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-gray-700 mb-4">
             Start a new cohort of candidates. This resets the 60-day clock to today and clears all disclaimer acknowledgments so every user must re-sign before accessing the guide.
           </p>
           {cohortResetSuccess && (
@@ -442,7 +442,7 @@ export default function AdminSettings() {
           )}
           <button
             onClick={() => setConfirmCohortReset(true)}
-            className="w-full py-3 rounded-xl bg-amber-900/30 border border-amber-700/40 hover:bg-amber-900/50 text-amber-300 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-amber-900/30 border border-amber-700/40 hover:bg-amber-900/50 text-amber-800 text-sm font-medium transition-colors flex items-center justify-center gap-2"
           >
             <RefreshCw size={15} />
             Start New Cohort
@@ -470,7 +470,7 @@ export default function AdminSettings() {
               {showChangePinSection ? "Cancel" : "Change PIN"}
             </button>
           </div>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-gray-700 mb-4">
             The admin PIN is a second layer of protection on top of OAuth login.
             It is verified server-side and never stored in the browser.
           </p>
@@ -485,7 +485,7 @@ export default function AdminSettings() {
           {showChangePinSection && (
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Current PIN</label>
+                <label className="text-xs text-gray-600 block mb-1">Current PIN</label>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -497,7 +497,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">New PIN (min 4 digits)</label>
+                <label className="text-xs text-gray-600 block mb-1">New PIN (min 4 digits)</label>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -509,7 +509,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Confirm New PIN</label>
+                <label className="text-xs text-gray-600 block mb-1">Confirm New PIN</label>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -546,11 +546,11 @@ export default function AdminSettings() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <AlertOctagon size={16} className="text-red-400" />
-              <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Failed PIN Attempts</h4>
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Failed PIN Attempts</h4>
             </div>
             <button
               onClick={() => refetchPinAttempts()}
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
+              className="text-xs text-gray-700 hover:text-gray-700 transition-colors flex items-center gap-1"
             >
               <RefreshCw size={11} />
               Refresh
@@ -563,15 +563,15 @@ export default function AdminSettings() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-800">
-                    <th className="text-left py-2 pr-4 text-gray-500 font-medium">Time</th>
-                    <th className="text-left py-2 pr-4 text-gray-500 font-medium">IP Address</th>
-                    <th className="text-left py-2 text-gray-500 font-medium">Status</th>
+                    <th className="text-left py-2 pr-4 text-gray-700 font-medium">Time</th>
+                    <th className="text-left py-2 pr-4 text-gray-700 font-medium">IP Address</th>
+                    <th className="text-left py-2 text-gray-700 font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pinAttempts.map((attempt: { id: number; ipAddress: string; createdAt: Date }) => (
                     <tr key={attempt.id} className="border-b border-gray-800/50 last:border-0">
-                      <td className="py-2 pr-4 text-gray-400 whitespace-nowrap">
+                      <td className="py-2 pr-4 text-gray-600 whitespace-nowrap">
                         {new Date(attempt.createdAt).toLocaleString()}
                       </td>
                       <td className="py-2 pr-4 font-mono text-red-400">{attempt.ipAddress}</td>
@@ -592,8 +592,8 @@ export default function AdminSettings() {
         {/* PIN Attempt Bar Chart */}
         <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <AlertOctagon size={16} className="text-amber-400" />
-            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Failed Attempts — Last 7 Days</h4>
+            <AlertOctagon size={16} className="text-amber-900" />
+            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Failed Attempts — Last 7 Days</h4>
           </div>
           {!chartData || chartData.every(d => d.count === 0) ? (
             <p className="text-xs text-gray-600 text-center py-4">No failed PIN attempts in the last 7 days.</p>
@@ -623,9 +623,9 @@ export default function AdminSettings() {
         <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
           <div className="flex items-center gap-2 mb-1">
             <Wifi size={16} className="text-emerald-400" />
-            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Trusted IP Allowlist</h4>
+            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Trusted IP Allowlist</h4>
           </div>
-          <p className="text-[11px] text-gray-500 mb-4">IPs on this list bypass the PIN gate entirely. Supports exact IPv4 (e.g. <code className="text-gray-400">1.2.3.4</code>) and /24 CIDR (e.g. <code className="text-gray-400">192.168.1.0/24</code>).</p>
+          <p className="text-[11px] text-gray-700 mb-4">IPs on this list bypass the PIN gate entirely. Supports exact IPv4 (e.g. <code className="text-gray-600">1.2.3.4</code>) and /24 CIDR (e.g. <code className="text-gray-600">192.168.1.0/24</code>).</p>
           {/* Current IPs */}
           {allowedIps.length === 0 ? (
             <p className="text-xs text-gray-600 mb-3">No trusted IPs configured. All visitors must enter the PIN.</p>
@@ -684,13 +684,13 @@ export default function AdminSettings() {
 
         {/* How it works */}
         <div className="bg-gray-900/50 rounded-2xl border border-gray-800/50 p-5">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">How the Time-Lock Works</h4>
-          <ul className="space-y-2 text-xs text-gray-500">
+          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">How the Time-Lock Works</h4>
+          <ul className="space-y-2 text-xs text-gray-700">
             <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> When the timer is enabled, the site auto-locks after the set number of days from the start date.</li>
-            <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> You (the admin) are <strong className="text-gray-300">never locked out</strong> — your login bypasses the gate entirely.</li>
+            <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> You (the admin) are <strong className="text-gray-700">never locked out</strong> — your login bypasses the gate entirely.</li>
             <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Locked visitors see a "Guide is currently closed" screen with no access to content.</li>
-            <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Use <strong className="text-gray-300">Reset Clock</strong> to start a new cohort — this sets today as the new start date and enables the timer.</li>
-            <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Use <strong className="text-gray-300">Lock Now</strong> to immediately close the site for all non-admin users.</li>
+            <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Use <strong className="text-gray-700">Reset Clock</strong> to start a new cohort — this sets today as the new start date and enables the timer.</li>
+            <li className="flex items-start gap-2"><span className="text-blue-400 mt-0.5">•</span> Use <strong className="text-gray-700">Lock Now</strong> to immediately close the site for all non-admin users.</li>
           </ul>
         </div>
       </div>
@@ -701,17 +701,17 @@ export default function AdminSettings() {
           <div className="bg-gray-900 border border-amber-800/50 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-amber-900/50 flex items-center justify-center">
-                <RefreshCw size={18} className="text-amber-400" />
+                <RefreshCw size={18} className="text-amber-900" />
               </div>
               <div>
                 <h3 className="font-semibold text-white">Start New Cohort?</h3>
-                <p className="text-sm text-gray-400">This will reset the 60-day clock and clear all disclaimer acknowledgments.</p>
+                <p className="text-sm text-gray-600">This will reset the 60-day clock and clear all disclaimer acknowledgments.</p>
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmCohortReset(false)}
-                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-700 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -737,13 +737,13 @@ export default function AdminSettings() {
               </div>
               <div>
                 <h3 className="font-semibold text-white">Lock the Site Now?</h3>
-                <p className="text-sm text-gray-400">All non-admin users will immediately lose access.</p>
+                <p className="text-sm text-gray-600">All non-admin users will immediately lose access.</p>
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmLock(false)}
-                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-700 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -769,13 +769,13 @@ export default function AdminSettings() {
               </div>
               <div>
                 <h3 className="font-semibold text-white">Unlock the Site?</h3>
-                <p className="text-sm text-gray-400">All visitors will immediately regain access to the guide.</p>
+                <p className="text-sm text-gray-600">All visitors will immediately regain access to the guide.</p>
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmUnlock(false)}
-                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-700 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>

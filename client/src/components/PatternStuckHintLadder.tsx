@@ -33,8 +33,8 @@ const HINT_STEPS: HintStep[] = [
     level: "medium",
     label: "Medium Hint",
     description: "Describe the core insight",
-    color: "text-amber-700 dark:text-amber-400",
-    bgColor: "bg-amber-50 dark:bg-amber-900/20",
+    color: "text-amber-900 dark:text-amber-900",
+    bgColor: "bg-amber-100 dark:bg-amber-900/20",
     borderColor: "border-amber-200 dark:border-amber-700",
     icon: "🔍",
   },
@@ -43,7 +43,7 @@ const HINT_STEPS: HintStep[] = [
     label: "Full Walkthrough",
     description: "Step-by-step algorithm explanation",
     color: "text-red-700 dark:text-red-400",
-    bgColor: "bg-red-50 dark:bg-red-900/20",
+    bgColor: "bg-red-100 dark:bg-red-900/20",
     borderColor: "border-red-200 dark:border-red-700",
     icon: "📖",
   },
@@ -104,24 +104,24 @@ export default function PatternStuckHintLadder({ patternName, keyIdea }: Pattern
       >
         <div className="flex items-center gap-2">
           <Lightbulb size={14} className="text-amber-500" />
-          <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+          <span className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
             Stuck? Get a Hint
           </span>
           {currentStep >= 0 && (
-            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-semibold">
+            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-900 px-2 py-0.5 rounded-full font-semibold">
               Step {currentStep + 1}/3 revealed
             </span>
           )}
         </div>
         <ChevronRight
           size={14}
-          className={`text-gray-400 transition-transform ${open ? "rotate-90" : ""}`}
+          className={`text-gray-600 transition-transform ${open ? "rotate-90" : ""}`}
         />
       </button>
 
       {open && (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100 dark:border-gray-700 pt-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+          <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
             Hints escalate progressively. Try the gentlest hint first — only go deeper if you're still stuck.
           </p>
 
@@ -147,10 +147,10 @@ export default function PatternStuckHintLadder({ patternName, keyIdea }: Pattern
                     <div className="flex items-center gap-2">
                       <span className="text-base">{step.icon}</span>
                       <div>
-                        <div className={`text-xs font-bold ${isRevealed ? step.color : "text-gray-500 dark:text-gray-400"}`}>
+                        <div className={`text-xs font-bold ${isRevealed ? step.color : "text-gray-700 dark:text-gray-300"}`}>
                           {step.label}
                         </div>
-                        <div className="text-[10px] text-gray-400 dark:text-gray-500">{step.description}</div>
+                        <div className="text-[10px] text-gray-600 dark:text-gray-200">{step.description}</div>
                       </div>
                     </div>
                     {!isRevealed && (
@@ -159,10 +159,10 @@ export default function PatternStuckHintLadder({ patternName, keyIdea }: Pattern
                         disabled={isLocked || isLoading}
                         className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg transition-all ${
                           isLocked
-                            ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                            ? "text-gray-700 dark:text-gray-300 cursor-not-allowed"
                             : isNextToReveal
                             ? `${step.color} ${step.bgColor} ${step.borderColor} border hover:opacity-80`
-                            : "text-gray-400 cursor-not-allowed"
+                            : "text-gray-600 cursor-not-allowed"
                         }`}
                         title={isLocked ? "Reveal previous hints first" : undefined}
                       >
@@ -190,7 +190,7 @@ export default function PatternStuckHintLadder({ patternName, keyIdea }: Pattern
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 rounded-lg px-3 py-2">
               <AlertCircle size={12} />
               {error}
             </div>
@@ -200,7 +200,7 @@ export default function PatternStuckHintLadder({ patternName, keyIdea }: Pattern
           {currentStep >= 0 && (
             <button
               onClick={handleReset}
-              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-xs text-gray-600 hover:text-gray-600 dark:hover:text-gray-700 transition-colors"
             >
               ↺ Reset hints
             </button>

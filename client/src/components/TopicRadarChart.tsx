@@ -59,7 +59,7 @@ export default function TopicRadarChart() {
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
       <div className="px-5 py-4 border-b border-gray-100">
         <p className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Topic Mastery Radar</p>
-        <p className="text-xs text-gray-400 mt-0.5">CTCI solve % per topic — larger polygon = stronger coverage</p>
+        <p className="text-xs text-gray-600 mt-0.5">CTCI solve % per topic — larger polygon = stronger coverage</p>
       </div>
       <div className="flex flex-col sm:flex-row items-center gap-4 p-4">
         <svg viewBox="0 0 260 260" className="w-full max-w-[260px] flex-shrink-0">
@@ -116,7 +116,7 @@ export default function TopicRadarChart() {
                     style={{ width: `${d.pct * 100}%`, background: d.pct >= 0.7 ? "#10b981" : d.pct >= 0.4 ? "#3b82f6" : "#f59e0b" }}
                   />
                 </div>
-                <span className="text-[11px] font-bold text-gray-500 w-12 text-right">{d.solved}/{d.total}</span>
+                <span className="text-[11px] font-bold text-gray-700 w-12 text-right">{d.solved}/{d.total}</span>
               </div>
             ))}
           </div>

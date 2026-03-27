@@ -145,20 +145,20 @@ function QuickStart({ onNavigate, currentWeek }: { onNavigate: (tab: string) => 
             )}
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${
               s.done ? "bg-emerald-100 text-emerald-700" :
-              currentWeek === parseInt(s.num) ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-500"
+              currentWeek === parseInt(s.num) ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700"
             }`}>
               {s.done ? <CheckCircle2 size={14} /> : s.num}
             </div>
             <div>
               <p className="font-bold text-gray-900">{s.title}</p>
-              <p className="text-xs text-gray-400">{s.subtitle}</p>
+              <p className="text-xs text-gray-600">{s.subtitle}</p>
             </div>
             <p className="text-xs text-gray-600 leading-relaxed">{s.desc}</p>
             <button
               onClick={() => onNavigate(s.tab)}
               className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
                 s.done ? "text-emerald-600 hover:text-emerald-700" :
-                currentWeek === parseInt(s.num) ? "text-blue-600 hover:text-blue-700" : "text-gray-400 hover:text-gray-600"
+                currentWeek === parseInt(s.num) ? "text-blue-600 hover:text-blue-700" : "text-gray-600 hover:text-gray-600"
               }`}
             >
               {s.tabLabel} <ArrowRight size={11} />
@@ -233,7 +233,7 @@ const FEATURE_GROUPS = [
 
 const COLOR_MAP: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700 border-blue-200",
-  amber:   "bg-amber-100 text-amber-700 border-amber-200",
+  amber:   "bg-amber-100 text-amber-900 border-amber-200",
   purple:  "bg-purple-100 text-purple-700 border-purple-200",
   rose:    "bg-rose-100 text-rose-700 border-rose-200",
   emerald: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -262,9 +262,9 @@ function FeatureMap({ onNavigate }: { onNavigate: (tab: string) => void }) {
                 <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${COLOR_MAP[g.color]}`}>
                   {g.icon} {g.group}
                 </span>
-                <span className="text-xs text-gray-400">{g.features.length} tool{g.features.length > 1 ? "s" : ""}</span>
+                <span className="text-xs text-gray-600">{g.features.length} tool{g.features.length > 1 ? "s" : ""}</span>
               </div>
-              {expanded === g.group ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
+              {expanded === g.group ? <ChevronDown size={14} className="text-gray-600" /> : <ChevronRight size={14} className="text-gray-600" />}
             </button>
             {expanded === g.group && (
               <div className="divide-y divide-gray-100">
@@ -275,7 +275,7 @@ function FeatureMap({ onNavigate }: { onNavigate: (tab: string) => void }) {
                         <span className="text-sm font-semibold text-gray-900">{f.label}</span>
                       </div>
                       <p className="text-xs text-gray-600 leading-relaxed">{f.desc}</p>
-                      <p className="text-xs text-gray-400 mt-1 italic">When: {f.when}</p>
+                      <p className="text-xs text-gray-600 mt-1 italic">When: {f.when}</p>
                     </div>
                     <button
                       onClick={() => onNavigate(f.tab)}
@@ -393,7 +393,7 @@ function LearningPath({ currentWeek }: { currentWeek: number }) {
         <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           4-Week Learning Path — 1 hr/day
         </h2>
-        <span className="text-xs text-gray-400 ml-1">Tick off each day as you complete it</span>
+        <span className="text-xs text-gray-600 ml-1">Tick off each day as you complete it</span>
       </div>
       <div className="space-y-3">
         {WEEKS.map((w) => {
@@ -423,9 +423,9 @@ function LearningPath({ currentWeek }: { currentWeek: number }) {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-xs text-gray-500">{done}/{total}</span>
+                    <span className="text-xs text-gray-700">{done}/{total}</span>
                   </div>
-                  {isOpen ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
+                  {isOpen ? <ChevronDown size={14} className="text-gray-600" /> : <ChevronRight size={14} className="text-gray-600" />}
                 </div>
               </button>
               {isOpen && (
@@ -438,7 +438,7 @@ function LearningPath({ currentWeek }: { currentWeek: number }) {
                       <div className="mt-0.5 flex-shrink-0">
                         {checked[d.key]
                           ? <CheckCircle2 size={15} className="text-emerald-500" />
-                          : <Circle size={15} className="text-gray-300" />
+                          : <Circle size={15} className="text-gray-700" />
                         }
                       </div>
                       <input
@@ -448,8 +448,8 @@ function LearningPath({ currentWeek }: { currentWeek: number }) {
                         onChange={() => toggle(d.key)}
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold text-gray-400 mr-2">{d.day}</span>
-                        <span className={`text-sm ${checked[d.key] ? "line-through text-gray-400" : "text-gray-800"}`}>
+                        <span className="text-xs font-bold text-gray-600 mr-2">{d.day}</span>
+                        <span className={`text-sm ${checked[d.key] ? "line-through text-gray-600" : "text-gray-800"}`}>
                           {d.task}
                         </span>
                       </div>
@@ -562,8 +562,8 @@ const DRILL_BADGE_COLORS: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700 border-blue-200",
   indigo:  "bg-indigo-100 text-indigo-700 border-indigo-200",
   purple:  "bg-purple-100 text-purple-700 border-purple-200",
-  amber:   "bg-amber-100 text-amber-700 border-amber-200",
-  orange:  "bg-orange-100 text-orange-700 border-orange-200",
+  amber:   "bg-amber-100 text-amber-900 border-amber-200",
+  orange:  "bg-orange-100 text-orange-900 border-orange-200",
   green:   "bg-green-100 text-green-700 border-green-200",
   teal:    "bg-teal-100 text-teal-700 border-teal-200",
   rose:    "bg-rose-100 text-rose-700 border-rose-200",
@@ -594,8 +594,8 @@ function AdvancedDrillsGuide({ drillHistory, onNavigate }: { drillHistory: Drill
           Advanced Drills Guide — Drills 11–18
         </h2>
         <div className="ml-auto flex items-center gap-1">
-          <Star size={12} className="text-amber-400 fill-amber-400" />
-          <span className="text-xs font-bold text-amber-600">High Impact</span>
+          <Star size={12} className="text-amber-900 fill-amber-400" />
+          <span className="text-xs font-bold text-amber-800">High Impact</span>
         </div>
       </div>
       <div className="space-y-2">
@@ -610,41 +610,41 @@ function AdvancedDrillsGuide({ drillHistory, onNavigate }: { drillHistory: Drill
                 onClick={() => setExpanded(isOpen ? null : d.id)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
               >
-                <span className="text-xs font-black text-gray-300 w-5">#{d.num}</span>
+                <span className="text-xs font-black text-gray-700 w-5">#{d.num}</span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex-shrink-0 ${DRILL_BADGE_COLORS[d.badgeColor]}`}>
                   {d.badge}
                 </span>
                 <span className="text-sm font-semibold text-gray-900 flex-1">{d.label}</span>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {best !== undefined ? (
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${best >= 7 ? "bg-emerald-100 text-emerald-700" : best >= 5 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${best >= 7 ? "bg-emerald-100 text-emerald-700" : best >= 5 ? "bg-amber-100 text-amber-900" : "bg-red-100 text-red-700"}`}>
                       Best: {best}/10
                     </span>
                   ) : (
-                    <span className="text-xs text-gray-400">Not attempted</span>
+                    <span className="text-xs text-gray-600">Not attempted</span>
                   )}
-                  {attempts > 0 && <span className="text-xs text-gray-400">{attempts}× tried</span>}
-                  {isOpen ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
+                  {attempts > 0 && <span className="text-xs text-gray-600">{attempts}× tried</span>}
+                  {isOpen ? <ChevronDown size={14} className="text-gray-600" /> : <ChevronRight size={14} className="text-gray-600" />}
                 </div>
               </button>
               {isOpen && (
                 <div className="px-4 pb-4 pt-1 space-y-3 border-t border-gray-100 bg-gray-50/50">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <p className="text-xs font-bold text-gray-500 mb-1 flex items-center gap-1"><Target size={10} /> What it trains</p>
+                      <p className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1"><Target size={10} /> What it trains</p>
                       <p className="text-xs text-gray-700 leading-relaxed">{d.trains}</p>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <p className="text-xs font-bold text-gray-500 mb-1 flex items-center gap-1"><Lightbulb size={10} /> How to start</p>
+                      <p className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1"><Lightbulb size={10} /> How to start</p>
                       <p className="text-xs text-gray-700 leading-relaxed">{d.howToStart}</p>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <p className="text-xs font-bold text-gray-500 mb-1 flex items-center gap-1"><Award size={10} /> What a good score looks like</p>
+                      <p className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1"><Award size={10} /> What a good score looks like</p>
                       <p className="text-xs text-gray-700 leading-relaxed">{d.goodScore}</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-400">Targets: <span className="font-medium text-gray-600">{d.targetWeakness}</span></p>
+                    <p className="text-xs text-gray-600">Targets: <span className="font-medium text-gray-600">{d.targetWeakness}</span></p>
                     <button
                       onClick={() => onNavigate("ai-round")}
                       className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700"
@@ -685,7 +685,7 @@ function ProgressSummary({ masteredPatterns, totalPatterns, readyBQs, totalBQs, 
       {stats.map((s) => (
         <div key={s.label} className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">{s.label}</span>
+            <span className="text-xs text-gray-700">{s.label}</span>
             <span className="text-xs font-bold text-gray-900">{s.value}</span>
           </div>
           <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
@@ -717,7 +717,7 @@ export default function GuideHowToUse({ onNavigate }: { onNavigate: (tab: string
             How to Use This Guide
           </h1>
         </div>
-        <p className="text-sm text-gray-500 max-w-2xl">
+        <p className="text-sm text-gray-700 max-w-2xl">
           This guide has 40+ tools across 10 tabs. This page shows you exactly what each tool does, when to use it, and where you are in the 4-week plan — based on your actual progress.
         </p>
       </div>

@@ -119,8 +119,8 @@ export function ApexPicks({ onTabChange }: ApexPicksProps) {
     <div className="container mt-6">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Star size={14} className="text-amber-400 fill-amber-400" />
-        <span className="text-xs font-black tracking-widest uppercase text-amber-400">
+        <Star size={14} className="text-amber-900 fill-amber-400" />
+        <span className="text-xs font-black tracking-widest uppercase text-amber-900">
           Apex Picks
         </span>
         <span className="text-xs text-muted-foreground">

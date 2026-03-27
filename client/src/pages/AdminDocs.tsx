@@ -33,7 +33,7 @@ function CodeBlock({ children, label }: { children: string; label?: string }) {
   return (
     <div className="rounded-lg overflow-hidden border border-gray-700 my-2">
       {label && (
-        <div className="bg-gray-800 px-3 py-1.5 text-[10px] font-mono text-gray-400 border-b border-gray-700 flex items-center justify-between">
+        <div className="bg-gray-800 px-3 py-1.5 text-[10px] font-mono text-gray-600 border-b border-gray-700 flex items-center justify-between">
           <span>{label}</span>
           <CopyButton value={children} />
         </div>
@@ -128,7 +128,7 @@ export default function AdminDocs() {
           <InfoBox type="warning">
             <strong>Keep this URL private.</strong> Anyone with this link has full admin access. Do not share it with candidates.
           </InfoBox>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+          <p className="text-sm text-gray-700 dark:text-gray-200 mb-3">
             The admin panel uses a secret token in the URL — no login required. Visit the link below to access all admin pages instantly. The token is saved in your browser after the first visit, so you only need the full URL once.
           </p>
           <CodeBlock label="Admin Entry URL (bookmark this)">{adminUrl}</CodeBlock>
@@ -147,7 +147,7 @@ export default function AdminDocs() {
                     {p.label}
                     <ExternalLink size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{p.desc}</p>
+                  <p className="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5 leading-snug">{p.desc}</p>
                 </div>
               </a>
             ))}
@@ -156,17 +156,17 @@ export default function AdminDocs() {
 
         {/* ── Admin Token ── */}
         <Section title="Admin Token Details" icon={<ShieldCheck size={16} />}>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+          <p className="text-sm text-gray-700 dark:text-gray-200 mb-3">
             The token is read from the <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">?key=</code> URL parameter and stored in <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">localStorage</code>. Once saved, you can navigate directly to any admin URL without the token in the address bar.
           </p>
           <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono text-xs">
-            <span className="text-gray-500 shrink-0">Token:</span>
+            <span className="text-gray-700 shrink-0">Token:</span>
             <span className="flex-1 text-gray-900 dark:text-gray-100 break-all">
               {showToken ? ADMIN_TOKEN : "•".repeat(36)}
             </span>
             <button
               onClick={() => setShowToken(v => !v)}
-              className="shrink-0 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              className="shrink-0 text-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               title={showToken ? "Hide token" : "Reveal token"}
             >
               {showToken ? <EyeOff size={13} /> : <Eye size={13} />}
@@ -180,7 +180,7 @@ export default function AdminDocs() {
 
         {/* ── Deployment Process ── */}
         <Section title="Deployment Process" icon={<GitBranch size={16} />}>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+          <p className="text-sm text-gray-700 dark:text-gray-200 mb-4">
             The site is deployed automatically to GitHub Pages via a GitHub Actions workflow. Every push to the <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">main</code> branch triggers a full rebuild and deployment. No manual steps are needed.
           </p>
 
@@ -201,15 +201,15 @@ export default function AdminDocs() {
                     <span className="text-indigo-500">{s.icon}</span>
                     {s.title}
                   </div>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{s.desc}</p>
+                  <p className="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5 leading-snug">{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="mt-4">
-            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Typical deployment time</p>
-            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+            <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2">Typical deployment time</p>
+            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-300">
               <span className="flex items-center gap-1"><Clock size={12} /> Build: ~25 seconds</span>
               <span className="flex items-center gap-1"><Globe size={12} /> Deploy: ~10 seconds</span>
               <span className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-500" /> Total: ~35 seconds</span>
@@ -219,7 +219,7 @@ export default function AdminDocs() {
 
         {/* ── Monitoring ── */}
         <Section title="Daily Automated Monitoring" icon={<Clock size={16} />}>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+          <p className="text-sm text-gray-700 dark:text-gray-200 mb-3">
             A daily health check runs every morning at 08:00 UTC and verifies four things:
           </p>
           <div className="space-y-2">
@@ -233,7 +233,7 @@ export default function AdminDocs() {
                 <CheckCircle2 size={13} className="text-emerald-500 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-gray-900 dark:text-gray-100">{c.check}: </span>
-                  <span className="text-gray-600 dark:text-gray-400">{c.desc}</span>
+                  <span className="text-gray-600 dark:text-gray-300">{c.desc}</span>
                 </div>
               </div>
             ))}
@@ -246,29 +246,29 @@ export default function AdminDocs() {
         <Section title="Repository & Workflow" icon={<GitBranch size={16} />}>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs w-28 shrink-0">GitHub repo</span>
+              <span className="text-gray-700 text-xs w-28 shrink-0">GitHub repo</span>
               <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline text-xs flex items-center gap-1">
                 suly-1/meta-interview-guide <ExternalLink size={11} />
               </a>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs w-28 shrink-0">Workflow file</span>
+              <span className="text-gray-700 text-xs w-28 shrink-0">Workflow file</span>
               <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">.github/workflows/deploy.yml</code>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs w-28 shrink-0">Build script</span>
+              <span className="text-gray-700 text-xs w-28 shrink-0">Build script</span>
               <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">pnpm build:standalone:static</code>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs w-28 shrink-0">Build config</span>
+              <span className="text-gray-700 text-xs w-28 shrink-0">Build config</span>
               <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">vite.standalone.config.ts</code>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs w-28 shrink-0">Output dir</span>
+              <span className="text-gray-700 text-xs w-28 shrink-0">Output dir</span>
               <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">dist/standalone/</code>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs w-28 shrink-0">Live site</span>
+              <span className="text-gray-700 text-xs w-28 shrink-0">Live site</span>
               <a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline text-xs flex items-center gap-1">
                 metaengguide.pro <ExternalLink size={11} />
               </a>
@@ -299,7 +299,7 @@ export default function AdminDocs() {
             ].map((faq, i) => (
               <div key={i} className="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
                 <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-1.5">Q: {faq.q}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">A: {faq.a}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">A: {faq.a}</p>
               </div>
             ))}
           </div>
@@ -308,7 +308,7 @@ export default function AdminDocs() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-6 text-center text-xs text-gray-400">
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-6 text-center text-xs text-gray-600">
         Meta IC6/IC7 Interview Guide — Admin Documentation · Last updated March 2026
       </footer>
     </div>

@@ -420,7 +420,7 @@ function FlashcardFlipDeck() {
                 Your Answer (STAR format)
               </span>
               <span
-                className={`text-[10px] font-mono ${wc < 50 ? "text-red-400" : wc < 150 ? "text-amber-400" : "text-emerald-400"}`}
+                className={`text-[10px] font-mono ${wc < 50 ? "text-red-400" : wc < 150 ? "text-amber-900" : "text-emerald-400"}`}
               >
                 {wc} words
               </span>
@@ -440,7 +440,7 @@ function FlashcardFlipDeck() {
                 {card.probes.map((p, i) => (
                   <span
                     key={i}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400"
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-900"
                   >
                     {p}
                   </span>
@@ -662,7 +662,7 @@ function L7Signals() {
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                  <div className="text-[10px] font-bold text-amber-400 mb-1">
+                  <div className="text-[10px] font-bold text-amber-900 mb-1">
                     💡 Coaching Tip
                   </div>
                   <p className="text-xs text-amber-100 leading-relaxed">
@@ -1235,7 +1235,7 @@ function MockHistoryLog({
                       >
                         {q.area.split(" ")[0]}
                       </span>
-                      <span className="text-amber-400">
+                      <span className="text-amber-900">
                         ★{session.ratings[i]}
                       </span>
                     </div>
@@ -1373,7 +1373,7 @@ function SurpriseMe({
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-400" : "text-foreground"}`}
+              className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-900" : "text-foreground"}`}
             >
               {mm}:{ss}
             </span>
@@ -1392,7 +1392,7 @@ function SurpriseMe({
               (label, i) => {
                 const colors = [
                   "text-blue-400",
-                  "text-amber-400",
+                  "text-amber-900",
                   "text-purple-400",
                   "text-emerald-400",
                 ];
@@ -1471,7 +1471,7 @@ function SurpriseMe({
           )}
 
           {done && (
-            <div className="text-xs font-semibold text-amber-400">
+            <div className="text-xs font-semibold text-amber-900">
               ⏱ Time’s up! Rate your answer above to continue.
             </div>
           )}
@@ -1608,7 +1608,7 @@ function XFNSurpriseMe({
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-400" : "text-teal-400"}`}
+              className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-900" : "text-teal-400"}`}
             >
               {mm}:{ss}
             </span>
@@ -1626,7 +1626,7 @@ function XFNSurpriseMe({
               (label, i) => {
                 const colors = [
                   "text-blue-400",
-                  "text-amber-400",
+                  "text-amber-900",
                   "text-violet-400",
                   "text-emerald-400",
                 ];
@@ -1703,7 +1703,7 @@ function XFNSurpriseMe({
           )}
 
           {done && (
-            <div className="text-xs font-semibold text-amber-400">
+            <div className="text-xs font-semibold text-amber-900">
               ⏱ Time's up! Rate your answer above to continue.
             </div>
           )}
@@ -1830,7 +1830,7 @@ function StoryStrengthTracker({
   const AREA_BADGE: Record<string, string> = {
     "Conflict & Influence": "text-red-400 bg-red-500/10 border-red-500/20",
     "Ownership & Ambiguity":
-      "text-amber-400 bg-amber-500/10 border-amber-500/20",
+      "text-amber-900 bg-amber-500/10 border-amber-500/20",
     "Scale & Impact": "text-blue-400 bg-blue-500/10 border-blue-500/20",
     "Failure & Learning":
       "text-purple-400 bg-purple-500/10 border-purple-500/20",
@@ -2082,7 +2082,7 @@ function XFNStoryBuilder({ onPopulatePlanner }: XFNStoryBuilderProps) {
               {(
                 [
                   ["situation", "S — Situation", "text-blue-400"],
-                  ["task", "T — Task", "text-amber-400"],
+                  ["task", "T — Task", "text-amber-900"],
                   ["action", "A — Action", "text-violet-400"],
                   ["result", "R — Result", "text-emerald-400"],
                 ] as [keyof typeof story, string, string][]
@@ -2539,7 +2539,7 @@ function TechRetroPlanner({
                 <div className="px-4 pb-4 space-y-3 bg-secondary/30">
                   {(
                     [
-                      ["Key Trade-offs", p.tradeoffs, "text-amber-400"],
+                      ["Key Trade-offs", p.tradeoffs, "text-amber-900"],
                       ["Biggest Bug / Incident", p.biggestBug, "text-red-400"],
                       ["Outcome & Impact", p.outcome, "text-emerald-400"],
                       ["Lessons Learned", p.lessonsLearned, "text-cyan-400"],
@@ -2672,7 +2672,7 @@ function TechRetroPlanner({
                                   </div>
                                 )}
                                 {score.improvements && (
-                                  <div className="text-xs text-amber-400 leading-relaxed">
+                                  <div className="text-xs text-amber-900 leading-relaxed">
                                     <span className="font-bold">
                                       💡 Improve:{" "}
                                     </span>
@@ -2821,7 +2821,7 @@ Result: ..."
               const secs = estSecs % 60;
               const color =
                 words < 100
-                  ? "text-amber-400"
+                  ? "text-amber-900"
                   : words <= 350
                     ? "text-emerald-400"
                     : "text-red-400";
@@ -2845,7 +2845,7 @@ Result: ..."
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="text-amber-400">&lt;100 short</span>
+                    <span className="text-amber-900">&lt;100 short</span>
                     <span className="text-emerald-400">100–250 ideal</span>
                     <span className="text-red-400">&gt;350 too long</span>
                   </div>
@@ -2877,14 +2877,14 @@ Result: ..."
                       key={s}
                       className={
                         s <= result.overall
-                          ? "text-amber-400"
+                          ? "text-amber-900"
                           : "text-muted-foreground/30"
                       }
                     >
                       ★
                     </span>
                   ))}
-                  <span className="text-sm font-extrabold text-amber-400 ml-1">
+                  <span className="text-sm font-extrabold text-amber-900 ml-1">
                     {result.overall}/5
                   </span>
                 </div>
@@ -2926,7 +2926,7 @@ Result: ..."
               )}
               {result.improvements.length > 0 && (
                 <div>
-                  <div className="text-xs font-bold text-amber-400 mb-1">
+                  <div className="text-xs font-bold text-amber-900 mb-1">
                     💡 Improvements
                   </div>
                   <ul className="space-y-1">
@@ -2935,7 +2935,7 @@ Result: ..."
                         key={i}
                         className="text-xs text-muted-foreground flex gap-2"
                       >
-                        <span className="text-amber-400 shrink-0">•</span>
+                        <span className="text-amber-900 shrink-0">•</span>
                         {s}
                       </li>
                     ))}
@@ -3122,7 +3122,7 @@ export default function BehavioralTab() {
           </button>
           <button
             onClick={handleSurpriseMe}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-800 text-xs font-semibold transition-all"
           >
             <Shuffle size={12} />
             Surprise Me
@@ -3315,7 +3315,7 @@ export default function BehavioralTab() {
                     href="https://excalidraw.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline text-amber-300 hover:text-amber-100"
+                    className="underline text-amber-800 hover:text-amber-100"
                   >
                     Excalidraw
                   </a>{" "}
@@ -3693,7 +3693,7 @@ export default function BehavioralTab() {
             [
               "T — Task",
               "Your specific responsibility. What were YOU asked to do?",
-              "text-amber-400",
+              "text-amber-900",
             ],
             [
               "A — Action",
@@ -3783,7 +3783,7 @@ export default function BehavioralTab() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {r > 0 && (
-                    <span className="text-amber-400 text-xs font-bold">
+                    <span className="text-amber-900 text-xs font-bold">
                       ★{r}
                     </span>
                   )}
@@ -3820,7 +3820,7 @@ export default function BehavioralTab() {
                             wc < 80
                               ? "text-red-400"
                               : wc < 200
-                                ? "text-amber-400"
+                                ? "text-amber-900"
                                 : "text-emerald-400";
                           return (
                             <span className={`text-[10px] font-mono ${color}`}>

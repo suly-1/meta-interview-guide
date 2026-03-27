@@ -127,7 +127,7 @@ const SCENARIOS: DrillScenario[] = [
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  Medium: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+  Medium: "text-amber-900 bg-amber-500/10 border-amber-500/30",
   Hard: "text-red-400 bg-red-500/10 border-red-500/30",
 };
 
@@ -387,13 +387,13 @@ export default function PromptEngineeringDrill() {
             : "bg-red-500/10 border-red-500/30"
         }`}>
           <div className={`text-2xl font-black ${
-            score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-red-400"
+            score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-900" : "text-red-400"
           }`}>
             {score}
           </div>
           <div>
             <div className={`text-xs font-bold ${
-              score >= 80 ? "text-emerald-300" : score >= 60 ? "text-amber-300" : "text-red-300"
+              score >= 80 ? "text-emerald-300" : score >= 60 ? "text-amber-800" : "text-red-300"
             }`}>
               {score >= 80 ? "Strong Prompt" : score >= 60 ? "Needs Refinement" : "Too Vague"}
             </div>
@@ -406,7 +406,7 @@ export default function PromptEngineeringDrill() {
       {aiFeedback && (
         <div className="rounded-lg bg-secondary/30 border border-border p-4">
           <div className="flex items-center gap-1.5 mb-2">
-            <Lightbulb size={13} className="text-amber-400" />
+            <Lightbulb size={13} className="text-amber-900" />
             <span className="text-xs font-semibold text-foreground">AI Feedback</span>
           </div>
           <div className="text-xs text-muted-foreground">
@@ -433,8 +433,8 @@ export default function PromptEngineeringDrill() {
               </p>
             </div>
             <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
-              <Lightbulb size={12} className="text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-amber-300">{scenario.tip}</p>
+              <Lightbulb size={12} className="text-amber-900 shrink-0 mt-0.5" />
+              <p className="text-[11px] text-amber-800">{scenario.tip}</p>
             </div>
           </div>
         )}

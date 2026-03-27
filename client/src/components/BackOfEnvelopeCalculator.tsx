@@ -105,7 +105,7 @@ export function BackOfEnvelopeCalculator() {
       score >= 4
         ? "text-emerald-400"
         : score >= 3
-          ? "text-amber-400"
+          ? "text-amber-900"
           : "text-red-400";
     return (
       <div className="space-y-1">
@@ -286,7 +286,7 @@ export function BackOfEnvelopeCalculator() {
                 result.overallVerdict.toLowerCase().includes("pass") ? (
                   <CheckCircle2 size={16} className="text-emerald-400" />
                 ) : (
-                  <XCircle size={16} className="text-amber-400" />
+                  <XCircle size={16} className="text-amber-900" />
                 )}
                 <span className="text-sm font-bold text-foreground">
                   {result.overallVerdict}

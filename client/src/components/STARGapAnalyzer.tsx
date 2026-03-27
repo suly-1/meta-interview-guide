@@ -100,23 +100,23 @@ export default function STARGapAnalyzer() {
     <div className="space-y-6">
       {/* Summary bar */}
       <div className="grid grid-cols-3 gap-3">
-        <div className={`rounded-xl border p-3.5 text-center ${totalGaps > 0 ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"}`}>
+        <div className={`rounded-xl border p-3.5 text-center ${totalGaps > 0 ? "border-red-200 bg-red-100" : "border-emerald-200 bg-emerald-50"}`}>
           <div className={`text-2xl font-extrabold mb-0.5 ${totalGaps > 0 ? "text-red-700" : "text-emerald-700"}`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{totalGaps}</div>
           <div className="text-[11px] font-semibold text-gray-600">Focus Area Gaps</div>
-          <div className="text-[10px] text-gray-400 mt-0.5">zero stories</div>
+          <div className="text-[10px] text-gray-600 mt-0.5">zero stories</div>
         </div>
-        <div className={`rounded-xl border p-3.5 text-center ${totalSinglePoints > 0 ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50"}`}>
-          <div className={`text-2xl font-extrabold mb-0.5 ${totalSinglePoints > 0 ? "text-amber-700" : "text-emerald-700"}`}
+        <div className={`rounded-xl border p-3.5 text-center ${totalSinglePoints > 0 ? "border-amber-200 bg-amber-100" : "border-emerald-200 bg-emerald-50"}`}>
+          <div className={`text-2xl font-extrabold mb-0.5 ${totalSinglePoints > 0 ? "text-amber-900" : "text-emerald-700"}`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{totalSinglePoints}</div>
           <div className="text-[11px] font-semibold text-gray-600">Single-Story Risk</div>
-          <div className="text-[10px] text-gray-400 mt-0.5">only 1 story</div>
+          <div className="text-[10px] text-gray-600 mt-0.5">only 1 story</div>
         </div>
         <div className={`rounded-xl border p-3.5 text-center ${ic7Gaps > 0 ? "border-purple-200 bg-purple-50" : "border-emerald-200 bg-emerald-50"}`}>
           <div className={`text-2xl font-extrabold mb-0.5 ${ic7Gaps > 0 ? "text-purple-700" : "text-emerald-700"}`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{ic7Gaps}</div>
           <div className="text-[11px] font-semibold text-gray-600">L7 Signal Gaps</div>
-          <div className="text-[10px] text-gray-400 mt-0.5">uncovered signals</div>
+          <div className="text-[10px] text-gray-600 mt-0.5">uncovered signals</div>
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export default function STARGapAnalyzer() {
         <div className="space-y-2.5">
           {areaCoverage.map(({ area, practiced, total, gap, singlePoint, coveringStories }) => (
             <div key={area.id} className={`rounded-xl border p-3.5 ${
-              gap ? "border-red-200 bg-red-50/50" : singlePoint ? "border-amber-200 bg-amber-50/50" : "border-emerald-200 bg-emerald-50/30"
+              gap ? "border-red-200 bg-red-100/80" : singlePoint ? "border-amber-200 bg-amber-100/80" : "border-emerald-200 bg-emerald-50/30"
             }`}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export default function STARGapAnalyzer() {
                   <span className="text-xs font-bold text-gray-800">{area.title.replace(/Focus Area \d+: /, "")}</span>
                 </div>
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  gap ? "text-red-700 bg-red-100" : singlePoint ? "text-amber-700 bg-amber-100" : "text-emerald-700 bg-emerald-100"
+                  gap ? "text-red-700 bg-red-100" : singlePoint ? "text-amber-900 bg-amber-100" : "text-emerald-700 bg-emerald-100"
                 }`}>
                   {practiced}/{total} stories practiced
                 </span>
@@ -150,7 +150,7 @@ export default function STARGapAnalyzer() {
                   <p className="text-[11px] text-gray-600">Suggested stories to prepare:</p>
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {coveringStories.slice(0, 3).map((s) => (
-                      <span key={s.type} className="text-[10px] text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                      <span key={s.type} className="text-[10px] text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full">
                         {s.type}
                       </span>
                     ))}
@@ -160,11 +160,11 @@ export default function STARGapAnalyzer() {
 
               {singlePoint && !gap && (
                 <div className="mt-1.5">
-                  <p className="text-[11px] text-amber-700 font-semibold mb-1">Single-story risk — prepare a backup</p>
+                  <p className="text-[11px] text-amber-900 font-semibold mb-1">Single-story risk — prepare a backup</p>
                   <p className="text-[11px] text-gray-600">Add one more story from:</p>
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {coveringStories.filter((s) => !practicedTypes.has(s.type)).slice(0, 2).map((s) => (
-                      <span key={s.type} className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      <span key={s.type} className="text-[10px] text-amber-900 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">
                         {s.type}
                       </span>
                     ))}
@@ -181,7 +181,7 @@ export default function STARGapAnalyzer() {
         <h3 className="text-sm font-bold text-gray-800 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           L7 Signal Coverage
         </h3>
-        <p className="text-xs text-gray-500 mb-3">Based on your practiced stories — each signal needs at least one supporting story</p>
+        <p className="text-xs text-gray-700 mb-3">Based on your practiced stories — each signal needs at least one supporting story</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {signalCoverage.map(({ signal, covered, coveringStories, coveringAreaIds }) => (
             <div key={signal} className={`rounded-xl border p-3 flex items-start gap-2.5 ${
@@ -189,16 +189,16 @@ export default function STARGapAnalyzer() {
             }`}>
               {covered
                 ? <CheckCircle2 size={13} className="text-purple-500 flex-shrink-0 mt-0.5" />
-                : <AlertTriangle size={13} className="text-gray-400 flex-shrink-0 mt-0.5" />}
+                : <AlertTriangle size={13} className="text-gray-600 flex-shrink-0 mt-0.5" />}
               <div className="min-w-0">
-                <p className={`text-[11px] font-semibold leading-snug ${covered ? "text-purple-800" : "text-gray-500"}`}>{signal}</p>
+                <p className={`text-[11px] font-semibold leading-snug ${covered ? "text-purple-800" : "text-gray-700"}`}>{signal}</p>
                 {covered && (
                   <p className="text-[10px] text-purple-600 mt-0.5">
                     Covered by: {coveringStories.map((s) => s.type).join(", ")}
                   </p>
                 )}
                 {!covered && (
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-600 mt-0.5">
                     Practice stories in: {coveringAreaIds.map((id) =>
                       BEHAVIORAL_FOCUS_AREAS.find((a) => a.id === id)?.title.replace(/Focus Area \d+: /, "") ?? id
                     ).join(", ")}
@@ -238,8 +238,8 @@ export default function STARGapAnalyzer() {
 
       {practicedStories.length === 0 && (
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
-          <p className="text-sm text-gray-500">No stories practiced yet.</p>
-          <p className="text-xs text-gray-400 mt-1">Use Practice Mode or Full Mock to rate questions — the analyzer will map your coverage automatically.</p>
+          <p className="text-sm text-gray-700">No stories practiced yet.</p>
+          <p className="text-xs text-gray-600 mt-1">Use Practice Mode or Full Mock to rate questions — the analyzer will map your coverage automatically.</p>
         </div>
       )}
     </div>

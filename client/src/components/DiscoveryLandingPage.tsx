@@ -66,7 +66,7 @@ export default function DiscoveryLandingPage({
           </div>
 
           <div className="prep-card p-4 flex items-start gap-3">
-            <Users size={16} className="text-amber-400 shrink-0 mt-0.5" />
+            <Users size={16} className="text-amber-900 shrink-0 mt-0.5" />
             <div>
               <p className="text-xs font-semibold text-foreground mb-0.5">
                 Not affiliated with Meta or any FAANG company

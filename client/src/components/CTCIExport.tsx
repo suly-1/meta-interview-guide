@@ -153,26 +153,26 @@ export default function CTCIExport() {
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Download size={14} className="text-gray-500" />
+        <Download size={14} className="text-gray-700" />
         <span className="text-sm font-bold text-gray-800 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           Export Progress
         </span>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-gray-600">
           {solved.length} solved · {starred.length} starred · {withNotes.length} with notes
         </span>
       </div>
 
       {solved.length === 0 && withNotes.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">Solve some problems or add notes first to enable export.</p>
+        <p className="text-xs text-gray-600 italic">Solve some problems or add notes first to enable export.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Markdown export */}
           <div className={`border rounded-lg p-3 ${solved.length === 0 ? 'opacity-50' : 'border-gray-200 dark:border-gray-600'}`}>
             <div className="flex items-center gap-1.5 mb-2">
               <FileText size={13} className="text-indigo-500" />
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Solved Checklist</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">Solved Checklist</span>
             </div>
-            <p className="text-[11px] text-gray-400 mb-3">Markdown checklist — paste into Notion, GitHub, or Obsidian</p>
+            <p className="text-[11px] text-gray-600 mb-3">Markdown checklist — paste into Notion, GitHub, or Obsidian</p>
             <div className="flex gap-2">
               <button
                 onClick={handleCopyMd}
@@ -195,9 +195,9 @@ export default function CTCIExport() {
           <div className={`border rounded-lg p-3 ${solved.length === 0 ? 'opacity-50' : 'border-gray-200 dark:border-gray-600'}`}>
             <div className="flex items-center gap-1.5 mb-2">
               <Table2 size={13} className="text-emerald-500" />
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">CSV Spreadsheet</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">CSV Spreadsheet</span>
             </div>
-            <p className="text-[11px] text-gray-400 mb-3">Full progress data — open in Excel, Sheets, or Airtable</p>
+            <p className="text-[11px] text-gray-600 mb-3">Full progress data — open in Excel, Sheets, or Airtable</p>
             <div className="flex gap-2">
               <button
                 onClick={handleCopyCsv}
@@ -217,12 +217,12 @@ export default function CTCIExport() {
           </div>
 
           {/* Notes Cheat Sheet export */}
-          <div className={`border rounded-lg p-3 ${withNotes.length === 0 ? 'opacity-50' : 'border-amber-200 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/10'}`}>
+          <div className={`border rounded-lg p-3 ${withNotes.length === 0 ? 'opacity-50' : 'border-amber-200 dark:border-amber-700 bg-amber-100/80 dark:bg-amber-900/10'}`}>
             <div className="flex items-center gap-1.5 mb-2">
               <BookOpen size={13} className="text-amber-500" />
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Notes Cheat Sheet</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">Notes Cheat Sheet</span>
             </div>
-            <p className="text-[11px] text-gray-400 mb-3">
+            <p className="text-[11px] text-gray-600 mb-3">
               {withNotes.length > 0
                 ? `${withNotes.length} problems with notes — grouped by topic, with complexity & approach`
                 : "Add notes to problems to generate a cheat sheet"}

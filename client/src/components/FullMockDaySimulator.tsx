@@ -545,7 +545,7 @@ export function FullMockDaySimulator() {
   const recColor = (rec: string) => {
     if (rec.includes("Strong")) return "text-emerald-400";
     if (rec.includes("Hire")) return "text-blue-400";
-    if (rec.includes("Borderline")) return "text-amber-400";
+    if (rec.includes("Borderline")) return "text-amber-900";
     return "text-red-400";
   };
 
@@ -810,7 +810,7 @@ export function FullMockDaySimulator() {
                       </ul>
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-amber-400 mb-1.5">
+                      <div className="text-xs font-bold text-amber-900 mb-1.5">
                         🎯 Top Improvements
                       </div>
                       <ul className="space-y-1">
@@ -819,7 +819,7 @@ export function FullMockDaySimulator() {
                             key={i}
                             className="text-xs text-muted-foreground flex gap-1.5"
                           >
-                            <span className="text-amber-400 shrink-0">•</span>
+                            <span className="text-amber-900 shrink-0">•</span>
                             {s}
                           </li>
                         ))}

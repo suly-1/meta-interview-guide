@@ -173,14 +173,14 @@ export default function HeatmapCalendar() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Flame size={15} className="text-orange-400" />
+          <Flame size={15} className="text-orange-900" />
           <span className="section-title text-sm mb-0 pb-0 border-0">
             60-Day Activity Calendar
           </span>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
           <span className="flex items-center gap-1.5">
-            <span className="text-orange-400 font-bold text-sm">
+            <span className="text-orange-900 font-bold text-sm">
               🔥 {streak}
             </span>
             <span>day streak</span>
@@ -198,7 +198,7 @@ export default function HeatmapCalendar() {
             mocks
           </span>
           <span>
-            <span className="text-amber-400 font-semibold">{totalStories}</span>{" "}
+            <span className="text-amber-900 font-semibold">{totalStories}</span>{" "}
             stories
           </span>
           <button

@@ -66,7 +66,7 @@ export function WeakPatternRemediationPlan() {
     if (r === 0) return { label: "Not rated", color: "text-muted-foreground" };
     if (r === 1) return { label: "Never seen it", color: "text-red-400" };
     if (r === 2) return { label: "Struggling", color: "text-red-400" };
-    if (r === 3) return { label: "Getting there", color: "text-amber-400" };
+    if (r === 3) return { label: "Getting there", color: "text-amber-900" };
     if (r === 4) return { label: "Comfortable", color: "text-emerald-400" };
     return { label: "Mastered", color: "text-emerald-400" };
   }
@@ -138,7 +138,7 @@ export function WeakPatternRemediationPlan() {
                 <div className="text-xs text-muted-foreground">
                   Overall avg:{" "}
                   <span
-                    className={`font-bold ${avgRating >= 4 ? "text-emerald-400" : avgRating >= 3 ? "text-amber-400" : "text-red-400"}`}
+                    className={`font-bold ${avgRating >= 4 ? "text-emerald-400" : avgRating >= 3 ? "text-amber-900" : "text-red-400"}`}
                   >
                     {avgRating.toFixed(1)}/5
                   </span>

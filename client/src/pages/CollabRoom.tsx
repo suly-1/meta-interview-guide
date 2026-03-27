@@ -731,7 +731,7 @@ function ScorecardPanel({
                     ? v <= 2
                       ? "bg-red-500/20 border-red-500/30 text-red-400"
                       : v <= 3
-                        ? "bg-amber-500/20 border-amber-500/30 text-amber-400"
+                        ? "bg-amber-500/20 border-amber-500/30 text-amber-900"
                         : "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
                     : "bg-secondary border-border text-muted-foreground"
                 }`}
@@ -762,7 +762,7 @@ function ScorecardPanel({
         <div className="text-xs text-muted-foreground">
           Overall avg:{" "}
           <span
-            className={`font-bold ${avg >= 4 ? "text-emerald-400" : avg >= 3 ? "text-amber-400" : "text-red-400"}`}
+            className={`font-bold ${avg >= 4 ? "text-emerald-400" : avg >= 3 ? "text-amber-900" : "text-red-400"}`}
           >
             {avg}/5
           </span>

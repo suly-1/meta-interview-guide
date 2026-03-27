@@ -58,7 +58,7 @@ function BreathingTimer({ onDone }: { onDone: () => void }) {
     {
       label: "Hold",
       duration: 4,
-      color: "text-amber-400",
+      color: "text-amber-900",
       ring: "oklch(0.78 0.17 75)",
     },
     {
@@ -288,7 +288,7 @@ export function DayOfModePanel() {
     return (
       <div className="prep-card p-5 border-2 border-dashed border-border/50">
         <div className="flex items-center gap-3 mb-2">
-          <Zap size={16} className="text-amber-400" />
+          <Zap size={16} className="text-amber-900" />
           <div className="text-sm font-bold text-foreground">
             D-0 Interview Day Mode
           </div>
@@ -310,8 +310,8 @@ export function DayOfModePanel() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Zap size={16} className="text-amber-400 animate-pulse" />
-          <span className="text-sm font-black text-amber-400">
+          <Zap size={16} className="text-amber-900 animate-pulse" />
+          <span className="text-sm font-black text-amber-900">
             🎯 TODAY IS THE DAY — D-0 Mode Active
           </span>
         </div>
@@ -350,7 +350,7 @@ export function DayOfModePanel() {
           };
           const textMap: Record<string, string> = {
             blue: "text-blue-400",
-            amber: "text-amber-400",
+            amber: "text-amber-900",
             purple: "text-purple-400",
             emerald: "text-emerald-400",
           };
@@ -452,7 +452,7 @@ export function DayOfModePanel() {
                           className="p-3 rounded-lg bg-secondary/50 border border-border"
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black text-amber-400">
+                            <span className="text-[10px] font-black text-amber-900">
                               Story {idx + 1}
                             </span>
                             <span className="text-xs font-semibold text-foreground">
@@ -462,7 +462,7 @@ export function DayOfModePanel() {
                           <div className="text-[10px] text-muted-foreground whitespace-pre-line">
                             {story.note || story.template}
                           </div>
-                          <div className="mt-1 text-[10px] text-amber-300/70">
+                          <div className="mt-1 text-[10px] text-amber-800/70">
                             🎯 Tags: {story.tags.join(", ")}
                           </div>
                         </div>
@@ -770,7 +770,7 @@ export function LastMileCheatSheet() {
       <button
         onClick={generate}
         disabled={generating}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-sm font-semibold text-amber-400 hover:text-amber-300 transition-all disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-sm font-semibold text-amber-900 hover:text-amber-800 transition-all disabled:opacity-50"
       >
         <Download size={14} />
         {generating
@@ -950,7 +950,7 @@ export function ConfidenceCalibrationQuiz() {
       overallPct >= 80
         ? "text-emerald-400"
         : overallPct >= 60
-          ? "text-amber-400"
+          ? "text-amber-900"
           : "text-red-400";
 
     const focusRecs: Record<string, string> = {
@@ -1049,14 +1049,14 @@ export function ConfidenceCalibrationQuiz() {
         {/* Focus recommendations */}
         <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
           <div className="flex items-center gap-2 mb-3">
-            <Target size={13} className="text-amber-400" />
-            <span className="text-xs font-bold text-amber-400">
+            <Target size={13} className="text-amber-900" />
+            <span className="text-xs font-bold text-amber-900">
               Focus on these 2 things in the next hour:
             </span>
           </div>
           {weakAreas.map(({ area }, i) => (
             <div key={area} className="flex items-start gap-2 mb-2">
-              <span className="text-amber-400 font-black text-xs shrink-0">
+              <span className="text-amber-900 font-black text-xs shrink-0">
                 {i + 1}.
               </span>
               <div>

@@ -85,7 +85,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
                   <h2 className="text-base font-black text-white leading-tight">
                     Welcome — here's your first move
                   </h2>
-                  <p className="text-xs text-white/60 mt-0.5">
+                  <p className="text-xs text-white/90 mt-0.5">
                     New here? Do these 3 steps in order. Takes 10 minutes. Sets up everything else.
                   </p>
                 </>
@@ -96,7 +96,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
                       ? `You have ${totalWeak} weak area${totalWeak > 1 ? "s" : ""} — drill them now`
                       : `${ratedCount} areas rated · ${mockHistory} mock${mockHistory !== 1 ? "s" : ""} done`}
                   </h2>
-                  <p className="text-xs text-white/60 mt-0.5">
+                  <p className="text-xs text-white/90 mt-0.5">
                     {daysLeft !== null
                       ? daysLeft === 0
                         ? "🔴 Interview day — use the Day-Of Protocol"
@@ -132,9 +132,9 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
                 description: "Most behavioral failures happen because candidates reuse the same 2 stories. Map your STAR stories to all 8 Meta values — gaps will be obvious.",
                 tabId: "behavioral", cta: "Map your stories",
                 icon: <BookOpen size={18} />,
-                accent: "text-amber-700 dark:text-amber-400",
+                accent: "text-amber-900 dark:text-amber-900",
                 border: "border-amber-300 dark:border-amber-700",
-                bg: "bg-amber-50 dark:bg-amber-900/20",
+                bg: "bg-amber-100 dark:bg-amber-900/20",
               },
               {
                 step: 3, emoji: "🤖", title: "Simulate Pressure",
@@ -156,7 +156,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-xs font-black text-gray-600 dark:text-gray-300 shadow-sm">
+                    <span className="w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-xs font-black text-gray-600 dark:text-gray-200 shadow-sm">
                       {pick.step}
                     </span>
                     <span className="text-xl">{pick.emoji}</span>
@@ -164,7 +164,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
                   <ChevronRight size={16} className={`${pick.accent} opacity-0 group-hover:opacity-100 transition-opacity`} />
                 </div>
                 <h3 className={`text-sm font-black mb-1.5 ${pick.accent}`}>{pick.title}</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{pick.description}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-3">{pick.description}</p>
                 <div className={`flex items-center gap-1.5 text-xs font-bold ${pick.accent}`}>
                   {pick.icon}
                   {pick.cta}
@@ -184,7 +184,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
               onClick={() => onTabChange(totalWeak > 0 ? "coding" : "readiness")}
               className={`group text-left rounded-2xl border-2 p-4 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 ${
                 totalWeak > 0
-                  ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20"
+                  ? "border-red-300 dark:border-red-700 bg-red-100 dark:bg-red-900/20"
                   : "border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20"
               }`}
             >
@@ -195,7 +195,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
               <h3 className={`text-sm font-black mb-1.5 ${totalWeak > 0 ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"}`}>
                 {totalWeak > 0 ? `${totalWeak} Weak Area${totalWeak > 1 ? "s" : ""}` : "All Areas Strong"}
               </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
                 {totalWeak > 0
                   ? "Drill your weakest patterns first — these are the highest-leverage minutes you can spend."
                   : "Your ratings look solid. Keep drilling to maintain sharpness before the interview."}
@@ -222,7 +222,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
               <h3 className="text-sm font-black mb-1.5 text-indigo-700 dark:text-indigo-400">
                 {mockHistory === 0 ? "First Mock Interview" : `Mock #${mockHistory + 1}`}
               </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
                 {mockHistory === 0
                   ? "You haven't done a mock yet. This is the single highest-ROI activity — start one now."
                   : `You've done ${mockHistory} mock${mockHistory > 1 ? "s" : ""}. Consistency beats intensity — do another one today.`}
@@ -249,7 +249,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
               <h3 className="text-sm font-black mb-1.5 text-violet-700 dark:text-violet-400">
                 {daysLeft !== null && daysLeft <= 1 ? "Day-Of Protocol" : "IC7 Signal Check"}
               </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
                 {daysLeft !== null && daysLeft <= 1
                   ? "Interview is today or tomorrow. Use the Day-Of Protocol — morning warmup, STAR review, breathing."
                   : "Check which IC7 signals you have stories for. Missing even one critical signal is a downlevel risk."}

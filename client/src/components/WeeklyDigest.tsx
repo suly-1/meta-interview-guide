@@ -121,9 +121,9 @@ export default function WeeklyDigest() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             {/* Email */}
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Your Email</label>
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">Your Email</label>
               <div className="relative">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
                 <input
                   type="email"
                   value={email}
@@ -136,9 +136,9 @@ export default function WeeklyDigest() {
 
             {/* Interview date */}
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Interview Date</label>
+              <label className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">Interview Date</label>
               <div className="relative">
-                <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
                 <input
                   type="date"
                   value={dateStr}
@@ -178,7 +178,7 @@ export default function WeeklyDigest() {
               </button>
               <button
                 onClick={handleReset}
-                className="px-3 py-2 text-xs text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-semibold"
+                className="px-3 py-2 text-xs text-gray-600 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-semibold"
               >
                 Edit
               </button>
@@ -190,7 +190,7 @@ export default function WeeklyDigest() {
             <pre className="text-xs text-gray-200 font-mono leading-relaxed whitespace-pre-wrap">{digest}</pre>
           </div>
 
-          <p className="text-[11px] text-gray-400">
+          <p className="text-[11px] text-gray-600">
             Paste this into a Google Doc, Notion page, or email to yourself as a weekly reminder.
           </p>
         </div>

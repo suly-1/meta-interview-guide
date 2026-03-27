@@ -100,7 +100,7 @@ const CATEGORY_CONFIG = {
   review: {
     label: "Review",
     icon: <Star size={11} />,
-    color: "text-amber-400",
+    color: "text-amber-900",
     bg: "bg-amber-500/10",
     border: "border-amber-500/20",
   },
@@ -179,7 +179,7 @@ function SprintFeedbackModal({
               key={s}
               onClick={() => setRating(s)}
               className={`text-2xl transition-all ${
-                s <= rating ? "text-amber-400" : "text-muted-foreground/30"
+                s <= rating ? "text-amber-900" : "text-muted-foreground/30"
               }`}
             >
               ★
@@ -680,7 +680,7 @@ export function SevenDaySprintPlan() {
         {/* Header */}
         <div className="flex items-start gap-3 mb-5">
           <div className="w-9 h-9 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center shrink-0">
-            <Zap size={16} className="text-orange-400" />
+            <Zap size={16} className="text-orange-900" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -690,7 +690,7 @@ export function SevenDaySprintPlan() {
               >
                 7-Day Sprint Plan Generator
               </h2>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/30">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-900 border border-orange-500/30">
                 AI-POWERED
               </span>
             </div>
@@ -762,9 +762,9 @@ export function SevenDaySprintPlan() {
         {/* Weak patterns notice */}
         {weakPatterns.length > 0 && (
           <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 mb-4 text-xs">
-            <AlertCircle size={11} className="text-amber-400 shrink-0 mt-0.5" />
+            <AlertCircle size={11} className="text-amber-900 shrink-0 mt-0.5" />
             <span className="text-muted-foreground">
-              <span className="text-amber-400 font-semibold">
+              <span className="text-amber-900 font-semibold">
                 {weakPatterns.length} weak patterns detected:{" "}
               </span>
               {weakPatterns.slice(0, 4).join(", ")}

@@ -178,7 +178,7 @@ const PHASES: Phase[] = [
     days: "Days 15–30",
     month: 1,
     icon: <Zap size={18} />,
-    color: "text-amber-400",
+    color: "text-amber-900",
     bgColor: "bg-amber-950/40",
     borderColor: "border-amber-700/50",
     focus: ["1 behavioral mock per day", "1 Speed Run per week", "Solve 3 CTCI problems per day"],
@@ -240,8 +240,8 @@ const TYPE_COLORS: Record<string, string> = {
   coding: "bg-blue-900/60 text-blue-300 border-blue-700/40",
   behavioral: "bg-emerald-900/60 text-emerald-300 border-emerald-700/40",
   "system-design": "bg-violet-900/60 text-violet-300 border-violet-700/40",
-  mock: "bg-amber-900/60 text-amber-300 border-amber-700/40",
-  review: "bg-gray-800/60 text-gray-300 border-gray-600/40",
+  mock: "bg-amber-900/60 text-amber-800 border-amber-700/40",
+  review: "bg-gray-800/60 text-gray-700 border-gray-600/40",
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
@@ -272,7 +272,7 @@ function MissionControl({ progress, onTabChange }: {
       <div className="bg-gray-900/80 border border-gray-700/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp size={14} className="text-blue-400" />
-          <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Where You Are</span>
+          <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Where You Are</span>
         </div>
         <div className="flex items-center gap-2 mb-2">
           <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${phase.bgColor} ${phase.color} ${phase.borderColor}`}>
@@ -280,10 +280,10 @@ function MissionControl({ progress, onTabChange }: {
             Phase {phase.id}: {phase.name}
           </span>
         </div>
-        <p className="text-xs text-gray-400 mb-3">{phase.days} · {phase.subtitle}</p>
+        <p className="text-xs text-gray-600 mb-3">{phase.days} · {phase.subtitle}</p>
         {/* Phase progress bar */}
         <div className="mb-2">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <div className="flex justify-between text-xs text-gray-700 mb-1">
             <span>Phase progress</span>
             <span className={phase.color}>{phaseProgress}%</span>
           </div>
@@ -303,15 +303,15 @@ function MissionControl({ progress, onTabChange }: {
         </div>
         {progress.daysLeft !== null && (
           <div className="flex items-center gap-1.5 mt-3 text-xs">
-            <Calendar size={11} className="text-amber-400" />
-            <span className="text-amber-300 font-semibold">{progress.daysLeft} days</span>
-            <span className="text-gray-500">until interview</span>
+            <Calendar size={11} className="text-amber-900" />
+            <span className="text-amber-800 font-semibold">{progress.daysLeft} days</span>
+            <span className="text-gray-700">until interview</span>
           </div>
         )}
         {progress.dayOfPrep !== null && (
           <div className="flex items-center gap-1.5 mt-1 text-xs">
-            <Flame size={11} className="text-orange-400" />
-            <span className="text-gray-400">Day <span className="text-white font-semibold">{progress.dayOfPrep}</span> of 60</span>
+            <Flame size={11} className="text-orange-900" />
+            <span className="text-gray-600">Day <span className="text-white font-semibold">{progress.dayOfPrep}</span> of 60</span>
           </div>
         )}
       </div>
@@ -319,9 +319,9 @@ function MissionControl({ progress, onTabChange }: {
       {/* Column 2: Today's Mission */}
       <div className="bg-gray-900/80 border border-gray-700/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Target size={14} className="text-amber-400" />
-          <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Today's Mission</span>
-          <span className="ml-auto text-xs text-gray-500">{phase.dailyHours}h/day</span>
+          <Target size={14} className="text-amber-900" />
+          <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Today's Mission</span>
+          <span className="ml-auto text-xs text-gray-700">{phase.dailyHours}h/day</span>
         </div>
         <div className="space-y-2">
           {primaryTasks.map((task, i) => (
@@ -331,7 +331,7 @@ function MissionControl({ progress, onTabChange }: {
               className="w-full text-left flex items-start gap-2.5 p-2.5 rounded-lg bg-gray-800/60 hover:bg-gray-800 border border-gray-700/40 hover:border-gray-600 transition-all group"
             >
               <div className={`flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full border text-[10px] font-bold ${
-                i === 0 ? "bg-amber-500/20 border-amber-500/50 text-amber-400" : "bg-gray-700/50 border-gray-600 text-gray-400"
+                i === 0 ? "bg-amber-500/20 border-amber-500/50 text-amber-900" : "bg-gray-700/50 border-gray-600 text-gray-600"
               }`}>
                 {i + 1}
               </div>
@@ -341,12 +341,12 @@ function MissionControl({ progress, onTabChange }: {
                   <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border ${TYPE_COLORS[task.type]}`}>
                     {TYPE_ICONS[task.type]} {task.type.replace("-", " ")}
                   </span>
-                  <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                  <span className="text-[10px] text-gray-700 flex items-center gap-0.5">
                     <Clock size={9} /> {task.time}
                   </span>
                 </div>
               </div>
-              <ArrowRight size={12} className="flex-shrink-0 text-gray-600 group-hover:text-gray-400 transition-colors mt-1" />
+              <ArrowRight size={12} className="flex-shrink-0 text-gray-600 group-hover:text-gray-600 transition-colors mt-1" />
             </button>
           ))}
         </div>
@@ -356,7 +356,7 @@ function MissionControl({ progress, onTabChange }: {
       <div className="bg-gray-900/80 border border-gray-700/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <ArrowRight size={14} className="text-emerald-400" />
-          <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Also Today</span>
+          <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Also Today</span>
         </div>
         <div className="space-y-2 mb-4">
           {secondaryTasks.map((task) => (
@@ -367,7 +367,7 @@ function MissionControl({ progress, onTabChange }: {
             >
               <Circle size={12} className="flex-shrink-0 text-gray-600 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-400 group-hover:text-gray-300 leading-tight">{task.label}</p>
+                <p className="text-xs text-gray-600 group-hover:text-gray-700 leading-tight">{task.label}</p>
                 <span className="text-[10px] text-gray-600 flex items-center gap-0.5 mt-0.5">
                   <Clock size={9} /> {task.time}
                 </span>
@@ -431,7 +431,7 @@ function PhaseCard({
           isComplete ? "bg-emerald-900/50 border-emerald-600/50 text-emerald-400" :
           isActive ? `${phase.bgColor} ${phase.borderColor} ${phase.color}` :
           isLocked ? "bg-gray-800/50 border-gray-700/50 text-gray-600" :
-          "bg-gray-800/50 border-gray-700/50 text-gray-400"
+          "bg-gray-800/50 border-gray-700/50 text-gray-600"
         }`}>
           {isComplete ? <CheckCircle2 size={16} /> : isLocked ? <Lock size={14} /> : phase.icon}
         </div>
@@ -439,7 +439,7 @@ function PhaseCard({
         {/* Title */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-sm font-bold ${isLocked ? "text-gray-600" : isComplete ? "text-gray-300" : "text-white"}`}>
+            <span className={`text-sm font-bold ${isLocked ? "text-gray-600" : isComplete ? "text-gray-700" : "text-white"}`}>
               Phase {phase.id}: {phase.name}
             </span>
             <span className={`text-xs px-2 py-0.5 rounded-full border ${
@@ -449,9 +449,9 @@ function PhaseCard({
             }`}>
               Month {phase.month}
             </span>
-            <span className="text-xs text-gray-500">{phase.days}</span>
+            <span className="text-xs text-gray-700">{phase.days}</span>
           </div>
-          <p className={`text-xs mt-0.5 ${isLocked ? "text-gray-700" : "text-gray-400"}`}>{phase.subtitle}</p>
+          <p className={`text-xs mt-0.5 ${isLocked ? "text-gray-700" : "text-gray-600"}`}>{phase.subtitle}</p>
         </div>
 
         {/* Progress */}
@@ -477,7 +477,7 @@ function PhaseCard({
               {isComplete ? "✓" : `${phasePct}%`}
             </span>
             {!isLocked && (
-              <div className="text-gray-500">
+              <div className="text-gray-700">
                 {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </div>
             )}
@@ -498,10 +498,10 @@ function PhaseCard({
             <div className="px-4 pb-4 border-t border-gray-700/30 pt-3">
               {/* Focus areas */}
               <div className="mb-3">
-                <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Daily Focus ({phase.dailyHours}h/day)</p>
+                <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Daily Focus ({phase.dailyHours}h/day)</p>
                 <ul className="space-y-1">
                   {phase.focus.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
+                    <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
                       <CheckCircle2 size={11} className={`flex-shrink-0 mt-0.5 ${phase.color}`} />
                       {f}
                     </li>
@@ -511,7 +511,7 @@ function PhaseCard({
 
               {/* Tasks */}
               <div className="mb-3">
-                <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Daily Tasks</p>
+                <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Daily Tasks</p>
                 <div className="space-y-1.5">
                   {phase.tasks.map((task) => (
                     <button
@@ -522,11 +522,11 @@ function PhaseCard({
                       <span className={`flex-shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border ${TYPE_COLORS[task.type]}`}>
                         {TYPE_ICONS[task.type]}
                       </span>
-                      <span className="flex-1 text-xs text-gray-300 group-hover:text-white">{task.label}</span>
-                      <span className="text-[10px] text-gray-500 flex-shrink-0 flex items-center gap-0.5">
+                      <span className="flex-1 text-xs text-gray-700 group-hover:text-white">{task.label}</span>
+                      <span className="text-[10px] text-gray-700 flex-shrink-0 flex items-center gap-0.5">
                         <Clock size={9} /> {task.time}
                       </span>
-                      <ArrowRight size={11} className="flex-shrink-0 text-gray-600 group-hover:text-gray-400" />
+                      <ArrowRight size={11} className="flex-shrink-0 text-gray-600 group-hover:text-gray-600" />
                     </button>
                   ))}
                 </div>
@@ -540,10 +540,10 @@ function PhaseCard({
               }`}>
                 {phasePct >= phase.gateThreshold
                   ? <CheckCircle2 size={12} className="flex-shrink-0 text-emerald-400 mt-0.5" />
-                  : <Lock size={12} className="flex-shrink-0 text-gray-500 mt-0.5" />
+                  : <Lock size={12} className="flex-shrink-0 text-gray-700 mt-0.5" />
                 }
-                <p className="text-[10px] text-gray-400">
-                  <span className="font-semibold text-gray-300">Unlock next phase: </span>
+                <p className="text-[10px] text-gray-600">
+                  <span className="font-semibold text-gray-700">Unlock next phase: </span>
                   {phase.gateLabel}
                 </p>
               </div>
@@ -565,7 +565,7 @@ export function RoadmapStrip({ onTabChange }: { onTabChange?: (tabId: string) =>
 
   return (
     <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-900/60 border border-gray-700/40 rounded-xl mb-4 overflow-x-auto scrollbar-hide">
-      <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide flex-shrink-0 mr-1">60-Day Path:</span>
+      <span className="text-[10px] text-gray-700 font-semibold uppercase tracking-wide flex-shrink-0 mr-1">60-Day Path:</span>
       {PHASES.map((phase, i) => {
         const pct = phaseProgress[i];
         const isActive = i === progress.currentPhase;
@@ -577,7 +577,7 @@ export function RoadmapStrip({ onTabChange }: { onTabChange?: (tabId: string) =>
               isComplete ? "bg-emerald-950/50 border-emerald-700/50 text-emerald-400" :
               isActive ? `${phase.bgColor} ${phase.borderColor} ${phase.color}` :
               isLocked ? "bg-gray-800/30 border-gray-700/30 text-gray-600" :
-              "bg-gray-800/50 border-gray-700/40 text-gray-400"
+              "bg-gray-800/50 border-gray-700/40 text-gray-600"
             }`}>
               {isComplete ? <CheckCircle2 size={9} /> : isLocked ? <Lock size={9} /> : phase.icon}
               <span className="hidden sm:inline">{phase.name}</span>
@@ -590,7 +590,7 @@ export function RoadmapStrip({ onTabChange }: { onTabChange?: (tabId: string) =>
         );
       })}
       {progress.daysLeft !== null && (
-        <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-[10px] text-amber-400">
+        <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-[10px] text-amber-900">
           <Calendar size={9} />
           <span className="font-semibold">{progress.daysLeft}d left</span>
         </div>
@@ -622,12 +622,12 @@ export default function RoadmapJourney({ onTabChange }: RoadmapJourneyProps) {
             <Shield size={16} className="text-blue-400" />
             Your 60-Day Interview Roadmap
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-600 mt-0.5">
             Month 1 (Days 1–30): Behavioral + Coding · Month 2 (Days 31–60): Full Loop
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">1h/day recommended</span>
+          <span className="text-xs text-gray-700">1h/day recommended</span>
         </div>
       </div>
 
@@ -680,7 +680,7 @@ export default function RoadmapJourney({ onTabChange }: RoadmapJourneyProps) {
       {!showAllPhases && progress.currentPhase < 3 && (
         <button
           onClick={() => setShowAllPhases(true)}
-          className="w-full flex items-center justify-center gap-2 py-2 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2 text-xs text-gray-700 hover:text-gray-700 transition-colors"
         >
           <ChevronDown size={13} />
           Show all 5 phases

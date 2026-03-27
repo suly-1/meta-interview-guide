@@ -216,7 +216,7 @@ export default function ProgressExport() {
             </button>
           </div>
 
-          <p className="text-[11px] text-gray-400 mt-3">
+          <p className="text-[11px] text-gray-600 mt-3">
             All data is read from your browser's local storage — nothing is sent to any server.
           </p>
         </div>

@@ -139,13 +139,13 @@ export default function InterviewTimer() {
   const textColor =
     urgency === "finished" ? "text-emerald-600"
     : urgency === "critical" ? "text-red-600"
-    : urgency === "warning"  ? "text-amber-600"
+    : urgency === "warning"  ? "text-amber-800"
     : "text-gray-900";
 
   const bgColor =
     urgency === "finished" ? "bg-emerald-50 border-emerald-300"
-    : urgency === "critical" ? "bg-red-50 border-red-300"
-    : urgency === "warning"  ? "bg-amber-50 border-amber-300"
+    : urgency === "critical" ? "bg-red-100 border-red-300"
+    : urgency === "warning"  ? "bg-amber-100 border-amber-300"
     : "bg-white border-gray-200";
 
   return (
@@ -156,7 +156,7 @@ export default function InterviewTimer() {
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/[0.02] transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Timer size={16} className={running ? "text-blue-500 animate-pulse" : "text-gray-500"} />
+          <Timer size={16} className={running ? "text-blue-500 animate-pulse" : "text-gray-700"} />
           <span className="text-sm font-bold text-gray-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Mock Interview Timer
           </span>
@@ -176,7 +176,7 @@ export default function InterviewTimer() {
           {collapsed && (
             <span className={`text-sm font-bold font-mono ${textColor}`}>{formatTime(remaining)}</span>
           )}
-          <span className="text-gray-400">{collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}</span>
+          <span className="text-gray-600">{collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}</span>
         </div>
       </button>
 
@@ -194,7 +194,7 @@ export default function InterviewTimer() {
             <div className="px-4 pb-4 pt-1 border-t border-gray-100">
               {/* Preset selector */}
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Duration</span>
+                <span className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Duration</span>
                 <div className="flex gap-1.5">
                   {PRESETS.map((p, i) => (
                     <button
@@ -253,7 +253,7 @@ export default function InterviewTimer() {
                   >
                     {formatTime(remaining)}
                   </motion.p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     {finished
                       ? "Interview complete — great work!"
                       : urgency === "critical"
@@ -306,7 +306,7 @@ export default function InterviewTimer() {
                   transition={{ duration: 0.5, ease: "linear" }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+              <div className="flex justify-between text-[10px] text-gray-600 mt-1">
                 <span>0:00</span>
                 <span>{PRESETS[presetIdx].label}</span>
               </div>

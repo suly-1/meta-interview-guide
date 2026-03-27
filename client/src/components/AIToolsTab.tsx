@@ -93,7 +93,7 @@ const TOOLS: Tool[] = [
       "Book at least 2 sessions with engineers who have Meta experience. Ask them specifically: 'Did my communication match what you'd expect from an L6 candidate?' The answer will tell you more than any AI debrief.",
     link: "https://interviewing.io",
     badge: "Highest Signal",
-    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    badgeColor: "bg-amber-500/20 text-amber-800 border-amber-500/40",
     icon: <Users size={20} />,
   },
   {
@@ -130,12 +130,12 @@ function ToolCard({ tool }: { tool: Tool }) {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-200 flex-shrink-0">
             {tool.icon}
           </div>
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white text-base leading-tight">{tool.name}</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight mt-0.5">{tool.tagline}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300 leading-tight mt-0.5">{tool.tagline}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -156,7 +156,7 @@ function ToolCard({ tool }: { tool: Tool }) {
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-200 leading-relaxed">{tool.description}</p>
 
       {/* Meta Tip */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/40 rounded-xl p-3">
@@ -168,9 +168,9 @@ function ToolCard({ tool }: { tool: Tool }) {
 
       {/* Warning */}
       {tool.warning && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl p-3 flex gap-2">
-          <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">{tool.warning}</p>
+        <div className="bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl p-3 flex gap-2">
+          <AlertTriangle size={14} className="text-amber-800 dark:text-amber-900 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-800 dark:text-amber-100 leading-relaxed">{tool.warning}</p>
         </div>
       )}
     </div>
@@ -191,7 +191,7 @@ export default function AIToolsTab() {
             AI Tools & Resources for 2026
           </h2>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-3xl">
+        <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed max-w-3xl">
           The best engineers preparing for Meta in 2026 are not just grinding LeetCode — they are using AI tools to practise smarter, simulate real interview conditions, and build the communication skills that separate a <strong>Strong</strong> from an <strong>Exceptional</strong> rating. This curated list covers the tools worth your time, with specific tips for Meta prep at L4–L7.
         </p>
       </div>
@@ -218,7 +218,7 @@ export default function AIToolsTab() {
             <h3 className={`text-lg font-bold ${CATEGORY_META.coding.headerColor}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {CATEGORY_META.coding.label}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{CATEGORY_META.coding.subtitle}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{CATEGORY_META.coding.subtitle}</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -235,7 +235,7 @@ export default function AIToolsTab() {
             <h3 className={`text-lg font-bold ${CATEGORY_META.simulator.headerColor}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {CATEGORY_META.simulator.label}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{CATEGORY_META.simulator.subtitle}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{CATEGORY_META.simulator.subtitle}</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -246,12 +246,12 @@ export default function AIToolsTab() {
       </div>
 
       {/* Ethical Use Notice */}
-      <div className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-2xl p-5">
+      <div className="bg-amber-100 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-2xl p-5">
         <div className="flex items-start gap-3">
-          <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <AlertTriangle size={18} className="text-amber-800 dark:text-amber-900 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-bold text-amber-800 dark:text-amber-300 text-sm mb-1">Ethical Use Reminder</h4>
-            <p className="text-xs text-amber-700 dark:text-amber-200 leading-relaxed">
+            <h4 className="font-bold text-amber-800 dark:text-amber-800 text-sm mb-1">Ethical Use Reminder</h4>
+            <p className="text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
               AI tools are powerful for <strong>preparation</strong>, but using them during a live Meta interview (to receive real-time answers, generate code, or provide hidden assistance) violates Meta's interview policy and could result in immediate disqualification and a permanent ban from future applications. Use these tools to build genuine skills — not to circumvent the assessment.
             </p>
           </div>
@@ -267,10 +267,10 @@ export default function AIToolsTab() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Tool</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Best For</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Cost</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">AI-Enabled Round?</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Tool</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Best For</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Cost</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">AI-Enabled Round?</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -285,9 +285,9 @@ export default function AIToolsTab() {
               ].map((row, i) => (
                 <tr key={i} className="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                   <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.name}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{row.best}</td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{row.cost}</td>
-                  <td className={`px-4 py-3 font-medium ${row.ai.startsWith("✓") ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400"}`}>{row.ai}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-200">{row.best}</td>
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{row.cost}</td>
+                  <td className={`px-4 py-3 font-medium ${row.ai.startsWith("✓") ? "text-emerald-600 dark:text-emerald-400" : "text-gray-600"}`}>{row.ai}</td>
                 </tr>
               ))}
             </tbody>
@@ -298,7 +298,7 @@ export default function AIToolsTab() {
       {/* Star ratings / recommended stack */}
       <div className="bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
         <h3 className="font-bold text-gray-900 dark:text-white text-base mb-3 flex items-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Star size={16} className="text-amber-400 fill-amber-400" />
+          <Star size={16} className="text-amber-900 fill-amber-400" />
           Recommended Stack by Goal
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -320,7 +320,7 @@ export default function AIToolsTab() {
             },
           ].map((item, i) => (
             <div key={i} className={`rounded-xl border p-4 ${item.color}`}>
-              <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">{item.goal}</p>
+              <p className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider mb-2">{item.goal}</p>
               <ul className="space-y-1">
                 {item.stack.map((s, j) => (
                   <li key={j} className="text-sm text-gray-700 dark:text-gray-200 flex items-center gap-1.5">

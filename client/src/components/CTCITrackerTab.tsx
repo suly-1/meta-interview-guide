@@ -138,7 +138,7 @@ export default function CTCITrackerTab() {
             >
               <Flame
                 className={`w-5 h-5 ${
-                  streak >= 7 ? 'text-orange-400' : streak >= 3 ? 'text-amber-400' : streak >= 1 ? 'text-yellow-400' : 'text-blue-400'
+                  streak >= 7 ? 'text-orange-900' : streak >= 3 ? 'text-amber-900' : streak >= 1 ? 'text-yellow-400' : 'text-blue-400'
                 }`}
                 fill={streak >= 3 ? 'currentColor' : 'none'}
               />
@@ -187,9 +187,9 @@ export default function CTCITrackerTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Easy Solved', solved: easySolved, total: easyTotal, icon: <Target className="w-4 h-4" />, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-          { label: 'Medium Solved', solved: medSolved, total: medTotal, icon: <Flame className="w-4 h-4" />, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-          { label: 'Hard Solved', solved: hardSolved, total: hardTotal, icon: <Trophy className="w-4 h-4" />, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20' },
-          { label: 'Starred', solved: starredCount, total: totalCount, icon: <Star className="w-4 h-4" />, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
+          { label: 'Medium Solved', solved: medSolved, total: medTotal, icon: <Flame className="w-4 h-4" />, color: 'text-amber-800 dark:text-amber-900', bg: 'bg-amber-100 dark:bg-amber-900/20' },
+          { label: 'Hard Solved', solved: hardSolved, total: hardTotal, icon: <Trophy className="w-4 h-4" />, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/20' },
+          { label: 'Starred', solved: starredCount, total: totalCount, icon: <Star className="w-4 h-4" />, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900/20' },
         ].map(s => (
           <div key={s.label} className={`${s.bg} rounded-xl p-4 border border-border`}>
             <div className={`flex items-center gap-2 ${s.color} mb-2`}>
@@ -215,16 +215,16 @@ export default function CTCITrackerTab() {
             <div className="text-3xl select-none flex-shrink-0 animate-bounce">🌟</div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-600">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-amber-900 dark:text-amber-900 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-600">
                   🌟 Problem of the Day
                 </span>
-                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">{dailyDate}</span>
+                <span className="text-xs text-amber-800 dark:text-amber-900 font-medium">{dailyDate}</span>
               </div>
               <a
                 href={dailyChallenge.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-base font-bold text-gray-900 dark:text-gray-100 hover:text-amber-700 dark:hover:text-amber-300 transition-colors leading-snug flex items-center gap-1.5 group"
+                className="text-base font-bold text-gray-900 dark:text-gray-100 hover:text-amber-900 dark:hover:text-amber-800 transition-colors leading-snug flex items-center gap-1.5 group"
               >
                 {dailyChallenge.id}. {dailyChallenge.name}
                 <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
@@ -233,9 +233,9 @@ export default function CTCITrackerTab() {
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                   dailyChallenge.difficulty === 'Easy' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' :
                   dailyChallenge.difficulty === 'Hard' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
-                  'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+                  'bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-900'
                 }`}>{dailyChallenge.difficulty}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{dailyChallenge.topic.split(',').slice(0, 3).join(', ')}</span>
+                <span className="text-xs text-gray-700 dark:text-gray-300">{dailyChallenge.topic.split(',').slice(0, 3).join(', ')}</span>
               </div>
             </div>
             <button
@@ -243,7 +243,7 @@ export default function CTCITrackerTab() {
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                 progress[dailyChallenge.id]?.solved
                   ? 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-600'
-                  : 'bg-white dark:bg-gray-800 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30'
+                  : 'bg-white dark:bg-gray-800 text-amber-900 dark:text-amber-900 border-amber-300 dark:border-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30'
               }`}
             >
               {progress[dailyChallenge.id]?.solved

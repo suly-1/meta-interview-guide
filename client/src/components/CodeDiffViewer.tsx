@@ -125,7 +125,7 @@ export default function CodeDiffViewer({ baseSubmission, compareSubmission, onCl
               const rowBg = isAdd
                 ? "bg-emerald-50 dark:bg-emerald-900/20"
                 : isRemove
-                ? "bg-red-50 dark:bg-red-900/20"
+                ? "bg-red-100 dark:bg-red-900/20"
                 : "";
               const textColor = isAdd
                 ? "text-emerald-800 dark:text-emerald-300"

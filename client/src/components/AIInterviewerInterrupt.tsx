@@ -28,8 +28,8 @@ const SD_PROBLEMS = [
 
 const INTERRUPT_TYPE_LABELS: Record<string, { label: string; color: string; emoji: string }> = {
   math_check: { label: "Math Check", color: "text-red-600 dark:text-red-400", emoji: "🔢" },
-  failure_mode: { label: "Failure Mode", color: "text-orange-600 dark:text-orange-400", emoji: "💥" },
-  trade_off: { label: "Trade-off", color: "text-amber-600 dark:text-amber-400", emoji: "⚖️" },
+  failure_mode: { label: "Failure Mode", color: "text-orange-800 dark:text-orange-900", emoji: "💥" },
+  trade_off: { label: "Trade-off", color: "text-amber-800 dark:text-amber-900", emoji: "⚖️" },
   scale_assumption: { label: "Scale Assumption", color: "text-violet-600 dark:text-violet-400", emoji: "📈" },
   alternative_approach: { label: "Alternative", color: "text-blue-600 dark:text-blue-400", emoji: "🔄" },
 };
@@ -175,7 +175,7 @@ export default function AIInterviewerInterrupt() {
       {phase === "setup" && (
         <HighImpactWrapper variant="orange" className="p-4 space-y-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">System Design Problem</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">System Design Problem</label>
             <select
               value={problem}
               onChange={e => setProblem(e.target.value)}
@@ -185,19 +185,19 @@ export default function AIInterviewerInterrupt() {
             </select>
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Target Level</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">Target Level</label>
             <div className="flex gap-2">
               {(["L4", "L5", "L6", "L7"] as Level[]).map(l => (
                 <button key={l} onClick={() => setTargetLevel(l)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-orange-300"}`}>
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 dark:border-gray-700 text-gray-700 hover:border-orange-300"}`}>
                   {l}
                 </button>
               ))}
             </div>
           </div>
-          <div className="rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 p-3">
-            <p className="text-xs font-bold text-orange-700 dark:text-orange-400 mb-2">What to expect:</p>
-            <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+          <div className="rounded-lg bg-orange-100 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 p-3">
+            <p className="text-xs font-bold text-orange-900 dark:text-orange-900 mb-2">What to expect:</p>
+            <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
               <li>• 35-minute session — design the system in the text area</li>
               <li>• AI interrupts every ~4 minutes with a sharp question</li>
               <li>• You must respond to the interrupt before continuing</li>
@@ -219,7 +219,7 @@ export default function AIInterviewerInterrupt() {
               <div className="flex items-center gap-3">
                 <Clock size={15} className={timeColor} />
                 <span className={`text-lg font-bold font-mono ${timeColor}`}>{fmtTime(timeLeft)}</span>
-                <span className="text-xs text-gray-500">remaining · {interrupts.length} interrupt{interrupts.length !== 1 ? "s" : ""} handled</span>
+                <span className="text-xs text-gray-700">remaining · {interrupts.length} interrupt{interrupts.length !== 1 ? "s" : ""} handled</span>
               </div>
               <button onClick={endSession} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold rounded-lg transition-all">
                 <Square size={11} /> End Session
@@ -245,7 +245,7 @@ export default function AIInterviewerInterrupt() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest">INTERRUPT</span>
+                        <span className="text-xs font-bold text-orange-800 dark:text-orange-900 uppercase tracking-widest">INTERRUPT</span>
                         {INTERRUPT_TYPE_LABELS[currentInterrupt.interruptType] && (
                           <span className={`text-xs font-bold ${INTERRUPT_TYPE_LABELS[currentInterrupt.interruptType].color}`}>
                             {INTERRUPT_TYPE_LABELS[currentInterrupt.interruptType].emoji} {INTERRUPT_TYPE_LABELS[currentInterrupt.interruptType].label}
@@ -261,7 +261,7 @@ export default function AIInterviewerInterrupt() {
                     onChange={e => setInterruptResponse(e.target.value)}
                     placeholder="Respond directly and confidently. Add new information — don't just repeat what you wrote. Then you'll continue your design..."
                     rows={4}
-                    className="w-full px-3 py-2.5 text-sm rounded-lg border border-orange-200 dark:border-orange-800/40 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 resize-none"
+                    className="w-full px-3 py-2.5 text-sm rounded-lg border border-orange-200 dark:border-orange-800/40 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-orange-400 resize-none"
                   />
                   <div className="flex justify-end mt-2">
                     <button
@@ -280,10 +280,10 @@ export default function AIInterviewerInterrupt() {
           {/* Design area */}
           <HighImpactWrapper variant="orange" className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+              <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest">
                 Your Design — {problem}
               </label>
-              <span className="text-xs text-gray-400">{designText.length} chars</span>
+              <span className="text-xs text-gray-600">{designText.length} chars</span>
             </div>
             <textarea
               value={designText}
@@ -291,27 +291,27 @@ export default function AIInterviewerInterrupt() {
               disabled={phase === "responding"}
               placeholder="Start designing. Think out loud as you write. Cover: requirements, scale estimates, high-level architecture, data model, API design, deep dives..."
               rows={16}
-              className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 resize-none disabled:opacity-60"
+              className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-orange-400 resize-none disabled:opacity-60"
             />
           </HighImpactWrapper>
 
           {/* Previous interrupt scores */}
           {interrupts.length > 0 && (
             <HighImpactWrapper variant="orange" className="p-4">
-              <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Interrupt History</h4>
+              <h4 className="font-bold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-3">Interrupt History</h4>
               <div className="space-y-2">
                 {interrupts.map((ev, i) => (
-                  <div key={i} className={`rounded-lg border px-3 py-2 ${ev.score?.verdict === "Strong" ? "border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800/40" : ev.score?.verdict === "Weak" ? "border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800/40" : "border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
+                  <div key={i} className={`rounded-lg border px-3 py-2 ${ev.score?.verdict === "Strong" ? "border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800/40" : ev.score?.verdict === "Weak" ? "border-red-200 bg-red-100 dark:bg-red-950/20 dark:border-red-800/40" : "border-amber-200 bg-amber-100 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate flex-1 mr-2">
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate flex-1 mr-2">
                         {INTERRUPT_TYPE_LABELS[ev.interruptType]?.emoji} {ev.question.slice(0, 60)}...
                       </span>
-                      <span className={`text-xs font-bold flex-shrink-0 ${ev.score?.verdict === "Strong" ? "text-emerald-600 dark:text-emerald-400" : ev.score?.verdict === "Weak" ? "text-red-600 dark:text-red-400" : "text-amber-600 dark:text-amber-400"}`}>
+                      <span className={`text-xs font-bold flex-shrink-0 ${ev.score?.verdict === "Strong" ? "text-emerald-600 dark:text-emerald-400" : ev.score?.verdict === "Weak" ? "text-red-600 dark:text-red-400" : "text-amber-800 dark:text-amber-900"}`}>
                         {ev.score?.verdict}
                       </span>
                     </div>
                     {ev.score?.oneLineFeedback && (
-                      <p className="text-[10px] text-gray-500 mt-0.5">{ev.score.oneLineFeedback}</p>
+                      <p className="text-[10px] text-gray-700 mt-0.5">{ev.score.oneLineFeedback}</p>
                     )}
                   </div>
                 ))}
@@ -329,17 +329,17 @@ export default function AIInterviewerInterrupt() {
               Session Complete — {problem}
             </h4>
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 p-3 text-center">
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{interrupts.length}</p>
-                <p className="text-[10px] text-gray-500">Interrupts Handled</p>
+              <div className="rounded-lg bg-orange-100 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 p-3 text-center">
+                <p className="text-2xl font-bold text-orange-800 dark:text-orange-900">{interrupts.length}</p>
+                <p className="text-[10px] text-gray-700">Interrupts Handled</p>
               </div>
-              <div className={`rounded-lg border p-3 text-center ${avgScore && parseFloat(avgScore) >= 4 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/40" : "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
-                <p className={`text-2xl font-bold ${avgScore && parseFloat(avgScore) >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>{avgScore ?? "—"}</p>
-                <p className="text-[10px] text-gray-500">Avg Response Score</p>
+              <div className={`rounded-lg border p-3 text-center ${avgScore && parseFloat(avgScore) >= 4 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/40" : "bg-amber-100 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
+                <p className={`text-2xl font-bold ${avgScore && parseFloat(avgScore) >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-800 dark:text-amber-900"}`}>{avgScore ?? "—"}</p>
+                <p className="text-[10px] text-gray-700">Avg Response Score</p>
               </div>
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3 text-center">
-                <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">{fmtTime(timeUsed)}</p>
-                <p className="text-[10px] text-gray-500">Time Used</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">{fmtTime(timeUsed)}</p>
+                <p className="text-[10px] text-gray-700">Time Used</p>
               </div>
             </div>
             {interrupts.length > 0 && (
@@ -347,7 +347,7 @@ export default function AIInterviewerInterrupt() {
                 {interrupts.map((ev, i) => (
                   <div key={i} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
                         {INTERRUPT_TYPE_LABELS[ev.interruptType]?.emoji} {ev.targetArea}
                       </span>
                       <div className="flex gap-2 text-[10px] font-bold">
@@ -356,12 +356,12 @@ export default function AIInterviewerInterrupt() {
                         <span className="text-emerald-600 dark:text-emerald-400">R:{ev.score?.recovery}</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-gray-500">{ev.score?.oneLineFeedback}</p>
+                    <p className="text-[10px] text-gray-700">{ev.score?.oneLineFeedback}</p>
                   </div>
                 ))}
               </div>
             )}
-            <button onClick={() => setPhase("setup")} className="flex items-center gap-2 text-xs font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 transition-colors">
+            <button onClick={() => setPhase("setup")} className="flex items-center gap-2 text-xs font-semibold text-orange-800 hover:text-orange-900 dark:text-orange-900 transition-colors">
               <RotateCcw size={12} /> Try Another Problem
             </button>
           </HighImpactWrapper>

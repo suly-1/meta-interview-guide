@@ -195,7 +195,7 @@ export default function InterviewerPersonaSimulator() {
                   <h3 className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {persona.name}
                   </h3>
-                  <p className="text-[11px] text-gray-500">{persona.tagline}</p>
+                  <p className="text-[11px] text-gray-700">{persona.tagline}</p>
                 </div>
               </div>
               <p className="text-xs text-gray-600 leading-relaxed mb-2">{persona.description}</p>
@@ -227,13 +227,13 @@ export default function InterviewerPersonaSimulator() {
           <span className="text-xl">{selectedPersona.emoji}</span>
           <div>
             <span className="text-xs font-bold text-gray-800">{selectedPersona.name}</span>
-            <span className="text-[11px] text-gray-500 ml-2">— {selectedPersona.tagline}</span>
+            <span className="text-[11px] text-gray-700 ml-2">— {selectedPersona.tagline}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Q{questionIdx + 1}/{questions.length}</span>
+          <span className="text-xs text-gray-700">Q{questionIdx + 1}/{questions.length}</span>
           <button onClick={() => setActive(false)}
-            className="text-xs text-gray-400 hover:text-gray-700 bg-white/60 hover:bg-white px-2.5 py-1 rounded-lg transition-colors font-semibold">
+            className="text-xs text-gray-600 hover:text-gray-700 bg-white/60 hover:bg-white px-2.5 py-1 rounded-lg transition-colors font-semibold">
             Exit
           </button>
         </div>
@@ -257,7 +257,7 @@ export default function InterviewerPersonaSimulator() {
 
         {/* Question */}
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Question</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Question</p>
           <p className="text-sm font-semibold text-gray-800 leading-relaxed">{currentQ.question}</p>
         </div>
 
@@ -282,7 +282,7 @@ export default function InterviewerPersonaSimulator() {
               </p>
               <button
                 onClick={nextFollowUp}
-                className="text-[11px] font-bold text-gray-500 hover:text-gray-800 flex items-center gap-1 transition-colors"
+                className="text-[11px] font-bold text-gray-700 hover:text-gray-800 flex items-center gap-1 transition-colors"
               >
                 <RotateCcw size={11} /> Another follow-up from this persona
               </button>
@@ -294,7 +294,7 @@ export default function InterviewerPersonaSimulator() {
         <div>
           <button
             onClick={() => setShowOriginalProbes(!showOriginalProbes)}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 hover:text-gray-700 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-600 hover:text-gray-700 transition-colors"
           >
             {showOriginalProbes ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
             Show original interviewer probes
@@ -304,7 +304,7 @@ export default function InterviewerPersonaSimulator() {
               <ul className="space-y-1.5">
                 {currentQ.probes.map((probe, pi) => (
                   <li key={pi} className="flex items-start gap-2 text-xs text-gray-600">
-                    <ChevronRight size={11} className="text-gray-300 flex-shrink-0 mt-0.5" />
+                    <ChevronRight size={11} className="text-gray-700 flex-shrink-0 mt-0.5" />
                     {probe}
                   </li>
                 ))}

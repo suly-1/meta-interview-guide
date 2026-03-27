@@ -646,7 +646,7 @@ You must solve this in O(h + k) time where h is the height of the BST, without c
 
 const DIFF_COLORS: Record<string, string> = {
   C: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  D: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+  D: "text-amber-900 bg-amber-500/10 border-amber-500/30",
   E: "text-red-400 bg-red-500/10 border-red-500/30",
 };
 
@@ -762,7 +762,7 @@ export default function YandexAlgorithmTrainer() {
   const timerColor = remaining <= 120
     ? "text-red-400"
     : remaining <= 300
-    ? "text-amber-400"
+    ? "text-amber-900"
     : "text-emerald-400";
   const hintUnlocked = !timerRunning || pct >= hintThreshold;
   const getProblemStreak = (id: string): number => {
@@ -792,7 +792,7 @@ export default function YandexAlgorithmTrainer() {
       return (
         <div className="prep-card p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2"><BarChart2 size={16} className="text-amber-400" /><span className="font-bold text-sm text-foreground">Personal Leaderboard</span></div>
+            <div className="flex items-center gap-2"><BarChart2 size={16} className="text-amber-900" /><span className="font-bold text-sm text-foreground">Personal Leaderboard</span></div>
             <button onClick={() => setShowLeaderboard(false)} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
           </div>
           {ranked.length === 0 ? (
@@ -802,10 +802,10 @@ export default function YandexAlgorithmTrainer() {
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Solved by best time</p>
               {ranked.map((p, rank) => (
                 <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/30 border border-border">
-                  <span className={`text-xs font-black w-5 shrink-0 ${rank === 0 ? "text-amber-400" : rank === 1 ? "text-slate-300" : "text-muted-foreground"}`}>#{rank + 1}</span>
+                  <span className={`text-xs font-black w-5 shrink-0 ${rank === 0 ? "text-amber-900" : rank === 1 ? "text-slate-300" : "text-muted-foreground"}`}>#{rank + 1}</span>
                   <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground truncate">{p.title}</p><p className="text-[10px] text-muted-foreground">{p.attempts} attempt{p.attempts !== 1 ? "s" : ""}</p></div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {p.streak >= 2 && <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-bold"><Flame size={10} />{p.streak}x</span>}
+                    {p.streak >= 2 && <span className="flex items-center gap-0.5 text-[10px] text-orange-900 font-bold"><Flame size={10} />{p.streak}x</span>}
                     <span className="flex items-center gap-1 text-xs font-mono font-bold text-emerald-400"><Clock size={10} />{formatTime(p.bestTime!)}</span>
                     <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${DIFF_COLORS[p.difficulty]}`}>{p.difficulty}</span>
                   </div>
@@ -841,18 +841,18 @@ export default function YandexAlgorithmTrainer() {
             <button onClick={() => setShowSettings(false)} className="text-xs text-muted-foreground hover:text-foreground">Back</button>
           </div>
           <div className="rounded-lg bg-secondary/30 border border-border p-4 space-y-3">
-            <div className="flex items-center gap-2"><Unlock size={14} className="text-amber-400" /><span className="text-sm font-semibold text-foreground">Hint Unlock Threshold</span></div>
+            <div className="flex items-center gap-2"><Unlock size={14} className="text-amber-900" /><span className="text-sm font-semibold text-foreground">Hint Unlock Threshold</span></div>
             <p className="text-xs text-muted-foreground">Controls when the solution can be revealed during a session.</p>
             <div className="grid grid-cols-2 gap-2">
               {([25, 50, 75, 100] as HintThreshold[]).map((t) => (
                 <button key={t} onClick={() => handleHintThresholdChange(t)}
-                  className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-all ${hintThreshold === t ? "bg-amber-500/20 border-amber-500/50 text-amber-300" : "bg-secondary/40 border-border text-muted-foreground hover:text-foreground"}`}>
+                  className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-all ${hintThreshold === t ? "bg-amber-500/20 border-amber-500/50 text-amber-800" : "bg-secondary/40 border-border text-muted-foreground hover:text-foreground"}`}>
                   {t === 100 ? <span className="flex items-center justify-center gap-1.5"><Lock size={11} /> Timer ends (strict)</span>
                     : <span className="flex items-center justify-center gap-1.5"><Unlock size={11} /> {HINT_THRESHOLD_LABELS[t]}</span>}
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-muted-foreground">Current: <span className="text-amber-300 font-semibold">{HINT_THRESHOLD_LABELS[hintThreshold]}</span></p>
+            <p className="text-[10px] text-muted-foreground">Current: <span className="text-amber-800 font-semibold">{HINT_THRESHOLD_LABELS[hintThreshold]}</span></p>
           </div>
           <div className="rounded-lg bg-secondary/30 border border-border p-4 space-y-2">
             <span className="text-sm font-semibold text-foreground">Reset Progress</span>
@@ -875,7 +875,7 @@ export default function YandexAlgorithmTrainer() {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs text-muted-foreground">{completedIds.size}/{PROBLEMS.length} solved</span>
-            <button onClick={() => setShowLeaderboard(true)} title="Personal leaderboard" className="p-1.5 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-amber-400 transition-all"><Medal size={13} /></button>
+            <button onClick={() => setShowLeaderboard(true)} title="Personal leaderboard" className="p-1.5 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-amber-900 transition-all"><Medal size={13} /></button>
             <button onClick={() => setShowSettings(true)} title="Settings" className="p-1.5 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-foreground transition-all"><Settings size={13} /></button>
             <button onClick={() => setActive(true)} className="px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-all">Enter Arena</button>
           </div>
@@ -924,7 +924,7 @@ export default function YandexAlgorithmTrainer() {
                   : <Lock size={12} className="opacity-40 shrink-0" />}
                 <span className="truncate flex-1">{p.title}</span>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {streak >= 2 && <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-bold"><Flame size={9} />{streak}</span>}
+                  {streak >= 2 && <span className="flex items-center gap-0.5 text-[10px] text-orange-900 font-bold"><Flame size={9} />{streak}</span>}
                   {best !== null && <span className="flex items-center gap-0.5 text-[10px] text-emerald-400 font-mono"><Clock size={9} />{formatTime(best)}</span>}
                   <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${DIFF_COLORS[p.difficulty]}`}>{p.difficulty}</span>
                 </div>
@@ -935,7 +935,7 @@ export default function YandexAlgorithmTrainer() {
         <div className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground">
           {hintThreshold === 100
             ? <><Lock size={9} /> Hints locked until timer ends (strict mode)</>
-            : <><Unlock size={9} /> Hints unlock at {HINT_THRESHOLD_LABELS[hintThreshold]} — <button onClick={() => setShowSettings(true)} className="text-amber-400 hover:underline">change</button></>
+            : <><Unlock size={9} /> Hints unlock at {HINT_THRESHOLD_LABELS[hintThreshold]} — <button onClick={() => setShowSettings(true)} className="text-amber-900 hover:underline">change</button></>
           }
         </div>
       </div>
@@ -1117,7 +1117,7 @@ export default function YandexAlgorithmTrainer() {
         <button
           onClick={() => setShowSolution(!showSolution)}
           disabled={timerRunning}
-          className="flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1.5 text-xs text-amber-900 hover:text-amber-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {showSolution ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           {timerRunning ? "Stop timer to reveal solution" : "Reveal solution + key insight"}
@@ -1125,7 +1125,7 @@ export default function YandexAlgorithmTrainer() {
         {showSolution && (
           <div className="mt-2 space-y-3">
             <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3">
-              <p className="text-[11px] font-semibold text-amber-300 mb-1">Key Insight</p>
+              <p className="text-[11px] font-semibold text-amber-800 mb-1">Key Insight</p>
               <p className="text-xs text-amber-200/80">{problem.keyInsight}</p>
             </div>
             <div className="rounded-lg bg-secondary/30 border border-border p-3">

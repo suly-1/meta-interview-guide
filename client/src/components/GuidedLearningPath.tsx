@@ -202,7 +202,7 @@ function usePhases(
       title: "Phase 2 — Fix Your Gaps",
       subtitle: "Weeks 3–5 · Eliminate the exact things that would reject you",
       icon: <Zap size={16} />,
-      color: "text-amber-400",
+      color: "text-amber-900",
       bgColor: "bg-amber-500/10",
       borderColor: "border-amber-500/30",
       exitCriteria:
@@ -284,7 +284,7 @@ function usePhases(
       title: "Phase 3 — Simulate Pressure",
       subtitle: "Weeks 6–7 · Performance under pressure is a separate skill",
       icon: <Flame size={16} />,
-      color: "text-orange-400",
+      color: "text-orange-900",
       bgColor: "bg-orange-500/10",
       borderColor: "border-orange-500/30",
       exitCriteria:
@@ -465,7 +465,7 @@ export function GuidedLearningPath({ onTabChange }: GuidedLearningPathProps) {
 
   const PRIORITY_COLORS = {
     critical: "text-red-400 bg-red-500/10 border-red-500/20",
-    high: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    high: "text-amber-900 bg-amber-500/10 border-amber-500/20",
     medium: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   };
 
@@ -651,7 +651,7 @@ export function GuidedLearningPath({ onTabChange }: GuidedLearningPathProps) {
                               step.priority === "critical"
                                 ? "text-red-400"
                                 : step.priority === "high"
-                                  ? "text-amber-400"
+                                  ? "text-amber-900"
                                   : "text-muted-foreground"
                             }
                           />

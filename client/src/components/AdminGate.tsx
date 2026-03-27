@@ -49,7 +49,7 @@ function SessionLockButton() {
     return (
       <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gray-900 border border-red-800/60 rounded-xl shadow-2xl px-4 py-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
         <LockKeyhole size={14} className="text-red-400 flex-shrink-0" />
-        <span className="text-xs text-gray-300">Lock this session?</span>
+        <span className="text-xs text-gray-700">Lock this session?</span>
         <button
           onClick={() => {
             clearPinToken();
@@ -61,7 +61,7 @@ function SessionLockButton() {
         </button>
         <button
           onClick={() => setConfirmLock(false)}
-          className="px-2 py-1 text-xs text-gray-500 hover:text-gray-300 rounded-lg transition-colors"
+          className="px-2 py-1 text-xs text-gray-700 hover:text-gray-700 rounded-lg transition-colors"
         >
           Cancel
         </button>
@@ -73,7 +73,7 @@ function SessionLockButton() {
     <button
       onClick={() => setConfirmLock(true)}
       title="Lock admin session — requires PIN re-entry"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-3 py-2 bg-gray-900/90 backdrop-blur-sm border border-gray-700/60 hover:border-red-700/60 text-gray-500 hover:text-red-400 rounded-xl shadow-lg transition-all duration-200 text-xs font-medium group"
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-3 py-2 bg-gray-900/90 backdrop-blur-sm border border-gray-700/60 hover:border-red-700/60 text-gray-700 hover:text-red-400 rounded-xl shadow-lg transition-all duration-200 text-xs font-medium group"
     >
       <LockKeyhole size={13} className="transition-colors" />
       <span className="hidden sm:inline">Lock session</span>
@@ -110,13 +110,13 @@ export default function AdminGate({ children }: AdminGateProps) {
             <ShieldAlert size={28} className="text-red-400" />
           </div>
           <h1 className="text-xl font-bold text-white mb-2">Admin Access Restricted</h1>
-          <p className="text-gray-400 text-sm leading-relaxed mb-6">
+          <p className="text-gray-600 text-sm leading-relaxed mb-6">
             The admin panel is only accessible on the live hosted version of this site.
             This static build does not support admin features.
           </p>
           <Button
             variant="outline"
-            className="w-full max-w-xs text-gray-300 border-gray-700 hover:bg-gray-800"
+            className="w-full max-w-xs text-gray-700 border-gray-700 hover:bg-gray-800"
             onClick={() => navigate("/")}
           >
             Back to guide
@@ -129,7 +129,7 @@ export default function AdminGate({ children }: AdminGateProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-gray-400">
+        <div className="flex flex-col items-center gap-3 text-gray-600">
           <div className="w-8 h-8 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
           <span className="text-sm">Verifying access…</span>
         </div>
@@ -148,7 +148,7 @@ export default function AdminGate({ children }: AdminGateProps) {
             <ShieldAlert size={28} className="text-red-400" />
           </div>
           <h1 className="text-xl font-bold text-white mb-2">Admin Access Restricted</h1>
-          <p className="text-gray-400 text-sm leading-relaxed mb-6">
+          <p className="text-gray-600 text-sm leading-relaxed mb-6">
             {isUnauthenticated
               ? "You must be signed in with the owner account to access the admin panel."
               : "This area is restricted to the site owner only. Your account does not have admin privileges."}
@@ -168,7 +168,7 @@ export default function AdminGate({ children }: AdminGateProps) {
             )}
             <Button
               variant="outline"
-              className="w-full max-w-xs text-gray-300 border-gray-700 hover:bg-gray-800"
+              className="w-full max-w-xs text-gray-700 border-gray-700 hover:bg-gray-800"
               onClick={() => navigate("/")}
             >
               Back to guide

@@ -102,8 +102,8 @@ export default function PeerComparisonPrompts({ question }: { question: string }
         className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-left transition-colors"
         onClick={() => setOpen(o => !o)}
       >
-        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">L6 Answer Signals</span>
-        {open ? <ChevronUp size={13} className="text-gray-400" /> : <ChevronDown size={13} className="text-gray-400" />}
+        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-700">L6 Answer Signals</span>
+        {open ? <ChevronUp size={13} className="text-gray-600" /> : <ChevronDown size={13} className="text-gray-600" />}
       </button>
       {open && (
         <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
@@ -121,7 +121,7 @@ export default function PeerComparisonPrompts({ question }: { question: string }
               ))}
             </ul>
           </div>
-          <div className="p-4 bg-red-50/30">
+          <div className="p-4 bg-red-100/30">
             <div className="flex items-center gap-1.5 mb-2">
               <ThumbsDown size={13} className="text-red-500" />
               <span className="text-xs font-bold text-red-600">Weak Answer Signals</span>

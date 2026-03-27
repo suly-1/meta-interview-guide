@@ -368,7 +368,7 @@ export function VoiceAnswerMode({
               <div className="rounded-lg bg-background border border-border p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Star size={13} className="text-amber-400" />
+                    <Star size={13} className="text-amber-900" />
                     <span className="text-xs font-bold text-foreground">
                       STAR Scorecard
                     </span>
@@ -376,7 +376,7 @@ export function VoiceAnswerMode({
                   <div className="flex items-center gap-2">
                     <ICBadge level={score.level} />
                     <span
-                      className={`text-lg font-black ${score.overallScore >= 4 ? "text-emerald-400" : score.overallScore >= 3 ? "text-blue-400" : score.overallScore >= 2 ? "text-amber-400" : "text-red-400"}`}
+                      className={`text-lg font-black ${score.overallScore >= 4 ? "text-emerald-400" : score.overallScore >= 3 ? "text-blue-400" : score.overallScore >= 2 ? "text-amber-900" : "text-red-400"}`}
                     >
                       {score.overallScore.toFixed(1)}
                     </span>

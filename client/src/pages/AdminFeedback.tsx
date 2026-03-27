@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
   bug:     { label: "Bug",     icon: <Bug size={13} />,        color: "text-red-700",    bg: "bg-red-100 border-red-200" },
-  feature: { label: "Feature", icon: <Lightbulb size={13} />,  color: "text-amber-700",  bg: "bg-amber-100 border-amber-200" },
+  feature: { label: "Feature", icon: <Lightbulb size={13} />,  color: "text-amber-900",  bg: "bg-amber-100 border-amber-200" },
   content: { label: "Content", icon: <BookOpen size={13} />,   color: "text-blue-700",   bg: "bg-blue-100 border-blue-200" },
   ux:      { label: "UX",      icon: <Palette size={13} />,    color: "text-violet-700", bg: "bg-violet-100 border-violet-200" },
   other:   { label: "Other",   icon: <HelpCircle size={13} />, color: "text-gray-700",   bg: "bg-gray-100 border-gray-200" },
@@ -27,23 +27,23 @@ const RATING_LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
   new:         { label: "New",         color: "text-blue-700",    bg: "bg-blue-50",    border: "border-blue-200" },
-  in_progress: { label: "In Progress", color: "text-amber-700",   bg: "bg-amber-50",   border: "border-amber-200" },
+  in_progress: { label: "In Progress", color: "text-amber-900",   bg: "bg-amber-100",   border: "border-amber-200" },
   done:        { label: "Done",        color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
-  dismissed:   { label: "Dismissed",   color: "text-gray-500",   bg: "bg-gray-50",   border: "border-gray-200" },
+  dismissed:   { label: "Dismissed",   color: "text-gray-700",   bg: "bg-gray-50",   border: "border-gray-200" },
 };
 
 function StarRow({ rating }: { rating: number | null }) {
-  if (!rating) return <span className="text-xs text-gray-400">No rating</span>;
+  if (!rating) return <span className="text-xs text-gray-600">No rating</span>;
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map(s => (
         <Star
           key={s}
           size={12}
-          className={s <= rating ? "text-amber-400 fill-amber-400" : "text-gray-200"}
+          className={s <= rating ? "text-amber-900 fill-amber-400" : "text-gray-200"}
         />
       ))}
-      <span className="ml-1 text-xs text-gray-500">{RATING_LABELS[rating]}</span>
+      <span className="ml-1 text-xs text-gray-700">{RATING_LABELS[rating]}</span>
     </div>
   );
 }
@@ -134,11 +134,11 @@ function DigestPreviewModal({
           <div className="flex items-center gap-2">
             <Mail size={16} className="text-blue-400" />
             <span className="font-bold text-white text-sm">Digest Preview</span>
-            <span className="text-xs text-gray-500 ml-1">— review before sending</span>
+            <span className="text-xs text-gray-700 ml-1">— review before sending</span>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-white transition-colors rounded-lg p-1 hover:bg-gray-800"
+            className="text-gray-700 hover:text-white transition-colors rounded-lg p-1 hover:bg-gray-800"
           >
             <X size={16} />
           </button>
@@ -147,16 +147,16 @@ function DigestPreviewModal({
         {/* Email metadata */}
         <div className="px-5 py-3 border-b border-gray-800 space-y-1.5 bg-gray-950/50">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-500 w-14 flex-shrink-0">To:</span>
+            <span className="text-gray-700 w-14 flex-shrink-0">To:</span>
             <span className="text-gray-200 font-mono bg-gray-800 px-2 py-0.5 rounded">{data.to}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-500 w-14 flex-shrink-0">Subject:</span>
+            <span className="text-gray-700 w-14 flex-shrink-0">Subject:</span>
             <span className="text-gray-200 font-semibold">{data.subject}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-500 w-14 flex-shrink-0">Items:</span>
-            <span className={`font-bold ${data.itemCount === 0 ? "text-gray-500" : "text-blue-400"}`}>
+            <span className="text-gray-700 w-14 flex-shrink-0">Items:</span>
+            <span className={`font-bold ${data.itemCount === 0 ? "text-gray-700" : "text-blue-400"}`}>
               {data.itemCount} feedback item{data.itemCount !== 1 ? "s" : ""} from the last 7 days
             </span>
           </div>
@@ -165,14 +165,14 @@ function DigestPreviewModal({
         {/* Email body preview */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {data.itemCount === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-700">
               <MessageSquare size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm font-semibold text-gray-400">No new feedback this week</p>
+              <p className="text-sm font-semibold text-gray-600">No new feedback this week</p>
               <p className="text-xs mt-1">The digest will say: "No new feedback this week."</p>
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-gray-500 mb-3 italic">
+              <p className="text-xs text-gray-700 mb-3 italic">
                 Email body preview — formatted as plain text in the actual email:
               </p>
               {data.items.map((item, idx) => {
@@ -189,17 +189,17 @@ function DigestPreviewModal({
                         {meta.label.toUpperCase()}
                       </span>
                       {item.rating && (
-                        <span className="text-amber-400 text-xs font-bold">{item.rating}★</span>
+                        <span className="text-amber-900 text-xs font-bold">{item.rating}★</span>
                       )}
                       <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${statusMeta.color} ${statusMeta.bg} ${statusMeta.border}`}>
                         {statusMeta.label}
                       </span>
-                      <span className="text-xs text-gray-500 ml-auto">
+                      <span className="text-xs text-gray-700 ml-auto">
                         #{idx + 1} of {data.itemCount}
                       </span>
                     </div>
                     <p className="text-gray-200 leading-relaxed text-sm">{item.message}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-700">
                       {item.page && (
                         <span className="font-mono bg-gray-700 px-1.5 py-0.5 rounded">{item.page}</span>
                       )}
@@ -219,7 +219,7 @@ function DigestPreviewModal({
 
         {/* Modal footer */}
         <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-gray-800">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-700">
             {data.itemCount > 0
               ? "This digest will be sent via email (if SMTP configured) or to your Manus inbox."
               : "Sending will notify you that there is no new feedback this week."}
@@ -227,7 +227,7 @@ function DigestPreviewModal({
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all"
+              className="px-4 py-2 text-xs font-semibold text-gray-700 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all"
             >
               Cancel
             </button>
@@ -338,7 +338,7 @@ export default function AdminFeedback() {
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
               <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 flex flex-col items-center gap-3">
                 <RefreshCw size={24} className="text-blue-400 animate-spin" />
-                <p className="text-sm text-gray-300">Loading digest preview…</p>
+                <p className="text-sm text-gray-700">Loading digest preview…</p>
               </div>
             </div>
           ) : digestPreview ? (
@@ -357,7 +357,7 @@ export default function AdminFeedback() {
       <div className="sticky top-0 z-50 bg-gray-900 border-b border-gray-800 shadow-lg">
         <div className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto">
           <Link href="/">
-            <button className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition-colors flex-shrink-0 mr-1">
+            <button className="flex items-center gap-1.5 text-gray-600 hover:text-white text-sm transition-colors flex-shrink-0 mr-1">
               <ArrowLeft size={15} />
             </button>
           </Link>
@@ -366,29 +366,29 @@ export default function AdminFeedback() {
               <BarChart2 size={15} className="text-indigo-400" />
               <span className="text-sm font-bold text-white whitespace-nowrap">Feedback Dashboard</span>
             </div>
-            <p className="text-[10px] text-gray-500 hidden sm:block">Admin view · All submitted feedback</p>
+            <p className="text-[10px] text-gray-700 hidden sm:block">Admin view · All submitted feedback</p>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <Link href="/admin/stats">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
                 <BarChart2 size={13} />
                 <span className="hidden sm:inline">Stats</span>
               </button>
             </Link>
             <Link href="/admin/analytics">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
                 <TrendingUp size={13} />
                 <span className="hidden sm:inline">Analytics</span>
               </button>
             </Link>
             <Link href="/admin/settings">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
                 <Lock size={13} />
                 <span className="hidden sm:inline">Access</span>
               </button>
             </Link>
             <Link href="/admin/users">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
                 <Users size={13} />
                 <span className="hidden sm:inline">Users</span>
               </button>
@@ -399,14 +399,14 @@ export default function AdminFeedback() {
             <button
               onClick={() => refetch()}
               disabled={isFetching}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all disabled:opacity-50"
             >
               <RefreshCw size={13} className={isFetching ? "animate-spin" : ""} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               onClick={() => exportToCSV((feedback ?? []) as Array<Record<string, unknown>>)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all"
             >
               <Download size={13} />
               <span className="hidden sm:inline">Export CSV</span>
@@ -451,9 +451,9 @@ export default function AdminFeedback() {
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
         {/* Stat Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard icon={<MessageSquare size={12} />} label="Total" value={isLoading ? "…" : total} color="text-gray-300" />
+          <StatCard icon={<MessageSquare size={12} />} label="Total" value={isLoading ? "…" : total} color="text-gray-700" />
           <StatCard icon={<Clock size={12} />} label="Last 7 Days" value={isLoading ? "…" : last7Days} color="text-green-400" />
-          <StatCard icon={<Star size={12} />} label="Top Category" value={isLoading ? "…" : topCategory} color="text-amber-400" />
+          <StatCard icon={<Star size={12} />} label="Top Category" value={isLoading ? "…" : topCategory} color="text-amber-900" />
           <StatCard icon={<TrendingUp size={12} />} label="Showing" value={filtered.length} color="text-blue-400" />
         </div>
 
@@ -466,7 +466,7 @@ export default function AdminFeedback() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white">Feature Performance</h3>
-                <p className="text-xs text-gray-500">Anonymous pass rates across all AI features</p>
+                <p className="text-xs text-gray-700">Anonymous pass rates across all AI features</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -484,10 +484,10 @@ export default function AdminFeedback() {
                         </span>
                         <div className="text-right">
                           <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.passRate}%</p>
-                          <p className="text-[10px] text-gray-400">pass rate</p>
+                          <p className="text-[10px] text-gray-600">pass rate</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 text-xs text-gray-700">
                         <span className="flex items-center gap-1"><Users size={11} /> {stats.totalSessions} sessions</span>
                         <span className="flex items-center gap-1"><Trophy size={11} /> avg {avgScore}/100</span>
                       </div>
@@ -504,7 +504,7 @@ export default function AdminFeedback() {
                   );
                 })}
             </div>
-            <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
+            <p className="text-xs text-gray-600 mt-3 flex items-center gap-1">
               <Zap size={11} /> Stats update in real-time as candidates complete sessions. Minimum 5 sessions required per feature for reliable data.
             </p>
           </div>
@@ -512,7 +512,7 @@ export default function AdminFeedback() {
 
         {/* Filters + Search */}
         <div className="flex flex-wrap gap-2 items-center">
-          <Filter size={13} className="text-gray-500 flex-shrink-0" />
+          <Filter size={13} className="text-gray-700 flex-shrink-0" />
           <div className="relative">
             <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
               className="appearance-none text-xs font-semibold bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-3 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
@@ -523,7 +523,7 @@ export default function AdminFeedback() {
               <option value="ux">UX</option>
               <option value="other">Other</option>
             </select>
-            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
           </div>
           <div className="relative">
             <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
@@ -534,7 +534,7 @@ export default function AdminFeedback() {
               <option value="content">Content Issue</option>
               <option value="ux">UX Feedback</option>
             </select>
-            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
           </div>
           <div className="relative">
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
@@ -545,10 +545,10 @@ export default function AdminFeedback() {
               <option value="done">Done</option>
               <option value="dismissed">Dismissed</option>
             </select>
-            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
           </div>
           <div className="flex-1 min-w-[180px] relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 pointer-events-none" />
             <input type="text" placeholder="Search messages..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               className="w-full text-xs bg-gray-800 text-gray-200 border border-gray-700 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-600" />
           </div>
@@ -559,7 +559,7 @@ export default function AdminFeedback() {
               <option value="rating_high">Highest rating</option>
               <option value="rating_low">Lowest rating</option>
             </select>
-            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
           </div>
         </div>
 
@@ -571,9 +571,9 @@ export default function AdminFeedback() {
             ))}
           </div>
         ) : !filtered.length ? (
-          <div className="text-center py-16 text-gray-500">
+          <div className="text-center py-16 text-gray-700">
             <MessageSquare size={40} className="mx-auto mb-3 opacity-30" />
-            <p className="font-semibold text-gray-400">No feedback entries yet. They will appear here once users submit feedback.</p>
+            <p className="font-semibold text-gray-600">No feedback entries yet. They will appear here once users submit feedback.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -606,7 +606,7 @@ export default function AdminFeedback() {
                               ? "bg-emerald-900/40 text-emerald-400 border-emerald-700"
                               : (item as { sentiment?: string }).sentiment === "negative"
                               ? "bg-rose-900/40 text-rose-400 border-rose-700"
-                              : "bg-gray-700/60 text-gray-400 border-gray-600"
+                              : "bg-gray-700/60 text-gray-600 border-gray-600"
                           }`}>
                             {(item as { sentiment?: string }).sentiment === "positive" ? "😊 Positive"
                               : (item as { sentiment?: string }).sentiment === "negative" ? "😞 Negative"
@@ -614,16 +614,16 @@ export default function AdminFeedback() {
                           </span>
                         )}
                         {item.page && (
-                          <span className="text-xs text-gray-500 font-mono bg-gray-800 px-2 py-0.5 rounded-md">
+                          <span className="text-xs text-gray-700 font-mono bg-gray-800 px-2 py-0.5 rounded-md">
                             {item.page}
                           </span>
                         )}
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <span className="text-xs text-gray-700 flex items-center gap-1">
                           <Clock size={11} />
                           {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </span>
                         {item.userId && (
-                          <span className="text-xs text-gray-500">User #{item.userId}</span>
+                          <span className="text-xs text-gray-700">User #{item.userId}</span>
                         )}
                       </div>
                     </div>

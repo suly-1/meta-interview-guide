@@ -39,7 +39,7 @@ const TAG_COLORS: Record<string, string> = {
   blue:    "bg-blue-100 text-blue-700",
   indigo:  "bg-indigo-100 text-indigo-700",
   teal:    "bg-teal-100 text-teal-700",
-  amber:   "bg-amber-100 text-amber-700",
+  amber:   "bg-amber-100 text-amber-900",
   emerald: "bg-emerald-100 text-emerald-700",
 };
 
@@ -53,7 +53,7 @@ const CONNECTOR_COLORS: Record<string, string> = {
 
 const DIFF_COLORS: Record<string, string> = {
   green: "text-emerald-600",
-  amber: "text-amber-600",
+  amber: "text-amber-800",
   red:   "text-red-600",
 };
 
@@ -111,7 +111,7 @@ function CountdownCard() {
           />
           {dateStr && (
             <button onClick={() => setDateStr("")}
-              className="text-[11px] text-white/60 hover:text-white underline underline-offset-2 transition-colors text-right">
+              className="text-[11px] text-white/90 hover:text-white underline underline-offset-2 transition-colors text-right">
               Clear date
             </button>
           )}
@@ -181,11 +181,11 @@ function StoryRow({
   }, [s, note]);
 
   return (
-    <div className={`rounded-xl border transition-all ${done ? "bg-amber-50 border-amber-300" : "bg-white border-gray-200 hover:border-amber-300"}`}>
+    <div className={`rounded-xl border transition-all ${done ? "bg-amber-100 border-amber-300" : "bg-white border-gray-200 hover:border-amber-300"}`}>
       {/* Main row */}
       <div className="flex items-center gap-4 px-4 py-3.5">
         {/* Number */}
-        <span className={`flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${done ? "bg-amber-400 text-white" : "bg-gray-100 text-gray-500"}`}>
+        <span className={`flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${done ? "bg-amber-400 text-white" : "bg-gray-100 text-gray-700"}`}>
           {index + 1}
         </span>
 
@@ -198,7 +198,7 @@ function StoryRow({
               </motion.div>
             ) : (
               <motion.div key="unchecked" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ duration: 0.15 }}>
-                <Circle size={16} className="text-gray-300 hover:text-amber-400 transition-colors" />
+                <Circle size={16} className="text-gray-700 hover:text-amber-900 transition-colors" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -211,15 +211,15 @@ function StoryRow({
             {s.type}
           </p>
           <div className="flex flex-wrap gap-x-4 mt-0.5">
-            <p className="text-xs text-gray-500 truncate">Focus: {s.focusAreas}</p>
-            <p className="text-xs text-gray-400 truncate hidden md:block">Values: {s.values}</p>
+            <p className="text-xs text-gray-700 truncate">Focus: {s.focusAreas}</p>
+            <p className="text-xs text-gray-600 truncate hidden md:block">Values: {s.values}</p>
           </div>
         </div>
 
         {/* Badges + notes toggle */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {done && (
-            <span className="text-[11px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full hidden sm:block">
+            <span className="text-[11px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full hidden sm:block">
               Ready
             </span>
           )}
@@ -230,7 +230,7 @@ function StoryRow({
                 ? "bg-blue-100 text-blue-700"
                 : hasNote
                 ? "bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                : "text-gray-400 hover:text-blue-500 hover:bg-blue-50"
+                : "text-gray-600 hover:text-blue-500 hover:bg-blue-50"
             }`}
             title="Toggle notes"
           >
@@ -253,7 +253,7 @@ function StoryRow({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 pt-1 border-t border-gray-100">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block">
+              <label className="text-[11px] font-bold text-gray-600 uppercase tracking-widest mb-1.5 block">
                 STAR Notes — {s.type}
               </label>
               <textarea
@@ -264,7 +264,7 @@ function StoryRow({
                 className="w-full text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 resize-y focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder-gray-400 leading-relaxed font-mono"
               />
               <div className="flex items-center justify-between mt-1.5">
-                <p className="text-[11px] text-gray-400">Saved automatically as you type</p>
+                <p className="text-[11px] text-gray-600">Saved automatically as you type</p>
                 <div className="flex items-center gap-3">
                   {/* Copy STAR template button */}
                   <button
@@ -315,7 +315,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Weak-Spot Dashboard
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             Your 3 lowest-rated coding patterns and behavioral questions — based on your Quick Drill and Practice Mode sessions
           </p>
         </div>
@@ -328,7 +328,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Interview Countdown
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Set your interview date to see how many days you have and which week of the plan you should be on</p>
+          <p className="text-sm text-gray-700 mt-1">Set your interview date to see how many days you have and which week of the plan you should be on</p>
         </div>
         <CountdownCard />
       </section>
@@ -339,7 +339,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Your Prep Progress
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Track your patterns and STAR stories — saved automatically in your browser</p>
+          <p className="text-sm text-gray-700 mt-1">Track your patterns and STAR stories — saved automatically in your browser</p>
         </div>
 
         <div className={`bg-gradient-to-r ${isComplete ? "from-emerald-500 to-teal-500" : "from-blue-600 to-indigo-600"} rounded-xl p-5 text-white mb-4 shadow-md transition-all duration-700`}>
@@ -359,7 +359,7 @@ export default function TimelineTab() {
               ) : (
                 <>
                   <p className="text-sm text-white/80">{totalDone} of {totalItems} items</p>
-                  <p className="text-xs text-white/60 mt-0.5">Patterns + Stories</p>
+                  <p className="text-xs text-white/90 mt-0.5">Patterns + Stories</p>
                 </>
               )}
             </div>
@@ -382,7 +382,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Pattern Mastery Heatmap
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             All 14 patterns color-coded by your Quick Drill ratings — red is weak, green is strong
           </p>
         </div>
@@ -395,10 +395,10 @@ export default function TimelineTab() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>LeetCode Pattern Checklist</h2>
-              <p className="text-sm text-gray-500 mt-1">Check off each pattern as you master it — also synced with the Coding tab filter</p>
+              <p className="text-sm text-gray-700 mt-1">Check off each pattern as you master it — also synced with the Coding tab filter</p>
             </div>
             {patterns.count > 0 && (
-              <button onClick={patterns.reset} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition-colors">
+              <button onClick={patterns.reset} className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-red-500 transition-colors">
                 <RotateCcw size={12} /> Reset all
               </button>
             )}
@@ -420,7 +420,7 @@ export default function TimelineTab() {
                       </motion.div>
                     ) : (
                       <motion.div key="unchecked" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ duration: 0.15 }}>
-                        <Circle size={18} className="text-gray-300" />
+                        <Circle size={18} className="text-gray-700" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -432,8 +432,8 @@ export default function TimelineTab() {
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-[11px] font-medium ${DIFF_COLORS[p.difficultyColor]}`}>{p.difficulty}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-[11px] text-gray-400">{"★".repeat(p.frequency)}{"☆".repeat(5 - p.frequency)}</span>
+                    <span className="text-gray-700">·</span>
+                    <span className="text-[11px] text-gray-600">{"★".repeat(p.frequency)}{"☆".repeat(5 - p.frequency)}</span>
                   </div>
                 </div>
               </motion.button>
@@ -448,10 +448,10 @@ export default function TimelineTab() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>STAR Story Bank</h2>
-              <p className="text-sm text-gray-500 mt-1">Mark stories as ready and add private notes for each — saved in your browser</p>
+              <p className="text-sm text-gray-700 mt-1">Mark stories as ready and add private notes for each — saved in your browser</p>
             </div>
             {stories.count > 0 && (
-              <button onClick={stories.reset} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition-colors">
+              <button onClick={stories.reset} className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-red-500 transition-colors">
                 <RotateCcw size={12} /> Reset all
               </button>
             )}
@@ -479,7 +479,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Weekly Prep Digest
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             Enter your email and interview date to generate a personalized week-by-week checklist you can copy into a doc or email to yourself
           </p>
         </div>
@@ -492,7 +492,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Share Your Prep State
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             Bookmark or share a link that restores your interview date and checklist progress on any device
           </p>
         </div>
@@ -503,7 +503,7 @@ export default function TimelineTab() {
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>4-Week Study Timeline</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             {activeWeekIndex >= 0
               ? `Based on your interview date, you should currently be on ${TIMELINE_WEEKS[activeWeekIndex].weeks}.`
               : "Set your interview date above to highlight which week you should be on."}
@@ -528,7 +528,7 @@ export default function TimelineTab() {
               return (
                 <div key={i} className="flex gap-4 sm:gap-6 items-start">
                   <div className="flex-shrink-0 w-[80px] text-right hidden sm:block">
-                    <span className={`text-xs font-bold leading-tight ${isActive ? "text-blue-600" : "text-gray-400"}`}>{w.weeks}</span>
+                    <span className={`text-xs font-bold leading-tight ${isActive ? "text-blue-600" : "text-gray-600"}`}>{w.weeks}</span>
                   </div>
                   <div className={`hidden sm:flex flex-shrink-0 w-4 h-4 rounded-full border-2 border-white shadow-sm mt-1 z-10 transition-all ${
                     isActive ? "bg-blue-600 ring-2 ring-blue-300 ring-offset-1 scale-125" : CONNECTOR_COLORS[w.tagColor]
@@ -540,7 +540,7 @@ export default function TimelineTab() {
                   }`}>
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
-                        <span className={`text-xs font-bold sm:hidden block mb-1 ${isActive ? "text-blue-600" : "text-gray-400"}`}>{w.weeks}</span>
+                        <span className={`text-xs font-bold sm:hidden block mb-1 ${isActive ? "text-blue-600" : "text-gray-600"}`}>{w.weeks}</span>
                         <h4 className={`font-bold text-sm ${isActive ? "text-blue-900" : "text-gray-900"}`}
                           style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           {w.focus}
@@ -564,7 +564,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             60-Day Activity Calendar
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             GitHub-style heatmap of your daily practice activity across drills, CTCI solves, and behavioral sessions
           </p>
         </div>
@@ -577,7 +577,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             4-Week Prep Checklist
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             A week-by-week action plan with checkable tasks — coding, CTCI problems, behavioral, and Meta-specific prep
           </p>
         </div>
@@ -590,7 +590,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Pattern Dependency Graph
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             Understand which patterns are prerequisites for others — learn in the right order to avoid foundational gaps
           </p>
         </div>
@@ -603,7 +603,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Interview Day Checklist
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             A short, printable day-of checklist — from the night before to right after the interview
           </p>
         </div>
@@ -616,7 +616,7 @@ export default function TimelineTab() {
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Export Progress Report
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-700 mt-1">
             Download or copy a full summary of your readiness, patterns, stories, weak spots, and session history
           </p>
         </div>
@@ -627,7 +627,7 @@ export default function TimelineTab() {
       <section>
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>L6 vs. L7 Behavioral Bar</h2>
-          <p className="text-sm text-gray-500 mt-1">What distinguishes a Senior Engineer answer from a Staff Engineer answer</p>
+          <p className="text-sm text-gray-700 mt-1">What distinguishes a Senior Engineer answer from a Staff Engineer answer</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
@@ -673,7 +673,7 @@ export default function TimelineTab() {
             Coding Session Debrief Log
           </h2>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-700">
           After each coding session, log a structured debrief: what pattern you used, where you got stuck, and what you’d do differently. Stored in your browser and searchable over time.
         </p>
         <CodingSessionDebriefLog />
@@ -687,7 +687,7 @@ export default function TimelineTab() {
             Daily Practice Reminder
           </h2>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-700">
           Set a browser notification to fire daily with your personalized recommended problems — keeping your streak alive without manually opening the guide.
         </p>
         <DailyNotificationReminder />
@@ -701,7 +701,7 @@ export default function TimelineTab() {
             🔔 Interview Milestone Alerts
           </h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           Set your interview date and get D-14, D-7, D-3, and D-1 browser push notifications with targeted prep advice for each milestone.
         </p>
         <MilestoneNotifications />
@@ -715,7 +715,7 @@ export default function TimelineTab() {
             ✨ AI Study Session Planner
           </h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           Generate a personalised 30, 60, or 90-minute study plan. SRS reviews due today are automatically prepended as the first block so they are never skipped.
         </p>
         <AIStudySessionPlanner />
@@ -729,7 +729,7 @@ export default function TimelineTab() {
             📅 Spaced Repetition Calendar
           </h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           GitHub-style heatmap showing how many pattern reviews are due each day for the next 30 days — plan your study sessions around your review load.
         </p>
         <SRDueDateHeatmap />

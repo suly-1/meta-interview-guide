@@ -101,7 +101,7 @@ export default function AdminDisclaimerReport() {
           </Link>
           <div>
             <h1 className="text-lg font-bold tracking-tight flex items-center gap-2">
-              <ShieldAlert size={18} className="text-amber-400" />
+              <ShieldAlert size={18} className="text-amber-900" />
               Disclaimer Acknowledgment Report
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">Admin audit — all registered users</p>
@@ -117,7 +117,7 @@ export default function AdminDisclaimerReport() {
           </Link>
           <Link
             href="/admin/settings"
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-secondary text-gray-400 transition-colors"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-secondary text-gray-600 transition-colors"
           >
             <Settings size={13} />
             Site Settings
@@ -151,7 +151,7 @@ export default function AdminDisclaimerReport() {
             <div className="text-xs text-muted-foreground mt-0.5">Acknowledged</div>
           </div>
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-            <div className="text-2xl font-bold text-amber-400">{pendingCount}</div>
+            <div className="text-2xl font-bold text-amber-900">{pendingCount}</div>
             <div className="text-xs text-muted-foreground mt-0.5">Pending / Not Yet Seen</div>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function AdminDisclaimerReport() {
                           {row.acknowledged ? (
                             <span className="text-emerald-400">{formatDate(row.acknowledgedAt)}</span>
                           ) : (
-                            <span className="text-amber-400/70 italic">Not yet</span>
+                            <span className="text-amber-900/70 italic">Not yet</span>
                           )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -247,7 +247,7 @@ export default function AdminDisclaimerReport() {
                               <CheckCircle2 size={11} /> Acknowledged
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-900 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
                               <XCircle size={11} /> Pending
                             </span>
                           )}

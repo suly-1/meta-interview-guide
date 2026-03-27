@@ -398,7 +398,7 @@ function ScorecardPanel({ roomCode, scorerName, candidateName, onSubmit }: {
                 className={`flex-1 py-1.5 rounded text-xs font-bold border transition-all ${
                   (scores[d.key as keyof Omit<ScorecardData, "notes">] as number) >= v
                     ? v <= 2 ? "bg-red-500/20 border-red-500/30 text-red-400"
-                    : v <= 3 ? "bg-amber-500/20 border-amber-500/30 text-amber-400"
+                    : v <= 3 ? "bg-amber-500/20 border-amber-500/30 text-amber-900"
                     : "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
                     : "bg-secondary border-border text-muted-foreground"
                 }`}>
@@ -420,7 +420,7 @@ function ScorecardPanel({ roomCode, scorerName, candidateName, onSubmit }: {
       </div>
 
       <div className="flex items-center justify-between pt-1">
-        <div className="text-xs text-muted-foreground">Overall avg: <span className={`font-bold ${avg >= 4 ? "text-emerald-400" : avg >= 3 ? "text-amber-400" : "text-red-400"}`}>{avg}/5</span></div>
+        <div className="text-xs text-muted-foreground">Overall avg: <span className={`font-bold ${avg >= 4 ? "text-emerald-400" : avg >= 3 ? "text-amber-900" : "text-red-400"}`}>{avg}/5</span></div>
         <button onClick={handleSubmit} disabled={saveScorecard.isPending}
           className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-all flex items-center gap-1.5 disabled:opacity-50">
           {saveScorecard.isPending ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}

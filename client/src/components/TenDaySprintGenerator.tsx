@@ -132,7 +132,7 @@ export function TenDaySprintGenerator() {
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
-            <Rocket size={16} className="text-orange-400" />
+            <Rocket size={16} className="text-orange-900" />
           </div>
           <div className="text-left">
             <div className="font-semibold text-sm text-foreground">
@@ -145,7 +145,7 @@ export function TenDaySprintGenerator() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 font-medium">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-800 font-medium">
             Final Stretch
           </span>
           {expanded ? (
@@ -158,7 +158,7 @@ export function TenDaySprintGenerator() {
 
       {expanded && (
         <div className="px-5 pb-5 space-y-4 border-t border-orange-500/20">
-          <div className="mt-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs text-orange-300">
+          <div className="mt-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs text-orange-800">
             The AI reads your actual pattern ratings, behavioral coverage, and
             STAR story strength to build a plan targeting your specific weak
             spots — not a generic schedule.
@@ -254,7 +254,7 @@ export function TenDaySprintGenerator() {
                     <div className="flex items-start gap-2">
                       <Sun
                         size={13}
-                        className="text-amber-400 mt-0.5 shrink-0"
+                        className="text-amber-900 mt-0.5 shrink-0"
                       />
                       <div>
                         <div className="text-xs text-muted-foreground font-medium">

@@ -215,11 +215,11 @@ export default function PatternRecognitionDrill() {
       {phase === "setup" && (
         <HighImpactWrapper variant="blue" className="p-4 space-y-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Session Length</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">Session Length</label>
             <div className="flex gap-2">
               {[5, 8, 12].map(n => (
                 <button key={n} onClick={() => setSessionCount(n)}
-                  className={`px-4 py-2 text-sm font-bold rounded-lg border transition-all ${sessionCount === n ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-blue-300"}`}>
+                  className={`px-4 py-2 text-sm font-bold rounded-lg border transition-all ${sessionCount === n ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 dark:border-gray-700 text-gray-700 hover:border-blue-300"}`}>
                   {n} Problems
                 </button>
               ))}
@@ -227,7 +227,7 @@ export default function PatternRecognitionDrill() {
           </div>
           <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 p-3">
             <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-2">How it works:</p>
-            <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+            <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
               <li>• Read the problem description</li>
               <li>• Choose the correct pattern in under 30 seconds</li>
               <li>• Learn the key signal that gives it away</li>
@@ -245,7 +245,7 @@ export default function PatternRecognitionDrill() {
           {/* Progress + timer */}
           <HighImpactWrapper variant="blue" className="p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-gray-500">Problem {currentIdx + 1} of {problems.length}</span>
+              <span className="text-xs font-bold text-gray-700">Problem {currentIdx + 1} of {problems.length}</span>
               <div className="flex items-center gap-2">
                 <span className={`text-lg font-bold font-mono ${timerColor}`}>{timeLeft}s</span>
                 <HighImpactBadge size="sm" variant="violet" label={current.difficulty} />
@@ -270,13 +270,13 @@ export default function PatternRecognitionDrill() {
                 const isSelected = pattern === selected;
                 let cls = "text-left px-3 py-2.5 rounded-lg border text-sm font-semibold transition-all ";
                 if (!revealed) {
-                  cls += "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 cursor-pointer";
+                  cls += "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 cursor-pointer";
                 } else if (isCorrect) {
                   cls += "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400";
                 } else if (isSelected && !isCorrect) {
-                  cls += "border-red-500 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400";
+                  cls += "border-red-500 bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400";
                 } else {
-                  cls += "border-gray-200 dark:border-gray-700 text-gray-400 opacity-50";
+                  cls += "border-gray-200 dark:border-gray-700 text-gray-600 opacity-50";
                 }
                 return (
                   <button key={pattern} onClick={() => handleSelect(pattern)} className={cls}>
@@ -296,10 +296,10 @@ export default function PatternRecognitionDrill() {
                 <motion.div
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 px-3 py-2.5"
+                  className="mt-4 rounded-lg bg-amber-100 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 px-3 py-2.5"
                 >
-                  <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Key Signal to Remember:</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{current.keySignal}</p>
+                  <p className="text-xs font-bold text-amber-900 dark:text-amber-900 mb-1">Key Signal to Remember:</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">{current.keySignal}</p>
                   <button onClick={handleNext} className="mt-3 flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 transition-colors">
                     {currentIdx + 1 >= problems.length ? "See Results" : "Next Problem"} <ChevronRight size={13} />
                   </button>
@@ -314,24 +314,24 @@ export default function PatternRecognitionDrill() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <HighImpactWrapper variant="blue" className="p-4">
             <div className="flex items-center gap-3 mb-4">
-              <Trophy size={24} className={accuracy >= 80 ? "text-yellow-500" : accuracy >= 60 ? "text-amber-500" : "text-gray-400"} />
+              <Trophy size={24} className={accuracy >= 80 ? "text-yellow-500" : accuracy >= 60 ? "text-amber-500" : "text-gray-600"} />
               <div>
                 <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200">Drill Complete!</h4>
-                <p className="text-xs text-gray-500">{problems.length} problems · avg {avgTime}s per problem</p>
+                <p className="text-xs text-gray-700">{problems.length} problems · avg {avgTime}s per problem</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className={`rounded-lg border p-3 text-center ${accuracy >= 80 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/40" : "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
-                <p className={`text-2xl font-bold ${accuracy >= 80 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>{accuracy}%</p>
-                <p className="text-[10px] text-gray-500">Accuracy</p>
+              <div className={`rounded-lg border p-3 text-center ${accuracy >= 80 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/40" : "bg-amber-100 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
+                <p className={`text-2xl font-bold ${accuracy >= 80 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-800 dark:text-amber-900"}`}>{accuracy}%</p>
+                <p className="text-[10px] text-gray-700">Accuracy</p>
               </div>
-              <div className={`rounded-lg border p-3 text-center ${avgTime <= 15 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/40" : "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
-                <p className={`text-2xl font-bold ${avgTime <= 15 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>{avgTime}s</p>
-                <p className="text-[10px] text-gray-500">Avg Time</p>
+              <div className={`rounded-lg border p-3 text-center ${avgTime <= 15 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/40" : "bg-amber-100 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/40"}`}>
+                <p className={`text-2xl font-bold ${avgTime <= 15 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-800 dark:text-amber-900"}`}>{avgTime}s</p>
+                <p className="text-[10px] text-gray-700">Avg Time</p>
               </div>
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3 text-center">
-                <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">{correctCount}/{problems.length}</p>
-                <p className="text-[10px] text-gray-500">Correct</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">{correctCount}/{problems.length}</p>
+                <p className="text-[10px] text-gray-700">Correct</p>
               </div>
             </div>
             {accuracy < 80 && (

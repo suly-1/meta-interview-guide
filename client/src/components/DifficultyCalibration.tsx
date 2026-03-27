@@ -33,8 +33,8 @@ export default function DifficultyCalibration() {
 
   const diffColors: Record<string, { bar: string; text: string; bg: string }> = {
     Easy:   { bar: "bg-emerald-500", text: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
-    Medium: { bar: "bg-amber-500",   text: "text-amber-700",   bg: "bg-amber-50 border-amber-200" },
-    Hard:   { bar: "bg-red-500",     text: "text-red-700",     bg: "bg-red-50 border-red-200" },
+    Medium: { bar: "bg-amber-500",   text: "text-amber-900",   bg: "bg-amber-100 border-amber-200" },
+    Hard:   { bar: "bg-red-500",     text: "text-red-700",     bg: "bg-red-100 border-red-200" },
   };
 
   return (
@@ -54,21 +54,21 @@ export default function DifficultyCalibration() {
           return (
             <div key={s.diff} className={`rounded-lg border p-3 ${cleared ? c.bg : "bg-gray-50 border-gray-200"}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className={`text-xs font-bold ${cleared ? c.text : "text-gray-500"}`}>{s.diff}</span>
+                <span className={`text-xs font-bold ${cleared ? c.text : "text-gray-700"}`}>{s.diff}</span>
                 {cleared && <span className="text-[10px] text-emerald-600 font-bold">✓ Cleared</span>}
               </div>
               <p className={`text-xl font-extrabold ${cleared ? c.text : "text-gray-700"}`}
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {Math.round(s.rate * 100)}%
               </p>
-              <p className="text-[10px] text-gray-400">{s.solved}/{s.total} solved</p>
+              <p className="text-[10px] text-gray-600">{s.solved}/{s.total} solved</p>
               <div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${c.bar}`}
                   style={{ width: `${Math.min(100, (s.rate / threshold) * 100)}%` }}
                 />
               </div>
-              <p className="text-[9px] text-gray-400 mt-0.5">Target: {Math.round(threshold * 100)}%</p>
+              <p className="text-[9px] text-gray-600 mt-0.5">Target: {Math.round(threshold * 100)}%</p>
             </div>
           );
         })}

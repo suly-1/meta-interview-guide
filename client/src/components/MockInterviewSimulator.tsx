@@ -62,7 +62,7 @@ function verdictColor(v: string) {
     return "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
   if (v === "Hire") return "text-blue-400 bg-blue-500/10 border-blue-500/30";
   if (v === "Borderline")
-    return "text-amber-400 bg-amber-500/10 border-amber-500/30";
+    return "text-amber-900 bg-amber-500/10 border-amber-500/30";
   return "text-red-400 bg-red-500/10 border-red-500/30";
 }
 
@@ -111,7 +111,7 @@ function CircularTimer({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className={`font-mono text-xl font-extrabold ${urgent ? "text-red-400" : warning ? "text-amber-400" : "text-foreground"}`}
+          className={`font-mono text-xl font-extrabold ${urgent ? "text-red-400" : warning ? "text-amber-900" : "text-foreground"}`}
         >
           {fmtTime(timeLeft)}
         </span>
@@ -310,7 +310,7 @@ export default function MockInterviewSimulator() {
     coding: <Code2 size={13} className="text-blue-400" />,
     bq1: <Brain size={13} className="text-purple-400" />,
     bq2: <Brain size={13} className="text-purple-400" />,
-    debrief: <Trophy size={13} className="text-amber-400" />,
+    debrief: <Trophy size={13} className="text-amber-900" />,
   };
 
   const debrief = debriefMutation.data;
@@ -462,7 +462,7 @@ export default function MockInterviewSimulator() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
-                                <div className="text-xs text-amber-400">
+                                <div className="text-xs text-amber-900">
                                   {[1, 2, 3, 4, 5]
                                     .map(n => (n <= s.overallScore ? "★" : "☆"))
                                     .join("")}
@@ -508,7 +508,7 @@ export default function MockInterviewSimulator() {
                                 </div>
                                 {s.nextSteps.length > 0 && (
                                   <div>
-                                    <div className="text-xs font-bold text-amber-400 mb-1">
+                                    <div className="text-xs font-bold text-amber-900 mb-1">
                                       📋 Next Steps
                                     </div>
                                     <ol className="space-y-0.5">
@@ -517,7 +517,7 @@ export default function MockInterviewSimulator() {
                                           key={i}
                                           className="text-xs text-muted-foreground flex gap-2"
                                         >
-                                          <span className="text-amber-400 font-bold shrink-0">
+                                          <span className="text-amber-900 font-bold shrink-0">
                                             {i + 1}.
                                           </span>
                                           {step}
@@ -668,7 +668,7 @@ export default function MockInterviewSimulator() {
               <div className="space-y-5">
                 {debriefMutation.isPending && (
                   <div className="flex flex-col items-center py-10 gap-3">
-                    <Zap size={28} className="text-amber-400 animate-pulse" />
+                    <Zap size={28} className="text-amber-900 animate-pulse" />
                     <div className="text-sm font-semibold text-foreground">
                       Generating your debrief…
                     </div>
@@ -694,7 +694,7 @@ export default function MockInterviewSimulator() {
                             key={s}
                             className={
                               s <= debrief.overallScore
-                                ? "text-amber-400"
+                                ? "text-amber-900"
                                 : "opacity-20"
                             }
                           >
@@ -799,7 +799,7 @@ export default function MockInterviewSimulator() {
                     {/* Next steps */}
                     {debrief.nextSteps.length > 0 && (
                       <div>
-                        <div className="text-xs font-bold text-amber-400 mb-2">
+                        <div className="text-xs font-bold text-amber-900 mb-2">
                           📋 Next Steps
                         </div>
                         <ol className="space-y-1">
@@ -808,7 +808,7 @@ export default function MockInterviewSimulator() {
                               key={i}
                               className="text-xs text-muted-foreground flex gap-2"
                             >
-                              <span className="text-amber-400 font-bold shrink-0">
+                              <span className="text-amber-900 font-bold shrink-0">
                                 {i + 1}.
                               </span>
                               {step}

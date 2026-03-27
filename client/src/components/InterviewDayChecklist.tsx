@@ -28,7 +28,7 @@ const CATEGORIES = ["Evening Before", "Morning Of", "During", "After"];
 
 const CAT_COLORS: Record<string, { bg: string; border: string; title: string; badge: string }> = {
   "Evening Before": { bg: "bg-indigo-50",  border: "border-indigo-200",  title: "text-indigo-800",  badge: "bg-indigo-100 text-indigo-700"  },
-  "Morning Of":     { bg: "bg-amber-50",   border: "border-amber-200",   title: "text-amber-800",   badge: "bg-amber-100 text-amber-700"    },
+  "Morning Of":     { bg: "bg-amber-100",   border: "border-amber-200",   title: "text-amber-800",   badge: "bg-amber-100 text-amber-900"    },
   "During":         { bg: "bg-blue-50",    border: "border-blue-200",    title: "text-blue-800",    badge: "bg-blue-100 text-blue-700"      },
   "After":          { bg: "bg-emerald-50", border: "border-emerald-200", title: "text-emerald-800", badge: "bg-emerald-100 text-emerald-700"},
 };
@@ -57,17 +57,17 @@ export default function InterviewDayChecklist() {
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-sm font-bold text-gray-800">Interview Day Readiness</p>
-            <p className="text-xs text-gray-400">{done} of {total} items checked</p>
+            <p className="text-xs text-gray-600">{done} of {total} items checked</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
               <Printer size={12} /> Print
             </button>
             {done > 0 && (
-              <button onClick={reset} className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors">
+              <button onClick={reset} className="flex items-center gap-1 text-xs text-gray-600 hover:text-red-500 transition-colors">
                 <RotateCcw size={11} /> Reset
               </button>
             )}
@@ -123,7 +123,7 @@ export default function InterviewDayChecklist() {
                             </motion.div>
                           ) : (
                             <motion.div key="undone" initial={{ scale: 0.5 }} animate={{ scale: 1 }} exit={{ scale: 0.5 }} transition={{ duration: 0.15 }}>
-                              <Circle size={17} className="text-gray-300" />
+                              <Circle size={17} className="text-gray-700" />
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -131,12 +131,12 @@ export default function InterviewDayChecklist() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-base">{item.emoji}</span>
-                          <span className={`text-sm font-semibold leading-snug ${isDone ? "line-through text-gray-400" : "text-gray-800"}`}>
+                          <span className={`text-sm font-semibold leading-snug ${isDone ? "line-through text-gray-600" : "text-gray-800"}`}>
                             {item.title}
                           </span>
-                          <span className="text-[11px] text-gray-400 font-medium">{item.time}</span>
+                          <span className="text-[11px] text-gray-600 font-medium">{item.time}</span>
                         </div>
-                        <p className={`text-xs leading-relaxed mt-1 ${isDone ? "text-gray-400" : "text-gray-500"}`}>
+                        <p className={`text-xs leading-relaxed mt-1 ${isDone ? "text-gray-600" : "text-gray-700"}`}>
                           {item.detail}
                         </p>
                       </div>
@@ -149,7 +149,7 @@ export default function InterviewDayChecklist() {
         );
       })}
 
-      <p className="text-[11px] text-gray-400 text-center">
+      <p className="text-[11px] text-gray-600 text-center">
         Click "Print" to save a clean copy for interview day. Checklist state is not persisted — reset each time you use it.
       </p>
     </div>

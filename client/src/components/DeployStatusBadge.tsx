@@ -53,10 +53,10 @@ export default function DeployStatusBadge() {
     },
     in_progress: {
       icon: (
-        <Loader2 size={11} className="animate-spin text-amber-400 shrink-0" />
+        <Loader2 size={11} className="animate-spin text-amber-900 shrink-0" />
       ),
       label: "Deploying…",
-      color: "text-amber-400",
+      color: "text-amber-900",
       bg: "bg-amber-500/10 border-amber-500/20",
       title: "Deployment in progress",
     },

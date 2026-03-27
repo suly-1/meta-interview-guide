@@ -118,7 +118,7 @@ export function SessionHistoryPanel({ problem }: { problem: Problem }) {
       : s >= 3
         ? "text-blue-400"
         : s >= 2
-          ? "text-amber-400"
+          ? "text-amber-900"
           : "text-red-400";
   const icColors: Record<string, string> = {
     L5: "bg-slate-500/20 text-slate-300 border-slate-500/30",
@@ -411,7 +411,7 @@ export function AISolutionReviewer({
       : r.score >= 3
         ? "text-blue-400"
         : r.score >= 2
-          ? "text-amber-400"
+          ? "text-amber-900"
           : "text-red-400"
     : "text-foreground";
 
@@ -538,10 +538,10 @@ export function AISolutionReviewer({
                 <div className="flex items-start gap-1.5">
                   <AlertTriangle
                     size={11}
-                    className="text-amber-400 shrink-0 mt-0.5"
+                    className="text-amber-900 shrink-0 mt-0.5"
                   />
                   <div>
-                    <span className="text-xs font-semibold text-amber-400">
+                    <span className="text-xs font-semibold text-amber-900">
                       Coaching:{" "}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -583,8 +583,8 @@ export function ProgressiveHintSystem({
     "Pseudocode Skeleton",
   ];
   const levelColors = [
-    "text-amber-400 border-amber-500/30 bg-amber-500/10",
-    "text-orange-400 border-orange-500/30 bg-orange-500/10",
+    "text-amber-900 border-amber-500/30 bg-amber-500/10",
+    "text-orange-900 border-orange-500/30 bg-orange-500/10",
     "text-red-400 border-red-500/30 bg-red-500/10",
   ];
 
@@ -610,7 +610,7 @@ export function ProgressiveHintSystem({
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-amber-500/5 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Lightbulb size={14} className="text-amber-400" />
+          <Lightbulb size={14} className="text-amber-900" />
           <span className="text-sm font-semibold text-foreground">
             AI Hint System
           </span>
@@ -906,12 +906,12 @@ export function ComplexityAnalyzer({
                   {
                     label: "Your Time",
                     value: r.actualTime,
-                    color: r.isOptimal ? "text-emerald-400" : "text-amber-400",
+                    color: r.isOptimal ? "text-emerald-400" : "text-amber-900",
                   },
                   {
                     label: "Your Space",
                     value: r.actualSpace,
-                    color: r.isOptimal ? "text-emerald-400" : "text-amber-400",
+                    color: r.isOptimal ? "text-emerald-400" : "text-amber-900",
                   },
                   {
                     label: "Optimal Time",
@@ -940,7 +940,7 @@ export function ComplexityAnalyzer({
 
               {/* Optimal badge */}
               <div
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs ${r.isOptimal ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-amber-500/30 bg-amber-500/10 text-amber-400"}`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs ${r.isOptimal ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-amber-500/30 bg-amber-500/10 text-amber-900"}`}
               >
                 {r.isOptimal ? (
                   <CheckCircle size={11} />
@@ -964,7 +964,7 @@ export function ComplexityAnalyzer({
                   <div className="text-[10px] font-semibold text-muted-foreground mb-1">
                     BOTTLENECK
                   </div>
-                  <p className="text-xs font-mono text-amber-300">
+                  <p className="text-xs font-mono text-amber-800">
                     {r.bottleneck}
                   </p>
                 </div>
@@ -1030,7 +1030,7 @@ export function PatternRecognitionTrainer({
   const r = scoreMutation.data;
   const scoreColors = [
     "text-red-400",
-    "text-amber-400",
+    "text-amber-900",
     "text-blue-400",
     "text-emerald-400",
   ];
@@ -1099,7 +1099,7 @@ export function PatternRecognitionTrainer({
                         size={14}
                         className={
                           i <= r.score
-                            ? "text-amber-400 fill-amber-400"
+                            ? "text-amber-900 fill-amber-400"
                             : "text-muted-foreground"
                         }
                       />
@@ -1193,7 +1193,7 @@ export function L7OptimizationChallenge({
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-orange-500/5 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Zap size={14} className="text-orange-400" />
+          <Zap size={14} className="text-orange-900" />
           <span className="text-sm font-semibold text-foreground">
             L7 Optimization Challenge
           </span>
@@ -1231,7 +1231,7 @@ export function L7OptimizationChallenge({
             <button
               onClick={() => handleChallenge(true)}
               disabled={challengeMutation.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 disabled:opacity-50 text-orange-300 text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 disabled:opacity-50 text-orange-800 text-xs font-semibold transition-all"
             >
               {challengeMutation.isPending && showHint ? (
                 <Loader2 size={11} className="animate-spin" />
@@ -1246,7 +1246,7 @@ export function L7OptimizationChallenge({
             <div className="space-y-3">
               {/* Challenge statement */}
               <div className="rounded-lg bg-orange-500/10 border border-orange-500/30 p-3">
-                <div className="text-[10px] font-bold text-orange-400 mb-1">
+                <div className="text-[10px] font-bold text-orange-900 mb-1">
                   L7 CHALLENGE
                 </div>
                 <p className="text-xs text-foreground font-medium">
@@ -1275,7 +1275,7 @@ export function L7OptimizationChallenge({
               {/* Hint (if requested) */}
               {r.hint && (
                 <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
-                  <div className="text-[10px] font-bold text-amber-400 mb-1">
+                  <div className="text-[10px] font-bold text-amber-900 mb-1">
                     DIRECTIONAL HINT
                   </div>
                   <p className="text-xs text-muted-foreground">{r.hint}</p>

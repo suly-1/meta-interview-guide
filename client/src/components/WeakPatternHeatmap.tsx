@@ -52,8 +52,8 @@ function heatLabel(score: number): string {
 function heatTextColor(score: number): string {
   if (score >= 4.5) return "text-emerald-300";
   if (score >= 3.5) return "text-blue-300";
-  if (score >= 2.5) return "text-amber-300";
-  if (score >= 1.5) return "text-orange-300";
+  if (score >= 2.5) return "text-amber-800";
+  if (score >= 1.5) return "text-orange-800";
   return "text-red-300";
 }
 
@@ -75,10 +75,10 @@ export function WeakPatternHeatmap() {
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-orange-500/5 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Flame size={14} className="text-orange-400" />
+          <Flame size={14} className="text-orange-900" />
           <span className="text-sm font-semibold text-foreground">Weak Pattern Heatmap</span>
           {weakTopics.length > 0 && (
-            <span className="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-300 text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-800 text-[10px] font-bold">
               {weakTopics.length} weak area{weakTopics.length !== 1 ? "s" : ""}
             </span>
           )}

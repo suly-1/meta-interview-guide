@@ -409,7 +409,7 @@ export default function VoiceToStar() {
                 {
                   label: "T — Task",
                   value: starResult.task,
-                  color: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+                  color: "text-amber-900 border-amber-500/20 bg-amber-500/5",
                 },
                 {
                   label: "A — Action",
@@ -453,7 +453,7 @@ export default function VoiceToStar() {
               <button
                 onClick={handleScore}
                 disabled={scoreAnswer.isPending}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 text-xs font-semibold transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-900 text-xs font-semibold transition-all disabled:opacity-50"
               >
                 {scoreAnswer.isPending ? (
                   <>
@@ -521,7 +521,7 @@ export default function VoiceToStar() {
               )}
               {scoreResult.improvements && (
                 <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
-                  <div className="text-xs font-bold text-amber-400 mb-1">
+                  <div className="text-xs font-bold text-amber-900 mb-1">
                     ↑ Improvements
                   </div>
                   <div className="text-xs text-foreground leading-relaxed">

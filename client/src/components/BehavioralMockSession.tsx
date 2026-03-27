@@ -83,7 +83,7 @@ const scoreColor = (s: number) =>
     : s >= 3
       ? "text-blue-400"
       : s >= 2
-        ? "text-amber-400"
+        ? "text-amber-900"
         : "text-red-400";
 
 // ── History Panel ─────────────────────────────────────────────────────────────
@@ -820,7 +820,7 @@ export function BehavioralMockSession() {
                 </ul>
               </div>
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="text-xs font-bold text-amber-400 mb-2">
+                <div className="text-xs font-bold text-amber-900 mb-2">
                   💡 Improvements
                 </div>
                 <ul className="space-y-1">
@@ -829,7 +829,7 @@ export function BehavioralMockSession() {
                       key={i}
                       className="text-xs text-foreground leading-relaxed flex gap-1.5"
                     >
-                      <span className="text-amber-400 shrink-0">•</span>
+                      <span className="text-amber-900 shrink-0">•</span>
                       {s}
                     </li>
                   ))}

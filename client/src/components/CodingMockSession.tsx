@@ -102,7 +102,7 @@ const scoreColor = (s: number) =>
     : s >= 3
       ? "text-blue-400"
       : s >= 2
-        ? "text-amber-400"
+        ? "text-amber-900"
         : "text-red-400";
 
 const diffColor = (delta: number) =>
@@ -430,7 +430,7 @@ function CodingHistoryPanel({ onClose }: { onClose: () => void }) {
                     </ul>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-amber-400 mb-1">
+                    <div className="text-[10px] font-bold text-amber-900 mb-1">
                       Improvements
                     </div>
                     <ul className="space-y-1">
@@ -439,7 +439,7 @@ function CodingHistoryPanel({ onClose }: { onClose: () => void }) {
                           key={i}
                           className="text-[11px] text-foreground flex gap-1.5"
                         >
-                          <span className="text-amber-400 shrink-0">→</span>
+                          <span className="text-amber-900 shrink-0">→</span>
                           {s}
                         </li>
                       ))}
@@ -498,7 +498,7 @@ export function CodingMockSession() {
     timeLeft > phase.time * 0.4
       ? "text-blue-400"
       : timeLeft > 60
-        ? "text-amber-400"
+        ? "text-amber-900"
         : "text-red-400";
   const ringColor =
     timeLeft > phase.time * 0.4
@@ -746,7 +746,7 @@ export function CodingMockSession() {
                     : d === "Easy"
                       ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
                       : d === "Medium"
-                        ? "bg-amber-500/20 border-amber-500/30 text-amber-400"
+                        ? "bg-amber-500/20 border-amber-500/30 text-amber-900"
                         : "bg-blue-500/20 border-blue-500/30 text-blue-400"
                   : "bg-secondary border-border text-muted-foreground hover:border-border"
               }`}
@@ -1169,7 +1169,7 @@ export function CodingMockSession() {
                 </ul>
               </div>
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="text-[10px] font-bold text-amber-400 mb-2">
+                <div className="text-[10px] font-bold text-amber-900 mb-2">
                   → Improvements
                 </div>
                 <ul className="space-y-1.5">
@@ -1178,7 +1178,7 @@ export function CodingMockSession() {
                       key={i}
                       className="text-xs text-foreground leading-relaxed flex gap-1.5"
                     >
-                      <span className="text-amber-400 shrink-0">•</span>
+                      <span className="text-amber-900 shrink-0">•</span>
                       {s}
                     </li>
                   ))}

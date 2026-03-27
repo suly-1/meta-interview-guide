@@ -138,9 +138,9 @@ const SCENARIOS: Scenario[] = [
 ];
 
 const SCORE_COLORS: Record<number, string> = {
-  1: "text-red-700 bg-red-50 border-red-200",
-  2: "text-orange-700 bg-orange-50 border-orange-200",
-  3: "text-amber-700 bg-amber-50 border-amber-200",
+  1: "text-red-700 bg-red-100 border-red-200",
+  2: "text-orange-900 bg-orange-100 border-orange-200",
+  3: "text-amber-900 bg-amber-100 border-amber-200",
   4: "text-emerald-700 bg-emerald-50 border-emerald-200",
   5: "text-green-700 bg-green-50 border-green-200",
 };
@@ -159,7 +159,7 @@ function DimensionResult({
 }: { label: string; score: number; feedback: string; modelAnswer: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`rounded-xl border p-3 ${score >= 3 ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-50/40"}`}>
+    <div className={`rounded-xl border p-3 ${score >= 3 ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-100/40"}`}>
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="text-xs font-bold text-gray-800">{label}</span>
         <ScorePill score={score} />
@@ -278,7 +278,7 @@ export default function SDMathTrainer() {
             <span>{s.title}</span>
             {bestScores[s.id] !== undefined && (
               <span className={`text-[9px] font-semibold mt-0.5 ${
-                i === scenarioIdx ? "text-gray-300" : "text-blue-500"
+                i === scenarioIdx ? "text-gray-700" : "text-blue-500"
               }`}>
                 Best: {bestScores[s.id]}/5
               </span>
@@ -355,7 +355,7 @@ export default function SDMathTrainer() {
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setShowHints((h) => !h)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 border border-amber-200 bg-amber-50 px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-amber-900 border border-amber-200 bg-amber-100 px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors"
           >
             <BookOpen size={11} /> {showHints ? "Hide hints" : "Show hints"}
           </button>
@@ -368,7 +368,7 @@ export default function SDMathTrainer() {
         </div>
 
         {showHints && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2">
+          <div className="rounded-xl border border-amber-200 bg-amber-100 p-3 space-y-2">
             <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">Hints</p>
             <p className="text-xs text-amber-900"><strong>QPS:</strong> {scenario.hints.qps}</p>
             <p className="text-xs text-amber-900"><strong>Storage:</strong> {scenario.hints.storage}</p>
@@ -403,7 +403,7 @@ export default function SDMathTrainer() {
       {result && (
         <div className="space-y-4">
           {/* Overall verdict */}
-          <div className={`rounded-2xl border p-4 ${result.passesBar ? "border-emerald-300 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
+          <div className={`rounded-2xl border p-4 ${result.passesBar ? "border-emerald-300 bg-emerald-50" : "border-red-200 bg-red-100"}`}>
             <div className="flex items-center gap-2 mb-2">
               {result.passesBar
                 ? <CheckCircle2 size={16} className="text-emerald-600" />

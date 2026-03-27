@@ -79,22 +79,22 @@ export default function SolveVelocityChart({ days = 30 }: { days?: number }) {
           <span className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Solve Velocity
           </span>
-          <span className="text-xs text-gray-400">Last {days} days</span>
+          <span className="text-xs text-gray-600">Last {days} days</span>
         </div>
         <div className="flex items-center gap-4 text-right">
           <div>
             <p className="text-lg font-extrabold text-blue-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{totalSolved}</p>
-            <p className="text-[10px] text-gray-400">total solved</p>
+            <p className="text-[10px] text-gray-600">total solved</p>
           </div>
           <div>
             <p className="text-lg font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{avgPerDay}</p>
-            <p className="text-[10px] text-gray-400">avg/active day</p>
+            <p className="text-[10px] text-gray-600">avg/active day</p>
           </div>
         </div>
       </div>
 
       {totalSolved === 0 ? (
-        <div className="px-5 py-8 text-center text-gray-400 text-sm">
+        <div className="px-5 py-8 text-center text-gray-600 text-sm">
           <TrendingUp size={24} className="mx-auto mb-2 text-gray-200" />
           No problems solved yet. Start solving to see your velocity chart!
         </div>

@@ -134,15 +134,15 @@ export default function StreakCalendar({ weeks = 12 }: { weeks?: number }) {
         <div className="flex items-center gap-4">
           <div className="text-center">
             <p className="text-base font-extrabold text-orange-500" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{currentStreak}</p>
-            <p className="text-[10px] text-gray-400">current streak</p>
+            <p className="text-[10px] text-gray-600">current streak</p>
           </div>
           <div className="text-center">
             <p className="text-base font-extrabold text-blue-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{maxStreak}</p>
-            <p className="text-[10px] text-gray-400">best streak</p>
+            <p className="text-[10px] text-gray-600">best streak</p>
           </div>
           <div className="text-center">
             <p className="text-base font-extrabold text-gray-700" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{totalActiveDays}</p>
-            <p className="text-[10px] text-gray-400">active days</p>
+            <p className="text-[10px] text-gray-600">active days</p>
           </div>
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function StreakCalendar({ weeks = 12 }: { weeks?: number }) {
             <div className="h-4" /> {/* month label spacer */}
             {DAY_LABELS.map((d, i) => (
               <div key={d} className="h-3 flex items-center">
-                {i % 2 === 1 && <span className="text-[9px] text-gray-400 w-6">{d.slice(0, 1)}</span>}
+                {i % 2 === 1 && <span className="text-[9px] text-gray-600 w-6">{d.slice(0, 1)}</span>}
                 {i % 2 === 0 && <span className="w-6" />}
               </div>
             ))}
@@ -166,7 +166,7 @@ export default function StreakCalendar({ weeks = 12 }: { weeks?: number }) {
               {/* Month label */}
               <div className="h-4 flex items-center">
                 {monthLabels.find(m => m.col === w) && (
-                  <span className="text-[9px] text-gray-400 font-semibold">{monthLabels.find(m => m.col === w)?.label}</span>
+                  <span className="text-[9px] text-gray-600 font-semibold">{monthLabels.find(m => m.col === w)?.label}</span>
                 )}
               </div>
               {week.map((day, d) => (
@@ -186,11 +186,11 @@ export default function StreakCalendar({ weeks = 12 }: { weeks?: number }) {
 
         {/* Legend */}
         <div className="flex items-center gap-1.5 mt-3 justify-end">
-          <span className="text-[10px] text-gray-400">Less</span>
+          <span className="text-[10px] text-gray-600">Less</span>
           {intensityColors.map((c, i) => (
             <div key={i} className={`w-3 h-3 rounded-sm ${c}`} />
           ))}
-          <span className="text-[10px] text-gray-400">More</span>
+          <span className="text-[10px] text-gray-600">More</span>
         </div>
       </div>
     </div>

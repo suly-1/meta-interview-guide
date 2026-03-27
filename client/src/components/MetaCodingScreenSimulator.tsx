@@ -219,7 +219,7 @@ const E6_BEHAVIORAL_AREAS = [
     key: "conflict" as const,
     label: "Scope & Conflict Resolution",
     icon: <Swords size={13} />,
-    color: "text-orange-600",
+    color: "text-orange-800",
     description: "Navigating ambiguity, resolving technical/team conflicts, setting scope boundaries",
   },
 ];
@@ -235,11 +235,11 @@ const RATINGS: MetaRating[] = [
 
 const RATING_COLORS: Record<string, string> = {
   "Insufficient": "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400",
-  "Moderate": "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400",
+  "Moderate": "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/30 dark:text-amber-900",
   "Solid": "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400",
   "Strong": "bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400",
   "Exceptional": "bg-violet-100 text-violet-700 border-violet-300 dark:bg-violet-900/30 dark:text-violet-400",
-  "Can't Assess": "bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800 dark:text-gray-400",
+  "Can't Assess": "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300",
 };
 
 const FOCUS_AREAS = [
@@ -261,7 +261,7 @@ const FOCUS_AREAS = [
     key: "verification" as const,
     label: "Verification & Debugging",
     icon: <ShieldCheck size={13} />,
-    color: "text-amber-600",
+    color: "text-amber-800",
     description: "Find & fix errors, use test cases, handle edge cases, ensure code meets requirements",
   },
   {
@@ -275,8 +275,8 @@ const FOCUS_AREAS = [
 
 const DIFF_COLORS: Record<string, string> = {
   Easy: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  Medium: "text-amber-600 bg-amber-50 border-amber-200",
-  Hard: "text-red-600 bg-red-50 border-red-200",
+  Medium: "text-amber-800 bg-amber-100 border-amber-200",
+  Hard: "text-red-600 bg-red-100 border-red-200",
 };
 
 // -- Sub-components -------------------------------------------------------
@@ -296,7 +296,7 @@ function RunHistoryPanel({ runs }: { runs: RunHistoryEntry[] }) {
       {open && (
         <div className="px-4 pb-3 space-y-1.5">
           {runs.map((r, i) => (
-            <div key={i} className={`flex items-center gap-2 rounded p-1.5 text-[10px] ${r.passed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-50 dark:bg-red-900/20"}`}>
+            <div key={i} className={`flex items-center gap-2 rounded p-1.5 text-[10px] ${r.passed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-100 dark:bg-red-900/20"}`}>
               {r.passed ? <CheckCircle2 size={10} className="text-emerald-600 shrink-0" /> : <XCircle size={10} className="text-red-600 shrink-0" />}
               <span className="font-mono text-muted-foreground shrink-0">{new Date(r.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
               <span className="font-semibold truncate flex-1">{r.statusDescription}</span>
@@ -897,7 +897,7 @@ export default function MetaCodingScreenSimulator() {
               ))}
             </div>
             {(targetLevel === "E6" || targetLevel === "E6+") && (
-              <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+              <p className="text-[10px] text-amber-800 dark:text-amber-900 mt-1.5 flex items-center gap-1">
                 <AlertCircle size={10} /> Senior screens may also assess XFN Collaboration and Scope & Conflict Resolution.
               </p>
             )}
@@ -1144,7 +1144,7 @@ export default function MetaCodingScreenSimulator() {
 
             {/* Execution result */}
             {q.execResult && (
-              <div className={`px-4 py-3 border-b border-border text-xs ${q.execResult.passed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-50 dark:bg-red-900/20"}`}>
+              <div className={`px-4 py-3 border-b border-border text-xs ${q.execResult.passed ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-100 dark:bg-red-900/20"}`}>
                 <div className="flex items-center gap-2 mb-1">
                   {q.execResult.passed
                     ? <CheckCircle2 size={13} className="text-emerald-600" />
@@ -1224,7 +1224,7 @@ export default function MetaCodingScreenSimulator() {
               <>
                 <div className="flex items-center gap-2 pt-2">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest whitespace-nowrap">E6+ Senior Focus Areas</span>
+                  <span className="text-[10px] font-bold text-amber-800 uppercase tracking-widest whitespace-nowrap">E6+ Senior Focus Areas</span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
                 {E6_BEHAVIORAL_AREAS.map(fa => {

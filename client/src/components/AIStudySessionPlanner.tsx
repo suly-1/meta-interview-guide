@@ -69,7 +69,7 @@ const TAG_STYLES: Record<string, string> = {
   review:   "bg-emerald-100 text-emerald-700 border-emerald-200",
   practice: "bg-blue-100 text-blue-700 border-blue-200",
   mock:     "bg-violet-100 text-violet-700 border-violet-200",
-  meta:     "bg-orange-100 text-orange-700 border-orange-200",
+  meta:     "bg-orange-100 text-orange-900 border-orange-200",
 };
 
 function buildPlan(durationMin: 30 | 60 | 90): PlanBlock[] {
@@ -220,7 +220,7 @@ export default function AIStudySessionPlanner() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             AI Study Session Planner
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             Generates a personalised plan based on your weak patterns and SRS reviews
           </p>
         </div>
@@ -239,7 +239,7 @@ export default function AIStudySessionPlanner() {
       {!generated ? (
         <>
           {/* Duration picker */}
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">How much time do you have?</p>
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">How much time do you have?</p>
           <div className="grid grid-cols-3 gap-3 mb-5">
             {([30, 60, 90] as const).map(d => (
               <button
@@ -248,10 +248,10 @@ export default function AIStudySessionPlanner() {
                 className={`flex flex-col items-center gap-1.5 py-4 rounded-xl border-2 font-bold transition-all ${
                   duration === d
                     ? "border-violet-500 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300"
-                    : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-violet-300"
+                    : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-violet-300"
                 }`}
               >
-                <Clock size={18} className={duration === d ? "text-violet-600" : "text-gray-400"} />
+                <Clock size={18} className={duration === d ? "text-violet-600" : "text-gray-600"} />
                 <span className="text-lg">{d}</span>
                 <span className="text-xs font-normal">minutes</span>
               </button>
@@ -272,14 +272,14 @@ export default function AIStudySessionPlanner() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Brain size={16} className="text-violet-600" />
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
                 {duration}-minute session plan
               </span>
-              <span className="text-xs text-gray-400">({totalMin} min total)</span>
+              <span className="text-xs text-gray-600">({totalMin} min total)</span>
             </div>
             <button
               onClick={handleReset}
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
               <RotateCcw size={12} /> New Plan
             </button>
@@ -299,7 +299,7 @@ export default function AIStudySessionPlanner() {
                       : block.type === "mock"
                       ? "bg-violet-100 border-violet-400 text-violet-700"
                       : block.type === "debrief"
-                      ? "bg-orange-100 border-orange-400 text-orange-700"
+                      ? "bg-orange-100 border-orange-400 text-orange-900"
                       : "bg-blue-100 border-blue-400 text-blue-700"
                   }`}>
                     {i + 1}
@@ -319,14 +319,14 @@ export default function AIStudySessionPlanner() {
                       <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${TAG_STYLES[block.tag]}`}>
                         {block.tag}
                       </span>
-                      <span className="text-xs text-gray-400 font-semibold whitespace-nowrap">{block.durationMin} min</span>
+                      <span className="text-xs text-gray-600 font-semibold whitespace-nowrap">{block.durationMin} min</span>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{block.description}</p>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{block.description}</p>
                   {block.patterns && block.patterns.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {block.patterns.map(p => (
-                        <span key={p} className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full font-medium">
+                        <span key={p} className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 rounded-full font-medium">
                           {p}
                         </span>
                       ))}
@@ -340,10 +340,10 @@ export default function AIStudySessionPlanner() {
           {/* Start session CTA */}
           <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2">
             <Zap size={14} className="text-violet-500" />
-            <p className="text-xs text-gray-500 dark:text-gray-400 flex-1">
+            <p className="text-xs text-gray-700 dark:text-gray-300 flex-1">
               Start your Pomodoro timer, then work through each block in order. Log the session in the Debrief panel when done.
             </p>
-            <ChevronRight size={14} className="text-gray-300" />
+            <ChevronRight size={14} className="text-gray-700" />
           </div>
         </>
       )}

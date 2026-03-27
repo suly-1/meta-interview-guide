@@ -440,8 +440,8 @@ for i, h in enumerate(heights):
 const TIER_STYLES: Record<string, { bg: string; border: string; badge: string; text: string }> = {
   Foundation: { bg: "bg-blue-50",   border: "border-blue-200",  badge: "bg-blue-100 text-blue-700",   text: "text-blue-700"   },
   Core:       { bg: "bg-green-50",  border: "border-green-200", badge: "bg-green-100 text-green-700", text: "text-green-700"  },
-  Advanced:   { bg: "bg-amber-50",  border: "border-amber-200", badge: "bg-amber-100 text-amber-700", text: "text-amber-700"  },
-  Expert:     { bg: "bg-red-50",    border: "border-red-200",   badge: "bg-red-100 text-red-700",     text: "text-red-700"    },
+  Advanced:   { bg: "bg-amber-100",  border: "border-amber-200", badge: "bg-amber-100 text-amber-900", text: "text-amber-900"  },
+  Expert:     { bg: "bg-red-100",    border: "border-red-200",   badge: "bg-red-100 text-red-700",     text: "text-red-700"    },
 };
 
 function PatternCard({ p }: { p: PatternCard }) {
@@ -469,7 +469,7 @@ function PatternCard({ p }: { p: PatternCard }) {
             className="flex-shrink-0 p-1 rounded-lg hover:bg-white/60 transition-colors"
             aria-label={expanded ? "Collapse" : "Expand"}
           >
-            {expanded ? <ChevronUp size={14} className="text-gray-500" /> : <ChevronDown size={14} className="text-gray-500" />}
+            {expanded ? <ChevronUp size={14} className="text-gray-700" /> : <ChevronDown size={14} className="text-gray-700" />}
           </button>
         </div>
 
@@ -486,13 +486,13 @@ function PatternCard({ p }: { p: PatternCard }) {
 
       {/* Key Idea — always visible */}
       <div className="px-4 py-2.5 bg-white border-t border-gray-100">
-        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Key Idea</p>
+        <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1">Key Idea</p>
         <p className="text-xs text-gray-700 leading-relaxed">{p.keyIdea}</p>
       </div>
 
       {/* Key Signals — always visible */}
       <div className="px-4 pb-2.5 bg-white">
-        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Use When</p>
+        <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5">Use When</p>
         <div className="flex flex-wrap gap-1">
           {p.keySignals.map(s => (
             <span key={s} className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-md font-medium">{s}</span>
@@ -505,7 +505,7 @@ function PatternCard({ p }: { p: PatternCard }) {
         <div className="border-t border-gray-100">
           {/* Code Template */}
           <div className="px-4 py-3 bg-gray-950">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Code Template</p>
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-2">Code Template</p>
             <pre className="text-[10.5px] text-green-300 leading-relaxed overflow-x-auto font-mono whitespace-pre">
               {p.template}
             </pre>
@@ -513,7 +513,7 @@ function PatternCard({ p }: { p: PatternCard }) {
 
           {/* Canonical Problems */}
           <div className="px-4 py-3 bg-white border-t border-gray-100">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
               <BookOpen size={10} /> Canonical Problems
             </p>
             <div className="flex flex-wrap gap-1">
@@ -563,7 +563,7 @@ export default function PatternQuickReference() {
           <h3 className="text-base font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Pattern Quick Reference
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-gray-700 mt-0.5">
             All 14 patterns — key idea, complexity, signals, code template, and Meta-specific notes. Click any card to expand.
           </p>
         </div>
@@ -578,7 +578,7 @@ export default function PatternQuickReference() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
           <input
             type="text"
             placeholder="Search patterns, problems, signals…"
@@ -605,14 +605,14 @@ export default function PatternQuickReference() {
       </div>
 
       {/* Stats row */}
-      <div className="flex gap-3 text-xs text-gray-500">
+      <div className="flex gap-3 text-xs text-gray-700">
         <span className="font-semibold text-gray-700">{filtered.length}</span> of {PATTERNS.length} patterns
         {search && <span>· matching "<span className="font-semibold text-blue-600">{search}</span>"</span>}
       </div>
 
       {/* Cards grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-gray-400 text-sm">No patterns match your search.</div>
+        <div className="text-center py-12 text-gray-600 text-sm">No patterns match your search.</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filtered.map(p => (
@@ -652,7 +652,7 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => { setTeachMode(m => !m); setTeachRevealed(false); setTeachInput({ idea: "", signals: "", example: "" }); }}
-              className="text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-colors bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+              className="text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-colors bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-100"
               title="Teach It Back mode"
             >
               Teach It Back
@@ -661,7 +661,7 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
               onClick={() => setLocalExpanded(e => !e)}
               className="p-1 rounded-lg hover:bg-white/60 transition-colors"
             >
-              {expanded ? <ChevronUp size={14} className="text-gray-500" /> : <ChevronDown size={14} className="text-gray-500" />}
+              {expanded ? <ChevronUp size={14} className="text-gray-700" /> : <ChevronDown size={14} className="text-gray-700" />}
             </button>
           </div>
         </div>
@@ -676,12 +676,12 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
       </div>
 
       <div className="px-4 py-2.5 bg-white border-t border-gray-100">
-        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Key Idea</p>
+        <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1">Key Idea</p>
         <p className="text-xs text-gray-700 leading-relaxed">{p.keyIdea}</p>
       </div>
 
       <div className="px-4 pb-2.5 bg-white">
-        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Use When</p>
+        <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5">Use When</p>
         <div className="flex flex-wrap gap-1">
           {p.keySignals.map(s => (
             <span key={s} className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-md font-medium">{s}</span>
@@ -691,14 +691,14 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
 
       {/* Teach It Back mode */}
       {teachMode && (
-        <div className="border-t border-amber-200 bg-amber-50/60 px-4 py-4 space-y-3">
+        <div className="border-t border-amber-200 bg-amber-100/60 px-4 py-4 space-y-3">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-bold text-amber-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Teach It Back — {p.name}</p>
-            <button onClick={() => setTeachMode(false)} className="text-[11px] text-amber-600 hover:text-amber-900 font-semibold">Close</button>
+            <button onClick={() => setTeachMode(false)} className="text-[11px] text-amber-800 hover:text-amber-900 font-semibold">Close</button>
           </div>
           <div className="space-y-2.5">
             <div>
-              <label className="text-[11px] font-bold text-amber-700 block mb-1">1. Key Idea (in your own words)</label>
+              <label className="text-[11px] font-bold text-amber-900 block mb-1">1. Key Idea (in your own words)</label>
               <textarea
                 value={teachInput.idea}
                 onChange={e => setTeachInput(prev => ({ ...prev, idea: e.target.value }))}
@@ -708,7 +708,7 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
               />
             </div>
             <div>
-              <label className="text-[11px] font-bold text-amber-700 block mb-1">2. Key Signals (when to use it)</label>
+              <label className="text-[11px] font-bold text-amber-900 block mb-1">2. Key Signals (when to use it)</label>
               <textarea
                 value={teachInput.signals}
                 onChange={e => setTeachInput(prev => ({ ...prev, signals: e.target.value }))}
@@ -718,7 +718,7 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
               />
             </div>
             <div>
-              <label className="text-[11px] font-bold text-amber-700 block mb-1">3. Canonical Example Problem</label>
+              <label className="text-[11px] font-bold text-amber-900 block mb-1">3. Canonical Example Problem</label>
               <textarea
                 value={teachInput.example}
                 onChange={e => setTeachInput(prev => ({ ...prev, example: e.target.value }))}
@@ -738,19 +738,19 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
           {teachRevealed && (
             <div className="rounded-xl border border-amber-300 bg-white p-4 space-y-3 mt-2">
               <div>
-                <p className="text-[11px] font-bold text-amber-700 mb-1">Reference Key Idea</p>
+                <p className="text-[11px] font-bold text-amber-900 mb-1">Reference Key Idea</p>
                 <p className="text-xs text-gray-700 leading-relaxed">{p.keyIdea}</p>
               </div>
               <div>
-                <p className="text-[11px] font-bold text-amber-700 mb-1">Reference Signals</p>
+                <p className="text-[11px] font-bold text-amber-900 mb-1">Reference Signals</p>
                 <div className="flex flex-wrap gap-1">
                   {p.keySignals.map(s => (
-                    <span key={s} className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md font-medium">{s}</span>
+                    <span key={s} className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-1.5 py-0.5 rounded-md font-medium">{s}</span>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-[11px] font-bold text-amber-700 mb-1">Canonical Problems</p>
+                <p className="text-[11px] font-bold text-amber-900 mb-1">Canonical Problems</p>
                 <div className="flex flex-wrap gap-1">
                   {p.canonicalProblems.slice(0, 3).map(prob => (
                     <span key={prob} className="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-100 px-1.5 py-0.5 rounded-md font-medium">{prob}</span>
@@ -765,13 +765,13 @@ function ExpandablePatternCard({ p, forceExpand }: { p: PatternCard; forceExpand
       {expanded && (
         <div className="border-t border-gray-100">
           <div className="px-4 py-3 bg-gray-950">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Code Template</p>
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-2">Code Template</p>
             <pre className="text-[10.5px] text-green-300 leading-relaxed overflow-x-auto font-mono whitespace-pre">
               {p.template}
             </pre>
           </div>
           <div className="px-4 py-3 bg-white border-t border-gray-100">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
               <BookOpen size={10} /> Canonical Problems
             </p>
             <div className="flex flex-wrap gap-1">

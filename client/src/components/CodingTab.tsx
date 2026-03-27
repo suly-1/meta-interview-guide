@@ -569,7 +569,7 @@ function ComplexityCard() {
                             : v.includes("log")
                               ? "text-blue-400"
                               : v === "O(n)"
-                                ? "text-amber-400"
+                                ? "text-amber-900"
                                 : "text-red-400"
                         }`}
                       >
@@ -584,7 +584,7 @@ function ComplexityCard() {
           <div className="px-4 py-2 border-t border-border flex gap-4 text-xs">
             <span className="text-emerald-400">● O(1) constant</span>
             <span className="text-blue-400">● O(log n) logarithmic</span>
-            <span className="text-amber-400">● O(n) linear</span>
+            <span className="text-amber-900">● O(n) linear</span>
             <span className="text-red-400">● O(n²)+ polynomial</span>
           </div>
         </div>
@@ -754,7 +754,7 @@ function PatternHeatmap({ ratings }: { ratings: Record<string, number> }) {
                   ? "text-emerald-400"
                   : diff === "Hard"
                     ? "text-red-400"
-                    : "text-amber-400";
+                    : "text-amber-900";
               const barColor =
                 diff === "Easy"
                   ? "bg-emerald-500"
@@ -893,7 +893,7 @@ function QuickDrill({
     <div className="prep-card p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Zap size={14} className="text-amber-400" />
+          <Zap size={14} className="text-amber-900" />
           <span className="text-sm font-semibold text-foreground">
             Quick Drill
           </span>
@@ -901,7 +901,7 @@ function QuickDrill({
         </div>
         <div className="flex items-center gap-2">
           <span
-            className={`mono text-lg font-bold ${timeLeft <= 10 ? "text-red-400" : "text-amber-400"}`}
+            className={`mono text-lg font-bold ${timeLeft <= 10 ? "text-red-400" : "text-amber-900"}`}
           >
             {timeLeft}s
           </span>
@@ -1069,7 +1069,7 @@ function MockTimer({
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className={`mono text-lg font-bold ${urgent ? "text-red-400" : warning ? "text-amber-400" : "text-foreground"}`}
+              className={`mono text-lg font-bold ${urgent ? "text-red-400" : warning ? "text-amber-900" : "text-foreground"}`}
             >
               {mm}:{ss}
             </span>
@@ -1215,7 +1215,7 @@ function SprintMode({
       <div className="prep-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Trophy size={18} className="text-amber-400" />
+            <Trophy size={18} className="text-amber-900" />
             <span className="text-base font-bold text-foreground">
               Sprint Complete!
             </span>
@@ -1278,7 +1278,7 @@ function SprintMode({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Timer size={14} className="text-orange-400" />
+          <Timer size={14} className="text-orange-900" />
           <span className="text-sm font-bold text-foreground">Sprint Mode</span>
           <span className="badge badge-gray">
             {idx + 1}/{pool.length}
@@ -1334,7 +1334,7 @@ function SprintMode({
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-400" : "text-foreground"}`}
+              className={`font-mono text-base font-bold ${urgent ? "text-red-400" : warning ? "text-amber-900" : "text-foreground"}`}
             >
               {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
               {String(timeLeft % 60).padStart(2, "0")}
@@ -1398,7 +1398,7 @@ function SprintMode({
                   r <= 2
                     ? "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
                     : r === 3
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+                      ? "bg-amber-500/10 border-amber-500/30 text-amber-900 hover:bg-amber-500/20"
                       : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                 }`}
               >
@@ -1668,7 +1668,7 @@ export default function CodingTab() {
               const el = document.getElementById("coding-patterns-list");
               if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-800 text-xs font-semibold transition-all"
           >
             <Zap size={12} />
             Jump to Weak Patterns
@@ -1763,7 +1763,7 @@ export default function CodingTab() {
             setShowDrillMode(d => !d);
             setShowSprintMode(false);
           }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 text-sm font-semibold transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-900 text-sm font-semibold transition-all"
         >
           <Zap size={13} /> {showDrillMode ? "Hide" : "Show"} Quick Drill
         </button>
@@ -1774,8 +1774,8 @@ export default function CodingTab() {
           }}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
             showSprintMode
-              ? "bg-orange-500/25 border-orange-500/50 text-orange-300"
-              : "bg-orange-500/15 hover:bg-orange-500/25 border-orange-500/30 text-orange-400"
+              ? "bg-orange-500/25 border-orange-500/50 text-orange-800"
+              : "bg-orange-500/15 hover:bg-orange-500/25 border-orange-500/30 text-orange-900"
           }`}
         >
           <Timer size={13} /> {showSprintMode ? "Hide" : "Start"} Sprint Mode
@@ -2015,7 +2015,7 @@ export default function CodingTab() {
                             })
                           : getPatternHint(p, "gentle")
                       }
-                      className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
+                      className="flex items-center gap-1 text-xs text-amber-900 hover:text-amber-800 transition-colors"
                     >
                       <Zap size={11} />{" "}
                       {stuckHints[p.id] ? "Hide hints" : "Stuck?"}
@@ -2213,7 +2213,7 @@ export default function CodingTab() {
                   <div className="mt-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-3">
                     {/* Level selector */}
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-amber-400">
+                      <span className="text-xs font-bold text-amber-900">
                         Hint Level:
                       </span>
                       {(["gentle", "medium", "full"] as const).map(lvl => (
@@ -2236,7 +2236,7 @@ export default function CodingTab() {
                     </div>
                     {/* Hint content */}
                     {stuckHints[p.id]?.loading ? (
-                      <div className="flex items-center gap-2 text-xs text-amber-400">
+                      <div className="flex items-center gap-2 text-xs text-amber-900">
                         <Zap size={11} className="animate-pulse" /> Generating
                         hint…
                       </div>
@@ -2427,7 +2427,7 @@ function AIEnabledRoundSection() {
 
           {/* Key insight */}
           <div className="callout callout-amber p-3">
-            <div className="text-xs font-bold text-amber-400 mb-1">
+            <div className="text-xs font-bold text-amber-900 mb-1">
               ⚡ KEY INSIGHT
             </div>
             <p className="text-xs text-muted-foreground">
@@ -2517,7 +2517,7 @@ function AIEnabledRoundSection() {
                       {m.note}
                     </div>
                     <div
-                      className={`text-xs mt-0.5 ${m.status === "confirmed" ? "text-emerald-400" : "text-amber-400"}`}
+                      className={`text-xs mt-0.5 ${m.status === "confirmed" ? "text-emerald-400" : "text-amber-900"}`}
                     >
                       {m.status === "confirmed"
                         ? "✓ Confirmed"
@@ -2969,10 +2969,10 @@ function CTCITracker() {
                 >
                   🔥
                 </span>
-                <span className="text-xs font-extrabold text-orange-400">
+                <span className="text-xs font-extrabold text-orange-900">
                   {ctciStreak.currentStreak}
                 </span>
-                <span className="text-xs text-orange-300/80">day streak</span>
+                <span className="text-xs text-orange-800/80">day streak</span>
                 {ctciStreak.longestStreak > ctciStreak.currentStreak && (
                   <span className="text-xs text-muted-foreground ml-1">
                     · best {ctciStreak.longestStreak}
@@ -3192,7 +3192,7 @@ function CTCITracker() {
                         >
                           🌟
                         </span>
-                        <span className="text-xs font-extrabold text-amber-400 uppercase tracking-wide">
+                        <span className="text-xs font-extrabold text-amber-900 uppercase tracking-wide">
                           Problem of the Day
                         </span>
                         <span className="text-xs text-muted-foreground ml-auto">
@@ -3207,7 +3207,7 @@ function CTCITracker() {
                           href={dc.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-bold text-amber-300 hover:underline flex-1"
+                          className="text-sm font-bold text-amber-800 hover:underline flex-1"
                         >
                           {dc.name}
                         </a>
@@ -3262,7 +3262,7 @@ function CTCITracker() {
                             solved[q.num]
                               ? "line-through text-muted-foreground"
                               : isDaily
-                                ? "text-amber-300 font-bold"
+                                ? "text-amber-800 font-bold"
                                 : "text-foreground"
                           }`}
                         >
@@ -3325,9 +3325,9 @@ function CTCITracker() {
                             title="Open notes"
                             className={`text-xs px-1.5 py-0.5 rounded border transition-all ${
                               notes[q.num]?.trim()
-                                ? "border-amber-500/40 text-amber-400 bg-amber-500/10"
+                                ? "border-amber-500/40 text-amber-900 bg-amber-500/10"
                                 : notesOpen === q.num
-                                  ? "border-amber-500/40 text-amber-400 bg-amber-500/10"
+                                  ? "border-amber-500/40 text-amber-900 bg-amber-500/10"
                                   : "border-border text-muted-foreground hover:text-foreground hover:bg-accent"
                             }`}
                           >
@@ -3368,7 +3368,7 @@ function CTCITracker() {
                                     ? "text-emerald-400"
                                     : q.difficulty === "Hard"
                                       ? "text-red-400"
-                                      : "text-amber-400"
+                                      : "text-amber-900"
                                 }
                               >
                                 {q.difficulty}
@@ -3415,7 +3415,7 @@ function CTCITracker() {
                                       ? level === "Easy"
                                         ? "bg-emerald-500/20 border-emerald-400 text-emerald-300"
                                         : level === "Medium"
-                                          ? "bg-amber-500/20 border-amber-400 text-amber-300"
+                                          ? "bg-amber-500/20 border-amber-400 text-amber-800"
                                           : level === "Hard"
                                             ? "bg-red-500/20 border-red-400 text-red-300"
                                             : "bg-rose-500/20 border-rose-400 text-rose-300"
@@ -3457,7 +3457,7 @@ function CTCITracker() {
                                 );
                               if (gap > 0)
                                 return (
-                                  <p className="text-xs text-orange-400 mt-2">
+                                  <p className="text-xs text-orange-900 mt-2">
                                     ⚠️ You found this harder than expected.
                                     Consider more practice on{" "}
                                     <strong>
@@ -3483,7 +3483,7 @@ function CTCITracker() {
                       {notesOpen === q.num && (
                         <div className="border-t border-amber-500/20 bg-amber-500/5 p-3">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-amber-400">
+                            <span className="text-xs font-bold text-amber-900">
                               📌 Notes — {q.name}
                             </span>
                             <span className="text-xs text-muted-foreground">
@@ -3692,7 +3692,7 @@ Key insight:
                 </div>
                 <button
                   onClick={exportNotesMarkdown}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-900 hover:bg-amber-500/20 text-xs font-semibold transition-all"
                 >
                   <Download size={11} /> Export Notes (.md)
                 </button>

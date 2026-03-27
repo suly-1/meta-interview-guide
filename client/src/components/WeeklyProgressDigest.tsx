@@ -155,28 +155,28 @@ export default function WeeklyProgressDigest() {
         <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3">
           <BarChart2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
           <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Readiness</div>
+            <div className="text-xs text-gray-700 dark:text-gray-300">Readiness</div>
             <div className="text-base font-bold text-indigo-700 dark:text-indigo-300">{readinessScore}/100</div>
           </div>
         </div>
         <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3">
           <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">CTCI Solved</div>
-            <div className="text-base font-bold text-emerald-700 dark:text-emerald-300">{solvedCount} <span className="text-xs font-normal text-gray-400">({pct}%)</span></div>
+            <div className="text-xs text-gray-700 dark:text-gray-300">CTCI Solved</div>
+            <div className="text-base font-bold text-emerald-700 dark:text-emerald-300">{solvedCount} <span className="text-xs font-normal text-gray-600">({pct}%)</span></div>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+        <div className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900/20 rounded-xl p-3">
           <Flame className="w-4 h-4 text-orange-500 flex-shrink-0" />
           <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Streak</div>
-            <div className="text-base font-bold text-orange-600 dark:text-orange-400">{streak > 0 ? `${streak}d 🔥` : 'None'}</div>
+            <div className="text-xs text-gray-700 dark:text-gray-300">Streak</div>
+            <div className="text-base font-bold text-orange-800 dark:text-orange-900">{streak > 0 ? `${streak}d 🔥` : 'None'}</div>
           </div>
         </div>
         <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-900/20 rounded-xl p-3">
           <Brain className="w-4 h-4 text-violet-600 dark:text-violet-400 flex-shrink-0" />
           <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Patterns Rated</div>
+            <div className="text-xs text-gray-700 dark:text-gray-300">Patterns Rated</div>
             <div className="text-base font-bold text-violet-700 dark:text-violet-300">{Object.keys(drillRatings).length}/{PATTERNS.length}</div>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function WeeklyProgressDigest() {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all ${
               copied
                 ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300'
-                : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             {copied ? <><Check className="w-4 h-4" /> Copied!</> : <><Copy className="w-4 h-4" /> Copy to Clipboard</>}

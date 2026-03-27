@@ -178,7 +178,7 @@ const PRIORITY_CONFIG = {
     label: "Critical",
   },
   high: {
-    color: "text-amber-400",
+    color: "text-amber-900",
     bg: "bg-amber-500/10",
     border: "border-amber-500/20",
     label: "High",

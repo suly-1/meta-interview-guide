@@ -91,12 +91,12 @@ export default function SDTradeoffLibrary() {
       {/* Filters */}
       <div className="space-y-2">
         <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search decisions, categories, trade-off axes..."
-            className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -114,7 +114,7 @@ export default function SDTradeoffLibrary() {
             </button>
           ))}
         </div>
-        <p className="text-[11px] text-gray-500">{filtered.length} decision{filtered.length !== 1 ? "s" : ""}</p>
+        <p className="text-[11px] text-gray-700">{filtered.length} decision{filtered.length !== 1 ? "s" : ""}</p>
       </div>
 
       {/* Entries */}
@@ -130,14 +130,14 @@ export default function SDTradeoffLibrary() {
                   <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
                     {entry.category}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-medium">{entry.tradeoffAxes}</span>
+                  <span className="text-[10px] text-gray-700 font-medium">{entry.tradeoffAxes}</span>
                 </div>
                 <p className="text-sm font-semibold text-gray-900">{entry.decision}</p>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                <p className="text-xs text-gray-700 mt-0.5 truncate">
                   {entry.optionA.split(":")[0]} vs. {entry.optionB.split(":")[0]}
                 </p>
               </div>
-              {expandedId === entry.id ? <ChevronDown size={14} className="text-gray-400 flex-shrink-0 mt-0.5" /> : <ChevronRight size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />}
+              {expandedId === entry.id ? <ChevronDown size={14} className="text-gray-600 flex-shrink-0 mt-0.5" /> : <ChevronRight size={14} className="text-gray-600 flex-shrink-0 mt-0.5" />}
             </button>
 
             {expandedId === entry.id && (
@@ -156,7 +156,7 @@ export default function SDTradeoffLibrary() {
 
                 {/* Meta-scale context */}
                 <div className="rounded-lg border border-gray-200 bg-white p-3">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Meta-Scale Context</p>
+                  <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide mb-1">Meta-Scale Context</p>
                   <p className="text-xs text-gray-800 leading-relaxed">{entry.metaScaleContext}</p>
                 </div>
 
@@ -167,8 +167,8 @@ export default function SDTradeoffLibrary() {
                 </div>
 
                 {/* What interviewer listens for */}
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-                  <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">What the Interviewer Is Listening For</p>
+                <div className="rounded-lg border border-amber-200 bg-amber-100 p-3">
+                  <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wide mb-1">What the Interviewer Is Listening For</p>
                   <p className="text-xs text-amber-900 leading-relaxed">{entry.whatInterviewerListensFor}</p>
                 </div>
               </div>

@@ -68,10 +68,10 @@ const MASTERY_STYLES: Record<MasteryLevel, {
   bg: string; border: string; text: string; label: string; dot: string;
   ring: string; badgeBg: string; badgeText: string;
 }> = {
-  unrated:    { bg: "bg-gray-50",      border: "border-gray-200",    text: "text-gray-500",    label: "Not drilled",  dot: "bg-gray-300",     ring: "ring-gray-200",    badgeBg: "bg-gray-100",    badgeText: "text-gray-500"    },
-  weak:       { bg: "bg-red-50",       border: "border-red-300",     text: "text-red-700",     label: "Weak",         dot: "bg-red-500",      ring: "ring-red-300",     badgeBg: "bg-red-100",     badgeText: "text-red-700"     },
-  developing: { bg: "bg-orange-50",    border: "border-orange-300",  text: "text-orange-700",  label: "Developing",   dot: "bg-orange-500",   ring: "ring-orange-300",  badgeBg: "bg-orange-100",  badgeText: "text-orange-700"  },
-  decent:     { bg: "bg-amber-50",     border: "border-amber-300",   text: "text-amber-700",   label: "Decent",       dot: "bg-amber-500",    ring: "ring-amber-300",   badgeBg: "bg-amber-100",   badgeText: "text-amber-700"   },
+  unrated:    { bg: "bg-gray-50",      border: "border-gray-200",    text: "text-gray-700",    label: "Not drilled",  dot: "bg-gray-300",     ring: "ring-gray-200",    badgeBg: "bg-gray-100",    badgeText: "text-gray-700"    },
+  weak:       { bg: "bg-red-100",       border: "border-red-300",     text: "text-red-700",     label: "Weak",         dot: "bg-red-500",      ring: "ring-red-300",     badgeBg: "bg-red-100",     badgeText: "text-red-700"     },
+  developing: { bg: "bg-orange-100",    border: "border-orange-300",  text: "text-orange-900",  label: "Developing",   dot: "bg-orange-500",   ring: "ring-orange-300",  badgeBg: "bg-orange-100",  badgeText: "text-orange-900"  },
+  decent:     { bg: "bg-amber-100",     border: "border-amber-300",   text: "text-amber-900",   label: "Decent",       dot: "bg-amber-500",    ring: "ring-amber-300",   badgeBg: "bg-amber-100",   badgeText: "text-amber-900"   },
   solid:      { bg: "bg-blue-50",      border: "border-blue-300",    text: "text-blue-700",    label: "Solid",        dot: "bg-blue-500",     ring: "ring-blue-300",    badgeBg: "bg-blue-100",    badgeText: "text-blue-700"    },
   strong:     { bg: "bg-emerald-50",   border: "border-emerald-300", text: "text-emerald-700", label: "Strong",       dot: "bg-emerald-500",  ring: "ring-emerald-300", badgeBg: "bg-emerald-100", badgeText: "text-emerald-700" },
 };
@@ -87,7 +87,7 @@ const LEGEND: { level: MasteryLevel; range: string }[] = [
 
 /** Mini sparkline bar chart for rating history */
 function RatingSparkline({ entries }: { entries: RatingEntry[] }) {
-  if (!entries.length) return <p className="text-xs text-gray-400 italic">No drill sessions yet.</p>;
+  if (!entries.length) return <p className="text-xs text-gray-600 italic">No drill sessions yet.</p>;
   const last10 = entries.slice(-10);
   return (
     <div className="flex items-end gap-0.5 h-8">
@@ -157,7 +157,7 @@ function PatternDetailPanel({
           className="flex-shrink-0 p-1 rounded-lg hover:bg-black/10 transition-colors"
           title="Close"
         >
-          <X size={14} className="text-gray-500" />
+          <X size={14} className="text-gray-700" />
         </button>
       </div>
 
@@ -165,28 +165,28 @@ function PatternDetailPanel({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
           <p className="text-xl font-extrabold text-gray-900">{avg !== null ? avg.toFixed(1) : "—"}</p>
-          <p className="text-[11px] text-gray-500 mt-0.5">Avg rating</p>
+          <p className="text-[11px] text-gray-700 mt-0.5">Avg rating</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
           <p className="text-xl font-extrabold text-gray-900">{attempts}</p>
-          <p className="text-[11px] text-gray-500 mt-0.5">Drill sessions</p>
+          <p className="text-[11px] text-gray-700 mt-0.5">Drill sessions</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
           <p className="text-xl font-extrabold text-gray-900">{"★".repeat(pattern.frequency)}</p>
-          <p className="text-[11px] text-gray-500 mt-0.5">Meta frequency</p>
+          <p className="text-[11px] text-gray-700 mt-0.5">Meta frequency</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
           <p className="text-[13px] font-bold text-gray-700">
             {lastTs ? formatDistanceToNow(new Date(lastTs), { addSuffix: true }) : "Never"}
           </p>
-          <p className="text-[11px] text-gray-500 mt-0.5">Last practiced</p>
+          <p className="text-[11px] text-gray-700 mt-0.5">Last practiced</p>
         </div>
       </div>
 
       {/* Rating history sparkline */}
       <div className="bg-white rounded-xl border border-gray-100 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <BarChart2 size={13} className="text-gray-500" />
+          <BarChart2 size={13} className="text-gray-700" />
           <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">
             Rating History (last {Math.min(entries.length, 10)} sessions)
           </span>
@@ -194,8 +194,8 @@ function PatternDetailPanel({
         <RatingSparkline entries={entries} />
         {entries.length > 0 && (
           <div className="flex justify-between mt-1">
-            <span className="text-[10px] text-gray-400">Oldest</span>
-            <span className="text-[10px] text-gray-400">Most recent</span>
+            <span className="text-[10px] text-gray-600">Oldest</span>
+            <span className="text-[10px] text-gray-600">Most recent</span>
           </div>
         )}
       </div>
@@ -204,7 +204,7 @@ function PatternDetailPanel({
       {(PATTERN_PREREQUISITES[pattern.id] ?? []).length > 0 && (
         <div className="bg-white rounded-xl border border-gray-100 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Lock size={12} className="text-gray-500" />
+            <Lock size={12} className="text-gray-700" />
             <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Prerequisite Chain</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -213,7 +213,7 @@ function PatternDetailPanel({
               return prereq ? (
                 <span key={pid} className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
                   prereqNames.includes(prereq.name)
-                    ? "bg-red-50 border-red-200 text-red-700"
+                    ? "bg-red-100 border-red-200 text-red-700"
                     : "bg-emerald-50 border-emerald-200 text-emerald-700"
                 }`}>
                   {prereqNames.includes(prereq.name) ? "⚠ " : "✓ "}{prereq.name}
@@ -292,20 +292,20 @@ export default function PatternHeatmap() {
         </div>
         {lockedCount > 0 && (
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-xs">
-            <Lock size={11} className="text-gray-500" />
+            <Lock size={11} className="text-gray-700" />
             <span className="font-bold text-gray-600">{lockedCount}</span>
-            <span className="text-gray-500">locked (prerequisites not met)</span>
+            <span className="text-gray-700">locked (prerequisites not met)</span>
           </div>
         )}
         {rustyCount > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 border border-amber-200 rounded-xl text-xs">
             <AlertTriangle size={12} className="text-amber-500" />
-            <span className="font-bold text-amber-700">{rustyCount}</span>
-            <span className="text-amber-600">pattern{rustyCount !== 1 ? "s" : ""} rusty (7+ days idle)</span>
+            <span className="font-bold text-amber-900">{rustyCount}</span>
+            <span className="text-amber-800">pattern{rustyCount !== 1 ? "s" : ""} rusty (7+ days idle)</span>
           </div>
         )}
         {drilledCount === 0 && (
-          <p className="text-xs text-gray-400 italic">Complete Quick Drill sessions to fill in the heatmap</p>
+          <p className="text-xs text-gray-600 italic">Complete Quick Drill sessions to fill in the heatmap</p>
         )}
       </div>
 
@@ -337,8 +337,8 @@ export default function PatternHeatmap() {
               <div className="flex items-center justify-between">
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
                 <div className="flex items-center gap-1">
-                  {p.isLocked && <Lock size={9} className="text-gray-400" />}
-                  <span className="text-[9px] font-bold text-gray-400">{"★".repeat(p.frequency)}</span>
+                  {p.isLocked && <Lock size={9} className="text-gray-600" />}
+                  <span className="text-[9px] font-bold text-gray-600">{"★".repeat(p.frequency)}</span>
                 </div>
               </div>
 
@@ -361,15 +361,15 @@ export default function PatternHeatmap() {
                     {/* Decayed avg */}
                     <div className="absolute inset-y-0 left-0 rounded-full bg-amber-400 transition-all" style={{ width: `${(p.displayAvg / 5) * 100}%` }} />
                   </div>
-                  <p className="text-[8px] text-amber-600 font-semibold">{Math.round(p.daysSince ?? 0)}d idle — drill to restore</p>
+                  <p className="text-[8px] text-amber-800 font-semibold">{Math.round(p.daysSince ?? 0)}d idle — drill to restore</p>
                 </div>
               )}
 
               {/* Last practiced */}
               {p.lastTs && !p.isRusty && (
                 <div className="flex items-center gap-0.5 mt-0.5">
-                  <Calendar size={8} className="text-gray-400 flex-shrink-0" />
-                  <p className="text-[9px] text-gray-400 truncate">
+                  <Calendar size={8} className="text-gray-600 flex-shrink-0" />
+                  <p className="text-[9px] text-gray-600 truncate">
                     {formatDistanceToNow(new Date(p.lastTs), { addSuffix: true })}
                   </p>
                 </div>
@@ -411,12 +411,12 @@ export default function PatternHeatmap() {
             </div>
           );
         })}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold bg-gray-100 border-gray-200 text-gray-500">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold bg-gray-100 border-gray-200 text-gray-700">
           <Lock size={9} /> Locked (prereqs not met)
         </div>
       </div>
 
-      <p className="text-xs text-gray-400">Click any card to see drill history, rating trend, and prerequisite chain.</p>
+      <p className="text-xs text-gray-600">Click any card to see drill history, rating trend, and prerequisite chain.</p>
     </div>
   );
 }

@@ -68,7 +68,7 @@ export function TearDownMyDesign() {
     : result.overallScore >= 8
       ? "text-emerald-400"
       : result.overallScore >= 6
-        ? "text-amber-400"
+        ? "text-amber-900"
         : "text-red-400";
 
   return (
@@ -257,8 +257,8 @@ export function TearDownMyDesign() {
               {result.minorIssues.length > 0 && (
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Info size={14} className="text-amber-400" />
-                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    <Info size={14} className="text-amber-900" />
+                    <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
                       Minor Issues
                     </span>
                   </div>
@@ -268,7 +268,7 @@ export function TearDownMyDesign() {
                         key={i}
                         className="text-xs text-amber-200/80 flex items-start gap-1.5"
                       >
-                        <span className="text-amber-400 mt-0.5">·</span>
+                        <span className="text-amber-900 mt-0.5">·</span>
                         {issue}
                       </li>
                     ))}

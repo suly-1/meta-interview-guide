@@ -410,12 +410,12 @@ export default function SoundtrackPlayer() {
         }
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold border transition-all ${
           phase === "work"
-            ? "bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300"
+            ? "bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700 text-orange-900 dark:text-orange-800"
             : phase === "break"
             ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300"
             : isPlaying
             ? "bg-violet-100 dark:bg-violet-900/30 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300"
-            : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400"
+            : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400"
         }`}
       >
         {navIcon()}
@@ -436,24 +436,24 @@ export default function SoundtrackPlayer() {
           {/* ── Pomodoro Section ── */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pomodoro Timer</p>
-              <span className="text-[10px] text-gray-400 font-semibold">{sessions} session{sessions !== 1 ? "s" : ""} today</span>
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">Pomodoro Timer</p>
+              <span className="text-[10px] text-gray-600 font-semibold">{sessions} session{sessions !== 1 ? "s" : ""} today</span>
             </div>
 
             {/* Timer display */}
             <div className={`rounded-xl p-3 text-center mb-2 ${
-              phase === "work" ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800" :
+              phase === "work" ? "bg-orange-100 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800" :
               phase === "break" ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800" :
               "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
             }`}>
               <p className={`text-2xl font-bold tabular-nums tracking-wider ${
-                phase === "work" ? "text-orange-600 dark:text-orange-400" :
+                phase === "work" ? "text-orange-800 dark:text-orange-900" :
                 phase === "break" ? "text-emerald-600 dark:text-emerald-400" :
-                "text-gray-500 dark:text-gray-400"
+                "text-gray-700 dark:text-gray-300"
               }`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {formatTime(timeLeft)}
               </p>
-              <p className="text-[10px] text-gray-400 mt-0.5">
+              <p className="text-[10px] text-gray-600 mt-0.5">
                 {phase === "work" ? (running ? "Focus session in progress" : "Paused") :
                  phase === "break" ? "Break — music paused" :
                  "25 min focus · 5 min break"}
@@ -488,7 +488,7 @@ export default function SoundtrackPlayer() {
                     onClick={togglePause}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-xl transition-colors ${
                       running
-                        ? "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300"
+                        ? "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200"
                         : "bg-orange-500 hover:bg-orange-600 text-white"
                     }`}
                   >
@@ -497,7 +497,7 @@ export default function SoundtrackPlayer() {
                   <button
                     onClick={reset}
                     title="Reset timer"
-                    className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 rounded-xl transition-colors"
+                    className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-colors"
                   >
                     <RotateCcw size={12} />
                   </button>
@@ -516,8 +516,8 @@ export default function SoundtrackPlayer() {
             return (
               <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Session History</p>
-                  <span className="text-[10px] text-orange-600 font-bold">{totalFocusMin} min focus today</span>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">Session History</p>
+                  <span className="text-[10px] text-orange-800 font-bold">{totalFocusMin} min focus today</span>
                 </div>
                 <div className="space-y-1">
                   {last5.map((s, i) => {
@@ -528,8 +528,8 @@ export default function SoundtrackPlayer() {
                       : d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
                     return (
                       <div key={i} className="flex items-center justify-between">
-                        <span className={`text-[10px] ${isToday ? "text-orange-600 font-semibold" : "text-gray-400"}`}>{label}</span>
-                        <span className="text-[10px] text-gray-400">{s.durationMin} min</span>
+                        <span className={`text-[10px] ${isToday ? "text-orange-800 font-semibold" : "text-gray-600"}`}>{label}</span>
+                        <span className="text-[10px] text-gray-600">{s.durationMin} min</span>
                       </div>
                     );
                   })}
@@ -539,7 +539,7 @@ export default function SoundtrackPlayer() {
           })()}
 
           <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Study Soundtrack</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-2">Study Soundtrack</p>
 
             {/* Mode buttons */}
             <div className="grid grid-cols-3 gap-1.5">
@@ -551,7 +551,7 @@ export default function SoundtrackPlayer() {
                   className={`flex flex-col items-center gap-1 py-2 rounded-xl border text-xs font-semibold transition-all ${
                     mode === m.id
                       ? "bg-violet-100 dark:bg-violet-900/30 border-violet-400 dark:border-violet-600 text-violet-700 dark:text-violet-300"
-                      : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-400"
+                      : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 hover:border-gray-400"
                   }`}
                 >
                   {m.icon}
@@ -564,7 +564,7 @@ export default function SoundtrackPlayer() {
             {isPlaying && (
               <button
                 onClick={() => { setMode("off"); setShowVolume(false); }}
-                className="w-full mt-1.5 flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="w-full mt-1.5 flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <VolumeX size={12} /> Stop Sound
               </button>
@@ -574,8 +574,8 @@ export default function SoundtrackPlayer() {
             {isPlaying && (
               <div className="space-y-1 mt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-gray-400 font-semibold">Volume</span>
-                  <span className="text-[10px] text-gray-400">{Math.round(volume * 100)}%</span>
+                  <span className="text-[10px] text-gray-600 font-semibold">Volume</span>
+                  <span className="text-[10px] text-gray-600">{Math.round(volume * 100)}%</span>
                 </div>
                 <input
                   type="range" min={0} max={1} step={0.05} value={volume}
@@ -592,7 +592,7 @@ export default function SoundtrackPlayer() {
             )}
           </div>
 
-          <p className="text-[9px] text-gray-400 leading-relaxed">
+          <p className="text-[9px] text-gray-600 leading-relaxed">
             Sounds via Web Audio API — no downloads. Notifications require browser permission.
           </p>
         </div>

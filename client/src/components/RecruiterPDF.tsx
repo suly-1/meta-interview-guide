@@ -86,7 +86,7 @@ export default function RecruiterPDF() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Recruiter-Ready Summary</h3>
-          <p className="text-xs text-gray-500">One-page printable prep summary for the night before</p>
+          <p className="text-xs text-gray-700">One-page printable prep summary for the night before</p>
         </div>
         <button
           onClick={handlePrint}
@@ -182,7 +182,7 @@ export default function RecruiterPDF() {
           </div>
           <div>
             <p className="text-sm font-bold text-gray-800">Interview Readiness Summary</p>
-            <p className="text-xs text-gray-500">Score {readiness.total}/100 · {readiness.ctciSolved} CTCI solved · {readiness.streak}d streak</p>
+            <p className="text-xs text-gray-700">Score {readiness.total}/100 · {readiness.ctciSolved} CTCI solved · {readiness.streak}d streak</p>
           </div>
         </div>
         <button

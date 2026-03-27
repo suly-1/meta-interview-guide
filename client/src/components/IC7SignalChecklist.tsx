@@ -72,8 +72,8 @@ const IC7_SIGNALS = [
 ];
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
-  critical: { label: "Critical Signal", color: "text-red-600", bg: "bg-red-50", border: "border-red-200", dot: "bg-red-500" },
-  high:     { label: "High Signal",     color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", dot: "bg-amber-500" },
+  critical: { label: "Critical Signal", color: "text-red-600", bg: "bg-red-100", border: "border-red-200", dot: "bg-red-500" },
+  high:     { label: "High Signal",     color: "text-amber-800", bg: "bg-amber-100", border: "border-amber-200", dot: "bg-amber-500" },
 };
 
 const STORAGE_KEY = "ic7-signal-checklist";
@@ -191,8 +191,8 @@ export default function IC7SignalChecklist() {
                 state.hasStory
                   ? "border-emerald-300 bg-emerald-50"
                   : signal.priority === "critical"
-                  ? "border-red-200 bg-red-50/40"
-                  : "border-amber-200 bg-amber-50/40"
+                  ? "border-red-200 bg-red-100/40"
+                  : "border-amber-200 bg-amber-100/40"
               }`}
             >
               {/* Signal header row */}
@@ -206,7 +206,7 @@ export default function IC7SignalChecklist() {
                   {state.hasStory ? (
                     <CheckCircle2 size={20} className="text-emerald-500" />
                   ) : (
-                    <Circle size={20} className={signal.priority === "critical" ? "text-red-300 hover:text-red-500" : "text-amber-300 hover:text-amber-500"} />
+                    <Circle size={20} className={signal.priority === "critical" ? "text-red-300 hover:text-red-500" : "text-amber-800 hover:text-amber-500"} />
                   )}
                 </button>
 
@@ -226,13 +226,13 @@ export default function IC7SignalChecklist() {
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {signal.signal}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{signal.description}</p>
+                  <p className="text-xs text-gray-700 mt-0.5 leading-relaxed">{signal.description}</p>
                 </div>
 
                 {/* Expand toggle */}
                 <button
                   onClick={() => toggle(signal.id, "expanded")}
-                  className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors mt-0.5"
+                  className="flex-shrink-0 text-gray-600 hover:text-gray-600 transition-colors mt-0.5"
                 >
                   {state.expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
@@ -254,14 +254,14 @@ export default function IC7SignalChecklist() {
                   <div className="flex items-start gap-2">
                     <Lightbulb size={13} className="text-amber-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-amber-600 mb-1">Story Hint</p>
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-amber-800 mb-1">Story Hint</p>
                       <p className="text-xs text-gray-600 leading-relaxed">{signal.storyHint}</p>
                     </div>
                   </div>
 
                   {/* Story note textarea */}
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1.5 block">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-gray-700 mb-1.5 block">
                       Your Story (optional — saved locally)
                     </label>
                     <textarea
@@ -363,7 +363,7 @@ export default function IC7SignalChecklist() {
 
       {/* Gap summary */}
       {gaps.length > 0 && (
-        <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+        <div className="rounded-xl border border-orange-200 bg-orange-100 p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle size={16} className="text-orange-500 flex-shrink-0 mt-0.5" />
             <div>
@@ -374,11 +374,11 @@ export default function IC7SignalChecklist() {
                 {gaps.map((g) => (
                   <div key={g.id} className="flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${PRIORITY_CONFIG[g.priority].dot}`} />
-                    <p className="text-xs text-orange-700">{g.signal}</p>
+                    <p className="text-xs text-orange-900">{g.signal}</p>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-orange-600 mt-3 italic">
+              <p className="text-xs text-orange-800 mt-3 italic">
                 Tip: Review your STAR Story Bank in the Timeline tab — many existing stories can be reframed to cover these signals.
               </p>
             </div>

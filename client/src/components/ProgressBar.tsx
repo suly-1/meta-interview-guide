@@ -36,12 +36,12 @@ export default function ProgressBar({
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold text-gray-700">
             {count} / {total}
-            <span className="text-gray-400 font-normal ml-1">({pct}%)</span>
+            <span className="text-gray-600 font-normal ml-1">({pct}%)</span>
           </span>
           {onReset && count > 0 && (
             <button
               onClick={onReset}
-              className="text-[11px] text-gray-400 hover:text-red-500 transition-colors underline underline-offset-2"
+              className="text-[11px] text-gray-600 hover:text-red-500 transition-colors underline underline-offset-2"
             >
               Reset
             </button>

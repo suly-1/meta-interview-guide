@@ -52,7 +52,7 @@ function ScoreBar({ score }: { score: number }) {
         <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}/5</span>
         <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
           score >= 4 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" :
-          score >= 3 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" :
+          score >= 3 ? "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-800" :
           "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
         }`}>{label}</span>
       </div>
@@ -105,7 +105,7 @@ export default function BehavioralAnswerScorer() {
               Behavioral Answer Scorer
             </h3>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             Paste your STAR answer and get an LLM-powered rubric breakdown across 5 dimensions.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function BehavioralAnswerScorer() {
               className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
                 targetLevel === level
                   ? "bg-white dark:bg-gray-600 text-purple-700 dark:text-purple-300 shadow-sm"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  : "text-gray-700 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200"
               }`}
             >
               {level}
@@ -129,8 +129,8 @@ export default function BehavioralAnswerScorer() {
 
       {/* Question input (optional) */}
       <div>
-        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">
-          Interview Question <span className="font-normal text-gray-400">(optional — helps calibrate scoring)</span>
+        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
+          Interview Question <span className="font-normal text-gray-600">(optional — helps calibrate scoring)</span>
         </label>
         <input
           type="text"
@@ -143,7 +143,7 @@ export default function BehavioralAnswerScorer() {
 
       {/* Answer textarea */}
       <div>
-        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">
+        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
           Your STAR Answer <span className="text-red-400">*</span>
         </label>
         <textarea
@@ -154,9 +154,9 @@ export default function BehavioralAnswerScorer() {
           className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-y leading-relaxed"
         />
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-gray-400">{answer.length} characters · ~{Math.ceil(answer.split(/\s+/).filter(Boolean).length / 130)} min read</span>
+          <span className="text-xs text-gray-600">{answer.length} characters · ~{Math.ceil(answer.split(/\s+/).filter(Boolean).length / 130)} min read</span>
           {answer.length > 0 && (
-            <button onClick={handleClear} className="text-xs text-gray-400 hover:text-red-400 transition-colors">Clear</button>
+            <button onClick={handleClear} className="text-xs text-gray-600 hover:text-red-400 transition-colors">Clear</button>
           )}
         </div>
       </div>
@@ -165,17 +165,17 @@ export default function BehavioralAnswerScorer() {
       <div className="border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
         <button
           onClick={() => setShowTips(!showTips)}
-          className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
         >
           <span>💡 STAR format tips for {targetLevel}</span>
           {showTips ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
         {showTips && (
-          <div className="px-4 pb-3 pt-1 text-xs text-gray-500 dark:text-gray-400 space-y-1.5 border-t border-gray-100 dark:border-gray-700">
-            <p><strong className="text-gray-700 dark:text-gray-300">Situation:</strong> Set context in 1–2 sentences. Include team size, timeline, and stakes.</p>
-            <p><strong className="text-gray-700 dark:text-gray-300">Task:</strong> What was your specific responsibility? {targetLevel === "L7" ? "For L7: show you defined the problem, not just received it." : "For L6: show clear ownership of a defined scope."}</p>
-            <p><strong className="text-gray-700 dark:text-gray-300">Action:</strong> Use "I" not "we". {targetLevel === "L7" ? "For L7: show cross-functional influence, ambiguity navigation, and strategic decisions." : "For L6: show technical depth and independent execution."}</p>
-            <p><strong className="text-gray-700 dark:text-gray-300">Result:</strong> Quantify impact. {targetLevel === "L7" ? "For L7: org-level or multi-team impact, long-term outcomes." : "For L6: team or product-level metrics, latency/reliability/velocity."}</p>
+          <div className="px-4 pb-3 pt-1 text-xs text-gray-700 dark:text-gray-300 space-y-1.5 border-t border-gray-100 dark:border-gray-700">
+            <p><strong className="text-gray-700 dark:text-gray-200">Situation:</strong> Set context in 1–2 sentences. Include team size, timeline, and stakes.</p>
+            <p><strong className="text-gray-700 dark:text-gray-200">Task:</strong> What was your specific responsibility? {targetLevel === "L7" ? "For L7: show you defined the problem, not just received it." : "For L6: show clear ownership of a defined scope."}</p>
+            <p><strong className="text-gray-700 dark:text-gray-200">Action:</strong> Use "I" not "we". {targetLevel === "L7" ? "For L7: show cross-functional influence, ambiguity navigation, and strategic decisions." : "For L6: show technical depth and independent execution."}</p>
+            <p><strong className="text-gray-700 dark:text-gray-200">Result:</strong> Quantify impact. {targetLevel === "L7" ? "For L7: org-level or multi-team impact, long-term outcomes." : "For L6: team or product-level metrics, latency/reliability/velocity."}</p>
           </div>
         )}
       </div>
@@ -201,7 +201,7 @@ export default function BehavioralAnswerScorer() {
 
       {/* Error state */}
       {scoreMutation.isError && (
-        <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-sm text-red-700 dark:text-red-300">
+        <div className="flex items-start gap-2 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-sm text-red-700 dark:text-red-300">
           <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
           <span>Scoring failed. Please check your connection and try again.</span>
         </div>
@@ -213,31 +213,31 @@ export default function BehavioralAnswerScorer() {
           {/* Overall score hero */}
           <div className={`rounded-xl p-4 text-center ${
             (avgScore ?? 0) >= 4 ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700" :
-            (avgScore ?? 0) >= 3 ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700" :
-            "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700"
+            (avgScore ?? 0) >= 3 ? "bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700" :
+            "bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-700"
           }`}>
             <div className="text-4xl font-black mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {avgScore}/5
             </div>
-            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
               {(avgScore ?? 0) >= 4.5 ? "Outstanding" :
                (avgScore ?? 0) >= 4 ? "Strong Answer" :
                (avgScore ?? 0) >= 3 ? "Solid Foundation" :
                (avgScore ?? 0) >= 2 ? "Needs Improvement" : "Significant Gaps"}
               {" "}· {targetLevel} calibration
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 italic">"{result.overallAssessment}"</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 italic">"{result.overallAssessment}"</p>
           </div>
 
           {/* Dimension breakdown */}
           <div>
-            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Dimension Breakdown</h4>
+            <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Dimension Breakdown</h4>
             <div className="space-y-3">
               {DIMENSIONS.map(dim => (
                 <div key={dim.key}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{dim.label}</span>
-                    <span className="text-xs text-gray-400">{dim.desc}</span>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{dim.label}</span>
+                    <span className="text-xs text-gray-600">{dim.desc}</span>
                   </div>
                   <ScoreBar score={result[dim.key as DimKey] as number} />
                 </div>
@@ -258,14 +258,14 @@ export default function BehavioralAnswerScorer() {
 
           {/* Improvements */}
           {result.improvements.length > 0 && (
-            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+            <div className="p-3 bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
               <div className="flex items-center gap-1.5 mb-2">
-                <TrendingUp size={14} className="text-amber-600 dark:text-amber-400" />
-                <p className="text-xs font-bold text-amber-700 dark:text-amber-300">Improvement Suggestions</p>
+                <TrendingUp size={14} className="text-amber-800 dark:text-amber-900" />
+                <p className="text-xs font-bold text-amber-900 dark:text-amber-800">Improvement Suggestions</p>
               </div>
               <ul className="space-y-1.5">
                 {result.improvements.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-400">
+                  <li key={i} className="flex items-start gap-2 text-xs text-amber-900 dark:text-amber-900">
                     <span className="font-bold flex-shrink-0">{i + 1}.</span>
                     <span>{tip}</span>
                   </li>

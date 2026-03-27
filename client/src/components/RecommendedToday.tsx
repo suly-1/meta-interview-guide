@@ -17,7 +17,7 @@ function loadDrillRatings(): Record<string, { rating: number; ts: number }[]> {
 
 const DIFF_COLORS: Record<string, string> = {
   Easy:   "bg-emerald-100 text-emerald-700 border-emerald-200",
-  Medium: "bg-amber-100 text-amber-700 border-amber-200",
+  Medium: "bg-amber-100 text-amber-900 border-amber-200",
   Hard:   "bg-red-100 text-red-700 border-red-200",
 };
 
@@ -135,12 +135,12 @@ export default function RecommendedToday() {
               const solved = progress[p.id]?.solved ?? false;
               return (
                 <div key={p.id} className={`flex items-center gap-3 px-5 py-3 transition-colors ${solved ? "bg-emerald-50" : "hover:bg-gray-50"}`}>
-                  <span className="text-xs font-bold text-gray-300 w-5 flex-shrink-0">{i + 1}</span>
+                  <span className="text-xs font-bold text-gray-700 w-5 flex-shrink-0">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${solved ? "line-through text-gray-400" : "text-gray-800"}`}>
+                    <p className={`text-sm font-semibold truncate ${solved ? "line-through text-gray-600" : "text-gray-800"}`}>
                       {p.name}
                     </p>
-                    <p className="text-[11px] text-gray-400 truncate">{p.patternName} · {p.topic.split(",")[0].trim()}</p>
+                    <p className="text-[11px] text-gray-600 truncate">{p.patternName} · {p.topic.split(",")[0].trim()}</p>
                   </div>
                   <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${DIFF_COLORS[p.difficulty]}`}>
                     {p.difficulty}
@@ -150,14 +150,14 @@ export default function RecommendedToday() {
                       href={p.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
+                      className="p-1.5 text-gray-600 hover:text-blue-600 transition-colors"
                       title="Open on LeetCode"
                     >
                       <ExternalLink size={13} />
                     </a>
                     <button
                       onClick={() => toggleSolved(p.id)}
-                      className={`p-1.5 transition-colors ${solved ? "text-emerald-500" : "text-gray-300 hover:text-emerald-500"}`}
+                      className={`p-1.5 transition-colors ${solved ? "text-emerald-500" : "text-gray-700 hover:text-emerald-500"}`}
                       title={solved ? "Mark unsolved" : "Mark solved"}
                     >
                       <CheckCircle2 size={15} />
@@ -169,13 +169,13 @@ export default function RecommendedToday() {
           </div>
 
           {recommendations.length === 0 && (
-            <div className="px-5 py-8 text-center text-gray-400 text-sm">
+            <div className="px-5 py-8 text-center text-gray-600 text-sm">
               All recommended problems solved! Refresh for more.
             </div>
           )}
 
           <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-600">
               {solvedCount}/{recommendations.length} completed today
             </p>
             <div className="flex-1 mx-4 h-1.5 bg-gray-200 rounded-full overflow-hidden">

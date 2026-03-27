@@ -191,10 +191,10 @@ const VERDICT_CONFIG: Record<string, { label: string; color: string; bg: string;
   },
   borderline: {
     label: "Borderline",
-    color: "text-amber-300",
+    color: "text-amber-800",
     bg: "bg-amber-500/10",
     border: "border-amber-500/40",
-    icon: <AlertCircle size={20} className="text-amber-400" />,
+    icon: <AlertCircle size={20} className="text-amber-900" />,
   },
   no_hire: {
     label: "No Hire",
@@ -349,7 +349,7 @@ export default function InstantVerdictCard() {
     ? result.overallScore >= 75
       ? "text-emerald-400"
       : result.overallScore >= 55
-      ? "text-amber-400"
+      ? "text-amber-900"
       : "text-red-400"
     : "text-muted-foreground";
 
@@ -373,7 +373,7 @@ export default function InstantVerdictCard() {
                 ✓ Using Verdict Engine rubric scores
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-400 font-semibold">
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-900 font-semibold">
                 ⚡ Using heuristic scores — fill Verdict Engine for precision
               </span>
             )}
@@ -513,7 +513,7 @@ export default function InstantVerdictCard() {
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] text-muted-foreground">{d.level}</span>
                           <span className={`text-xs font-bold ${
-                            d.score >= 75 ? "text-emerald-400" : d.score >= 55 ? "text-amber-400" : "text-red-400"
+                            d.score >= 75 ? "text-emerald-400" : d.score >= 55 ? "text-amber-900" : "text-red-400"
                           }`}>
                             {d.score}
                           </span>

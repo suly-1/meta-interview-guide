@@ -155,7 +155,7 @@ export default function SDDeepDiveBank() {
 
       {/* Level filter */}
       <div className="flex items-center gap-2">
-        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Level:</span>
+        <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wide">Level:</span>
         {(["All", "L5", "L6", "L7"] as const).map(level => (
           <button
             key={level}
@@ -189,13 +189,13 @@ export default function SDDeepDiveBank() {
                 {q.level}
               </span>
               <p className="text-sm font-semibold text-gray-900 flex-1">{q.question}</p>
-              {expandedIdx === idx ? <ChevronDown size={14} className="text-gray-400 flex-shrink-0 mt-0.5" /> : <ChevronRight size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />}
+              {expandedIdx === idx ? <ChevronDown size={14} className="text-gray-600 flex-shrink-0 mt-0.5" /> : <ChevronRight size={14} className="text-gray-600 flex-shrink-0 mt-0.5" />}
             </button>
 
             {expandedIdx === idx && (
               <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50/50">
                 <div className="rounded-lg border border-gray-200 bg-white px-3 py-2">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">What this tests</p>
+                  <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide mb-0.5">What this tests</p>
                   <p className="text-xs text-gray-700">{q.whatItTests}</p>
                 </div>
                 <button

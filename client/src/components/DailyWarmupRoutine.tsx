@@ -176,7 +176,7 @@ export function DailyWarmupRoutine() {
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-            <Flame size={16} className="text-amber-400" />
+            <Flame size={16} className="text-amber-900" />
           </div>
           <div className="text-left">
             <div className="font-semibold text-sm text-foreground">
@@ -189,7 +189,7 @@ export function DailyWarmupRoutine() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-medium">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 font-medium">
             Daily Habit
           </span>
           {expanded ? (
@@ -211,7 +211,7 @@ export function DailyWarmupRoutine() {
                   completedPhases.includes(p.id as Phase)
                     ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
                     : phase === p.id
-                      ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                      ? "bg-amber-500/20 border-amber-500/40 text-amber-800"
                       : "bg-secondary/30 border-border text-muted-foreground"
                 }`}
               >
@@ -252,7 +252,7 @@ export function DailyWarmupRoutine() {
                       ? "Phase 2: Complexity Proofs"
                       : "Phase 3: Easy Warm-Up"}
                 </div>
-                <div className="flex items-center gap-1 text-amber-400 font-mono text-sm font-bold">
+                <div className="flex items-center gap-1 text-amber-900 font-mono text-sm font-bold">
                   <Timer size={13} />
                   {formatTime(timeLeft)}
                 </div>
@@ -279,7 +279,7 @@ export function DailyWarmupRoutine() {
               {!showAnswer ? (
                 <button
                   onClick={() => setShowAnswer(true)}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-800 hover:bg-amber-500/10 transition-colors"
                 >
                   Show Pattern Details
                 </button>
@@ -331,7 +331,7 @@ export function DailyWarmupRoutine() {
               {!showComplexityAnswer ? (
                 <button
                   onClick={() => setShowComplexityAnswer(true)}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-800 hover:bg-amber-500/10 transition-colors"
                 >
                   Reveal Answer
                 </button>
@@ -380,7 +380,7 @@ export function DailyWarmupRoutine() {
               {!showHint ? (
                 <button
                   onClick={() => setShowHint(true)}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-800 hover:bg-amber-500/10 transition-colors"
                 >
                   Show Hint
                 </button>

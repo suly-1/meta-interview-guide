@@ -126,8 +126,8 @@ const BOSS_TOPICS: BossTopic[] = [
     id: "backtracking",
     name: "Backtracking",
     emoji: "🌀",
-    color: "text-amber-700",
-    bgColor: "bg-amber-50",
+    color: "text-amber-900",
+    bgColor: "bg-amber-100",
     borderColor: "border-amber-200",
     bossName: "The Recursion Demon",
     bossDesc: "A demon that multiplies with every wrong branch. Only perfect pruning can defeat it.",
@@ -226,16 +226,16 @@ export default function TopicBossFight() {
             <Swords size={16} className="text-red-500" />
             Topic Boss Fight
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">
             Defeat each boss by solving all 3 hard problems in one session. Resets every Monday.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+          <div className="text-xs text-gray-600 dark:text-gray-200 flex items-center gap-1">
             <RefreshCw size={11} />
             Resets in {daysUntilReset}d
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200">
             <Crown size={12} className="text-amber-500" />
             {clearedCount} / {BOSS_TOPICS.length} cleared
           </div>
@@ -262,7 +262,7 @@ export default function TopicBossFight() {
               key={topic.id}
               className={`rounded-xl border-2 transition-all ${
                 cleared
-                  ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20"
+                  ? "border-amber-400 bg-amber-100 dark:bg-amber-900/20"
                   : `${topic.borderColor} ${topic.bgColor} dark:bg-gray-800/50`
               }`}
             >
@@ -275,12 +275,12 @@ export default function TopicBossFight() {
                   <span className="text-xl">{topic.emoji}</span>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-sm font-bold ${cleared ? "text-amber-700" : topic.color} dark:text-white`}>
+                      <span className={`text-sm font-bold ${cleared ? "text-amber-900" : topic.color} dark:text-white`}>
                         {topic.bossName}
                       </span>
                       {cleared && <Crown size={13} className="text-amber-500" />}
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{topic.name}</span>
+                    <span className="text-xs text-gray-700 dark:text-gray-300">{topic.name}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ export default function TopicBossFight() {
                       />
                     ))}
                   </div>
-                  {isExpanded ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+                  {isExpanded ? <ChevronUp size={14} className="text-gray-600" /> : <ChevronDown size={14} className="text-gray-600" />}
                 </div>
               </button>
 
@@ -310,15 +310,15 @@ export default function TopicBossFight() {
                   />
                 </div>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-[11px] text-gray-400">{progress}/{total} defeated</span>
-                  {cleared && <span className="text-[11px] font-bold text-amber-600">👑 CLEARED!</span>}
+                  <span className="text-[11px] text-gray-600">{progress}/{total} defeated</span>
+                  {cleared && <span className="text-[11px] font-bold text-amber-800">👑 CLEARED!</span>}
                 </div>
               </div>
 
               {/* Expanded problem list */}
               {isExpanded && (
                 <div className="px-3 pb-3 border-t border-gray-100 dark:border-gray-700 pt-3 space-y-2">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 italic mb-2">{topic.lore}</p>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 italic mb-2">{topic.lore}</p>
                   {topic.problems.map(prob => {
                     const isSolved = solved.includes(prob.name);
                     return (
@@ -330,7 +330,7 @@ export default function TopicBossFight() {
                         >
                           {isSolved
                             ? <CheckCircle2 size={16} className="text-emerald-500" />
-                            : <Circle size={16} className="text-gray-300 hover:text-emerald-400 transition-colors" />
+                            : <Circle size={16} className="text-gray-700 hover:text-emerald-400 transition-colors" />
                           }
                         </button>
                         <a
@@ -338,11 +338,11 @@ export default function TopicBossFight() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`flex-1 text-xs font-medium flex items-center gap-1 hover:underline ${
-                            isSolved ? "line-through text-gray-400" : "text-gray-700 dark:text-gray-300"
+                            isSolved ? "line-through text-gray-600" : "text-gray-700 dark:text-gray-200"
                           }`}
                         >
                           {prob.name}
-                          <ExternalLink size={10} className="text-gray-400 flex-shrink-0" />
+                          <ExternalLink size={10} className="text-gray-600 flex-shrink-0" />
                         </a>
                         <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold flex-shrink-0">
                           Hard
@@ -354,7 +354,7 @@ export default function TopicBossFight() {
                   {progress > 0 && (
                     <button
                       onClick={() => resetTopic(topic.id)}
-                      className="mt-2 flex items-center gap-1 text-[11px] text-gray-400 hover:text-red-500 transition-colors"
+                      className="mt-2 flex items-center gap-1 text-[11px] text-gray-600 hover:text-red-500 transition-colors"
                     >
                       <RefreshCw size={10} /> Reset progress
                     </button>
@@ -369,14 +369,14 @@ export default function TopicBossFight() {
       {/* Weekly summary */}
       {clearedCount > 0 && (
         <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
-          <div className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
+          <div className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-800">
             <Shield size={14} />
             Week {weekKey} — {clearedCount} boss{clearedCount !== 1 ? "es" : ""} defeated
             {allCleared && " 🎉 Full clear!"}
           </div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {BOSS_TOPICS.filter(t => record.cleared[t.id]).map(t => (
-              <span key={t.id} className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-800 text-amber-700 dark:text-amber-300 rounded-full font-medium flex items-center gap-1">
+              <span key={t.id} className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-800 rounded-full font-medium flex items-center gap-1">
                 <Crown size={9} /> {t.bossName}
               </span>
             ))}

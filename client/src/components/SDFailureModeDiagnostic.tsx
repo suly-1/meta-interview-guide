@@ -235,7 +235,7 @@ function FailureModeCard({ mode }: { mode: FailureMode }) {
   const [expanded, setExpanded] = useState(false);
   const levelColors: Record<string, string> = {
     "L4 trap": "bg-red-100 text-red-700 border-red-200",
-    "L5 gap": "bg-amber-100 text-amber-700 border-amber-200",
+    "L5 gap": "bg-amber-100 text-amber-900 border-amber-200",
     "L6 gap": "bg-blue-100 text-blue-700 border-blue-200",
   };
   return (
@@ -261,18 +261,18 @@ function FailureModeCard({ mode }: { mode: FailureMode }) {
             </span>
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[10px] font-semibold text-gray-500">{mode.scoreWeight}</span>
+            <span className="text-[10px] font-semibold text-gray-700">{mode.scoreWeight}</span>
           </div>
         </div>
         {expanded
-          ? <ChevronUp size={13} className="text-gray-400 flex-shrink-0 mt-1" />
-          : <ChevronDown size={13} className="text-gray-400 flex-shrink-0 mt-1" />
+          ? <ChevronUp size={13} className="text-gray-600 flex-shrink-0 mt-1" />
+          : <ChevronDown size={13} className="text-gray-600 flex-shrink-0 mt-1" />
         }
       </button>
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100">
           <p className="text-xs text-gray-700 leading-relaxed pt-3">{mode.description}</p>
-          <div className="rounded-lg bg-red-50 border border-red-100 p-2.5">
+          <div className="rounded-lg bg-red-100 border border-red-100 p-2.5">
             <p className="text-[10px] font-bold text-red-700 uppercase tracking-wide mb-1">Symptom</p>
             <p className="text-xs text-red-800">{mode.symptom}</p>
           </div>
@@ -309,7 +309,7 @@ export default function SDFailureModeDiagnostic() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+      <div className="rounded-xl border border-red-200 bg-red-100 p-4">
         <div className="flex items-start gap-3">
           <AlertTriangle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
           <div>
@@ -325,11 +325,11 @@ export default function SDFailureModeDiagnostic() {
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-white border border-red-100 p-2.5 text-center">
             <p className="text-lg font-black text-red-600">55%</p>
-            <p className="text-[10px] text-gray-500 font-semibold leading-tight">of score from just 2 failure modes<br />(requirements + trade-offs)</p>
+            <p className="text-[10px] text-gray-700 font-semibold leading-tight">of score from just 2 failure modes<br />(requirements + trade-offs)</p>
           </div>
           <div className="rounded-lg bg-white border border-red-100 p-2.5 text-center">
             <p className="text-lg font-black text-emerald-600">60%</p>
-            <p className="text-[10px] text-gray-500 font-semibold leading-tight">achievable pass rate with<br />targeted preparation</p>
+            <p className="text-[10px] text-gray-700 font-semibold leading-tight">achievable pass rate with<br />targeted preparation</p>
           </div>
         </div>
       </div>
@@ -391,7 +391,7 @@ export default function SDFailureModeDiagnostic() {
                         : "border-gray-200 hover:border-emerald-300 text-gray-700"
                     }`}
                   >
-                    <CheckCircle2 size={13} className={calibrationAnswers[i] === "pass" ? "text-emerald-600" : "text-gray-300"} />
+                    <CheckCircle2 size={13} className={calibrationAnswers[i] === "pass" ? "text-emerald-600" : "text-gray-700"} />
                     {q.icPass}
                   </button>
                   <button
@@ -401,15 +401,15 @@ export default function SDFailureModeDiagnostic() {
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left text-xs transition-all ${
                       calibrationAnswers[i] === "fail"
-                        ? "border-red-400 bg-red-50 text-red-800"
+                        ? "border-red-400 bg-red-100 text-red-800"
                         : "border-gray-200 hover:border-red-300 text-gray-700"
                     }`}
                   >
-                    <Circle size={13} className={calibrationAnswers[i] === "fail" ? "text-red-500" : "text-gray-300"} />
+                    <Circle size={13} className={calibrationAnswers[i] === "fail" ? "text-red-500" : "text-gray-700"} />
                     {q.icFail}
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-2 font-semibold">Signal: {q.targetSignal}</p>
+                <p className="text-[10px] text-gray-600 mt-2 font-semibold">Signal: {q.targetSignal}</p>
               </div>
             ))}
           </div>
@@ -477,7 +477,7 @@ export default function SDFailureModeDiagnostic() {
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className={`text-sm font-black ${level.color}`}>{level.level}</span>
-                <span className="text-xs text-gray-500 font-semibold">— {level.label}</span>
+                <span className="text-xs text-gray-700 font-semibold">— {level.label}</span>
               </div>
               <div className="space-y-1.5">
                 {level.expectations.map(e => (
@@ -489,10 +489,10 @@ export default function SDFailureModeDiagnostic() {
               </div>
               {level.gaps.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-gray-200 space-y-1.5">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Typical gaps vs. next level</p>
+                  <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide">Typical gaps vs. next level</p>
                   {level.gaps.map(g => (
-                    <div key={g} className="flex items-start gap-2 text-xs text-gray-500">
-                      <AlertTriangle size={10} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div key={g} className="flex items-start gap-2 text-xs text-gray-700">
+                      <AlertTriangle size={10} className="text-amber-900 flex-shrink-0 mt-0.5" />
                       {g}
                     </div>
                   ))}

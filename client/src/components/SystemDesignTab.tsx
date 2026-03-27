@@ -447,7 +447,7 @@ export default function SystemDesignTab() {
                 <span className="text-sm font-bold text-white">
                   Meta's Full Interview Loop Structure
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-800 border border-amber-500/30">
                   MUST KNOW
                 </span>
               </div>
@@ -484,7 +484,7 @@ export default function SystemDesignTab() {
                   n: "4",
                   title: "Hiring Committee Review",
                   desc: "All packets reviewed collectively. Level determination (E5 vs E6) happens here.",
-                  color: "text-amber-300",
+                  color: "text-amber-800",
                   bg: "bg-amber-500/10",
                 },
                 {
@@ -519,7 +519,7 @@ export default function SystemDesignTab() {
                   </div>
                 </div>
               ))}
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800">
                 💡 <strong>Critical:</strong> The design round in the onsite
                 carries more weight than the technical screen design round. It
                 is the{" "}
@@ -945,7 +945,7 @@ export default function SystemDesignTab() {
                 <span className="text-sm font-bold text-white">
                   Official Meta Resources + Top Prep Platforms
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-800 border border-amber-500/30">
                   FREE PDFs
                 </span>
               </div>
@@ -994,7 +994,7 @@ export default function SystemDesignTab() {
                   desc: "79 verified Meta system design questions with answers + ML system design course. Updated March 2026.",
                   href: "https://www.tryexponent.com/meta",
                   tag: "PAID",
-                  tagColor: "text-amber-400",
+                  tagColor: "text-amber-900",
                 },
                 {
                   emoji: "📦",
@@ -1002,7 +1002,7 @@ export default function SystemDesignTab() {
                   desc: "Visual learners & Back End generalists. Step-by-step breakdowns with animations and diagrams.",
                   href: "https://bytebytego.com",
                   tag: "PAID",
-                  tagColor: "text-amber-400",
+                  tagColor: "text-amber-900",
                 },
                 {
                   emoji: "📋",
@@ -1023,7 +1023,7 @@ export default function SystemDesignTab() {
                   <span className="text-base shrink-0">{r.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white group-hover/link:text-amber-300 transition-colors">
+                      <span className="text-xs font-bold text-white group-hover/link:text-amber-800 transition-colors">
                         {r.title}
                       </span>
                       <span className={`text-[10px] font-bold ${r.tagColor}`}>
@@ -1266,7 +1266,7 @@ export default function SystemDesignTab() {
                     </div>
                   </div>
                 ))}
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800">
                   <strong>Note:</strong> Each layer enforces a contract — data
                   shape, freshness, latency, and correctness. Most production
                   issues arise when these contracts are implicit rather than
@@ -1350,7 +1350,7 @@ export default function SystemDesignTab() {
                     </p>
                   </div>
                   <div className="p-3 rounded-lg bg-secondary border border-border">
-                    <div className="text-xs font-bold text-orange-400 mb-2">
+                    <div className="text-xs font-bold text-orange-900 mb-2">
                       Real-time Systems
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
@@ -1535,7 +1535,7 @@ export default function SystemDesignTab() {
                     using statistical tests. Tools: Prometheus, Grafana,
                     Evidently AI.
                   </p>
-                  <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+                  <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800">
                     <strong>Tip:</strong> Use online evaluation (e.g., real-time
                     click-through rate) as a proxy for model performance when
                     ground-truth labels are delayed.
@@ -2048,11 +2048,11 @@ export default function SystemDesignTab() {
       <div className="prep-card border border-amber-500/20 bg-amber-500/5">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400">📊</span>
+            <span className="text-amber-900">📊</span>
             <span className="text-sm font-bold text-foreground">
               Complexity Cheat Sheet
             </span>
-            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 font-semibold">
               NEW
             </span>
           </div>
@@ -2092,11 +2092,11 @@ export default function SystemDesignTab() {
       <div className="prep-card border border-orange-500/20 bg-orange-500/5">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Zap size={14} className="text-orange-400" />
+            <Zap size={14} className="text-orange-900" />
             <span className="text-sm font-bold text-foreground">
               Explain Like a PM Mode
             </span>
-            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 font-semibold">
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-800 font-semibold">
               NEW · AI
             </span>
           </div>
@@ -2390,7 +2390,7 @@ function SystemDesignFlashCards() {
 
   const TAG_COLORS: Record<string, string> = {
     Fundamentals: "text-blue-400 bg-blue-500/10 border-blue-500/30",
-    Databases: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    Databases: "text-amber-900 bg-amber-500/10 border-amber-500/30",
     Scalability: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
     Reliability: "text-red-400 bg-red-500/10 border-red-500/30",
     "Meta-Specific": "text-purple-400 bg-purple-500/10 border-purple-500/30",
@@ -2410,7 +2410,7 @@ function SystemDesignFlashCards() {
               {customCards.length > 0 ? ` + ${customCards.length} custom` : ""})
               · {knownCards.size} mastered
               {Object.values(srDue).filter(d => d <= today).length > 0 && (
-                <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold">
+                <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-900 font-bold">
                   ⏰ {Object.values(srDue).filter(d => d <= today).length} due
                   today
                 </span>
@@ -2613,7 +2613,7 @@ function SystemDesignFlashCards() {
                 <div className="text-xs text-muted-foreground">Got it</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-black text-orange-400">
+                <div className="text-2xl font-black text-orange-900">
                   {sessionScore.review}
                 </div>
                 <div className="text-xs text-muted-foreground">Review</div>
@@ -2705,7 +2705,7 @@ function SystemDesignFlashCards() {
                 <div className="flex-1 flex flex-col gap-1">
                   <button
                     onClick={markReview}
-                    className="w-full py-2.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 text-sm font-bold transition-all"
+                    className="w-full py-2.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-900 text-sm font-bold transition-all"
                   >
                     🔄 Review Again
                   </button>

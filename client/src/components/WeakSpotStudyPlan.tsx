@@ -102,7 +102,7 @@ const WEEK_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 // ─── Score helpers ────────────────────────────────────────────────────────────
 function scoreColor(score: number) {
   if (score >= 4) return "text-emerald-400";
-  if (score >= 3) return "text-amber-400";
+  if (score >= 3) return "text-amber-900";
   return "text-red-400";
 }
 
@@ -412,7 +412,7 @@ export function WeakSpotStudyPlan() {
                 Your Weakest Dimensions
               </span>
               {!hasData && (
-                <span className="text-xs text-amber-400 ml-auto">
+                <span className="text-xs text-amber-900 ml-auto">
                   Complete 3+ AI reviews for personalized data
                 </span>
               )}

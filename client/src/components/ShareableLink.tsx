@@ -50,11 +50,11 @@ export default function ShareableLink() {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
             <p className="text-sm font-bold text-gray-800 mb-0.5">Generate Shareable Link</p>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <p className="text-xs text-gray-700 leading-relaxed">
               Creates a URL that encodes your interview date and checklist progress. Open it on any device to restore your state — no account needed.
             </p>
           </div>
-          <button onClick={() => setShowInfo((v) => !v)} className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0 mt-0.5">
+          <button onClick={() => setShowInfo((v) => !v)} className="text-gray-700 hover:text-gray-700 transition-colors flex-shrink-0 mt-0.5">
             <Info size={15} />
           </button>
         </div>
@@ -87,7 +87,7 @@ export default function ShareableLink() {
             />
             <button
               onClick={() => { navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 3000); }}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             >
               <Copy size={14} />
             </button>

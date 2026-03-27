@@ -61,8 +61,8 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
   if (!isAuthenticated) {
     return (
       <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-        <Lock size={14} className="text-gray-400" />
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <Lock size={14} className="text-gray-600" />
+        <p className="text-xs text-gray-700 dark:text-gray-300">
           <a href={getLoginUrl()} className="text-indigo-600 hover:underline font-semibold">Sign in</a> to share this plan with a mentor or peer
         </p>
       </div>
@@ -108,7 +108,7 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-gray-100">Share Sprint Plan</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Anyone with the link can view — no login required</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-300">Anyone with the link can view — no login required</p>
                   </div>
                 </div>
               </div>
@@ -122,9 +122,9 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
                   <>
                     {/* Share URL */}
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">Shareable Link</label>
+                      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">Shareable Link</label>
                       <div className="flex gap-2">
-                        <div className="flex-1 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 font-mono truncate">
+                        <div className="flex-1 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200 font-mono truncate">
                           {shareUrl}
                         </div>
                         <button
@@ -142,9 +142,9 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
                     </div>
 
                     {/* Instructions */}
-                    <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 p-4 space-y-2">
-                      <p className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">How to use</p>
-                      <ul className="text-xs text-amber-700 dark:text-amber-300 space-y-1.5">
+                    <div className="rounded-xl bg-amber-100 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 p-4 space-y-2">
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-900 uppercase tracking-wider">How to use</p>
+                      <ul className="text-xs text-amber-900 dark:text-amber-800 space-y-1.5">
                         <li className="flex items-start gap-2">
                           <span className="font-bold mt-0.5">1.</span>
                           Copy the link above and send it to your mentor, manager, or study partner
@@ -169,7 +169,7 @@ export default function SprintPlanShare({ planData, targetLevel = "L6", focusPri
                       href={shareUrl ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                     >
                       <ExternalLink size={14} />
                       Preview shared view

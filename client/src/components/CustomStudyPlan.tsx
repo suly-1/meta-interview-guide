@@ -135,7 +135,7 @@ ${d.tasks.map(t => `- [ ] ${t}`).join("\n")}`).join("\n\n")}
               min={new Date().toISOString().split("T")[0]}
             />
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-700">
             <span className="font-bold text-gray-700">{solvedCount}</span> / {CTCI_PROBLEMS.length} CTCI solved
             {daysLeft !== null && <span className="ml-2 text-teal-600 font-semibold">· {daysLeft} days left</span>}
           </div>
@@ -169,7 +169,7 @@ ${d.tasks.map(t => `- [ ] ${t}`).join("\n")}`).join("\n\n")}
             {plan.slice(0, 14).map(d => (
               <div key={d.day} className="px-5 py-3 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[11px] font-bold text-gray-400 w-10">Day {d.day}</span>
+                  <span className="text-[11px] font-bold text-gray-600 w-10">Day {d.day}</span>
                   <span className="text-xs font-semibold text-gray-700">{d.date}</span>
                   <span className="text-[10px] px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full font-semibold">{d.phase}</span>
                 </div>
@@ -184,7 +184,7 @@ ${d.tasks.map(t => `- [ ] ${t}`).join("\n")}`).join("\n\n")}
               </div>
             ))}
             {plan.length > 14 && (
-              <div className="px-5 py-3 text-center text-xs text-gray-400">
+              <div className="px-5 py-3 text-center text-xs text-gray-600">
                 +{plan.length - 14} more days — download the full plan to see all
               </div>
             )}

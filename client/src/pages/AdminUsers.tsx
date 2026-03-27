@@ -32,7 +32,7 @@ function UserBlockHistory({ userId }: { userId: number }) {
   if (isLoading) {
     return (
       <tr>
-        <td colSpan={6} className="px-6 py-3 bg-gray-800/40 text-xs text-gray-500 text-center">
+        <td colSpan={6} className="px-6 py-3 bg-gray-800/40 text-xs text-gray-700 text-center">
           Loading history…
         </td>
       </tr>
@@ -42,7 +42,7 @@ function UserBlockHistory({ userId }: { userId: number }) {
   if (!history?.length) {
     return (
       <tr>
-        <td colSpan={6} className="px-6 py-3 bg-gray-800/40 text-xs text-gray-500 text-center">
+        <td colSpan={6} className="px-6 py-3 bg-gray-800/40 text-xs text-gray-700 text-center">
           No block/unblock events recorded for this user.
         </td>
       </tr>
@@ -53,7 +53,7 @@ function UserBlockHistory({ userId }: { userId: number }) {
     <>
       {history.map((event: { id: number; action: string; actorId: number; actorName: string | null; targetUserId: number; targetUserName: string | null; reason: string | null; createdAt: Date }) => (
         <tr key={event.id} className="bg-gray-800/40 border-b border-gray-700/30 last:border-0">
-          <td className="px-6 py-2 text-[11px] text-gray-500 whitespace-nowrap">
+          <td className="px-6 py-2 text-[11px] text-gray-700 whitespace-nowrap">
             {new Date(event.createdAt).toLocaleString()}
           </td>
           <td className="px-4 py-2" colSpan={2}>
@@ -66,13 +66,13 @@ function UserBlockHistory({ userId }: { userId: number }) {
                 <Shield size={9} /> Unblocked
               </span>
             ) : (
-              <span className="text-amber-400 text-[11px] font-semibold">{event.action}</span>
+              <span className="text-amber-900 text-[11px] font-semibold">{event.action}</span>
             )}
           </td>
-          <td className="px-4 py-2 text-[11px] text-gray-400 hidden md:table-cell">
+          <td className="px-4 py-2 text-[11px] text-gray-600 hidden md:table-cell">
             by {event.actorName ?? `Admin #${event.actorId}`}
           </td>
-          <td className="px-4 py-2 text-[11px] text-gray-500 hidden lg:table-cell max-w-[200px] truncate" title={event.reason ?? ""}>
+          <td className="px-4 py-2 text-[11px] text-gray-700 hidden lg:table-cell max-w-[200px] truncate" title={event.reason ?? ""}>
             {event.reason ?? "—"}
           </td>
           <td />
@@ -135,7 +135,7 @@ export default function AdminUsers() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur border-b border-gray-800">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/admin/disclaimer" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/admin/disclaimer" className="text-gray-600 hover:text-white transition-colors">
             <ArrowLeft size={18} />
           </Link>
           <div className="flex items-center gap-2">
@@ -146,8 +146,8 @@ export default function AdminUsers() {
             {checkInactiveResult && (
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
                 checkInactiveResult.notified
-                  ? "bg-amber-900/50 text-amber-300 border-amber-700"
-                  : "bg-gray-800 text-gray-400 border-gray-700"
+                  ? "bg-amber-900/50 text-amber-800 border-amber-700"
+                  : "bg-gray-800 text-gray-600 border-gray-700"
               }`}>
                 {checkInactiveResult.notified
                   ? `⚠️ ${checkInactiveResult.count} inactive users notified`
@@ -157,7 +157,7 @@ export default function AdminUsers() {
             <button
               onClick={() => checkInactiveMutation.mutate()}
               disabled={checkInactiveMutation.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-900/30 hover:bg-amber-900/50 rounded-lg border border-amber-700 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-900/30 hover:bg-amber-900/50 rounded-lg border border-amber-700 transition-all disabled:opacity-50"
             >
               <AlertCircle size={13} className={checkInactiveMutation.isPending ? "animate-pulse" : ""} />
               Check Inactive
@@ -174,34 +174,34 @@ export default function AdminUsers() {
               <Users size={11} /> Total Users
             </p>
             <p className="text-3xl font-bold text-white">{userList?.length ?? "—"}</p>
-            <p className="text-xs text-gray-500 mt-1">registered accounts</p>
+            <p className="text-xs text-gray-700 mt-1">registered accounts</p>
           </div>
           <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
             <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
               <CheckCircle size={11} /> Active This Week
             </p>
             <p className="text-3xl font-bold text-blue-400">{activeThisWeek}</p>
-            <p className="text-xs text-gray-500 mt-1">logged in last 7 days</p>
+            <p className="text-xs text-gray-700 mt-1">logged in last 7 days</p>
           </div>
           <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
             <p className="text-xs text-red-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
               <ShieldOff size={11} /> Blocked
             </p>
             <p className="text-3xl font-bold text-red-400">{bannedCount}</p>
-            <p className="text-xs text-gray-500 mt-1">access revoked</p>
+            <p className="text-xs text-gray-700 mt-1">access revoked</p>
           </div>
         </div>
 
         {/* User table */}
         {isLoading ? (
-          <div className="text-center py-16 text-gray-500">Loading users...</div>
+          <div className="text-center py-16 text-gray-700">Loading users...</div>
         ) : !userList?.length ? (
-          <div className="text-center py-16 text-gray-500">No users found.</div>
+          <div className="text-center py-16 text-gray-700">No users found.</div>
         ) : (
           <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden mb-8">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wider">
+                <tr className="border-b border-gray-800 text-xs text-gray-700 uppercase tracking-wider">
                   <th className="text-left px-4 py-3">User</th>
                   <th className="text-left px-4 py-3 hidden md:table-cell">Email</th>
                   <th className="text-left px-4 py-3 hidden lg:table-cell">Last Seen</th>
@@ -231,19 +231,19 @@ export default function AdminUsers() {
                           <div>
                             <p className="font-medium text-white text-xs leading-tight">{u.name}</p>
                             {u.role === "admin" && (
-                              <span className="text-[10px] text-amber-400 font-medium">Admin</span>
+                              <span className="text-[10px] text-amber-900 font-medium">Admin</span>
                             )}
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <span className="text-gray-400 text-xs flex items-center gap-1">
+                        <span className="text-gray-600 text-xs flex items-center gap-1">
                           <Mail size={11} />
                           {u.email}
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
-                        <span className="text-gray-500 text-xs flex items-center gap-1">
+                        <span className="text-gray-700 text-xs flex items-center gap-1">
                           <Clock size={11} />
                           {new Date(u.lastSignedIn).toLocaleDateString()}
                         </span>
@@ -266,12 +266,12 @@ export default function AdminUsers() {
                               Blocked
                             </span>
                             {u.bannedUntil ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 text-[10px] font-medium">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-900 text-[10px] font-medium">
                                 <Timer size={9} />
                                 {formatTimeLeft(u.bannedUntil)}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 text-[10px] font-medium">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 text-gray-700 text-[10px] font-medium">
                                 <Infinity size={9} />
                                 Permanent
                               </span>
@@ -298,7 +298,7 @@ export default function AdminUsers() {
                             className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                               expandedHistoryUserId === u.id
                                 ? "bg-indigo-700/60 text-indigo-300 border border-indigo-600"
-                                : "bg-gray-800 hover:bg-gray-700 text-gray-400 border border-gray-700"
+                                : "bg-gray-800 hover:bg-gray-700 text-gray-600 border border-gray-700"
                             }`}
                           >
                             <History size={11} />
@@ -346,27 +346,27 @@ export default function AdminUsers() {
             className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-800/50 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <ScrollText size={16} className="text-amber-400" />
+              <ScrollText size={16} className="text-amber-900" />
               <span className="font-semibold text-sm text-white">Admin Audit Log</span>
-              <span className="text-xs text-gray-500">— tamper-evident record of all block/unblock actions</span>
+              <span className="text-xs text-gray-700">— tamper-evident record of all block/unblock actions</span>
             </div>
             {showAuditLog ? (
-              <ChevronUp size={16} className="text-gray-500" />
+              <ChevronUp size={16} className="text-gray-700" />
             ) : (
-              <ChevronDown size={16} className="text-gray-500" />
+              <ChevronDown size={16} className="text-gray-700" />
             )}
           </button>
 
           {showAuditLog && (
             <div className="border-t border-gray-800">
               {auditLoading ? (
-                <div className="text-center py-8 text-gray-500 text-sm">Loading audit log...</div>
+                <div className="text-center py-8 text-gray-700 text-sm">Loading audit log...</div>
               ) : !auditLog?.length ? (
                 <div className="text-center py-8 text-gray-600 text-sm">No audit events recorded yet.</div>
               ) : (
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-gray-800 text-gray-500 uppercase tracking-wider">
+                    <tr className="border-b border-gray-800 text-gray-700 uppercase tracking-wider">
                       <th className="text-left px-5 py-2.5">When</th>
                       <th className="text-left px-5 py-2.5">Action</th>
                       <th className="text-left px-5 py-2.5">Target User</th>
@@ -377,7 +377,7 @@ export default function AdminUsers() {
                   <tbody>
                     {auditLog.map(event => (
                       <tr key={event.id} className="border-b border-gray-800/40 last:border-0 hover:bg-gray-800/20">
-                        <td className="px-5 py-2.5 text-gray-500 whitespace-nowrap">
+                        <td className="px-5 py-2.5 text-gray-700 whitespace-nowrap">
                           {new Date(event.createdAt).toLocaleString()}
                         </td>
                         <td className="px-5 py-2.5">
@@ -392,7 +392,7 @@ export default function AdminUsers() {
                               Unblocked
                             </span>
                           ) : (
-                            <span className="text-amber-400 font-semibold">{event.action}</span>
+                            <span className="text-amber-900 font-semibold">{event.action}</span>
                           )}
                         </td>
                         <td className="px-5 py-2.5">
@@ -401,10 +401,10 @@ export default function AdminUsers() {
                             <p className="text-gray-600">{event.targetUserEmail}</p>
                           )}
                         </td>
-                        <td className="px-5 py-2.5 hidden md:table-cell text-gray-400">
+                        <td className="px-5 py-2.5 hidden md:table-cell text-gray-600">
                           {event.actorName ?? `Admin #${event.actorId}`}
                         </td>
-                        <td className="px-5 py-2.5 hidden lg:table-cell text-gray-500 max-w-[200px] truncate" title={event.reason ?? ""}>
+                        <td className="px-5 py-2.5 hidden lg:table-cell text-gray-700 max-w-[200px] truncate" title={event.reason ?? ""}>
                           {event.reason ?? "—"}
                         </td>
                       </tr>
@@ -427,7 +427,7 @@ export default function AdminUsers() {
               </div>
               <div>
                 <h3 className="font-semibold text-white">Block User</h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-600">
                   Revoke access for <strong className="text-white">{confirmBlock.name}</strong>
                 </p>
               </div>
@@ -435,7 +435,7 @@ export default function AdminUsers() {
 
             {/* Duration picker */}
             <div className="mb-4">
-              <label className="block text-xs text-gray-500 mb-2 flex items-center gap-1">
+              <label className="block text-xs text-gray-700 mb-2 flex items-center gap-1">
                 <Timer size={11} /> Block Duration
               </label>
               <div className="grid grid-cols-5 gap-1.5">
@@ -448,7 +448,7 @@ export default function AdminUsers() {
                         ? opt.days === null
                           ? "bg-red-700 border-red-500 text-white"
                           : "bg-amber-700 border-amber-500 text-white"
-                        : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                        : "bg-gray-800 border-gray-700 text-gray-600 hover:border-gray-500 hover:text-gray-200"
                     }`}
                     title={opt.description}
                   >
@@ -456,14 +456,14 @@ export default function AdminUsers() {
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-gray-500 mt-1.5">
+              <p className="text-[11px] text-gray-700 mt-1.5">
                 {selectedDuration.description}
               </p>
             </div>
 
             {/* Reason */}
             <div className="mb-5">
-              <label className="block text-xs text-gray-500 mb-1.5">Reason (optional — recorded in audit log)</label>
+              <label className="block text-xs text-gray-700 mb-1.5">Reason (optional — recorded in audit log)</label>
               <textarea
                 value={blockReason}
                 onChange={e => setBlockReason(e.target.value)}
@@ -476,7 +476,7 @@ export default function AdminUsers() {
             <div className="flex gap-3">
               <button
                 onClick={() => { setConfirmBlock(null); setBlockReason(""); setBlockDurationDays(null); }}
-                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-700 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>

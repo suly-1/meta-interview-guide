@@ -83,8 +83,8 @@ const QUALITY_CONFIG: Record<
     label: "Adequate",
   },
   weak: {
-    color: "text-amber-400",
-    icon: <AlertTriangle size={16} className="text-amber-400" />,
+    color: "text-amber-900",
+    icon: <AlertTriangle size={16} className="text-amber-900" />,
     label: "Weak Proof",
   },
   incorrect: {
@@ -357,7 +357,7 @@ export function ComplexityProofTrainer() {
 
               {/* Follow-up question */}
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="text-xs font-semibold text-amber-400 mb-1 flex items-center gap-1">
+                <div className="text-xs font-semibold text-amber-900 mb-1 flex items-center gap-1">
                   <Lightbulb size={12} />
                   Interviewer Follow-Up
                 </div>

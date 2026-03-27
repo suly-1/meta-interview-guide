@@ -65,9 +65,9 @@ const WEEKS: Week[] = [
     week: 3,
     title: "Advanced Patterns",
     subtitle: "Cover remaining patterns and start mock interview practice",
-    color: "text-amber-700",
+    color: "text-amber-900",
     borderColor: "border-amber-200",
-    bgColor: "bg-amber-50",
+    bgColor: "bg-amber-100",
     tasks: [
       { id: "w3-1", text: "Master Binary Search Variations — solve 8 CTCI problems. Know rotated array variants.", type: "ctci" },
       { id: "w3-2", text: "Master Backtracking — solve 8 CTCI problems. Know Word Search.", type: "ctci" },
@@ -151,7 +151,7 @@ export default function PrepTimeline4Week() {
           <h3 className="text-base font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             4-Week Prep Timeline
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">
             {totalDone} / {totalTasks} tasks completed
           </p>
         </div>
@@ -183,15 +183,15 @@ export default function PrepTimeline4Week() {
                 </div>
                 <div>
                   <p className={`text-sm font-bold ${week.color}`}>{week.title}</p>
-                  <p className="text-xs text-gray-500">{week.subtitle}</p>
+                  <p className="text-xs text-gray-700">{week.subtitle}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <p className={`text-sm font-extrabold ${week.color}`}>{pct}%</p>
-                  <p className="text-[10px] text-gray-400">{done}/{total}</p>
+                  <p className="text-[10px] text-gray-600">{done}/{total}</p>
                 </div>
-                {isExpanded ? <ChevronDown size={15} className="text-gray-400" /> : <ChevronRight size={15} className="text-gray-400" />}
+                {isExpanded ? <ChevronDown size={15} className="text-gray-600" /> : <ChevronRight size={15} className="text-gray-600" />}
               </div>
             </button>
 
@@ -217,12 +217,12 @@ export default function PrepTimeline4Week() {
                       {checked.has(task.id) ? (
                         <CheckCircle2 size={16} className="text-emerald-500" />
                       ) : (
-                        <Circle size={16} className="text-gray-300 group-hover:text-gray-400 transition-colors" />
+                        <Circle size={16} className="text-gray-700 group-hover:text-gray-600 transition-colors" />
                       )}
                     </div>
                     <div className="flex items-start gap-2 flex-1 min-w-0">
                       <span className="flex-shrink-0 mt-0.5">{TYPE_ICONS[task.type]}</span>
-                      <span className={`text-sm ${checked.has(task.id) ? "line-through text-gray-400" : "text-gray-700 dark:text-gray-300"}`}>
+                      <span className={`text-sm ${checked.has(task.id) ? "line-through text-gray-600" : "text-gray-700 dark:text-gray-200"}`}>
                         {task.text}
                       </span>
                     </div>
@@ -244,7 +244,7 @@ export default function PrepTimeline4Week() {
         ].map(item => (
           <div key={item.label} className="flex items-center gap-1.5">
             {item.icon}
-            <span className="text-[11px] text-gray-500">{item.label}</span>
+            <span className="text-[11px] text-gray-700">{item.label}</span>
           </div>
         ))}
       </div>

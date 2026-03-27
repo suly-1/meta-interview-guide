@@ -101,7 +101,7 @@ function DisclaimerBanner() {
                   ✓ Acknowledged — click to review again
                 </span>
               ) : !expanded ? (
-                <span className="text-amber-400/80 text-xs ml-2 hidden sm:inline">
+                <span className="text-amber-900/80 text-xs ml-2 hidden sm:inline">
                   — Supplementary material only. Click to read in full.
                 </span>
               ) : null}
@@ -114,7 +114,7 @@ function DisclaimerBanner() {
                 Acknowledged
               </span>
             )}
-            <span className="text-amber-400 group-hover:text-amber-200 transition-colors">
+            <span className="text-amber-900 group-hover:text-amber-200 transition-colors">
               {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </span>
           </div>
@@ -123,7 +123,7 @@ function DisclaimerBanner() {
         <button
           onClick={handleDismiss}
           title="Dismiss banner"
-          className="flex-shrink-0 mt-0.5 text-amber-600 hover:text-amber-200 transition-colors p-1 rounded hover:bg-amber-900/60"
+          className="flex-shrink-0 mt-0.5 text-amber-800 hover:text-amber-200 transition-colors p-1 rounded hover:bg-amber-900/60"
           aria-label="Dismiss disclaimer banner"
         >
           <X size={14} />
@@ -143,32 +143,32 @@ function DisclaimerBanner() {
             >
               <div className="pt-3 pb-1 border-t border-amber-700/40 mt-3">
                 {/* Independence & Non-Affiliation */}
-                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">Independence &amp; Non-Affiliation</p>
+                <p className="text-amber-800/80 text-xs font-bold uppercase tracking-widest mb-1.5">Independence &amp; Non-Affiliation</p>
                 <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
                   This is an <strong className="text-amber-100">independent study resource</strong> for software engineering interview preparation. It is{" "}
                   <strong className="text-amber-100">not affiliated with, endorsed by, or connected to Meta Platforms, Inc.</strong>{" "}in any way. All trademarks are property of their respective owners, used here for identification only under nominative fair use.
                 </p>
 
                 {/* Accuracy */}
-                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">Accuracy &amp; Currency of Information</p>
+                <p className="text-amber-800/80 text-xs font-bold uppercase tracking-widest mb-1.5">Accuracy &amp; Currency of Information</p>
                 <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
                   All content is based on publicly available information and may be <strong className="text-amber-100">outdated, incomplete, or inaccurate</strong>. This is not professional or career advice. Always verify details with your recruiter or hiring manager.
                 </p>
 
                 {/* Warranty & Liability */}
-                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">No Warranty &amp; Limitation of Liability</p>
+                <p className="text-amber-800/80 text-xs font-bold uppercase tracking-widest mb-1.5">No Warranty &amp; Limitation of Liability</p>
                 <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
                   This guide is provided <strong className="text-amber-100">&ldquo;AS IS&rdquo;</strong> without warranty of any kind, express or implied. The author(s) shall not be liable for any damages — direct, indirect, incidental, or consequential — arising from your use of or reliance on this guide. <strong className="text-amber-100">No outcome is guaranteed.</strong>
                 </p>
 
                 {/* Assumption of Risk */}
-                <p className="text-amber-300/80 text-xs font-bold uppercase tracking-widest mb-1.5">Assumption of Risk &amp; Indemnification</p>
+                <p className="text-amber-800/80 text-xs font-bold uppercase tracking-widest mb-1.5">Assumption of Risk &amp; Indemnification</p>
                 <p className="text-amber-200/90 text-sm leading-relaxed mb-3">
                   By using this guide, you assume all risk, agree you are solely responsible for any decisions made based on its content, and agree to <strong className="text-amber-100">indemnify and hold harmless</strong> the author(s) from any claims arising from your use.
                 </p>
 
                 {/* Severability */}
-                <p className="text-amber-400/70 text-xs leading-relaxed italic mb-4">
+                <p className="text-amber-900/70 text-xs leading-relaxed italic mb-4">
                   If any provision of this disclaimer is unenforceable, the remainder shall remain in effect.
                 </p>
 
@@ -194,7 +194,7 @@ function DisclaimerBanner() {
                       {acknowledged ? (
                         <CheckSquare size={20} className="text-emerald-400 flex-shrink-0" />
                       ) : (
-                        <Square size={20} className="text-amber-500/70 group-hover/ack:text-amber-300 flex-shrink-0 transition-colors" />
+                        <Square size={20} className="text-amber-500/70 group-hover/ack:text-amber-800 flex-shrink-0 transition-colors" />
                       )}
                     </motion.div>
                     <span
@@ -265,7 +265,7 @@ function ShareButton() {
         {copied ? "Message copied to clipboard!" : "Copy safe share message"}
       </button>
       {copied && (
-        <p className="mt-2 text-xs text-white/40 leading-relaxed max-w-lg">
+        <p className="mt-2 text-xs text-white/80 leading-relaxed max-w-lg">
           Paste this into WhatsApp, LinkedIn DM, or personal email. It frames the guide as a community resource you found online — not official Meta prep material.
         </p>
       )}
@@ -370,10 +370,10 @@ export default function Hero() {
 
           {/* Official prep notice */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-8 p-3 rounded-xl border border-white/10 bg-white/5 max-w-2xl">
-            <span className="text-amber-300 text-xs font-bold uppercase tracking-widest flex-shrink-0">⚠ Always refer first to</span>
-            <span className="text-white/60 text-xs hidden sm:inline">|</span>
+            <span className="text-amber-800 text-xs font-bold uppercase tracking-widest flex-shrink-0">⚠ Always refer first to</span>
+            <span className="text-white/90 text-xs hidden sm:inline">|</span>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-              <span className="text-white/60">the official preparation materials your recruiter or hiring manager shared with you, including:</span>
+              <span className="text-white/90">the official preparation materials your recruiter or hiring manager shared with you, including:</span>
               <a
                 href="https://www.metacareers.com/swe-prep-techscreen"
                 target="_blank"
@@ -398,14 +398,14 @@ export default function Hero() {
 
           {/* IC Level Selector */}
           <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="text-white/50 text-xs font-bold uppercase tracking-widest">Your Level:</span>
+            <span className="text-white/85 text-xs font-bold uppercase tracking-widest">Your Level:</span>
             <div className="flex rounded-lg overflow-hidden border border-white/20 text-sm font-semibold">
               <button
                 onClick={() => setICLevel("junior")}
                 className={`px-4 py-1.5 transition-all ${
                   icLevel === "junior"
                     ? "bg-emerald-600 text-white"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    : "bg-white/5 text-white/90 hover:bg-white/10 hover:text-white"
                 }`}
                 title="L4 — Junior Engineer"
               >
@@ -416,7 +416,7 @@ export default function Hero() {
                 className={`px-4 py-1.5 transition-all border-l border-white/10 ${
                   icLevel === "mid"
                     ? "bg-violet-600 text-white"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    : "bg-white/5 text-white/90 hover:bg-white/10 hover:text-white"
                 }`}
                 title="L5 — Senior Engineer"
               >
@@ -427,7 +427,7 @@ export default function Hero() {
                 className={`px-4 py-1.5 transition-all border-l border-white/10 ${
                   icLevel === "senior"
                     ? "bg-[#4d9fff] text-white"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    : "bg-white/5 text-white/90 hover:bg-white/10 hover:text-white"
                 }`}
                 title="L6/L7 — Staff / Senior Staff Engineer"
               >
@@ -521,7 +521,7 @@ function HeroCountdown() {
         // Empty state — invite user to set a date
         <button
           onClick={() => setEditing(true)}
-          className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 border border-white/20 hover:border-white/40 px-4 py-2 rounded-full transition-all"
+          className="flex items-center gap-2 text-sm text-white/85 hover:text-white/80 border border-white/20 hover:border-white/40 px-4 py-2 rounded-full transition-all"
         >
           <CalendarDays size={14} />
           Set your interview date for a countdown
@@ -530,7 +530,7 @@ function HeroCountdown() {
         // Date input
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 bg-white/10 border border-white/30 rounded-xl px-3 py-2">
-            <CalendarDays size={14} className="text-white/60" />
+            <CalendarDays size={14} className="text-white/90" />
             <input
               ref={inputRef}
               type="date"
@@ -546,7 +546,7 @@ function HeroCountdown() {
           >Save</button>
           <button
             onClick={() => setEditing(false)}
-            className="p-2 text-white/50 hover:text-white/80 transition-colors"
+            className="p-2 text-white/85 hover:text-white/80 transition-colors"
           ><X size={14} /></button>
         </div>
       ) : urgencyConfig ? (
@@ -581,7 +581,7 @@ function HeroCountdown() {
 
           {/* Urgency note */}
           {urgencyNote && (
-            <p className="text-sm text-white/60 max-w-xs leading-snug">{urgencyNote}</p>
+            <p className="text-sm text-white/90 max-w-xs leading-snug">{urgencyNote}</p>
           )}
 
           {/* Edit / clear */}

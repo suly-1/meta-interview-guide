@@ -131,7 +131,7 @@ function AIUpgradePanel() {
             rows={6}
             className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-gray-50 resize-y"
           />
-          <p className="text-[11px] text-gray-400 mt-1">{answer.length} / 4000 characters</p>
+          <p className="text-[11px] text-gray-600 mt-1">{answer.length} / 4000 characters</p>
         </div>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ function AIUpgradePanel() {
                 className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
                   targetLevel === lvl
                     ? `${LEVEL_COLORS[lvl].bg} ${LEVEL_COLORS[lvl].text} ${LEVEL_COLORS[lvl].border}`
-                    : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                    : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
                 }`}
               >
                 {lvl}
@@ -166,7 +166,7 @@ function AIUpgradePanel() {
 
       {/* Error */}
       {upgrade.isError && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-100 border border-red-200 rounded-lg px-4 py-3">
           <AlertCircle size={14} className="flex-shrink-0" />
           Failed to analyze answer. Please try again.
         </div>
@@ -179,22 +179,22 @@ function AIUpgradePanel() {
           <div className="rounded-xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
             <div className="flex flex-wrap items-center gap-3 mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 font-medium">Detected level:</span>
+                <span className="text-xs text-gray-700 font-medium">Detected level:</span>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${levelCfg?.bg} ${levelCfg?.text} ${levelCfg?.border}`}>
                   {result.detectedLevel}
                 </span>
               </div>
-              <ArrowRight size={14} className="text-gray-400" />
+              <ArrowRight size={14} className="text-gray-600" />
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 font-medium">Target:</span>
+                <span className="text-xs text-gray-700 font-medium">Target:</span>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${targetCfg.bg} ${targetCfg.text} ${targetCfg.border}`}>
                   {targetLevel}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 ml-auto">
-                <span className="text-xs text-gray-500">Score:</span>
-                <span className={`text-lg font-extrabold ${result.currentScore >= 8 ? "text-emerald-600" : result.currentScore >= 6 ? "text-amber-600" : "text-red-600"}`}>
-                  {result.currentScore}<span className="text-sm text-gray-400">/10</span>
+                <span className="text-xs text-gray-700">Score:</span>
+                <span className={`text-lg font-extrabold ${result.currentScore >= 8 ? "text-emerald-600" : result.currentScore >= 6 ? "text-amber-800" : "text-red-600"}`}>
+                  {result.currentScore}<span className="text-sm text-gray-600">/10</span>
                 </span>
               </div>
             </div>
@@ -221,7 +221,7 @@ function AIUpgradePanel() {
                 )) : <p className="text-xs text-emerald-600 italic">No strong signals detected yet.</p>}
               </div>
             </div>
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+            <div className="rounded-xl border border-red-200 bg-red-100 p-4">
               <div className="flex items-center gap-1.5 mb-2.5">
                 <XCircle size={13} className="text-red-600" />
                 <span className="text-xs font-bold text-red-800 uppercase tracking-wide">Missing for {targetLevel}</span>
@@ -239,9 +239,9 @@ function AIUpgradePanel() {
 
           {/* Upgrade instructions */}
           {result.upgradeInstructions.length > 0 && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div className="rounded-xl border border-amber-200 bg-amber-100 p-4">
               <div className="flex items-center gap-1.5 mb-2.5">
-                <ArrowUpCircle size={13} className="text-amber-700" />
+                <ArrowUpCircle size={13} className="text-amber-900" />
                 <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">3 Upgrade Instructions</span>
               </div>
               <ol className="space-y-2">
@@ -271,7 +271,7 @@ function AIUpgradePanel() {
               {showUpgraded && (
                 <div className="p-4 bg-white border-t border-purple-100">
                   <p className="text-sm text-gray-800 leading-relaxed italic">"{result.upgradedAnswer}"</p>
-                  <p className="text-[11px] text-gray-400 mt-3">
+                  <p className="text-[11px] text-gray-600 mt-3">
                     This is an AI-generated example to illustrate {targetLevel}-level signals. Adapt it to your real experiences — never use it verbatim.
                   </p>
                 </div>
@@ -312,7 +312,7 @@ function StaticExamplesPanel() {
                 {ex.scenario}
               </span>
             </div>
-            {openIdx === idx ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
+            {openIdx === idx ? <ChevronDown size={14} className="text-gray-600" /> : <ChevronRight size={14} className="text-gray-600" />}
           </button>
           {openIdx === idx && (
             <div className="border-t border-gray-100">
@@ -399,7 +399,7 @@ export default function L7AnswerUpgrader() {
           className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
             mode === "ai"
               ? "bg-white text-indigo-700 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              : "text-gray-700 hover:text-gray-700"
           }`}
         >
           <Sparkles size={13} /> Upgrade My Answer
@@ -409,7 +409,7 @@ export default function L7AnswerUpgrader() {
           className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
             mode === "examples"
               ? "bg-white text-indigo-700 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              : "text-gray-700 hover:text-gray-700"
           }`}
         >
           Study Examples

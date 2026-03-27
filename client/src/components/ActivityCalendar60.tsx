@@ -141,7 +141,7 @@ export default function ActivityCalendar60() {
           <h3 className="text-base font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             60-Day Activity Calendar
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">
             {activeDays} active day{activeDays !== 1 ? "s" : ""} · {currentStreak}-day current streak
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function ActivityCalendar60() {
             ✓ Practiced today
           </span>
         ) : (
-          <span className="text-xs font-bold px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full border border-amber-200">
+          <span className="text-xs font-bold px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full border border-amber-200">
             Practice today to keep your streak
           </span>
         )}
@@ -165,7 +165,7 @@ export default function ActivityCalendar60() {
             {weeks.map((_, col) => {
               const label = monthLabels.find(m => m.col === col);
               return (
-                <div key={col} className="flex-1 text-[10px] text-gray-400 font-medium">
+                <div key={col} className="flex-1 text-[10px] text-gray-600 font-medium">
                   {label ? label.label : ""}
                 </div>
               );
@@ -177,7 +177,7 @@ export default function ActivityCalendar60() {
             {/* Day labels */}
             <div className="flex flex-col gap-0.5 mr-1 pt-0.5">
               {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                <div key={i} className="text-[9px] text-gray-400 w-5 h-[13px] flex items-center justify-end pr-1">
+                <div key={i} className="text-[9px] text-gray-600 w-5 h-[13px] flex items-center justify-end pr-1">
                   {i % 2 === 1 ? d : ""}
                 </div>
               ))}
@@ -220,11 +220,11 @@ export default function ActivityCalendar60() {
       {/* Legend + stats */}
       <div className="flex items-center justify-between flex-wrap gap-3 pt-1 border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-gray-400">Less</span>
+          <span className="text-[11px] text-gray-600">Less</span>
           {intensityColors.map((c, i) => (
             <div key={i} className={`w-3 h-3 rounded-sm ${c} border border-gray-200 dark:border-gray-700`} />
           ))}
-          <span className="text-[11px] text-gray-400">More</span>
+          <span className="text-[11px] text-gray-600">More</span>
         </div>
 
         <div className="flex items-center gap-4">
@@ -234,7 +234,7 @@ export default function ActivityCalendar60() {
           ].map(s => (
             <div key={s.label} className="text-center">
               <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.value}</p>
-              <p className="text-[10px] text-gray-400">{s.label}</p>
+              <p className="text-[10px] text-gray-600">{s.label}</p>
             </div>
           ))}
         </div>

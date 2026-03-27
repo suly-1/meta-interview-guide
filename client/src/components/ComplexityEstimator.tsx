@@ -64,23 +64,23 @@ export default function ComplexityEstimator() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Complexity Estimator
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Guess time & space before revealing the answer</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Guess time & space before revealing the answer</p>
         </div>
       </div>
 
       {/* Problem card */}
       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-5">
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Problem</p>
+        <p className="text-xs text-gray-600 uppercase tracking-widest mb-1">Problem</p>
         <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           {problem}
         </h4>
-        <p className="text-xs text-gray-500 mt-1">Pattern: <span className="font-semibold text-gray-700 dark:text-gray-300">{pattern.name}</span></p>
+        <p className="text-xs text-gray-700 mt-1">Pattern: <span className="font-semibold text-gray-700 dark:text-gray-200">{pattern.name}</span></p>
       </div>
 
       {/* Selectors */}
       <div className="grid grid-cols-2 gap-4 mb-5">
         <div>
-          <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide block mb-2">Time Complexity</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide block mb-2">Time Complexity</label>
           <div className="flex flex-wrap gap-1.5">
             {TIME_OPTIONS.map(opt => (
               <button
@@ -92,7 +92,7 @@ export default function ComplexityEstimator() {
                     ? revealed
                       ? timeCorrect ? "bg-emerald-500 text-white border-emerald-500" : "bg-red-500 text-white border-red-500"
                       : "bg-purple-500 text-white border-purple-500"
-                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-purple-400"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-purple-400"
                 }`}
               >
                 {opt}
@@ -101,7 +101,7 @@ export default function ComplexityEstimator() {
           </div>
         </div>
         <div>
-          <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide block mb-2">Space Complexity</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide block mb-2">Space Complexity</label>
           <div className="flex flex-wrap gap-1.5">
             {SPACE_OPTIONS.map(opt => (
               <button
@@ -113,7 +113,7 @@ export default function ComplexityEstimator() {
                     ? revealed
                       ? spaceCorrect ? "bg-emerald-500 text-white border-emerald-500" : "bg-red-500 text-white border-red-500"
                       : "bg-purple-500 text-white border-purple-500"
-                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-purple-400"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-purple-400"
                 }`}
               >
                 {opt}
@@ -140,12 +140,12 @@ export default function ComplexityEstimator() {
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
                 {timeCorrect ? <CheckCircle2 size={15} className="text-emerald-500" /> : <XCircle size={15} className="text-red-500" />}
-                <span className="text-sm text-gray-700 dark:text-gray-300">Time: <strong>{pattern.timeComplexity}</strong></span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">Time: <strong>{pattern.timeComplexity}</strong></span>
                 {!timeCorrect && timeGuess && <span className="text-xs text-red-500">(you: {timeGuess})</span>}
               </div>
               <div className="flex items-center gap-2">
                 {spaceCorrect ? <CheckCircle2 size={15} className="text-emerald-500" /> : <XCircle size={15} className="text-red-500" />}
-                <span className="text-sm text-gray-700 dark:text-gray-300">Space: <strong>{pattern.spaceComplexity}</strong></span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">Space: <strong>{pattern.spaceComplexity}</strong></span>
                 {!spaceCorrect && spaceGuess && <span className="text-xs text-red-500">(you: {spaceGuess})</span>}
               </div>
             </div>
@@ -153,17 +153,17 @@ export default function ComplexityEstimator() {
 
           {/* Brute force */}
           <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Brute Force (for comparison)</p>
+            <p className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Brute Force (for comparison)</p>
             <div className="grid grid-cols-2 gap-3">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Time: <strong>{bruteForce.time}</strong></span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Space: <strong>{bruteForce.space}</strong></span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Time: <strong>{bruteForce.time}</strong></span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Space: <strong>{bruteForce.space}</strong></span>
             </div>
           </div>
 
           {/* Key idea */}
           <div className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-900/20 p-3">
             <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">Key Idea</p>
-            <p className="text-sm text-gray-700 dark:text-gray-300">{pattern.keyIdea}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-200">{pattern.keyIdea}</p>
           </div>
 
           <button

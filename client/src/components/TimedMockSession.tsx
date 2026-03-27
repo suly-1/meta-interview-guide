@@ -36,7 +36,7 @@ function formatTime(sec: number): string {
 
 const DIFF_COLORS: Record<string, string> = {
   Easy:   "bg-emerald-100 text-emerald-700 border-emerald-200",
-  Medium: "bg-amber-100 text-amber-700 border-amber-200",
+  Medium: "bg-amber-100 text-amber-900 border-amber-200",
   Hard:   "bg-red-100 text-red-700 border-red-200",
 };
 
@@ -131,21 +131,21 @@ export default function TimedMockSession() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h4 className="font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{problem.name}</h4>
-                <p className="text-xs text-gray-400 mt-0.5">{problem.topic.split(",").slice(0, 2).join(", ")}</p>
+                <p className="text-xs text-gray-600 mt-0.5">{problem.topic.split(",").slice(0, 2).join(", ")}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${DIFF_COLORS[problem.difficulty]}`}>
                   {problem.difficulty}
                 </span>
                 <a href={problem.url} target="_blank" rel="noopener noreferrer"
-                  className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
+                  className="p-1.5 text-gray-600 hover:text-blue-600 transition-colors">
                   <ExternalLink size={13} />
                 </a>
               </div>
             </div>
           </div>
         ) : (
-          <div className="border border-dashed border-gray-200 rounded-xl p-4 text-center text-gray-400 text-sm">
+          <div className="border border-dashed border-gray-200 rounded-xl p-4 text-center text-gray-600 text-sm">
             Click "Pick Problem" to get a random unsolved problem from your weakest topics.
           </div>
         )}
@@ -157,7 +157,7 @@ export default function TimedMockSession() {
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {formatTime(timeLeft)}
             </div>
-            <p className="text-xs text-gray-400 mt-1">{running ? "Session in progress" : finished ? "Time's up!" : "Ready to start"}</p>
+            <p className="text-xs text-gray-600 mt-1">{running ? "Session in progress" : finished ? "Time's up!" : "Ready to start"}</p>
             <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${urgent ? "bg-red-500" : "bg-blue-500"}`}
@@ -234,7 +234,7 @@ export default function TimedMockSession() {
         {/* Staff Engineer Rubric — shown after session is finished */}
         {finished && problem && (
           <div className="border-t border-gray-100 pt-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3">Staff Engineer Rubric Assessment</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-3">Staff Engineer Rubric Assessment</p>
             <MetaRubricAssessment
               problemName={problem.name}
               approachText={`Timed mock session: ${problem.name} (${problem.difficulty}). Time used: ${formatTime(elapsed)}.`}
@@ -247,7 +247,7 @@ export default function TimedMockSession() {
         {/* Session log */}
         {showLogs && logs.length > 0 && (
           <div className="border-t border-gray-100 pt-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Recent Sessions</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Recent Sessions</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {logs.slice(0, 10).map((log, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs">
@@ -257,7 +257,7 @@ export default function TimedMockSession() {
                   }
                   <span className="flex-1 truncate text-gray-700">{log.problemName}</span>
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${DIFF_COLORS[log.difficulty]}`}>{log.difficulty}</span>
-                  <span className="text-gray-400">{formatTime(log.durationSec)}</span>
+                  <span className="text-gray-600">{formatTime(log.durationSec)}</span>
                 </div>
               ))}
             </div>

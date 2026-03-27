@@ -109,7 +109,7 @@ const FAILURE_REASONS = [
     rank: 4,
     title: "Poor Time Management",
     frequency: "Common",
-    frequencyColor: "text-amber-400",
+    frequencyColor: "text-amber-900",
     icon: Clock,
     description:
       "Spending 25+ minutes on high-level architecture and leaving no time for deep dives, trade-offs, or edge cases.",
@@ -123,7 +123,7 @@ const FAILURE_REASONS = [
     rank: 5,
     title: "Optimizing Without Knowing the Bottleneck",
     frequency: "Common",
-    frequencyColor: "text-amber-400",
+    frequencyColor: "text-amber-900",
     icon: Target,
     description:
       "Adding Kafka, microservices, and event sourcing before identifying what actually needs to be optimized.",
@@ -137,7 +137,7 @@ const FAILURE_REASONS = [
     rank: 6,
     title: "Ignoring Failure Modes",
     frequency: "Common",
-    frequencyColor: "text-amber-400",
+    frequencyColor: "text-amber-900",
     icon: Shield,
     description:
       "Designing the happy path only. No discussion of what happens when a dependency is slow, a node fails, or traffic spikes 10x.",
@@ -151,7 +151,7 @@ const FAILURE_REASONS = [
     rank: 7,
     title: "Microservices Soup (Over-engineering)",
     frequency: "Moderately Common",
-    frequencyColor: "text-amber-400",
+    frequencyColor: "text-amber-900",
     icon: Layers,
     description:
       "Jumping to complex distributed architecture without justification. 15 microservices for a system that could start as a monolith.",
@@ -165,7 +165,7 @@ const FAILURE_REASONS = [
     rank: 8,
     title: "No Data Model Tied to Access Patterns",
     frequency: "Moderately Common",
-    frequencyColor: "text-amber-400",
+    frequencyColor: "text-amber-900",
     icon: Zap,
     description:
       "Picking a database 'because it's fast' without tying the schema or keys to actual read/write patterns.",
@@ -345,7 +345,7 @@ const DRILL_LINKS: Record<
     label: "Use Time-Boxed Practice Timer",
     anchor: "sd-time-boxed-timer",
     color:
-      "text-amber-400 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20",
+      "text-amber-900 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20",
   },
   5: {
     label: "Open Scale Estimation Calculator",
@@ -444,7 +444,7 @@ function FailurePatternSelfAssessment() {
   return (
     <div className="rounded-xl border border-border bg-card p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <ClipboardCheck size={14} className="text-amber-400" />
+        <ClipboardCheck size={14} className="text-amber-900" />
         <h3 className="text-sm font-semibold text-foreground">
           Failure Pattern Self-Assessment
         </h3>
@@ -532,7 +532,7 @@ function FailurePatternSelfAssessment() {
                       ? opt === "yes"
                         ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
                         : opt === "sometimes"
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-400"
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-900"
                           : "bg-red-500/20 border-red-500/50 text-red-400"
                       : "bg-background border-border text-muted-foreground hover:border-foreground/30"
                   }`}
@@ -618,7 +618,7 @@ function InterviewerPerspectiveSimulator() {
                 ? "border-purple-500/40 bg-purple-500/10 text-purple-400"
                 : result.verdict.includes("L6")
                   ? "border-blue-500/40 bg-blue-500/10 text-blue-400"
-                  : "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                  : "border-amber-500/40 bg-amber-500/10 text-amber-900"
             }`}
           >
             {result.verdict}
@@ -857,7 +857,7 @@ function RubricTable() {
                       row.weight === "Very High"
                         ? "bg-red-500/20 text-red-400"
                         : row.weight === "High"
-                          ? "bg-amber-500/20 text-amber-400"
+                          ? "bg-amber-500/20 text-amber-900"
                           : "bg-secondary text-muted-foreground"
                     }`}
                   >

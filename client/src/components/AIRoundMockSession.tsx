@@ -469,10 +469,10 @@ function ScoreBar({ label, score, feedback, icon }: { label: string; score: numb
   return (
     <div className="space-y-1">
       <button onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-2 text-left group">
-        <span className="text-gray-500 flex-shrink-0">{icon}</span>
+        <span className="text-gray-700 flex-shrink-0">{icon}</span>
         <span className="text-xs font-semibold text-gray-700 flex-1">{label}</span>
-        <span className={`text-xs font-bold ${score >= 4 ? "text-emerald-600" : score >= 3 ? "text-amber-600" : "text-red-600"}`}>{score}/5</span>
-        {open ? <ChevronUp size={12} className="text-gray-400" /> : <ChevronDown size={12} className="text-gray-400" />}
+        <span className={`text-xs font-bold ${score >= 4 ? "text-emerald-600" : score >= 3 ? "text-amber-800" : "text-red-600"}`}>{score}/5</span>
+        {open ? <ChevronUp size={12} className="text-gray-600" /> : <ChevronDown size={12} className="text-gray-600" />}
       </button>
       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
@@ -616,7 +616,7 @@ export default function AIRoundMockSession() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const timerColor = timeLeft < 300 ? "text-red-600" : timeLeft < 900 ? "text-amber-600" : "text-emerald-600";
+  const timerColor = timeLeft < 300 ? "text-red-600" : timeLeft < 900 ? "text-amber-800" : "text-emerald-600";
 
   // ── Setup phase ──────────────────────────────────────────────────────────────
   if (phase === "setup") {
@@ -686,10 +686,10 @@ export default function AIRoundMockSession() {
                   <div className="flex items-start justify-between gap-2">
                     <span className="text-xs font-bold text-gray-800">{p.title}</span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                      p.difficulty === "Hard" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+                      p.difficulty === "Hard" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-900"
                     }`}>{p.difficulty}</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 mt-0.5">{p.domain}</p>
+                  <p className="text-[10px] text-gray-700 mt-0.5">{p.domain}</p>
                 </button>
               ))}
             </div>
@@ -707,7 +707,7 @@ export default function AIRoundMockSession() {
             { icon: <Brain size={14} />, label: "Problem Solving", color: "text-blue-600 bg-blue-50 border-blue-200" },
             { icon: <Code2 size={14} />, label: "Code Development", color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
             { icon: <ShieldCheck size={14} />, label: "Verification", color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-            { icon: <MessageSquare size={14} />, label: "Communication", color: "text-amber-600 bg-amber-50 border-amber-200" },
+            { icon: <MessageSquare size={14} />, label: "Communication", color: "text-amber-800 bg-amber-100 border-amber-200" },
           ].map((l) => (
             <div key={l.label} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold ${l.color}`}>
               {l.icon} {l.label}
@@ -736,10 +736,10 @@ export default function AIRoundMockSession() {
           <div className="flex items-center gap-2">
             <Clock size={16} className={timerColor} />
             <span className={`font-mono font-bold text-lg ${timerColor}`}>{formatTime(timeLeft)}</span>
-            <span className="text-xs text-gray-400">remaining</span>
+            <span className="text-xs text-gray-600">remaining</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-300 font-semibold">{selectedProblem.title}</span>
+            <span className="text-xs text-gray-700 font-semibold">{selectedProblem.title}</span>
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
               selectedProblem.difficulty === "Hard" ? "bg-red-900 text-red-200" : "bg-amber-900 text-amber-200"
             }`}>{selectedProblem.difficulty}</span>
@@ -761,7 +761,7 @@ export default function AIRoundMockSession() {
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
                 i === currentPhaseIdx
                   ? PHASE_COLORS[p.type]
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                  : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
               }`}
             >
               {PHASE_ICONS[p.type]}
@@ -813,7 +813,7 @@ export default function AIRoundMockSession() {
             <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${PHASE_COLORS[currentP.type]}`}>
               {PHASE_ICONS[currentP.type]} {currentP.type.replace("-", " ").replace(/\b\w/g, c => c.toUpperCase())}
             </span>
-            <span className="text-xs text-gray-500 flex items-center gap-1"><Clock size={11} /> {currentP.timeTarget}</span>
+            <span className="text-xs text-gray-700 flex items-center gap-1"><Clock size={11} /> {currentP.timeTarget}</span>
           </div>
           <h4 className="text-sm font-bold text-gray-900">{currentP.title}</h4>
           <p className="text-sm text-gray-600 leading-relaxed">{currentP.description}</p>
@@ -822,13 +822,13 @@ export default function AIRoundMockSession() {
           <div>
             <button
               onClick={() => setShowHint(h => { const n = [...h]; n[currentPhaseIdx] = !n[currentPhaseIdx]; return n; })}
-              className="flex items-center gap-1.5 text-xs text-amber-600 font-semibold hover:text-amber-800 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-amber-800 font-semibold hover:text-amber-800 transition-colors"
             >
               <Lightbulb size={13} />
               {showHint[currentPhaseIdx] ? "Hide hint" : "Show hint"}
             </button>
             {showHint[currentPhaseIdx] && (
-              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+              <div className="mt-2 p-3 bg-amber-100 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
                 {currentP.hint}
               </div>
             )}
@@ -934,7 +934,7 @@ export default function AIRoundMockSession() {
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
             <div className="w-12 h-12 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin" />
-            <p className="text-sm text-gray-500">Generating IC-level debrief…</p>
+            <p className="text-sm text-gray-700">Generating IC-level debrief…</p>
           </div>
         )}
 
@@ -989,7 +989,7 @@ export default function AIRoundMockSession() {
                   ))}
                 </ul>
               </div>
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <div className="bg-red-100 border border-red-200 rounded-xl p-4">
                 <p className="text-xs font-bold text-red-800 mb-2 flex items-center gap-1.5"><AlertTriangle size={13} /> Top Improvements</p>
                 <ul className="space-y-1.5">
                   {result.topImprovements.map((s, i) => (
@@ -1100,12 +1100,12 @@ export default function AIRoundMockSession() {
                           {!drillRevealIdx.includes(i) ? (
                             <button
                               onClick={() => setDrillRevealIdx(v => [...v, i])}
-                              className="text-[10px] font-semibold text-amber-600 hover:text-amber-800 flex items-center gap-1 border border-amber-200 rounded px-2 py-0.5 bg-amber-50"
+                              className="text-[10px] font-semibold text-amber-800 hover:text-amber-800 flex items-center gap-1 border border-amber-200 rounded px-2 py-0.5 bg-amber-100"
                             >
                               <Lightbulb size={10} /> Show Hint
                             </button>
                           ) : (
-                            <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                            <p className="text-[10px] text-amber-900 bg-amber-100 border border-amber-200 rounded px-2 py-1">
                               💡 {c.hint}
                             </p>
                           )}
@@ -1139,7 +1139,7 @@ export default function AIRoundMockSession() {
                     <div className={`flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-lg w-fit border ${PHASE_COLORS[p.type]}`}>
                       {PHASE_ICONS[p.type]} {p.title}
                     </div>
-                    <p className="text-xs text-gray-500 italic">{p.description}</p>
+                    <p className="text-xs text-gray-700 italic">{p.description}</p>
                     <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-700 font-mono whitespace-pre-wrap leading-relaxed">
                       {phaseAnswers[i] || "(no answer provided)"}
                     </div>

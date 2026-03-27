@@ -30,7 +30,7 @@ function saveEntries(entries: DebriefEntry[]) {
 }
 
 const RATING_LABELS = ["", "Very rough", "Struggled", "Got through it", "Solid", "Nailed it"];
-const RATING_COLORS = ["", "text-red-600", "text-orange-600", "text-amber-600", "text-emerald-600", "text-blue-600"];
+const RATING_COLORS = ["", "text-red-600", "text-orange-800", "text-amber-800", "text-emerald-600", "text-blue-600"];
 
 export default function CodingSessionDebriefLog() {
   const [entries, setEntries] = useState<DebriefEntry[]>([]);
@@ -87,7 +87,7 @@ export default function CodingSessionDebriefLog() {
           <h3 className="text-sm font-bold text-gray-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Coding Session Debrief Log
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-gray-700 mt-0.5">
             {entries.length} session{entries.length !== 1 ? "s" : ""} logged
             {entries.length > 0 && ` · avg self-rating ${avgRating.toFixed(1)}/5`}
           </p>
@@ -179,7 +179,7 @@ export default function CodingSessionDebriefLog() {
                     className={`w-7 h-7 rounded-lg text-xs font-bold border transition-all ${
                       form.selfRating === r
                         ? "bg-indigo-600 text-white border-indigo-600"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-indigo-300"
+                        : "bg-white text-gray-700 border-gray-200 hover:border-indigo-300"
                     }`}
                   >
                     {r}
@@ -215,7 +215,7 @@ export default function CodingSessionDebriefLog() {
       {/* Search */}
       {entries.length > 0 && (
         <div className="relative">
-          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
           <input
             type="text"
             placeholder="Search sessions by problem, pattern, or stuck point…"
@@ -229,9 +229,9 @@ export default function CodingSessionDebriefLog() {
       {/* Session history */}
       {filtered.length === 0 && entries.length === 0 && (
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
-          <BookOpen size={20} className="text-gray-300 mx-auto mb-2" />
-          <p className="text-sm text-gray-500">No debriefs yet.</p>
-          <p className="text-xs text-gray-400 mt-1">After each coding session, log a debrief to track patterns, stuck points, and improvements over time.</p>
+          <BookOpen size={20} className="text-gray-700 mx-auto mb-2" />
+          <p className="text-sm text-gray-700">No debriefs yet.</p>
+          <p className="text-xs text-gray-600 mt-1">After each coding session, log a debrief to track patterns, stuck points, and improvements over time.</p>
         </div>
       )}
 
@@ -245,8 +245,8 @@ export default function CodingSessionDebriefLog() {
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex-shrink-0">
                   {expandedId === entry.id
-                    ? <ChevronDown size={13} className="text-gray-400" />
-                    : <ChevronRight size={13} className="text-gray-400" />}
+                    ? <ChevronDown size={13} className="text-gray-600" />
+                    : <ChevronRight size={13} className="text-gray-600" />}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-gray-800 truncate">{entry.problemName}</p>
@@ -256,7 +256,7 @@ export default function CodingSessionDebriefLog() {
                         {entry.patternUsed}
                       </span>
                     )}
-                    <span className="flex items-center gap-0.5 text-[10px] text-gray-400">
+                    <span className="flex items-center gap-0.5 text-[10px] text-gray-600">
                       <Clock size={9} /> {entry.timeSpent}m
                     </span>
                   </div>
@@ -268,7 +268,7 @@ export default function CodingSessionDebriefLog() {
                     {entry.selfRating}/5
                   </span>
                 )}
-                <span className="text-[10px] text-gray-400">
+                <span className="text-[10px] text-gray-600">
                   {new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </span>
               </div>
@@ -278,13 +278,13 @@ export default function CodingSessionDebriefLog() {
               <div className="border-t border-gray-100 px-4 py-3 space-y-2.5 bg-gray-50/50">
                 {entry.stuckPoint && (
                   <div>
-                    <p className="text-[11px] font-bold text-gray-500 mb-0.5">Where I got stuck</p>
+                    <p className="text-[11px] font-bold text-gray-700 mb-0.5">Where I got stuck</p>
                     <p className="text-xs text-gray-700 leading-relaxed">{entry.stuckPoint}</p>
                   </div>
                 )}
                 {entry.wouldDoDifferently && (
                   <div>
-                    <p className="text-[11px] font-bold text-gray-500 mb-0.5">What I'd do differently</p>
+                    <p className="text-[11px] font-bold text-gray-700 mb-0.5">What I'd do differently</p>
                     <p className="text-xs text-gray-700 leading-relaxed">{entry.wouldDoDifferently}</p>
                   </div>
                 )}

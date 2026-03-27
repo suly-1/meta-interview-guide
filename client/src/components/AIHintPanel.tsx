@@ -18,7 +18,7 @@ type HintLevel = 'gentle' | 'medium' | 'strong';
 
 const HINT_LEVELS: { value: HintLevel; label: string; description: string; color: string }[] = [
   { value: 'gentle', label: 'Gentle Nudge', description: 'Point to the right data structure or approach family', color: 'text-emerald-600 dark:text-emerald-400' },
-  { value: 'medium', label: 'Key Insight', description: 'Describe the core algorithmic idea at a high level', color: 'text-amber-600 dark:text-amber-400' },
+  { value: 'medium', label: 'Key Insight', description: 'Describe the core algorithmic idea at a high level', color: 'text-amber-800 dark:text-amber-900' },
   { value: 'strong', label: 'Step-by-Step', description: 'Walk through the algorithm in plain English (no code)', color: 'text-red-600 dark:text-red-400' },
 ];
 
@@ -53,14 +53,14 @@ export default function AIHintPanel({ problemName, currentCode = '', compact = f
       <div className="mt-2">
         <button
           onClick={() => setIsOpen(v => !v)}
-          className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+          className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-900 hover:text-amber-900 dark:hover:text-amber-800 font-medium transition-colors"
         >
           <Lightbulb className="w-3.5 h-3.5" />
           {isOpen ? 'Hide hint' : 'Get AI Hint'}
           {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </button>
         {isOpen && (
-          <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
+          <div className="mt-2 p-3 bg-amber-100 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
             <HintContent
               problemName={problemName}
               code={code}
@@ -83,16 +83,16 @@ export default function AIHintPanel({ problemName, currentCode = '', compact = f
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-amber-200 dark:border-amber-700 overflow-hidden">
-      <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700">
+      <div className="flex items-center justify-between p-4 bg-amber-100 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-5 h-5 text-amber-500" />
           <div>
             <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">AI Hint</h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{problemName}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{problemName}</p>
           </div>
         </div>
         {hint && (
-          <button onClick={handleReset} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <button onClick={handleReset} className="text-gray-600 hover:text-gray-600 dark:hover:text-gray-200">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -146,13 +146,13 @@ function HintContent({
             {levelInfo.label} Hint
           </div>
         )}
-        <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200 dark:border-amber-700">
+        <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed bg-amber-100 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200 dark:border-amber-700">
           {hint}
         </div>
         <div className="flex gap-2">
           <button
             onClick={onReset}
-            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
+            className="text-xs text-gray-700 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 underline"
           >
             Get another hint
           </button>
@@ -165,7 +165,7 @@ function HintContent({
     <div className="space-y-3">
       {/* Hint level selector */}
       <div>
-        <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block">
+        <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2 block">
           Hint Strength
         </label>
         <div className="flex gap-2 flex-wrap">
@@ -175,8 +175,8 @@ function HintContent({
               onClick={() => setHintLevel(level.value)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 hintLevel === level.value
-                  ? 'bg-amber-100 dark:bg-amber-900/40 border-amber-400 dark:border-amber-500 text-amber-800 dark:text-amber-200'
-                  : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-amber-300 dark:hover:border-amber-600'
+                  ? 'bg-amber-100 dark:bg-amber-900/40 border-amber-400 dark:border-amber-500 text-amber-800 dark:text-amber-100'
+                  : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-amber-300 dark:hover:border-amber-600'
               }`}
               title={level.description}
             >
@@ -184,7 +184,7 @@ function HintContent({
             </button>
           ))}
         </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+        <p className="text-xs text-gray-600 dark:text-gray-200 mt-1">
           {HINT_LEVELS.find(l => l.value === hintLevel)?.description}
         </p>
       </div>
@@ -192,7 +192,7 @@ function HintContent({
       {/* Optional code input */}
       {!compact && (
         <div>
-          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">
+          <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-1.5 block">
             Your current approach (optional)
           </label>
           <textarea

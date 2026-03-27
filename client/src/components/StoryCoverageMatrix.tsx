@@ -111,7 +111,7 @@ export function StoryCoverageMatrix() {
           </p>
           <div className="flex items-center gap-3 mt-2">
             <div
-              className={`text-xs font-bold ${coveragePct >= 80 ? "text-emerald-400" : coveragePct >= 50 ? "text-amber-400" : "text-red-400"}`}
+              className={`text-xs font-bold ${coveragePct >= 80 ? "text-emerald-400" : coveragePct >= 50 ? "text-amber-900" : "text-red-400"}`}
             >
               {coveragePct}% covered
             </div>
@@ -154,7 +154,7 @@ export function StoryCoverageMatrix() {
                 Overall story coverage
               </span>
               <span
-                className={`font-bold ${coveragePct >= 80 ? "text-emerald-400" : coveragePct >= 50 ? "text-amber-400" : "text-red-400"}`}
+                className={`font-bold ${coveragePct >= 80 ? "text-emerald-400" : coveragePct >= 50 ? "text-amber-900" : "text-red-400"}`}
               >
                 {totalCovered}/{totalQuestions} ({coveragePct}%)
               </span>
@@ -189,7 +189,7 @@ export function StoryCoverageMatrix() {
 
           {weakValues.length > 0 && (
             <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
                 <Info size={12} />
                 Partial Coverage — More Stories Recommended
               </div>
@@ -197,7 +197,7 @@ export function StoryCoverageMatrix() {
                 {weakValues.map(vc => (
                   <span
                     key={vc.value.name}
-                    className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-semibold border border-amber-500/30"
+                    className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 text-[10px] font-semibold border border-amber-500/30"
                   >
                     {vc.value.name} ({vc.covered}/{vc.total})
                   </span>
@@ -232,7 +232,7 @@ export function StoryCoverageMatrix() {
                       </span>
                     </div>
                     <span
-                      className={`text-xs font-bold ${pct === 100 ? "text-emerald-400" : pct > 0 ? "text-amber-400" : "text-red-400"}`}
+                      className={`text-xs font-bold ${pct === 100 ? "text-emerald-400" : pct > 0 ? "text-amber-900" : "text-red-400"}`}
                     >
                       {pct}%
                     </span>

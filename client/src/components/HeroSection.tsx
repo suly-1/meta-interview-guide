@@ -77,7 +77,7 @@ function AchievementBadges({
   return (
     <div className="prep-card p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Award size={14} className="text-amber-400" />
+        <Award size={14} className="text-amber-900" />
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Achievement Badges
         </span>
@@ -94,7 +94,7 @@ function AchievementBadges({
               title={b.desc}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
                 isEarned
-                  ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
+                  ? "bg-amber-500/15 border-amber-500/40 text-amber-800"
                   : "bg-secondary border-border text-muted-foreground opacity-40 grayscale"
               }`}
             >
@@ -185,7 +185,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
               size={24}
               className={
                 streak.currentStreak > 0
-                  ? "text-orange-400"
+                  ? "text-orange-900"
                   : "text-muted-foreground"
               }
             />
@@ -319,7 +319,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                 className={
                   daysLeft !== null && daysLeft <= 7
                     ? "text-red-400"
-                    : "text-amber-400"
+                    : "text-amber-900"
                 }
               />
               <span className="text-xs text-muted-foreground font-medium">
@@ -332,7 +332,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                   ? "text-muted-foreground"
                   : daysLeft <= 7
                     ? "text-red-400"
-                    : "text-amber-400"
+                    : "text-amber-900"
               }`}
             >
               {daysLeft === null

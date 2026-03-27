@@ -165,8 +165,8 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
   const getVerdict = (s: number) => {
     if (s >= 7) return { label: "Strong Hire", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
     if (s >= 5) return { label: "Hire", color: "text-blue-600", bg: "bg-blue-50 border-blue-200" };
-    if (s >= 3) return { label: "Lean Hire", color: "text-amber-600", bg: "bg-amber-50 border-amber-200" };
-    return { label: "No Hire", color: "text-red-600", bg: "bg-red-50 border-red-200" };
+    if (s >= 3) return { label: "Lean Hire", color: "text-amber-800", bg: "bg-amber-100 border-amber-200" };
+    return { label: "No Hire", color: "text-red-600", bg: "bg-red-100 border-red-200" };
   };
 
   // IDLE
@@ -181,7 +181,7 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Sprint Mode
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">8 problems · 30 seconds each · Pattern identification</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">8 problems · 30 seconds each · Pattern identification</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-5">
@@ -192,11 +192,11 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
           ].map(item => (
             <div key={item.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
               <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.value}</div>
-              <div className="text-xs text-gray-500">{item.label}</div>
+              <div className="text-xs text-gray-700">{item.label}</div>
             </div>
           ))}
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-5">
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-5">
           You'll see a LeetCode problem name and must identify which pattern it belongs to from 4 choices.
           The faster and more accurately you answer, the higher your score.
         </p>
@@ -223,11 +223,11 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Zap size={16} className="text-yellow-500" />
-            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Problem {currentIdx + 1} of {SPRINT_COUNT}</span>
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Problem {currentIdx + 1} of {SPRINT_COUNT}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock size={14} className={timeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-400"} />
-            <span className={`text-lg font-bold tabular-nums ${timeLeft <= 5 ? "text-red-600" : "text-gray-700 dark:text-gray-300"}`}>
+            <Clock size={14} className={timeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-600"} />
+            <span className={`text-lg font-bold tabular-nums ${timeLeft <= 5 ? "text-red-600" : "text-gray-700 dark:text-gray-200"}`}>
               {timeLeft}s
             </span>
           </div>
@@ -244,7 +244,7 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
 
         {/* Problem */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-5 text-center">
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Identify the pattern</p>
+          <p className="text-xs text-gray-600 uppercase tracking-widest mb-1">Identify the pattern</p>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {current.problem}
           </h3>
@@ -256,7 +256,7 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
             let cls = "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20";
             if (answered) {
               if (choice === current.correctPattern) cls = "border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20";
-              else if (choice === chosen) cls = "border-red-400 bg-red-50 dark:bg-red-900/20";
+              else if (choice === chosen) cls = "border-red-400 bg-red-100 dark:bg-red-900/20";
               else cls = "border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 opacity-50";
             }
             return (
@@ -298,28 +298,28 @@ export default function SprintMode({ focusPatterns, autoStart, onComplete }: Spr
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{score}/{SPRINT_COUNT}</div>
-          <div className="text-xs text-gray-500">Correct</div>
+          <div className="text-xs text-gray-700">Correct</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{Math.round((score / SPRINT_COUNT) * 100)}%</div>
-          <div className="text-xs text-gray-500">Accuracy</div>
+          <div className="text-xs text-gray-700">Accuracy</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{avgTime}s</div>
-          <div className="text-xs text-gray-500">Avg Time</div>
+          <div className="text-xs text-gray-700">Avg Time</div>
         </div>
       </div>
 
       {/* Per-problem breakdown */}
       <div className="space-y-2 mb-6">
         {results.map((r, i) => (
-          <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg text-sm ${r.correct ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-50 dark:bg-red-900/20"}`}>
+          <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg text-sm ${r.correct ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-100 dark:bg-red-900/20"}`}>
             {r.correct
               ? <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
               : <XCircle size={15} className="text-red-500 flex-shrink-0" />}
             <span className="flex-1 font-medium text-gray-800 dark:text-gray-200 truncate">{r.problem}</span>
-            <span className="text-xs text-gray-500 flex-shrink-0">{r.correct ? r.correctPattern : `→ ${r.correctPattern}`}</span>
-            <span className="text-xs text-gray-400 flex-shrink-0 tabular-nums">{r.timeUsed}s</span>
+            <span className="text-xs text-gray-700 flex-shrink-0">{r.correct ? r.correctPattern : `→ ${r.correctPattern}`}</span>
+            <span className="text-xs text-gray-600 flex-shrink-0 tabular-nums">{r.timeUsed}s</span>
           </div>
         ))}
       </div>

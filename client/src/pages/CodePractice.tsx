@@ -384,7 +384,7 @@ function StatusBadge({ statusId, desc }: { statusId: number; desc: string }) {
   const color =
     statusId === 3 ? "bg-emerald-100 text-emerald-700 border-emerald-300" :
     statusId === 6 ? "bg-red-100 text-red-700 border-red-300" :
-    statusId >= 4 && statusId <= 14 ? "bg-amber-100 text-amber-700 border-amber-300" :
+    statusId >= 4 && statusId <= 14 ? "bg-amber-100 text-amber-900 border-amber-300" :
     "bg-gray-100 text-gray-600 border-gray-300";
   const icon = statusId === 3 ? "✅" : statusId === 6 ? "❌" : statusId >= 4 ? "⚠️" : "ℹ️";
   return (
@@ -412,11 +412,11 @@ function PracticeTimer({ running, onReset, onTick }: { running: boolean; onReset
   const fmt = (n: number) => String(n).padStart(2, "0");
   return (
     <div className="flex items-center gap-2">
-      <Clock size={14} className={running ? "text-blue-500 animate-pulse" : "text-gray-400"} />
+      <Clock size={14} className={running ? "text-blue-500 animate-pulse" : "text-gray-600"} />
       <span className={`font-mono text-sm font-bold ${secs > 2700 ? "text-red-500" : secs > 1500 ? "text-amber-500" : "text-foreground"}`}>
         {h > 0 ? `${fmt(h)}:` : ""}{fmt(m)}:{fmt(s)}
       </span>
-      <button onClick={() => { setSecs(0); onReset(); }} title="Reset timer" className="text-gray-400 hover:text-gray-600 transition-colors">
+      <button onClick={() => { setSecs(0); onReset(); }} title="Reset timer" className="text-gray-600 hover:text-gray-600 transition-colors">
         <RotateCcw size={12} />
       </button>
     </div>
@@ -501,8 +501,8 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Total Solved", value: totalSolved, icon: <CheckCircle2 size={16} className="text-emerald-500" />, color: "border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20" },
-          { label: "Starred", value: totalStarred, icon: <Star size={16} className="text-yellow-500 fill-current" />, color: "border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20" },
-          { label: "Today", value: todaySolved, icon: <Flame size={16} className="text-orange-500" />, color: "border-orange-200 bg-orange-50 dark:bg-orange-900/20" },
+          { label: "Starred", value: totalStarred, icon: <Star size={16} className="text-yellow-500 fill-current" />, color: "border-yellow-200 bg-yellow-100 dark:bg-yellow-900/20" },
+          { label: "Today", value: todaySolved, icon: <Flame size={16} className="text-orange-500" />, color: "border-orange-200 bg-orange-100 dark:bg-orange-900/20" },
           { label: "This Week", value: weekTotal, icon: <TrendingUp size={16} className="text-blue-500" />, color: "border-blue-200 bg-blue-50 dark:bg-blue-900/20" },
         ].map(card => (
           <div key={card.label} className={`rounded-xl border p-3 ${card.color}`}>
@@ -565,7 +565,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
             {Object.entries(diffStats).map(([diff, { total, solved }]) => {
               const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
               const barColor = diff === "Easy" ? "bg-emerald-500" : diff === "Medium" ? "bg-amber-500" : "bg-red-500";
-              const textColor = diff === "Easy" ? "text-emerald-600" : diff === "Medium" ? "text-amber-600" : "text-red-600";
+              const textColor = diff === "Easy" ? "text-emerald-600" : diff === "Medium" ? "text-amber-800" : "text-red-600";
               return (
                 <div key={diff}>
                   <div className="flex items-center justify-between mb-1">
@@ -618,8 +618,8 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         </div>
         <div className="grid grid-cols-3 gap-3">
           {avgByDiff.map(({ diff, avg, count }) => {
-            const textColor = diff === "Easy" ? "text-emerald-600" : diff === "Medium" ? "text-amber-600" : "text-red-600";
-            const bgColor = diff === "Easy" ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20" : diff === "Medium" ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20" : "bg-red-50 border-red-200 dark:bg-red-900/20";
+            const textColor = diff === "Easy" ? "text-emerald-600" : diff === "Medium" ? "text-amber-800" : "text-red-600";
+            const bgColor = diff === "Easy" ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20" : diff === "Medium" ? "bg-amber-100 border-amber-200 dark:bg-amber-900/20" : "bg-red-100 border-red-200 dark:bg-red-900/20";
             const mins = avg ? Math.floor(avg / 60) : null;
             const secs = avg ? avg % 60 : null;
             return (
@@ -649,7 +649,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
             {leaderboard.slice(0, 10).map((e, i) => {
               const mins = Math.floor(e.timeSec / 60);
               const secs = e.timeSec % 60;
-              const dc = { Easy: "text-emerald-600", Medium: "text-amber-600", Hard: "text-red-600" }[e.difficulty] ?? "";
+              const dc = { Easy: "text-emerald-600", Medium: "text-amber-800", Hard: "text-red-600" }[e.difficulty] ?? "";
               return (
                 <div key={e.id} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-1.5">
                   <span className="text-[10px] font-bold text-muted-foreground w-4 text-center">{i + 1}</span>
@@ -658,7 +658,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
                   <span className={`font-semibold text-[10px] ${dc}`}>{e.difficulty}</span>
                   {e.hintsUsed > 0 && <span className="text-[10px] text-amber-500" title="Hints used">💡{e.hintsUsed}</span>}
                   <span className="text-muted-foreground text-[10px] font-mono">{mins}:{String(secs).padStart(2, "0")}</span>
-                  <span className="text-orange-600 dark:text-orange-400 font-bold text-[10px]">{e.score}pts</span>
+                  <span className="text-orange-800 dark:text-orange-900 font-bold text-[10px]">{e.score}pts</span>
                 </div>
               );
             })}
@@ -674,14 +674,14 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
             <span className="text-xs font-semibold text-foreground">Speed Run Streak</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800 p-3 text-center">
-              <div className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 mb-1 uppercase tracking-wide">Current</div>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 font-mono">{srStreak.streak}</div>
+            <div className="rounded-lg border border-orange-200 bg-orange-100 dark:bg-orange-900/20 dark:border-orange-800 p-3 text-center">
+              <div className="text-[10px] font-semibold text-orange-800 dark:text-orange-900 mb-1 uppercase tracking-wide">Current</div>
+              <div className="text-2xl font-bold text-orange-800 dark:text-orange-900 font-mono">{srStreak.streak}</div>
               <div className="text-[10px] text-muted-foreground mt-0.5">days</div>
             </div>
-            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-3 text-center">
-              <div className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 mb-1 uppercase tracking-wide">Best</div>
-              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 font-mono">{srStreak.longestStreak}</div>
+            <div className="rounded-lg border border-amber-200 bg-amber-100 dark:bg-amber-900/20 dark:border-amber-800 p-3 text-center">
+              <div className="text-[10px] font-semibold text-amber-800 dark:text-amber-900 mb-1 uppercase tracking-wide">Best</div>
+              <div className="text-2xl font-bold text-amber-800 dark:text-amber-900 font-mono">{srStreak.longestStreak}</div>
               <div className="text-[10px] text-muted-foreground mt-0.5">days</div>
             </div>
             <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
@@ -733,7 +733,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
 
             {/* Summary stats */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800 p-2.5 text-center">
+              <div className="rounded-lg border border-yellow-200 bg-yellow-100 dark:bg-yellow-900/20 dark:border-yellow-800 p-2.5 text-center">
                 <div className="text-[10px] font-semibold text-yellow-600 dark:text-yellow-400 mb-0.5 uppercase tracking-wide">All-Time High</div>
                 <div className="text-xl font-black text-yellow-600 dark:text-yellow-400 font-mono">{allTimeHigh}</div>
                 <div className="text-[10px] text-muted-foreground">pts</div>
@@ -754,13 +754,13 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
             <div className="space-y-1.5 max-h-72 overflow-y-auto">
               {sorted.slice(0, 10).map((rec, i) => {
                 const isATH = rec.totalScore === allTimeHigh;
-                const diffColor: Record<string, string> = { Easy: "text-emerald-600", Medium: "text-amber-600", Hard: "text-red-600", All: "text-blue-600" };
+                const diffColor: Record<string, string> = { Easy: "text-emerald-600", Medium: "text-amber-800", Hard: "text-red-600", All: "text-blue-600" };
                 return (
                   <div
                     key={rec.id}
                     className={`rounded-lg px-3 py-2 border transition-all ${
                       isATH && tournamentSort === "score" && i === 0
-                        ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700"
+                        ? "bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700"
                         : "bg-muted/30 border-transparent"
                     }`}
                   >
@@ -768,8 +768,8 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
                       {/* Rank */}
                       <span className={`text-[10px] font-black w-5 text-center flex-shrink-0 ${
                         i === 0 && tournamentSort === "score" ? "text-yellow-500" :
-                        i === 1 && tournamentSort === "score" ? "text-gray-400" :
-                        i === 2 && tournamentSort === "score" ? "text-amber-700" :
+                        i === 1 && tournamentSort === "score" ? "text-gray-600" :
+                        i === 2 && tournamentSort === "score" ? "text-amber-900" :
                         "text-muted-foreground"
                       }`}>
                         {tournamentSort === "score" ? (i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`) : `#${i + 1}`}
@@ -945,7 +945,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
                       {entry.scores.map((s, j) => (
                         <span key={j} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
                           s >= 60 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                          s >= 30 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                          s >= 30 ? "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-900" :
                           "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                         }`} title={entry.problemNames[j]}>
                           P{j + 1}: {s}pts
@@ -1011,7 +1011,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
                     if (!window.confirm("Clear all difficulty ratings? This cannot be undone.")) return;
                     onClearAssessments();
                   }}
-                  className="text-[10px] font-semibold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="text-[10px] font-semibold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/20"
                   title="Clear all self-assessments"
                 >
                   <Trash2 size={10} /> Clear
@@ -1201,7 +1201,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         const VERDICT_COLORS: Record<string, string> = {
           "Strong Hire": "text-emerald-700 bg-emerald-100",
           "Hire": "text-blue-700 bg-blue-100",
-          "Borderline": "text-amber-700 bg-amber-100",
+          "Borderline": "text-amber-900 bg-amber-100",
           "No Hire": "text-red-700 bg-red-100",
         };
         return (
@@ -1237,7 +1237,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
         const VERDICT_COLORS: Record<string, string> = {
           "Strong Hire": "text-emerald-700 bg-emerald-100",
           "Hire": "text-blue-700 bg-blue-100",
-          "Borderline": "text-amber-700 bg-amber-100",
+          "Borderline": "text-amber-900 bg-amber-100",
           "No Hire": "text-red-700 bg-red-100",
         };
         return (
@@ -1339,7 +1339,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
       {/* Recent session log */}
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <History size={13} className="text-gray-500" />
+          <History size={13} className="text-gray-700" />
           <span className="text-xs font-semibold text-foreground">Recent Solves</span>
           <span className="text-xs text-muted-foreground ml-auto">{session.length} total</span>
         </div>
@@ -1351,7 +1351,7 @@ function StatsDashboard({ session, progress, leaderboard, sprintHistory, assessm
               const langName = LANGUAGES.find(l => l.id === e.langId)?.name ?? "?";
               const mins = Math.floor(e.timeSec / 60);
               const secs = e.timeSec % 60;
-              const dc = { Easy: "text-emerald-600", Medium: "text-amber-600", Hard: "text-red-600" }[e.difficulty] ?? "";
+              const dc = { Easy: "text-emerald-600", Medium: "text-amber-800", Hard: "text-red-600" }[e.difficulty] ?? "";
               return (
                 <div key={i} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-1.5">
                   <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0" />
@@ -2312,8 +2312,8 @@ export default function CodePractice() {
 
   const diffColors: Record<string, string> = {
     Easy: "text-emerald-600 bg-emerald-50 border-emerald-200",
-    Medium: "text-amber-600 bg-amber-50 border-amber-200",
-    Hard: "text-red-600 bg-red-50 border-red-200"
+    Medium: "text-amber-800 bg-amber-100 border-amber-200",
+    Hard: "text-red-600 bg-red-100 border-red-200"
   };
 
   return (
@@ -2326,7 +2326,7 @@ export default function CodePractice() {
           {sidebarOpen && sprintStreakToday >= 3 && (
             <span
               title={`${sprintStreakToday} sprints completed today — on fire! 🔥`}
-              className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700 animate-pulse ml-auto mr-1"
+              className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 border border-orange-300 dark:bg-orange-900/30 dark:text-orange-900 dark:border-orange-700 animate-pulse ml-auto mr-1"
             >
               🔥 {sprintStreakToday}
             </span>
@@ -2443,7 +2443,7 @@ export default function CodePractice() {
                   {weakTopicSuggestion && (
                     <button
                       onClick={() => setSprintTopic(weakTopicSuggestion.topic)}
-                      className="w-full text-left text-[10px] px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                      className="w-full text-left text-[10px] px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-900 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
                       title={`Your weakest topic — avg ${Math.round(weakTopicSuggestion.avg)} pts over ${weakTopicSuggestion.count} sprint${weakTopicSuggestion.count > 1 ? 's' : ''}`}
                     >
                       🎯 Focus area: <span className="font-bold">{weakTopicSuggestion.topic}</span>
@@ -2516,7 +2516,7 @@ export default function CodePractice() {
 
             {/* Progression lock notice for Hard problems */}
             {!progressionStats.hardUnlocked && (
-              <div className="mx-2 mb-1 px-2 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-[10px] text-red-700 dark:text-red-400">
+              <div className="mx-2 mb-1 px-2 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-[10px] text-red-700 dark:text-red-400">
                 <div className="flex items-center gap-1 font-bold mb-0.5"><Lock size={9} /> Hard locked</div>
                 <div className="text-[9px] text-red-600/80 dark:text-red-400/80">
                   Easy: {Math.round(progressionStats.easyPct * 100)}% / 60% needed
@@ -2588,7 +2588,7 @@ export default function CodePractice() {
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${diffColors[problem.difficulty]}`}>{problem.difficulty}</span>
                 {speedRunActive ? (
-                  <span className="flex items-center gap-1.5 text-sm font-semibold text-orange-600 dark:text-orange-400">
+                  <span className="flex items-center gap-1.5 text-sm font-semibold text-orange-800 dark:text-orange-900">
                     <EyeOff size={14} />
                     <span className="italic text-muted-foreground">Hidden — Speed Run active</span>
                   </span>
@@ -2628,8 +2628,8 @@ export default function CodePractice() {
                   <div
                     className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border transition-all ${
                       srStreak.streak >= 5
-                        ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400"
-                        : "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400"
+                        ? "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-900/30 dark:text-orange-900"
+                        : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-900"
                     }`}
                     title={`Speed Run streak: ${srStreak.streak} consecutive days${srStreak.longestStreak > srStreak.streak ? ` (best: ${srStreak.longestStreak})` : ""}`}
                   >
@@ -2642,7 +2642,7 @@ export default function CodePractice() {
                     {(["All", "Easy", "Med", "Hard"] as const).map(d => {
                       const val = d === "Med" ? "Medium" : d as "All" | "Easy" | "Hard";
                       const active = speedRunDifficulty === val;
-                      const color = d === "Easy" ? "text-emerald-600" : d === "Med" ? "text-amber-600" : d === "Hard" ? "text-red-600" : "text-foreground";
+                      const color = d === "Easy" ? "text-emerald-600" : d === "Med" ? "text-amber-800" : d === "Hard" ? "text-red-600" : "text-foreground";
                       return (
                         <button
                           key={d}
@@ -2663,7 +2663,7 @@ export default function CodePractice() {
                   title={speedRunActive ? "Stop Speed Run" : `Start Speed Run (20 min${speedRunDifficulty !== "All" ? `, ${speedRunDifficulty} only` : ""})`}
                   className={`flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-lg border transition-all ${
                     speedRunActive
-                      ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse"
+                      ? "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-900/30 dark:text-orange-900 animate-pulse"
                       : "bg-background border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
@@ -2729,8 +2729,8 @@ export default function CodePractice() {
                   combo >= 3
                     ? "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 animate-pulse"
                     : combo >= 2
-                    ? "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400"
-                    : "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400"
+                    ? "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-900/30 dark:text-orange-900"
+                    : "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/30 dark:text-amber-900"
                 }`} title={`Combo ×${comboMultiplier} — keep solving without hints to grow it!`}>
                   <span>🔥</span>
                   <span>×{comboMultiplier}</span>
@@ -2764,7 +2764,7 @@ export default function CodePractice() {
               <div className={`px-4 py-3 border-b flex-shrink-0 ${
                 speedRunScore.solved
                   ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-                  : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                  : "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800"
               }`}>
                 {/* Header row */}
                 <div className="flex items-center gap-3 mb-2">
@@ -2796,7 +2796,7 @@ export default function CodePractice() {
                     </span>
                   )}
                   {speedRunScore.hintPenalty > 0 && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-900">
                       −{speedRunScore.hintPenalty} hints ({speedRunScore.hintsUsed}×💡)
                     </span>
                   )}
@@ -2808,7 +2808,7 @@ export default function CodePractice() {
                   <span className="text-[10px] text-muted-foreground">=</span>
                   <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                     speedRunScore.score >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                    speedRunScore.score >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                    speedRunScore.score >= 50 ? "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-900" :
                     "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                   }`}>
                     {speedRunScore.score} pts
@@ -2830,7 +2830,7 @@ export default function CodePractice() {
 
             {/* Tournament active banner */}
             {tournament.active && (
-              <div className="px-4 py-2 border-b flex-shrink-0 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+              <div className="px-4 py-2 border-b flex-shrink-0 bg-yellow-100 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
                 <div className="flex items-center gap-3">
                   <Trophy size={14} className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -2871,7 +2871,7 @@ export default function CodePractice() {
 
             {/* Tournament done panel */}
             {tournament.done && (
-              <div className="px-4 py-3 border-b flex-shrink-0 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+              <div className="px-4 py-3 border-b flex-shrink-0 bg-yellow-100 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-2xl">🏆</span>
                   <div className="flex-1">
@@ -2887,7 +2887,7 @@ export default function CodePractice() {
                     <div key={i} className={`rounded-lg p-1.5 text-center border ${
                       r.solved
                         ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                        : "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800"
                     }`}>
                       <div className="text-[10px] font-bold">{r.solved ? "✅" : "❌"}</div>
                       <div className="text-[9px] text-muted-foreground truncate" title={r.problemName}>{r.problemName.slice(0,12)}{r.problemName.length > 12 ? "…" : ""}</div>
@@ -2991,7 +2991,7 @@ export default function CodePractice() {
 
             {/* Blitz Round active banner */}
             {blitz.active && (
-              <div className="px-4 py-2 border-b flex-shrink-0 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+              <div className="px-4 py-2 border-b flex-shrink-0 bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-3">
                   <Zap size={14} className="text-red-600 dark:text-red-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -3022,7 +3022,7 @@ export default function CodePractice() {
 
             {/* Blitz Round done panel */}
             {blitz.done && (
-              <div className="px-4 py-3 border-b flex-shrink-0 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+              <div className="px-4 py-3 border-b flex-shrink-0 bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-2xl">⚡</span>
                   <div className="flex-1">
@@ -3218,7 +3218,7 @@ export default function CodePractice() {
                           {output.compileOutput && (
                             <div>
                               <div className="text-[10px] text-amber-500 font-sans font-semibold mb-0.5">compile output</div>
-                              <pre className="bg-gray-900 text-amber-300 rounded p-2 text-xs overflow-x-auto whitespace-pre-wrap">{output.compileOutput}</pre>
+                              <pre className="bg-gray-900 text-amber-800 rounded p-2 text-xs overflow-x-auto whitespace-pre-wrap">{output.compileOutput}</pre>
                             </div>
                           )}
                         </div>
@@ -3242,7 +3242,7 @@ export default function CodePractice() {
                               Get
                             </button>
                           </div>
-                          {hintText && <div className="text-xs text-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded p-2 leading-relaxed">{hintText}</div>}
+                          {hintText && <div className="text-xs text-foreground bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded p-2 leading-relaxed">{hintText}</div>}
                         </div>
                       )}
                     </div>
@@ -3284,7 +3284,7 @@ export default function CodePractice() {
                       )}
 
                       {testCases.map((tc, i) => (
-                        <div key={tc.id} className={`rounded-lg border p-2 space-y-1.5 ${tc.result === "pass" ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20" : tc.result === "fail" || tc.result === "error" ? "border-red-300 bg-red-50 dark:bg-red-900/20" : "border-border bg-background"}`}>
+                        <div key={tc.id} className={`rounded-lg border p-2 space-y-1.5 ${tc.result === "pass" ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20" : tc.result === "fail" || tc.result === "error" ? "border-red-300 bg-red-100 dark:bg-red-900/20" : "border-border bg-background"}`}>
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-muted-foreground">Case {i + 1}</span>
                             {tc.result === "pass" && <span className="text-emerald-600 font-bold text-[10px]">✅ PASS</span>}
@@ -3316,7 +3316,7 @@ export default function CodePractice() {
                             </div>
                           </div>
                           {tc.result === "fail" && tc.actual !== undefined && (
-                            <div className="text-[10px] text-red-600 font-mono bg-red-50 dark:bg-red-900/30 rounded px-2 py-1">
+                            <div className="text-[10px] text-red-600 font-mono bg-red-100 dark:bg-red-900/30 rounded px-2 py-1">
                               Got: <span className="font-bold">{tc.actual || "(empty)"}</span>
                             </div>
                           )}
@@ -3355,7 +3355,7 @@ export default function CodePractice() {
                         const mins = Math.floor(e.timeSec / 60);
                         const secs = e.timeSec % 60;
                         const langName = LANGUAGES.find(l => l.id === e.langId)?.name ?? "?";
-                        const dc = { Easy: "text-emerald-600", Medium: "text-amber-600", Hard: "text-red-600" }[e.difficulty] ?? "";
+                        const dc = { Easy: "text-emerald-600", Medium: "text-amber-800", Hard: "text-red-600" }[e.difficulty] ?? "";
                         return (
                           <div key={i} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
                             <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0" />
@@ -3373,7 +3373,7 @@ export default function CodePractice() {
                   {outputTab === "submissions" && (
                     <div className="p-3 space-y-2 font-sans text-xs">
                       <div className="flex items-center gap-2 mb-1">
-                        <GitCommit size={12} className="text-gray-500" />
+                        <GitCommit size={12} className="text-gray-700" />
                         <span className="font-semibold text-foreground">Submission History</span>
                         <span className="text-muted-foreground ml-auto">{submissions.length} runs for this problem</span>
                       </div>
@@ -3566,7 +3566,7 @@ export default function CodePractice() {
                   {studyPlan.blocks.map((block, i) => {
                     const typeColors: Record<string, string> = {
                       coding: "border-blue-300 bg-blue-50 dark:bg-blue-900/20",
-                      behavioral: "border-amber-300 bg-amber-50 dark:bg-amber-900/20",
+                      behavioral: "border-amber-300 bg-amber-100 dark:bg-amber-900/20",
                       sr_review: "border-violet-300 bg-violet-50 dark:bg-violet-900/20",
                       system_design: "border-teal-300 bg-teal-50 dark:bg-teal-900/20",
                       break: "border-gray-200 bg-gray-50 dark:bg-gray-800/30",
@@ -3576,8 +3576,8 @@ export default function CodePractice() {
                     };
                     const priorityBadge: Record<string, string> = {
                       high: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-                      medium: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-                      low: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+                      medium: "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-900",
+                      low: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
                     };
                     return (
                       <div key={i} className={`border rounded-xl p-3 ${typeColors[block.type] ?? "border-border bg-card"}`}>
@@ -3779,7 +3779,7 @@ export default function CodePractice() {
                     className={`py-2 rounded-xl border-2 text-xs font-bold transition-all ${
                       tournament.difficulty === d
                         ? d === "Easy" ? "bg-emerald-100 border-emerald-400 text-emerald-700" :
-                          d === "Medium" ? "bg-amber-100 border-amber-400 text-amber-700" :
+                          d === "Medium" ? "bg-amber-100 border-amber-400 text-amber-900" :
                           d === "Hard" ? "bg-red-100 border-red-400 text-red-700" :
                           "bg-yellow-100 border-yellow-400 text-yellow-700"
                         : "bg-background border-border text-muted-foreground hover:bg-muted"
@@ -3833,14 +3833,14 @@ export default function CodePractice() {
             <div className="text-xs text-muted-foreground mb-3">
               Official rating: <span className={`font-bold ${
                 pendingAssessmentProblem.difficulty === "Easy" ? "text-emerald-600" :
-                pendingAssessmentProblem.difficulty === "Medium" ? "text-amber-600" : "text-red-600"
+                pendingAssessmentProblem.difficulty === "Medium" ? "text-amber-800" : "text-red-600"
               }`}>{pendingAssessmentProblem.difficulty}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {(["Easy", "Medium", "Hard", "Very Hard"] as const).map(rating => {
                 const colors: Record<string, string> = {
                   Easy: "bg-emerald-100 text-emerald-700 border-emerald-300 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400",
-                  Medium: "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400",
+                  Medium: "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-900",
                   Hard: "bg-red-100 text-red-700 border-red-300 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400",
                   "Very Hard": "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400",
                 };

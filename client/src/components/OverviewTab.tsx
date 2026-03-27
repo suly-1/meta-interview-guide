@@ -623,7 +623,7 @@ function ReadinessDashboard() {
           </div>
           <div className="text-right">
             <span
-              className={`text-2xl font-extrabold stat-num ${overallPct >= 80 ? "text-emerald-400" : overallPct >= 50 ? "text-amber-400" : "text-red-400"}`}
+              className={`text-2xl font-extrabold stat-num ${overallPct >= 80 ? "text-emerald-400" : overallPct >= 50 ? "text-amber-900" : "text-red-400"}`}
             >
               {overallPct}%
             </span>
@@ -695,7 +695,7 @@ function ReadinessDashboard() {
       {/* Weak-spot dashboard */}
       {(weakPatterns.length > 0 || weakBQ.length > 0) && (
         <div className="prep-card p-4 border-amber-500/20">
-          <div className="section-title text-amber-400 mb-3">
+          <div className="section-title text-amber-900 mb-3">
             ⚠ Weak-Spot Dashboard
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -841,7 +841,7 @@ function RecruiterCard({
               peer: mockPercentile,
             },
             {
-              icon: <Flame size={13} className="text-orange-400" />,
+              icon: <Flame size={13} className="text-orange-900" />,
               label: "Current Streak",
               value: `${streak} days`,
               peer:
@@ -859,7 +859,7 @@ function RecruiterCard({
                 {item.value}
               </div>
               <div
-                className={`text-xs mt-0.5 ${item.peer === "Top 20%" ? "text-emerald-400" : item.peer === "Top 50%" ? "text-amber-400" : "text-muted-foreground"}`}
+                className={`text-xs mt-0.5 ${item.peer === "Top 20%" ? "text-emerald-400" : item.peer === "Top 50%" ? "text-amber-900" : "text-muted-foreground"}`}
               >
                 {item.peer}
               </div>
@@ -883,14 +883,14 @@ function InterviewCountdown() {
   return (
     <div className="prep-card p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Calendar size={14} className="text-amber-400" />
+        <Calendar size={14} className="text-amber-900" />
         <span className="section-title mb-0 pb-0 border-0">
           Interview Countdown
         </span>
       </div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div
-          className={`text-5xl font-extrabold stat-num ${daysLeft === null ? "text-muted-foreground" : daysLeft <= 7 ? "text-red-400" : daysLeft <= 14 ? "text-amber-400" : "text-emerald-400"}`}
+          className={`text-5xl font-extrabold stat-num ${daysLeft === null ? "text-muted-foreground" : daysLeft <= 7 ? "text-red-400" : daysLeft <= 14 ? "text-amber-900" : "text-emerald-400"}`}
         >
           {daysLeft === null ? "—" : daysLeft === 0 ? "🎯" : `${daysLeft}d`}
         </div>
@@ -999,8 +999,8 @@ function PrepTimeline() {
 
       {/* Mode-specific warnings */}
       {mode === "fast" && (
-        <div className="mb-3 p-3 rounded-lg border border-orange-500/30 bg-orange-500/5 text-xs text-orange-300">
-          <span className="font-semibold text-orange-400">⚠️ Fast-Track: </span>
+        <div className="mb-3 p-3 rounded-lg border border-orange-500/30 bg-orange-500/5 text-xs text-orange-800">
+          <span className="font-semibold text-orange-900">⚠️ Fast-Track: </span>
           Requires 3–4 hours of focused daily practice. Best for candidates with
           strong CS fundamentals who need to sharpen interview-specific skills
           quickly.
@@ -1072,7 +1072,7 @@ function PrepTimeline() {
                   <span
                     className={`mt-0.5 ${
                       mode === "fast"
-                        ? "text-orange-400"
+                        ? "text-orange-900"
                         : mode === "10week"
                           ? "text-emerald-400"
                           : "text-blue-400"
@@ -1521,7 +1521,7 @@ function SharePrepState() {
           </div>
         </div>
         <div className="p-3 rounded-lg bg-secondary/50 border border-border text-center">
-          <div className="text-lg font-black text-amber-400">
+          <div className="text-lg font-black text-amber-900">
             {readyCount}/{BEHAVIORAL_QUESTIONS.length}
           </div>
           <div className="text-[10px] text-muted-foreground">Stories Ready</div>
@@ -1820,7 +1820,7 @@ function ReadinessGoalSetter() {
           {/* Daily task card */}
           {!onTrack && daysLeft > 0 && (
             <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
-              <div className="text-xs font-bold text-amber-400 mb-2">
+              <div className="text-xs font-bold text-amber-900 mb-2">
                 📅 Daily Task Card — {daysLeft} days to goal
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -2012,7 +2012,7 @@ function WeeklyDigest() {
           <div className="text-xs text-muted-foreground">Readiness</div>
         </div>
         <div className="p-3 rounded-lg bg-secondary text-center">
-          <div className="text-lg font-extrabold text-orange-400">
+          <div className="text-lg font-extrabold text-orange-900">
             {streak.currentStreak}d
           </div>
           <div className="text-xs text-muted-foreground">Study Streak</div>
@@ -2058,7 +2058,7 @@ function MostHintedBadge() {
   return (
     <div className="prep-card p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Flame size={14} className="text-orange-400" />
+        <Flame size={14} className="text-orange-900" />
         <span className="text-sm font-bold text-foreground">
           Hint Usage Analytics
         </span>
@@ -2074,11 +2074,11 @@ function MostHintedBadge() {
             <span
               className={`text-xs font-bold w-5 text-center ${
                 i === 0
-                  ? "text-amber-400"
+                  ? "text-amber-900"
                   : i === 1
                     ? "text-slate-300"
                     : i === 2
-                      ? "text-orange-600"
+                      ? "text-orange-800"
                       : "text-muted-foreground"
               }`}
             >
@@ -2106,7 +2106,7 @@ function MostHintedBadge() {
                   </span>
                 )}
                 {e.medium > 0 && (
-                  <span className="text-[10px] text-amber-400">
+                  <span className="text-[10px] text-amber-900">
                     🔍 {e.medium}×
                   </span>
                 )}
@@ -2498,7 +2498,7 @@ function CTCIDivergenceReport() {
           <div className="text-xs text-muted-foreground">Calibrated</div>
         </div>
         <div className="text-center p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
-          <div className="text-xl font-black text-orange-400 stat-num">
+          <div className="text-xl font-black text-orange-900 stat-num">
             {harder.length}
           </div>
           <div className="text-xs text-muted-foreground">
@@ -2543,7 +2543,7 @@ function CTCIDivergenceReport() {
         <div className="border-t border-border divide-y divide-border">
           {harder.length > 0 && (
             <div className="p-4">
-              <div className="text-xs font-bold text-orange-400 mb-2">
+              <div className="text-xs font-bold text-orange-900 mb-2">
                 ⚠️ Harder Than Expected — Focus Here
               </div>
               <div className="space-y-2">
@@ -2559,7 +2559,7 @@ function CTCIDivergenceReport() {
                       href={q.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-medium text-foreground hover:text-orange-400 flex-1 truncate transition-colors"
+                      className="text-xs font-medium text-foreground hover:text-orange-900 flex-1 truncate transition-colors"
                     >
                       {q.name}
                     </a>
@@ -2568,7 +2568,7 @@ function CTCIDivergenceReport() {
                     </span>
                     <div className="flex gap-0.5 shrink-0">
                       {Array.from({ length: q.gap }).map((_, i) => (
-                        <span key={i} className="text-orange-400 text-xs">
+                        <span key={i} className="text-orange-900 text-xs">
                           ▲
                         </span>
                       ))}
@@ -2708,7 +2708,7 @@ function DailyDrillButton() {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-300 text-xs font-semibold transition-all"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-800 text-xs font-semibold transition-all"
       title={`Weakest topics: ${sorted.map(t => t.topic).join(", ")}`}
     >
       <Target size={12} />3 Drills Due Today
@@ -2879,7 +2879,7 @@ function QuickActionsRow() {
       {streak.currentStreak > 0 && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="flex items-center gap-1 text-xs font-bold text-amber-400 whitespace-nowrap ml-auto cursor-default select-none">
+            <span className="flex items-center gap-1 text-xs font-bold text-amber-900 whitespace-nowrap ml-auto cursor-default select-none">
               🔥 {streak.currentStreak} day
               {streak.currentStreak !== 1 ? "s" : ""}
             </span>

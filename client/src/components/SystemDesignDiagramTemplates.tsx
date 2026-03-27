@@ -1315,7 +1315,7 @@ export function SystemDesignDiagramTemplates() {
           </div>
 
           <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-xs text-muted-foreground">
-            <span className="text-amber-400 font-bold">💡 L7 Tip: </span>
+            <span className="text-amber-900 font-bold">💡 L7 Tip: </span>
             Each diagram includes coaching notes at the bottom highlighting L7
             differentiation signals. During your interview, use Excalidraw to
             draw live — practice navigating these diagrams fluently.

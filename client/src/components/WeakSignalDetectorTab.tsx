@@ -142,8 +142,8 @@ function DrillCard({ signal, score, evidenceCount, rank }: DrillCardProps) {
   return (
     <div className={cn(
       "rounded-xl border transition-all",
-      severity === "critical" && "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10",
-      severity === "warning" && "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10",
+      severity === "critical" && "border-red-300 dark:border-red-700 bg-red-100 dark:bg-red-900/10",
+      severity === "warning" && "border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-900/10",
       severity === "ok" && "border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800"
     )}>
       <button
@@ -153,8 +153,8 @@ function DrillCard({ signal, score, evidenceCount, rank }: DrillCardProps) {
         <div className={cn(
           "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0",
           severity === "critical" && "bg-red-100 dark:bg-red-900/40 text-red-600",
-          severity === "warning" && "bg-amber-100 dark:bg-amber-900/40 text-amber-600",
-          severity === "ok" && "bg-gray-100 dark:bg-gray-700 text-gray-600"
+          severity === "warning" && "bg-amber-100 dark:bg-amber-900/40 text-amber-800",
+          severity === "ok" && "bg-gray-200 dark:bg-gray-600 text-gray-800"
         )}>
           #{rank}
         </div>
@@ -169,14 +169,14 @@ function DrillCard({ signal, score, evidenceCount, rank }: DrillCardProps) {
                 "text-xs capitalize",
                 signal.category === "coding" && "border-blue-200 text-blue-600",
                 signal.category === "system_design" && "border-purple-200 text-purple-600",
-                signal.category === "behavioral" && "border-amber-200 text-amber-600",
+                signal.category === "behavioral" && "border-amber-200 text-amber-800",
                 signal.category === "process" && "border-gray-200 text-gray-600"
               )}
             >
               {signal.category.replace("_", " ")}
             </Badge>
             {evidenceCount > 0 && (
-              <span className="text-xs text-gray-400">{evidenceCount} signals detected</span>
+              <span className="text-xs text-gray-600">{evidenceCount} signals detected</span>
             )}
           </div>
           <div className="flex items-center gap-2 mt-1.5">
@@ -192,29 +192,29 @@ function DrillCard({ signal, score, evidenceCount, rank }: DrillCardProps) {
             <span className={cn(
               "text-xs font-bold w-8 text-right",
               severity === "critical" && "text-red-600",
-              severity === "warning" && "text-amber-600",
+              severity === "warning" && "text-amber-800",
               severity === "ok" && "text-emerald-600"
             )}>
               {score}%
             </span>
           </div>
         </div>
-        <div className="flex-shrink-0 text-gray-400">
+        <div className="flex-shrink-0 text-gray-600">
           {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </div>
       </button>
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100 dark:border-gray-700 pt-3">
-          <p className="text-sm text-gray-600 dark:text-gray-300">{signal.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-200">{signal.description}</p>
 
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
+            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Common patterns where this signal is missing:
             </p>
             <ul className="space-y-1">
               {signal.examples.map((ex, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300">
                   <AlertTriangle size={11} className="text-amber-500 flex-shrink-0 mt-0.5" />
                   {ex}
                 </li>
@@ -224,9 +224,9 @@ function DrillCard({ signal, score, evidenceCount, rank }: DrillCardProps) {
 
           <div className={cn(
             "rounded-lg border p-3",
-            severity === "critical" && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
-            severity === "warning" && "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800",
-            severity === "ok" && "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800"
+            severity === "critical" && "bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700",
+            severity === "warning" && "bg-amber-100 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800",
+            severity === "ok" && "bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700"
           )}>
             <div className="flex items-center gap-1.5 mb-1.5">
               <Zap size={12} className={cn(
@@ -234,11 +234,11 @@ function DrillCard({ signal, score, evidenceCount, rank }: DrillCardProps) {
                 severity === "warning" && "text-amber-500",
                 severity === "ok" && "text-blue-500"
               )} />
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
                 15-Minute Targeted Drill
               </span>
             </div>
-            <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-xs text-gray-700 dark:text-gray-200 leading-relaxed">
               {signal.drillPrompt}
             </p>
           </div>
@@ -310,7 +310,7 @@ function AIAnalysisPanel({ sessions, debugAttempts }: AIAnalysisPanelProps) {
         </div>
         <div className="flex items-center gap-2">
           {analysisDate && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-600">
               Last: {new Date(analysisDate).toLocaleDateString()}
             </span>
           )}
@@ -331,26 +331,26 @@ function AIAnalysisPanel({ sessions, debugAttempts }: AIAnalysisPanelProps) {
       </div>
 
       {!hasData && (
-        <p className="text-sm text-gray-400 italic">
+        <p className="text-sm text-gray-600 italic">
           Complete some practice sessions first. The AI will analyze patterns across your sessions to identify your weakest signals.
         </p>
       )}
 
       {hasData && !analysis && !analyzeSignals.isPending && (
         <div className="text-center py-6">
-          <Brain size={28} className="text-gray-300 mx-auto mb-2" />
-          <p className="text-sm text-gray-500">
+          <Brain size={28} className="text-gray-700 mx-auto mb-2" />
+          <p className="text-sm text-gray-700">
             You have {sessions.length} replay session{sessions.length !== 1 ? "s" : ""} and{" "}
             {debugAttempts.length} debug attempt{debugAttempts.length !== 1 ? "s" : ""} to analyze.
           </p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-600 mt-1">
             Click "Analyze" to identify your weakest signals across all sessions.
           </p>
         </div>
       )}
 
       {analyzeSignals.isPending && (
-        <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
+        <div className="flex items-center gap-2 text-sm text-gray-700 py-4">
           <Loader2 size={14} className="animate-spin text-purple-500" />
           Analyzing patterns across {sessions.length} sessions…
         </div>
@@ -363,12 +363,12 @@ function AIAnalysisPanel({ sessions, debugAttempts }: AIAnalysisPanelProps) {
             <p className="text-sm text-purple-800 dark:text-purple-200">{analysis.overallPattern}</p>
           </div>
 
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+          <div className="bg-amber-100 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-1">
-              <ArrowRight size={12} className="text-amber-600" />
-              <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Priority Action</p>
+              <ArrowRight size={12} className="text-amber-800" />
+              <p className="text-xs font-semibold text-amber-900 dark:text-amber-800">Priority Action</p>
             </div>
-            <p className="text-sm text-amber-800 dark:text-amber-200">{analysis.priorityAction}</p>
+            <p className="text-sm text-amber-800 dark:text-amber-100">{analysis.priorityAction}</p>
           </div>
 
           <div className="space-y-2">
@@ -378,7 +378,7 @@ function AIAnalysisPanel({ sessions, debugAttempts }: AIAnalysisPanelProps) {
               return (
                 <div key={ws.signalId} className="rounded-lg border border-gray-100 dark:border-gray-700 p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-gray-400">#{i + 1}</span>
+                    <span className="text-xs font-bold text-gray-600">#{i + 1}</span>
                     <span className="font-semibold text-sm text-gray-900 dark:text-white">{signal.name}</span>
                     <span className={cn(
                       "text-xs font-bold",
@@ -390,14 +390,14 @@ function AIAnalysisPanel({ sessions, debugAttempts }: AIAnalysisPanelProps) {
                   {ws.evidence.length > 0 && (
                     <ul className="space-y-0.5 mb-2">
                       {ws.evidence.map((ev, j) => (
-                        <li key={j} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-1.5">
-                          <AlertTriangle size={10} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                        <li key={j} className="text-xs text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
+                          <AlertTriangle size={10} className="text-amber-900 flex-shrink-0 mt-0.5" />
                           {ev}
                         </li>
                       ))}
                     </ul>
                   )}
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded p-2">
+                  <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded p-2">
                     <div className="flex items-center gap-1 mb-1">
                       <Lightbulb size={11} className="text-blue-500" />
                       <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Drill</span>
@@ -495,7 +495,7 @@ export default function WeakSignalDetectorTab() {
               Weak Signal Detector
             </h2>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             Identifies your three weakest interview signals based on practice history. Each weak
             signal comes with a targeted 15-minute drill to address it directly.
           </p>
@@ -507,11 +507,11 @@ export default function WeakSignalDetectorTab() {
           <div>
             <div className={cn(
               "text-xl font-bold leading-tight",
-              overallScore >= 70 ? "text-emerald-600" : overallScore >= 50 ? "text-amber-600" : "text-red-600"
+              overallScore >= 70 ? "text-emerald-600" : overallScore >= 50 ? "text-amber-800" : "text-red-600"
             )}>
               {overallScore}%
             </div>
-            <div className="text-xs text-gray-400">Signal Health</div>
+            <div className="text-xs text-gray-600">Signal Health</div>
           </div>
         </div>
       </div>
@@ -520,10 +520,10 @@ export default function WeakSignalDetectorTab() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Target size={14} className="text-red-500" />
-          <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+          <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
             Your 3 Weakest Signals
           </span>
-          <span className="text-xs text-gray-400">— focus here first</span>
+          <span className="text-xs text-gray-600">— focus here first</span>
         </div>
         <div className="space-y-2">
           {weakestThree.map((signal, i) => (
@@ -545,8 +545,8 @@ export default function WeakSignalDetectorTab() {
       <div>
         <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <BookOpen size={14} className="text-gray-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+            <BookOpen size={14} className="text-gray-700" />
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
               All Signal Dimensions
             </span>
           </div>
@@ -559,7 +559,7 @@ export default function WeakSignalDetectorTab() {
                   "px-2.5 py-1 rounded-full text-xs font-semibold transition-all capitalize",
                   selectedCategory === cat
                     ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
                 )}
               >
                 {cat.replace("_", " ")}
@@ -583,12 +583,12 @@ export default function WeakSignalDetectorTab() {
       {/* How scores are calculated */}
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
         <div className="flex items-center gap-2 mb-2">
-          <Clock size={13} className="text-gray-400" />
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <Clock size={13} className="text-gray-600" />
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
             How scores are calculated
           </span>
         </div>
-        <p className="text-xs text-gray-400 leading-relaxed">
+        <p className="text-xs text-gray-600 leading-relaxed">
           Scores are computed from your debug drill performance (hit rate, hint usage, time-to-solve)
           and replay session AI commentary (warning/critical comment ratio). Scores start at 50% for
           dimensions with no data. Use the AI Cross-Session Analysis for a deeper, LLM-powered

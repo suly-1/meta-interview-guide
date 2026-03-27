@@ -58,7 +58,7 @@ function ICSignalTrendChart() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 IC Signal Detector Trend
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Track how your L4/L5/L6/L7 signal distribution evolves across mock sessions.
               </p>
             </div>
@@ -77,7 +77,7 @@ function ICSignalTrendChart() {
 
   const levelColors = {
     L4: { bar: "bg-red-400", text: "text-red-700", badge: "bg-red-100 text-red-700 border-red-200" },
-    L5: { bar: "bg-amber-400", text: "text-amber-700", badge: "bg-amber-100 text-amber-700 border-amber-200" },
+    L5: { bar: "bg-amber-400", text: "text-amber-900", badge: "bg-amber-100 text-amber-900 border-amber-200" },
     L6: { bar: "bg-blue-400", text: "text-blue-700", badge: "bg-blue-100 text-blue-700 border-blue-200" },
     L7: { bar: "bg-emerald-400", text: "text-emerald-700", badge: "bg-emerald-100 text-emerald-700 border-emerald-200" },
   };
@@ -116,7 +116,7 @@ function ICSignalTrendChart() {
             <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               IC Signal Detector Trend
             </h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-gray-700 mt-0.5">
               Your L4/L5/L6/L7 signal distribution across {history.length} mock session{history.length !== 1 ? "s" : ""}.
             </p>
           </div>
@@ -186,14 +186,14 @@ function ICSignalTrendChart() {
         {/* Per-session history table */}
         <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
           <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Session History</p>
+            <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide">Session History</p>
           </div>
           <div className="divide-y divide-gray-100">
             {[...history].reverse().map((e, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
-                <span className="text-[10px] text-gray-400 w-16 shrink-0">{new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                <span className="text-[10px] text-gray-600 w-16 shrink-0">{new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                 <span className="text-xs font-semibold text-gray-700 flex-1 min-w-0 truncate">{e.problemTitle}</span>
-                <span className="text-[10px] font-bold text-gray-500 shrink-0">{e.targetLevel}</span>
+                <span className="text-[10px] font-bold text-gray-700 shrink-0">{e.targetLevel}</span>
                 <div className="flex gap-1 shrink-0">
                   {(["L4", "L5", "L6", "L7"] as const).map(lvl => (
                     e.counts[lvl] > 0 ? (
@@ -310,7 +310,7 @@ function RecruiterSummaryPrint() {
           <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Recruiter-Ready Summary
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5">One-page printable prep summary — ideal for the night before your interview</p>
+          <p className="text-xs text-gray-700 mt-0.5">One-page printable prep summary — ideal for the night before your interview</p>
         </div>
         <button
           onClick={() => setShowPreviewModal(true)}
@@ -341,24 +341,24 @@ function RecruiterSummaryPrint() {
                   <Printer size={16} className="text-slate-600 dark:text-slate-400" />
                   <span className="font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Print Preview</span>
                 </div>
-                <button onClick={() => setShowPreviewModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                <button onClick={() => setShowPreviewModal(false)} className="text-gray-600 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
                   <X size={16} />
                 </button>
               </div>
 
               {/* Density info */}
               <div className="px-5 py-4 space-y-3">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Your PDF will be generated using the current density setting:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Your PDF will be generated using the current density setting:</p>
 
                 <div className="rounded-xl border-2 border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/20 p-4">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">{meta.icon}</span>
                     <div>
                       <div className="font-bold text-gray-900 dark:text-gray-100">{meta.label} mode</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Font scale: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">{meta.scale}</code></div>
+                      <div className="text-xs text-gray-700 dark:text-gray-300">Font scale: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">{meta.scale}</code></div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{meta.note}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">{meta.note}</p>
                 </div>
 
                 {/* Density switcher hint */}
@@ -370,7 +370,7 @@ function RecruiterSummaryPrint() {
                 </div>
 
                 {/* Page size note */}
-                <div className="text-xs text-gray-400 dark:text-gray-500">
+                <div className="text-xs text-gray-600 dark:text-gray-200">
                   A4 / Letter · Portrait · Print to PDF via your browser's print dialog
                 </div>
               </div>
@@ -379,7 +379,7 @@ function RecruiterSummaryPrint() {
               <div className="flex gap-2 px-5 pb-5">
                 <button
                   onClick={() => setShowPreviewModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >Cancel</button>
                 <button
                   onClick={() => { setShowPreviewModal(false); handlePrint(); }}
@@ -414,10 +414,10 @@ function RecruiterSummaryPrint() {
                 {readiness.total}
               </span>
               <span className="text-sm font-bold mt-1" style={{ color: scoreColor }}>{scoreLabel}</span>
-              <span className="text-xs text-gray-400 mt-0.5">Overall Readiness Score</span>
+              <span className="text-xs text-gray-600 mt-0.5">Overall Readiness Score</span>
             </div>
             <div className="space-y-2.5 p-4 rounded-xl bg-gray-50 border border-gray-100">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Score Breakdown</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Score Breakdown</p>
               {[
                 { label: "Quick Drill", value: readiness.drillScore, detail: readiness.drillAvg ? `${readiness.drillAvg.toFixed(1)}★` : "—", color: "bg-blue-500" },
                 { label: "CTCI Solved", value: readiness.ctciScore, detail: `${readiness.ctciSolved}/${readiness.ctciTotal}`, color: "bg-violet-500" },
@@ -427,7 +427,7 @@ function RecruiterSummaryPrint() {
                 <div key={item.label}>
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-xs font-semibold text-gray-600">{item.label}</span>
-                    <span className="text-xs text-gray-400">{item.detail}</span>
+                    <span className="text-xs text-gray-600">{item.detail}</span>
                   </div>
                   <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${item.color}`} style={{ width: `${item.value}%` }} />
@@ -440,33 +440,33 @@ function RecruiterSummaryPrint() {
           {/* Pattern strengths */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Top 3 Strong Patterns</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Top 3 Strong Patterns</p>
               <div className="flex flex-wrap gap-1.5">
                 {strong.length ? strong.map(p => (
                   <span key={p.name} className="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full">
                     {p.name} {p.avg!.toFixed(1)}★
                   </span>
-                )) : <span className="text-xs text-gray-400 italic">No drills yet</span>}
+                )) : <span className="text-xs text-gray-600 italic">No drills yet</span>}
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Top 3 Weak Patterns</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Top 3 Weak Patterns</p>
               <div className="flex flex-wrap gap-1.5">
                 {weak.length ? weak.map(p => (
                   <span key={p.name} className="text-xs font-bold px-2.5 py-1 bg-red-100 text-red-600 rounded-full">
                     {p.name} {p.avg!.toFixed(1)}★
                   </span>
-                )) : <span className="text-xs text-gray-400 italic">No drills yet</span>}
+                )) : <span className="text-xs text-gray-600 italic">No drills yet</span>}
               </div>
             </div>
           </div>
 
           {undrilled.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Undrilled Patterns</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Undrilled Patterns</p>
               <div className="flex flex-wrap gap-1.5">
                 {undrilled.map(n => (
-                  <span key={n} className="text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full">{n}</span>
+                  <span key={n} className="text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full">{n}</span>
                 ))}
               </div>
             </div>
@@ -474,17 +474,17 @@ function RecruiterSummaryPrint() {
 
           {/* CTCI */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">CTCI Problem Breakdown</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">CTCI Problem Breakdown</p>
             <div className="grid grid-cols-3 gap-3">
               {ctciByDiff.map(d => {
                 const c = d.diff === "Easy" ? { text: "text-emerald-600", bar: "bg-emerald-500", bg: "bg-emerald-50 border-emerald-200" }
-                  : d.diff === "Medium" ? { text: "text-amber-600", bar: "bg-amber-500", bg: "bg-amber-50 border-amber-200" }
-                  : { text: "text-red-600", bar: "bg-red-500", bg: "bg-red-50 border-red-200" };
+                  : d.diff === "Medium" ? { text: "text-amber-800", bar: "bg-amber-500", bg: "bg-amber-100 border-amber-200" }
+                  : { text: "text-red-600", bar: "bg-red-500", bg: "bg-red-100 border-red-200" };
                 const pct = d.total > 0 ? Math.round((d.solved / d.total) * 100) : 0;
                 return (
                   <div key={d.diff} className={`rounded-lg border p-3 text-center ${c.bg}`}>
                     <p className={`text-2xl font-extrabold ${c.text}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{d.solved}</p>
-                    <p className="text-[11px] text-gray-500">/ {d.total} {d.diff}</p>
+                    <p className="text-[11px] text-gray-700">/ {d.total} {d.diff}</p>
                     <div className="mt-1.5 h-1.5 bg-white/60 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${c.bar}`} style={{ width: `${pct}%` }} />
                     </div>
@@ -701,7 +701,7 @@ function SprintScheduler() {
   if (!supported) {
     return (
       <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
-        <span className="text-xs text-gray-500">Browser notifications are not supported in this browser.</span>
+        <span className="text-xs text-gray-700">Browser notifications are not supported in this browser.</span>
       </div>
     );
   }
@@ -718,13 +718,13 @@ function SprintScheduler() {
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
               isActive ? "bg-rose-500" : "bg-gray-200 dark:bg-gray-700"
             }`}>
-              <Bell size={18} className={isActive ? "text-white" : "text-gray-500 dark:text-gray-400"} />
+              <Bell size={18} className={isActive ? "text-white" : "text-gray-700 dark:text-gray-300"} />
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Schedule Daily Sprint
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">
                 {isActive
                   ? `Active — fires daily at ${settings.time}`
                   : "Get a browser notification reminding you to run your weakness sprint"}
@@ -755,7 +755,7 @@ function SprintScheduler() {
 
         {/* Permission denied */}
         {permission === "denied" && (
-          <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+          <div className="mt-3 flex items-start gap-2 p-3 bg-red-100 border border-red-200 rounded-xl">
             <AlertTriangle size={13} className="text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-red-600">
               Notifications are blocked. Click the lock icon in your browser's address bar → Site settings → Notifications → Allow.
@@ -767,7 +767,7 @@ function SprintScheduler() {
         {isActive && (
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-3 flex-wrap">
-              <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Reminder time</label>
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Reminder time</label>
               <input
                 type="time"
                 value={settings.time}
@@ -779,7 +779,7 @@ function SprintScheduler() {
                 className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
                   testFired
                     ? "bg-green-100 border-green-300 text-green-700"
-                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-400"
                 }`}
               >
                 {testFired ? <CheckCircle2 size={12} /> : <Bell size={12} />}
@@ -790,7 +790,7 @@ function SprintScheduler() {
             <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${
               swReady
                 ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
-                : "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500"
+                : "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700"
             }`}>
               {swReady ? <CheckCircle2 size={12} /> : <Bell size={12} />}
               {swReady
@@ -924,10 +924,10 @@ function FixMyWeaknesses() {
 
   if (weakPatterns.length === 0) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
+      <div className="bg-amber-100 border border-amber-200 rounded-2xl p-5 text-center">
         <AlertTriangle size={20} className="text-amber-500 mx-auto mb-2" />
-        <p className="text-sm font-semibold text-amber-700">No drill data yet</p>
-        <p className="text-xs text-amber-600 mt-1">Complete some Quick Drills in the Coding tab to identify your weak patterns.</p>
+        <p className="text-sm font-semibold text-amber-900">No drill data yet</p>
+        <p className="text-xs text-amber-800 mt-1">Complete some Quick Drills in the Coding tab to identify your weak patterns.</p>
       </div>
     );
   }
@@ -955,8 +955,8 @@ function FixMyWeaknesses() {
   if (active && queue) {
     const current = queue[currentIdx];
     const diffColor = current.difficulty === "Easy" ? "text-emerald-600 bg-emerald-50 border-emerald-200" :
-      current.difficulty === "Medium" ? "text-amber-600 bg-amber-50 border-amber-200" :
-      "text-red-600 bg-red-50 border-red-200";
+      current.difficulty === "Medium" ? "text-amber-800 bg-amber-100 border-amber-200" :
+      "text-red-600 bg-red-100 border-red-200";
     return (
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 space-y-4">
         {/* Header */}
@@ -964,15 +964,15 @@ function FixMyWeaknesses() {
           <div className="flex items-center gap-2">
             <Dumbbell size={16} className="text-rose-500" />
             <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Weakness Sprint</span>
-            <span className="text-xs text-gray-500">Problem {currentIdx + 1} of {queue.length}</span>
+            <span className="text-xs text-gray-700">Problem {currentIdx + 1} of {queue.length}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`font-mono text-sm font-bold ${secsLeft < 120 ? "text-red-500 animate-pulse" : "text-gray-700 dark:text-gray-300"}`}>
+            <span className={`font-mono text-sm font-bold ${secsLeft < 120 ? "text-red-500 animate-pulse" : "text-gray-700 dark:text-gray-200"}`}>
               {formatTime(secsLeft)}
             </span>
             <button
               onClick={() => { if (timerRef.current) clearInterval(timerRef.current); setActive(false); setQueue(null); }}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-xs text-gray-600 hover:text-gray-600 transition-colors"
             >Stop</button>
           </div>
         </div>
@@ -1001,7 +1001,7 @@ function FixMyWeaknesses() {
         {/* Problem card */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2">
           <div className="text-sm font-bold text-gray-900 dark:text-gray-100">{current.name}</div>
-          <div className="text-xs text-gray-500">{current.topic}</div>
+          <div className="text-xs text-gray-700">{current.topic}</div>
           <a
             href={current.url}
             target="_blank"
@@ -1022,7 +1022,7 @@ function FixMyWeaknesses() {
           </button>
           <button
             onClick={skipProblem}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             Skip →
           </button>
@@ -1036,7 +1036,7 @@ function FixMyWeaknesses() {
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 space-y-4">
       {/* Weak patterns preview */}
       <div>
-        <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Your bottom 3 patterns</div>
+        <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Your bottom 3 patterns</div>
         <div className="space-y-2">
           {weakPatterns.map((p, i) => (
             <div key={p.patternId} className="flex items-center gap-3">
@@ -1046,7 +1046,7 @@ function FixMyWeaknesses() {
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{p.patternName}</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-700">
                     {p.avg !== null ? `${p.avg.toFixed(1)}★ avg` : "Not drilled"}
                   </span>
                 </div>
@@ -1110,7 +1110,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 XP Level & Progress
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Earn XP by solving problems, completing sprints, and running mock interviews. Level up from Rookie to Distinguished Engineer.
               </p>
             </div>
@@ -1128,7 +1128,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Achievement Badges
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 30 badges across Coding, Behavioral, Mock Interviews, Streaks, and Milestones — automatically unlocked as you practice.
               </p>
             </div>
@@ -1145,7 +1145,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Interview Goal Planner
               </h2>
-              <p className="text-sm text-gray-500 mt-1">Set a target readiness score and interview date to get a personalized daily task plan.</p>
+              <p className="text-sm text-gray-700 mt-1">Set a target readiness score and interview date to get a personalized daily task plan.</p>
             </div>
           </div>
         </div>
@@ -1161,7 +1161,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Fix My Weaknesses
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Auto-queues a 20-minute focused sprint on your lowest-rated patterns. Problems are pulled from your CTCI tracker.
               </p>
             </div>
@@ -1179,7 +1179,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Schedule Daily Sprint
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Set a daily browser notification to remind you to run your weakness sprint at a chosen time.
               </p>
             </div>
@@ -1197,7 +1197,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Overall Readiness
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Live composite score across all four dimensions — updated as you practice
               </p>
             </div>
@@ -1215,7 +1215,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 L7 Signal Self-Assessment
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Check off each of the 8 L7 key signals you can back with a real story. Gaps are flagged as preparation priorities.
               </p>
             </div>
@@ -1236,7 +1236,7 @@ export default function ReadinessTab() {
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Recruiter-Ready Summary
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-700 mt-0.5">
                 Printable one-page snapshot of your full readiness state — ideal for the night before your interview
               </p>
             </div>

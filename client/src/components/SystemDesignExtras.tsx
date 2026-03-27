@@ -189,7 +189,7 @@ export function CapacityCalculator() {
               {
                 label: "Write QPS",
                 val: fmt(writeQPS),
-                color: "text-amber-400",
+                color: "text-amber-900",
                 sub: "writes/sec",
               },
               {
@@ -219,7 +219,7 @@ export function CapacityCalculator() {
               {
                 label: "Total Storage",
                 val: `${totalStorageTB.toFixed(1)} TB`,
-                color: "text-orange-400",
+                color: "text-orange-900",
                 sub: `over ${retentionYears}yr`,
               },
               {
@@ -455,7 +455,7 @@ export function DesignPatternLibrary() {
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">
+                      <div className="text-[10px] font-bold text-amber-900 uppercase tracking-wider mb-1">
                         Trade-offs
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -555,7 +555,7 @@ export function FlashCardCSVImport({
         className="w-full flex items-center justify-between p-5 group"
       >
         <div className="flex items-center gap-2">
-          <Upload size={14} className="text-orange-400" />
+          <Upload size={14} className="text-orange-900" />
           <span className="text-sm font-bold text-foreground">
             Flash Card CSV Import
           </span>
@@ -619,7 +619,7 @@ export function FlashCardCSVImport({
                   <div className="text-[10px] text-muted-foreground truncate mt-0.5">
                     {c.a}
                   </div>
-                  <span className="text-[9px] px-1 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/20 font-semibold mt-1 inline-block">
+                  <span className="text-[9px] px-1 py-0.5 rounded bg-orange-500/15 text-orange-900 border border-orange-500/20 font-semibold mt-1 inline-block">
                     {c.tag}
                   </span>
                 </div>

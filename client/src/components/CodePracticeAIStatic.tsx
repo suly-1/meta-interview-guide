@@ -206,8 +206,8 @@ export function ProgressiveHintSystem({ problem, code }: Props) {
     "Pseudocode Skeleton",
   ];
   const levelColors = [
-    "text-amber-400 border-amber-500/30 bg-amber-500/10",
-    "text-orange-400 border-orange-500/30 bg-orange-500/10",
+    "text-amber-900 border-amber-500/30 bg-amber-500/10",
+    "text-orange-900 border-orange-500/30 bg-orange-500/10",
     "text-red-400 border-red-500/30 bg-red-500/10",
   ];
 
@@ -240,7 +240,7 @@ export function ProgressiveHintSystem({ problem, code }: Props) {
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-amber-500/5 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Lightbulb size={14} className="text-amber-400" />
+          <Lightbulb size={14} className="text-amber-900" />
           <span className="text-sm font-semibold text-foreground">
             AI Hint System
           </span>

@@ -36,8 +36,8 @@ function grade(pct: number): { letter: string; color: string } {
   if (pct >= 0.8) return { letter: "A",  color: "text-emerald-600" };
   if (pct >= 0.7) return { letter: "B+", color: "text-blue-600" };
   if (pct >= 0.6) return { letter: "B",  color: "text-blue-600" };
-  if (pct >= 0.5) return { letter: "C",  color: "text-amber-600" };
-  if (pct >= 0.3) return { letter: "D",  color: "text-orange-600" };
+  if (pct >= 0.5) return { letter: "C",  color: "text-amber-800" };
+  if (pct >= 0.3) return { letter: "D",  color: "text-orange-800" };
   return { letter: "F", color: "text-red-600" };
 }
 
@@ -156,13 +156,13 @@ ${report.ctciThisWeek.length > 0 ? `### Problems Solved This Week\n${report.ctci
         {categories.map(c => (
           <div key={c.label} className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400">{c.label}</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-gray-600">{c.label}</span>
               <span className={`text-sm font-extrabold ${c.grade.color}`}>{c.grade.letter}</span>
             </div>
             <p className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {c.value}
             </p>
-            <p className="text-xs text-gray-400">of {c.target} target {c.unit}</p>
+            <p className="text-xs text-gray-600">of {c.target} target {c.unit}</p>
             <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
@@ -175,7 +175,7 @@ ${report.ctciThisWeek.length > 0 ? `### Problems Solved This Week\n${report.ctci
 
       {report.ctciThisWeek.length > 0 && (
         <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Solved This Week</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Solved This Week</p>
           <div className="flex flex-wrap gap-1.5">
             {report.ctciThisWeek.slice(0, 8).map(p => (
               <a
@@ -189,7 +189,7 @@ ${report.ctciThisWeek.length > 0 ? `### Problems Solved This Week\n${report.ctci
               </a>
             ))}
             {report.ctciThisWeek.length > 8 && (
-              <span className="text-[11px] px-2 py-0.5 text-gray-400">+{report.ctciThisWeek.length - 8} more</span>
+              <span className="text-[11px] px-2 py-0.5 text-gray-600">+{report.ctciThisWeek.length - 8} more</span>
             )}
           </div>
         </div>

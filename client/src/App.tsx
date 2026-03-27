@@ -39,7 +39,7 @@ function BannedGate({ children }: { children: React.ReactNode }) {
             <ShieldOff size={28} className="text-red-400" />
           </div>
           <h1 className="text-xl font-bold text-white mb-2">Access Revoked</h1>
-          <p className="text-gray-400 text-sm leading-relaxed">
+          <p className="text-gray-600 text-sm leading-relaxed">
             Your access to this guide has been revoked by the administrator.
             If you believe this is a mistake, please contact the site owner.
           </p>

@@ -87,12 +87,12 @@ export function KeyboardShortcutOverlay({ open, onClose }: KeyboardShortcutOverl
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900 rounded-t-2xl">
           <div className="flex items-center gap-2">
-            <Keyboard size={16} className="text-gray-500" />
+            <Keyboard size={16} className="text-gray-700" />
             <span className="font-bold text-gray-900 dark:text-white text-sm">Keyboard Shortcuts</span>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="text-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <X size={16} />
           </button>
@@ -102,16 +102,16 @@ export function KeyboardShortcutOverlay({ open, onClose }: KeyboardShortcutOverl
         <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
           {SHORTCUT_GROUPS.map((group) => (
             <div key={group.title}>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{group.title}</p>
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">{group.title}</p>
               <div className="space-y-2">
                 {group.shortcuts.map((s, i) => (
                   <div key={i} className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-gray-600 dark:text-gray-300 flex-1">{s.description}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-200 flex-1">{s.description}</span>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {s.keys.map((k, ki) => (
                         <span key={ki} className="flex items-center gap-1">
                           <KeyBadge k={k} />
-                          {ki < s.keys.length - 1 && <span className="text-[10px] text-gray-400">+</span>}
+                          {ki < s.keys.length - 1 && <span className="text-[10px] text-gray-600">+</span>}
                         </span>
                       ))}
                     </div>
@@ -124,7 +124,7 @@ export function KeyboardShortcutOverlay({ open, onClose }: KeyboardShortcutOverl
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 rounded-b-2xl bg-gray-50 dark:bg-gray-800/50">
-          <p className="text-[10px] text-gray-400 text-center">
+          <p className="text-[10px] text-gray-600 text-center">
             Press <KeyBadge k="?" /> anywhere (outside input fields) to toggle this overlay · <KeyBadge k="Esc" /> to close
           </p>
         </div>

@@ -52,17 +52,17 @@ const RATING_ORDER: MetaRating[] = [
 const RATING_CONFIG: Record<MetaRating, {
   color: string; bg: string; border: string; dot: string; barWidth: string;
 }> = {
-  "Insufficient":  { color: "text-red-700",     bg: "bg-red-50 dark:bg-red-900/20",     border: "border-red-200 dark:border-red-800",     dot: "bg-red-500",     barWidth: "w-[10%]" },
-  "Moderate":      { color: "text-orange-700",   bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-800", dot: "bg-orange-500", barWidth: "w-[30%]" },
-  "Solid":         { color: "text-yellow-700",   bg: "bg-yellow-50 dark:bg-yellow-900/20", border: "border-yellow-200 dark:border-yellow-800", dot: "bg-yellow-500", barWidth: "w-[55%]" },
+  "Insufficient":  { color: "text-red-700",     bg: "bg-red-100 dark:bg-red-900/20",     border: "border-red-200 dark:border-red-800",     dot: "bg-red-500",     barWidth: "w-[10%]" },
+  "Moderate":      { color: "text-orange-900",   bg: "bg-orange-100 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-800", dot: "bg-orange-500", barWidth: "w-[30%]" },
+  "Solid":         { color: "text-yellow-700",   bg: "bg-yellow-100 dark:bg-yellow-900/20", border: "border-yellow-200 dark:border-yellow-800", dot: "bg-yellow-500", barWidth: "w-[55%]" },
   "Strong":        { color: "text-blue-700",     bg: "bg-blue-50 dark:bg-blue-900/20",   border: "border-blue-200 dark:border-blue-800",   dot: "bg-blue-500",   barWidth: "w-[75%]" },
   "Exceptional":   { color: "text-emerald-700",  bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-200 dark:border-emerald-800", dot: "bg-emerald-500", barWidth: "w-full" },
-  "Can't Assess":  { color: "text-gray-500",     bg: "bg-gray-50 dark:bg-gray-800",      border: "border-gray-200 dark:border-gray-700",   dot: "bg-gray-400",   barWidth: "w-0" },
+  "Can't Assess":  { color: "text-gray-700",     bg: "bg-gray-50 dark:bg-gray-800",      border: "border-gray-200 dark:border-gray-700",   dot: "bg-gray-400",   barWidth: "w-0" },
 };
 
 const VERDICT_CONFIG: Record<string, { color: string; bg: string; border: string }> = {
   "No Hire":       { color: "text-red-700",    bg: "bg-red-100",    border: "border-red-300" },
-  "Lean No Hire":  { color: "text-orange-700", bg: "bg-orange-100", border: "border-orange-300" },
+  "Lean No Hire":  { color: "text-orange-900", bg: "bg-orange-100", border: "border-orange-300" },
   "Lean Hire":     { color: "text-yellow-700", bg: "bg-yellow-100", border: "border-yellow-300" },
   "Hire":          { color: "text-blue-700",   bg: "bg-blue-100",   border: "border-blue-300" },
   "Strong Hire":   { color: "text-emerald-700",bg: "bg-emerald-100",border: "border-emerald-300" },
@@ -141,7 +141,7 @@ function DimensionCard({
           <span className={`flex-shrink-0 ${cfg.color}`}>{icon}</span>
           <div className="min-w-0">
             <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight">{label}</p>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight mt-0.5">{description}</p>
+            <p className="text-[11px] text-gray-700 dark:text-gray-300 leading-tight mt-0.5">{description}</p>
           </div>
         </div>
         <RatingPill rating={dimension.rating as MetaRating} />
@@ -150,13 +150,13 @@ function DimensionCard({
       <RatingBar rating={dimension.rating as MetaRating} />
 
       {/* Rationale */}
-      <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed mt-3">{dimension.rationale}</p>
+      <p className="text-xs text-gray-700 dark:text-gray-200 leading-relaxed mt-3">{dimension.rationale}</p>
 
       {/* Strength / Gap */}
       {(dimension.keyStrength || dimension.keyGap) && (
         <button
           onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mt-2 transition-colors"
+          className="flex items-center gap-1 text-xs font-semibold text-gray-700 hover:text-gray-700 dark:hover:text-gray-700 mt-2 transition-colors"
         >
           {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           {expanded ? "Hide details" : "Show strength & gap"}
@@ -170,16 +170,16 @@ function DimensionCard({
               <TrendingUp size={13} className="text-emerald-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide mb-0.5">Key Strength</p>
-                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{dimension.keyStrength}</p>
+                <p className="text-xs text-gray-700 dark:text-gray-200 leading-relaxed">{dimension.keyStrength}</p>
               </div>
             </div>
           )}
           {dimension.keyGap && (
             <div className="flex items-start gap-2 bg-white/60 dark:bg-white/5 rounded-lg p-2.5">
-              <AlertCircle size={13} className="text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle size={13} className="text-amber-800 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-0.5">Key Gap</p>
-                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{dimension.keyGap}</p>
+                <p className="text-[10px] font-bold text-amber-900 dark:text-amber-900 uppercase tracking-wide mb-0.5">Key Gap</p>
+                <p className="text-xs text-gray-700 dark:text-gray-200 leading-relaxed">{dimension.keyGap}</p>
               </div>
             </div>
           )}
@@ -208,7 +208,7 @@ function RatingSelector({
             className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
               active
                 ? `${cfg.bg} ${cfg.border} ${cfg.color} ring-2 ring-offset-1 ring-current`
-                : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-gray-400"
+                : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 hover:border-gray-400"
             }`}
           >
             {r}
@@ -301,7 +301,7 @@ export default function MetaRubricAssessment({
             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Meta SWE Focus Area Assessment
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-700 dark:text-gray-300">
               Official Meta rubric — 4 dimensions, 6-point scale
             </p>
           </div>
@@ -313,7 +313,7 @@ export default function MetaRubricAssessment({
             className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
               mode === "ai"
                 ? "bg-white dark:bg-gray-700 text-indigo-700 dark:text-indigo-300 shadow-sm"
-                : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                : "text-gray-700 hover:text-gray-700 dark:hover:text-gray-700"
             }`}
           >
             AI Score
@@ -323,7 +323,7 @@ export default function MetaRubricAssessment({
             className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
               mode === "self"
                 ? "bg-white dark:bg-gray-700 text-indigo-700 dark:text-indigo-300 shadow-sm"
-                : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                : "text-gray-700 hover:text-gray-700 dark:hover:text-gray-700"
             }`}
           >
             Self-Assess
@@ -334,7 +334,7 @@ export default function MetaRubricAssessment({
       <div className="p-5 space-y-4">
         {/* Problem context */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
-          <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Problem</p>
+          <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-0.5">Problem</p>
           <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{problemName}</p>
         </div>
 
@@ -342,7 +342,7 @@ export default function MetaRubricAssessment({
           <>
             {/* Level selector */}
             <div>
-              <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">Calibrate to level</p>
+              <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-2">Calibrate to level</p>
               <div className="flex gap-2">
                 {(["L5", "L6", "L7"] as const).map(l => (
                   <button
@@ -351,7 +351,7 @@ export default function MetaRubricAssessment({
                     className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-all ${
                       level === l
                         ? "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
-                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-gray-400"
+                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 hover:border-gray-400"
                     }`}
                   >
                     {l === "L5" ? "L5 (SWE)" : l === "L6" ? "L6 (Senior)" : "L7 (Staff)"}
@@ -364,16 +364,16 @@ export default function MetaRubricAssessment({
               <>
                 {/* Approach preview */}
                 {approachText.trim().length < 10 ? (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-start gap-2">
-                    <AlertCircle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                  <div className="bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-start gap-2">
+                    <AlertCircle size={14} className="text-amber-800 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-900 dark:text-amber-800">
                       Write or speak your approach above (at least 10 characters) before requesting AI scoring.
                     </p>
                   </div>
                 ) : (
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Your approach (preview)</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3">{approachText}</p>
+                    <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-1">Your approach (preview)</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">{approachText}</p>
                   </div>
                 )}
 
@@ -403,7 +403,7 @@ export default function MetaRubricAssessment({
                     <div key={dim.key}>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-indigo-600 dark:text-indigo-400">{dim.icon}</span>
-                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{dim.label}</p>
+                        <p className="text-xs font-bold text-gray-700 dark:text-gray-200">{dim.label}</p>
                       </div>
                       <RatingSelector
                         value={selfRatings[dim.key] as MetaRating}
@@ -428,7 +428,7 @@ export default function MetaRubricAssessment({
             {verdictCfg && (
               <div className={`rounded-xl border p-4 ${verdictCfg.bg} ${verdictCfg.border}`}>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Overall Verdict</p>
+                  <p className="text-xs font-bold text-gray-700 uppercase tracking-widest">Overall Verdict</p>
                   <span className={`text-lg font-black ${verdictCfg.color}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {result.overallVerdict}
                   </span>
@@ -452,7 +452,7 @@ export default function MetaRubricAssessment({
 
             {/* Rating legend */}
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Rating Scale</p>
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">Rating Scale</p>
               <div className="grid grid-cols-3 gap-1.5">
                 {RATING_ORDER.filter(r => r !== "Can't Assess").map(r => {
                   const cfg = RATING_CONFIG[r];
@@ -468,7 +468,7 @@ export default function MetaRubricAssessment({
 
             <button
               onClick={() => setResult(null)}
-              className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors text-sm"
+              className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-xl transition-colors text-sm"
             >
               Re-assess
             </button>

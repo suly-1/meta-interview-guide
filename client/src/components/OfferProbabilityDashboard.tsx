@@ -145,7 +145,7 @@ function computeSignals(
 function getGaugeColor(pct: number) {
   if (pct >= 80) return "text-emerald-400";
   if (pct >= 60) return "text-blue-400";
-  if (pct >= 40) return "text-amber-400";
+  if (pct >= 40) return "text-amber-900";
   return "text-red-400";
 }
 
@@ -174,7 +174,7 @@ function getVerdict(pct: number) {
   if (pct >= 50)
     return {
       label: "Borderline",
-      color: "text-amber-400",
+      color: "text-amber-900",
       bg: "bg-amber-500/10",
       border: "border-amber-500/30",
     };
@@ -314,7 +314,7 @@ export function OfferProbabilityDashboard() {
         {gaps.length > 0 && (
           <div className="space-y-2">
             <div className="text-xs font-semibold text-foreground flex items-center gap-1">
-              <AlertTriangle size={12} className="text-amber-400" />
+              <AlertTriangle size={12} className="text-amber-900" />
               Top Actions to Improve Your Score
             </div>
             {gaps.slice(0, 3).map((gap, i) => (
@@ -322,7 +322,7 @@ export function OfferProbabilityDashboard() {
                 key={i}
                 className="flex items-start gap-2 p-2.5 rounded-lg bg-background/50 border border-border"
               >
-                <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-900 text-xs font-bold flex items-center justify-center shrink-0">
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">

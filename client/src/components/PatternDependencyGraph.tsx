@@ -446,7 +446,7 @@ export default function PatternDependencyGraph() {
             {[1, 2, 3, 4, 5].map(s => (
               <span
                 key={s}
-                className={`text-base ${s <= rating ? "text-amber-400" : "text-muted-foreground/30"}`}
+                className={`text-base ${s <= rating ? "text-amber-900" : "text-muted-foreground/30"}`}
               >
                 ★
               </span>

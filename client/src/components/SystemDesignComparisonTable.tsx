@@ -142,9 +142,9 @@ export default function SystemDesignComparisonTable() {
         <div className="flex items-center gap-2">
           <Table2 size={14} className="text-indigo-500" />
           <span className="text-xs font-bold text-gray-900 dark:text-white">Pattern Comparison Matrix</span>
-          <span className="text-[10px] text-gray-400 hidden sm:inline">— click column headers to highlight</span>
+          <span className="text-[10px] text-gray-600 hidden sm:inline">— click column headers to highlight</span>
         </div>
-        {expanded ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+        {expanded ? <ChevronUp size={14} className="text-gray-600" /> : <ChevronDown size={14} className="text-gray-600" />}
       </button>
 
       {expanded && (
@@ -152,7 +152,7 @@ export default function SystemDesignComparisonTable() {
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left px-3 py-2.5 font-bold text-gray-700 dark:text-gray-300 sticky left-0 bg-gray-50 dark:bg-gray-800 z-10 min-w-[120px]">
+                <th className="text-left px-3 py-2.5 font-bold text-gray-700 dark:text-gray-200 sticky left-0 bg-gray-50 dark:bg-gray-800 z-10 min-w-[120px]">
                   Pattern
                 </th>
                 {COLUMNS.map(col => (
@@ -162,7 +162,7 @@ export default function SystemDesignComparisonTable() {
                     className={`text-left px-3 py-2.5 font-bold cursor-pointer select-none transition-colors ${col.width} ${
                       highlightCol === col.key
                         ? "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30"
-                        : "text-gray-600 dark:text-gray-400 hover:text-indigo-500 hover:bg-indigo-50/50"
+                        : "text-gray-600 dark:text-gray-300 hover:text-indigo-500 hover:bg-indigo-50/50"
                     }`}
                   >
                     {col.label}
@@ -201,12 +201,12 @@ export default function SystemDesignComparisonTable() {
                   </td>
 
                   {/* Primary Storage */}
-                  <td className={`px-3 py-2.5 text-gray-600 dark:text-gray-400 leading-relaxed ${highlightCol === "primaryStorage" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
+                  <td className={`px-3 py-2.5 text-gray-600 dark:text-gray-300 leading-relaxed ${highlightCol === "primaryStorage" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
                     {row.primaryStorage}
                   </td>
 
                   {/* Scaling Strategy */}
-                  <td className={`px-3 py-2.5 text-gray-600 dark:text-gray-400 leading-relaxed ${highlightCol === "scalingStrategy" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
+                  <td className={`px-3 py-2.5 text-gray-600 dark:text-gray-300 leading-relaxed ${highlightCol === "scalingStrategy" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
                     {row.scalingStrategy}
                   </td>
 
@@ -216,7 +216,7 @@ export default function SystemDesignComparisonTable() {
                   </td>
 
                   {/* L7 Differentiator */}
-                  <td className={`px-3 py-2.5 text-gray-500 dark:text-gray-400 leading-relaxed italic ${highlightCol === "ic7Differentiator" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
+                  <td className={`px-3 py-2.5 text-gray-700 dark:text-gray-300 leading-relaxed italic ${highlightCol === "ic7Differentiator" ? "bg-indigo-50/60 dark:bg-indigo-900/20" : ""}`}>
                     {row.ic7Differentiator}
                   </td>
                 </tr>
@@ -229,7 +229,7 @@ export default function SystemDesignComparisonTable() {
       {/* Footer hint */}
       {expanded && (
         <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-          <p className="text-[10px] text-gray-400">
+          <p className="text-[10px] text-gray-600">
             Click any column header to highlight that dimension across all patterns. Scroll right to see all columns.
           </p>
         </div>

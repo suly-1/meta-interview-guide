@@ -111,7 +111,7 @@ export function ThinkOutLoudCoach() {
       score >= 4
         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
         : score >= 3
-          ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+          ? "bg-amber-500/20 text-amber-900 border-amber-500/30"
           : "bg-red-500/20 text-red-400 border-red-500/30";
     return (
       <div
@@ -303,7 +303,7 @@ export function ThinkOutLoudCoach() {
               {/* Improvements */}
               {result.improvements.length > 0 && (
                 <div className="space-y-1">
-                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                  <div className="text-xs font-bold text-amber-900 uppercase tracking-wider">
                     To Improve
                   </div>
                   {result.improvements.map((s, i) => (
@@ -311,7 +311,7 @@ export function ThinkOutLoudCoach() {
                       key={i}
                       className="flex gap-2 text-xs text-foreground/80"
                     >
-                      <span className="text-amber-400 shrink-0">→</span>
+                      <span className="text-amber-900 shrink-0">→</span>
                       {s}
                     </div>
                   ))}

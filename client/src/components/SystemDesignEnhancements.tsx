@@ -46,11 +46,11 @@ function SectionWrapper({
     blue: "text-blue-400 border-blue-500/20 bg-blue-500/5",
     violet: "text-violet-400 border-violet-500/20 bg-violet-500/5",
     emerald: "text-emerald-400 border-emerald-500/20 bg-emerald-500/5",
-    amber: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+    amber: "text-amber-900 border-amber-500/20 bg-amber-500/5",
     cyan: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5",
     rose: "text-rose-400 border-rose-500/20 bg-rose-500/5",
     purple: "text-purple-400 border-purple-500/20 bg-purple-500/5",
-    orange: "text-orange-400 border-orange-500/20 bg-orange-500/5",
+    orange: "text-orange-900 border-orange-500/20 bg-orange-500/5",
   };
   const cls = accentMap[accent] ?? accentMap.blue;
   return (
@@ -492,7 +492,7 @@ export function TradeoffDecisionSimulator() {
       : s >= 3
         ? "text-blue-400"
         : s >= 2
-          ? "text-amber-400"
+          ? "text-amber-900"
           : "text-red-400";
 
   return (
@@ -784,7 +784,7 @@ const colorMap: Record<string, { badge: string; border: string; bg: string }> =
       bg: "bg-emerald-500/5",
     },
     amber: {
-      badge: "bg-amber-500/20 text-amber-300",
+      badge: "bg-amber-500/20 text-amber-800",
       border: "border-amber-500/30",
       bg: "bg-amber-500/5",
     },
@@ -804,7 +804,7 @@ const colorMap: Record<string, { badge: string; border: string; bg: string }> =
       bg: "bg-rose-500/5",
     },
     orange: {
-      badge: "bg-orange-500/20 text-orange-300",
+      badge: "bg-orange-500/20 text-orange-800",
       border: "border-orange-500/30",
       bg: "bg-orange-500/5",
     },
@@ -1125,7 +1125,7 @@ export function ScaleEstimationCalculator() {
           {
             label: "Peak Write QPS",
             value: fmt(peakQPSWrites),
-            color: "text-amber-400",
+            color: "text-amber-900",
           },
           {
             label: "Peak Read QPS",
@@ -1145,7 +1145,7 @@ export function ScaleEstimationCalculator() {
           {
             label: "Peak Bandwidth",
             value: `${bandwidthGbps.toFixed(1)} Gbps`,
-            color: "text-orange-400",
+            color: "text-orange-900",
           },
           {
             label: "Servers (10K QPS)",
@@ -1172,7 +1172,7 @@ export function ScaleEstimationCalculator() {
           {warnings.map(w => (
             <div
               key={w}
-              className="flex items-start gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400"
+              className="flex items-start gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900"
             >
               <AlertTriangle size={12} className="shrink-0 mt-0.5" /> {w}
             </div>
@@ -1215,8 +1215,8 @@ export function AntiPatternDetector() {
     s === "Critical"
       ? "text-red-400 bg-red-500/10 border-red-500/30"
       : s === "High"
-        ? "text-orange-400 bg-orange-500/10 border-orange-500/30"
-        : "text-amber-400 bg-amber-500/10 border-amber-500/30";
+        ? "text-orange-900 bg-orange-500/10 border-orange-500/30"
+        : "text-amber-900 bg-amber-500/10 border-amber-500/30";
 
   return (
     <div className="space-y-4">
@@ -1250,7 +1250,7 @@ export function AntiPatternDetector() {
               {result.antiPatterns.length !== 1 ? "s" : ""}
             </div>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded ${result.level === "IC7" ? "text-purple-400 bg-purple-500/10" : result.level === "IC6" ? "text-blue-400 bg-blue-500/10" : "text-amber-400 bg-amber-500/10"}`}
+              className={`text-xs font-bold px-2 py-0.5 rounded ${result.level === "IC7" ? "text-purple-400 bg-purple-500/10" : result.level === "IC6" ? "text-blue-400 bg-blue-500/10" : "text-amber-900 bg-amber-500/10"}`}
             >
               {result.level} Signal
             </span>
@@ -1748,7 +1748,7 @@ export function ComplexityCheatSheet() {
                 <tr key={i} className={i % 2 === 0 ? "bg-secondary/20" : ""}>
                   <td className="p-2 text-foreground">{r.op}</td>
                   <td
-                    className={`p-2 text-right font-mono font-bold ${r.ns < 1000 ? "text-emerald-400" : r.ns < 1000000 ? "text-blue-400" : r.ns < 100000000 ? "text-amber-400" : "text-red-400"}`}
+                    className={`p-2 text-right font-mono font-bold ${r.ns < 1000 ? "text-emerald-400" : r.ns < 1000000 ? "text-blue-400" : r.ns < 100000000 ? "text-amber-900" : "text-red-400"}`}
                   >
                     {r.note}
                   </td>
@@ -1774,7 +1774,7 @@ export function ComplexityCheatSheet() {
                   </th>
                   <th className="text-center p-2 text-blue-400">C</th>
                   <th className="text-center p-2 text-emerald-400">A</th>
-                  <th className="text-center p-2 text-amber-400">P</th>
+                  <th className="text-center p-2 text-amber-900">P</th>
                   <th className="text-left p-2 text-muted-foreground">Note</th>
                 </tr>
               </thead>
@@ -1905,7 +1905,7 @@ export function ExplainLikeAPM() {
       <button
         onClick={handleExplain}
         disabled={explainMutation.isPending}
-        className="w-full py-2.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-300 text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full py-2.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-800 text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Zap size={14} />
         {explainMutation.isPending
@@ -1914,7 +1914,7 @@ export function ExplainLikeAPM() {
       </button>
       {result && (
         <div className="space-y-2">
-          <div className="text-xs font-bold text-orange-400 uppercase tracking-wider">
+          <div className="text-xs font-bold text-orange-900 uppercase tracking-wider">
             PM-Friendly Explanation
           </div>
           <div className="bg-secondary/40 rounded-lg p-4 text-sm">
@@ -2054,7 +2054,7 @@ export function TimeBoxedPracticeTimer() {
       {/* Main timer display */}
       <div className="text-center space-y-2">
         <div
-          className={`text-5xl font-black font-mono tabular-nums ${isOvertime ? "text-red-400" : isWarning ? "text-amber-400" : "text-foreground"}`}
+          className={`text-5xl font-black font-mono tabular-nums ${isOvertime ? "text-red-400" : isWarning ? "text-amber-900" : "text-foreground"}`}
         >
           {isOvertime ? "+" + fmt(elapsed - preset.total) : fmt(remaining)}
         </div>
@@ -2077,7 +2077,7 @@ export function TimeBoxedPracticeTimer() {
       >
         <div className="flex items-center justify-between mb-2">
           <span
-            className={`text-xs font-bold ${isWarning ? "text-amber-400" : "text-blue-400"}`}
+            className={`text-xs font-bold ${isWarning ? "text-amber-900" : "text-blue-400"}`}
           >
             {isWarning ? "⚠️ " : ""}Phase {currentPhaseIdx + 1}/
             {preset.phases.length}: {currentPhase.name}
@@ -2116,7 +2116,7 @@ export function TimeBoxedPracticeTimer() {
       <div className="flex gap-2">
         <button
           onClick={() => setRunning(r => !r)}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${running ? "bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-300" : "bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300"}`}
+          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${running ? "bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-800" : "bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300"}`}
         >
           {running ? (
             <>
@@ -2293,7 +2293,7 @@ const tierColors: Record<string, string> = {
 };
 const relevanceColors: Record<string, string> = {
   Critical: "text-red-400",
-  High: "text-amber-400",
+  High: "text-amber-900",
   Medium: "text-blue-400",
   Low: "text-muted-foreground",
 };
@@ -2332,7 +2332,7 @@ export function EnhancedQuestionBank() {
             <button
               key={r}
               onClick={() => setRelevanceFilter(r)}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${relevanceFilter === r ? "bg-amber-600/30 text-amber-300 border border-amber-500/40" : "bg-secondary text-muted-foreground border border-border hover:border-amber-500/30"}`}
+              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${relevanceFilter === r ? "bg-amber-600/30 text-amber-800 border border-amber-500/40" : "bg-secondary text-muted-foreground border border-border hover:border-amber-500/30"}`}
             >
               {r}
             </button>

@@ -55,8 +55,8 @@ const ACHIEVEMENTS: Achievement[] = [
     name: "On Fire",
     description: "Maintain a 3-day streak",
     icon: <Flame size={20} />,
-    color: "text-orange-600",
-    bg: "bg-orange-50 border-orange-200",
+    color: "text-orange-800",
+    bg: "bg-orange-100 border-orange-200",
     check: s => s.streak >= 3,
   },
   {
@@ -65,7 +65,7 @@ const ACHIEVEMENTS: Achievement[] = [
     description: "Maintain a 7-day streak",
     icon: <Flame size={20} />,
     color: "text-red-600",
-    bg: "bg-red-50 border-red-200",
+    bg: "bg-red-100 border-red-200",
     check: s => s.streak >= 7,
   },
   {
@@ -74,7 +74,7 @@ const ACHIEVEMENTS: Achievement[] = [
     description: "Complete a Sprint Mode session",
     icon: <Zap size={20} />,
     color: "text-yellow-600",
-    bg: "bg-yellow-50 border-yellow-200",
+    bg: "bg-yellow-100 border-yellow-200",
     check: s => s.sprintCompleted >= 1,
   },
   {
@@ -100,8 +100,8 @@ const ACHIEVEMENTS: Achievement[] = [
     name: "Interview Ready",
     description: "Reach 80%+ readiness score",
     icon: <Trophy size={20} />,
-    color: "text-amber-600",
-    bg: "bg-amber-50 border-amber-200",
+    color: "text-amber-800",
+    bg: "bg-amber-100 border-amber-200",
     check: s => s.readinessScore >= 80,
   },
   {
@@ -130,27 +130,27 @@ export default function StreakBadges() {
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-5">
         <div className="p-2 bg-amber-100 rounded-xl">
-          <Trophy size={20} className="text-amber-600" />
+          <Trophy size={20} className="text-amber-800" />
         </div>
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Streak & Achievements
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{earned.length}/{ACHIEVEMENTS.length} badges earned</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">{earned.length}/{ACHIEVEMENTS.length} badges earned</p>
         </div>
       </div>
 
       {/* Streak banner */}
       <div className={`rounded-xl p-4 mb-5 flex items-center gap-4 ${
-        stats.streak >= 7 ? "bg-red-50 border border-red-200" :
-        stats.streak >= 3 ? "bg-orange-50 border border-orange-200" :
-        stats.streak >= 1 ? "bg-amber-50 border border-amber-200" :
+        stats.streak >= 7 ? "bg-red-100 border border-red-200" :
+        stats.streak >= 3 ? "bg-orange-100 border border-orange-200" :
+        stats.streak >= 1 ? "bg-amber-100 border border-amber-200" :
         "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
       }`}>
         <div className="relative">
           <Flame
             size={36}
-            className={stats.streak >= 3 ? "text-orange-500" : stats.streak >= 1 ? "text-amber-400" : "text-gray-300"}
+            className={stats.streak >= 3 ? "text-orange-500" : stats.streak >= 1 ? "text-amber-900" : "text-gray-700"}
             fill={stats.streak >= 3 ? "currentColor" : "none"}
           />
           {stats.streak >= 7 && (
@@ -161,7 +161,7 @@ export default function StreakBadges() {
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {stats.streak} day{stats.streak !== 1 ? "s" : ""}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-700">
             {stats.streak === 0 ? "Start practicing to begin your streak!" :
              stats.streak < 3 ? "Keep going — 3 days for the On Fire badge!" :
              stats.streak < 7 ? "Almost at Week Warrior! Keep it up." :
@@ -169,22 +169,22 @@ export default function StreakBadges() {
           </p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-xs text-gray-400">Problems</p>
-          <p className="text-lg font-bold text-gray-700 dark:text-gray-300 tabular-nums">{stats.totalSolved}</p>
+          <p className="text-xs text-gray-600">Problems</p>
+          <p className="text-lg font-bold text-gray-700 dark:text-gray-200 tabular-nums">{stats.totalSolved}</p>
         </div>
       </div>
 
       {/* Earned badges */}
       {earned.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Earned</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Earned</p>
           <div className="grid grid-cols-2 gap-2">
             {earned.map(a => (
               <div key={a.id} className={`flex items-center gap-3 p-3 rounded-xl border ${a.bg}`}>
                 <div className={a.color}>{a.icon}</div>
                 <div>
                   <p className="text-sm font-bold text-gray-800">{a.name}</p>
-                  <p className="text-xs text-gray-500">{a.description}</p>
+                  <p className="text-xs text-gray-700">{a.description}</p>
                 </div>
               </div>
             ))}
@@ -195,14 +195,14 @@ export default function StreakBadges() {
       {/* Locked badges */}
       {locked.length > 0 && (
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Locked</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Locked</p>
           <div className="grid grid-cols-2 gap-2">
             {locked.map(a => (
               <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 opacity-60">
-                <Lock size={16} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                <Lock size={16} className="text-gray-700 dark:text-gray-300 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{a.name}</p>
-                  <p className="text-xs text-gray-400">{a.description}</p>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{a.name}</p>
+                  <p className="text-xs text-gray-600">{a.description}</p>
                 </div>
               </div>
             ))}

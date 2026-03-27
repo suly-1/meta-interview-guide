@@ -51,17 +51,17 @@ class TabErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
           <div className="w-14 h-14 rounded-full bg-amber-900/30 flex items-center justify-center mb-4">
-            <AlertTriangle size={24} className="text-amber-400" />
+            <AlertTriangle size={24} className="text-amber-900" />
           </div>
           <h3 className="text-base font-semibold text-gray-200 mb-1">
             {tabName ? `${tabName} encountered an error` : "This section encountered an error"}
           </h3>
-          <p className="text-sm text-gray-500 mb-5 max-w-sm">
+          <p className="text-sm text-gray-700 mb-5 max-w-sm">
             Other tabs are unaffected. You can switch tabs now and retry this one at any time.
           </p>
           {/* Collapsed error details for debugging */}
           <details className="mb-5 w-full max-w-lg text-left">
-            <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-400 transition-colors">
+            <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-600 transition-colors">
               Show error details
             </summary>
             <pre className="mt-2 text-xs text-red-400 bg-gray-950 rounded-xl p-4 overflow-auto max-h-40 border border-gray-800">

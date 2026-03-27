@@ -440,8 +440,8 @@ export default function ReverseEngineeringDrill() {
           {/* Score banner */}
           <div className={`rounded-xl p-4 text-center border ${
             result.total >= 80 ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700" :
-            result.total >= 50 ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700" :
-            "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"
+            result.total >= 50 ? "bg-amber-100 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700" :
+            "bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700"
           }`}>
             <div className="text-3xl font-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {result.total}<span className="text-base font-semibold opacity-60">/100</span>
@@ -454,19 +454,19 @@ export default function ReverseEngineeringDrill() {
 
           {/* Breakdown */}
           <div className="space-y-2">
-            <div className={`flex items-center justify-between px-3 py-2 rounded-xl border text-xs ${result.patternCorrect ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-red-50 dark:bg-red-900/20 border-red-200"}`}>
+            <div className={`flex items-center justify-between px-3 py-2 rounded-xl border text-xs ${result.patternCorrect ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-red-100 dark:bg-red-900/20 border-red-200"}`}>
               <span className="font-semibold text-foreground">Pattern</span>
               <span className={result.patternCorrect ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-red-700 dark:text-red-400"}>
                 {selectedPattern ?? "—"} {result.patternCorrect ? "✅ +40" : `❌ +0 (was: ${challenge.patternName})`}
               </span>
             </div>
-            <div className={`flex items-center justify-between px-3 py-2 rounded-xl border text-xs ${result.complexityCorrect ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-red-50 dark:bg-red-900/20 border-red-200"}`}>
+            <div className={`flex items-center justify-between px-3 py-2 rounded-xl border text-xs ${result.complexityCorrect ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-red-100 dark:bg-red-900/20 border-red-200"}`}>
               <span className="font-semibold text-foreground">Time Complexity</span>
               <span className={result.complexityCorrect ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-red-700 dark:text-red-400"}>
                 {selectedComplexity ?? "—"} {result.complexityCorrect ? "✅ +40" : `❌ +0 (was: ${challenge.timeComplexity})`}
               </span>
             </div>
-            <div className={`flex items-center justify-between px-3 py-2 rounded-xl border text-xs ${result.edgeCaseScore > 0 ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-red-50 dark:bg-red-900/20 border-red-200"}`}>
+            <div className={`flex items-center justify-between px-3 py-2 rounded-xl border text-xs ${result.edgeCaseScore > 0 ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200" : "bg-red-100 dark:bg-red-900/20 border-red-200"}`}>
               <span className="font-semibold text-foreground">Edge Case</span>
               <span className={result.edgeCaseScore > 0 ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-red-700 dark:text-red-400"}>
                 {result.edgeCaseScore > 0 ? `✅ +${result.edgeCaseScore * 10}` : `❌ +0 (try: ${challenge.keyEdgeCases[0]})`}

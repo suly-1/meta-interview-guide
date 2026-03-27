@@ -54,7 +54,7 @@ const CATEGORIES: {
     id: "other",
     label: "Other",
     icon: <Lightbulb size={12} />,
-    color: "text-amber-400",
+    color: "text-amber-900",
   },
 ];
 
@@ -163,7 +163,7 @@ export function GeneralFeedback({ inline = false }: Props) {
                     onClick={() => setRating(s === rating ? 0 : s)}
                     className={`text-xl transition-all ${
                       s <= rating
-                        ? "text-amber-400"
+                        ? "text-amber-900"
                         : "text-muted-foreground/30 hover:text-muted-foreground/60"
                     }`}
                   >

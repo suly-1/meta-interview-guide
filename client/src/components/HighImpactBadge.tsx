@@ -29,7 +29,7 @@ export function HighImpactBadge({
     lg: "text-xs px-3 py-1.5 gap-1.5",
   };
   const variantClasses = {
-    orange: "bg-orange-500/15 text-orange-600 border-orange-400/40 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/40",
+    orange: "bg-orange-500/15 text-orange-800 border-orange-400/40 dark:bg-orange-500/20 dark:text-orange-900 dark:border-orange-500/40",
     red: "bg-red-500/15 text-red-600 border-red-400/40 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/40",
     violet: "bg-violet-500/15 text-violet-600 border-violet-400/40 dark:bg-violet-500/20 dark:text-violet-400 dark:border-violet-500/40",
     emerald: "bg-emerald-500/15 text-emerald-600 border-emerald-400/40 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/40",
@@ -109,7 +109,7 @@ export function HighImpactSectionHeader({
     blue: "from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 border-blue-100 dark:border-blue-900/30",
   };
   const textMap = {
-    orange: "text-orange-700 dark:text-orange-400",
+    orange: "text-orange-900 dark:text-orange-900",
     violet: "text-violet-700 dark:text-violet-400",
     emerald: "text-emerald-700 dark:text-emerald-400",
     blue: "text-blue-700 dark:text-blue-400",
@@ -128,7 +128,7 @@ export function HighImpactSectionHeader({
               <HighImpactBadge size="sm" variant={variant === "blue" ? "violet" : variant} />
             </div>
             {subtitle && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{subtitle}</p>
+              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{subtitle}</p>
             )}
           </div>
         </div>
@@ -151,8 +151,8 @@ interface ImpactCalloutProps {
 
 export function ImpactCallout({ children, variant = "orange" }: ImpactCalloutProps) {
   const map = {
-    orange: "bg-orange-50 border-orange-200 text-orange-800 dark:bg-orange-950/30 dark:border-orange-800/40 dark:text-orange-300",
-    red: "bg-red-50 border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800/40 dark:text-red-300",
+    orange: "bg-orange-100 border-orange-200 text-orange-800 dark:bg-orange-950/30 dark:border-orange-800/40 dark:text-orange-800",
+    red: "bg-red-100 border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800/40 dark:text-red-300",
     violet: "bg-violet-50 border-violet-200 text-violet-800 dark:bg-violet-950/30 dark:border-violet-800/40 dark:text-violet-300",
     emerald: "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-300",
   };

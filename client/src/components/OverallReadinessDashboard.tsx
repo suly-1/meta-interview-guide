@@ -43,7 +43,7 @@ function MiniBar({ value, color, label, detail }: { value: number; color: string
     <div>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-semibold text-gray-700">{label}</span>
-        <span className="text-xs text-gray-400">{detail}</span>
+        <span className="text-xs text-gray-600">{detail}</span>
       </div>
       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${value}%` }} />
@@ -154,7 +154,7 @@ export default function OverallReadinessDashboard() {
 
           {/* Breakdown bars */}
           <div className="flex-1 w-full space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Score Breakdown</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-3">Score Breakdown</p>
             <MiniBar
               value={readiness.drillScore}
               color="bg-blue-500"
@@ -188,13 +188,13 @@ export default function OverallReadinessDashboard() {
         {[
           { label: "Patterns Drilled", value: `${drilled.length}/${PATTERNS.length}`, sub: `${undrilled.length} remaining`, icon: <Brain size={16} className="text-blue-500" />, bg: "bg-blue-50 border-blue-200" },
           { label: "CTCI Solved", value: `${readiness.ctciSolved}`, sub: `of ${readiness.ctciTotal} problems`, icon: <BookOpen size={16} className="text-violet-500" />, bg: "bg-violet-50 border-violet-200" },
-          { label: "Behavioral Rated", value: `${behSummary.rated}`, sub: `of ${behSummary.total} questions`, icon: <Target size={16} className="text-amber-500" />, bg: "bg-amber-50 border-amber-200" },
-          { label: "Current Streak", value: `${readiness.streak}d`, sub: readiness.streak >= 3 ? "Keep it up!" : "Practice daily", icon: <Flame size={16} className="text-orange-500" />, bg: "bg-orange-50 border-orange-200" },
+          { label: "Behavioral Rated", value: `${behSummary.rated}`, sub: `of ${behSummary.total} questions`, icon: <Target size={16} className="text-amber-500" />, bg: "bg-amber-100 border-amber-200" },
+          { label: "Current Streak", value: `${readiness.streak}d`, sub: readiness.streak >= 3 ? "Keep it up!" : "Practice daily", icon: <Flame size={16} className="text-orange-500" />, bg: "bg-orange-100 border-orange-200" },
         ].map(card => (
           <div key={card.label} className={`rounded-xl border p-4 ${card.bg}`}>
             <div className="flex items-center gap-2 mb-2">{card.icon}<span className="text-xs font-bold text-gray-600">{card.label}</span></div>
             <p className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{card.value}</p>
-            <p className="text-[11px] text-gray-500 mt-0.5">{card.sub}</p>
+            <p className="text-[11px] text-gray-700 mt-0.5">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -222,7 +222,7 @@ export default function OverallReadinessDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400 italic">Complete Quick Drills to see your strongest patterns.</p>
+            <p className="text-sm text-gray-600 italic">Complete Quick Drills to see your strongest patterns.</p>
           )}
         </div>
 
@@ -247,16 +247,16 @@ export default function OverallReadinessDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400 italic">No drills yet — start with the Coding tab.</p>
+            <p className="text-sm text-gray-600 italic">No drills yet — start with the Coding tab.</p>
           )}
           {undrilled.length > 0 && (
             <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Never Drilled</p>
+              <p className="text-[11px] font-bold text-gray-600 uppercase tracking-widest mb-1.5">Never Drilled</p>
               <div className="flex flex-wrap gap-1">
                 {undrilled.slice(0, 5).map(p => (
-                  <span key={p.id} className="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{p.name}</span>
+                  <span key={p.id} className="text-[11px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{p.name}</span>
                 ))}
-                {undrilled.length > 5 && <span className="text-[11px] text-gray-400">+{undrilled.length - 5} more</span>}
+                {undrilled.length > 5 && <span className="text-[11px] text-gray-600">+{undrilled.length - 5} more</span>}
               </div>
             </div>
           )}
@@ -272,12 +272,12 @@ export default function OverallReadinessDashboard() {
         <div className="grid grid-cols-3 gap-4">
           {ctciByDiff.map(d => {
             const color = d.diff === "Easy" ? { bar: "bg-emerald-500", text: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" }
-              : d.diff === "Medium" ? { bar: "bg-amber-500", text: "text-amber-600", bg: "bg-amber-50 border-amber-200" }
-              : { bar: "bg-red-500", text: "text-red-600", bg: "bg-red-50 border-red-200" };
+              : d.diff === "Medium" ? { bar: "bg-amber-500", text: "text-amber-800", bg: "bg-amber-100 border-amber-200" }
+              : { bar: "bg-red-500", text: "text-red-600", bg: "bg-red-100 border-red-200" };
             return (
               <div key={d.diff} className={`rounded-lg border p-3 text-center ${color.bg}`}>
                 <p className={`text-2xl font-extrabold ${color.text}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{d.solved}</p>
-                <p className="text-[11px] text-gray-500">/ {d.total} {d.diff}</p>
+                <p className="text-[11px] text-gray-700">/ {d.total} {d.diff}</p>
                 <div className="mt-2 h-1.5 bg-white/60 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${color.bar}`} style={{ width: `${d.pct}%` }} />
                 </div>
@@ -295,7 +295,7 @@ export default function OverallReadinessDashboard() {
             <Flame size={15} className="text-orange-500" />
             <span className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>14-Day Activity</span>
           </div>
-          <span className="text-xs text-gray-400">{readiness.streak}-day current streak</span>
+          <span className="text-xs text-gray-600">{readiness.streak}-day current streak</span>
         </div>
         <div className="flex gap-1.5">
           {last14.map(date => {
@@ -311,8 +311,8 @@ export default function OverallReadinessDashboard() {
           })}
         </div>
         <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-gray-400">14 days ago</span>
-          <span className="text-[10px] text-gray-400">Today</span>
+          <span className="text-[10px] text-gray-600">14 days ago</span>
+          <span className="text-[10px] text-gray-600">Today</span>
         </div>
       </div>
 
@@ -326,13 +326,13 @@ export default function OverallReadinessDashboard() {
           <div className="space-y-2">
             {actions.map((a, i) => (
               <div key={i} className={`flex items-start gap-2.5 p-2.5 rounded-lg ${
-                a.priority === "high" ? "bg-red-50 border border-red-100" :
-                a.priority === "medium" ? "bg-amber-50 border border-amber-100" :
+                a.priority === "high" ? "bg-red-100 border border-red-100" :
+                a.priority === "medium" ? "bg-amber-100 border border-amber-100" :
                 "bg-gray-50 border border-gray-100"
               }`}>
                 <Circle size={7} className={`flex-shrink-0 mt-1.5 ${
                   a.priority === "high" ? "text-red-400 fill-red-400" :
-                  a.priority === "medium" ? "text-amber-400 fill-amber-400" : "text-gray-400 fill-gray-400"
+                  a.priority === "medium" ? "text-amber-900 fill-amber-400" : "text-gray-600 fill-gray-400"
                 }`} />
                 <span className="text-xs text-gray-700">{a.text}</span>
               </div>

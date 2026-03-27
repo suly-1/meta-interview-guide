@@ -160,7 +160,7 @@ export function ImpactQuantificationCoach() {
               {/* Weak claims */}
               {result.weakClaims.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                  <div className="text-xs font-bold text-amber-900 uppercase tracking-wider">
                     Vague Claims to Quantify ({result.weakClaims.length})
                   </div>
                   {result.weakClaims.map((c, i) => (

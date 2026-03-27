@@ -122,7 +122,7 @@ const COLOR_MAP: Record<string, string> = {
   violet: "bg-violet-100 text-violet-700 border-violet-300 dark:bg-violet-900/30 dark:text-violet-400 dark:border-violet-700",
   blue:   "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700",
   teal:   "bg-teal-100 text-teal-700 border-teal-300 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-700",
-  amber:  "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700",
+  amber:  "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/30 dark:text-amber-900 dark:border-amber-700",
   emerald:"bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700",
   rose:   "bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-700",
   slate:  "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-700",
@@ -238,7 +238,7 @@ export default function GauntletMode({ gauntlet, onStart, onAdvance, onStop, onN
       <div className={`rounded-xl border p-4 ${
         cleared
           ? "bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-300 dark:border-yellow-700"
-          : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"
+          : "bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700"
       }`}>
         <div className="flex items-center gap-3 mb-3">
           <span className="text-3xl">{cleared ? "🏅" : "💀"}</span>
@@ -298,14 +298,14 @@ export default function GauntletMode({ gauntlet, onStart, onAdvance, onStop, onN
 
   // Active state
   return (
-    <div className="rounded-xl border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20 p-4">
+    <div className="rounded-xl border border-orange-300 dark:border-orange-700 bg-orange-100 dark:bg-orange-900/20 p-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Sword size={14} className="text-orange-600 dark:text-orange-400" />
-        <span className="text-xs font-bold text-orange-700 dark:text-orange-400">
+        <Sword size={14} className="text-orange-800 dark:text-orange-900" />
+        <span className="text-xs font-bold text-orange-900 dark:text-orange-900">
           Gauntlet — Tab {gauntlet.currentIdx + 1} of {CHALLENGES.length}
         </span>
-        <span className="ml-auto text-[10px] font-mono text-orange-600 dark:text-orange-400 flex items-center gap-1">
+        <span className="ml-auto text-[10px] font-mono text-orange-800 dark:text-orange-900 flex items-center gap-1">
           <Clock size={10} /> {fmt(elapsed)}
         </span>
         <button onClick={onStop} className="text-muted-foreground hover:text-foreground p-0.5 rounded">
@@ -366,7 +366,7 @@ export default function GauntletMode({ gauntlet, onStart, onAdvance, onStop, onN
         {currentChallenge?.taskCount > 1 && tasksDone < currentChallenge.taskCount && (
           <button
             onClick={() => setTasksDone(n => Math.min(n + 1, currentChallenge.taskCount))}
-            className="px-3 py-1.5 rounded-lg border border-orange-300 dark:border-orange-700 text-xs font-semibold text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-orange-300 dark:border-orange-700 text-xs font-semibold text-orange-900 dark:text-orange-900 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
           >
             +1 Task
           </button>

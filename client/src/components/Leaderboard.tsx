@@ -43,7 +43,7 @@ function getBadges(
 function getRankIcon(rank: number) {
   if (rank === 1) return <Crown size={14} className="text-yellow-400" />;
   if (rank === 2) return <Crown size={14} className="text-slate-300" />;
-  if (rank === 3) return <Crown size={14} className="text-amber-600" />;
+  if (rank === 3) return <Crown size={14} className="text-amber-800" />;
   return (
     <span className="text-xs text-muted-foreground font-mono w-3.5 text-center">
       {rank}
@@ -279,7 +279,7 @@ export default function Leaderboard() {
                     <span className="text-emerald-400 font-semibold text-xs tabular-nums text-right">
                       {entry.patterns_mastered}/20
                     </span>
-                    <span className="text-orange-400 font-semibold text-xs tabular-nums text-right">
+                    <span className="text-orange-900 font-semibold text-xs tabular-nums text-right">
                       🔥{entry.streak}
                     </span>
                     <span className="text-purple-400 font-semibold text-xs tabular-nums text-right">
@@ -330,7 +330,7 @@ export default function Leaderboard() {
                 <div className="text-xs text-muted-foreground">Patterns</div>
               </div>
               <div>
-                <div className="text-orange-400 font-bold text-lg">
+                <div className="text-orange-900 font-bold text-lg">
                   🔥{localStats.streakDays}
                 </div>
                 <div className="text-xs text-muted-foreground">Streak</div>

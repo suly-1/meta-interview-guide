@@ -42,7 +42,7 @@ function ScoreBar({ label, score, color }: { label: string; score: number; color
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{label}</span>
+        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{label}</span>
         <span className={`text-xs font-bold ${color}`}>{score}/5</span>
       </div>
       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -141,7 +141,7 @@ export default function PersonaStressTest() {
       {phase === "setup" && (
         <HighImpactWrapper variant="violet" className="p-4 space-y-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Choose Persona</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">Choose Persona</label>
             <div className="grid grid-cols-2 gap-2">
               {PERSONAS.map(p => (
                 <button
@@ -154,14 +154,14 @@ export default function PersonaStressTest() {
                     <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{p.label}</span>
                     {persona === p.id && <HighImpactBadge size="sm" variant="violet" label="SELECTED" />}
                   </div>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">{p.desc}</p>
+                  <p className="text-[10px] text-gray-700 dark:text-gray-300 leading-relaxed">{p.desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Question</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">Question</label>
             <select
               value={question}
               onChange={e => setQuestion(e.target.value)}
@@ -172,11 +172,11 @@ export default function PersonaStressTest() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Target Level</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">Target Level</label>
             <div className="flex gap-2">
               {(["L4", "L5", "L6", "L7"] as Level[]).map(l => (
                 <button key={l} onClick={() => setTargetLevel(l)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-violet-300"}`}>
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-700 hover:border-violet-300"}`}>
                   {l}
                 </button>
               ))}
@@ -184,7 +184,7 @@ export default function PersonaStressTest() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">
               Your Initial Answer
             </label>
             <textarea
@@ -192,7 +192,7 @@ export default function PersonaStressTest() {
               onChange={e => setInitialAnswer(e.target.value)}
               placeholder="Give your best STAR answer. The persona will then probe the weakest part..."
               rows={6}
-              className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
+              className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-violet-400 resize-none"
             />
             <div className="flex justify-end mt-2">
               <button
@@ -235,10 +235,10 @@ export default function PersonaStressTest() {
                 <div className="flex items-start gap-3 justify-end">
                   <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-xl rounded-tr-sm px-4 py-3 max-w-[85%] ml-auto">
                     <div className="flex items-center gap-2 mb-1">
-                      <User size={11} className="text-gray-500" />
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">You</span>
+                      <User size={11} className="text-gray-700" />
+                      <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">You</span>
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{ex.candidateAnswer}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{ex.candidateAnswer}</p>
                   </div>
                 </div>
               )}
@@ -262,7 +262,7 @@ export default function PersonaStressTest() {
                   onChange={e => setCurrentAnswer(e.target.value)}
                   placeholder="Respond to the follow-up. Add new information — don't just repeat your initial answer..."
                   rows={5}
-                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
+                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-violet-400 resize-none"
                 />
                 <div className="flex justify-end mt-2">
                   <button
@@ -286,23 +286,23 @@ export default function PersonaStressTest() {
                     <Sparkles size={15} className="text-violet-500" />
                     Stress Test Results
                   </h4>
-                  <span className={`text-sm font-bold px-3 py-1 rounded-full ${scoreData.overallVerdict === "Pass" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : scoreData.overallVerdict === "Borderline" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
+                  <span className={`text-sm font-bold px-3 py-1 rounded-full ${scoreData.overallVerdict === "Pass" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : scoreData.overallVerdict === "Borderline" ? "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-900" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
                     {scoreData.overallVerdict}
                   </span>
                 </div>
                 <div className="space-y-3 mb-4">
-                  <ScoreBar label="Composure under pressure" score={scoreData.composure} color={scoreData.composure >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"} />
-                  <ScoreBar label="Added new depth each turn" score={scoreData.depth} color={scoreData.depth >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"} />
-                  <ScoreBar label="Quantified impact when pushed" score={scoreData.metrics} color={scoreData.metrics >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"} />
+                  <ScoreBar label="Composure under pressure" score={scoreData.composure} color={scoreData.composure >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-800 dark:text-amber-900"} />
+                  <ScoreBar label="Added new depth each turn" score={scoreData.depth} color={scoreData.depth >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-800 dark:text-amber-900"} />
+                  <ScoreBar label="Quantified impact when pushed" score={scoreData.metrics} color={scoreData.metrics >= 4 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-800 dark:text-amber-900"} />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 p-3">
                     <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Strength</p>
-                    <p className="text-xs text-gray-700 dark:text-gray-300">{scoreData.keyStrength}</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-200">{scoreData.keyStrength}</p>
                   </div>
-                  <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 p-3">
+                  <div className="rounded-lg bg-red-100 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 p-3">
                     <p className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Key Gap</p>
-                    <p className="text-xs text-gray-700 dark:text-gray-300">{scoreData.keyGap}</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-200">{scoreData.keyGap}</p>
                   </div>
                 </div>
                 <button onClick={reset} className="flex items-center gap-2 text-xs font-semibold text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors">

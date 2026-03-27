@@ -213,14 +213,14 @@ export function AIInterviewerInterruptMode() {
           <span className="px-2 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-black tracking-wider uppercase">
             🔥 Highest Impact
           </span>
-          <Zap size={16} className="text-orange-400" />
-          <span className="text-sm font-bold text-orange-300">
+          <Zap size={16} className="text-orange-900" />
+          <span className="text-sm font-bold text-orange-800">
             AI Interviewer Interrupt Mode
           </span>
         </div>
         <button
           onClick={() => setExpanded(e => !e)}
-          className="text-orange-400 hover:text-orange-300 transition-colors"
+          className="text-orange-900 hover:text-orange-800 transition-colors"
         >
           {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
@@ -235,7 +235,7 @@ export function AIInterviewerInterruptMode() {
           </p>
           <button
             onClick={() => setExpanded(true)}
-            className="mt-2 text-xs text-orange-400 hover:text-orange-300 font-semibold transition-colors"
+            className="mt-2 text-xs text-orange-900 hover:text-orange-800 font-semibold transition-colors"
           >
             Start session →
           </button>
@@ -247,7 +247,7 @@ export function AIInterviewerInterruptMode() {
           <div className="flex gap-2 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
             <AlertTriangle
               size={14}
-              className="text-orange-400 shrink-0 mt-0.5"
+              className="text-orange-900 shrink-0 mt-0.5"
             />
             <p className="text-xs text-orange-200">
               <strong>Why this matters:</strong> The #1 reason candidates fail
@@ -312,7 +312,7 @@ export function AIInterviewerInterruptMode() {
                 </span>
                 <span className="text-muted-foreground">
                   Next interrupt in:{" "}
-                  <strong className="text-orange-400">
+                  <strong className="text-orange-900">
                     {fmt(nextInterruptIn)}
                   </strong>
                 </span>
@@ -330,7 +330,7 @@ export function AIInterviewerInterruptMode() {
                   <div className="flex items-start gap-2">
                     <Zap
                       size={16}
-                      className="text-orange-400 shrink-0 mt-0.5"
+                      className="text-orange-900 shrink-0 mt-0.5"
                     />
                     <p className="text-sm font-semibold text-orange-200">
                       {currentInterrupt}
@@ -397,12 +397,12 @@ export function AIInterviewerInterruptMode() {
                     className="rounded-lg bg-white/5 border border-white/10 p-3 space-y-1.5"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-orange-400 uppercase">
+                      <span className="text-[10px] font-bold text-orange-900 uppercase">
                         Interrupt #{idx + 1} · {fmt(int.timestamp)}
                       </span>
                       {int.score && (
                         <span
-                          className={`text-[10px] font-black ${int.score.score >= 4 ? "text-emerald-400" : int.score.score >= 3 ? "text-amber-400" : "text-red-400"}`}
+                          className={`text-[10px] font-black ${int.score.score >= 4 ? "text-emerald-400" : int.score.score >= 3 ? "text-amber-900" : "text-red-400"}`}
                         >
                           {int.score.score}/5
                         </span>
@@ -429,7 +429,7 @@ export function AIInterviewerInterruptMode() {
                   setInterrupts([]);
                   setElapsed(0);
                 }}
-                className="w-full px-4 py-2 rounded-xl bg-orange-600/20 border border-orange-500/30 text-orange-400 text-sm font-semibold hover:bg-orange-600/30 transition-colors"
+                className="w-full px-4 py-2 rounded-xl bg-orange-600/20 border border-orange-500/30 text-orange-900 text-sm font-semibold hover:bg-orange-600/30 transition-colors"
               >
                 New Session
               </button>

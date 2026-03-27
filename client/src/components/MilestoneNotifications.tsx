@@ -132,11 +132,11 @@ export default function MilestoneNotifications() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Interview Countdown
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">D-14, D-7, D-3, D-1 milestone reminders</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">D-14, D-7, D-3, D-1 milestone reminders</p>
         </div>
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-gray-600 hover:text-gray-600 transition-colors"
         >
           <Calendar size={16} />
         </button>
@@ -159,9 +159,9 @@ export default function MilestoneNotifications() {
       {/* Countdown display */}
       {config.interviewDate && daysUntil !== null ? (
         <div className={`rounded-xl p-4 mb-4 text-center ${
-          daysUntil <= 1 ? "bg-red-50 border border-red-200" :
-          daysUntil <= 3 ? "bg-orange-50 border border-orange-200" :
-          daysUntil <= 7 ? "bg-amber-50 border border-amber-200" :
+          daysUntil <= 1 ? "bg-red-100 border border-red-200" :
+          daysUntil <= 3 ? "bg-orange-100 border border-orange-200" :
+          daysUntil <= 7 ? "bg-amber-100 border border-amber-200" :
           "bg-blue-50 border border-blue-200"
         }`}>
           {daysUntil > 0 ? (
@@ -183,21 +183,21 @@ export default function MilestoneNotifications() {
             </>
           ) : (
             <>
-              <p className="text-3xl font-bold text-gray-400">D+{Math.abs(daysUntil)}</p>
-              <p className="text-sm text-gray-500 mt-1">Interview has passed</p>
+              <p className="text-3xl font-bold text-gray-600">D+{Math.abs(daysUntil)}</p>
+              <p className="text-sm text-gray-700 mt-1">Interview has passed</p>
             </>
           )}
         </div>
       ) : (
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4 text-center">
-          <p className="text-sm text-gray-500">Set your interview date to start the countdown</p>
+          <p className="text-sm text-gray-700">Set your interview date to start the countdown</p>
         </div>
       )}
 
       {/* Milestone timeline */}
       {config.interviewDate && daysUntil !== null && daysUntil > 0 && (
         <div className="mb-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Milestones</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Milestones</p>
           <div className="flex gap-2">
             {MILESTONES.map(m => {
               const isPast = daysUntil <= m;
@@ -207,8 +207,8 @@ export default function MilestoneNotifications() {
                   key={m}
                   className={`flex-1 py-2 rounded-lg text-center text-xs font-bold border transition-all ${
                     isNext ? "bg-blue-100 border-blue-300 text-blue-700" :
-                    isPast ? "bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400" :
-                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500"
+                    isPast ? "bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600" :
+                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700"
                   }`}
                 >
                   D-{m}
@@ -223,7 +223,7 @@ export default function MilestoneNotifications() {
       {showSettings && (
         <div className="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-3">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Interview Date</label>
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-1">Interview Date</label>
             <input
               type="date"
               value={config.interviewDate}
@@ -234,8 +234,8 @@ export default function MilestoneNotifications() {
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Push Notifications</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Push Notifications</p>
+              <p className="text-xs text-gray-600">
                 {permissionStatus === "granted" ? "Permission granted" :
                  permissionStatus === "denied" ? "Permission denied — use in-app banners" :
                  "Click to enable browser notifications"}
@@ -247,7 +247,7 @@ export default function MilestoneNotifications() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                   config.notificationsEnabled
                     ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-500"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700"
                 }`}
               >
                 {config.notificationsEnabled ? <Bell size={12} /> : <BellOff size={12} />}
@@ -269,7 +269,7 @@ export default function MilestoneNotifications() {
       {!showSettings && (
         <button
           onClick={() => setShowSettings(true)}
-          className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 font-bold rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+          className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-200 font-bold rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
         >
           <Calendar size={14} /> Set Interview Date
         </button>

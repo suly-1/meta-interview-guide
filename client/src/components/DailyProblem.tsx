@@ -20,7 +20,7 @@ function dateHash(dateStr: string): number {
 
 const DIFF_COLORS: Record<string, string> = {
   Easy: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  Medium: "bg-amber-100 text-amber-700 border-amber-200",
+  Medium: "bg-amber-100 text-amber-900 border-amber-200",
   Hard: "bg-red-100 text-red-700 border-red-200",
 };
 
@@ -60,23 +60,23 @@ export default function DailyProblem() {
             Problem of the Day
           </span>
         </div>
-        <span className="text-xs text-gray-500 font-medium">{dayOfWeek}, {dateDisplay}</span>
+        <span className="text-xs text-gray-700 font-medium">{dayOfWeek}, {dateDisplay}</span>
       </div>
 
       {isFromWeakTopic && weakTopicName && (
         <div className="flex items-center gap-1.5 mb-2">
           <Star size={11} className="text-amber-500 fill-amber-400" />
-          <span className="text-[11px] font-semibold text-amber-700">From your weak area: {weakTopicName}</span>
+          <span className="text-[11px] font-semibold text-amber-900">From your weak area: {weakTopicName}</span>
         </div>
       )}
 
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h4 className={`font-extrabold text-base leading-tight ${solved ? "line-through text-gray-400" : "text-gray-900"}`}
+          <h4 className={`font-extrabold text-base leading-tight ${solved ? "line-through text-gray-600" : "text-gray-900"}`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {problem.name}
           </h4>
-          <p className="text-xs text-gray-500 mt-0.5 truncate">{problem.topic.split(",").slice(0, 2).join(", ")}</p>
+          <p className="text-xs text-gray-700 mt-0.5 truncate">{problem.topic.split(",").slice(0, 2).join(", ")}</p>
         </div>
         <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${DIFF_COLORS[problem.difficulty]}`}>
           {problem.difficulty}
@@ -100,7 +100,7 @@ export default function DailyProblem() {
               : "bg-white text-gray-600 border-gray-200 hover:border-emerald-400 hover:text-emerald-700"
           }`}
         >
-          <CheckCircle2 size={12} className={solved ? "text-emerald-600" : "text-gray-400"} />
+          <CheckCircle2 size={12} className={solved ? "text-emerald-600" : "text-gray-600"} />
           {solved ? "Solved!" : "Mark solved"}
         </button>
       </div>

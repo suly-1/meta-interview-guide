@@ -144,7 +144,7 @@ export default function SpacedRepetitionQueue() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Spaced Repetition Queue
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             {dueItems.length} due · {queue.length} total in queue
           </p>
         </div>
@@ -156,12 +156,12 @@ export default function SpacedRepetitionQueue() {
           <div className="bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-200 dark:border-violet-700 p-4 mb-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-violet-600 uppercase tracking-wide">{current.pattern}</span>
-              <span className="text-xs text-gray-400">{currentIdx + 1}/{dueItems.length} due</span>
+              <span className="text-xs text-gray-600">{currentIdx + 1}/{dueItems.length} due</span>
             </div>
             <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {current.problem}
             </h4>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-700 mt-1">
               Interval: {current.interval}d · Reps: {current.repetitions} · EF: {current.easeFactor.toFixed(2)}
             </p>
           </div>
@@ -175,7 +175,7 @@ export default function SpacedRepetitionQueue() {
             </button>
           ) : (
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 text-center">How well did you recall this problem's approach?</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 text-center">How well did you recall this problem's approach?</p>
               <div className="grid grid-cols-3 gap-2">
                 {QUALITY_LABELS.map(q => (
                   <button
@@ -195,21 +195,21 @@ export default function SpacedRepetitionQueue() {
         <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700 p-4 mb-5 text-center">
           <CheckCircle size={24} className="text-emerald-500 mx-auto mb-2" />
           <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">All caught up!</p>
-          <p className="text-xs text-gray-500 mt-1">No problems due right now. Check back later.</p>
+          <p className="text-xs text-gray-700 mt-1">No problems due right now. Check back later.</p>
         </div>
       ) : null}
 
       {/* Upcoming */}
       {!addMode && upcoming.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Upcoming Reviews</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Upcoming Reviews</p>
           <div className="space-y-1.5">
             {upcoming.map(r => (
               <div key={r.problem} className="flex items-center gap-2 text-sm">
-                <Clock size={12} className="text-gray-400 flex-shrink-0" />
-                <span className="flex-1 text-gray-700 dark:text-gray-300 truncate">{r.problem}</span>
-                <span className="text-xs text-gray-400 flex-shrink-0">{formatDue(r.nextReview)}</span>
-                <button onClick={() => removeProblem(r.problem)} className="text-gray-300 hover:text-red-400 transition-colors">
+                <Clock size={12} className="text-gray-600 flex-shrink-0" />
+                <span className="flex-1 text-gray-700 dark:text-gray-200 truncate">{r.problem}</span>
+                <span className="text-xs text-gray-600 flex-shrink-0">{formatDue(r.nextReview)}</span>
+                <button onClick={() => removeProblem(r.problem)} className="text-gray-700 hover:text-red-400 transition-colors">
                   <XCircle size={12} />
                 </button>
               </div>
@@ -236,17 +236,17 @@ export default function SpacedRepetitionQueue() {
                 className="w-full flex items-center gap-2 text-left px-3 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
               >
                 <ChevronRight size={12} className="text-violet-400 flex-shrink-0" />
-                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{p.problem}</span>
-                <span className="text-xs text-gray-400 flex-shrink-0">{p.pattern}</span>
+                <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate">{p.problem}</span>
+                <span className="text-xs text-gray-600 flex-shrink-0">{p.pattern}</span>
               </button>
             ))}
             {problems.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">All problems already in queue</p>
+              <p className="text-sm text-gray-600 text-center py-4">All problems already in queue</p>
             )}
           </div>
           <button
             onClick={() => { setAddMode(false); setSearchTerm(""); }}
-            className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors text-sm"
+            className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-bold rounded-xl transition-colors text-sm"
           >
             Done Adding
           </button>
@@ -262,7 +262,7 @@ export default function SpacedRepetitionQueue() {
           {queue.length > 0 && (
             <button
               onClick={() => { setCurrentIdx(0); setShowAnswer(false); }}
-              className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-600 dark:text-gray-300 rounded-xl transition-colors"
+              className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-600 dark:text-gray-200 rounded-xl transition-colors"
             >
               <RotateCcw size={14} />
             </button>

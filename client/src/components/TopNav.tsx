@@ -65,7 +65,7 @@ function CountdownPill({
       : days <= 7
         ? "text-red-400 border-red-500/30 bg-red-500/10"
         : days <= 14
-          ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+          ? "text-amber-900 border-amber-500/30 bg-amber-500/10"
           : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
   const label =
     days < 0
@@ -119,8 +119,8 @@ export function CountdownBar({
           : days <= 14
             ? {
                 bar: "bg-amber-500/8 border-amber-500/20",
-                num: "text-amber-400",
-                badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+                num: "text-amber-900",
+                badge: "bg-amber-500/15 text-amber-800 border-amber-500/30",
               }
             : {
                 bar: "bg-emerald-500/5 border-emerald-500/20",
@@ -223,7 +223,7 @@ function BadgePopover({ items, onJump, onClose, title }: BadgePopoverProps) {
       onClick={e => e.stopPropagation()}
     >
       <div className="flex items-center justify-between px-3 py-2 bg-amber-500/10 border-b border-amber-500/20">
-        <span className="text-xs font-bold text-amber-400">{title}</span>
+        <span className="text-xs font-bold text-amber-900">{title}</span>
         <button
           onClick={onClose}
           className="text-muted-foreground hover:text-foreground text-xs"
@@ -241,7 +241,7 @@ function BadgePopover({ items, onJump, onClose, title }: BadgePopoverProps) {
             }}
             className="w-full text-left px-3 py-2 hover:bg-secondary transition-colors group"
           >
-            <div className="text-xs font-medium text-foreground group-hover:text-amber-400 transition-colors truncate">
+            <div className="text-xs font-medium text-foreground group-hover:text-amber-900 transition-colors truncate">
               {item.label}
             </div>
             <div className="text-[10px] text-muted-foreground mt-0.5">
@@ -261,7 +261,7 @@ function BadgePopover({ items, onJump, onClose, title }: BadgePopoverProps) {
             onJump();
             onClose();
           }}
-          className="w-full text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors text-center"
+          className="w-full text-xs font-semibold text-amber-900 hover:text-amber-800 transition-colors text-center"
         >
           Go to tab to review →
         </button>
@@ -577,7 +577,7 @@ function GauntletButton({
       <button
         onClick={stopGauntlet}
         title={`Gauntlet active — ${gauntlet.tabsCompleted.length}/${GAUNTLET_TABS.length} tabs done. Click to cancel.`}
-        className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 transition-all"
+        className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-orange-900 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 transition-all"
       >
         <Swords size={13} className="animate-pulse" />
         <span className="hidden sm:inline">{fmt(elapsed)}</span>
@@ -596,12 +596,12 @@ function GauntletButton({
           ? `Gauntlet Mode — Best: ${fmt(Math.floor(gauntlet.bestTimeMs / 1000))}`
           : "Gauntlet Mode — visit all 5 tabs in one run"
       }
-      className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 hover:border hover:border-orange-500/20 transition-all"
+      className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-orange-900 hover:bg-orange-500/10 hover:border hover:border-orange-500/20 transition-all"
     >
       <Swords size={13} />
       <span className="hidden sm:inline">Gauntlet</span>
       {gauntlet.bestTimeMs && (
-        <span className="hidden sm:inline text-[10px] text-orange-400/70">
+        <span className="hidden sm:inline text-[10px] text-orange-900/70">
           {fmt(Math.floor(gauntlet.bestTimeMs / 1000))}
         </span>
       )}

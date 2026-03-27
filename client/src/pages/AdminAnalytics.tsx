@@ -39,7 +39,7 @@ interface StatCardProps {
 function StatCard({ icon, label, value, color }: StatCardProps) {
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-gray-600 text-xs font-semibold uppercase tracking-wider">
         <span className={color}>{icon}</span>
         {label}
       </div>
@@ -53,7 +53,7 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
 function MiniBarChart({ data }: { data: { date: string; sessions?: number; count?: number }[] }) {
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-32 text-gray-500 text-sm">
+      <div className="flex items-center justify-center h-32 text-gray-700 text-sm">
         No session data yet for this period.
       </div>
     );
@@ -133,7 +133,7 @@ export default function AdminAnalytics() {
         <div className="flex items-center gap-4 px-4 py-3">
           {/* Back to Feedback */}
           <Link href="/admin/feedback">
-            <button className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition-colors">
+            <button className="flex items-center gap-1.5 text-gray-600 hover:text-white text-sm transition-colors">
               <ArrowLeft size={15} />
               <span className="hidden sm:inline">Feedback</span>
             </button>
@@ -145,7 +145,7 @@ export default function AdminAnalytics() {
               <TrendingUp size={16} className="text-blue-400 flex-shrink-0" />
               <h1 className="text-sm font-bold text-white truncate">Site Analytics</h1>
             </div>
-            <p className="text-xs text-gray-500 hidden sm:block">First-party usage data · No PII collected</p>
+            <p className="text-xs text-gray-700 hidden sm:block">First-party usage data · No PII collected</p>
           </div>
 
           {/* Day range selector */}
@@ -157,7 +157,7 @@ export default function AdminAnalytics() {
                 className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
                   days === d
                     ? "bg-blue-600 text-white"
-                    : "text-gray-400 hover:text-white"
+                    : "text-gray-600 hover:text-white"
                 }`}
               >
                 {d}d
@@ -169,7 +169,7 @@ export default function AdminAnalytics() {
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-all disabled:opacity-50"
           >
             <RefreshCw size={13} className={isFetching ? "animate-spin" : ""} />
             <span className="hidden sm:inline">Refresh</span>
@@ -218,7 +218,7 @@ export default function AdminAnalytics() {
             icon={<Clock size={14} />}
             label="Avg Session"
             value={isLoading ? "…" : formatMinutes(stats?.avgSessionMinutes ?? 0)}
-            color="text-amber-400"
+            color="text-amber-900"
           />
           <StatCard
             icon={<Timer size={14} />}
@@ -243,7 +243,7 @@ export default function AdminAnalytics() {
                   className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
                     chartDays === d
                       ? "bg-blue-600 text-white"
-                      : "text-gray-400 hover:text-white"
+                      : "text-gray-600 hover:text-white"
                   }`}
                 >
                   {d}d
@@ -266,7 +266,7 @@ export default function AdminAnalytics() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <AlertCircle size={14} className="text-orange-400" />
+              <AlertCircle size={14} className="text-orange-900" />
               <span className="text-sm font-semibold text-white">
                 Top 3 Unactioned Feedback Items
               </span>
@@ -279,7 +279,7 @@ export default function AdminAnalytics() {
           </div>
 
           {!unactioned || unactioned.length === 0 ? (
-            <p className="text-gray-500 text-sm">No unactioned feedback — backlog is clear! 🎉</p>
+            <p className="text-gray-700 text-sm">No unactioned feedback — backlog is clear! 🎉</p>
           ) : (
             <div className="space-y-3">
               {unactioned.map((item) => (
@@ -289,12 +289,12 @@ export default function AdminAnalytics() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg border border-gray-700"
                 >
-                  <AlertCircle size={14} className="text-orange-400 mt-0.5 flex-shrink-0" />
+                  <AlertCircle size={14} className="text-orange-900 mt-0.5 flex-shrink-0" />
                   <div className="min-w-0">
-                    <span className="text-xs font-semibold text-orange-300 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-orange-800 uppercase tracking-wider">
                       {item.category}
                     </span>
-                    <p className="text-sm text-gray-300 mt-0.5 line-clamp-2">{item.message}</p>
+                    <p className="text-sm text-gray-700 mt-0.5 line-clamp-2">{item.message}</p>
                   </div>
                 </motion.div>
               ))}

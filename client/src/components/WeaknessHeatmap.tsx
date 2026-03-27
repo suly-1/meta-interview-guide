@@ -38,8 +38,8 @@ const BAR_COLORS = [
 ];
 const TEXT_COLORS = [
   "text-red-600",
-  "text-orange-600",
-  "text-amber-600",
+  "text-orange-800",
+  "text-amber-800",
   "text-yellow-600",
   "text-lime-600",
   "text-emerald-600",
@@ -73,7 +73,7 @@ export default function WeaknessHeatmap() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Weakness Heatmap
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Pattern mastery sorted by weakest areas</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Pattern mastery sorted by weakest areas</p>
         </div>
       </div>
 
@@ -83,19 +83,19 @@ export default function WeaknessHeatmap() {
           <p className="text-xl font-bold text-gray-900 dark:text-gray-100 tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {avgScore.toFixed(1)}/5
           </p>
-          <p className="text-xs text-gray-500">Avg Score</p>
+          <p className="text-xs text-gray-700">Avg Score</p>
         </div>
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 text-center">
+        <div className="bg-red-100 dark:bg-red-900/20 rounded-xl p-3 text-center">
           <p className="text-xl font-bold text-red-600 tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {weakPatterns}
           </p>
-          <p className="text-xs text-gray-500">Needs Work</p>
+          <p className="text-xs text-gray-700">Needs Work</p>
         </div>
         <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3 text-center">
           <p className="text-xl font-bold text-emerald-600 tabular-nums" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {masteredPatterns}
           </p>
-          <p className="text-xs text-gray-500">Mastered</p>
+          <p className="text-xs text-gray-700">Mastered</p>
         </div>
       </div>
 
@@ -106,7 +106,7 @@ export default function WeaknessHeatmap() {
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
             sortMode === "weakest"
               ? "bg-rose-100 text-rose-700 border border-rose-200"
-              : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
           }`}
         >
           Weakest First
@@ -116,7 +116,7 @@ export default function WeaknessHeatmap() {
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
             sortMode === "strongest"
               ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-              : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
           }`}
         >
           Strongest First
@@ -128,7 +128,7 @@ export default function WeaknessHeatmap() {
         {sorted.map(p => (
           <div key={p.name} className="flex items-center gap-3">
             <div className="w-32 flex-shrink-0">
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate" title={p.name}>{p.name}</p>
+              <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate" title={p.name}>{p.name}</p>
               <p className={`text-[10px] font-medium ${TEXT_COLORS[p.score]}`}>{SCORE_LABELS[p.score]}</p>
             </div>
             <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -137,7 +137,7 @@ export default function WeaknessHeatmap() {
                 style={{ width: `${(p.score / 5) * 100}%` }}
               />
             </div>
-            <span className="text-xs font-bold text-gray-500 tabular-nums w-6 text-right">{p.score}/5</span>
+            <span className="text-xs font-bold text-gray-700 tabular-nums w-6 text-right">{p.score}/5</span>
           </div>
         ))}
       </div>
@@ -195,7 +195,7 @@ export default function WeaknessHeatmap() {
         </div>
       )}
 
-      <p className="text-xs text-gray-400 mt-3 text-center">
+      <p className="text-xs text-gray-600 mt-3 text-center">
         Scores update as you practice in the Coding Interview tab
       </p>
     </div>

@@ -31,7 +31,7 @@ function ScoreRing({ score, size = 80 }: { score: number; size?: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-extrabold" style={{ color, fontFamily: "'Space Grotesk', sans-serif" }}>{score}</span>
-        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{label}</span>
+        <span className="text-[9px] font-bold text-gray-600 uppercase tracking-wide">{label}</span>
       </div>
     </div>
   );

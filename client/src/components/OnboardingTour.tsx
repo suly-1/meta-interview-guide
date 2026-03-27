@@ -117,7 +117,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         {/* Close button */}
         <button
           onClick={() => handleDismiss(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10"
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-600 dark:hover:text-gray-700 transition-colors z-10"
           aria-label="Skip tour"
         >
           <X size={18} />
@@ -157,7 +157,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                 >
                   {currentStep.title}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                   {currentStep.subtitle}
                 </p>
               </div>
@@ -171,7 +171,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                       label: "System Design",
                       pct: "42%",
                       desc: "Can't handle interruptions, no BoE instinct",
-                      color: "bg-red-50 border-red-200 text-red-700",
+                      color: "bg-red-100 border-red-200 text-red-700",
                       iconBg: "bg-red-100 text-red-600",
                     },
                     {
@@ -179,16 +179,16 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                       label: "Coding",
                       pct: "31%",
                       desc: "Silent coding, wrong pattern recognition",
-                      color: "bg-orange-50 border-orange-200 text-orange-700",
-                      iconBg: "bg-orange-100 text-orange-600",
+                      color: "bg-orange-100 border-orange-200 text-orange-900",
+                      iconBg: "bg-orange-100 text-orange-800",
                     },
                     {
                       icon: <MessageSquare size={20} />,
                       label: "Behavioral",
                       pct: "27%",
                       desc: "Story gaps, no metrics, weak under pressure",
-                      color: "bg-amber-50 border-amber-200 text-amber-700",
-                      iconBg: "bg-amber-100 text-amber-600",
+                      color: "bg-amber-100 border-amber-200 text-amber-900",
+                      iconBg: "bg-amber-100 text-amber-800",
                     },
                   ].map((item) => (
                     <div
@@ -211,13 +211,13 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                   {HIGH_IMPACT_TOOLS.map((tool) => (
                     <div
                       key={tool.label}
-                      className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 text-center"
+                      className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-orange-100 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 text-center"
                     >
                       <span className="text-xl">{tool.emoji}</span>
-                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 leading-tight">
+                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-200 leading-tight">
                         {tool.label}
                       </span>
-                      <span className="text-[9px] text-orange-600 dark:text-orange-400 font-semibold">
+                      <span className="text-[9px] text-orange-800 dark:text-orange-900 font-semibold">
                         {tool.tab}
                       </span>
                     </div>
@@ -238,7 +238,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                       </div>
                     </div>
                   </div>
-                  <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                  <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-200">
                     {[
                       "Scores your readiness across System Design, Coding, and Behavioral",
                       "Identifies your exact weakest area so you don't waste time",
@@ -263,14 +263,14 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
               size="sm"
               onClick={prev}
               disabled={step === 0}
-              className="gap-1.5 text-gray-500"
+              className="gap-1.5 text-gray-700"
             >
               <ChevronLeft size={15} /> Back
             </Button>
 
             <button
               onClick={() => handleDismiss(false)}
-              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 underline underline-offset-2"
+              className="text-xs text-gray-600 hover:text-gray-600 dark:hover:text-gray-700 underline underline-offset-2"
             >
               Skip tour
             </button>

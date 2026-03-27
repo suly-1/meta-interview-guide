@@ -34,7 +34,7 @@ const PERSONAS = [
     name: "The Devil's Advocate",
     description: "Argues the opposite of everything you say",
     icon: "😈",
-    color: "text-orange-400",
+    color: "text-orange-900",
     bgColor: "bg-orange-500/10",
     borderColor: "border-orange-500/20",
   },
@@ -52,7 +52,7 @@ const PERSONAS = [
     name: "The Silent Starer",
     description: "Responds with 'Interesting. Tell me more.' to everything",
     icon: "😶",
-    color: "text-gray-400",
+    color: "text-gray-600",
     bgColor: "bg-gray-500/10",
     borderColor: "border-gray-500/20",
   },
@@ -194,14 +194,14 @@ export function InterviewerPersonaStressTest() {
           <span className="px-2 py-0.5 rounded-full bg-orange-600 text-white text-[10px] font-black tracking-wider uppercase">
             🎯 Very High Impact
           </span>
-          <UserX size={16} className="text-orange-400" />
-          <span className="text-sm font-bold text-orange-300">
+          <UserX size={16} className="text-orange-900" />
+          <span className="text-sm font-bold text-orange-800">
             Interviewer Persona Stress Test
           </span>
         </div>
         <button
           onClick={() => setExpanded(e => !e)}
-          className="text-orange-400 hover:text-orange-300 transition-colors"
+          className="text-orange-900 hover:text-orange-800 transition-colors"
         >
           {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
@@ -216,7 +216,7 @@ export function InterviewerPersonaStressTest() {
           </p>
           <button
             onClick={() => setExpanded(true)}
-            className="mt-2 text-xs text-orange-400 hover:text-orange-300 font-semibold transition-colors"
+            className="mt-2 text-xs text-orange-900 hover:text-orange-800 font-semibold transition-colors"
           >
             Start stress test →
           </button>
@@ -229,7 +229,7 @@ export function InterviewerPersonaStressTest() {
           <div className="flex gap-2 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
             <AlertTriangle
               size={14}
-              className="text-orange-400 shrink-0 mt-0.5"
+              className="text-orange-900 shrink-0 mt-0.5"
             />
             <p className="text-xs text-orange-200">
               <strong>Why this matters:</strong> Most candidates prepare for
@@ -343,7 +343,7 @@ export function InterviewerPersonaStressTest() {
                 </span>
                 {avgScore !== null && (
                   <span
-                    className={`font-bold ${avgScore >= 4 ? "text-emerald-400" : avgScore >= 3 ? "text-amber-400" : "text-red-400"}`}
+                    className={`font-bold ${avgScore >= 4 ? "text-emerald-400" : avgScore >= 3 ? "text-amber-900" : "text-red-400"}`}
                   >
                     Avg: {avgScore.toFixed(1)}/5
                   </span>
@@ -377,7 +377,7 @@ export function InterviewerPersonaStressTest() {
                         {ex.feedback}
                       </p>
                       <span
-                        className={`text-xs font-bold shrink-0 ml-2 ${ex.score >= 4 ? "text-emerald-400" : ex.score >= 3 ? "text-amber-400" : "text-red-400"}`}
+                        className={`text-xs font-bold shrink-0 ml-2 ${ex.score >= 4 ? "text-emerald-400" : ex.score >= 3 ? "text-amber-900" : "text-red-400"}`}
                       >
                         {ex.score}/5
                       </span>
@@ -422,7 +422,7 @@ export function InterviewerPersonaStressTest() {
               {/* Final score */}
               {phase === "done" && finalScore && (
                 <div className="rounded-lg bg-white/5 border border-white/10 p-4 space-y-2">
-                  <div className="text-xs font-bold text-orange-400 uppercase tracking-wider">
+                  <div className="text-xs font-bold text-orange-900 uppercase tracking-wider">
                     Final Verdict
                   </div>
                   <Streamdown>{finalScore}</Streamdown>

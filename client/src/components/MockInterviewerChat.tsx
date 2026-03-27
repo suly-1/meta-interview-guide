@@ -41,8 +41,8 @@ const SUGGESTED_PROMPTS = [
 
 const DIFF_COLORS: Record<string, string> = {
   Easy: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  Medium: "text-amber-600 bg-amber-50 border-amber-200",
-  Hard: "text-red-600 bg-red-50 border-red-200",
+  Medium: "text-amber-800 bg-amber-100 border-amber-200",
+  Hard: "text-red-600 bg-red-100 border-red-200",
 };
 
 export default function MockInterviewerChat({ problemName, difficulty, targetLevel, currentCode, compact = false }: Props) {

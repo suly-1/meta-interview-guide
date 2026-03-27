@@ -222,8 +222,8 @@ function fmt(n: number, decimals = 1): string {
 
 const LEVEL_COLORS = {
   green: { border: "border-emerald-200", bg: "bg-emerald-50", badge: "bg-emerald-100 text-emerald-800", icon: "text-emerald-600" },
-  amber: { border: "border-amber-200", bg: "bg-amber-50", badge: "bg-amber-100 text-amber-800", icon: "text-amber-600" },
-  red: { border: "border-red-200", bg: "bg-red-50", badge: "bg-red-100 text-red-800", icon: "text-red-600" },
+  amber: { border: "border-amber-200", bg: "bg-amber-100", badge: "bg-amber-100 text-amber-800", icon: "text-amber-800" },
+  red: { border: "border-red-200", bg: "bg-red-100", badge: "bg-red-100 text-red-800", icon: "text-red-600" },
 };
 
 export default function SDBoECalculator() {
@@ -294,7 +294,7 @@ export default function SDBoECalculator() {
 
       {/* Presets */}
       <div className="space-y-1.5">
-        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Quick Presets</p>
+        <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide">Quick Presets</p>
         <div className="flex flex-wrap gap-1.5">
           {PRESETS.map((p, i) => (
             <button
@@ -315,7 +315,7 @@ export default function SDBoECalculator() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Input Panel */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Scale Parameters</p>
+          <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide">Scale Parameters</p>
           <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
             {[
               { key: "dau" as const, label: "Daily Active Users (M)", min: 0.1, max: 5000, step: 10, unit: "M" },
@@ -339,7 +339,7 @@ export default function SDBoECalculator() {
                     onChange={e => update(key, parseFloat(e.target.value) || 0)}
                     className="w-20 text-xs text-right border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   />
-                  {unit && <span className="text-[10px] text-gray-400 w-6">{unit}</span>}
+                  {unit && <span className="text-[10px] text-gray-600 w-6">{unit}</span>}
                 </div>
               </div>
             ))}
@@ -348,7 +348,7 @@ export default function SDBoECalculator() {
 
         {/* Derived Metrics */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Derived Metrics</p>
+          <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide">Derived Metrics</p>
           <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-2.5">
             {[
               { icon: <Zap size={13} className="text-amber-500" />, label: "Avg Write QPS", value: `${fmt(derived.writeQPS)}/s` },
@@ -360,7 +360,7 @@ export default function SDBoECalculator() {
               { icon: <Database size={13} className="text-purple-500" />, label: "Total Storage (replicated)", value: derived.totalStorageTB >= 1000 ? `${(derived.totalStorageTB / 1000).toFixed(2)} PB` : `${derived.totalStorageTB.toFixed(1)} TB`, highlight: true },
               { icon: <Server size={13} className="text-green-500" />, label: "Avg Egress Bandwidth", value: `${derived.dailyBandwidthGbps.toFixed(2)} Gbps` },
               { icon: <Server size={13} className="text-green-500" />, label: "Peak Egress Bandwidth (3×)", value: `${derived.peakBandwidthGbps.toFixed(2)} Gbps`, highlight: true },
-              { icon: <Calculator size={13} className="text-gray-500" />, label: "Read/Write Ratio", value: `${Math.round(derived.readQPS / Math.max(derived.writeQPS, 0.001))}:1` },
+              { icon: <Calculator size={13} className="text-gray-700" />, label: "Read/Write Ratio", value: `${Math.round(derived.readQPS / Math.max(derived.writeQPS, 0.001))}:1` },
             ].map(({ icon, label, value, highlight }) => (
               <div key={label} className={`flex items-center justify-between gap-2 ${highlight ? "py-1 px-2 rounded-lg bg-gray-50 border border-gray-100" : ""}`}>
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -402,7 +402,7 @@ export default function SDBoECalculator() {
       {showNotes && notes.length > 0 && (
         <div className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
           <div className="px-4 py-2.5 bg-white border-b border-gray-200 flex items-center justify-between">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Saved BoE Calculations ({notes.length})</p>
+            <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide">Saved BoE Calculations ({notes.length})</p>
           </div>
           <div className="divide-y divide-gray-100">
             {[...notes].reverse().map(note => (
@@ -410,15 +410,15 @@ export default function SDBoECalculator() {
                 <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none hover:bg-white transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-gray-800 truncate">{note.label}</p>
-                    <p className="text-[10px] text-gray-400">{new Date(note.date).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                    <p className="text-[10px] text-gray-600">{new Date(note.date).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-[10px] font-bold text-gray-500">{note.inputs.dau}M DAU</span>
-                    <span className="text-[10px] text-gray-400">Pk Write: {fmt(note.derived.peakWriteQPS)}/s</span>
-                    <span className="text-[10px] text-gray-400">Storage: {note.derived.totalStorageTB >= 1000 ? `${(note.derived.totalStorageTB/1000).toFixed(1)}PB` : `${note.derived.totalStorageTB.toFixed(0)}TB`}</span>
+                    <span className="text-[10px] font-bold text-gray-700">{note.inputs.dau}M DAU</span>
+                    <span className="text-[10px] text-gray-600">Pk Write: {fmt(note.derived.peakWriteQPS)}/s</span>
+                    <span className="text-[10px] text-gray-600">Storage: {note.derived.totalStorageTB >= 1000 ? `${(note.derived.totalStorageTB/1000).toFixed(1)}PB` : `${note.derived.totalStorageTB.toFixed(0)}TB`}</span>
                     <button
                       onClick={e => { e.preventDefault(); deleteNote(note.id); }}
-                      className="text-gray-300 hover:text-red-500 transition-colors"
+                      className="text-gray-700 hover:text-red-500 transition-colors"
                     >
                       <Trash2 size={11} />
                     </button>
@@ -429,11 +429,11 @@ export default function SDBoECalculator() {
                     <div key={i} className="flex items-start gap-2">
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${
                         imp.level === "green" ? "bg-emerald-100 text-emerald-700" :
-                        imp.level === "amber" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                        imp.level === "amber" ? "bg-amber-100 text-amber-900" : "bg-red-100 text-red-700"
                       }`}>{imp.value}</span>
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold text-gray-700">{imp.metric}</p>
-                        <p className="text-[10px] text-gray-500 leading-relaxed">{imp.implication}</p>
+                        <p className="text-[10px] text-gray-700 leading-relaxed">{imp.implication}</p>
                       </div>
                     </div>
                   ))}
@@ -446,8 +446,8 @@ export default function SDBoECalculator() {
 
       {/* Architectural Implications */}
       <div className="space-y-2">
-        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Architectural Decision Mapping</p>
-        <p className="text-xs text-gray-500">Each metric maps to a concrete architecture decision. Expand to see Meta's approach and the interview signal.</p>
+        <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide">Architectural Decision Mapping</p>
+        <p className="text-xs text-gray-700">Each metric maps to a concrete architecture decision. Expand to see Meta's approach and the interview signal.</p>
         {implications.map((imp, idx) => {
           const colors = LEVEL_COLORS[imp.level];
           const isExpanded = expandedIdx === idx;
@@ -464,10 +464,10 @@ export default function SDBoECalculator() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold text-gray-900">{imp.metric}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colors.badge}`}>{imp.value}</span>
-                    <span className="text-[10px] text-gray-500">{imp.threshold}</span>
+                    <span className="text-[10px] text-gray-700">{imp.threshold}</span>
                   </div>
                 </div>
-                <div className="flex-shrink-0 text-gray-400">
+                <div className="flex-shrink-0 text-gray-600">
                   {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 </div>
               </button>
@@ -475,15 +475,15 @@ export default function SDBoECalculator() {
               {isExpanded && (
                 <div className="border-t border-gray-200/60 p-4 space-y-3 bg-white/60">
                   <div>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Architectural Implication</p>
+                    <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide mb-1">Architectural Implication</p>
                     <p className="text-xs text-gray-800 leading-relaxed">{imp.implication}</p>
                   </div>
                   <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                     <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide mb-1">Meta's Approach</p>
                     <p className="text-xs text-blue-900 leading-relaxed">{imp.metaApproach}</p>
                   </div>
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">Interview Signal</p>
+                  <div className="rounded-lg border border-amber-200 bg-amber-100 p-3">
+                    <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wide mb-1">Interview Signal</p>
                     <p className="text-xs text-amber-900 leading-relaxed font-medium">{imp.interviewSignal}</p>
                   </div>
                 </div>

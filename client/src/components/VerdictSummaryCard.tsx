@@ -62,7 +62,7 @@ const VERDICT_CONFIG: Record<
   },
   borderline: {
     label: "Borderline",
-    color: "text-amber-400",
+    color: "text-amber-900",
     bg: "bg-amber-500/10",
     border: "border-amber-500/30",
     Icon: Minus,
@@ -212,15 +212,15 @@ export function VerdictSummaryCard({ onNavigate }: { onNavigate?: (tab: string) 
             title="Click to open Weak Signal Detector"
           >
             <div className="flex items-center gap-1.5">
-              <AlertTriangle size={12} className="text-amber-400 shrink-0" />
-              <span className="text-xs font-bold text-amber-400">Top Weak Signal</span>
-              <span className="ml-auto text-xs font-bold text-amber-400">
+              <AlertTriangle size={12} className="text-amber-900 shrink-0" />
+              <span className="text-xs font-bold text-amber-900">Top Weak Signal</span>
+              <span className="ml-auto text-xs font-bold text-amber-900">
                 {Math.round(topWeak.score)}%
               </span>
             </div>
             <div className="text-xs font-semibold text-foreground">{topWeakName}</div>
             <div className="text-[10px] text-muted-foreground leading-snug">
-              <span className="font-semibold text-amber-300">Drill: </span>
+              <span className="font-semibold text-amber-800">Drill: </span>
               {topWeak.targetedDrill.slice(0, 100)}
               {topWeak.targetedDrill.length > 100 ? "…" : ""}
             </div>

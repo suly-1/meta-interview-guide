@@ -165,10 +165,10 @@ export default function ApproachAnalyzer() {
   };
 
   const scoreColor = (s: number) =>
-    s === 3 ? "text-emerald-600" : s === 2 ? "text-blue-600" : s === 1 ? "text-amber-600" : "text-red-500";
+    s === 3 ? "text-emerald-600" : s === 2 ? "text-blue-600" : s === 1 ? "text-amber-800" : "text-red-500";
 
   const scoreBg = (s: number) =>
-    s === 3 ? "bg-emerald-50 border-emerald-200" : s === 2 ? "bg-blue-50 border-blue-200" : s === 1 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200";
+    s === 3 ? "bg-emerald-50 border-emerald-200" : s === 2 ? "bg-blue-50 border-blue-200" : s === 1 ? "bg-amber-100 border-amber-200" : "bg-red-100 border-red-200";
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
@@ -180,17 +180,17 @@ export default function ApproachAnalyzer() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Approach Analyzer
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Type or speak your approach — scored on 4 IC dimensions</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Type or speak your approach — scored on 4 IC dimensions</p>
         </div>
       </div>
 
       {/* Problem */}
       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Problem</p>
+        <p className="text-xs text-gray-600 uppercase tracking-widest mb-1">Problem</p>
         <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           {currentProblem}
         </h4>
-        <p className="text-xs text-gray-500 mt-1">Pattern: <span className="font-semibold">{currentPattern.name}</span></p>
+        <p className="text-xs text-gray-700 mt-1">Pattern: <span className="font-semibold">{currentPattern.name}</span></p>
       </div>
 
       {!result ? (
@@ -216,7 +216,7 @@ export default function ApproachAnalyzer() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
                 isListening
                   ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+                  : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200"
               }`}
             >
               {isListening ? <MicOff size={15} /> : <Mic size={15} />}
@@ -237,8 +237,8 @@ export default function ApproachAnalyzer() {
           <div className={`rounded-xl border p-4 ${
             result.icLevel === "L7 Signal" ? "bg-emerald-50 border-emerald-200" :
             result.icLevel === "L6 Signal" ? "bg-blue-50 border-blue-200" :
-            result.icLevel === "L5 Signal" ? "bg-amber-50 border-amber-200" :
-            "bg-red-50 border-red-200"
+            result.icLevel === "L5 Signal" ? "bg-amber-100 border-amber-200" :
+            "bg-red-100 border-red-200"
           }`}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-bold text-gray-700">{result.icLevel}</span>
@@ -261,7 +261,7 @@ export default function ApproachAnalyzer() {
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => setResult(null)}
-              className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors text-sm"
+              className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-bold rounded-xl transition-colors text-sm"
             >
               Edit Approach
             </button>

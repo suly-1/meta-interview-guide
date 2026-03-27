@@ -55,11 +55,11 @@ export default function AnswerQualityChecklist({ onRate, onSkip }: Props) {
           >
             {checked.has(r.id)
               ? <CheckSquare size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-              : <Square size={16} className="text-gray-300 flex-shrink-0 mt-0.5" />
+              : <Square size={16} className="text-gray-700 flex-shrink-0 mt-0.5" />
             }
             <div>
               <p className={`text-sm font-semibold ${checked.has(r.id) ? "text-emerald-700" : "text-gray-700"}`}>{r.label}</p>
-              <p className="text-xs text-gray-400">{r.desc}</p>
+              <p className="text-xs text-gray-600">{r.desc}</p>
             </div>
           </button>
         ))}
@@ -73,7 +73,7 @@ export default function AnswerQualityChecklist({ onRate, onSkip }: Props) {
               style={{ width: `${(score / RUBRIC.length) * 100}%`, background: score === RUBRIC.length ? "#10b981" : "#6366f1" }}
             />
           </div>
-          <span className="text-xs font-bold text-gray-500">{score}/{RUBRIC.length}</span>
+          <span className="text-xs font-bold text-gray-700">{score}/{RUBRIC.length}</span>
         </div>
 
         {allChecked ? (
@@ -90,7 +90,7 @@ export default function AnswerQualityChecklist({ onRate, onSkip }: Props) {
                 >
                   <Star
                     size={22}
-                    className={s <= (hover || rated || 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                    className={s <= (hover || rated || 0) ? "fill-amber-400 text-amber-900" : "text-gray-200"}
                   />
                 </button>
               ))}
@@ -99,8 +99,8 @@ export default function AnswerQualityChecklist({ onRate, onSkip }: Props) {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-400">Check all {RUBRIC.length} criteria to unlock rating</p>
-            <button onClick={onSkip} className="text-xs text-gray-400 hover:text-gray-600 underline">Skip checklist</button>
+            <p className="text-xs text-gray-600">Check all {RUBRIC.length} criteria to unlock rating</p>
+            <button onClick={onSkip} className="text-xs text-gray-600 hover:text-gray-600 underline">Skip checklist</button>
           </div>
         )}
       </div>

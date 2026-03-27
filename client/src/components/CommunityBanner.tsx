@@ -172,7 +172,7 @@ export default function CommunityBanner() {
               .
             </p>
 
-            <p className="text-sm text-amber-400 font-medium leading-snug mb-4">
+            <p className="text-sm text-amber-900 font-medium leading-snug mb-4">
               Always refer first to any official preparation materials you have
               received.
             </p>

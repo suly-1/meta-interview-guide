@@ -41,7 +41,7 @@ export function FeatureHeatmapBadge({
       : count >= 10
         ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
         : count >= 5
-          ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+          ? "bg-amber-500/20 text-amber-800 border-amber-500/30"
           : "bg-slate-500/20 text-slate-300 border-slate-500/30";
 
   return (

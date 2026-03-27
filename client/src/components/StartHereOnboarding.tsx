@@ -56,7 +56,7 @@ const LEVEL_DESCRIPTIONS: Record<
     title: "Senior Staff / Principal (L7)",
     focus:
       "Multi-system architecture, strategic thinking, executive communication",
-    color: "text-amber-400",
+    color: "text-amber-900",
   },
 };
 
@@ -72,7 +72,7 @@ const TIMELINE_URGENCY: Record<
   "3-4 weeks": {
     label: "Focused prep — cover all 3 domains with daily practice",
     badge: "⚡ ACTIVE",
-    badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    badgeColor: "bg-amber-500/20 text-amber-900 border-amber-500/30",
   },
   "1-2 months": {
     label: "Balanced prep — build depth across coding, design, and behavioral",
@@ -207,7 +207,7 @@ export function StartHereOnboarding({ onDismiss, onNavigate }: Props) {
           {step === 1 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Calendar size={18} className="text-amber-400" />
+                <Calendar size={18} className="text-amber-900" />
                 <h2
                   className="text-base font-bold text-foreground"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
@@ -254,7 +254,7 @@ export function StartHereOnboarding({ onDismiss, onNavigate }: Props) {
                       {isSelected && (
                         <CheckCircle
                           size={16}
-                          className="text-amber-400 shrink-0"
+                          className="text-amber-900 shrink-0"
                         />
                       )}
                     </button>
@@ -325,7 +325,7 @@ export function StartHereOnboarding({ onDismiss, onNavigate }: Props) {
                 <div className="flex gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
                   <div className="text-xl">📊</div>
                   <div>
-                    <div className="text-sm font-bold text-amber-300 mb-0.5">
+                    <div className="text-sm font-bold text-amber-800 mb-0.5">
                       Overview Tab
                     </div>
                     <div className="text-xs text-muted-foreground">
@@ -370,10 +370,10 @@ export function StartHereOnboarding({ onDismiss, onNavigate }: Props) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar size={13} className="text-amber-400" />
+                  <Calendar size={13} className="text-amber-900" />
                   <span className="text-xs text-muted-foreground">
                     Timeline:{" "}
-                    <span className="font-bold text-amber-400">
+                    <span className="font-bold text-amber-900">
                       {selectedTimeline ?? "Not set"}
                     </span>
                   </span>

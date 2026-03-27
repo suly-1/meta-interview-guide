@@ -40,11 +40,11 @@ export default function CTCITrackerBanner({
               <span className="inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm animate-pulse">
                 🚨 MUST DO ‼️
               </span>
-              <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-bold px-2.5 py-1 rounded-full border border-orange-300">
+              <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-900 text-xs font-bold px-2.5 py-1 rounded-full border border-orange-300">
                 ⚡ HIGH PRIORITY
               </span>
             </div>
-            <span className="text-xs text-gray-400 group-hover:text-blue-600 transition-colors font-medium">
+            <span className="text-xs text-gray-600 group-hover:text-blue-600 transition-colors font-medium">
               Click to open in Google Sheets →
             </span>
           </div>

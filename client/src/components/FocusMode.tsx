@@ -50,7 +50,7 @@ export function FocusModeToggle() {
       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all ${
         isFocused
           ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-          : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+          : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
       }`}
     >
       {isFocused ? <Minimize2 size={14} /> : <Focus size={14} />}

@@ -168,8 +168,8 @@ export default function DailyNotificationReminder() {
   if (!supported) {
     return (
       <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
-        <AlertCircle size={16} className="text-gray-400 flex-shrink-0" />
-        <p className="text-sm text-gray-500">
+        <AlertCircle size={16} className="text-gray-600 flex-shrink-0" />
+        <p className="text-sm text-gray-700">
           Browser notifications are not supported in this browser. Try Chrome or Firefox.
         </p>
       </div>
@@ -194,14 +194,14 @@ export default function DailyNotificationReminder() {
               }`}>
                 {settings.enabled && permission === "granted"
                   ? <BellRing size={18} className="text-white" />
-                  : <BellOff size={18} className="text-gray-500" />
+                  : <BellOff size={18} className="text-gray-700" />
                 }
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   Daily Practice Reminder
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-700 mt-0.5">
                   {settings.enabled && permission === "granted"
                     ? `Active — fires daily at ${settings.time}`
                     : "Get a browser notification with today's recommended problems"
@@ -234,7 +234,7 @@ export default function DailyNotificationReminder() {
 
           {/* Permission denied warning */}
           {permission === "denied" && (
-            <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+            <div className="mt-3 flex items-start gap-2 p-3 bg-red-100 border border-red-200 rounded-xl">
               <AlertCircle size={13} className="text-red-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-bold text-red-700">Notifications blocked</p>
@@ -249,7 +249,7 @@ export default function DailyNotificationReminder() {
           {settings.enabled && permission === "granted" && (
             <div className="mt-4 flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <Clock size={14} className="text-gray-400" />
+                <Clock size={14} className="text-gray-600" />
                 <label className="text-xs font-bold text-gray-600">Reminder time</label>
               </div>
               <input
@@ -289,7 +289,7 @@ export default function DailyNotificationReminder() {
               </div>
               <div>
                 <p className="text-[11px] font-bold text-gray-900">Meta Interview Prep — Daily Reminder</p>
-                <p className="text-[10px] text-gray-400">meta-interview-guide.manus.space</p>
+                <p className="text-[10px] text-gray-600">meta-interview-guide.manus.space</p>
               </div>
             </div>
             <p className="text-[11px] text-gray-700 leading-relaxed">
@@ -313,7 +313,7 @@ export default function DailyNotificationReminder() {
       {/* How it works */}
       <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-100">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">How It Works</p>
+          <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">How It Works</p>
         </div>
         <div className="px-4 py-3 space-y-2">
           {[
@@ -331,8 +331,8 @@ export default function DailyNotificationReminder() {
             </div>
           ))}
         </div>
-        <div className="px-4 py-3 bg-amber-50 border-t border-amber-100">
-          <p className="text-[11px] text-amber-700 flex items-start gap-1.5">
+        <div className="px-4 py-3 bg-amber-100 border-t border-amber-100">
+          <p className="text-[11px] text-amber-900 flex items-start gap-1.5">
             <AlertCircle size={11} className="flex-shrink-0 mt-0.5" />
             The guide must be open in a browser tab for the reminder to fire. For background notifications, consider bookmarking the guide and opening it each morning.
           </p>

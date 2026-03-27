@@ -140,9 +140,9 @@ export function InterviewReadinessReport() {
       label: "Ready to Interview",
     },
     almost: {
-      color: "text-amber-400",
+      color: "text-amber-900",
       bg: "bg-amber-500/10 border-amber-500/30",
-      icon: <Clock size={20} className="text-amber-400" />,
+      icon: <Clock size={20} className="text-amber-900" />,
       label: "Almost Ready",
     },
     "no-go": {
@@ -210,7 +210,7 @@ export function InterviewReadinessReport() {
                   dataCompleteness >= 60
                     ? "text-emerald-400 font-semibold"
                     : dataCompleteness >= 30
-                      ? "text-amber-400 font-semibold"
+                      ? "text-amber-900 font-semibold"
                       : "text-red-400 font-semibold"
                 }
               >
@@ -258,7 +258,7 @@ export function InterviewReadinessReport() {
           </div>
 
           {dataCompleteness < 20 && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               Rate at least 20% of patterns and behavioral questions first to
               get a meaningful report.

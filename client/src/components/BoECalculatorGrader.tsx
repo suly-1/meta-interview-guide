@@ -73,8 +73,8 @@ function ScoreBar({ label, score, max = 5 }: { label: string; score: number; max
   return (
     <div>
       <div className="flex justify-between mb-1">
-        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{label}</span>
-        <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{score}/{max}</span>
+        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{label}</span>
+        <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{score}/{max}</span>
       </div>
       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
@@ -127,11 +127,11 @@ export default function BoECalculatorGrader() {
       <HighImpactWrapper variant="violet" className="p-4 space-y-4">
         {/* Problem selector */}
         <div>
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Problem</label>
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-2 block">Problem</label>
           <div className="grid grid-cols-2 gap-2">
             {BOE_PROBLEMS.map((p, i) => (
               <button key={i} onClick={() => handleProblemChange(i)}
-                className={`text-left px-3 py-2 text-xs font-semibold rounded-lg border transition-all ${selectedProblem === i ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-violet-300"}`}>
+                className={`text-left px-3 py-2 text-xs font-semibold rounded-lg border transition-all ${selectedProblem === i ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-violet-300"}`}>
                 {p.title}
               </button>
             ))}
@@ -141,18 +141,18 @@ export default function BoECalculatorGrader() {
         {/* Target + scaffold toggle */}
         <div className="flex items-center justify-between">
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Target Level</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 block">Target Level</label>
             <div className="flex gap-2">
               {(["L4", "L5", "L6", "L7"] as Level[]).map(l => (
                 <button key={l} onClick={() => setTargetLevel(l)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-violet-300"}`}>
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 dark:border-gray-700 text-gray-700 hover:border-violet-300"}`}>
                   {l}
                 </button>
               ))}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">Scaffold</span>
+            <span className="text-xs text-gray-700">Scaffold</span>
             <button
               onClick={() => {
                 setUseScaffold(!useScaffold);
@@ -169,17 +169,17 @@ export default function BoECalculatorGrader() {
         {/* Prompt */}
         <div className="rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800/40 p-3">
           <p className="text-xs font-bold text-violet-700 dark:text-violet-400 mb-1">Estimate:</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300">{BOE_PROBLEMS[selectedProblem].prompt}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200">{BOE_PROBLEMS[selectedProblem].prompt}</p>
         </div>
 
         {/* Estimation input */}
         <div>
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Your Estimation</label>
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 block">Your Estimation</label>
           <textarea
             value={estimationText}
             onChange={e => setEstimationText(e.target.value)}
             rows={10}
-            className="w-full px-3 py-2.5 text-sm font-mono rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
+            className="w-full px-3 py-2.5 text-sm font-mono rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-violet-400 resize-none"
             placeholder="Write your back-of-envelope calculations here..."
           />
         </div>
@@ -208,7 +208,7 @@ export default function BoECalculatorGrader() {
                   Estimation Grade
                 </h4>
                 <div className="flex items-center gap-2">
-                  <span className={`text-2xl font-bold ${parseFloat(avgScore!) >= 4 ? "text-emerald-600 dark:text-emerald-400" : parseFloat(avgScore!) >= 3 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                  <span className={`text-2xl font-bold ${parseFloat(avgScore!) >= 4 ? "text-emerald-600 dark:text-emerald-400" : parseFloat(avgScore!) >= 3 ? "text-amber-800 dark:text-amber-900" : "text-red-600 dark:text-red-400"}`}>
                     {avgScore}/5
                   </span>
                   <HighImpactBadge
@@ -225,11 +225,11 @@ export default function BoECalculatorGrader() {
               </div>
 
               {result.correctedMath && (
-                <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 p-3 mb-3">
+                <div className="rounded-lg bg-red-100 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 p-3 mb-3">
                   <p className="text-xs font-bold text-red-700 dark:text-red-400 mb-1 flex items-center gap-1">
                     <AlertCircle size={11} /> Math Correction
                   </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{result.correctedMath}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">{result.correctedMath}</p>
                 </div>
               )}
 
@@ -237,19 +237,19 @@ export default function BoECalculatorGrader() {
                 <p className="text-xs font-bold text-violet-700 dark:text-violet-400 mb-1 flex items-center gap-1">
                   <CheckCircle2 size={11} /> Key Insight
                 </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{result.keyInsight}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-200">{result.keyInsight}</p>
               </div>
 
               {result.missedConnection && (
-                <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 p-3 mb-3">
-                  <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Missed Architectural Connection</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{result.missedConnection}</p>
+                <div className="rounded-lg bg-amber-100 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 p-3 mb-3">
+                  <p className="text-xs font-bold text-amber-900 dark:text-amber-900 mb-1">Missed Architectural Connection</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">{result.missedConnection}</p>
                 </div>
               )}
 
               <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3">
-                <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Overall Feedback</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{result.overallFeedback}</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">Overall Feedback</p>
+                <p className="text-sm text-gray-700 dark:text-gray-200">{result.overallFeedback}</p>
               </div>
 
               <button onClick={() => { gradeBoE.reset(); setEstimationText(BOE_PROBLEMS[selectedProblem].scaffold); }}

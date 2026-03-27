@@ -254,10 +254,10 @@ export default function Home() {
           <div className="container flex items-start gap-3">
             <AlertTriangle
               size={14}
-              className="text-amber-400 shrink-0 mt-0.5"
+              className="text-amber-900 shrink-0 mt-0.5"
             />
             <div className="flex-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-amber-400">
+              <span className="font-semibold text-amber-900">
                 Public Community Resource:{" "}
               </span>
               This is an independent, publicly available study guide at{" "}
@@ -274,7 +274,7 @@ export default function Home() {
                     e.target.checked && setDisclaimerDismissed(true)
                   }
                 />
-                <span className="text-amber-400 font-medium">I understand</span>
+                <span className="text-amber-900 font-medium">I understand</span>
               </label>
             </div>
             <button
@@ -345,8 +345,8 @@ export default function Home() {
         activeTab !== "overview" && (
           <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5">
             <div className="container flex items-center gap-3">
-              <AlertTriangle size={13} className="text-amber-400 shrink-0" />
-              <span className="text-xs text-amber-300 flex-1">
+              <AlertTriangle size={13} className="text-amber-900 shrink-0" />
+              <span className="text-xs text-amber-800 flex-1">
                 <span className="font-bold">
                   Interview in{" "}
                   {daysUntilInterview === 0
@@ -365,7 +365,7 @@ export default function Home() {
               </span>
               <button
                 onClick={() => setCountdownDismissed(true)}
-                className="text-amber-400/60 hover:text-amber-300 transition-colors shrink-0"
+                className="text-amber-900/60 hover:text-amber-800 transition-colors shrink-0"
               >
                 <X size={13} />
               </button>
@@ -780,7 +780,7 @@ function CollabLobby() {
           </button>
           <button
             onClick={() => scrollTo("hero-leaderboard")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-amber-800 text-xs font-semibold transition-all"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -127,7 +127,7 @@ export function DailyStudyChecklist() {
         className="w-full flex items-center justify-between p-5 group"
       >
         <div className="flex items-center gap-2">
-          <Flame size={14} className="text-orange-400" />
+          <Flame size={14} className="text-orange-900" />
           <span className="text-sm font-bold text-foreground">
             Daily Study Checklist
           </span>
@@ -135,7 +135,7 @@ export function DailyStudyChecklist() {
             className={`text-xs px-2 py-0.5 rounded-full font-bold border ${
               allDone
                 ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
-                : "text-orange-400 bg-orange-500/15 border-orange-500/30"
+                : "text-orange-900 bg-orange-500/15 border-orange-500/30"
             }`}
           >
             {completedCount}/{tasks.length} done
@@ -173,7 +173,7 @@ export function DailyStudyChecklist() {
               ) : (
                 <Circle
                   size={16}
-                  className={`shrink-0 ${task.priority === "high" ? "text-red-400" : task.priority === "medium" ? "text-amber-400" : "text-muted-foreground"}`}
+                  className={`shrink-0 ${task.priority === "high" ? "text-red-400" : task.priority === "medium" ? "text-amber-900" : "text-muted-foreground"}`}
                 />
               )}
               <span
@@ -232,9 +232,9 @@ export function UrgencyModeBanner({ daysLeft }: { daysLeft: number }) {
           <div className="flex items-center gap-2">
             <AlertTriangle
               size={16}
-              className="text-amber-400 animate-bounce"
+              className="text-amber-900 animate-bounce"
             />
-            <span className="text-sm font-black text-amber-400">
+            <span className="text-sm font-black text-amber-900">
               🚨 FINAL SPRINT MODE — {daysLeft} day{daysLeft !== 1 ? "s" : ""}{" "}
               to go!
             </span>
@@ -257,7 +257,7 @@ export function UrgencyModeBanner({ daysLeft }: { daysLeft: number }) {
             </div>
           ))}
         </div>
-        <div className="mt-3 text-xs text-amber-300/70">
+        <div className="mt-3 text-xs text-amber-800/70">
           Focus on high-ROI activities. Quality over quantity. You've got this.
           💪
         </div>

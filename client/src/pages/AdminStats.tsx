@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
   bug:     { label: "Bug",         icon: <Bug size={14} />,        color: "text-red-700",    bg: "bg-red-100 border-red-200" },
-  feature: { label: "Feature Req", icon: <Lightbulb size={14} />,  color: "text-amber-700",  bg: "bg-amber-100 border-amber-200" },
+  feature: { label: "Feature Req", icon: <Lightbulb size={14} />,  color: "text-amber-900",  bg: "bg-amber-100 border-amber-200" },
   content: { label: "Content",     icon: <BookOpen size={14} />,   color: "text-blue-700",   bg: "bg-blue-100 border-blue-200" },
   ux:      { label: "UX",          icon: <Palette size={14} />,    color: "text-violet-700", bg: "bg-violet-100 border-violet-200" },
   other:   { label: "Other",       icon: <HelpCircle size={14} />, color: "text-gray-700",   bg: "bg-gray-100 border-gray-200" },
@@ -77,7 +77,7 @@ export default function AdminStats() {
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/admin/disclaimer" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            <Link href="/admin/disclaimer" className="text-gray-600 hover:text-gray-600 dark:hover:text-gray-700 transition-colors">
               <ArrowLeft size={18} />
             </Link>
             <div>
@@ -85,12 +85,12 @@ export default function AdminStats() {
                 <BarChart2 size={18} className="text-blue-500" />
                 Feedback Stats
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">Summary statistics and quick actions</p>
+              <p className="text-xs text-gray-700 mt-0.5">Summary statistics and quick actions</p>
             </div>
           </div>
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <RefreshCw size={13} />
             Refresh
@@ -144,34 +144,34 @@ export default function AdminStats() {
                 cohortHealth?.daysRemaining == null
                   ? "bg-gray-50 dark:bg-gray-800/30 border-gray-100 dark:border-gray-700"
                   : (cohortHealth.daysRemaining ?? 999) <= 7
-                  ? "bg-red-50 dark:bg-red-950/30 border-red-100 dark:border-red-900"
+                  ? "bg-red-100 dark:bg-red-950/30 border-red-100 dark:border-red-900"
                   : (cohortHealth.daysRemaining ?? 999) <= 14
-                  ? "bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-900"
+                  ? "bg-amber-100 dark:bg-amber-950/30 border-amber-100 dark:border-amber-900"
                   : "bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900"
               }`}>
                 <div className={`flex items-center gap-1.5 text-xs font-medium ${
-                  cohortHealth?.daysRemaining == null ? "text-gray-500" :
+                  cohortHealth?.daysRemaining == null ? "text-gray-700" :
                   (cohortHealth?.daysRemaining ?? 999) <= 7 ? "text-red-600 dark:text-red-400" :
-                  (cohortHealth?.daysRemaining ?? 999) <= 14 ? "text-amber-600 dark:text-amber-400" :
+                  (cohortHealth?.daysRemaining ?? 999) <= 14 ? "text-amber-800 dark:text-amber-900" :
                   "text-blue-600 dark:text-blue-400"
                 }`}>
                   <Timer size={13} /> Days Remaining
                 </div>
                 <div className={`text-2xl font-bold ${
-                  cohortHealth?.daysRemaining == null ? "text-gray-400" :
+                  cohortHealth?.daysRemaining == null ? "text-gray-600" :
                   (cohortHealth?.daysRemaining ?? 999) <= 7 ? "text-red-700 dark:text-red-300" :
-                  (cohortHealth?.daysRemaining ?? 999) <= 14 ? "text-amber-700 dark:text-amber-300" :
+                  (cohortHealth?.daysRemaining ?? 999) <= 14 ? "text-amber-900 dark:text-amber-800" :
                   "text-blue-700 dark:text-blue-300"
                 }`}>
                   {cohortHealth?.daysRemaining == null ? "—" : cohortHealth?.daysRemaining}
                 </div>
                 {cohortHealth?.lockStartDate && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-gray-700 dark:text-gray-300">
                     Started {new Date(cohortHealth.lockStartDate).toLocaleDateString()}
                   </div>
                 )}
                 {!cohortHealth?.lockEnabled && (
-                  <div className="text-xs text-gray-400 italic">Cohort window not active</div>
+                  <div className="text-xs text-gray-600 italic">Cohort window not active</div>
                 )}
               </div>
             </div>
@@ -182,23 +182,23 @@ export default function AdminStats() {
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">{isLoading ? "—" : total}</div>
-            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+            <div className="text-xs text-gray-700 mt-1 flex items-center gap-1">
               <BarChart2 size={12} />
               Total feedback items
             </div>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="text-2xl font-bold text-blue-600">{isLoading ? "—" : last7Days}</div>
-            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+            <div className="text-xs text-gray-700 mt-1 flex items-center gap-1">
               <TrendingUp size={12} />
               Last 7 days
             </div>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-            <div className={`text-2xl font-bold ${newCount > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+            <div className={`text-2xl font-bold ${newCount > 0 ? "text-amber-800" : "text-emerald-600"}`}>
               {isLoading ? "—" : newCount}
             </div>
-            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+            <div className="text-xs text-gray-700 mt-1 flex items-center gap-1">
               <AlertCircle size={12} />
               Unactioned (new)
             </div>
@@ -215,7 +215,7 @@ export default function AdminStats() {
               ))}
             </div>
           ) : byCategory.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">No feedback yet.</p>
+            <p className="text-sm text-gray-600 text-center py-4">No feedback yet.</p>
           ) : (
             <div className="space-y-3">
               {byCategory
@@ -235,7 +235,7 @@ export default function AdminStats() {
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-16 text-right">
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-200 w-16 text-right">
                         {count} ({pct}%)
                       </span>
                     </div>

@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquarePlus, X, Star, Send, CheckCircle2, Bug, Lightbulb, BookOpen, Palette, HelpCircle } from "lucide-react";
 
 const CATEGORIES = [
-  { id: "bug",     label: "Bug Report",      icon: <Bug size={14} />,        color: "text-red-600 bg-red-50 border-red-200" },
-  { id: "feature_request", label: "Feature Request", icon: <Lightbulb size={14} />,  color: "text-amber-600 bg-amber-50 border-amber-200" },
+  { id: "bug",     label: "Bug Report",      icon: <Bug size={14} />,        color: "text-red-600 bg-red-100 border-red-200" },
+  { id: "feature_request", label: "Feature Request", icon: <Lightbulb size={14} />,  color: "text-amber-800 bg-amber-100 border-amber-200" },
   { id: "content", label: "Content Issue",   icon: <BookOpen size={14} />,   color: "text-blue-600 bg-blue-50 border-blue-200" },
   { id: "ux",      label: "UX Feedback",     icon: <Palette size={14} />,    color: "text-violet-600 bg-violet-50 border-violet-200" },
   { id: "other",   label: "Other",           icon: <HelpCircle size={14} />, color: "text-gray-600 bg-gray-50 border-gray-200" },
@@ -87,9 +87,9 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30">
                 <div>
                   <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base">Help improve this guide</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your feedback goes directly to the guide maintainer</p>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">Your feedback goes directly to the guide maintainer</p>
                 </div>
-                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors">
+                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 transition-colors">
                   <X size={16} />
                 </button>
               </div>
@@ -98,13 +98,13 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
                 <div className="flex flex-col items-center justify-center py-12 px-6 gap-3">
                   <CheckCircle2 size={48} className="text-emerald-500" />
                   <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Thank you!</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Your feedback has been received and will help improve the guide for all candidates.</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 text-center">Your feedback has been received and will help improve the guide for all candidates.</p>
                 </div>
               ) : (
                 <div className="p-5 space-y-4">
                   {/* Category */}
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">Category</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">Category</label>
                     <div className="flex flex-wrap gap-2">
                       {CATEGORIES.map((cat) => (
                         <button
@@ -113,7 +113,7 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                             category === cat.id
                               ? cat.color + " ring-2 ring-offset-1 ring-current"
-                              : "text-gray-500 bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 hover:border-gray-300"
+                              : "text-gray-700 bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 hover:border-gray-300"
                           }`}
                         >
                           {cat.icon}
@@ -125,8 +125,8 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
 
                   {/* Star rating */}
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">
-                      Overall Rating <span className="text-gray-400 font-normal normal-case">(optional)</span>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">
+                      Overall Rating <span className="text-gray-600 font-normal normal-case">(optional)</span>
                     </label>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -141,14 +141,14 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
                             size={24}
                             className={`transition-colors ${
                               star <= displayRating
-                                ? "text-amber-400 fill-amber-400"
-                                : "text-gray-300 dark:text-gray-600"
+                                ? "text-amber-900 fill-amber-400"
+                                : "text-gray-700 dark:text-gray-300"
                             }`}
                           />
                         </button>
                       ))}
                       {rating > 0 && (
-                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 self-center">
+                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 self-center">
                           {["", "Poor", "Fair", "Good", "Great", "Excellent"][rating]}
                         </span>
                       )}
@@ -157,7 +157,7 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
 
                   {/* Message */}
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">Your Feedback</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 block">Your Feedback</label>
                     <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
@@ -171,7 +171,7 @@ export default function SiteFeedbackModal({ currentPage }: Props) {
                       rows={4}
                       className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
                     />
-                    <p className="text-xs text-gray-400 mt-1 text-right">{message.length}/2000</p>
+                    <p className="text-xs text-gray-600 mt-1 text-right">{message.length}/2000</p>
                   </div>
 
                   {/* Submit */}

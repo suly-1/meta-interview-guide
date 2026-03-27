@@ -50,15 +50,15 @@ function ReadOnlyView({ payload }: { payload: SharePayload }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white rounded-lg p-3 text-center border border-blue-100">
           <p className="text-xl font-extrabold text-blue-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{payload.readiness}</p>
-          <p className="text-[10px] text-gray-400">Readiness Score</p>
+          <p className="text-[10px] text-gray-600">Readiness Score</p>
         </div>
         <div className="bg-white rounded-lg p-3 text-center border border-blue-100">
           <p className="text-xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{payload.ctciSolved}</p>
-          <p className="text-[10px] text-gray-400">CTCI Solved</p>
+          <p className="text-[10px] text-gray-600">CTCI Solved</p>
         </div>
         <div className="bg-white rounded-lg p-3 text-center border border-blue-100">
           <p className="text-xl font-extrabold text-orange-500" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{payload.streak}</p>
-          <p className="text-[10px] text-gray-400">Day Streak</p>
+          <p className="text-[10px] text-gray-600">Day Streak</p>
         </div>
       </div>
       <div>
@@ -70,7 +70,7 @@ function ReadOnlyView({ payload }: { payload: SharePayload }) {
             </span>
           ))}
           {drillData.filter(d => d.avg === null).length > 0 && (
-            <span className="text-[11px] text-gray-400">+{drillData.filter(d => d.avg === null).length} undrilled</span>
+            <span className="text-[11px] text-gray-600">+{drillData.filter(d => d.avg === null).length} undrilled</span>
           )}
         </div>
       </div>
@@ -146,14 +146,14 @@ export default function StudyBuddySync() {
           <Users size={15} className="text-blue-600" />
           <span className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Study Buddy Sync</span>
         </div>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-gray-700 mb-3">
           Share your progress with a study partner. They'll see your readiness score, CTCI solve count, streak, and pattern ratings — read-only.
         </p>
         <div className="flex gap-2">
           <input
             readOnly
             value={shareLink}
-            className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 text-gray-500 truncate"
+            className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 truncate"
           />
           <button
             onClick={handleCopy}
@@ -162,7 +162,7 @@ export default function StudyBuddySync() {
             {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy Link</>}
           </button>
         </div>
-        <p className="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
+        <p className="text-[10px] text-gray-600 mt-2 flex items-center gap-1">
           <Link2 size={10} /> Progress is encoded in the URL — no server required. Regenerate anytime for fresh data.
         </p>
       </div>

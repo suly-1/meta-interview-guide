@@ -133,14 +133,14 @@ export function recordEvent(type: SessionEventType, data?: Record<string, unknow
 
 const COMMENT_COLORS: Record<LLMComment["type"], string> = {
   positive: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200",
-  warning: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200",
+  warning: "bg-amber-100 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-100",
   suggestion: "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-200",
-  critical: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200",
+  critical: "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200",
 };
 
 const COMMENT_ICONS: Record<LLMComment["type"], React.ReactNode> = {
   positive: <CheckCircle2 size={13} className="text-emerald-600 flex-shrink-0" />,
-  warning: <AlertCircle size={13} className="text-amber-600 flex-shrink-0" />,
+  warning: <AlertCircle size={13} className="text-amber-800 flex-shrink-0" />,
   suggestion: <MessageSquare size={13} className="text-blue-500 flex-shrink-0" />,
   critical: <AlertCircle size={13} className="text-red-500 flex-shrink-0" />,
 };
@@ -213,7 +213,7 @@ function NewSessionForm({ onSave, onCancel }: NewSessionFormProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">
             Session Title
           </label>
           <input
@@ -226,7 +226,7 @@ function NewSessionForm({ onSave, onCancel }: NewSessionFormProps) {
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">
             Session Type
           </label>
           <select
@@ -244,7 +244,7 @@ function NewSessionForm({ onSave, onCancel }: NewSessionFormProps) {
       </div>
 
       <div>
-        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+        <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">
           Your Answer / Notes
           {recording && (
             <span className="ml-2 text-red-500 font-normal animate-pulse">● Recording</span>
@@ -262,7 +262,7 @@ function NewSessionForm({ onSave, onCancel }: NewSessionFormProps) {
       </div>
 
       {recording && (
-        <div className="flex items-center gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
           <span className="text-sm font-mono text-red-700 dark:text-red-300">
             {String(Math.floor(elapsed / 60)).padStart(2, "0")}:{String(elapsed % 60).padStart(2, "0")}
@@ -281,7 +281,7 @@ function NewSessionForm({ onSave, onCancel }: NewSessionFormProps) {
             <Button variant="outline" onClick={onCancel}>Cancel</Button>
           </>
         ) : (
-          <Button onClick={stopRecording} variant="outline" className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50">
+          <Button onClick={stopRecording} variant="outline" className="gap-1.5 border-red-200 text-red-600 hover:bg-red-100">
             <StopCircle size={14} />
             Stop & Save
           </Button>
@@ -372,7 +372,7 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
                 className={cn(
                   "text-xs",
                   session.verdict === "pass" && "border-emerald-200 text-emerald-600",
-                  session.verdict === "borderline" && "border-amber-200 text-amber-600",
+                  session.verdict === "borderline" && "border-amber-200 text-amber-800",
                   session.verdict === "fail" && "border-red-200 text-red-600"
                 )}
               >
@@ -380,7 +380,7 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
               </Badge>
             )}
           </div>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-600 mt-0.5">
             {fmtDate(session.startedAt)} · {Math.floor(session.durationSeconds / 60)}m {session.durationSeconds % 60}s
           </p>
         </div>
@@ -392,7 +392,7 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
         <div className="flex items-center gap-3">
           <button
             onClick={() => setPlayheadMs(0)}
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            className="p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
           >
             <SkipBack size={16} />
           </button>
@@ -404,7 +404,7 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
           </button>
           <button
             onClick={() => setPlayheadMs(totalMs)}
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            className="p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
           >
             <SkipForward size={16} />
           </button>
@@ -418,13 +418,13 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
               className="w-full accent-blue-600"
             />
           </div>
-          <span className="text-xs font-mono text-gray-500 w-16 text-right">
+          <span className="text-xs font-mono text-gray-700 w-16 text-right">
             {fmtMs(playheadMs)} / {fmtMs(totalMs)}
           </span>
           <select
             value={speed}
             onChange={(e) => setSpeed(Number(e.target.value))}
-            className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
           >
             <option value={0.5}>0.5×</option>
             <option value={1}>1×</option>
@@ -439,15 +439,15 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
         {/* Event Timeline */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Clock size={14} className="text-gray-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+            <Clock size={14} className="text-gray-700" />
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
               Session Timeline
             </span>
-            <span className="text-xs text-gray-400">({visibleEvents.length} events)</span>
+            <span className="text-xs text-gray-600">({visibleEvents.length} events)</span>
           </div>
           <div className="space-y-1.5 max-h-64 overflow-y-auto">
             {session.events.length === 0 && (
-              <p className="text-xs text-gray-400 italic">No events recorded.</p>
+              <p className="text-xs text-gray-600 italic">No events recorded.</p>
             )}
             {session.events.map((event, i) => {
               const isVisible = event.timestamp <= playheadMs;
@@ -458,16 +458,16 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
                     "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all cursor-pointer",
                     isVisible
                       ? "bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200"
-                      : "text-gray-300 dark:text-gray-600"
+                      : "text-gray-700 dark:text-gray-300"
                   )}
                   onClick={() => setPlayheadMs(event.timestamp)}
                 >
-                  <span className="font-mono w-10 flex-shrink-0 text-gray-400">
+                  <span className="font-mono w-10 flex-shrink-0 text-gray-600">
                     {fmtMs(event.timestamp)}
                   </span>
                   <span className="font-medium capitalize">{event.type.replace("_", " ")}</span>
                   {event.data && Object.keys(event.data).length > 0 && (
-                    <span className="text-gray-400 truncate">
+                    <span className="text-gray-600 truncate">
                       {Object.entries(event.data)
                         .map(([k, v]) => `${k}: ${String(v).slice(0, 20)}`)
                         .join(", ")}
@@ -484,7 +484,7 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <MessageSquare size={14} className="text-purple-500" />
-              <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+              <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
                 AI Commentary
               </span>
             </div>
@@ -506,12 +506,12 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
           </div>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {!session.llmCommentary && !generateCommentary.isPending && (
-              <p className="text-xs text-gray-400 italic">
+              <p className="text-xs text-gray-600 italic">
                 Click "Generate" to get AI coaching commentary on this session.
               </p>
             )}
             {generateCommentary.isPending && (
-              <div className="flex items-center gap-2 text-xs text-gray-400">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
                 <Loader2 size={12} className="animate-spin" />
                 Analyzing your session…
               </div>
@@ -530,7 +530,7 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
                 >
                   <div className="flex items-center gap-1.5 mb-1">
                     {COMMENT_ICONS[comment.type]}
-                    <span className="font-mono text-gray-400">{fmtMs(comment.timestampMs)}</span>
+                    <span className="font-mono text-gray-600">{fmtMs(comment.timestampMs)}</span>
                     {comment.signal && (
                       <Badge variant="outline" className="text-[10px] px-1 py-0">{comment.signal}</Badge>
                     )}
@@ -547,12 +547,12 @@ function ReplayViewer({ session, onClose, onCommentaryGenerated }: ReplayViewerP
       {session.finalAnswer && (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <BookOpen size={14} className="text-gray-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+            <BookOpen size={14} className="text-gray-700" />
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
               Your Answer
             </span>
           </div>
-          <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto">
+          <pre className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto">
             {session.finalAnswer}
           </pre>
         </div>
@@ -612,7 +612,7 @@ export default function InterviewReplayTab() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setView("list")}
-            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
+            className="text-xs text-gray-600 hover:text-gray-600 dark:hover:text-gray-700 transition-all"
           >
             ← Back to sessions
           </button>
@@ -648,7 +648,7 @@ export default function InterviewReplayTab() {
               Interview Replay & Self-Review
             </h2>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             Record your practice sessions and replay them with AI coaching commentary. Learn more
             from reviewing your own mistakes than from reading guides.
           </p>
@@ -669,7 +669,7 @@ export default function InterviewReplayTab() {
               "px-3 py-1.5 rounded-full text-xs font-semibold transition-all capitalize",
               filter === f
                 ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
             )}
           >
             {f.replace("_", " ")}
@@ -680,9 +680,9 @@ export default function InterviewReplayTab() {
       {/* Session List */}
       {filteredSessions.length === 0 ? (
         <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-          <Video size={32} className="text-gray-300 mx-auto mb-3" />
-          <p className="font-semibold text-gray-500 dark:text-gray-400">No sessions yet</p>
-          <p className="text-sm text-gray-400 mt-1">
+          <Video size={32} className="text-gray-700 mx-auto mb-3" />
+          <p className="font-semibold text-gray-700 dark:text-gray-300">No sessions yet</p>
+          <p className="text-sm text-gray-600 mt-1">
             Record your first practice session to see it here.
           </p>
           <Button onClick={() => setView("new")} className="mt-4 gap-1.5" size="sm">
@@ -716,7 +716,7 @@ export default function InterviewReplayTab() {
                       className={cn(
                         "text-xs",
                         session.verdict === "pass" && "border-emerald-200 text-emerald-600",
-                        session.verdict === "borderline" && "border-amber-200 text-amber-600",
+                        session.verdict === "borderline" && "border-amber-200 text-amber-800",
                         session.verdict === "fail" && "border-red-200 text-red-600"
                       )}
                     >
@@ -724,7 +724,7 @@ export default function InterviewReplayTab() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-600 mt-0.5">
                   {fmtDate(session.startedAt)} ·{" "}
                   {Math.floor(session.durationSeconds / 60)}m {session.durationSeconds % 60}s ·{" "}
                   {session.events.length} events
@@ -733,14 +733,14 @@ export default function InterviewReplayTab() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleExport(session)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  className="p-1.5 rounded-lg text-gray-600 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                   title="Export JSON"
                 >
                   <Download size={14} />
                 </button>
                 <button
                   onClick={() => handleDeleteSession(session.id)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                  className="p-1.5 rounded-lg text-gray-600 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 transition-all"
                   title="Delete"
                 >
                   <Trash2 size={14} />

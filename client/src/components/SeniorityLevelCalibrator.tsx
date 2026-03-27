@@ -61,7 +61,7 @@ const SIGNAL_ICON = (signal: string) => {
   if (signal === "strong")
     return <CheckCircle2 size={14} className="text-emerald-400" />;
   if (signal === "weak")
-    return <AlertTriangle size={14} className="text-amber-400" />;
+    return <AlertTriangle size={14} className="text-amber-900" />;
   return <XCircle size={14} className="text-red-400" />;
 };
 
@@ -69,7 +69,7 @@ const SIGNAL_COLOR = (signal: string) =>
   signal === "strong"
     ? "text-emerald-400"
     : signal === "weak"
-      ? "text-amber-400"
+      ? "text-amber-900"
       : "text-red-400";
 
 export function SeniorityLevelCalibrator() {
@@ -148,7 +148,7 @@ export function SeniorityLevelCalibrator() {
       {expanded && (
         <div className="px-5 pb-5 space-y-4 border-t border-purple-500/20">
           {/* Explainer */}
-          <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+          <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800">
             <strong>22% of L6/L7 rejections</strong> happen because the
             candidate's stories read at the wrong seniority level. This tool
             detects the gap and tells you exactly how to fix it.
@@ -244,7 +244,7 @@ export function SeniorityLevelCalibrator() {
                   )}
                   {levelMatch === "below" && (
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-amber-400 font-semibold">
+                      <div className="flex items-center gap-2 text-amber-900 font-semibold">
                         <AlertTriangle size={18} />
                         Story reads as {result.detectedLevel} — below your{" "}
                         {targetLevel} target

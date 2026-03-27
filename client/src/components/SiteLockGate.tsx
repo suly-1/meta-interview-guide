@@ -28,7 +28,7 @@ export default function SiteLockGate({ children }: SiteLockGateProps) {
       <div className="text-center max-w-md">
         {/* Lock icon */}
         <div className="w-20 h-20 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center mx-auto mb-6">
-          <Lock size={32} className="text-gray-400" />
+          <Lock size={32} className="text-gray-600" />
         </div>
 
         {/* Title */}
@@ -37,7 +37,7 @@ export default function SiteLockGate({ children }: SiteLockGateProps) {
         </h1>
 
         {/* Description */}
-        <p className="text-gray-400 text-sm leading-relaxed mb-6">
+        <p className="text-gray-600 text-sm leading-relaxed mb-6">
           The Meta IC6/IC7 Interview Guide has reached the end of its current cohort period.
           The guide is periodically opened for new cohorts of candidates.
         </p>
@@ -47,8 +47,8 @@ export default function SiteLockGate({ children }: SiteLockGateProps) {
           <div className="flex items-center gap-3 text-sm">
             <Calendar size={15} className="text-blue-400 flex-shrink-0" />
             <div>
-              <p className="text-gray-300 font-medium">Cohort Period</p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-700 font-medium">Cohort Period</p>
+              <p className="text-gray-700 text-xs">
                 {data.lockStartDate
                   ? `Started ${new Date(data.lockStartDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`
                   : "Cohort period has ended"}
@@ -56,10 +56,10 @@ export default function SiteLockGate({ children }: SiteLockGateProps) {
             </div>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Shield size={15} className="text-amber-400 flex-shrink-0" />
+            <Shield size={15} className="text-amber-900 flex-shrink-0" />
             <div>
-              <p className="text-gray-300 font-medium">Access Policy</p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-700 font-medium">Access Policy</p>
+              <p className="text-gray-700 text-xs">
                 Access is managed by the guide administrator. Contact them for the next cohort opening.
               </p>
             </div>

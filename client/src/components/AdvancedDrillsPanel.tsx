@@ -15,7 +15,7 @@ function ScoreBar({ label, score, max = 5 }: { label: string; score: number; max
   const color = pct >= 80 ? "bg-emerald-500" : pct >= 60 ? "bg-amber-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-500 w-36 flex-shrink-0">{label}</span>
+      <span className="text-xs text-gray-700 w-36 flex-shrink-0">{label}</span>
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
@@ -41,9 +41,9 @@ function DrillShell({
             </Badge>
           </div>
           <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{title}</h3>
-          <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+          <p className="text-sm text-gray-700 mt-0.5">{subtitle}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onReset} className="flex-shrink-0 text-gray-400 hover:text-gray-600">
+        <Button variant="ghost" size="sm" onClick={onReset} className="flex-shrink-0 text-gray-600 hover:text-gray-600">
           <RotateCcw size={14} className="mr-1" /> Reset
         </Button>
       </div>
@@ -91,7 +91,7 @@ function DrillInterruptor() {
     <DrillShell title="The Interruptor" subtitle="Explain your system design. AI cuts in 3 times. Score: recovery + thread maintenance." badge="System Design" badgeColor="blue" onReset={reset}>
       {phase === "write" && (
         <div className="space-y-3">
-          <div className="text-xs text-gray-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="text-xs text-gray-700 bg-blue-50 border border-blue-200 rounded-lg p-3">
             <strong>Instructions:</strong> Start explaining your system design below (e.g., "Design a notification system"). Write 3-5 sentences, then click <strong>Fire Interruption</strong>. You'll be interrupted 3 times total.
           </div>
           <Textarea
@@ -105,7 +105,7 @@ function DrillInterruptor() {
               {fire.isPending ? "Interrupting..." : <><Zap size={13} className="mr-1.5" /> Fire Interruption ({interruptions.length}/3)</>}
             </Button>
             {interruptions.length > 0 && (
-              <span className="text-xs text-gray-400">{interruptions.length} interruption{interruptions.length > 1 ? "s" : ""} answered</span>
+              <span className="text-xs text-gray-600">{interruptions.length} interruption{interruptions.length > 1 ? "s" : ""} answered</span>
             )}
           </div>
         </div>
@@ -113,7 +113,7 @@ function DrillInterruptor() {
 
       {phase === "interrupted" && currentInterruption && (
         <div className="space-y-3">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="bg-red-100 border border-red-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle size={14} className="text-red-500" />
               <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Interruption {interruptions.length + 1}/3</span>
@@ -147,9 +147,9 @@ function DrillInterruptor() {
             <ScoreBar label="Technical Soundness" score={score.technicalScore} />
             <ScoreBar label="Thread Maintenance" score={score.threadScore} />
           </div>
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-xs font-bold text-amber-700 mb-1">Top Weakness</p>
-            <p className="text-xs text-amber-600">{score.topWeakness}</p>
+          <div className="bg-amber-100 border border-amber-200 rounded-lg p-3">
+            <p className="text-xs font-bold text-amber-900 mb-1">Top Weakness</p>
+            <p className="text-xs text-amber-800">{score.topWeakness}</p>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
             <p className="text-xs font-bold text-gray-700 mb-1">Coaching Note</p>
@@ -213,7 +213,7 @@ function DrillClarificationInterrogator() {
       {(phase === "clarify" || phase === "design") && (
         <div className="space-y-3">
           <div className="bg-gray-900 text-gray-100 rounded-xl p-4">
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Prompt</p>
+            <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">Prompt</p>
             <p className="text-sm font-semibold">{prompt}</p>
           </div>
 
@@ -231,7 +231,7 @@ function DrillClarificationInterrogator() {
           {phase === "clarify" && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">{3 - questionsAsked} question{3 - questionsAsked !== 1 ? "s" : ""} remaining</span>
+                <span className="text-xs text-gray-700">{3 - questionsAsked} question{3 - questionsAsked !== 1 ? "s" : ""} remaining</span>
               </div>
               <div className="flex gap-2">
                 <input
@@ -253,7 +253,7 @@ function DrillClarificationInterrogator() {
 
           {phase === "design" && (
             <div className="space-y-2">
-              <p className="text-xs text-amber-600 font-medium">Questions used up. Now design the system:</p>
+              <p className="text-xs text-amber-800 font-medium">Questions used up. Now design the system:</p>
               <Textarea value={design} onChange={e => setDesign(e.target.value)} placeholder="Write your design..." className="min-h-[120px] text-sm" />
               <Button onClick={handleScore} disabled={design.length < 50 || mut.isPending} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                 {mut.isPending ? "Scoring..." : "Reveal Assumptions & Score"}
@@ -273,7 +273,7 @@ function DrillClarificationInterrogator() {
             </div>
           </div>
           {score.wrongAssumptions?.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-100 border border-red-200 rounded-lg p-3">
               <p className="text-xs font-bold text-red-700 mb-1">Wrong Assumptions ({score.wrongAssumptions.length})</p>
               {score.wrongAssumptions.map((a: string, i: number) => (
                 <p key={i} className="text-xs text-red-600 flex items-start gap-1"><AlertTriangle size={10} className="mt-0.5 flex-shrink-0" />{a}</p>
@@ -337,7 +337,7 @@ function DrillDevilsAdvocate() {
     <DrillShell title="Devil's Advocate Interviewer" subtitle="State a design decision. AI takes the opposite position every time. Defend 3 times." badge="System Design" badgeColor="red" onReset={reset}>
       {phase === "input" && (
         <div className="space-y-3">
-          <div className="text-xs text-gray-500 bg-red-50 border border-red-200 rounded-lg p-3">
+          <div className="text-xs text-gray-700 bg-red-100 border border-red-200 rounded-lg p-3">
             <strong>Instructions:</strong> State ONE specific design decision (e.g., "I'd use PostgreSQL over DynamoDB for this use case because..."). The AI will immediately take the opposite position.
           </div>
           <Textarea value={decision} onChange={e => setDecision(e.target.value)} placeholder="State your design decision and reasoning..." className="min-h-[100px] text-sm" />
@@ -362,7 +362,7 @@ function DrillDevilsAdvocate() {
               ))}
             </div>
           )}
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="bg-red-100 border border-red-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle size={14} className="text-red-500" />
               <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Challenge {defenses.length + 1}/3 — {currentChallenge.challengeAngle}</span>
@@ -378,7 +378,7 @@ function DrillDevilsAdvocate() {
 
       {phase === "scored" && score && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 rounded-xl">
             <div className="text-3xl font-black text-red-700">{score.overallScore}<span className="text-lg font-normal text-red-400">/10</span></div>
             <div>
               <p className="text-sm font-bold text-red-900">Devil's Advocate Score</p>
@@ -436,13 +436,13 @@ function DrillSilentSkeptic() {
 
   const reset = () => { setStarAnswer(""); setExchanges([]); setCurrentElaboration(""); setReveal(null); setPhase("write"); };
 
-  const reactionColor = (r: string) => r === "Hmm." ? "text-amber-600" : "text-gray-500";
+  const reactionColor = (r: string) => r === "Hmm." ? "text-amber-800" : "text-gray-700";
 
   return (
     <DrillShell title="The Silent Skeptic" subtitle="Give a STAR answer. AI responds with 'Hmm.' After 3 exchanges, it reveals what it was looking for." badge="Behavioral" badgeColor="amber" onReset={reset}>
       {phase === "write" && (
         <div className="space-y-3">
-          <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <div className="text-xs text-gray-700 bg-amber-100 border border-amber-200 rounded-lg p-3">
             <strong>Instructions:</strong> Give a complete STAR answer to any behavioral question (e.g., "Tell me about a time you influenced without authority"). The AI will respond with minimal reactions. Your job: read the silence correctly.
           </div>
           <Textarea value={starAnswer} onChange={e => setStarAnswer(e.target.value)} placeholder="Give your STAR answer..." className="min-h-[160px] text-sm" />
@@ -457,12 +457,12 @@ function DrillSilentSkeptic() {
           <div className="space-y-2">
             {exchanges.map((ex, i) => (
               <div key={i} className="space-y-1">
-                <p className="text-xs text-gray-500 italic pl-3 border-l-2 border-gray-200 line-clamp-2">{ex.candidateResponse}</p>
+                <p className="text-xs text-gray-700 italic pl-3 border-l-2 border-gray-200 line-clamp-2">{ex.candidateResponse}</p>
                 <p className={`text-sm font-bold ${reactionColor(ex.aiReaction)}`}>Interviewer: "{ex.aiReaction}"</p>
               </div>
             ))}
           </div>
-          <div className="text-xs text-gray-400 bg-gray-50 rounded-lg p-3">
+          <div className="text-xs text-gray-600 bg-gray-50 rounded-lg p-3">
             How do you respond to the silence? Elaborate, add detail, or stay quiet?
           </div>
           <Textarea value={currentElaboration} onChange={e => setCurrentElaboration(e.target.value)} placeholder="Add elaboration, or type 'I'll leave it there.' to stop..." className="min-h-[80px] text-sm" />
@@ -479,8 +479,8 @@ function DrillSilentSkeptic() {
 
       {phase === "revealed" && reveal && (
         <div className="space-y-3">
-          <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-            <div className="text-3xl font-black text-amber-700">{reveal.overallScore}<span className="text-lg font-normal text-amber-400">/10</span></div>
+          <div className="flex items-center gap-3 p-4 bg-amber-100 border border-amber-200 rounded-xl">
+            <div className="text-3xl font-black text-amber-900">{reveal.overallScore}<span className="text-lg font-normal text-amber-900">/10</span></div>
             <div>
               <p className="text-sm font-bold text-amber-900">Silent Skeptic Score</p>
               <Badge variant="outline" className="text-xs mt-1">{reveal.elaborationInstinct?.replace(/_/g, " ")}</Badge>
@@ -495,7 +495,7 @@ function DrillSilentSkeptic() {
               <p className="text-xs font-bold text-emerald-700 mb-1">Strongest Part</p>
               <p className="text-xs text-emerald-600">{reveal.strongestPart}</p>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-100 border border-red-200 rounded-lg p-3">
               <p className="text-xs font-bold text-red-700 mb-1">Weakest Part</p>
               <p className="text-xs text-red-600">{reveal.weakestPart}</p>
             </div>
@@ -544,7 +544,7 @@ function DrillScopeCreep() {
     <DrillShell title="Scope Creep Challenger" subtitle="Design for 5 minutes. Mid-design, AI adds 3 new requirements. You have 90s to respond." badge="System Design" badgeColor="orange" onReset={reset}>
       {phase === "design" && (
         <div className="space-y-3">
-          <div className="text-xs text-gray-500 bg-orange-50 border border-orange-200 rounded-lg p-3">
+          <div className="text-xs text-gray-700 bg-orange-100 border border-orange-200 rounded-lg p-3">
             <strong>Instructions:</strong> Start designing a system (write 4-6 sentences). Then click <strong>Inject Scope Creep</strong> — the AI will add 3 new requirements mid-design. You have 90 seconds to respond.
           </div>
           <Textarea value={design} onChange={e => setDesign(e.target.value)} placeholder="Start your system design..." className="min-h-[140px] text-sm" />
@@ -557,20 +557,20 @@ function DrillScopeCreep() {
       {phase === "challenged" && scopeChallenge && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">Your original design (summarized)</span>
-            <div className={`flex items-center gap-1 text-xs font-bold ${timeLeft <= 20 ? "text-red-600" : "text-amber-600"}`}>
+            <span className="text-xs text-gray-700">Your original design (summarized)</span>
+            <div className={`flex items-center gap-1 text-xs font-bold ${timeLeft <= 20 ? "text-red-600" : "text-amber-800"}`}>
               <Timer size={12} /> {timeLeft}s
             </div>
           </div>
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+          <div className="bg-orange-100 border border-orange-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <Expand size={14} className="text-orange-500" />
-              <span className="text-xs font-bold text-orange-600 uppercase tracking-wide">Scope Expansion</span>
+              <span className="text-xs font-bold text-orange-800 uppercase tracking-wide">Scope Expansion</span>
             </div>
             <p className="text-sm font-semibold text-orange-800 mb-2">{scopeChallenge.scopeAddition}</p>
             <div className="space-y-1">
               {scopeChallenge.requirements?.map((r: string, i: number) => (
-                <p key={i} className="text-xs text-orange-700 flex items-start gap-1"><ChevronRight size={10} className="mt-0.5 flex-shrink-0" />{r}</p>
+                <p key={i} className="text-xs text-orange-900 flex items-start gap-1"><ChevronRight size={10} className="mt-0.5 flex-shrink-0" />{r}</p>
               ))}
             </div>
           </div>
@@ -583,8 +583,8 @@ function DrillScopeCreep() {
 
       {phase === "scored" && score && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-            <div className="text-3xl font-black text-orange-700">{score.overallScore}<span className="text-lg font-normal text-orange-400">/10</span></div>
+          <div className="flex items-center gap-3 p-4 bg-orange-100 border border-orange-200 rounded-xl">
+            <div className="text-3xl font-black text-orange-900">{score.overallScore}<span className="text-lg font-normal text-orange-900">/10</span></div>
             <div><p className="text-sm font-bold text-orange-900">Scope Creep Score</p></div>
           </div>
           <div className="space-y-2">
@@ -669,28 +669,28 @@ function DrillTimePressure() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-gray-900">{problem.title}</span>
-            <div className={`flex items-center gap-1 text-sm font-black ${timeLeft <= 120 ? "text-red-600" : timeLeft <= 300 ? "text-amber-600" : "text-green-600"}`}>
+            <div className={`flex items-center gap-1 text-sm font-black ${timeLeft <= 120 ? "text-red-600" : timeLeft <= 300 ? "text-amber-800" : "text-green-600"}`}>
               <Timer size={14} /> {formatTime(timeLeft)}
             </div>
           </div>
           <div className="bg-gray-900 text-gray-100 rounded-xl p-4 text-xs font-mono leading-relaxed">
-            <p className="text-gray-300 mb-2">{problem.problem}</p>
+            <p className="text-gray-700 mb-2">{problem.problem}</p>
             {problem.examples?.slice(0, 1).map((ex: any, i: number) => (
-              <div key={i} className="text-gray-400">
+              <div key={i} className="text-gray-600">
                 <span className="text-green-400">Input:</span> {ex.input} → <span className="text-blue-400">Output:</span> {ex.output}
               </div>
             ))}
           </div>
 
           {(phase === "status10" || phase === "status18") && (
-            <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4">
+            <div className="bg-amber-100 border-2 border-amber-400 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Timer size={14} className="text-amber-600" />
-                <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">
+                <Timer size={14} className="text-amber-800" />
+                <span className="text-xs font-bold text-amber-900 uppercase tracking-wide">
                   {phase === "status10" ? "10-Minute Check-In" : "2 Minutes Left — Final Status"}
                 </span>
               </div>
-              <p className="text-xs text-amber-600 mb-2">Give a quick status update: where are you, what's left, will you finish?</p>
+              <p className="text-xs text-amber-800 mb-2">Give a quick status update: where are you, what's left, will you finish?</p>
               <Textarea value={statusUpdate} onChange={e => setStatusUpdate(e.target.value)} placeholder="Status update..." className="min-h-[70px] text-sm mb-2" />
               <Button onClick={() => handleStatusUpdate(phase === "status10" ? 10 : 18)} disabled={statusUpdate.length < 10 || mut.isPending} size="sm" className="bg-amber-600 hover:bg-amber-700">
                 {mut.isPending ? "Scoring..." : "Submit Status Update"}
@@ -724,9 +724,9 @@ function DrillTimePressure() {
             <ScoreBar label="Communication" score={finalScore.communicationScore} />
           </div>
           {statusScores.map((s, i) => (
-            <div key={i} className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <p className="text-xs font-bold text-amber-700 mb-1">{s.minute}-Minute Status Score</p>
-              <p className="text-xs text-amber-600">{s.coachingNote}</p>
+            <div key={i} className="bg-amber-100 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs font-bold text-amber-900 mb-1">{s.minute}-Minute Status Score</p>
+              <p className="text-xs text-amber-800">{s.coachingNote}</p>
             </div>
           ))}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -877,7 +877,7 @@ function DrillGotchaFollowUp() {
               <button
                 key={c}
                 onClick={() => setCategory(c)}
-                className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all ${category === c ? "bg-rose-600 text-white border-rose-600" : "text-gray-500 border-gray-200 hover:border-rose-300"}`}
+                className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all ${category === c ? "bg-rose-600 text-white border-rose-600" : "text-gray-700 border-gray-200 hover:border-rose-300"}`}
               >
                 {c.replace("_", " ")}
               </button>
@@ -951,7 +951,7 @@ const DRILLS = [
 
 const BADGE_COLORS: Record<string, string> = {
   SD: "bg-blue-100 text-blue-700",
-  BEH: "bg-amber-100 text-amber-700",
+  BEH: "bg-amber-100 text-amber-900",
   CODE: "bg-green-100 text-green-700",
   ALL: "bg-rose-100 text-rose-700",
 };
@@ -969,11 +969,11 @@ export default function AdvancedDrillsPanel() {
           <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Advanced Drill Modes
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">8 high-pressure scenarios targeting the most common Meta rejection patterns</p>
+          <p className="text-xs text-gray-700 mt-0.5">8 high-pressure scenarios targeting the most common Meta rejection patterns</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <Star size={12} className="text-amber-400 fill-amber-400" />
-          <span className="text-xs font-bold text-amber-600">High Impact</span>
+          <Star size={12} className="text-amber-900 fill-amber-400" />
+          <span className="text-xs font-bold text-amber-800">High Impact</span>
         </div>
       </div>
 
@@ -989,7 +989,7 @@ export default function AdvancedDrillsPanel() {
                 : "text-gray-600 border-gray-200 hover:border-gray-400 bg-white"
             }`}
           >
-            <span className="text-[10px] font-bold text-gray-400">#{i + 11}</span>
+            <span className="text-[10px] font-bold text-gray-600">#{i + 11}</span>
             {d.icon}
             {d.label}
             <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${active === d.id ? "bg-white/20 text-white" : BADGE_COLORS[d.badge]}`}>

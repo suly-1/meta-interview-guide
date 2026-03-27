@@ -89,31 +89,31 @@ function loadActivityData(): ActivityData {
 const GRADE_STYLES: Record<string, string> = {
   A: "text-emerald-600 dark:text-emerald-400",
   B: "text-blue-600 dark:text-blue-400",
-  C: "text-amber-600 dark:text-amber-400",
-  D: "text-orange-600 dark:text-orange-400",
+  C: "text-amber-800 dark:text-amber-900",
+  D: "text-orange-800 dark:text-orange-900",
   F: "text-red-600 dark:text-red-400",
 };
 
 const TRAJECTORY_STYLES: Record<string, { color: string; badge: "emerald" | "orange" | "violet" }> = {
   "Ready": { color: "text-emerald-600 dark:text-emerald-400", badge: "emerald" },
   "On Track": { color: "text-violet-600 dark:text-violet-400", badge: "violet" },
-  "Needs Acceleration": { color: "text-amber-600 dark:text-amber-400", badge: "orange" },
+  "Needs Acceleration": { color: "text-amber-800 dark:text-amber-900", badge: "orange" },
   "At Risk": { color: "text-red-600 dark:text-red-400", badge: "orange" },
 };
 
 function ActivityInput({ label, value, onChange, icon }: { label: string; value: number; onChange: (v: number) => void; icon: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 text-gray-500">
+      <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 text-gray-700">
         {icon}
       </div>
       <div className="flex-1">
-        <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">{label}</label>
+        <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">{label}</label>
       </div>
       <div className="flex items-center gap-2">
-        <button onClick={() => onChange(Math.max(0, value - 1))} className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">−</button>
+        <button onClick={() => onChange(Math.max(0, value - 1))} className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">−</button>
         <span className="text-sm font-bold text-gray-800 dark:text-gray-200 w-6 text-center">{value}</span>
-        <button onClick={() => onChange(value + 1)} className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">+</button>
+        <button onClick={() => onChange(value + 1)} className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">+</button>
       </div>
     </div>
   );
@@ -166,17 +166,17 @@ export default function WeeklyReadinessReport() {
 
       {/* Current snapshot */}
       <HighImpactWrapper variant="emerald" className="p-4">
-        <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Your Current Snapshot</h4>
+        <h4 className="font-bold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-3">Your Current Snapshot</h4>
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3 text-center">
-            <p className={`text-2xl font-bold ${activityData.readinessScore >= 70 ? "text-emerald-600 dark:text-emerald-400" : activityData.readinessScore >= 50 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+            <p className={`text-2xl font-bold ${activityData.readinessScore >= 70 ? "text-emerald-600 dark:text-emerald-400" : activityData.readinessScore >= 50 ? "text-amber-800 dark:text-amber-900" : "text-red-600 dark:text-red-400"}`}>
               {activityData.readinessScore}
             </p>
-            <p className="text-[10px] text-gray-500">Readiness Score /100</p>
+            <p className="text-[10px] text-gray-700">Readiness Score /100</p>
           </div>
           <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3 text-center">
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{activityData.behavioralCoverage}%</p>
-            <p className="text-[10px] text-gray-500">Behavioral Coverage</p>
+            <p className="text-[10px] text-gray-700">Behavioral Coverage</p>
           </div>
         </div>
 
@@ -208,7 +208,7 @@ export default function WeeklyReadinessReport() {
 
         {/* Last week activity override */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-          <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">This Week's Activity (adjust if needed):</p>
+          <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">This Week's Activity (adjust if needed):</p>
           <div className="space-y-2">
             <ActivityInput
               label="Problems Solved"
@@ -236,18 +236,18 @@ export default function WeeklyReadinessReport() {
       <HighImpactWrapper variant="emerald" className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Target Level</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 block">Target Level</label>
             <div className="flex gap-2">
               {(["L4", "L5", "L6", "L7"] as Level[]).map(l => (
                 <button key={l} onClick={() => setTargetLevel(l)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-emerald-500 text-white border-emerald-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-emerald-300"}`}>
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-emerald-500 text-white border-emerald-500" : "border-gray-200 dark:border-gray-700 text-gray-700 hover:border-emerald-300"}`}>
                   {l}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 block">
               Interview Date
               {daysUntilInterview !== undefined && (
                 <span className="ml-2 text-emerald-600 dark:text-emerald-400 normal-case font-normal">
@@ -285,19 +285,19 @@ export default function WeeklyReadinessReport() {
             <HighImpactWrapper variant="emerald" className="p-4">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">This Week's Assessment</p>
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1">This Week's Assessment</p>
                   <p className="text-base font-bold text-gray-800 dark:text-gray-200 leading-snug">{report.headline}</p>
                 </div>
                 <div className="flex flex-col items-center flex-shrink-0">
-                  <span className={`text-4xl font-black ${GRADE_STYLES[report.weeklyGrade] ?? "text-gray-600 dark:text-gray-400"}`}>
+                  <span className={`text-4xl font-black ${GRADE_STYLES[report.weeklyGrade] ?? "text-gray-600 dark:text-gray-300"}`}>
                     {report.weeklyGrade}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-bold">GRADE</span>
+                  <span className="text-[10px] text-gray-700 font-bold">GRADE</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs font-bold text-gray-500">Trajectory:</span>
+                <span className="text-xs font-bold text-gray-700">Trajectory:</span>
                 <HighImpactBadge
                   variant={TRAJECTORY_STYLES[report.trajectory]?.badge ?? "orange"}
                   label={report.trajectory}
@@ -305,13 +305,13 @@ export default function WeeklyReadinessReport() {
               </div>
 
               <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3 mb-4">
-                <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Coach's Message:</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 italic">{report.coachMessage}</p>
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">Coach's Message:</p>
+                <p className="text-sm text-gray-700 dark:text-gray-200 italic">{report.coachMessage}</p>
               </div>
 
               {/* Top 3 focus areas */}
               <div>
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Top 3 Priorities This Week</p>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-3">Top 3 Priorities This Week</p>
                 <div className="space-y-3">
                   {report.top3Focus.map((focus: { area: string; why: string; exercise: string }, i: number) => (
                     <div key={i} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
@@ -321,10 +321,10 @@ export default function WeeklyReadinessReport() {
                         </span>
                         <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{focus.area}</span>
                       </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 ml-7">{focus.why}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-1.5 ml-7">{focus.why}</p>
                       <div className="ml-7 rounded bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 px-2 py-1.5">
                         <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 mb-0.5">This week's exercise:</p>
-                        <p className="text-xs text-gray-700 dark:text-gray-300">{focus.exercise}</p>
+                        <p className="text-xs text-gray-700 dark:text-gray-200">{focus.exercise}</p>
                       </div>
                     </div>
                   ))}

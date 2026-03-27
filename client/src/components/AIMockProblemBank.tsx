@@ -569,13 +569,13 @@ class LikeCounter:
 ];
 
 const PHASE_STYLES = {
-  "bug-fix":  { icon: Bug,        color: "text-red-600",    bg: "bg-red-50",    border: "border-red-200",    badge: "bg-red-100 text-red-700",    label: "Bug Fix"    },
+  "bug-fix":  { icon: Bug,        color: "text-red-600",    bg: "bg-red-100",    border: "border-red-200",    badge: "bg-red-100 text-red-700",    label: "Bug Fix"    },
   "feature":  { icon: PlusCircle, color: "text-blue-600",   bg: "bg-blue-50",   border: "border-blue-200",   badge: "bg-blue-100 text-blue-700",   label: "Feature"    },
   "optimize": { icon: TrendingUp, color: "text-green-600",  bg: "bg-green-50",  border: "border-green-200",  badge: "bg-green-100 text-green-700", label: "Optimize"   },
 };
 
 const DIFF_STYLES = {
-  Medium: "bg-amber-100 text-amber-700",
+  Medium: "bg-amber-100 text-amber-900",
   Hard:   "bg-red-100 text-red-700",
 };
 
@@ -609,7 +609,7 @@ function ProblemCard({ p }: { p: MockProblem }) {
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${DIFF_STYLES[p.difficulty]}`}>{p.difficulty}</span>
               <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{p.domain}</span>
-              <span className="flex items-center gap-1 text-[11px] text-gray-400">
+              <span className="flex items-center gap-1 text-[11px] text-gray-600">
                 <Clock size={10} /> {p.estimatedTime}
               </span>
               {allDone && <span className="text-[11px] font-bold text-green-600">✓ Completed</span>}
@@ -617,13 +617,13 @@ function ProblemCard({ p }: { p: MockProblem }) {
             <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {p.title}
             </h3>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2">{p.scenario}</p>
+            <p className="text-xs text-gray-700 mt-1 leading-relaxed line-clamp-2">{p.scenario}</p>
           </div>
           <button
             onClick={() => setExpanded(e => !e)}
             className="flex-shrink-0 p-1.5 rounded-xl hover:bg-gray-100 transition-colors"
           >
-            {expanded ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+            {expanded ? <ChevronUp size={16} className="text-gray-700" /> : <ChevronDown size={16} className="text-gray-700" />}
           </button>
         </div>
 
@@ -653,13 +653,13 @@ function ProblemCard({ p }: { p: MockProblem }) {
         <div className="border-t border-gray-100">
           {/* Scenario */}
           <div className="px-4 py-3 bg-gray-50">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Scenario</p>
+            <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1">Scenario</p>
             <p className="text-xs text-gray-700 leading-relaxed">{p.scenario}</p>
           </div>
 
           {/* Code Context */}
           <div className="px-4 py-3 bg-gray-950">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Existing Codebase (given to you)</p>
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-2">Existing Codebase (given to you)</p>
             <pre className="text-[10.5px] text-green-300 leading-relaxed overflow-x-auto font-mono whitespace-pre">
               {p.codeContext}
             </pre>
@@ -678,13 +678,13 @@ function ProblemCard({ p }: { p: MockProblem }) {
                       <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
                         <PhaseIcon size={9} /> Phase {i + 1}: {style.label}
                       </span>
-                      <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+                      <span className="text-[10px] text-gray-600 flex items-center gap-0.5">
                         <Clock size={9} /> {phase.timeTarget}
                       </span>
                     </div>
                     <button
                       onClick={() => togglePhase(i)}
-                      className={`flex-shrink-0 transition-colors ${done ? "text-green-500" : "text-gray-300 hover:text-green-400"}`}
+                      className={`flex-shrink-0 transition-colors ${done ? "text-green-500" : "text-gray-700 hover:text-green-400"}`}
                     >
                       {done ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                     </button>
@@ -697,12 +697,12 @@ function ProblemCard({ p }: { p: MockProblem }) {
                   {/* Hint toggle */}
                   <button
                     onClick={() => setShowHint(h => ({ ...h, [i]: !h[i] }))}
-                    className="text-[11px] font-semibold text-amber-600 hover:text-amber-800 transition-colors"
+                    className="text-[11px] font-semibold text-amber-800 hover:text-amber-800 transition-colors"
                   >
                     {showHint[i] ? "Hide hint ▲" : "Show hint ▼"}
                   </button>
                   {showHint[i] && (
-                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="mt-2 p-2.5 bg-amber-100 border border-amber-200 rounded-lg">
                       <p className="text-[11px] text-amber-800 leading-relaxed">{phase.hint}</p>
                     </div>
                   )}
@@ -728,11 +728,11 @@ function ProblemCard({ p }: { p: MockProblem }) {
 
           {/* Follow-up questions */}
           <div className="px-4 py-3 bg-white border-t border-gray-100">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Likely Follow-Up Questions</p>
+            <p className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-2">Likely Follow-Up Questions</p>
             <ul className="space-y-1">
               {p.followUps.map((q, i) => (
                 <li key={i} className="text-[11px] text-gray-600 flex items-start gap-1.5">
-                  <span className="text-gray-300 flex-shrink-0 mt-0.5">→</span>
+                  <span className="text-gray-700 flex-shrink-0 mt-0.5">→</span>
                   {q}
                 </li>
               ))}
@@ -764,7 +764,7 @@ export default function AIMockProblemBank() {
         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           AI-Enabled Mock Problem Bank
         </h3>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-gray-700 mt-0.5">
           8 multi-file codebase problems simulating Meta's 3-phase AI-enabled format: Bug Fix → Feature Add → Optimize. Each problem includes existing code, AI usage tips, and follow-up questions.
         </p>
       </div>
@@ -800,7 +800,7 @@ export default function AIMockProblemBank() {
             </button>
           ))}
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-700">
           <span className="font-bold text-gray-700">{totalCompleted}</span> / {PROBLEMS.length} problems fully completed
         </span>
       </div>

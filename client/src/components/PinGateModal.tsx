@@ -52,10 +52,10 @@ export function PinExpiryToast() {
 
   return (
     <div className="fixed bottom-4 right-4 z-[300] flex items-start gap-3 bg-amber-900/90 border border-amber-600 text-amber-100 rounded-xl px-4 py-3 shadow-xl max-w-xs backdrop-blur-sm">
-      <Timer size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
+      <Timer size={18} className="mt-0.5 flex-shrink-0 text-amber-900" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold">Admin session expiring</p>
-        <p className="text-xs text-amber-300 mt-0.5">
+        <p className="text-xs text-amber-800 mt-0.5">
           {minutesLeft <= 0
             ? "Your PIN session has expired. You will be prompted to re-enter your PIN."
             : `Your admin PIN session expires in ${minutesLeft} minute${minutesLeft === 1 ? "" : "s"}. You will need to re-enter your PIN.`}
@@ -66,7 +66,7 @@ export function PinExpiryToast() {
           if (minutesLeft <= 0) clearPinToken();
           else setDismissed(true);
         }}
-        className="flex-shrink-0 text-amber-400 hover:text-amber-200 text-lg leading-none"
+        className="flex-shrink-0 text-amber-900 hover:text-amber-200 text-lg leading-none"
         aria-label="Dismiss"
       >
         ×
@@ -200,7 +200,7 @@ export default function PinGateModal() {
             )}
           </div>
           <h2 className="text-lg font-bold text-white">Admin Access</h2>
-          <p className="text-sm text-gray-400 mt-1 text-center">
+          <p className="text-sm text-gray-600 mt-1 text-center">
             {isLocked
               ? "Too many failed attempts"
               : "Enter your admin PIN to continue"}
@@ -255,7 +255,7 @@ export default function PinGateModal() {
 
             {/* Failed attempts warning (1-4 attempts) */}
             {failedAttempts > 0 && failedAttempts < 5 && (
-              <p className="text-center text-xs text-amber-400 mb-3">
+              <p className="text-center text-xs text-amber-900 mb-3">
                 {5 - failedAttempts} attempt{5 - failedAttempts === 1 ? "" : "s"} remaining before 15-minute lockout
               </p>
             )}

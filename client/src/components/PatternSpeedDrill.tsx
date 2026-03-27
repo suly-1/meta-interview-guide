@@ -449,7 +449,7 @@ export function PatternSpeedDrill() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                   <div
-                    className={`text-xl font-black ${accuracy >= 80 ? "text-emerald-400" : accuracy >= 60 ? "text-amber-400" : "text-red-400"}`}
+                    className={`text-xl font-black ${accuracy >= 80 ? "text-emerald-400" : accuracy >= 60 ? "text-amber-900" : "text-red-400"}`}
                   >
                     {accuracy}%
                   </div>
@@ -479,7 +479,7 @@ export function PatternSpeedDrill() {
                     accuracy >= 80
                       ? "text-emerald-400"
                       : accuracy >= 60
-                        ? "text-amber-400"
+                        ? "text-amber-900"
                         : "text-red-400"
                   }
                 />

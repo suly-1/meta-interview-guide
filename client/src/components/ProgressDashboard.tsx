@@ -254,9 +254,9 @@ function StatCard({ icon, label, value, sub, color }: {
         {icon}
       </div>
       <div className="min-w-0">
-        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-0.5">{label}</div>
+        <div className="text-xs text-gray-700 dark:text-gray-300 font-medium mb-0.5">{label}</div>
         <div className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{value}</div>
-        {sub && <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{sub}</div>}
+        {sub && <div className="text-xs text-gray-600 dark:text-gray-200 mt-0.5">{sub}</div>}
       </div>
     </div>
   );
@@ -267,9 +267,9 @@ function ProgressBar({ label, value, max, color }: { label: string; value: numbe
   const pct = Math.min(100, Math.round((value / max) * 100));
   return (
     <div>
-      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+      <div className="flex justify-between text-xs text-gray-700 dark:text-gray-300 mb-1">
         <span>{label}</span>
-        <span className="font-semibold text-gray-700 dark:text-gray-300">{value} / {max}</span>
+        <span className="font-semibold text-gray-700 dark:text-gray-200">{value} / {max}</span>
       </div>
       <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
@@ -286,8 +286,8 @@ const RATING_COLORS_MAP: Record<string, string> = {
   "Exceptional": "text-violet-600 bg-violet-50 dark:bg-violet-900/20",
   "Strong": "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20",
   "Solid": "text-blue-600 bg-blue-50 dark:bg-blue-900/20",
-  "Moderate": "text-amber-600 bg-amber-50 dark:bg-amber-900/20",
-  "Insufficient": "text-red-600 bg-red-50 dark:bg-red-900/20",
+  "Moderate": "text-amber-800 bg-amber-100 dark:bg-amber-900/20",
+  "Insufficient": "text-red-600 bg-red-100 dark:bg-red-900/20",
 };
 function ScreenHistorySection() {
   const sessions = loadScreenSessions();
@@ -326,9 +326,9 @@ function ScreenHistorySection() {
             <div key={s.id} className="rounded-lg border border-gray-100 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-900/30">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-mono text-muted-foreground">{new Date(s.date).toLocaleDateString()}</span>
-                <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{s.targetLevel}</span>
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-200">{s.targetLevel}</span>
                 {s.overallRating && (
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${RATING_COLORS_MAP[s.overallRating] ?? "text-gray-500"}`}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${RATING_COLORS_MAP[s.overallRating] ?? "text-gray-700"}`}>
                     {s.overallRating}
                   </span>
                 )}
@@ -432,8 +432,8 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
 
   const DIFF_COLORS: Record<string, string> = {
     Easy: "text-emerald-600 bg-emerald-50 border-emerald-200",
-    Medium: "text-amber-600 bg-amber-50 border-amber-200",
-    Hard: "text-red-600 bg-red-50 border-red-200",
+    Medium: "text-amber-800 bg-amber-100 border-amber-200",
+    Hard: "text-red-600 bg-red-100 border-red-200",
   };
 
   return (
@@ -447,12 +447,12 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
             </div>
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Progress Dashboard</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-xs text-gray-600 dark:text-gray-200">
                 {snap.lastActive ? `Last active: ${snap.lastActive}` : "Start practicing to track progress"}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -465,12 +465,12 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
                 <span className="text-2xl">{snap.levelEmoji}</span>
                 <div>
                   <div className="font-bold text-gray-900 dark:text-gray-100">{snap.levelName}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{snap.totalXP.toLocaleString()} XP total · +{snap.todayXP} today</div>
+                  <div className="text-xs text-gray-700 dark:text-gray-300">{snap.totalXP.toLocaleString()} XP total · +{snap.todayXP} today</div>
                 </div>
               </div>
               {nextLevel && (
-                <div className="text-right text-xs text-gray-500 dark:text-gray-400">
-                  <div className="font-semibold text-gray-700 dark:text-gray-300">{snap.levelProgressPct}%</div>
+                <div className="text-right text-xs text-gray-700 dark:text-gray-300">
+                  <div className="font-semibold text-gray-700 dark:text-gray-200">{snap.levelProgressPct}%</div>
                   <div>to {nextLevel.name}</div>
                 </div>
               )}
@@ -485,7 +485,7 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
               {XP_LEVELS.map((lvl, i) => (
                 <div key={i} className="flex flex-col items-center gap-0.5" title={`${lvl.name}: ${lvl.minXP} XP`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${snap.totalXP >= lvl.minXP ? "bg-blue-500" : "bg-gray-200 dark:bg-gray-700"}`} />
-                  <span className="text-[9px] text-gray-400 hidden sm:block">{lvl.emoji}</span>
+                  <span className="text-[9px] text-gray-600 hidden sm:block">{lvl.emoji}</span>
                 </div>
               ))}
             </div>
@@ -494,13 +494,13 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
           {/* Readiness Score */}
           <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
                 <Target size={15} className="text-rose-500" />
                 Overall Readiness Score
               </div>
               <div className={`text-2xl font-bold ${
                 snap.readinessTotal >= 70 ? "text-emerald-600" :
-                snap.readinessTotal >= 40 ? "text-amber-600" : "text-rose-600"
+                snap.readinessTotal >= 40 ? "text-amber-800" : "text-rose-600"
               }`}>{snap.readinessTotal}%</div>
             </div>
             <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -512,16 +512,16 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
                 style={{ width: `${snap.readinessTotal}%` }}
               />
             </div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+            <div className="text-xs text-gray-600 dark:text-gray-200 mt-1.5">
               Weighted: 40% patterns · 30% CTCI · 20% behavioral · 10% streak
             </div>
           </div>
 
           {/* Stat Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <StatCard icon={<Flame size={16} className="text-orange-500" />} label="Daily Streak" value={`${snap.streak}d`} sub={snap.streak >= 7 ? "🔥 On fire!" : snap.streak > 0 ? "Keep going!" : "Start today"} color="bg-orange-50 dark:bg-orange-900/20" />
+            <StatCard icon={<Flame size={16} className="text-orange-500" />} label="Daily Streak" value={`${snap.streak}d`} sub={snap.streak >= 7 ? "🔥 On fire!" : snap.streak > 0 ? "Keep going!" : "Start today"} color="bg-orange-100 dark:bg-orange-900/20" />
             <StatCard icon={<BookOpen size={16} className="text-violet-500" />} label="Problems Solved" value={snap.ctciSolved} sub={`of ${snap.ctciTotal} · ${Math.round(snap.ctciSolved / snap.ctciTotal * 100)}%`} color="bg-violet-50 dark:bg-violet-900/20" />
-            <StatCard icon={<Star size={16} className="text-amber-500" />} label="Starred Problems" value={snap.ctciStarred} sub="for review" color="bg-amber-50 dark:bg-amber-900/20" />
+            <StatCard icon={<Star size={16} className="text-amber-500" />} label="Starred Problems" value={snap.ctciStarred} sub="for review" color="bg-amber-100 dark:bg-amber-900/20" />
             <StatCard icon={<Brain size={16} className="text-blue-500" />} label="Patterns Rated" value={snap.patternsRated} sub={snap.patternAvgRating !== null ? `avg ${snap.patternAvgRating}/5` : "Not started"} color="bg-blue-50 dark:bg-blue-900/20" />
             <StatCard icon={<MessageSquare size={16} className="text-teal-500" />} label="Behavioral Qs" value={snap.behavioralRated} sub={snap.behavioralAvg !== null ? `avg ${snap.behavioralAvg}/5` : "Not started"} color="bg-teal-50 dark:bg-teal-900/20" />
             <StatCard icon={<Trophy size={16} className="text-rose-500" />} label="Mock Sessions" value={snap.sdMockCount + snap.aiMockCount} sub={`${snap.sdMockCount} SD · ${snap.aiMockCount} AI`} color="bg-rose-50 dark:bg-rose-900/20" />
@@ -529,7 +529,7 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
 
           {/* Progress Bars */}
           <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 space-y-3">
-            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-1">
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 mb-1">
               <BarChart2 size={14} className="text-blue-500" />
               Detailed Progress
             </div>
@@ -542,8 +542,8 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
 
           {/* Activity summary */}
           <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3">
-              <Clock size={14} className="text-gray-400" />
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 mb-3">
+              <Clock size={14} className="text-gray-600" />
               Activity Summary
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
@@ -555,7 +555,7 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
               ].map(({ label, value }) => (
                 <div key={label} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg py-2 px-3">
                   <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{value}</div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500">{label}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-200">{label}</div>
                 </div>
               ))}
             </div>
@@ -638,13 +638,13 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
             return (
               <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                     <Medal size={14} className="text-rose-500" />
                     Weakness Sprint Leaderboard
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
-                    <span><span className="font-bold text-gray-700 dark:text-gray-300">{totalSprints}</span> sprint{totalSprints !== 1 ? "s" : ""}</span>
-                    <span><span className="font-bold text-gray-700 dark:text-gray-300">{allTimeAvg.toFixed(1)}/8</span> avg</span>
+                  <div className="flex items-center gap-3 text-xs text-gray-600">
+                    <span><span className="font-bold text-gray-700 dark:text-gray-200">{totalSprints}</span> sprint{totalSprints !== 1 ? "s" : ""}</span>
+                    <span><span className="font-bold text-gray-700 dark:text-gray-200">{allTimeAvg.toFixed(1)}/8</span> avg</span>
                   </div>
                 </div>
 
@@ -654,10 +654,10 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
                     const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
                     return (
                       <div key={row.key} className="flex items-center gap-3">
-                        <span className="text-base w-5 flex-shrink-0">{medal || <span className="text-xs text-gray-400 font-bold">#{i + 1}</span>}</span>
+                        <span className="text-base w-5 flex-shrink-0">{medal || <span className="text-xs text-gray-600 font-bold">#{i + 1}</span>}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate" title={row.key}>{row.key}</p>
-                          <p className="text-[10px] text-gray-400">
+                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate" title={row.key}>{row.key}</p>
+                          <p className="text-[10px] text-gray-600">
                             Best: {row.best.score}/{row.best.total} · Avg: {row.avgScore.toFixed(1)}/8 · {row.attempts} attempt{row.attempts !== 1 ? "s" : ""} · {row.best.date}
                           </p>
                         </div>
@@ -669,7 +669,7 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
                             />
                           </div>
                           <span className={`text-xs font-bold tabular-nums ${
-                            pct >= 75 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-rose-600"
+                            pct >= 75 ? "text-emerald-600" : pct >= 50 ? "text-amber-800" : "text-rose-600"
                           }`}>{row.best.score}/{row.best.total}</span>
                         </div>
                       </div>
@@ -694,7 +694,7 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
             </button>
             <button
               onClick={() => setConfirmReset(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-semibold transition-all"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 text-sm font-semibold transition-all"
             >
               <Trash2 size={15} />
               Reset All Data
@@ -703,12 +703,12 @@ export default function ProgressDashboard({ open, onClose, onRetrySession }: Pro
 
           {/* Reset confirmation */}
           {confirmReset && (
-            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-100 dark:bg-red-900/20 p-4">
               <p className="text-sm text-red-700 dark:text-red-300 font-semibold mb-1">⚠️ This will permanently delete all your progress.</p>
               <p className="text-xs text-red-600 dark:text-red-400 mb-3">XP, solved problems, ratings, streaks, notes, and mock history will all be erased. This cannot be undone.</p>
               <div className="flex gap-2">
                 <button onClick={resetAllProgress} className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all">Yes, delete everything</button>
-                <button onClick={() => setConfirmReset(false)} className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
+                <button onClick={() => setConfirmReset(false)} className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Cancel</button>
               </div>
             </div>
           )}

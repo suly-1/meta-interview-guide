@@ -31,7 +31,7 @@ const TYPE_LABELS: Record<
     emoji: "🎯",
   },
   design: { label: "System Design", color: "text-purple-400", emoji: "🏗️" },
-  ctci: { label: "CTCI Problems", color: "text-amber-400", emoji: "📖" },
+  ctci: { label: "CTCI Problems", color: "text-amber-900", emoji: "📖" },
 };
 
 export function FavoriteQuestions() {
@@ -169,7 +169,7 @@ export function FavoriteQuestions() {
               {current.questionText}
             </p>
             {current.notes && (
-              <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+              <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800">
                 <span className="font-semibold">Your note:</span>{" "}
                 {current.notes}
               </div>
@@ -278,7 +278,7 @@ export function FavoriteQuestions() {
                       {fav.questionText}
                     </p>
                     {fav.notes && editingNoteId !== fav.questionId && (
-                      <p className="text-xs text-amber-300/80 italic">
+                      <p className="text-xs text-amber-800/80 italic">
                         "{fav.notes}"
                       </p>
                     )}
@@ -329,7 +329,7 @@ export function FavoriteQuestions() {
                         setNoteText(fav.notes ?? "");
                       }}
                       title="Add note"
-                      className="p-1 rounded text-muted-foreground hover:text-amber-400 transition-colors"
+                      className="p-1 rounded text-muted-foreground hover:text-amber-900 transition-colors"
                     >
                       <StickyNote size={13} />
                     </button>

@@ -144,7 +144,7 @@ function PatternMasteryGrid({
   const ratingColor = (r: number) => {
     if (r >= 4) return "text-emerald-400";
     if (r >= 3) return "text-blue-400";
-    if (r >= 2) return "text-amber-400";
+    if (r >= 2) return "text-amber-900";
     if (r >= 1) return "text-red-400";
     return "text-muted-foreground/40";
   };
@@ -319,7 +319,7 @@ export function ProgressAnalyticsDashboard() {
           value={overallScore}
           max={100}
           icon={<Award size={14} />}
-          color="text-amber-400"
+          color="text-amber-900"
           subtitle="Coding 40% · BQ 30% · Stories 20% · Mocks 10%"
         />
         <ScoreCard
@@ -426,7 +426,7 @@ export function ProgressAnalyticsDashboard() {
                 </li>
               )}
               {patternsWeak > 3 && (
-                <li className="text-[11px] text-amber-400 flex items-start gap-1.5">
+                <li className="text-[11px] text-amber-900 flex items-start gap-1.5">
                   <span className="shrink-0">⚠</span>
                   {patternsWeak} weak patterns — use the sprint plan to address
                   these first
@@ -446,7 +446,7 @@ export function ProgressAnalyticsDashboard() {
                 </li>
               )}
               {mocksDone === 0 && (
-                <li className="text-[11px] text-amber-400 flex items-start gap-1.5">
+                <li className="text-[11px] text-amber-900 flex items-start gap-1.5">
                   <span className="shrink-0">⚠</span>
                   No mock sessions yet — schedule one this week
                 </li>

@@ -136,14 +136,14 @@ export default function SDComponentStressTest() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+      <div className="rounded-xl border border-orange-200 bg-orange-100 p-4">
         <div className="flex items-start gap-3">
-          <Zap size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
+          <Zap size={18} className="text-orange-800 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-extrabold text-orange-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Component Stress-Test Quiz
             </p>
-            <p className="text-xs text-orange-700 mt-1 leading-relaxed">
+            <p className="text-xs text-orange-900 mt-1 leading-relaxed">
               Meta interviewers probe every component with failure scenarios: <em>"What happens when your cache hit rate drops to 5%?"</em>
               Naming a component is L4. Reasoning through its failure cascade is L6. This quiz trains the 15%-weight <strong>Technical Depth</strong> signal.
             </p>
@@ -173,10 +173,10 @@ export default function SDComponentStressTest() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-orange-800 bg-orange-100 border border-orange-200 px-2 py-0.5 rounded-full">
                 {question.component}
               </span>
-              <span className="text-[10px] font-bold text-gray-400">
+              <span className="text-[10px] font-bold text-gray-600">
                 {questionIdx + 1}/{questions.length}
               </span>
             </div>
@@ -207,7 +207,7 @@ export default function SDComponentStressTest() {
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Walk through: (1) What fails first? (2) What's the cascade? (3) How do you mitigate? (4) How do you quantify the impact?"
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none min-h-[120px]"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none min-h-[120px]"
             disabled={scoreMutation.isPending}
           />
         </div>
@@ -246,7 +246,7 @@ export default function SDComponentStressTest() {
                 { label: "Mitigation Proposal", score: result.mitigationScore, feedback: result.mitigationFeedback },
                 { label: "Impact Quantification", score: result.quantificationScore, feedback: result.quantificationFeedback },
               ].map(({ label, score, feedback }) => (
-                <div key={label} className={`rounded-xl border p-3 ${score >= 3 ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-50/40"}`}>
+                <div key={label} className={`rounded-xl border p-3 ${score >= 3 ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-100/40"}`}>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-xs font-bold text-gray-800">{label}</span>
                     <ScorePill score={score} />
@@ -280,7 +280,7 @@ export default function SDComponentStressTest() {
           <>
             <button
               onClick={() => setShowModel(m => !m)}
-              className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 hover:text-gray-700"
+              className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-700 hover:text-gray-700"
             >
               {showModel ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
               {showModel ? "Hide model answer" : "Reveal model answer (without scoring)"}

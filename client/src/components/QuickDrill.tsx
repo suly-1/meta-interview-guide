@@ -135,8 +135,8 @@ export default function QuickDrill() {
 
   const DIFF_COLORS: Record<string, string> = {
     green: "text-emerald-600 bg-emerald-50 border-emerald-200",
-    amber: "text-amber-600 bg-amber-50 border-amber-200",
-    red:   "text-red-600 bg-red-50 border-red-200",
+    amber: "text-amber-800 bg-amber-100 border-amber-200",
+    red:   "text-red-600 bg-red-100 border-red-200",
   };
 
   const pct = remaining / DRILL_DURATION;
@@ -168,7 +168,7 @@ export default function QuickDrill() {
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-500">30 seconds to recall the approach — then reveal and rate yourself. Your rating schedules the next review.</p>
+            <p className="text-xs text-gray-700">30 seconds to recall the approach — then reveal and rate yourself. Your rating schedules the next review.</p>
           </div>
         </div>
       )}
@@ -191,7 +191,7 @@ export default function QuickDrill() {
                 {dueMode && (
                   <span className="text-[11px] font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">Due-Today Mode</span>
                 )}
-                <span className="text-[11px] text-gray-400">·</span>
+                <span className="text-[11px] text-gray-600">·</span>
                 <span className={`text-[11px] font-semibold border px-2 py-0.5 rounded-full ${DIFF_COLORS[pattern.difficultyColor]}`}>
                   {pattern.difficulty}
                 </span>
@@ -202,12 +202,12 @@ export default function QuickDrill() {
               </div>
               <div className="flex items-center gap-2">
                 {attempts(pattern.id) > 0 && (
-                  <span className="text-[11px] text-gray-400">{attempts(pattern.id)} attempt{attempts(pattern.id) > 1 ? "s" : ""}</span>
+                  <span className="text-[11px] text-gray-600">{attempts(pattern.id)} attempt{attempts(pattern.id) > 1 ? "s" : ""}</span>
                 )}
                 {latest(pattern.id) !== null && (
                   <div className="flex items-center gap-0.5">
                     {[1,2,3,4,5].map((s) => (
-                      <Star key={s} size={10} className={s <= (latest(pattern.id) ?? 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                      <Star key={s} size={10} className={s <= (latest(pattern.id) ?? 0) ? "fill-amber-400 text-amber-900" : "text-gray-200"} />
                     ))}
                   </div>
                 )}
@@ -216,7 +216,7 @@ export default function QuickDrill() {
 
             <div className="bg-white px-5 pt-5 pb-4">
               {/* Pattern name */}
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Pattern</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Pattern</p>
               <h3 className="text-2xl font-extrabold text-gray-900 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {pattern.name}
               </h3>
@@ -245,7 +245,7 @@ export default function QuickDrill() {
                   <p className="text-sm font-semibold text-gray-700">
                     {expired ? "Time's up — see the answer below" : revealed ? "Answer revealed" : running ? "Recall the approach out loud…" : "Ready?"}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-600 mt-0.5">
                     {revealed ? "Rate how well you knew it" : "What is the key idea? Time & space complexity?"}
                   </p>
                 </div>
@@ -279,24 +279,24 @@ export default function QuickDrill() {
                     {/* Complexity row */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Time</p>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-0.5">Time</p>
                         <p className="text-sm font-bold text-gray-800 font-mono">{pattern.timeComplexity}</p>
                       </div>
                       <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Space</p>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-0.5">Space</p>
                         <p className="text-sm font-bold text-gray-800 font-mono">{pattern.spaceComplexity}</p>
                       </div>
                     </div>
 
                     {/* Meta note */}
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-amber-600 mb-0.5">Meta Note</p>
+                    <div className="bg-amber-100 border border-amber-200 rounded-xl p-3">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-amber-800 mb-0.5">Meta Note</p>
                       <p className="text-xs text-amber-800 leading-relaxed">{pattern.metaNote}</p>
                     </div>
 
                     {/* Problems (hidden until revealed) */}
                     <div className="bg-white border border-gray-200 rounded-xl p-3">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Practice Problems</p>
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Practice Problems</p>
                       <div className="flex flex-wrap gap-1.5">
                         {pattern.problems.map((p) => (
                           <span key={p} className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">{p}</span>
@@ -316,10 +316,10 @@ export default function QuickDrill() {
                               onClick={() => handleRate(star)}
                               className="transition-transform hover:scale-110"
                             >
-                              <Star size={24} className={`transition-colors ${star <= (hover || 0) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                              <Star size={24} className={`transition-colors ${star <= (hover || 0) ? "fill-amber-400 text-amber-900" : "text-gray-700"}`} />
                             </button>
                           ))}
-                          <span className="ml-2 text-xs text-gray-400">
+                          <span className="ml-2 text-xs text-gray-600">
                             {hover === 1 ? "Blank" : hover === 2 ? "Vague idea" : hover === 3 ? "Mostly right" : hover === 4 ? "Solid" : hover === 5 ? "Perfect recall" : "Rate yourself"}
                           </span>
                         </div>
@@ -327,13 +327,13 @@ export default function QuickDrill() {
                         <div className="flex items-center gap-2">
                           <div className="flex gap-0.5">
                             {[1,2,3,4,5].map((s) => (
-                              <Star key={s} size={18} className={s <= saved ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                              <Star key={s} size={18} className={s <= saved ? "fill-amber-400 text-amber-900" : "text-gray-200"} />
                             ))}
                           </div>
                           <span className="text-xs font-semibold text-indigo-700">
                             {saved === 1 ? "Blank" : saved === 2 ? "Vague idea" : saved === 3 ? "Mostly right" : saved === 4 ? "Solid" : "Perfect recall"} — logged!
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-600">
                             Next review in {saved !== null ? (saved <= 2 ? "1 day" : saved === 3 ? "3 days" : saved === 4 ? "7 days" : "14 days") : ""}
                           </span>
                         </div>
@@ -346,7 +346,7 @@ export default function QuickDrill() {
 
             {/* Footer */}
             <div className="flex items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-t border-gray-100">
-              <button onClick={() => { setActive(false); setDueMode(false); }} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              <button onClick={() => { setActive(false); setDueMode(false); }} className="text-xs text-gray-600 hover:text-gray-600 transition-colors">
                 Exit drill
               </button>
               <button

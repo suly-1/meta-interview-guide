@@ -46,7 +46,7 @@ const OUTCOME_CONFIG: Record<
     label: "Hire",
   },
   borderline: {
-    color: "text-amber-400",
+    color: "text-amber-900",
     bg: "bg-amber-500/10",
     border: "border-amber-500/30",
     label: "Borderline",
@@ -193,7 +193,7 @@ export function PostInterviewDebrief() {
                       ? s <= 2
                         ? "bg-red-500/20 text-red-300 border-red-500/40"
                         : s === 3
-                          ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                          ? "bg-amber-500/20 text-amber-800 border-amber-500/40"
                           : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
                       : "border-border text-muted-foreground hover:border-blue-500/40"
                   }`}

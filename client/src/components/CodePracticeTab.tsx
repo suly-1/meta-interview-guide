@@ -1001,7 +1001,7 @@ interface GameState {
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   Easy: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  Medium: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  Medium: "text-amber-900 bg-amber-500/10 border-amber-500/20",
   Hard: "text-red-400 bg-red-500/10 border-red-500/20",
 };
 
@@ -1010,7 +1010,7 @@ const TOPIC_COLORS: Record<Topic, string> = {
   Strings: "bg-purple-500/10 text-purple-400",
   "Linked Lists": "bg-cyan-500/10 text-cyan-400",
   Trees: "bg-green-500/10 text-green-400",
-  Graphs: "bg-orange-500/10 text-orange-400",
+  Graphs: "bg-orange-500/10 text-orange-900",
   DP: "bg-pink-500/10 text-pink-400",
   Backtracking: "bg-red-500/10 text-red-400",
   Sorting: "bg-indigo-500/10 text-indigo-400",
@@ -1019,7 +1019,7 @@ const TOPIC_COLORS: Record<Topic, string> = {
   Tries: "bg-lime-500/10 text-lime-400",
   "Sliding Window": "bg-violet-500/10 text-violet-400",
   "Two Pointers": "bg-sky-500/10 text-sky-400",
-  "Stack/Queue": "bg-amber-500/10 text-amber-400",
+  "Stack/Queue": "bg-amber-500/10 text-amber-900",
   Math: "bg-rose-500/10 text-rose-400",
   "Bit Manipulation": "bg-fuchsia-500/10 text-fuchsia-400",
 };
@@ -1247,14 +1247,14 @@ export default function CodePracticeTab() {
             label: "🏆 Tournament",
             desc: "10 random problems",
             color:
-              "text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20",
+              "text-amber-900 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20",
           },
           {
             mode: "blitz" as GameMode,
             label: "💥 Blitz",
             desc: "5 problems, 3 min each",
             color:
-              "text-orange-400 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20",
+              "text-orange-900 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20",
           },
           {
             mode: "chaos" as GameMode,
@@ -1477,7 +1477,7 @@ export default function CodePracticeTab() {
                       setShowHints(h => !h);
                       setHintIdx(0);
                     }}
-                    className="flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-amber-900 hover:text-amber-800 transition-colors"
                   >
                     <BookOpen size={11} />
                     {showHints ? "Hide hints" : "Show hint"}
@@ -1489,7 +1489,7 @@ export default function CodePracticeTab() {
                         .map((h, i) => (
                           <div
                             key={i}
-                            className="px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300"
+                            className="px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800"
                           >
                             💡 {h}
                           </div>
@@ -1497,7 +1497,7 @@ export default function CodePracticeTab() {
                       {hintIdx < selectedProblem.hints.length - 1 && (
                         <button
                           onClick={() => setHintIdx(i => i + 1)}
-                          className="text-xs text-amber-400/60 hover:text-amber-400 transition-colors text-left"
+                          className="text-xs text-amber-900/60 hover:text-amber-900 transition-colors text-left"
                         >
                           + Next hint
                         </button>

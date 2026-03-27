@@ -297,7 +297,7 @@ export function InterviewProgressTracker() {
               label="Current Streak"
               value={`${streak.currentStreak}d`}
               sub={`Best: ${streak.longestStreak}d`}
-              color="text-amber-400"
+              color="text-amber-900"
             />
             <StatCard
               icon={Target}
@@ -329,7 +329,7 @@ export function InterviewProgressTracker() {
                   ? "text-emerald-400"
                   : overallPct >= 40
                     ? "text-blue-400"
-                    : "text-amber-400"
+                    : "text-amber-900"
               }
             />
           </div>
@@ -524,7 +524,7 @@ export function InterviewProgressTracker() {
               {codingPct < 60 && (
                 <li>
                   • Coding readiness is at {codingPct}% — focus on your{" "}
-                  <span className="text-amber-400 font-medium">
+                  <span className="text-amber-900 font-medium">
                     weakest 3 patterns
                   </span>{" "}
                   first.
@@ -534,7 +534,7 @@ export function InterviewProgressTracker() {
                 <li>
                   • Behavioral readiness is at {behavioralPct}% — write STAR
                   stories for{" "}
-                  <span className="text-amber-400 font-medium">
+                  <span className="text-amber-900 font-medium">
                     Conflict & Influence
                   </span>{" "}
                   questions.

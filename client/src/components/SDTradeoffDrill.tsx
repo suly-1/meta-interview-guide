@@ -139,8 +139,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Data Storage": "bg-emerald-100 text-emerald-700 border-emerald-200",
   "Consistency": "bg-violet-100 text-violet-700 border-violet-200",
   "Real-time Systems": "bg-cyan-100 text-cyan-700 border-cyan-200",
-  "Caching": "bg-amber-100 text-amber-700 border-amber-200",
-  "Architecture": "bg-orange-100 text-orange-700 border-orange-200",
+  "Caching": "bg-amber-100 text-amber-900 border-amber-200",
+  "Architecture": "bg-orange-100 text-orange-900 border-orange-200",
   "Rate Limiting": "bg-rose-100 text-rose-700 border-rose-200",
   "Database Scaling": "bg-indigo-100 text-indigo-700 border-indigo-200",
   "CDN": "bg-teal-100 text-teal-700 border-teal-200",
@@ -148,7 +148,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   Foundational: "bg-gray-100 text-gray-600 border-gray-200",
-  Intermediate: "bg-amber-100 text-amber-700 border-amber-200",
+  Intermediate: "bg-amber-100 text-amber-900 border-amber-200",
   Advanced: "bg-red-100 text-red-700 border-red-200",
 };
 
@@ -159,7 +159,7 @@ function ScoreDimension({
 }) {
   const pct = Math.round((score / 5) * 100);
   const color = score >= 4 ? "bg-emerald-500" : score >= 3 ? "bg-blue-500" : score >= 2 ? "bg-amber-500" : "bg-red-500";
-  const textColor = score >= 4 ? "text-emerald-600" : score >= 3 ? "text-blue-600" : score >= 2 ? "text-amber-600" : "text-red-600";
+  const textColor = score >= 4 ? "text-emerald-600" : score >= 3 ? "text-blue-600" : score >= 2 ? "text-amber-800" : "text-red-600";
   return (
     <div className="space-y-1">
       <button onClick={onToggle} className="w-full flex items-center gap-3 group">
@@ -280,7 +280,7 @@ export default function SDTradeoffDrill() {
               className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-all ${
                 filterCategory === cat
                   ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                  : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
               }`}
             >
               {cat}
@@ -322,8 +322,8 @@ export default function SDTradeoffDrill() {
         </div>
         <p className="text-sm font-bold text-white">{current.decision}</p>
         <div className="rounded-lg bg-gray-800 p-2.5">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Context</p>
-          <p className="text-xs text-gray-300 leading-relaxed">{current.context}</p>
+          <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1">Context</p>
+          <p className="text-xs text-gray-700 leading-relaxed">{current.context}</p>
         </div>
       </div>
 
@@ -343,7 +343,7 @@ export default function SDTradeoffDrill() {
                 }`}
               >
                 <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-black text-[10px] ${
-                  selectedChoice === opt ? "border-violet-500 bg-violet-500 text-white" : "border-gray-300 text-gray-400"
+                  selectedChoice === opt ? "border-violet-500 bg-violet-500 text-white" : "border-gray-300 text-gray-600"
                 }`}>
                   {opt}
                 </span>
@@ -356,14 +356,14 @@ export default function SDTradeoffDrill() {
           {!showHint && (
             <button
               onClick={() => setShowHint(true)}
-              className="flex items-center gap-1.5 text-[10px] text-amber-600 font-semibold hover:text-amber-700 transition-colors"
+              className="flex items-center gap-1.5 text-[10px] text-amber-800 font-semibold hover:text-amber-900 transition-colors"
             >
               <Lightbulb size={11} /> Show hint
             </button>
           )}
           {showHint && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-start gap-2">
-              <Lightbulb size={12} className="text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="rounded-xl border border-amber-200 bg-amber-100 p-3 flex items-start gap-2">
+              <Lightbulb size={12} className="text-amber-800 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800">{current.hint}</p>
             </div>
           )}
@@ -408,7 +408,7 @@ export default function SDTradeoffDrill() {
 
           {/* Error */}
           {scoreMutation.isError && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
+            <div className="rounded-xl border border-red-200 bg-red-100 p-4 text-xs text-red-800">
               Failed to score. Please try again.
             </div>
           )}
@@ -419,7 +419,7 @@ export default function SDTradeoffDrill() {
               <div className={`rounded-xl border p-4 flex items-center justify-between ${
                 result.passesBar
                   ? "border-emerald-200 bg-emerald-50"
-                  : "border-red-200 bg-red-50"
+                  : "border-red-200 bg-red-100"
               }`}>
                 <div className="flex items-center gap-2">
                   {result.passesBar
@@ -458,7 +458,7 @@ export default function SDTradeoffDrill() {
               </div>
 
               {/* Biggest gap */}
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 flex items-start gap-2">
+              <div className="rounded-xl border border-red-200 bg-red-100 p-3 flex items-start gap-2">
                 <AlertTriangle size={13} className="text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[10px] font-bold text-red-700 uppercase tracking-wide mb-1">Biggest Gap</p>
@@ -510,7 +510,7 @@ export default function SDTradeoffDrill() {
             </div>
             <span className="text-xs font-bold text-violet-700">{passedCount}/{sessionResults.length}</span>
           </div>
-          <p className="text-[10px] text-gray-500 mt-1">
+          <p className="text-[10px] text-gray-700 mt-1">
             {passedCount / sessionResults.length >= 0.8
               ? "Strong trade-off articulation. Focus on the decisions you missed."
               : passedCount / sessionResults.length >= 0.5

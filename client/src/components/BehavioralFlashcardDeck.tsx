@@ -49,9 +49,9 @@ function getWordCount(text: string): number {
 
 function getWordCountColor(count: number): { color: string; label: string } {
   if (count < 100) return { color: "text-red-600", label: "Too short" };
-  if (count < 150) return { color: "text-amber-600", label: "Getting there" };
+  if (count < 150) return { color: "text-amber-800", label: "Getting there" };
   if (count <= 300) return { color: "text-emerald-600", label: "Good length" };
-  if (count <= 400) return { color: "text-amber-600", label: "A bit long" };
+  if (count <= 400) return { color: "text-amber-800", label: "A bit long" };
   return { color: "text-red-600", label: "Too long" };
 }
 
@@ -138,7 +138,7 @@ export default function BehavioralFlashcardDeck() {
           </div>
           <div>
             <h3 className="font-bold text-gray-900 text-base">Flashcard Flip Deck</h3>
-            <p className="text-sm text-gray-500">One question at a time — type your answer, then flip to see probes and L6/L7 examples</p>
+            <p className="text-sm text-gray-700">One question at a time — type your answer, then flip to see probes and L6/L7 examples</p>
           </div>
         </div>
 
@@ -188,10 +188,10 @@ export default function BehavioralFlashcardDeck() {
             style={{ width: `${((idx + 1) / deck.length) * 100}%` }}
           />
         </div>
-        <span className="text-xs font-semibold text-gray-500 flex-shrink-0">{idx + 1} / {deck.length}</span>
+        <span className="text-xs font-semibold text-gray-700 flex-shrink-0">{idx + 1} / {deck.length}</span>
         <button
           onClick={() => { setActive(false); setAnswer(""); }}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+          className="text-xs text-gray-600 hover:text-gray-600 transition-colors flex-shrink-0"
         >
           Exit
         </button>
@@ -213,12 +213,12 @@ export default function BehavioralFlashcardDeck() {
               <span className="text-xs font-bold uppercase tracking-wide" style={{ color: card.areaIconColor }}>
                 {card.areaTitle}
               </span>
-              <span className="text-xs text-gray-400">Card {idx + 1} of {deck.length}</span>
+              <span className="text-xs text-gray-600">Card {idx + 1} of {deck.length}</span>
             </div>
 
             {/* Question */}
             <div className="bg-white px-5 pt-5 pb-4">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Question</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Question</p>
               <p className="text-lg font-bold text-gray-900 leading-snug mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {card.question}
               </p>
@@ -237,7 +237,7 @@ export default function BehavioralFlashcardDeck() {
                     onChange={(e) => setAnswer(e.target.value)}
                     placeholder="Type your STAR answer here... Aim for 150–300 words."
                     rows={6}
-                    className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none leading-relaxed"
+                    className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none leading-relaxed"
                   />
                   {/* Word count progress bar */}
                   <div className="space-y-1">
@@ -249,7 +249,7 @@ export default function BehavioralFlashcardDeck() {
                       {/* Target zone markers */}
                       <div className="absolute top-0 h-full" style={{ left: "50%", width: "1px", background: "rgba(0,0,0,0.15)" }} />
                     </div>
-                    <div className="flex justify-between text-[10px] text-gray-400">
+                    <div className="flex justify-between text-[10px] text-gray-600">
                       <span>0</span>
                       <span className="text-emerald-600 font-semibold">150–300 words ideal</span>
                       <span>300+</span>
@@ -288,7 +288,7 @@ export default function BehavioralFlashcardDeck() {
                     <div className="mt-4 space-y-4">
                       {/* Follow-up probes */}
                       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Follow-up Probes</p>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-2">Follow-up Probes</p>
                         <ul className="space-y-1.5">
                           {card.probes.map((probe, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
@@ -356,7 +356,7 @@ export default function BehavioralFlashcardDeck() {
               </button>
               <button
                 onClick={() => { setAnswer(""); setFlipped(false); }}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-600 transition-colors"
                 title="Clear answer and reset card"
               >
                 <RotateCcw size={11} /> Reset

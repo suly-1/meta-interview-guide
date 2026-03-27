@@ -281,8 +281,8 @@ export default function AdminAccess() {
       {import.meta.env.VITE_STANDALONE === "true" && (
         <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-3">
           <div className="container max-w-2xl flex items-start gap-3">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-300">
+            <AlertTriangle className="w-4 h-4 text-amber-900 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-800">
               <span className="font-semibold">Read-only mode.</span> You are
               viewing the static build (metaguide.blog). Settings cannot be
               saved here — visit{" "}
@@ -342,7 +342,7 @@ export default function AdminAccess() {
         <Card className="border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
+              <Clock className="w-4 h-4 text-amber-900" />
               Auto-Lock Timer
             </CardTitle>
             <CardDescription>
@@ -401,7 +401,7 @@ export default function AdminAccess() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="text-xs gap-1.5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                className="text-xs gap-1.5 border-amber-500/30 text-amber-900 hover:bg-amber-500/10"
                 onClick={() => {
                   const today = new Date().toISOString().slice(0, 10);
                   setLockStartDate(today);
@@ -545,7 +545,7 @@ export default function AdminAccess() {
         <Card className="border-amber-500/30 bg-amber-500/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="w-4 h-4 text-amber-400" />
+              <Users className="w-4 h-4 text-amber-900" />
               Cohort Reset
             </CardTitle>
             <CardDescription>
@@ -558,7 +558,7 @@ export default function AdminAccess() {
             {!showCohortConfirm ? (
               <Button
                 variant="outline"
-                className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10 gap-2"
+                className="border-amber-500/40 text-amber-900 hover:bg-amber-500/10 gap-2"
                 onClick={() => setShowCohortConfirm(true)}
               >
                 <RefreshCw className="w-4 h-4" />
@@ -567,8 +567,8 @@ export default function AdminAccess() {
             ) : (
               <div className="space-y-3">
                 <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/30 p-3">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-300">
+                  <AlertTriangle className="w-4 h-4 text-amber-900 shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-800">
                     This will reset the 60-day clock to{" "}
                     <strong>{new Date().toLocaleDateString()}</strong> and clear
                     all disclaimer acknowledgments. Users will be prompted to

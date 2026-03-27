@@ -27,8 +27,8 @@ function getDailyFocus(daysLeft: number): string {
 }
 
 function getUrgencyStyle(daysLeft: number): { bg: string; text: string; badge: string; bar: string } {
-  if (daysLeft <= 3) return { bg: "bg-red-50 border-red-200", text: "text-red-900", badge: "bg-red-100 text-red-700 border-red-200", bar: "bg-red-500" };
-  if (daysLeft <= 14) return { bg: "bg-amber-50 border-amber-200", text: "text-amber-900", badge: "bg-amber-100 text-amber-700 border-amber-200", bar: "bg-amber-500" };
+  if (daysLeft <= 3) return { bg: "bg-red-100 border-red-200", text: "text-red-900", badge: "bg-red-100 text-red-700 border-red-200", bar: "bg-red-500" };
+  if (daysLeft <= 14) return { bg: "bg-amber-100 border-amber-200", text: "text-amber-900", badge: "bg-amber-100 text-amber-900 border-amber-200", bar: "bg-amber-500" };
   return { bg: "bg-emerald-50 border-emerald-200", text: "text-emerald-900", badge: "bg-emerald-100 text-emerald-700 border-emerald-200", bar: "bg-emerald-500" };
 }
 
@@ -96,14 +96,14 @@ export default function InterviewCountdown() {
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => setEditing(true)}
-            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1.5 text-gray-600 hover:text-gray-600 transition-colors"
             title="Change date"
           >
             <Settings size={13} />
           </button>
           <button
             onClick={() => setDismissed(true)}
-            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1.5 text-gray-600 hover:text-gray-600 transition-colors"
             title="Dismiss"
           >
             <X size={13} />

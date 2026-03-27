@@ -174,7 +174,7 @@ function ScoreDimension({
 }) {
   const pct = Math.round((score / 5) * 100);
   const color = score >= 4 ? "bg-emerald-500" : score >= 3 ? "bg-blue-500" : score >= 2 ? "bg-amber-500" : "bg-red-500";
-  const textColor = score >= 4 ? "text-emerald-600" : score >= 3 ? "text-blue-600" : score >= 2 ? "text-amber-600" : "text-red-600";
+  const textColor = score >= 4 ? "text-emerald-600" : score >= 3 ? "text-blue-600" : score >= 2 ? "text-amber-800" : "text-red-600";
   return (
     <div className="space-y-1">
       <button onClick={onToggle} className="w-full flex items-center gap-3 group">
@@ -287,9 +287,9 @@ export default function SDRequirementsTrainer() {
                   <div className="text-[10px] text-muted-foreground truncate">{p.tagline}</div>
                 </div>
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${
-                  p.difficulty === "Very Hard" ? "bg-red-50 text-red-700 border-red-200" :
-                  p.difficulty === "Hard" ? "bg-orange-50 text-orange-700 border-orange-200" :
-                  "bg-amber-50 text-amber-700 border-amber-200"
+                  p.difficulty === "Very Hard" ? "bg-red-100 text-red-700 border-red-200" :
+                  p.difficulty === "Hard" ? "bg-orange-100 text-orange-900 border-orange-200" :
+                  "bg-amber-100 text-amber-900 border-amber-200"
                 }`}>
                   {p.difficulty}
                 </span>
@@ -314,7 +314,7 @@ export default function SDRequirementsTrainer() {
       <div className="space-y-4">
         {/* Problem prompt */}
         <div className="rounded-xl border border-gray-800 bg-gray-950 p-4">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Interview Prompt</p>
+          <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-2">Interview Prompt</p>
           <p className="text-sm font-semibold text-white leading-relaxed">{selectedProblem.context}</p>
         </div>
 
@@ -329,7 +329,7 @@ export default function SDRequirementsTrainer() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <p className="text-xs font-bold text-foreground">Your Clarifying Questions</p>
-            <span className={`text-[10px] font-semibold ${wordCount >= 50 ? "text-emerald-600" : wordCount >= 20 ? "text-amber-600" : "text-gray-400"}`}>
+            <span className={`text-[10px] font-semibold ${wordCount >= 50 ? "text-emerald-600" : wordCount >= 20 ? "text-amber-800" : "text-gray-600"}`}>
               {wordCount} words
             </span>
           </div>
@@ -365,7 +365,7 @@ export default function SDRequirementsTrainer() {
     <div className="space-y-4">
       {/* Problem reminder */}
       <div className="rounded-xl border border-gray-800 bg-gray-950 p-3">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Problem</p>
+        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1">Problem</p>
         <p className="text-xs font-semibold text-white">{selectedProblem.title}</p>
       </div>
 
@@ -379,7 +379,7 @@ export default function SDRequirementsTrainer() {
 
       {/* Error */}
       {scoreMutation.isError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
+        <div className="rounded-xl border border-red-200 bg-red-100 p-4 text-xs text-red-800">
           Failed to score. Please try again.
         </div>
       )}
@@ -390,7 +390,7 @@ export default function SDRequirementsTrainer() {
           {/* IC Level verdict */}
           <div className="rounded-xl border border-gray-200 bg-white p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-500 font-semibold">Requirements Clarification Level</p>
+              <p className="text-xs text-gray-700 font-semibold">Requirements Clarification Level</p>
               <p className="text-sm font-extrabold text-gray-900 mt-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {result.overallCoaching.split(".")[0]}.
               </p>
@@ -421,7 +421,7 @@ export default function SDRequirementsTrainer() {
           </div>
 
           {/* Biggest missed question */}
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="rounded-xl border border-red-200 bg-red-100 p-4">
             <div className="flex items-start gap-2">
               <AlertTriangle size={13} className="text-red-600 flex-shrink-0 mt-0.5" />
               <div>
@@ -478,13 +478,13 @@ export default function SDRequirementsTrainer() {
           </div>
 
           {/* Common mistakes */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50 overflow-hidden">
+          <div className="rounded-xl border border-amber-200 bg-amber-100 overflow-hidden">
             <button
               onClick={() => setShowMistakes(s => !s)}
               className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <AlertTriangle size={12} className="text-amber-600" />
+                <AlertTriangle size={12} className="text-amber-800" />
                 Common Mistakes on This Problem
               </div>
               {showMistakes ? <ChevronUp size={12} /> : <ChevronDown size={12} />}

@@ -49,18 +49,18 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
   if (compact) {
     return (
       <div className="flex items-center gap-3 py-2">
-        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+        <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
           {dayNumber ? `Day ${dayNumber} helpful?` : "Was this plan helpful?"}
         </span>
         <button
           onClick={() => { setHelpful(true); setRating(5); submitMutation.mutate({ rating: 5, message: 'Helpful', dayFeedback: dayNumber ? [{ day: dayNumber, comment: 'Helpful' }] : undefined }); }}
-          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all border ${helpful === true ? "bg-emerald-100 text-emerald-700 border-emerald-300" : "bg-gray-50 text-gray-500 border-gray-200 hover:border-emerald-300 hover:text-emerald-600"}`}
+          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all border ${helpful === true ? "bg-emerald-100 text-emerald-700 border-emerald-300" : "bg-gray-50 text-gray-700 border-gray-200 hover:border-emerald-300 hover:text-emerald-600"}`}
         >
           <ThumbsUp size={12} /> Yes
         </button>
         <button
           onClick={() => { setHelpful(false); setExpanded(true); }}
-          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all border ${helpful === false ? "bg-red-100 text-red-700 border-red-300" : "bg-gray-50 text-gray-500 border-gray-200 hover:border-red-300 hover:text-red-600"}`}
+          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all border ${helpful === false ? "bg-red-100 text-red-700 border-red-300" : "bg-gray-50 text-gray-700 border-gray-200 hover:border-red-300 hover:text-red-600"}`}
         >
           <ThumbsDown size={12} /> No
         </button>
@@ -120,7 +120,7 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
           >
             {/* Star rating */}
             <div>
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Rating</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 block">Rating</label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -132,12 +132,12 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
                   >
                     <Star
                       size={22}
-                      className={`transition-colors ${star <= displayRating ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`}
+                      className={`transition-colors ${star <= displayRating ? "text-amber-900 fill-amber-400" : "text-gray-700 dark:text-gray-300"}`}
                     />
                   </button>
                 ))}
                 {rating > 0 && (
-                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 self-center">
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 self-center">
                     {["", "Poor", "Fair", "Good", "Great", "Excellent"][rating]}
                   </span>
                 )}
@@ -146,8 +146,8 @@ export default function SprintPlanFeedback({ dayNumber, compact = false }: Props
 
             {/* Suggestion */}
             <div>
-              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">
-                Suggestion <span className="font-normal normal-case text-gray-400">(optional)</span>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 block">
+                Suggestion <span className="font-normal normal-case text-gray-600">(optional)</span>
               </label>
               <textarea
                 value={suggestion}

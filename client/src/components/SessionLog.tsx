@@ -28,7 +28,7 @@ function SessionRow({ entry }: { entry: SessionEntry }) {
       <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 ${isCoding ? "bg-blue-100" : "bg-amber-100"}`}>
         {isCoding
           ? <Code2 size={13} className="text-blue-600" />
-          : <MessageSquare size={13} className="text-amber-600" />
+          : <MessageSquare size={13} className="text-amber-800" />
         }
       </div>
 
@@ -40,19 +40,19 @@ function SessionRow({ entry }: { entry: SessionEntry }) {
 
         {/* Meta row */}
         <div className="flex flex-wrap items-center gap-2 mt-0.5">
-          <span className="text-[11px] text-gray-400 flex items-center gap-1">
+          <span className="text-[11px] text-gray-600 flex items-center gap-1">
             <Clock size={10} /> {formatDuration(entry.durationSec)}
           </span>
           <span className="text-gray-200">·</span>
-          <span className="text-[11px] text-gray-400">{formatDate(entry.date)}</span>
+          <span className="text-[11px] text-gray-600">{formatDate(entry.date)}</span>
           {entry.rating != null && (
             <>
               <span className="text-gray-200">·</span>
               <span className="flex items-center gap-0.5">
                 {[1,2,3,4,5].map((s) => (
-                  <Star key={s} size={10} className={s <= (entry.rating ?? 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                  <Star key={s} size={10} className={s <= (entry.rating ?? 0) ? "fill-amber-400 text-amber-900" : "text-gray-200"} />
                 ))}
-                <span className="text-[11px] text-gray-500 ml-1">{RATING_LABELS[entry.rating ?? 0]}</span>
+                <span className="text-[11px] text-gray-700 ml-1">{RATING_LABELS[entry.rating ?? 0]}</span>
               </span>
             </>
           )}
@@ -74,11 +74,11 @@ export default function SessionLog() {
     return (
       <div className="flex items-center gap-4 p-5 bg-gray-50 border border-dashed border-gray-300 rounded-2xl">
         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-          <Clock size={18} className="text-gray-400" />
+          <Clock size={18} className="text-gray-600" />
         </div>
         <div>
           <p className="text-sm font-bold text-gray-600">No sessions recorded yet</p>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-600 mt-0.5">
             Start the <strong>Mock Interview Timer</strong> above and complete a session — it will appear here automatically.
           </p>
         </div>
@@ -103,15 +103,15 @@ export default function SessionLog() {
           <span className="font-bold text-blue-700">{codingCount}</span>
           <span className="text-blue-600">coding sessions</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 border border-amber-200 rounded-xl text-xs">
           <MessageSquare size={12} className="text-amber-500" />
-          <span className="font-bold text-amber-700">{behavioralCount}</span>
-          <span className="text-amber-600">behavioral sessions</span>
+          <span className="font-bold text-amber-900">{behavioralCount}</span>
+          <span className="text-amber-800">behavioral sessions</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-xs">
-          <Clock size={12} className="text-gray-500" />
+          <Clock size={12} className="text-gray-700" />
           <span className="font-bold text-gray-700">{totalMinutes} min</span>
-          <span className="text-gray-500">total practice time</span>
+          <span className="text-gray-700">total practice time</span>
         </div>
         {avgRating && (
           <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-xl text-xs">
@@ -130,15 +130,15 @@ export default function SessionLog() {
           </p>
           {confirmClear ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Clear all?</span>
+              <span className="text-xs text-gray-700">Clear all?</span>
               <button onClick={() => { clearLog(); setConfirmClear(false); }}
                 className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors">Yes, clear</button>
               <button onClick={() => setConfirmClear(false)}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Cancel</button>
+                className="text-xs text-gray-600 hover:text-gray-600 transition-colors">Cancel</button>
             </div>
           ) : (
             <button onClick={() => setConfirmClear(true)}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors">
+              className="flex items-center gap-1 text-xs text-gray-600 hover:text-red-500 transition-colors">
               <Trash2 size={11} /> Clear
             </button>
           )}

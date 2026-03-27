@@ -164,7 +164,7 @@ function getVerdictColor(verdict?: string): string {
   if (!verdict) return "text-muted-foreground";
   if (verdict === "pass" || verdict === "strong_hire" || verdict === "hire") return "text-emerald-400";
   if (verdict === "fail" || verdict === "no_hire") return "text-red-400";
-  return "text-amber-400";
+  return "text-amber-900";
 }
 
 function getVerdictIcon(verdict?: string) {
@@ -173,13 +173,13 @@ function getVerdictIcon(verdict?: string) {
     return <CheckCircle size={12} className="text-emerald-400" />;
   if (verdict === "fail" || verdict === "no_hire")
     return <XCircle size={12} className="text-red-400" />;
-  return <AlertCircle size={12} className="text-amber-400" />;
+  return <AlertCircle size={12} className="text-amber-900" />;
 }
 
 const TYPE_COLORS: Record<string, string> = {
   verdict: "bg-blue-500/10 border-blue-500/30 text-blue-400",
   replay: "bg-purple-500/10 border-purple-500/30 text-purple-400",
-  debug: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+  debug: "bg-amber-500/10 border-amber-500/30 text-amber-900",
   "weak-signal": "bg-red-500/10 border-red-500/30 text-red-400",
 };
 
@@ -355,7 +355,7 @@ export default function CandidateReportArchive() {
             <div className="text-[10px] text-muted-foreground">Verdicts Run</div>
           </div>
           <div className="rounded-lg bg-secondary/30 border border-border p-3 text-center">
-            <div className={`text-lg font-black ${avgScore !== null ? (avgScore >= 70 ? "text-emerald-400" : avgScore >= 50 ? "text-amber-400" : "text-red-400") : "text-muted-foreground"}`}>
+            <div className={`text-lg font-black ${avgScore !== null ? (avgScore >= 70 ? "text-emerald-400" : avgScore >= 50 ? "text-amber-900" : "text-red-400") : "text-muted-foreground"}`}>
               {avgScore !== null ? `${avgScore}` : "—"}
             </div>
             <div className="text-[10px] text-muted-foreground">Avg Score</div>
@@ -422,7 +422,7 @@ export default function CandidateReportArchive() {
                 <div className="flex items-center gap-2 shrink-0">
                   {getVerdictIcon(entry.verdict)}
                   {entry.score !== undefined && (
-                    <span className={`text-xs font-bold ${entry.score >= 70 ? "text-emerald-400" : entry.score >= 50 ? "text-amber-400" : "text-red-400"}`}>
+                    <span className={`text-xs font-bold ${entry.score >= 70 ? "text-emerald-400" : entry.score >= 50 ? "text-amber-900" : "text-red-400"}`}>
                       {entry.score}
                     </span>
                   )}
@@ -470,7 +470,7 @@ export default function CandidateReportArchive() {
                           </div>
                         ))}
                         {(entry.raw as WeakSignalAnalysis).priorityAction && (
-                          <div className="text-[10px] text-amber-300">
+                          <div className="text-[10px] text-amber-800">
                             → {(entry.raw as WeakSignalAnalysis).priorityAction}
                           </div>
                         )}

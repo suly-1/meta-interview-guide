@@ -54,8 +54,8 @@ const CRITERIA = [
 const VERDICTS = [
   { min: 7, label: "Strong Hire", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-300", emoji: "🟢" },
   { min: 5, label: "Hire", color: "text-blue-700", bg: "bg-blue-50 border-blue-300", emoji: "🔵" },
-  { min: 3, label: "Lean Hire", color: "text-amber-700", bg: "bg-amber-50 border-amber-300", emoji: "🟡" },
-  { min: 0, label: "No Hire", color: "text-red-700", bg: "bg-red-50 border-red-300", emoji: "🔴" },
+  { min: 3, label: "Lean Hire", color: "text-amber-900", bg: "bg-amber-100 border-amber-300", emoji: "🟡" },
+  { min: 0, label: "No Hire", color: "text-red-700", bg: "bg-red-100 border-red-300", emoji: "🔴" },
 ];
 
 export default function InterviewScorecard() {
@@ -90,7 +90,7 @@ export default function InterviewScorecard() {
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Interview Scorecard
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">7-criterion self-assessment · Check what you did in your last session</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">7-criterion self-assessment · Check what you did in your last session</p>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default function InterviewScorecard() {
             style={{ width: `${(score / 7) * 100}%` }}
           />
         </div>
-        <span className="text-sm font-bold text-gray-700 dark:text-gray-300 tabular-nums w-12 text-right">{score}/7</span>
+        <span className="text-sm font-bold text-gray-700 dark:text-gray-200 tabular-nums w-12 text-right">{score}/7</span>
       </div>
 
       {/* Criteria */}
@@ -123,12 +123,12 @@ export default function InterviewScorecard() {
             >
               {isChecked
                 ? <CheckSquare size={18} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                : <Square size={18} className="text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />}
+                : <Square size={18} className="text-gray-700 dark:text-gray-300 flex-shrink-0 mt-0.5" />}
               <div>
                 <p className={`text-sm font-semibold ${isChecked ? "text-emerald-800 dark:text-emerald-300" : "text-gray-800 dark:text-gray-200"}`}>
                   {c.label}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{c.description}</p>
+                <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5 leading-relaxed">{c.description}</p>
               </div>
             </button>
           );
@@ -139,13 +139,13 @@ export default function InterviewScorecard() {
       <div className={`rounded-xl border p-4 mb-4 ${verdict.bg}`}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Verdict</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-700 mb-1">Verdict</p>
             <p className={`text-2xl font-bold ${verdict.color}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {verdict.emoji} {verdict.label}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Score</p>
+            <p className="text-xs text-gray-700">Score</p>
             <p className={`text-3xl font-bold tabular-nums ${verdict.color}`}>{score}/7</p>
           </div>
         </div>
@@ -162,7 +162,7 @@ export default function InterviewScorecard() {
 
       <button
         onClick={reset}
-        className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+        className="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
       >
         <RotateCcw size={14} /> Reset Scorecard
       </button>

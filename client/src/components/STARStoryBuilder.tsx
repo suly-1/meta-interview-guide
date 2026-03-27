@@ -58,9 +58,9 @@ function StoryCard({ story, onDelete }: { story: STARStory; onDelete: () => void
         <div className="flex items-center gap-2">
           <BookOpen size={14} className="text-indigo-500 flex-shrink-0" />
           <span className="text-sm font-semibold text-gray-800">{story.title || "Untitled Story"}</span>
-          <span className="text-[10px] text-gray-400">{new Date(story.updatedAt).toLocaleDateString()}</span>
+          <span className="text-[10px] text-gray-600">{new Date(story.updatedAt).toLocaleDateString()}</span>
         </div>
-        {open ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+        {open ? <ChevronUp size={14} className="text-gray-600" /> : <ChevronDown size={14} className="text-gray-600" />}
       </button>
 
       {open && (
@@ -85,7 +85,7 @@ function StoryCard({ story, onDelete }: { story: STARStory; onDelete: () => void
 
           {preview ? (
             <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Interviewer View — Labels Hidden</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600">Interviewer View — Labels Hidden</p>
               <p className="text-sm text-gray-800 leading-relaxed">{story.situation}</p>
               <p className="text-sm text-gray-800 leading-relaxed">{story.task}</p>
               <p className="text-sm text-gray-800 leading-relaxed">{story.action}</p>
@@ -95,7 +95,7 @@ function StoryCard({ story, onDelete }: { story: STARStory; onDelete: () => void
             FIELDS.map(f => (
               <div key={f.key}>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 mb-1">{f.label}</p>
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{story[f.key] || <span className="text-gray-300 italic">Empty</span>}</p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{story[f.key] || <span className="text-gray-700 italic">Empty</span>}</p>
               </div>
             ))
           )}
@@ -144,7 +144,7 @@ export default function STARStoryBuilder() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-gray-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>STAR Story Bank</h3>
-          <p className="text-xs text-gray-500">{stories.length} stor{stories.length !== 1 ? "ies" : "y"} saved</p>
+          <p className="text-xs text-gray-700">{stories.length} stor{stories.length !== 1 ? "ies" : "y"} saved</p>
         </div>
         {!creating && (
           <button
@@ -178,7 +178,7 @@ export default function STARStoryBuilder() {
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-bold text-indigo-700">{f.label}</label>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-400">{f.hint}</span>
+                    <span className="text-[10px] text-gray-600">{f.hint}</span>
                     <CharCount value={form[f.key]} target={f.target} />
                   </div>
                 </div>
@@ -209,7 +209,7 @@ export default function STARStoryBuilder() {
           ))}
         </div>
       ) : !creating ? (
-        <div className="text-center py-8 text-gray-400 border border-dashed border-gray-200 rounded-xl">
+        <div className="text-center py-8 text-gray-600 border border-dashed border-gray-200 rounded-xl">
           <BookOpen size={24} className="mx-auto mb-2 text-gray-200" />
           <p className="text-sm">No stories yet. Click "New Story" to build your first STAR narrative.</p>
         </div>

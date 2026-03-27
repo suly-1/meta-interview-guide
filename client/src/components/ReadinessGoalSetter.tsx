@@ -163,13 +163,13 @@ export default function ReadinessGoalSetter() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setEditing(true)}
-              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-xs text-gray-600 hover:text-gray-600 dark:hover:text-gray-700 transition-colors"
             >
               Edit
             </button>
             <button
               onClick={handleDelete}
-              className="text-xs text-gray-400 hover:text-red-400 transition-colors"
+              className="text-xs text-gray-600 hover:text-red-400 transition-colors"
             >
               <Trash2 size={13} />
             </button>
@@ -180,19 +180,19 @@ export default function ReadinessGoalSetter() {
       {/* Goal form */}
       {editing && (
         <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             Set a target readiness score and interview date to get a personalized daily task plan.
           </p>
 
           {/* Current score context */}
-          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
             <span>Your current readiness score:</span>
             <span className="font-bold text-gray-800 dark:text-gray-200">{currentScore}/100</span>
           </div>
 
           {/* Target score slider */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">
               Target Readiness Score: <span className="text-rose-600 dark:text-rose-400 font-black">{draftScore}%</span>
             </label>
             <input
@@ -203,7 +203,7 @@ export default function ReadinessGoalSetter() {
               onChange={e => setDraftScore(Number(e.target.value))}
               className="w-full accent-rose-500"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+            <div className="flex justify-between text-[10px] text-gray-600 mt-1">
               <span>Current: {currentScore}%</span>
               <span>Target: {draftScore}%</span>
               <span>Max: 100%</span>
@@ -212,7 +212,7 @@ export default function ReadinessGoalSetter() {
 
           {/* L6+ target */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">
               Target L6+ Signal %: <span className="text-blue-600 dark:text-blue-400 font-black">{draftIC6PlusPct}%</span>
             </label>
             <input
@@ -224,17 +224,17 @@ export default function ReadinessGoalSetter() {
               onChange={e => setDraftIC6PlusPct(Number(e.target.value))}
               className="w-full accent-blue-500"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+            <div className="flex justify-between text-[10px] text-gray-600 mt-1">
               <span>10% (L4 heavy)</span>
               <span className="font-bold text-blue-600">{draftIC6PlusPct}% target</span>
               <span>100% (all L6+)</span>
             </div>
-            <p className="text-[10px] text-gray-400 mt-1">This goal line appears on the IC Signal Trend chart in the System Design section.</p>
+            <p className="text-[10px] text-gray-600 mt-1">This goal line appears on the IC Signal Trend chart in the System Design section.</p>
           </div>
 
           {/* Target date */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
               <Calendar size={12} className="inline mr-1" />
               Interview Date
             </label>
@@ -258,7 +258,7 @@ export default function ReadinessGoalSetter() {
             {goal && (
               <button
                 onClick={() => setEditing(false)}
-                className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 font-semibold rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-semibold rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>
@@ -278,11 +278,11 @@ export default function ReadinessGoalSetter() {
               </div>
               <div className="text-xs text-rose-600/70 dark:text-rose-400/70 font-medium">days left</div>
             </div>
-            <div className="text-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
-              <div className="text-2xl font-black text-amber-600 dark:text-amber-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <div className="text-center p-3 bg-amber-100 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
+              <div className="text-2xl font-black text-amber-800 dark:text-amber-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {pointsNeeded}
               </div>
-              <div className="text-xs text-amber-600/70 dark:text-amber-400/70 font-medium">pts needed</div>
+              <div className="text-xs text-amber-800/70 dark:text-amber-900/70 font-medium">pts needed</div>
             </div>
             <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
               <div className="text-2xl font-black text-blue-600 dark:text-blue-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -295,7 +295,7 @@ export default function ReadinessGoalSetter() {
           {/* Progress bar */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Progress to goal</span>
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Progress to goal</span>
               <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{currentScore}% → {goal.targetScore}%</span>
             </div>
             <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
@@ -308,18 +308,18 @@ export default function ReadinessGoalSetter() {
                 style={{ width: `${progressToGoal}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+            <div className="flex justify-between text-[10px] text-gray-600 mt-1">
               <span>0%</span>
-              <span className="font-semibold text-gray-600 dark:text-gray-400">{progressToGoal}% of goal reached</span>
+              <span className="font-semibold text-gray-600 dark:text-gray-300">{progressToGoal}% of goal reached</span>
               <span>{goal.targetScore}%</span>
             </div>
           </div>
 
           {/* Interview date */}
           <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
-            daysLeft <= 3 ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300" :
-            daysLeft <= 7 ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300" :
-            "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400"
+            daysLeft <= 3 ? "bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300" :
+            daysLeft <= 7 ? "bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-800" :
+            "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300"
           }`}>
             <Calendar size={14} className="flex-shrink-0" />
             <span>
@@ -338,7 +338,7 @@ export default function ReadinessGoalSetter() {
               {dailyTasks.map((task, i) => (
                 <div key={i} className="flex items-start gap-2.5 p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <ChevronRight size={14} className="text-rose-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{task}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">{task}</span>
                 </div>
               ))}
             </div>

@@ -888,7 +888,7 @@ export default function DebuggingDrillTab() {
                 Meta Phase 1
               </Badge>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               20 pre-built buggy codebases drawn from real Meta Phase 1 reports. 8 minutes per
               challenge. Find and fix the bug before time runs out.
             </p>
@@ -899,16 +899,16 @@ export default function DebuggingDrillTab() {
         {stats.totalAttempted > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: <Target size={14} />, label: "Hit Rate", value: `${hitRate}%`, color: hitRate >= 70 ? "text-emerald-600" : hitRate >= 40 ? "text-amber-600" : "text-red-600" },
+              { icon: <Target size={14} />, label: "Hit Rate", value: `${hitRate}%`, color: hitRate >= 70 ? "text-emerald-600" : hitRate >= 40 ? "text-amber-800" : "text-red-600" },
               { icon: <CheckCircle2 size={14} />, label: "Solved", value: `${stats.totalSolved}/${stats.totalAttempted}`, color: "text-blue-600" },
               { icon: <Clock size={14} />, label: "Avg Time", value: `${Math.floor(stats.avgTimeSeconds / 60)}m ${stats.avgTimeSeconds % 60}s`, color: "text-gray-600" },
-              { icon: <Zap size={14} />, label: "Hint Rate", value: `${stats.hintRate}%`, color: stats.hintRate <= 30 ? "text-emerald-600" : "text-amber-600" },
+              { icon: <Zap size={14} />, label: "Hint Rate", value: `${stats.hintRate}%`, color: stats.hintRate <= 30 ? "text-emerald-600" : "text-amber-800" },
             ].map((s) => (
               <div key={s.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 flex items-center gap-2">
                 <span className={cn("flex-shrink-0", s.color)}>{s.icon}</span>
                 <div>
                   <div className={cn("text-lg font-bold leading-tight", s.color)}>{s.value}</div>
-                  <div className="text-xs text-gray-400">{s.label}</div>
+                  <div className="text-xs text-gray-600">{s.label}</div>
                 </div>
               </div>
             ))}
@@ -925,7 +925,7 @@ export default function DebuggingDrillTab() {
                 "px-3 py-1.5 rounded-full text-xs font-semibold transition-all",
                 filter === f
                   ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
               )}
             >
               {f}
@@ -957,7 +957,7 @@ export default function DebuggingDrillTab() {
                     ) : attempt ? (
                       <XCircle size={18} className="text-red-400" />
                     ) : (
-                      <Circle size={18} className="text-gray-300" />
+                      <Circle size={18} className="text-gray-700" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -970,7 +970,7 @@ export default function DebuggingDrillTab() {
                         className={cn(
                           "text-xs",
                           c.difficulty === "Easy" && "border-emerald-200 text-emerald-600",
-                          c.difficulty === "Medium" && "border-amber-200 text-amber-600",
+                          c.difficulty === "Medium" && "border-amber-200 text-amber-800",
                           c.difficulty === "Hard" && "border-red-200 text-red-600"
                         )}
                       >
@@ -980,20 +980,20 @@ export default function DebuggingDrillTab() {
                         {c.bugType}
                       </Badge>
                       {attempt && (
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-600">
                           {Math.floor(attempt.timeSeconds / 60)}m {attempt.timeSeconds % 60}s
                           {attempt.hintsUsed > 0 && ` · ${attempt.hintsUsed} hint`}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
+                    <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5 line-clamp-1">
                       {c.description}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                      className="p-1.5 rounded-lg text-gray-600 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                     >
                       {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                     </button>
@@ -1008,7 +1008,7 @@ export default function DebuggingDrillTab() {
                 </div>
                 {isExpanded && (
                   <div className="px-4 pb-4 pt-0 border-t border-gray-50 dark:border-gray-700">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-3">{c.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-200 mt-3">{c.description}</p>
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 italic">
                       Meta context: {c.metaContext}
                     </p>
@@ -1037,7 +1037,7 @@ export default function DebuggingDrillTab() {
                 className={cn(
                   "text-xs",
                   challenge.difficulty === "Easy" && "border-emerald-200 text-emerald-600",
-                  challenge.difficulty === "Medium" && "border-amber-200 text-amber-600",
+                  challenge.difficulty === "Medium" && "border-amber-200 text-amber-800",
                   challenge.difficulty === "Hard" && "border-red-200 text-red-600"
                 )}
               >
@@ -1047,13 +1047,13 @@ export default function DebuggingDrillTab() {
                 {challenge.bugType}
               </Badge>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{challenge.description}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5">{challenge.description}</p>
           </div>
           <div className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-xl font-mono font-bold text-lg transition-all",
             timer.urgent
-              ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
-              : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+              ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+              : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
           )}>
             <Timer size={16} />
             {timer.display}
@@ -1081,7 +1081,7 @@ export default function DebuggingDrillTab() {
               <div className="w-3 h-3 rounded-full bg-yellow-400" />
               <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
-            <span className="text-xs text-gray-400 font-mono">solution.py</span>
+            <span className="text-xs text-gray-600 font-mono">solution.py</span>
           </div>
           <Editor
             height="320px"
@@ -1114,12 +1114,12 @@ export default function DebuggingDrillTab() {
         )}
 
         {showHint && !showSolution && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+          <div className="bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
-              <AlertCircle size={14} className="text-amber-600" />
-              <span className="font-semibold text-amber-700 dark:text-amber-300 text-sm">Hint</span>
+              <AlertCircle size={14} className="text-amber-800" />
+              <span className="font-semibold text-amber-900 dark:text-amber-800 text-sm">Hint</span>
             </div>
-            <p className="text-sm text-amber-800 dark:text-amber-200">{challenge.hint}</p>
+            <p className="text-sm text-amber-800 dark:text-amber-100">{challenge.hint}</p>
           </div>
         )}
 
@@ -1139,7 +1139,7 @@ export default function DebuggingDrillTab() {
                 setShowSolution(true);
                 timer.pause();
               }}
-              className="gap-1.5 text-gray-500"
+              className="gap-1.5 text-gray-700"
             >
               <EyeOff size={14} />
               Show Solution
@@ -1150,7 +1150,7 @@ export default function DebuggingDrillTab() {
             variant="outline"
             size="sm"
             onClick={() => handleSubmit(false)}
-            className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
+            className="gap-1.5 border-red-200 text-red-600 hover:bg-red-100"
           >
             <XCircle size={14} />
             Give Up
@@ -1169,7 +1169,7 @@ export default function DebuggingDrillTab() {
           variant="ghost"
           size="sm"
           onClick={() => { timer.pause(); setPhase("select"); }}
-          className="text-gray-400 text-xs"
+          className="text-gray-600 text-xs"
         >
           ← Back to list
         </Button>
@@ -1190,7 +1190,7 @@ export default function DebuggingDrillTab() {
         "rounded-2xl p-8 text-center border",
         solved
           ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-          : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+          : "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800"
       )}>
         <div className={cn(
           "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4",
@@ -1206,14 +1206,14 @@ export default function DebuggingDrillTab() {
         )}>
           {solved ? "Bug Fixed!" : "Not This Time"}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
           {solved
             ? `Solved in ${Math.floor(elapsed / 60)}m ${elapsed % 60}s${hintsUsed > 0 ? ` with ${hintsUsed} hint` : " without hints"}`
             : "Review the explanation and try again — the pattern will stick."}
         </p>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 text-left border border-gray-100 dark:border-gray-700 mb-4">
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Explanation</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{challenge.explanation}</p>
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Explanation</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{challenge.explanation}</p>
         </div>
         <div className="flex gap-2 justify-center flex-wrap">
           <Button
@@ -1267,19 +1267,19 @@ export default function DebuggingDrillTab() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={14} className="text-blue-500" />
-            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Your Progress</span>
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Your Progress</span>
           </div>
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-sm text-gray-500">Hit Rate</span>
+            <span className="text-sm text-gray-700">Hit Rate</span>
             <Progress value={hitRate} className="flex-1 h-2" />
             <span className={cn(
               "text-sm font-bold",
-              hitRate >= 70 ? "text-emerald-600" : hitRate >= 40 ? "text-amber-600" : "text-red-500"
+              hitRate >= 70 ? "text-emerald-600" : hitRate >= 40 ? "text-amber-800" : "text-red-500"
             )}>
               {hitRate}%
             </span>
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-600">
             {stats.totalSolved} solved out of {stats.totalAttempted} attempted ·{" "}
             {stats.hintRate}% used hints
           </p>

@@ -214,8 +214,8 @@ export default function SDMetaBlogReader() {
       {/* Filters */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <Filter size={12} className="text-gray-400" />
-          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Priority:</span>
+          <Filter size={12} className="text-gray-600" />
+          <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wide">Priority:</span>
           {[1, 2, 3].map(r => (
             <button
               key={r}
@@ -223,7 +223,7 @@ export default function SDMetaBlogReader() {
               className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
                 r === minRelevance
                   ? RELEVANCE_COLORS[r]
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                  : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
               }`}
             >
               {r === 1 ? "All" : r === 2 ? "High+ only" : "Must-Read only"}
@@ -238,14 +238,14 @@ export default function SDMetaBlogReader() {
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
                 tag === selectedTag
                   ? "bg-teal-600 text-white border-teal-600"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-teal-300"
+                  : "bg-white text-gray-700 border-gray-200 hover:border-teal-300"
               }`}
             >
               {tag}
             </button>
           ))}
         </div>
-        <p className="text-[11px] text-gray-500">{filtered.length} paper{filtered.length !== 1 ? "s" : ""}</p>
+        <p className="text-[11px] text-gray-700">{filtered.length} paper{filtered.length !== 1 ? "s" : ""}</p>
       </div>
 
       {/* Posts */}
@@ -262,20 +262,20 @@ export default function SDMetaBlogReader() {
                     <Star size={9} fill={post.relevanceScore === 3 ? "currentColor" : "none"} />
                     {RELEVANCE_LABELS[post.relevanceScore]}
                   </span>
-                  <span className="text-[10px] text-gray-400">{post.year}</span>
+                  <span className="text-[10px] text-gray-600">{post.year}</span>
                   {post.tags.slice(0, 2).map(tag => (
                     <span key={tag} className="text-[10px] text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded-full">{tag}</span>
                   ))}
                 </div>
                 <p className="text-sm font-semibold text-gray-900">{post.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">System Design Topic: {post.systemDesignTopic}</p>
+                <p className="text-xs text-gray-700 mt-0.5">System Design Topic: {post.systemDesignTopic}</p>
               </div>
               <a
                 href={post.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+                className="flex-shrink-0 p-1.5 rounded-lg text-gray-600 hover:text-teal-600 hover:bg-teal-50 transition-colors"
                 title="Open original paper"
               >
                 <ExternalLink size={13} />
@@ -285,11 +285,11 @@ export default function SDMetaBlogReader() {
             {expandedIdx === idx && (
               <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50/50">
                 <div className="rounded-lg border border-gray-200 bg-white p-3">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">What to Extract</p>
+                  <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wide mb-1">What to Extract</p>
                   <p className="text-xs text-gray-800 leading-relaxed">{post.whatToExtract}</p>
                 </div>
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-                  <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">Key Insight for the Interview</p>
+                <div className="rounded-lg border border-amber-200 bg-amber-100 p-3">
+                  <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wide mb-1">Key Insight for the Interview</p>
                   <p className="text-xs text-amber-900 leading-relaxed font-medium">{post.keyInsight}</p>
                 </div>
                 <a

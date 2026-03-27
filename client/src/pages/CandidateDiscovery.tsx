@@ -45,7 +45,7 @@ export default function CandidateDiscovery() {
       >
         {/* Badge */}
         <div className="flex justify-center mb-8">
-          <span className="flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-white/60">
+          <span className="flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-white/90">
             <Globe size={12} />
             Publicly Available Community Resource
           </span>
@@ -61,7 +61,7 @@ export default function CandidateDiscovery() {
           <span className="text-[#4d9fff]">On Your Own.</span>
         </h1>
 
-        <p className="text-center text-white/60 text-base md:text-lg mb-10 leading-relaxed max-w-xl mx-auto">
+        <p className="text-center text-white/90 text-base md:text-lg mb-10 leading-relaxed max-w-xl mx-auto">
           This is a free, community-sourced study resource for software engineering interviews.
           It is publicly available on the internet and was not distributed to you by any company employee
           as official preparation material.
@@ -81,7 +81,7 @@ export default function CandidateDiscovery() {
               desc: "Synthesized from 200+ publicly available candidate reports, forums, YouTube channels, and published books.",
             },
             {
-              icon: <BookOpen size={22} className="text-amber-400" />,
+              icon: <BookOpen size={22} className="text-amber-900" />,
               title: "General SWE Prep",
               desc: "Covers Staff Engineer interview patterns applicable to FAANG-style interviews — not proprietary to any one company.",
             },
@@ -94,16 +94,16 @@ export default function CandidateDiscovery() {
               <p className="font-bold text-white text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {p.title}
               </p>
-              <p className="text-white/50 text-xs leading-relaxed">{p.desc}</p>
+              <p className="text-white/85 text-xs leading-relaxed">{p.desc}</p>
             </div>
           ))}
         </div>
 
         {/* Official prep reminder */}
         <div className="rounded-xl border border-amber-700/40 bg-amber-900/20 p-4 mb-8 flex flex-col sm:flex-row sm:items-start gap-3">
-          <span className="text-amber-400 text-lg flex-shrink-0">⚠</span>
+          <span className="text-amber-900 text-lg flex-shrink-0">⚠</span>
           <div>
-            <p className="text-amber-300 text-sm font-bold mb-1">Always refer to official preparation materials first.</p>
+            <p className="text-amber-800 text-sm font-bold mb-1">Always refer to official preparation materials first.</p>
             <p className="text-amber-200/70 text-xs leading-relaxed mb-2">
               If a recruiter or hiring manager has shared official prep resources with you, those take priority.
               This guide is a supplement — not a replacement.

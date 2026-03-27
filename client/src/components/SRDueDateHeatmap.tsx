@@ -68,7 +68,7 @@ export default function SRDueDateHeatmap() {
   }
 
   function textColor(count: number): string {
-    if (count === 0) return "text-gray-400";
+    if (count === 0) return "text-gray-600";
     const intensity = Math.min(count / maxCount, 1);
     return intensity >= 0.5 ? "text-white" : "text-emerald-900";
   }

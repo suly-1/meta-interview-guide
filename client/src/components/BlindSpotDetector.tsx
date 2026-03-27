@@ -70,7 +70,7 @@ export default function BlindSpotDetector({ onStartDrill }: { onStartDrill?: (pa
         <div className={`flex items-center gap-2 mb-2`}>
           <Icon size={14} className={color} />
           <span className={`text-xs font-bold uppercase tracking-widest ${color}`}>{title}</span>
-          <span className="text-xs text-gray-400">({items.length})</span>
+          <span className="text-xs text-gray-600">({items.length})</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {items.map(s => (
@@ -81,8 +81,8 @@ export default function BlindSpotDetector({ onStartDrill }: { onStartDrill?: (pa
               title={s.avg !== null ? `Avg: ${s.avg.toFixed(1)}★ over ${s.attempts} attempts` : "Never drilled"}
             >
               {s.patternName}
-              {s.avg !== null && <span className="text-gray-400 group-hover:text-blue-500">{s.avg.toFixed(1)}★</span>}
-              <Zap size={10} className="text-gray-300 group-hover:text-blue-500" />
+              {s.avg !== null && <span className="text-gray-600 group-hover:text-blue-500">{s.avg.toFixed(1)}★</span>}
+              <Zap size={10} className="text-gray-700 group-hover:text-blue-500" />
             </button>
           ))}
         </div>
@@ -91,22 +91,22 @@ export default function BlindSpotDetector({ onStartDrill }: { onStartDrill?: (pa
   };
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-4">
+    <div className="bg-amber-100 border border-amber-200 rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <AlertTriangle size={16} className="text-amber-600" />
+          <AlertTriangle size={16} className="text-amber-800" />
           <span className="text-sm font-bold text-amber-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Blind Spot Report
           </span>
         </div>
-        <span className="text-xs text-amber-600 font-medium">{totalSessions} total drill sessions</span>
+        <span className="text-xs text-amber-800 font-medium">{totalSessions} total drill sessions</span>
       </div>
-      <p className="text-xs text-amber-700">
+      <p className="text-xs text-amber-900">
         {blindSpots.length} pattern{blindSpots.length !== 1 ? "s" : ""} need attention. Click any to start a focused drill.
       </p>
       <Section title="Never drilled" icon={EyeOff} items={neverDrilled} color="text-red-600" />
-      <Section title="Consistently weak (avg &lt; 2.5★)" icon={TrendingDown} items={weak} color="text-orange-600" />
-      <Section title="Only drilled once" icon={AlertTriangle} items={rare} color="text-amber-600" />
+      <Section title="Consistently weak (avg &lt; 2.5★)" icon={TrendingDown} items={weak} color="text-orange-800" />
+      <Section title="Only drilled once" icon={AlertTriangle} items={rare} color="text-amber-800" />
     </div>
   );
 }

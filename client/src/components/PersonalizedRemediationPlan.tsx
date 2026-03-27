@@ -57,7 +57,7 @@ function RatingBar({ rating, count }: { rating: number; count: number }) {
       <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-[10px] font-bold text-gray-500 w-12 text-right">
+      <span className="text-[10px] font-bold text-gray-700 w-12 text-right">
         {count === 0 ? "Unrated" : `${rating.toFixed(1)}/5`}
       </span>
     </div>
@@ -111,7 +111,7 @@ export default function PersonalizedRemediationPlan() {
         <div className="flex items-center justify-between mb-3">
           <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200">Your Pattern Weakness Snapshot</h4>
           {!hasEnoughData && (
-            <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-1 text-[10px] text-amber-800 dark:text-amber-900">
               <AlertCircle size={11} />
               Complete drills to personalize
             </div>
@@ -121,7 +121,7 @@ export default function PersonalizedRemediationPlan() {
           {weakPatterns.slice(0, 8).map((p, i) => (
             <div key={p.name}>
               <div className="flex items-center justify-between mb-0.5">
-                <span className={`text-xs font-semibold ${i < 3 ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                <span className={`text-xs font-semibold ${i < 3 ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-300"}`}>
                   {i < 3 && "⚠ "}{p.name}
                 </span>
                 {i < 3 && <HighImpactBadge size="sm" variant="red" label="PRIORITY" />}
@@ -136,18 +136,18 @@ export default function PersonalizedRemediationPlan() {
       <HighImpactWrapper variant="emerald" className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Target Level</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 block">Target Level</label>
             <div className="flex gap-2">
               {(["L4", "L5", "L6", "L7"] as Level[]).map(l => (
                 <button key={l} onClick={() => setTargetLevel(l)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-emerald-500 text-white border-emerald-500" : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-emerald-300"}`}>
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${targetLevel === l ? "bg-emerald-500 text-white border-emerald-500" : "border-gray-200 dark:border-gray-700 text-gray-700 hover:border-emerald-300"}`}>
                   {l}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5 block">
               Interview Date (optional)
               {daysUntilInterview !== null && (
                 <span className="ml-2 text-emerald-600 dark:text-emerald-400 normal-case font-normal">
@@ -204,13 +204,13 @@ export default function PersonalizedRemediationPlan() {
               {plan.studyOrder && (
                 <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 p-3 mb-3">
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">Study Order:</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{plan.studyOrder}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">{plan.studyOrder}</p>
                 </div>
               )}
               {plan.mindsetTip && (
                 <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 p-3 mb-3">
                   <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">Mindset Tip:</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{plan.mindsetTip}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">{plan.mindsetTip}</p>
                 </div>
               )}
 
@@ -222,15 +222,15 @@ export default function PersonalizedRemediationPlan() {
                       className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${item.difficulty === "Easy" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : item.difficulty === "Hard" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${item.difficulty === "Easy" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : item.difficulty === "Hard" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-900"}`}>
                           {idx + 1}
                         </span>
                         <div className="text-left">
                           <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{item.problemName}</p>
-                          <p className="text-[10px] text-gray-500">{item.difficulty} · {item.targetPattern}</p>
+                          <p className="text-[10px] text-gray-700">{item.difficulty} · {item.targetPattern}</p>
                         </div>
                       </div>
-                      {expandedDay === idx ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+                      {expandedDay === idx ? <ChevronUp size={14} className="text-gray-600" /> : <ChevronDown size={14} className="text-gray-600" />}
                     </button>
                     <AnimatePresence>
                       {expandedDay === idx && (
@@ -244,7 +244,7 @@ export default function PersonalizedRemediationPlan() {
                             <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-1">
                               <TrendingUp size={11} /> Why this problem: {item.whyThisProblem}
                             </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <p className="text-xs text-gray-600 dark:text-gray-300">
                               <span className="font-bold">Key Insight:</span> {item.keyInsight}
                             </p>
                           </div>
