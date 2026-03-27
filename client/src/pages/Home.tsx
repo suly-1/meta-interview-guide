@@ -18,6 +18,7 @@ import OverviewTab from "@/components/OverviewTab";
 import SystemDesignTab from "@/components/SystemDesignTab";
 import { MetaAICodingMock } from "@/components/MetaAICodingMock";
 import AITrainingTab from "@/components/AITrainingTab";
+import AINativeHubTab from "@/components/AINativeHubTab";
 import OnboardingModal from "@/components/OnboardingModal";
 import NotificationBanner from "@/components/NotificationBanner";
 import { AlertTriangle, X } from "lucide-react";
@@ -175,6 +176,7 @@ export default function Home() {
         {activeTab === "design" && <SystemDesignTab />}
         {activeTab === "ai-coding" && <MetaAICodingMock />}
         {activeTab === "ai-training" && <AITrainingTab />}
+        {activeTab === "ai-native" && <AINativeHubTab />}
       </main>
 
       {/* Footer */}

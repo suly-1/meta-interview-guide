@@ -1340,4 +1340,598 @@ Return JSON: { "score": 1-5, "levelSignal": "${input.targetLevel} signal: Strong
         improvements: string[];
       };
     }),
+
+  // ─── AI-Native Hub: Feature 11 — RAG Explainer Drill ──────────────────────
+  // Candidate explains RAG to a PM; LLM scores correctness, succinctness, caveats
+  scoreRAGExplanation: publicProcedure
+    .input((v: unknown) => v as { explanation: string; followUp: string })
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a senior Meta engineer evaluating a candidate's ability to explain Retrieval-Augmented Generation (RAG) to a non-technical PM. Score on three dimensions (1-5 each): correctness (is the explanation technically accurate?), succinctness (is it clear and jargon-free for a PM?), caveats (does it mention limitations like cost, latency, retrieval quality, or when NOT to use RAG?). Also score the follow-up answer on depth (1-5). Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `RAG explanation: ${input.explanation}\n\nFollow-up (when wouldn't you use RAG?): ${input.followUp}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "rag_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                correctness: { type: "number" },
+                succinctness: { type: "number" },
+                caveats: { type: "number" },
+                followUpDepth: { type: "number" },
+                overall: { type: "number" },
+                feedback: { type: "string" },
+                strongPoints: { type: "array", items: { type: "string" } },
+                improvements: { type: "array", items: { type: "string" } },
+                ic7Signal: { type: "string" },
+              },
+              required: [
+                "correctness",
+                "succinctness",
+                "caveats",
+                "followUpDepth",
+                "overall",
+                "feedback",
+                "strongPoints",
+                "improvements",
+                "ic7Signal",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        correctness: number;
+        succinctness: number;
+        caveats: number;
+        followUpDepth: number;
+        overall: number;
+        feedback: string;
+        strongPoints: string[];
+        improvements: string[];
+        ic7Signal: string;
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 12 — AI Stack Builder ─────────────────────────
+  scoreAIStack: publicProcedure
+    .input(
+      (v: unknown) =>
+        v as {
+          modelLayer: string;
+          toolingLayer: string;
+          workflowLayer: string;
+          lessonsLearned: string;
+        }
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a Meta Principal Engineer (IC7) evaluating a candidate's personal AI stack walk-through. Score each layer (1-5): modelLayer (is the model choice justified?), toolingLayer (real tools mentioned — LangChain, LlamaIndex, evals framework, etc.?), workflowLayer (does it describe orchestration, not just a single API call?), lessonsLearned (genuine insight vs generic platitude?). The IC7 bar: the stack moved from prototype to production reliability with measurable impact. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Model layer: ${input.modelLayer}\nTooling layer: ${input.toolingLayer}\nWorkflow layer: ${input.workflowLayer}\nLessons learned: ${input.lessonsLearned}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "stack_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                modelLayer: { type: "number" },
+                toolingLayer: { type: "number" },
+                workflowLayer: { type: "number" },
+                lessonsLearned: { type: "number" },
+                overall: { type: "number" },
+                maturityLevel: { type: "string" },
+                feedback: { type: "string" },
+                strongPoints: { type: "array", items: { type: "string" } },
+                improvements: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "modelLayer",
+                "toolingLayer",
+                "workflowLayer",
+                "lessonsLearned",
+                "overall",
+                "maturityLevel",
+                "feedback",
+                "strongPoints",
+                "improvements",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        modelLayer: number;
+        toolingLayer: number;
+        workflowLayer: number;
+        lessonsLearned: number;
+        overall: number;
+        maturityLevel: string;
+        feedback: string;
+        strongPoints: string[];
+        improvements: string[];
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 14 — Agent Evaluation Designer ───────────────
+  scoreAgentEvalDesign: publicProcedure
+    .input((v: unknown) => v as { agentType: string; evalFramework: string })
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are evaluating a candidate's agent evaluation framework design. The IC7 signal: the framework blends simple state-change checks with semantic LLM evaluations (like Anthropic's approach), and addresses task success rate, hallucination rate, latency, cost, and safety. Score dimensions (1-5 each): taskSuccess, hallucinationHandling, latencyCost, safetyConsiderations, overallRigor. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Agent type: ${input.agentType}\n\nEvaluation framework: ${input.evalFramework}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "agent_eval_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                taskSuccess: { type: "number" },
+                hallucinationHandling: { type: "number" },
+                latencyCost: { type: "number" },
+                safetyConsiderations: { type: "number" },
+                overallRigor: { type: "number" },
+                feedback: { type: "string" },
+                missingDimensions: { type: "array", items: { type: "string" } },
+                strongPoints: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "taskSuccess",
+                "hallucinationHandling",
+                "latencyCost",
+                "safetyConsiderations",
+                "overallRigor",
+                "feedback",
+                "missingDimensions",
+                "strongPoints",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        taskSuccess: number;
+        hallucinationHandling: number;
+        latencyCost: number;
+        safetyConsiderations: number;
+        overallRigor: number;
+        feedback: string;
+        missingDimensions: string[];
+        strongPoints: string[];
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 15 — Enterprise Bottleneck Case ──────────────
+  scoreBottleneckAnalysis: publicProcedure
+    .input((v: unknown) => v as { scenario: string; analysis: string })
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a Meta Staff Engineer evaluating a candidate's enterprise AI bottleneck analysis. Strong answers connect LLMs, data, infra, AND people/governance layers — not just one dimension. Score (1-5): dataLayer, governanceLayer, peopleLayer, infraLayer, systemsThinking (overall connection across all layers). Flag if the candidate treats AI as a black box. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Scenario: ${input.scenario}\n\nCandidate analysis: ${input.analysis}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "bottleneck_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                dataLayer: { type: "number" },
+                governanceLayer: { type: "number" },
+                peopleLayer: { type: "number" },
+                infraLayer: { type: "number" },
+                systemsThinking: { type: "number" },
+                treatsAIAsBlackBox: { type: "boolean" },
+                feedback: { type: "string" },
+                missedLayers: { type: "array", items: { type: "string" } },
+                strongPoints: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "dataLayer",
+                "governanceLayer",
+                "peopleLayer",
+                "infraLayer",
+                "systemsThinking",
+                "treatsAIAsBlackBox",
+                "feedback",
+                "missedLayers",
+                "strongPoints",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        dataLayer: number;
+        governanceLayer: number;
+        peopleLayer: number;
+        infraLayer: number;
+        systemsThinking: number;
+        treatsAIAsBlackBox: boolean;
+        feedback: string;
+        missedLayers: string[];
+        strongPoints: string[];
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 16 — Human-in-the-Loop Challenge ─────────────
+  scoreHumanInLoop: publicProcedure
+    .input((v: unknown) => v as { systemType: string; designAnswer: string })
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are evaluating a candidate's human-in-the-loop (HITL) design for an AI system. Score (1-5): safetyRisk (correctly identified?), hitlMechanism (specific and actionable, not vague?), policyCompliance (mentions regulatory/ethical considerations?), transparentPractices (explains how humans are informed and in control?), overall. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `AI system type: ${input.systemType}\n\nHITL design: ${input.designAnswer}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "hitl_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                safetyRisk: { type: "number" },
+                hitlMechanism: { type: "number" },
+                policyCompliance: { type: "number" },
+                transparentPractices: { type: "number" },
+                overall: { type: "number" },
+                feedback: { type: "string" },
+                gaps: { type: "array", items: { type: "string" } },
+                strongPoints: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "safetyRisk",
+                "hitlMechanism",
+                "policyCompliance",
+                "transparentPractices",
+                "overall",
+                "feedback",
+                "gaps",
+                "strongPoints",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        safetyRisk: number;
+        hitlMechanism: number;
+        policyCompliance: number;
+        transparentPractices: number;
+        overall: number;
+        feedback: string;
+        gaps: string[];
+        strongPoints: string[];
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 13+26 — Epistemic Humility Coach ─────────────
+  scoreEpistemicHumility: publicProcedure
+    .input((v: unknown) => v as { storyAnswer: string; questionPrompt: string })
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are evaluating a candidate's answer for epistemic humility and genuine learning velocity — key signals for Meta's AI-Native Philosophy/Culture phase. Strong answers: (1) describe a specific project, (2) name a specific failure or surprise, (3) articulate a concrete belief update ('I used to think X, now I think Y because Z'). Weak answers sound like blog post summaries or project false confidence. Score (1-5): specificity, beliefUpdate, failureAcknowledgment, learningVelocity, overall. Flag if it sounds like a rehearsed talking point. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Question: ${input.questionPrompt}\n\nAnswer: ${input.storyAnswer}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "epistemic_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                specificity: { type: "number" },
+                beliefUpdate: { type: "number" },
+                failureAcknowledgment: { type: "number" },
+                learningVelocity: { type: "number" },
+                overall: { type: "number" },
+                soundsRehearsed: { type: "boolean" },
+                feedback: { type: "string" },
+                strongPoints: { type: "array", items: { type: "string" } },
+                improvements: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "specificity",
+                "beliefUpdate",
+                "failureAcknowledgment",
+                "learningVelocity",
+                "overall",
+                "soundsRehearsed",
+                "feedback",
+                "strongPoints",
+                "improvements",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        specificity: number;
+        beliefUpdate: number;
+        failureAcknowledgment: number;
+        learningVelocity: number;
+        overall: number;
+        soundsRehearsed: boolean;
+        feedback: string;
+        strongPoints: string[];
+        improvements: string[];
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 29 — Meta Values Alignment Check ─────────────
+  scoreMetaValuesAlignment: publicProcedure
+    .input((v: unknown) => v as { answers: Record<string, string> })
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are evaluating a candidate's alignment with Meta's four AI-Native values: (1) Move Fast = iterate with eval loops, not months-long training; (2) Be Open = open-source, reproducible experiments; (3) Focus on Impact = measure utility and cost, not benchmark scores; (4) Build Awesome Things = prototype without permission. For each value, score 1-5 and give a one-sentence verdict. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Candidate answers:\n${Object.entries(input.answers)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join("\n")}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "meta_values_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                moveFast: { type: "number" },
+                beOpen: { type: "number" },
+                focusOnImpact: { type: "number" },
+                buildAwesomeThings: { type: "number" },
+                overall: { type: "number" },
+                verdicts: {
+                  type: "object",
+                  properties: {
+                    moveFast: { type: "string" },
+                    beOpen: { type: "string" },
+                    focusOnImpact: { type: "string" },
+                    buildAwesomeThings: { type: "string" },
+                  },
+                  required: [
+                    "moveFast",
+                    "beOpen",
+                    "focusOnImpact",
+                    "buildAwesomeThings",
+                  ],
+                  additionalProperties: false,
+                },
+                overallVerdict: { type: "string" },
+                topStrength: { type: "string" },
+                topGap: { type: "string" },
+              },
+              required: [
+                "moveFast",
+                "beOpen",
+                "focusOnImpact",
+                "buildAwesomeThings",
+                "overall",
+                "verdicts",
+                "overallVerdict",
+                "topStrength",
+                "topGap",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        moveFast: number;
+        beOpen: number;
+        focusOnImpact: number;
+        buildAwesomeThings: number;
+        overall: number;
+        verdicts: Record<string, string>;
+        overallVerdict: string;
+        topStrength: string;
+        topGap: string;
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 17 — Maturity Self-Classifier ────────────────
+  scoreMaturityClassification: publicProcedure
+    .input(
+      (v: unknown) =>
+        v as {
+          claimedLevel: string;
+          fluencyExample: string;
+          impactExample: string;
+          responsibleAIExample: string;
+          continuousLearningExample: string;
+        }
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are evaluating whether a candidate's self-claimed AI maturity level (Traditionalist / AI Aware / AI Enabled / AI First / AI Native) is supported by their concrete examples across 4 core skills. For each skill, assess if the example matches the claimed level or reveals a gap. Return the actual assessed level per skill, an overall assessed level, and a gap analysis. Return JSON only.",
+          },
+          {
+            role: "user",
+            content: `Claimed level: ${input.claimedLevel}\nFluency & Orchestration example: ${input.fluencyExample}\nAI-Driven Impact example: ${input.impactExample}\nResponsible AI Use example: ${input.responsibleAIExample}\nContinuous AI Learning example: ${input.continuousLearningExample}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "maturity_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                fluencyAssessedLevel: { type: "string" },
+                impactAssessedLevel: { type: "string" },
+                responsibleAIAssessedLevel: { type: "string" },
+                continuousLearningAssessedLevel: { type: "string" },
+                overallAssessedLevel: { type: "string" },
+                claimedVsActualGap: { type: "string" },
+                gapAnalysis: { type: "string" },
+                whatAINativeLooksLike: { type: "string" },
+                nextSteps: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "fluencyAssessedLevel",
+                "impactAssessedLevel",
+                "responsibleAIAssessedLevel",
+                "continuousLearningAssessedLevel",
+                "overallAssessedLevel",
+                "claimedVsActualGap",
+                "gapAnalysis",
+                "whatAINativeLooksLike",
+                "nextSteps",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        fluencyAssessedLevel: string;
+        impactAssessedLevel: string;
+        responsibleAIAssessedLevel: string;
+        continuousLearningAssessedLevel: string;
+        overallAssessedLevel: string;
+        claimedVsActualGap: string;
+        gapAnalysis: string;
+        whatAINativeLooksLike: string;
+        nextSteps: string[];
+      };
+    }),
+
+  // ─── AI-Native Hub: Feature 30 — Full Mock Screening Call ────────────────
+  scoreMockScreeningPhase: publicProcedure
+    .input(
+      (v: unknown) => v as { phase: string; question: string; answer: string }
+    )
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a Meta recruiter running the AI-Native screening call. Phase: ${input.phase}. Evaluate the candidate's answer against the rubric for this phase. Warm-up: look for concrete reasoning, mentions of agents/infra, absence of hype. Fluency Check: correct, succinct, caveated answers; mentions evals/cost/latency. Builder Signal: describes full stack (model+tooling+workflow), lessons learned, quantified impact. Philosophy/Culture: epistemic humility, learning velocity, specific belief updates. Score overall (1-5), give a maturity tier signal, and provide coaching. Return JSON only.`,
+          },
+          {
+            role: "user",
+            content: `Question: ${input.question}\n\nAnswer: ${input.answer}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "mock_phase_score",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                phaseScore: { type: "number" },
+                maturityTierSignal: { type: "string" },
+                rubricAxis: { type: "string" },
+                axisScore: { type: "number" },
+                feedback: { type: "string" },
+                strongSignals: { type: "array", items: { type: "string" } },
+                weakSignals: { type: "array", items: { type: "string" } },
+                coachingNote: { type: "string" },
+              },
+              required: [
+                "phaseScore",
+                "maturityTierSignal",
+                "rubricAxis",
+                "axisScore",
+                "feedback",
+                "strongSignals",
+                "weakSignals",
+                "coachingNote",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      return JSON.parse(response.choices[0].message.content as string) as {
+        phaseScore: number;
+        maturityTierSignal: string;
+        rubricAxis: string;
+        axisScore: number;
+        feedback: string;
+        strongSignals: string[];
+        weakSignals: string[];
+        coachingNote: string;
+      };
+    }),
 });

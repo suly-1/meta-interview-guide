@@ -1085,6 +1085,128 @@ export const trpc = {
           improvements: [],
         })),
     },
+    scoreRAGExplanation: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          overall: 1,
+          correctness: 1,
+          succinctness: 1,
+          caveats: 1,
+          audienceAdaptation: 1,
+          feedback: "",
+          strongPoints: [],
+          improvements: [],
+        })),
+    },
+    scoreAIStack: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          modelLayer: 1,
+          toolingLayer: 1,
+          workflowLayer: 1,
+          lessonsLearned: 1,
+          overall: 1,
+          maturityLevel: "",
+          feedback: "",
+          strongPoints: [],
+          improvements: [],
+        })),
+    },
+    scoreAgentEvalDesign: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          taskSuccess: 1,
+          hallucinationHandling: 1,
+          latencyCost: 1,
+          safetyConsiderations: 1,
+          overallRigor: 1,
+          feedback: "",
+          missingDimensions: [],
+          strongPoints: [],
+        })),
+    },
+    scoreBottleneckAnalysis: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          dataLayer: 1,
+          governanceLayer: 1,
+          peopleLayer: 1,
+          infraLayer: 1,
+          systemsThinking: 1,
+          treatsAIAsBlackBox: false,
+          feedback: "",
+          missedLayers: [],
+          strongPoints: [],
+        })),
+    },
+    scoreHumanInLoop: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          safetyRisk: 1,
+          hitlMechanism: 1,
+          policyCompliance: 1,
+          transparentPractices: 1,
+          overall: 1,
+          feedback: "",
+          gaps: [],
+          strongPoints: [],
+        })),
+    },
+    scoreEpistemicHumility: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          specificity: 1,
+          beliefUpdate: 1,
+          failureAcknowledgment: 1,
+          learningVelocity: 1,
+          overall: 1,
+          soundsRehearsed: false,
+          feedback: "",
+          strongPoints: [],
+          improvements: [],
+        })),
+    },
+    scoreMetaValuesAlignment: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          moveFast: 1,
+          beOpen: 1,
+          focusOnImpact: 1,
+          buildAwesomeThings: 1,
+          overall: 1,
+          verdicts: {} as Record<string, string>,
+          overallVerdict: "",
+          topStrength: "",
+          topGap: "",
+        })),
+    },
+    scoreMaturityClassification: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          fluencyAssessedLevel: "",
+          impactAssessedLevel: "",
+          responsibleAIAssessedLevel: "",
+          continuousLearningAssessedLevel: "",
+          overallAssessedLevel: "",
+          claimedVsActualGap: "",
+          gapAnalysis: "",
+          whatAINativeLooksLike: "",
+          nextSteps: [] as string[],
+        })),
+    },
+    scoreMockScreeningPhase: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          phaseScore: 1,
+          maturityTierSignal: "",
+          rubricAxis: "",
+          axisScore: 1,
+          feedback: "",
+          strongSignals: [] as string[],
+          weakSignals: [] as string[],
+          coachingNote: "",
+        })),
+    },
   },
 
   // ── system ──────────────────────────────────────────────────────────────────────────────────────────
