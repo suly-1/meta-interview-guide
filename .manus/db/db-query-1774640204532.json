@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `failure_drill_sessions` (\n  `id` int NOT NULL AUTO_INCREMENT,\n  `userId` int NOT NULL,\n  `drillId` varchar(64) NOT NULL,\n  `score` int NOT NULL DEFAULT 0,\n  `payload` json,\n  `feedback` text,\n  `completedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute CREATE TABLE IF NOT EXISTS `failure_drill_sessions` (\n  `id` int NOT NULL AUTO_INCREMENT,\n  `userId` int NOT NULL,\n  `drillId` varchar(64) NOT NULL,\n  `score` int NOT NULL DEFAULT 0,\n  `payload` json,\n  `feedback` text,\n  `completedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 517
+}

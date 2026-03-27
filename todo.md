@@ -1219,3 +1219,32 @@
 - [ ] Per-week best-score badges on LearningPathTab cards (wired to DB)
 - [ ] Inline drill launchers on Failure Analysis weak signal cards
 - [ ] Persona Stress Test simulator (AI plays 5 archetypes, scores resilience)
+
+## Round 50 — Three Follow-Up Features
+
+- [ ] Drill score leaderboard on Overview Readiness Dashboard (per-drill best scores from DB)
+- [ ] Failure Analysis Part header drill completion rings (signals drilled / total)
+- [ ] Persona Stress Test history panel (last 5 sessions with date, persona, resilience score)
+
+## Round 51 — 18 Failure Analysis Hands-On Mock Drills
+
+- [ ] Drill 1: NFR Ambush Drill (timed NFR enumeration + AI scoring)
+- [ ] Drill 2: Bottleneck Autopsy (diagram analysis + bottleneck identification)
+- [ ] Drill 3: Scale Jump Stress Test (1K→100K RPS pivot challenge)
+- [ ] Drill 4: Edge Case Gauntlet (60s edge case enumeration + coverage scoring)
+- [ ] Drill 5: STAR Specificity Rewriter (vague phrase detection + forced rewrite)
+- [ ] Drill 6: Ownership Signal Extractor (probing questions + ownership scoring)
+- [ ] Drill 7: Down-Level Detector (L5/L6/L7 classification + rewrite loop)
+- [ ] Drill 8: Trade-Off Pressure Cooker (60s trade-off + challenge defense)
+- [ ] Drill 9: Failure Mode Flashcard Sprint (15-card classification sprint)
+- [ ] Drill 10: Live Fix Simulator (15-min end-to-end failure diagnosis)
+- [ ] Drill 11: The Interruptor (mid-explanation interruption recovery)
+- [ ] Drill 12: Clarification Interrogator (underspecified prompt + assumption design)
+- [ ] Drill 13: Devil's Advocate Interviewer (position defense under opposition)
+- [ ] Drill 14: The Silent Skeptic (reading interviewer silence)
+- [ ] Drill 15: Scope Creep Challenger (mid-interview pivot response)
+- [ ] Drill 16: Time Pressure Mock (20-min coding with status updates)
+- [ ] Drill 17: XFN Conflict Simulator (PM disagreement roleplay)
+- [ ] Drill 18: The Gotcha Follow-Up (weakest assumption challenge)
+- [ ] DrillHub component with category tabs, progress tracker, best-score badges
+- [ ] Embed DrillHub in FailureAnalysisTab

@@ -1267,7 +1267,270 @@ export const trpc = {
     },
   },
 
-  // ── system ──────────────────────────────────────────────────────────────────────────────────────────
+  // ── drillSessions ───────────────────────────────────────────────────────────────────────────────────────
+  drillSessions: {
+    getBestScoresByWeek: {
+      useQuery: () => makeQuery({} as Record<number, number>),
+    },
+    getSessionHistory: { useQuery: () => makeQuery([] as unknown[]) },
+    getPersonaHistory: { useQuery: () => makeQuery([] as unknown[]) },
+    getDrillLeaderboard: { useQuery: () => makeQuery([] as unknown[]) },
+    saveDrillSession: {
+      useMutation: () => makeMutation(() => ({ success: true })),
+    },
+    startPersonaSession: {
+      useMutation: () =>
+        makeMutation(() => ({
+          sessionId: 1,
+          opening: "Mock persona challenge.",
+        })),
+    },
+    continuePersonaSession: {
+      useMutation: () =>
+        makeMutation(() => ({
+          challenge: "Follow-up challenge.",
+          score: 75,
+          feedback: "Good response.",
+        })),
+    },
+    finishPersonaSession: {
+      useMutation: () =>
+        makeMutation(() => ({ resilienceScore: 75, aiCoachNote: "Good job." })),
+    },
+    evaluatePersonaTurn: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          feedback: "Good.",
+          nextChallenge: "Next challenge.",
+        })),
+    },
+    generatePersonaScorecard: {
+      useMutation: () =>
+        makeMutation(() => ({
+          resilienceScore: 75,
+          aiCoachNote: "Good job.",
+          breakdown: [],
+        })),
+    },
+  },
+  // ── failureDrills ───────────────────────────────────────────────────────────────────────────────────────
+  failureDrills: {
+    getBestScores: { useQuery: () => makeQuery({} as Record<string, number>) },
+    getHistory: { useQuery: () => makeQuery([] as unknown[]) },
+    scoreNFRAmbush: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          matched: [],
+          missed: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreBottleneckAutopsy: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          identified: [],
+          missed: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreScaleJump: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreEdgeCaseGauntlet: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          missed: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreSTARRewrite: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          improvements: [],
+          feedback: "Good.",
+        })),
+    },
+    generateOwnershipProbe: {
+      useMutation: () =>
+        makeMutation(() => ({
+          probe: "Tell me about a time you owned a project end-to-end.",
+        })),
+    },
+    scoreOwnershipSignal: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    detectLevel: {
+      useMutation: () =>
+        makeMutation(() => ({
+          detectedLevel: "L6",
+          confidence: 80,
+          signals: [],
+          recommendation: "Good.",
+        })),
+    },
+    generateTradeOffChallenge: {
+      useMutation: () =>
+        makeMutation(() => ({
+          challenge: "Why not use a different approach?",
+        })),
+    },
+    scoreTradeOffDefense: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreFlashcardSprint: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          correct: 0,
+          total: 0,
+          feedback: "Good.",
+        })),
+    },
+    scoreLiveFixSimulator: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          diagnosisScore: 75,
+          fixScore: 75,
+          strengths: [],
+          missed: [],
+          feedback: "Good.",
+        })),
+    },
+    startLiveMock: {
+      useMutation: () =>
+        makeMutation(() => ({
+          sessionId: "mock-1",
+          opening: "Mock opening challenge.",
+        })),
+    },
+    continueLiveMock: {
+      useMutation: () =>
+        makeMutation(() => ({
+          response: "Follow-up.",
+          score: 75,
+          feedback: "Good.",
+        })),
+    },
+    scoreLiveMock: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    answerClarification: {
+      useMutation: () =>
+        makeMutation(() => ({
+          answer: "Clarification answer.",
+          questionsRemaining: 2,
+        })),
+    },
+    scoreClarificationDesign: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    generateDevilsChallenge: {
+      useMutation: () =>
+        makeMutation(() => ({ challenge: "Devil's advocate challenge." })),
+    },
+    scoreDevilsAdvocate: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    generateGotchaQuestion: {
+      useMutation: () => makeMutation(() => ({ question: "Gotcha question." })),
+    },
+    scoreGotchaFollowUp: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    generateXFNResponse: {
+      useMutation: () => makeMutation(() => ({ response: "XFN response." })),
+    },
+    scoreXFNConflict: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    generateScopeCreep: {
+      useMutation: () =>
+        makeMutation(() => ({ requirement: "New scope requirement." })),
+    },
+    scoreScopeCreep: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreSilentSkeptic: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          gaps: [],
+          feedback: "Good.",
+        })),
+    },
+    scoreTimePressureMock: {
+      useMutation: () =>
+        makeMutation(() => ({
+          score: 75,
+          strengths: [],
+          missed: [],
+          feedback: "Good.",
+        })),
+    },
+  },
+  // ── system ───────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {
       useMutation: () => makeMutation(() => ({ success: true })),

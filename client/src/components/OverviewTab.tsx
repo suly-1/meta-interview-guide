@@ -167,6 +167,112 @@ function LevelCards() {
 }
 
 // ── Readiness Dashboard ────────────────────────────────────────────────────
+// ── Drill Score Leaderboard ──────────────────────────────────────────────────
+const DRILL_LABELS: Record<string, string> = {
+  "nfr-ambush": "NFR Ambush",
+  "bottleneck-autopsy": "Bottleneck Autopsy",
+  "scale-jump": "Scale Jump",
+  "edge-case-gauntlet": "Edge Case Gauntlet",
+  "star-specificity": "STAR Specificity",
+  "ownership-signal": "Ownership Signal",
+  "down-level-detector": "Down-Level Detector",
+  "trade-off-pressure": "Trade-Off Pressure",
+  "flashcard-sprint": "Flashcard Sprint",
+  "live-fix-simulator": "Live Fix Simulator",
+  "the-interruptor": "The Interruptor",
+  "clarification-interrogator": "Clarification Interrogator",
+  "devils-advocate": "Devil's Advocate",
+  "silent-skeptic": "Silent Skeptic",
+  "scope-creep": "Scope Creep",
+  "time-pressure": "Time Pressure Mock",
+  "xfn-conflict": "XFN Conflict",
+  "gotcha-followup": "Gotcha Follow-Up",
+};
+
+function DrillScoreLeaderboard() {
+  const { data: bestScores, isLoading } =
+    trpc.failureDrills.getBestScores.useQuery(undefined, { retry: false });
+
+  const entries = bestScores
+    ? Object.entries(bestScores)
+        .map(([drillId, score]) => ({
+          drillId,
+          score,
+          label: DRILL_LABELS[drillId] ?? drillId,
+        }))
+        .sort((a, b) => b.score - a.score)
+    : [];
+
+  if (isLoading) return null;
+  if (entries.length === 0) return null;
+
+  const top5 = entries.slice(0, 5);
+  const drillsAttempted = entries.length;
+  const avgScore =
+    entries.length > 0
+      ? Math.round(entries.reduce((s, e) => s + e.score, 0) / entries.length)
+      : 0;
+
+  return (
+    <div className="prep-card p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="section-title mb-0 pb-0 border-0 flex items-center gap-2">
+          <span>🎯</span> Failure Drill Scores
+        </div>
+        <div className="flex gap-3 text-xs text-muted-foreground">
+          <span>
+            <span className="font-bold text-foreground">{drillsAttempted}</span>
+            /18 attempted
+          </span>
+          <span>
+            avg <span className="font-bold text-amber-400">{avgScore}</span>
+          </span>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        {top5.map((entry, i) => (
+          <div key={entry.drillId} className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground w-4">{i + 1}.</span>
+            <span className="text-xs text-foreground flex-1 truncate">
+              {entry.label}
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="w-20 h-1.5 bg-secondary/60 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${
+                    entry.score >= 80
+                      ? "bg-emerald-500"
+                      : entry.score >= 60
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                  }`}
+                  style={{ width: `${entry.score}%` }}
+                />
+              </div>
+              <span
+                className={`text-xs font-bold w-8 text-right ${
+                  entry.score >= 80
+                    ? "text-emerald-400"
+                    : entry.score >= 60
+                      ? "text-amber-400"
+                      : "text-red-400"
+                }`}
+              >
+                {entry.score}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {entries.length > 5 && (
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          +{entries.length - 5} more drills completed
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ReadinessDashboard() {
   const [patternRatings] = usePatternRatings();
   const [bqRatings] = useBehavioralRatings();
@@ -314,6 +420,9 @@ function ReadinessDashboard() {
           </div>
         </div>
       )}
+
+      {/* Failure Drill Score Leaderboard */}
+      <DrillScoreLeaderboard />
 
       {/* Recruiter card with peer comparison */}
       <RecruiterCard

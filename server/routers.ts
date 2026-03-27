@@ -26,6 +26,7 @@ import { siteAccessRouter } from "./routers/siteAccess";
 import { adminUsersRouter } from "./routers/adminUsers";
 import { aiNativeHistoryRouter } from "./routers/aiNativeHistory";
 import { drillSessionsRouter } from "./routers/drillSessions";
+import { failureDrillsRouter } from "./routers/failureDrills";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "./db";
 import { pinAttempts } from "../drizzle/schema";
@@ -219,6 +220,7 @@ export const appRouter = router({
   collab: collabRouter,
   leaderboard: leaderboardRouter,
   drillSessions: drillSessionsRouter,
+  failureDrills: failureDrillsRouter,
   onboarding: onboardingRouter,
   ratings: ratingsRouter,
   ctciProgress: ctciProgressRouter,

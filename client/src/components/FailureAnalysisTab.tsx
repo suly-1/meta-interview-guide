@@ -14,6 +14,7 @@
  */
 
 import { useState, useCallback } from "react";
+import FailureDrillHub from "@/components/FailureDrillHub";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,7 @@ import {
   X,
 } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { trpc } from "@/lib/trpc";
 import CheckpointPacer from "@/components/training/CheckpointPacer";
 import TestFirstDebugger from "@/components/training/TestFirstDebugger";
 import VerbalExplanationScorer from "@/components/training/VerbalExplanationScorer";
@@ -965,12 +967,14 @@ function Section({
   children,
   defaultOpen = true,
   badge,
+  progress,
 }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   defaultOpen?: boolean;
   badge?: string;
+  progress?: { done: number; total: number };
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -986,6 +990,19 @@ function Section({
             <Badge className="bg-muted text-muted-foreground border text-xs">
               {badge}
             </Badge>
+          )}
+          {progress && (
+            <span
+              className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                progress.done === progress.total && progress.total > 0
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : progress.done > 0
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "bg-secondary/60 text-muted-foreground"
+              }`}
+            >
+              {progress.done}/{progress.total} drilled
+            </span>
           )}
         </div>
         {open ? (
@@ -1145,6 +1162,72 @@ function WeakSignalCard({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Persona Session History ─────────────────────────────────────────────────
+function PersonaSessionHistory() {
+  const [open, setOpen] = useState(false);
+  const { data: sessions, isLoading } =
+    trpc.drillSessions.getPersonaHistory.useQuery(undefined, { retry: false });
+
+  if (isLoading || !sessions || sessions.length === 0) return null;
+
+  return (
+    <div className="prep-card p-4">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between text-left"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-foreground">
+            Past Persona Sessions
+          </span>
+          <span className="text-xs bg-secondary/60 text-muted-foreground px-1.5 py-0.5 rounded-full">
+            {sessions.length}
+          </span>
+        </div>
+        {open ? (
+          <ChevronUp size={14} className="text-muted-foreground" />
+        ) : (
+          <ChevronDown size={14} className="text-muted-foreground" />
+        )}
+      </button>
+      {open && (
+        <div className="mt-3 space-y-2">
+          {sessions.slice(0, 5).map((s, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 text-xs p-2 rounded-lg bg-secondary/30"
+            >
+              <span className="text-muted-foreground w-16 shrink-0">
+                {new Date(s.completedAt).toLocaleDateString()}
+              </span>
+              <span className="flex-1 text-foreground font-medium truncate">
+                {s.personaLabel}
+              </span>
+              <span
+                className={`font-bold ${
+                  s.resilienceScore >= 80
+                    ? "text-emerald-400"
+                    : s.resilienceScore >= 60
+                      ? "text-amber-400"
+                      : "text-red-400"
+                }`}
+              >
+                {s.resilienceScore}
+              </span>
+              <span className="text-muted-foreground">/100</span>
+            </div>
+          ))}
+          {sessions.length > 5 && (
+            <p className="text-xs text-muted-foreground text-center">
+              +{sessions.length - 5} older sessions
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1309,6 +1392,10 @@ export default function FailureAnalysisTab() {
         title="Part 1 — System Design Failures (42% of Rejections)"
         icon={<Brain size={15} className="text-red-400" />}
         badge="42%"
+        progress={{
+          done: SYSTEM_DESIGN_WEAK_SIGNALS.filter(s => drillsDone[s.id]).length,
+          total: SYSTEM_DESIGN_WEAK_SIGNALS.length,
+        }}
       >
         <div className="space-y-5">
           <div>
@@ -1462,8 +1549,12 @@ export default function FailureAnalysisTab() {
       {/* Part 2 — Coding */}
       <Section
         title="Part 2 — Coding Failures (31% of Rejections)"
-        icon={<Code2 size={15} className="text-amber-400" />}
+        icon={<Code2 size={15} className="text-orange-400" />}
         badge="31%"
+        progress={{
+          done: CODING_WEAK_SIGNALS.filter(s => drillsDone[s.id]).length,
+          total: CODING_WEAK_SIGNALS.length,
+        }}
       >
         <div className="space-y-5">
           <div>
@@ -1528,8 +1619,12 @@ export default function FailureAnalysisTab() {
       {/* Part 3 — Behavioral */}
       <Section
         title="Part 3 — Behavioral Failures (27% of Rejections)"
-        icon={<Users size={15} className="text-blue-400" />}
+        icon={<Users size={15} className="text-purple-400" />}
         badge="27%"
+        progress={{
+          done: BEHAVIORAL_WEAK_SIGNALS.filter(s => drillsDone[s.id]).length,
+          total: BEHAVIORAL_WEAK_SIGNALS.length,
+        }}
       >
         <div className="space-y-5">
           <div>
@@ -1735,6 +1830,9 @@ export default function FailureAnalysisTab() {
             </p>
             <InterviewerPersonaStressTest />
           </div>
+
+          {/* Persona Session History */}
+          <PersonaSessionHistory />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {PERSONAS.map(p => (
               <div
@@ -1960,6 +2058,16 @@ export default function FailureAnalysisTab() {
             </table>
           </div>
         </div>
+      </Section>
+
+      {/* ── Part 8: Hands-On Mock Drills ─────────────────────────────── */}
+      <Section
+        title="Hands-On Mock Drills"
+        icon={<Zap size={18} className="text-yellow-400" />}
+        badge="18 Drills"
+        defaultOpen
+      >
+        <FailureDrillHub />
       </Section>
     </div>
   );

@@ -226,6 +226,50 @@ Average score: ${avgScore}/10`,
       };
     }),
 
+  /** Get per-drill best scores for the current user (flattened from drillScores JSON) */
+  getDrillLeaderboard: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.user)
+      return [] as Array<{
+        drillId: string;
+        bestScore: number;
+        completedAt: number;
+      }>;
+    const db = await getDb();
+    if (!db)
+      return [] as Array<{
+        drillId: string;
+        bestScore: number;
+        completedAt: number;
+      }>;
+    const rows = await db
+      .select()
+      .from(drillSessions)
+      .where(eq(drillSessions.userId, ctx.user.id))
+      .orderBy(desc(drillSessions.completedAt))
+      .limit(200);
+    // Flatten drillScores arrays and keep best per drillId
+    const best: Record<string, { bestScore: number; completedAt: number }> = {};
+    for (const row of rows) {
+      const scores =
+        (row.drillScores as Array<{
+          drillId: string;
+          score: number;
+          completedAt: number;
+        }>) ?? [];
+      for (const ds of scores) {
+        if (!best[ds.drillId] || ds.score > best[ds.drillId].bestScore) {
+          best[ds.drillId] = {
+            bestScore: ds.score,
+            completedAt: ds.completedAt,
+          };
+        }
+      }
+    }
+    return Object.entries(best)
+      .map(([drillId, v]) => ({ drillId, ...v }))
+      .sort((a, b) => b.bestScore - a.bestScore);
+  }),
+
   /** Get persona stress test history for the current user */
   getPersonaHistory: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return [];

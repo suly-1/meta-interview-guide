@@ -453,3 +453,18 @@ export const personaStressSessions = mysqlTable("persona_stress_sessions", {
   completedAt: timestamp("completedAt").defaultNow().notNull(),
 });
 export type PersonaStressSession = typeof personaStressSessions.$inferSelect;
+
+// ── Failure Drill Sessions ─────────────────────────────────────────────────────
+// Persists completed sessions for all 18 Failure Analysis hands-on drills.
+// drillId maps to one of the 18 drill identifiers (e.g. "nfr-ambush", "interruptor").
+// payload stores drill-specific input data as JSON.
+export const failureDrillSessions = mysqlTable("failure_drill_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  drillId: varchar("drillId", { length: 64 }).notNull(),
+  score: int("score").notNull().default(0), // 0–100
+  payload: json("payload").$type<Record<string, unknown>>(),
+  feedback: text("feedback"),
+  completedAt: timestamp("completedAt").defaultNow().notNull(),
+});
+export type FailureDrillSession = typeof failureDrillSessions.$inferSelect;
