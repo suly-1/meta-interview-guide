@@ -1191,3 +1191,24 @@
 - [x] getBestScoresByDrill returns Record<string,{overallScore,coreSkill,drillLabel}> — converted to Object.values() array, fixed field name bestScore→overallScore
 - [x] 85/85 tests pass
 - [ ] Save checkpoint
+
+## Round 49 — Interactive Learning Path (Hands-On Mock Practice)
+
+- [ ] Redesign LearningPathTab: each week becomes a launchable practice session
+- [ ] Week 1 session: Requirements Clarification Drill + Complexity Flashcards + STAR Story prompt
+- [ ] Week 2 session: Rubber Duck Explainer + Checkpoint Pacer + Behavioral timed question
+- [ ] Week 3 session: Code Navigation Speed Test + AI Hallucination Spotter + AI-Native drill
+- [ ] Week 4 session: Verbal Explanation Scorer + Test-First Debugger + Full Mock Screening Call
+- [ ] Per-week progress ring showing drills completed
+- [ ] Session summary panel with scores after completing all drills in a week
+- [ ] Persist session completion to DB (learningPathSessions table)
+- [ ] Add server router procedure for saving/loading learning path progress
+- [ ] Run pnpm test — all pass
+- [ ] Save checkpoint
+
+## New Features — Round 49
+
+- [x] Interactive LearningPathTab with per-week drill sessions (4 weeks × 3 drills each, progress rings, session summaries)
+- [x] FailureAnalysisTab — 7-part interactive reference ("Why Candidates Fail") with weak signal drills, stress-test scenarios, behavioral question bank, persona stress tests, 22% down-leveling guide, tools map, and summary fix table
+- [x] Register failure-analysis tab in TopNav and Home.tsx
+- [x] Vitest tests for FailureAnalysisTab data integrity and LearningPath drill sessions (17 tests passing)

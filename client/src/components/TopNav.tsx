@@ -19,6 +19,7 @@ const TABS = [
   { id: "ai-training", label: "🏋️ Training" },
   { id: "ai-native", label: "✦ AI Native" },
   { id: "learning-path", label: "📚 Learning Path" },
+  { id: "failure-analysis", label: "⚠️ Failure Analysis" },
 ];
 
 // Site identity — injected at build time via VITE_SITE_ID

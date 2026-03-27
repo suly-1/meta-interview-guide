@@ -1,10 +1,17 @@
-// Learning Path Tab
-// Audience: Engineers preparing for Meta IC6/IC7 loops.
-// Content: Rejection stats, 4-week accelerated path, Apex Picks, High Impact features.
-// 4-week path only — 8-week path excluded per user instruction.
+/**
+ * LearningPathTab — 4-Week Accelerated Meta IC6/IC7 Prep Path
+ * Now with Hands-On Practice Sessions: each week has 3 embedded drills
+ * that launch inline, track completion, and show a session summary.
+ */
 
-import { useState } from "react";
+// Design: Bold Engineering Dashboard
+// Dark charcoal base, Space Grotesk headings, Inter body
+// Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
+
+import { useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   AlertTriangle,
   Target,
@@ -13,12 +20,56 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
-  Flame,
   BookOpen,
+  Play,
+  CheckCircle2,
+  Circle,
+  ArrowLeft,
+  RotateCcw,
+  Flame,
   Brain,
   Code2,
   Layers,
+  X,
 } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { BEHAVIORAL_QUESTIONS } from "@/lib/data";
+
+// ── Drill imports ──────────────────────────────────────────────────────────────
+import RequirementsClarificationDrill from "@/components/training/RequirementsClarificationDrill";
+import ComplexityFlashcardTrainer from "@/components/training/ComplexityFlashcardTrainer";
+import RubberDuckExplainer from "@/components/training/RubberDuckExplainer";
+import CheckpointPacer from "@/components/training/CheckpointPacer";
+import CodeNavigationSpeedTest from "@/components/training/CodeNavigationSpeedTest";
+import AIHallucinationSpotter from "@/components/training/AIHallucinationSpotter";
+import VerbalExplanationScorer from "@/components/training/VerbalExplanationScorer";
+import TestFirstDebugger from "@/components/training/TestFirstDebugger";
+import EpistemicHumilityCoach from "@/components/ai-native/EpistemicHumilityCoach";
+import FullMockScreeningCall from "@/components/ai-native/FullMockScreeningCall";
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+interface DrillDef {
+  id: string;
+  label: string;
+  icon: string;
+  description: string;
+  badge: string;
+  badgeColor: string;
+  component: React.ComponentType;
+}
+
+interface WeekSession {
+  week: number;
+  title: string;
+  subtitle: string;
+  color: string;
+  headerColor: string;
+  accentColor: string;
+  ringColor: string;
+  icon: React.ReactNode;
+  drills: DrillDef[];
+  sessionGoal: string;
+}
 
 // ─── Rejection data ────────────────────────────────────────────────────────────
 const REJECTION_ROUNDS = [
@@ -426,6 +477,529 @@ const TYPE_COLOR: Record<string, string> = {
   "Meta / Coding": "bg-emerald-500/10 text-emerald-400",
 };
 
+// ─── Week session definitions ──────────────────────────────────────────────────
+const WEEK_SESSIONS: WeekSession[] = [
+  {
+    week: 1,
+    title: "Foundation",
+    subtitle: "Clarify → Analyze → Narrate",
+    color: "border-blue-500/40 bg-blue-500/5",
+    headerColor: "text-blue-400",
+    accentColor: "bg-blue-500",
+    ringColor: "stroke-blue-400",
+    icon: <Target size={16} className="text-blue-400" />,
+    sessionGoal:
+      "Train the 3 most-penalised early-interview skills: asking the right questions, stating complexity unprompted, and narrating your thinking.",
+    drills: [
+      {
+        id: "clarification",
+        label: "Requirements Clarification",
+        icon: "❓",
+        description:
+          "2-minute timed drill. Ask the right clarifying questions before coding. Meta interviewers explicitly score this.",
+        badge: "Phase 1",
+        badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+        component: RequirementsClarificationDrill,
+      },
+      {
+        id: "complexity",
+        label: "Complexity Flashcards",
+        icon: "📊",
+        description:
+          "Identify Big-O time & space complexity in under 10 seconds per card. Meta Phase 3 always asks unprompted.",
+        badge: "Speed Drill",
+        badgeColor: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+        component: ComplexityFlashcardTrainer,
+      },
+      {
+        id: "rubber-duck",
+        label: "Rubber Duck Explainer",
+        icon: "🦆",
+        description:
+          "Explain your approach out loud before writing any code. Technical Communication = 25% of Meta's rubric.",
+        badge: "Communication",
+        badgeColor: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+        component: RubberDuckExplainer,
+      },
+    ],
+  },
+  {
+    week: 2,
+    title: "Core Patterns",
+    subtitle: "Pace → Explain → Debug",
+    color: "border-emerald-500/40 bg-emerald-500/5",
+    headerColor: "text-emerald-400",
+    accentColor: "bg-emerald-500",
+    ringColor: "stroke-emerald-400",
+    icon: <Zap size={16} className="text-emerald-400" />,
+    sessionGoal:
+      "Build time-management discipline and communication under the 15/25/15 phase structure while practicing verbal explanation.",
+    drills: [
+      {
+        id: "pacer",
+        label: "Checkpoint Pacer",
+        icon: "⏱",
+        description:
+          "Train the 15/25/15 phase rhythm with checkpoint milestones. Time management is the #2 failure mode.",
+        badge: "Time Mgmt",
+        badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+        component: CheckpointPacer,
+      },
+      {
+        id: "verbal",
+        label: "Verbal Explanation Scorer",
+        icon: "🎙",
+        description:
+          "Type a 90-second explanation; AI scores your Technical Communication dimension against the Meta rubric.",
+        badge: "Communication",
+        badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+        component: VerbalExplanationScorer,
+      },
+      {
+        id: "test-first",
+        label: "Test-First Debugger",
+        icon: "🧪",
+        description:
+          "Given only failing test output, write the fix. Meta provides failing tests in Phase 1 — most candidates ignore them.",
+        badge: "Phase 1",
+        badgeColor: "bg-red-500/15 text-red-400 border-red-500/30",
+        component: TestFirstDebugger,
+      },
+    ],
+  },
+  {
+    week: 3,
+    title: "Advanced Patterns",
+    subtitle: "Navigate → Spot → Explain AI",
+    color: "border-purple-500/40 bg-purple-500/5",
+    headerColor: "text-purple-400",
+    accentColor: "bg-purple-500",
+    ringColor: "stroke-purple-400",
+    icon: <Brain size={16} className="text-purple-400" />,
+    sessionGoal:
+      "Master multi-file codebase navigation, AI output verification, and explaining AI concepts — all critical for Meta's AI-enabled round.",
+    drills: [
+      {
+        id: "navigation",
+        label: "Code Navigation Speed Test",
+        icon: "🗺",
+        description:
+          "Navigate 3-file codebases and answer questions in 5 minutes. Meta's CoderPad has 6–10 files.",
+        badge: "Phase 1",
+        badgeColor: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+        component: CodeNavigationSpeedTest,
+      },
+      {
+        id: "hallucination",
+        label: "AI Hallucination Spotter",
+        icon: "🧠",
+        description:
+          "AI gives subtly wrong code — spot the bug before the AI admits it. Critical for Meta's AI-enabled round.",
+        badge: "Critical",
+        badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+        component: AIHallucinationSpotter,
+      },
+      {
+        id: "epistemic",
+        label: "Epistemic Humility Coach",
+        icon: "🎓",
+        description:
+          "Answer AI philosophy questions scored by LLM on genuine learning velocity. IC7 signal for AI fluency.",
+        badge: "AI Fluency",
+        badgeColor: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+        component: EpistemicHumilityCoach,
+      },
+    ],
+  },
+  {
+    week: 4,
+    title: "Integration & Polish",
+    subtitle: "Explain → Debug → Full Mock",
+    color: "border-orange-500/40 bg-orange-500/5",
+    headerColor: "text-orange-400",
+    accentColor: "bg-orange-500",
+    ringColor: "stroke-orange-400",
+    icon: <Trophy size={16} className="text-orange-400" />,
+    sessionGoal:
+      "Integrate all skills under pressure. The Full Mock Screening Call is the closest simulation of a real Meta recruiter screen.",
+    drills: [
+      {
+        id: "hallucination-2",
+        label: "AI Hallucination Spotter (Hard)",
+        icon: "🧠",
+        description:
+          "Advanced round: harder subtly-wrong AI code. Spot the bug under time pressure. Week 4 difficulty.",
+        badge: "Critical",
+        badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+        component: AIHallucinationSpotter,
+      },
+      {
+        id: "verbal-2",
+        label: "Verbal Explanation (Advanced)",
+        icon: "🎙",
+        description:
+          "Harder scenarios: optimization trade-offs, system-level explanations. Full rubric scoring.",
+        badge: "Communication",
+        badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+        component: VerbalExplanationScorer,
+      },
+      {
+        id: "full-mock",
+        label: "Full Mock Screening Call",
+        icon: "📞",
+        description:
+          "4-phase AI recruiter screen: intro, coding signal, AI fluency, behavioral. Scored on all dimensions.",
+        badge: "Full Mock",
+        badgeColor: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+        component: FullMockScreeningCall,
+      },
+    ],
+  },
+];
+
+// ─── Progress ring SVG ─────────────────────────────────────────────────────────
+function ProgressRing({
+  done,
+  total,
+  color,
+}: {
+  done: number;
+  total: number;
+  color: string;
+}) {
+  const r = 20;
+  const circ = 2 * Math.PI * r;
+  const pct = total === 0 ? 0 : done / total;
+  const offset = circ * (1 - pct);
+  return (
+    <svg width="52" height="52" className="shrink-0">
+      <circle
+        cx="26"
+        cy="26"
+        r={r}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        className="text-muted/30"
+      />
+      <circle
+        cx="26"
+        cy="26"
+        r={r}
+        fill="none"
+        strokeWidth="3"
+        className={color}
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform="rotate(-90 26 26)"
+        style={{ transition: "stroke-dashoffset 0.5s ease" }}
+      />
+      <text
+        x="26"
+        y="30"
+        textAnchor="middle"
+        fontSize="11"
+        fontWeight="700"
+        className="fill-foreground"
+      >
+        {done}/{total}
+      </text>
+    </svg>
+  );
+}
+
+// ─── STAR Story Prompt (inline behavioral practice) ────────────────────────────
+function STARStoryPrompt({ onDone }: { onDone: () => void }) {
+  const bq = BEHAVIORAL_QUESTIONS[Math.floor(Math.random() * 5)]; // Conflict & Influence area
+  const [answer, setAnswer] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+
+  const handleChange = (v: string) => {
+    setAnswer(v);
+    setWordCount(v.trim() ? v.trim().split(/\s+/).length : 0);
+  };
+
+  const hasEnough = wordCount >= 80;
+
+  return (
+    <div className="space-y-3">
+      <div className="p-3 rounded-lg border border-purple-500/30 bg-purple-500/5">
+        <p className="text-xs font-semibold text-purple-400 mb-1">
+          Behavioral Question — {bq.area}
+        </p>
+        <p className="text-sm text-foreground font-medium">{bq.q}</p>
+        <p className="text-xs text-muted-foreground mt-1">Hint: {bq.hint}</p>
+      </div>
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">
+          Write your STAR answer. Aim for 80+ words with specific metrics.
+        </p>
+        <textarea
+          className="w-full h-32 text-xs p-3 rounded-lg border border-border bg-card text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+          placeholder="Situation: ...\nTask: ...\nAction: ...\nResult: ..."
+          value={answer}
+          onChange={e => handleChange(e.target.value)}
+          disabled={submitted}
+        />
+        <div className="flex items-center justify-between">
+          <span
+            className={`text-xs ${hasEnough ? "text-emerald-400" : "text-muted-foreground"}`}
+          >
+            {wordCount} words{" "}
+            {hasEnough ? "✓" : `(need ${80 - wordCount} more)`}
+          </span>
+          {!submitted ? (
+            <Button
+              size="sm"
+              disabled={!hasEnough}
+              onClick={() => setSubmitted(true)}
+              className="text-xs h-7"
+            >
+              Submit Answer
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onDone}
+              className="text-xs h-7 text-emerald-400 border-emerald-500/30"
+            >
+              <CheckCircle2 size={12} className="mr-1" /> Mark Complete
+            </Button>
+          )}
+        </div>
+      </div>
+      {submitted && (
+        <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-xs text-emerald-400">
+          ✓ Answer recorded. Review: Does it have a specific metric? Does it use
+          "I" not "we"? Does it signal the right seniority level?
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Session state type ────────────────────────────────────────────────────────
+interface SessionState {
+  completedDrills: string[]; // drill IDs completed this session
+  sessionDone: boolean;
+}
+
+// ─── Week Session Card ─────────────────────────────────────────────────────────
+function WeekSessionCard({
+  session,
+  sessionState,
+  onDrillComplete,
+  onResetSession,
+}: {
+  session: WeekSession;
+  sessionState: SessionState;
+  onDrillComplete: (drillId: string) => void;
+  onResetSession: () => void;
+}) {
+  const [activeDrill, setActiveDrill] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const done = sessionState.completedDrills.length;
+  const total = session.drills.length;
+  const allDone = done >= total;
+
+  const drill = session.drills.find(d => d.id === activeDrill);
+  const DrillComponent = drill?.component;
+
+  const handleDrillDone = useCallback(
+    (drillId: string) => {
+      onDrillComplete(drillId);
+      setActiveDrill(null);
+    },
+    [onDrillComplete]
+  );
+
+  // If a drill is active, show it full-width
+  if (activeDrill && DrillComponent) {
+    return (
+      <div className={`rounded-xl border ${session.color} overflow-hidden`}>
+        {/* Drill header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+          <button
+            onClick={() => setActiveDrill(null)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft size={13} />
+            Back to Week {session.week}
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{drill.icon}</span>
+            <span className="text-xs font-semibold text-foreground">
+              {drill.label}
+            </span>
+            <Badge className={`text-xs border ${drill.badgeColor}`}>
+              {drill.badge}
+            </Badge>
+          </div>
+          <button
+            onClick={() => handleDrillDone(activeDrill)}
+            className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            <CheckCircle2 size={13} />
+            Mark Done
+          </button>
+        </div>
+
+        {/* Drill content */}
+        <div className="p-4">
+          <DrillComponent />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-xl border ${session.color} overflow-hidden`}>
+      {/* Card header */}
+      <div className="flex items-center gap-3 px-4 py-3">
+        <ProgressRing done={done} total={total} color={session.ringColor} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-sm font-bold ${session.headerColor}`}>
+              Week {session.week} — {session.title}
+            </span>
+            {allDone && (
+              <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-xs">
+                ✓ Complete
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {session.subtitle}
+          </p>
+        </div>
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+        >
+          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+        </button>
+      </div>
+
+      {/* Session goal */}
+      {expanded && (
+        <div className="px-4 pb-3 space-y-3">
+          <p className="text-xs text-muted-foreground border-t border-border/40 pt-3">
+            {session.sessionGoal}
+          </p>
+
+          {/* Drill list */}
+          <div className="space-y-2">
+            {session.drills.map((d, i) => {
+              const isDone = sessionState.completedDrills.includes(d.id);
+              return (
+                <div
+                  key={d.id}
+                  className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                    isDone
+                      ? "border-emerald-500/30 bg-emerald-500/5 opacity-75"
+                      : "border-border bg-card hover:border-border/80"
+                  }`}
+                >
+                  {/* Step number / check */}
+                  <div
+                    className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                      isDone
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {isDone ? <CheckCircle2 size={13} /> : i + 1}
+                  </div>
+
+                  {/* Drill info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span className="text-sm">{d.icon}</span>
+                      <span className="text-xs font-semibold text-foreground">
+                        {d.label}
+                      </span>
+                      <Badge className={`text-xs border ${d.badgeColor}`}>
+                        {d.badge}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {d.description}
+                    </p>
+                  </div>
+
+                  {/* Action */}
+                  <div className="shrink-0 flex flex-col gap-1">
+                    {!isDone ? (
+                      <Button
+                        size="sm"
+                        onClick={() => setActiveDrill(d.id)}
+                        className={`text-xs h-7 gap-1 ${session.accentColor} hover:opacity-90 text-white border-0`}
+                      >
+                        <Play size={11} />
+                        Start
+                      </Button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          // Allow re-doing a completed drill
+                          setActiveDrill(d.id);
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Redo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Session summary */}
+          {allDone && (
+            <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 space-y-2">
+              <div className="flex items-center gap-2">
+                <Trophy size={14} className="text-emerald-400" />
+                <span className="text-xs font-semibold text-emerald-400">
+                  Week {session.week} Session Complete!
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                You've completed all 3 drills for this week. Keep your streak
+                going — come back tomorrow for the next session.
+              </p>
+              <button
+                onClick={onResetSession}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <RotateCcw size={11} />
+                Reset session (practice again)
+              </button>
+            </div>
+          )}
+
+          {/* Progress bar */}
+          {!allDone && done > 0 && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Session progress</span>
+                <span>
+                  {done}/{total} drills
+                </span>
+              </div>
+              <Progress value={(done / total) * 100} className="h-1.5" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Section toggle ────────────────────────────────────────────────────────────
 function Section({
   title,
@@ -464,6 +1038,59 @@ function Section({
 export default function LearningPathTab() {
   const [activeWeek, setActiveWeek] = useState<number | null>(null);
 
+  // Per-week session state persisted to localStorage
+  const [week1State, setWeek1State] = useLocalStorage<SessionState>(
+    "meta_lp_session_w1_v1",
+    { completedDrills: [], sessionDone: false }
+  );
+  const [week2State, setWeek2State] = useLocalStorage<SessionState>(
+    "meta_lp_session_w2_v1",
+    { completedDrills: [], sessionDone: false }
+  );
+  const [week3State, setWeek3State] = useLocalStorage<SessionState>(
+    "meta_lp_session_w3_v1",
+    { completedDrills: [], sessionDone: false }
+  );
+  const [week4State, setWeek4State] = useLocalStorage<SessionState>(
+    "meta_lp_session_w4_v1",
+    { completedDrills: [], sessionDone: false }
+  );
+
+  const sessionStates = [week1State, week2State, week3State, week4State];
+  const setters = [setWeek1State, setWeek2State, setWeek3State, setWeek4State];
+
+  const handleDrillComplete = useCallback(
+    (weekIdx: number, drillId: string) => {
+      setters[weekIdx](prev => {
+        if (prev.completedDrills.includes(drillId)) return prev;
+        const next = [...prev.completedDrills, drillId];
+        const session = WEEK_SESSIONS[weekIdx];
+        return {
+          completedDrills: next,
+          sessionDone: next.length >= session.drills.length,
+        };
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const handleResetSession = useCallback(
+    (weekIdx: number) => {
+      setters[weekIdx]({ completedDrills: [], sessionDone: false });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // Overall progress
+  const totalDrills = WEEK_SESSIONS.reduce((s, w) => s + w.drills.length, 0);
+  const completedDrills = sessionStates.reduce(
+    (s, st) => s + st.completedDrills.length,
+    0
+  );
+  const overallPct = Math.round((completedDrills / totalDrills) * 100);
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -488,6 +1115,51 @@ export default function LearningPathTab() {
           weeks accelerated path. Always refer first to any official preparation
           materials you have received.
         </p>
+      </div>
+
+      {/* ── Hands-On Practice Sessions ─────────────────────────────────────── */}
+      <div className="prep-card overflow-hidden">
+        <div className="p-4 border-b border-border/50">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold">
+                <Play size={10} />
+                HANDS-ON PRACTICE
+              </div>
+              <span className="text-sm font-semibold text-foreground">
+                Weekly Drill Sessions
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-muted-foreground">
+                {completedDrills}/{totalDrills} drills done
+              </div>
+              <div className="w-24">
+                <Progress value={overallPct} className="h-1.5" />
+              </div>
+              <span className="text-xs font-bold text-foreground">
+                {overallPct}%
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Each week has 3 targeted drills that address that week's core skill
+            gaps. Launch a drill, complete it, and mark it done. Progress is
+            saved locally.
+          </p>
+        </div>
+
+        <div className="p-4 space-y-3">
+          {WEEK_SESSIONS.map((session, i) => (
+            <WeekSessionCard
+              key={session.week}
+              session={session}
+              sessionState={sessionStates[i]}
+              onDrillComplete={drillId => handleDrillComplete(i, drillId)}
+              onResetSession={() => handleResetSession(i)}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Part 1 — Why Candidates Fail */}
@@ -639,7 +1311,7 @@ export default function LearningPathTab() {
         </div>
       </Section>
 
-      {/* Part 4 — Apex Picks */}
+      {/* Part 3 — Apex Picks */}
       <Section
         title="Part 3 — Apex Picks: The 5 Features That Move the Needle Most"
         icon={<Trophy size={15} className="text-amber-400" />}
@@ -685,7 +1357,7 @@ export default function LearningPathTab() {
         </div>
       </Section>
 
-      {/* Part 5 — High Impact Features */}
+      {/* Part 4 — High Impact Features */}
       <Section
         title="Part 4 — All High Impact Features"
         icon={<Zap size={15} className="text-violet-400" />}
