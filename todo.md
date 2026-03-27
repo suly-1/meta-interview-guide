@@ -1084,7 +1084,20 @@
 - [ ] TDD Mode toggle for Phase 1: hide code, show only failing tests, reveal code button after attempt
 - [ ] Add 5 new problems: distributed caching, news feed ranking, rate limiting with burst capacity, graph-based friend recommendations, distributed counter
 
-## 10 New High-Impact Features — Round 42 (to be researched and implemented)
+## Build Fix — Round 42
 
-- [ ] Research 10 more features from primary sources (hellointerview, interviewing.io, Reddit)
-- [ ] Implement all 10 researched features
+- [x] Fix package.json build script: server/index.ts → server/\_core/index.ts
+- [x] Fix package.json dev script to use tsx watch server/\_core/index.ts
+
+## 10 Research-Backed Features — Round 42
+
+- [ ] Feature 1: AI Hallucination Spotter — AI gives subtly wrong code, candidate finds the error
+- [ ] Feature 2: Requirements Clarification Drill — timed practice asking the right clarifying questions
+- [ ] Feature 3: Checkpoint Pacer — visual 60-min timeline with phase checkpoints and pacing alerts
+- [ ] Feature 4: Complexity Flashcard Trainer — given code snippet, identify Big-O time/space complexity
+- [ ] Feature 5: Code Navigation Speed Test — timed multi-file codebase Q&A without running code
+- [ ] Feature 6: Rubber Duck Explainer — type explanation of approach, AI scores clarity
+- [ ] Feature 7: Incremental Feature Builder — add features one at a time on shared codebase, timed
+- [ ] Feature 8: Test-First Debugger — given only failing test output, write the fix (no code shown)
+- [ ] Feature 9: Verbal Explanation Scorer — type 90-sec explanation, AI scores Technical Communication
+- [ ] Feature 10: Full Session Replay — replay code changes + AI messages on a timeline with annotations
