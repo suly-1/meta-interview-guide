@@ -1234,6 +1234,39 @@ export const trpc = {
     },
   },
 
+  // ── drillSessions ─────────────────────────────────────────────────────────────────────────────────
+  drillSessions: {
+    saveSession: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ id: 1 })),
+    },
+    getBestScoresByWeek: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    evaluatePersonaTurn: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          content: JSON.stringify({
+            challenge: "⚠️ AI Persona Stress Test requires the online version.",
+            score: 0,
+            feedback: "AI features are not available in the static build.",
+            betterResponse: "",
+          }),
+        })),
+    },
+    generatePersonaScorecard: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({
+          content: JSON.stringify({
+            overallScore: 0,
+            resilienceRating: "N/A",
+            strengths: [],
+            weaknesses: [],
+            summary: "⚠️ AI scoring requires the online version.",
+          }),
+        })),
+    },
+  },
+
   // ── system ──────────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {

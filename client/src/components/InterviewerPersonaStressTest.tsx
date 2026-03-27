@@ -1,8 +1,8 @@
 /**
- * #8 — Interviewer Persona Stress Test
- * Candidate picks a behavioral question and an interviewer persona.
- * AI plays the persona and fires 3 follow-up challenges.
- * Candidate responds to each. AI scores the full exchange.
+ * Interviewer Persona Stress Test
+ * AI plays one of 5 hostile interviewer archetypes.
+ * Per-turn: AI scores resilience (0-10) and generates the next challenge.
+ * Final: AI generates a coaching note and persists a resilience scorecard to DB.
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -16,7 +16,10 @@ import {
   ChevronUp,
   RefreshCw,
   MessageSquare,
+  Trophy,
+  Star,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const PERSONAS = [
   {
@@ -28,6 +31,8 @@ const PERSONAS = [
     color: "text-red-400",
     bgColor: "bg-red-500/10",
     borderColor: "border-red-500/20",
+    openingChallenge:
+      "You've given your answer. But how do you actually know that worked? What's the evidence?",
   },
   {
     id: "devil",
@@ -37,6 +42,8 @@ const PERSONAS = [
     color: "text-orange-400",
     bgColor: "bg-orange-500/10",
     borderColor: "border-orange-500/20",
+    openingChallenge:
+      "I'd argue the opposite approach would have been better. Why are you confident your choice was correct?",
   },
   {
     id: "detail",
@@ -46,6 +53,8 @@ const PERSONAS = [
     color: "text-blue-400",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500/20",
+    openingChallenge:
+      "Give me the exact numbers. What was the baseline metric, what was the result, and when exactly did this happen?",
   },
   {
     id: "silent",
@@ -55,6 +64,7 @@ const PERSONAS = [
     color: "text-gray-400",
     bgColor: "bg-gray-500/10",
     borderColor: "border-gray-500/20",
+    openingChallenge: "Interesting. Tell me more.",
   },
   {
     id: "friendly",
@@ -64,14 +74,24 @@ const PERSONAS = [
     color: "text-emerald-400",
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/20",
+    openingChallenge:
+      "That's great! And what would you have done differently if you had more time or resources?",
   },
 ];
 
-interface Exchange {
+const MAX_TURNS = 3;
+
+interface Turn {
   challenge: string;
   response: string;
-  score?: number;
-  feedback?: string;
+  score: number;
+  feedback: string;
+}
+
+interface ScorecardResult {
+  resilienceScore: number;
+  avgTurnScore: number;
+  aiCoachNote: string;
 }
 
 export function InterviewerPersonaStressTest() {
@@ -81,106 +101,94 @@ export function InterviewerPersonaStressTest() {
     BEHAVIORAL_QUESTIONS[0]?.id ?? ""
   );
   const [initialAnswer, setInitialAnswer] = useState("");
-  const [exchanges, setExchanges] = useState<Exchange[]>([]);
-  const [phase, setPhase] = useState<"setup" | "challenges" | "done">("setup");
-  const [currentChallengeIdx, setCurrentChallengeIdx] = useState(0);
-  const [challenges, setChallenges] = useState<string[]>([]);
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [phase, setPhase] = useState<"setup" | "running" | "done">("setup");
+  const [currentChallenge, setCurrentChallenge] = useState<string>("");
   const [responseInput, setResponseInput] = useState("");
-  const [finalScore, setFinalScore] = useState<string | null>(null);
+  const [scorecard, setScorecard] = useState<ScorecardResult | null>(null);
 
-  const startMutation = trpc.ai.personaStressTestStart.useMutation();
-  const respondMutation = trpc.ai.personaStressTestRespond.useMutation();
-  const scoreMutation = trpc.ai.personaStressTestScore.useMutation();
+  const evaluateTurn = trpc.drillSessions.evaluatePersonaTurn.useMutation();
+  const generateScorecard =
+    trpc.drillSessions.generatePersonaScorecard.useMutation();
 
   const selectedQ = BEHAVIORAL_QUESTIONS.find(q => q.id === selectedQId);
 
-  async function handleStart() {
+  function handleStart() {
     if (!initialAnswer.trim()) {
-      toast.error("Write your initial answer first");
+      toast.error("Write your initial STAR answer first");
       return;
     }
-    try {
-      const res = await startMutation.mutateAsync({
-        question: selectedQ?.q ?? "",
-        answer: initialAnswer,
-        persona: selectedPersona.id,
-        personaDescription: selectedPersona.description,
-      });
-      const parsed = JSON.parse(res.content) as { challenges: string[] };
-      setChallenges(parsed.challenges);
-      setPhase("challenges");
-      setCurrentChallengeIdx(0);
-    } catch {
-      toast.error("Failed to start — try again");
-    }
+    // Use the persona's opening challenge to kick off the first turn
+    setCurrentChallenge(selectedPersona.openingChallenge);
+    setPhase("running");
+    setTurns([]);
+    setResponseInput("");
+    setScorecard(null);
   }
 
-  async function handleRespond() {
+  async function handleSubmitResponse() {
     if (!responseInput.trim()) return;
-    const challenge = challenges[currentChallengeIdx];
+    const turnNumber = turns.length + 1;
     try {
-      const res = await respondMutation.mutateAsync({
-        question: selectedQ?.q ?? "",
-        initialAnswer,
-        persona: selectedPersona.id,
-        challenge,
+      const result = await evaluateTurn.mutateAsync({
+        personaId: selectedPersona.id,
+        personaLabel: selectedPersona.name,
+        personaDescription: selectedPersona.description,
+        topic: selectedQ?.q ?? "",
+        challenge: currentChallenge,
         response: responseInput,
+        turnNumber,
       });
-      const parsed = JSON.parse(res.content) as {
-        score: number;
-        feedback: string;
-      };
-      const newExchange: Exchange = {
-        challenge,
+
+      const newTurn: Turn = {
+        challenge: currentChallenge,
         response: responseInput,
-        score: parsed.score,
-        feedback: parsed.feedback,
+        score: result.resilienceScore,
+        feedback: result.coachingNote,
       };
-      const updatedExchanges = [...exchanges, newExchange];
-      setExchanges(updatedExchanges);
+      const updatedTurns = [...turns, newTurn];
+      setTurns(updatedTurns);
       setResponseInput("");
 
-      const nextIdx = currentChallengeIdx + 1;
-      if (nextIdx >= challenges.length) {
+      if (turnNumber >= MAX_TURNS) {
+        // Final turn — generate scorecard
         setPhase("done");
-        // Generate final summary
         try {
-          const summaryRes = await scoreMutation.mutateAsync({
-            question: selectedQ?.q ?? "",
-            initialAnswer,
-            persona: selectedPersona.id,
-            exchanges: updatedExchanges.map(e => ({
-              challenge: e.challenge,
-              response: e.response,
-              score: e.score ?? 0,
-            })),
+          const sc = await generateScorecard.mutateAsync({
+            personaId: selectedPersona.id,
+            personaLabel: selectedPersona.name,
+            topic: selectedQ?.q ?? "",
+            turns: updatedTurns,
           });
-          setFinalScore(summaryRes.content);
+          setScorecard(sc);
         } catch {
-          // non-fatal
+          // non-fatal — show partial results
         }
       } else {
-        setCurrentChallengeIdx(nextIdx);
+        // Advance to next challenge
+        setCurrentChallenge(result.nextChallenge);
       }
     } catch {
-      toast.error("Scoring failed");
+      toast.error("Scoring failed — try again");
     }
   }
 
   function reset() {
     setPhase("setup");
-    setExchanges([]);
-    setChallenges([]);
+    setTurns([]);
     setInitialAnswer("");
     setResponseInput("");
-    setFinalScore(null);
-    setCurrentChallengeIdx(0);
+    setCurrentChallenge("");
+    setScorecard(null);
   }
 
   const avgScore =
-    exchanges.length > 0
-      ? exchanges.reduce((a, e) => a + (e.score ?? 0), 0) / exchanges.length
+    turns.length > 0
+      ? turns.reduce((a, t) => a + t.score, 0) / turns.length
       : null;
+
+  const scoreColor = (s: number) =>
+    s >= 7 ? "text-emerald-400" : s >= 5 ? "text-amber-400" : "text-red-400";
 
   return (
     <div
@@ -210,9 +218,9 @@ export function InterviewerPersonaStressTest() {
       {!expanded && (
         <div className="px-4 py-3">
           <p className="text-xs text-muted-foreground">
-            AI plays a hostile interviewer persona and fires 3 follow-up
-            challenges at your answer. Builds resilience for the toughest
-            interviewers.
+            AI plays a hostile interviewer persona and fires {MAX_TURNS}{" "}
+            follow-up challenges at your STAR answer. Each turn is scored on
+            resilience (0–10). Final scorecard persisted to your profile.
           </p>
           <button
             onClick={() => setExpanded(true)}
@@ -235,7 +243,8 @@ export function InterviewerPersonaStressTest() {
               <strong>Why this matters:</strong> Most candidates prepare for
               friendly interviewers. The ones who fail are caught off-guard by
               skeptics and devil's advocates. This drill makes hostile
-              follow-ups feel routine.
+              follow-ups feel routine. Scores are saved to your profile so you
+              can track resilience improvement over time.
             </p>
           </div>
 
@@ -252,7 +261,11 @@ export function InterviewerPersonaStressTest() {
                     <button
                       key={p.id}
                       onClick={() => setSelectedPersona(p)}
-                      className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${selectedPersona.id === p.id ? `${p.bgColor} ${p.borderColor} border` : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                      className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                        selectedPersona.id === p.id
+                          ? `${p.bgColor} ${p.borderColor} border`
+                          : "bg-white/5 border-white/10 hover:bg-white/10"
+                      }`}
                     >
                       <span className="text-xl shrink-0">{p.icon}</span>
                       <div>
@@ -302,56 +315,65 @@ export function InterviewerPersonaStressTest() {
                 <textarea
                   value={initialAnswer}
                   onChange={e => setInitialAnswer(e.target.value)}
-                  rows={6}
+                  rows={5}
                   placeholder="Write your STAR answer here — Situation, Task, Action, Result..."
                   className="w-full text-xs rounded-lg bg-background border border-border px-3 py-2 text-foreground resize-none"
                 />
+                <p className="text-[10px] text-muted-foreground">
+                  The AI will read this answer and fire {MAX_TURNS}{" "}
+                  persona-style challenges at it.
+                </p>
               </div>
 
               <button
                 onClick={handleStart}
-                disabled={startMutation.isPending || !initialAnswer.trim()}
+                disabled={!initialAnswer.trim()}
                 className="w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-sm font-bold transition-all"
               >
-                {startMutation.isPending
-                  ? "Generating challenges…"
-                  : `Face ${selectedPersona.name} →`}
+                Face {selectedPersona.name} →
               </button>
             </div>
           )}
 
-          {/* Challenges phase */}
-          {(phase === "challenges" || phase === "done") && (
+          {/* Running / Done phase */}
+          {(phase === "running" || phase === "done") && (
             <div className="space-y-4">
-              {/* Persona badge */}
-              <div
-                className={`flex items-center gap-2 p-2 rounded-lg ${selectedPersona.bgColor} border ${selectedPersona.borderColor}`}
-              >
-                <span>{selectedPersona.icon}</span>
-                <span className={`text-xs font-bold ${selectedPersona.color}`}>
-                  {selectedPersona.name}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  — {selectedPersona.description}
-                </span>
-              </div>
-
-              {/* Progress */}
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>
-                  {exchanges.length}/{challenges.length} challenges completed
-                </span>
-                {avgScore !== null && (
+              {/* Persona badge + progress */}
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${selectedPersona.bgColor} border ${selectedPersona.borderColor}`}
+                >
+                  <span>{selectedPersona.icon}</span>
                   <span
-                    className={`font-bold ${avgScore >= 4 ? "text-emerald-400" : avgScore >= 3 ? "text-amber-400" : "text-red-400"}`}
+                    className={`text-xs font-bold ${selectedPersona.color}`}
                   >
-                    Avg: {avgScore.toFixed(1)}/5
+                    {selectedPersona.name}
                   </span>
-                )}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>
+                    Turn {Math.min(turns.length + 1, MAX_TURNS)}/{MAX_TURNS}
+                  </span>
+                  {avgScore !== null && (
+                    <span className={`font-bold ${scoreColor(avgScore)}`}>
+                      Avg resilience: {avgScore.toFixed(1)}/10
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Completed exchanges */}
-              {exchanges.map((ex, i) => (
+              {/* Initial answer recap */}
+              <div className="p-2.5 rounded-lg bg-white/5 border border-white/10">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                  Your initial answer
+                </p>
+                <p className="text-xs text-foreground/70 line-clamp-3">
+                  {initialAnswer}
+                </p>
+              </div>
+
+              {/* Completed turns */}
+              {turns.map((t, i) => (
                 <div
                   key={i}
                   className="rounded-lg bg-white/5 border border-white/10 p-3 space-y-2"
@@ -361,7 +383,7 @@ export function InterviewerPersonaStressTest() {
                       {selectedPersona.icon}
                     </span>
                     <p className="text-xs font-semibold text-foreground">
-                      "{ex.challenge}"
+                      "{t.challenge}"
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
@@ -369,32 +391,36 @@ export function InterviewerPersonaStressTest() {
                       size={12}
                       className="text-muted-foreground shrink-0 mt-0.5"
                     />
-                    <p className="text-xs text-foreground/70">{ex.response}</p>
+                    <p className="text-xs text-foreground/70">{t.response}</p>
                   </div>
-                  {ex.score !== undefined && (
-                    <div className="flex items-center justify-between pt-1 border-t border-white/5">
-                      <p className="text-xs text-muted-foreground">
-                        {ex.feedback}
-                      </p>
-                      <span
-                        className={`text-xs font-bold shrink-0 ml-2 ${ex.score >= 4 ? "text-emerald-400" : ex.score >= 3 ? "text-amber-400" : "text-red-400"}`}
-                      >
-                        {ex.score}/5
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                    <p className="text-xs text-muted-foreground flex-1 mr-2">
+                      {t.feedback}
+                    </p>
+                    <Badge
+                      className={`text-xs border shrink-0 ${
+                        t.score >= 7
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                          : t.score >= 5
+                            ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                            : "bg-red-500/15 text-red-400 border-red-500/30"
+                      }`}
+                    >
+                      {t.score}/10
+                    </Badge>
+                  </div>
                 </div>
               ))}
 
-              {/* Current challenge */}
-              {phase === "challenges" && challenges[currentChallengeIdx] && (
+              {/* Current challenge input */}
+              {phase === "running" && (
                 <div className="space-y-3 rounded-xl border-2 border-orange-500/40 p-4 bg-orange-950/20">
                   <div className="flex items-start gap-2">
                     <span className="text-lg shrink-0">
                       {selectedPersona.icon}
                     </span>
                     <p className="text-sm font-bold text-foreground">
-                      "{challenges[currentChallengeIdx]}"
+                      "{currentChallenge}"
                     </p>
                   </div>
                   <textarea
@@ -406,26 +432,61 @@ export function InterviewerPersonaStressTest() {
                     autoFocus
                   />
                   <button
-                    onClick={handleRespond}
-                    disabled={
-                      respondMutation.isPending || !responseInput.trim()
-                    }
+                    onClick={handleSubmitResponse}
+                    disabled={evaluateTurn.isPending || !responseInput.trim()}
                     className="w-full py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-xs font-bold transition-all"
                   >
-                    {respondMutation.isPending
+                    {evaluateTurn.isPending
                       ? "Scoring…"
-                      : "Submit Response →"}
+                      : turns.length + 1 >= MAX_TURNS
+                        ? "Submit Final Response →"
+                        : "Submit Response →"}
                   </button>
                 </div>
               )}
 
-              {/* Final score */}
-              {phase === "done" && finalScore && (
-                <div className="rounded-lg bg-white/5 border border-white/10 p-4 space-y-2">
-                  <div className="text-xs font-bold text-orange-400 uppercase tracking-wider">
-                    Final Verdict
+              {/* Generating scorecard spinner */}
+              {phase === "done" && generateScorecard.isPending && (
+                <div className="text-center py-4 text-xs text-muted-foreground animate-pulse">
+                  Generating your resilience scorecard…
+                </div>
+              )}
+
+              {/* Final scorecard */}
+              {phase === "done" && scorecard && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Trophy size={16} className="text-amber-400" />
+                    <span className="text-sm font-bold text-amber-400">
+                      Resilience Scorecard
+                    </span>
+                    <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 text-xs ml-auto">
+                      <Star size={10} className="mr-0.5" />
+                      {scorecard.resilienceScore}/100
+                    </Badge>
                   </div>
-                  <Streamdown>{finalScore}</Streamdown>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${
+                        scorecard.resilienceScore >= 70
+                          ? "bg-emerald-500"
+                          : scorecard.resilienceScore >= 50
+                            ? "bg-amber-500"
+                            : "bg-red-500"
+                      }`}
+                      style={{ width: `${scorecard.resilienceScore}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      AI Coach Note:{" "}
+                    </span>
+                    <Streamdown>{scorecard.aiCoachNote}</Streamdown>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    ✓ Scorecard saved to your profile. Avg turn score:{" "}
+                    {scorecard.avgTurnScore}/10
+                  </p>
                 </div>
               )}
 

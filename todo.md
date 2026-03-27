@@ -1212,3 +1212,10 @@
 - [x] FailureAnalysisTab — 7-part interactive reference ("Why Candidates Fail") with weak signal drills, stress-test scenarios, behavioral question bank, persona stress tests, 22% down-leveling guide, tools map, and summary fix table
 - [x] Register failure-analysis tab in TopNav and Home.tsx
 - [x] Vitest tests for FailureAnalysisTab data integrity and LearningPath drill sessions (17 tests passing)
+
+## New Features — Round 50
+
+- [ ] Server-side drill session score persistence (drillSessions table, tRPC procedures)
+- [ ] Per-week best-score badges on LearningPathTab cards (wired to DB)
+- [ ] Inline drill launchers on Failure Analysis weak signal cards
+- [ ] Persona Stress Test simulator (AI plays 5 archetypes, scores resilience)

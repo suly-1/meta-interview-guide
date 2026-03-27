@@ -45,3 +45,6 @@ Thumbs.db
 client/public/__manus__/
 *.min.js
 *.min.css
+
+# Scripts (standalone .mjs files with non-standard syntax)
+scripts/

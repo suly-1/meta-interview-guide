@@ -9,6 +9,7 @@
 // Blue (Meta), Emerald (mastered), Amber (weak), Orange (streak)
 
 import { useState, useCallback } from "react";
+import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -793,11 +794,13 @@ function WeekSessionCard({
   sessionState,
   onDrillComplete,
   onResetSession,
+  bestScore,
 }: {
   session: WeekSession;
   sessionState: SessionState;
   onDrillComplete: (drillId: string) => void;
   onResetSession: () => void;
+  bestScore?: number;
 }) {
   const [activeDrill, setActiveDrill] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -869,6 +872,12 @@ function WeekSessionCard({
             {allDone && (
               <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-xs">
                 ✓ Complete
+              </Badge>
+            )}
+            {bestScore !== undefined && bestScore > 0 && (
+              <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 text-xs">
+                <Star size={10} className="mr-0.5" />
+                Best: {bestScore}%
               </Badge>
             )}
           </div>
@@ -1059,15 +1068,34 @@ export default function LearningPathTab() {
   const sessionStates = [week1State, week2State, week3State, week4State];
   const setters = [setWeek1State, setWeek2State, setWeek3State, setWeek4State];
 
+  // Server-side best scores per week
+  const { data: bestScoresByWeek = {} } =
+    trpc.drillSessions.getBestScoresByWeek.useQuery();
+  const saveSession = trpc.drillSessions.saveSession.useMutation();
+
   const handleDrillComplete = useCallback(
     (weekIdx: number, drillId: string) => {
       setters[weekIdx](prev => {
         if (prev.completedDrills.includes(drillId)) return prev;
         const next = [...prev.completedDrills, drillId];
         const session = WEEK_SESSIONS[weekIdx];
+        const allDone = next.length >= session.drills.length;
+        // Persist to DB when all drills in the week are done
+        if (allDone) {
+          const drillScores = next.map(id => ({
+            drillId: id,
+            score: 80, // default score; individual drills can pass a real score later
+            completedAt: Date.now(),
+          }));
+          saveSession.mutate({
+            weekNumber: session.week,
+            sessionScore: 80,
+            drillScores,
+          });
+        }
         return {
           completedDrills: next,
-          sessionDone: next.length >= session.drills.length,
+          sessionDone: allDone,
         };
       });
     },
@@ -1157,6 +1185,7 @@ export default function LearningPathTab() {
               sessionState={sessionStates[i]}
               onDrillComplete={drillId => handleDrillComplete(i, drillId)}
               onResetSession={() => handleResetSession(i)}
+              bestScore={bestScoresByWeek[session.week]}
             />
           ))}
         </div>

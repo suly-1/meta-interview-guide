@@ -414,3 +414,42 @@ export const aiNativeMaturityLevels = mysqlTable("ai_native_maturity_levels", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type AiNativeMaturityLevel = typeof aiNativeMaturityLevels.$inferSelect;
+
+// ── Learning Path Drill Sessions ──────────────────────────────────────────────
+// Persists completed drill session results from the LearningPathTab.
+// Each row represents one completed session for a given week.
+// drillScores is a JSON array of { drillId, score, completedAt } objects.
+export const drillSessions = mysqlTable("drill_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  weekNumber: int("weekNumber").notNull(), // 1–4
+  sessionScore: int("sessionScore").notNull().default(0), // 0–100 composite
+  drillScores: json("drillScores")
+    .notNull()
+    .$type<Array<{ drillId: string; score: number; completedAt: number }>>(),
+  completedAt: timestamp("completedAt").defaultNow().notNull(),
+});
+export type DrillSession = typeof drillSessions.$inferSelect;
+
+// ── Persona Stress Test Sessions ──────────────────────────────────────────────
+// Persists completed Persona Stress Test simulator sessions.
+// personaId maps to one of the 5 archetypes (skeptic, devils-advocate, etc.).
+// turns is a JSON array of { challenge, response, score } objects.
+export const personaStressSessions = mysqlTable("persona_stress_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  personaId: varchar("personaId", { length: 64 }).notNull(),
+  personaLabel: varchar("personaLabel", { length: 128 }).notNull(),
+  resilienceScore: int("resilienceScore").notNull().default(0), // 0–100
+  turns: json("turns").notNull().$type<
+    Array<{
+      challenge: string;
+      response: string;
+      score: number;
+      feedback: string;
+    }>
+  >(),
+  aiCoachNote: text("aiCoachNote"),
+  completedAt: timestamp("completedAt").defaultNow().notNull(),
+});
+export type PersonaStressSession = typeof personaStressSessions.$inferSelect;

@@ -33,8 +33,14 @@ import {
   Circle,
   Play,
   Filter,
+  Rocket,
+  X,
 } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import CheckpointPacer from "@/components/training/CheckpointPacer";
+import TestFirstDebugger from "@/components/training/TestFirstDebugger";
+import VerbalExplanationScorer from "@/components/training/VerbalExplanationScorer";
+import { InterviewerPersonaStressTest } from "@/components/InterviewerPersonaStressTest";
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
@@ -1012,6 +1018,21 @@ function FailureMode({
   );
 }
 
+// Map each signal ID to its inline drill component
+// Only using components that compile cleanly (no pre-existing TS errors)
+const SIGNAL_DRILL_COMPONENTS: Record<string, React.ComponentType> = {
+  sd1: CheckpointPacer, // NFR: practice time-boxing requirements phase
+  sd2: CheckpointPacer, // Tradeoff: structured time per design phase
+  sd3: VerbalExplanationScorer, // Observability: verbal explanation drill
+  sd4: TestFirstDebugger, // Deep Dive: test-first debugging practice
+  c1: VerbalExplanationScorer, // Complexity: verbal explanation of Big-O
+  c2: TestFirstDebugger, // Edge Cases: test-first approach
+  b1: VerbalExplanationScorer, // STAR Specificity: verbal answer scoring
+  b2: VerbalExplanationScorer, // Ownership: verbal ownership framing
+  p1: CheckpointPacer, // Requirements: timed clarification phase
+  p2: CheckpointPacer, // Time Management: strict phase timer
+};
+
 function WeakSignalCard({
   signal,
   drillDone,
@@ -1022,6 +1043,14 @@ function WeakSignalCard({
   onToggleDrill: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [drillOpen, setDrillOpen] = useState(false);
+  const DrillComponent = SIGNAL_DRILL_COMPONENTS[signal.id];
+
+  function handleDrillComplete() {
+    setDrillOpen(false);
+    if (!drillDone) onToggleDrill();
+  }
+
   return (
     <div
       className={`rounded-lg border p-3 transition-all ${drillDone ? "border-emerald-500/30 bg-emerald-500/5" : "border-border bg-card"}`}
@@ -1045,19 +1074,35 @@ function WeakSignalCard({
             <span className="text-xs font-semibold text-foreground">
               {signal.title}
             </span>
+            {drillDone && (
+              <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] border">
+                ✓ Done
+              </Badge>
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-1">{signal.detail}</p>
-          <button
-            onClick={() => setExpanded(e => !e)}
-            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1.5 transition-colors"
-          >
-            <Play size={10} />
-            {expanded ? "Hide drill" : "Show drill"}
-          </button>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <button
+              onClick={() => setExpanded(e => !e)}
+              className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <Play size={10} />
+              {expanded ? "Hide drill tip" : "Show drill tip"}
+            </button>
+            {DrillComponent && (
+              <button
+                onClick={() => setDrillOpen(o => !o)}
+                className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-semibold"
+              >
+                <Rocket size={10} />
+                {drillOpen ? "Close drill" : "Launch drill"}
+              </button>
+            )}
+          </div>
           {expanded && (
             <div className="mt-2 p-2.5 rounded-lg border border-blue-500/30 bg-blue-500/5">
               <p className="text-xs font-semibold text-blue-400 mb-1">
-                Today's Drill
+                Today's Drill Tip
               </p>
               <p className="text-xs text-foreground">{signal.drill}</p>
               {!drillDone && (
@@ -1069,6 +1114,33 @@ function WeakSignalCard({
                   Mark drill done
                 </Button>
               )}
+            </div>
+          )}
+          {drillOpen && DrillComponent && (
+            <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-emerald-500/20">
+                <span className="text-xs font-semibold text-emerald-400">
+                  🚀 Inline Drill — Signal {signal.num}: {signal.title}
+                </span>
+                <button
+                  onClick={() => setDrillOpen(false)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+              <div className="p-3">
+                <DrillComponent />
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={handleDrillComplete}
+                    className="text-xs h-7 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    ✓ Mark Signal Done & Close
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -1655,6 +1727,14 @@ export default function FailureAnalysisTab() {
             conditions fail when they encounter these personas in real
             interviews.
           </p>
+
+          {/* Live Persona Simulator */}
+          <div>
+            <p className="text-xs font-semibold text-foreground mb-2">
+              Live Simulator — Practice Against Any Persona
+            </p>
+            <InterviewerPersonaStressTest />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {PERSONAS.map(p => (
               <div
