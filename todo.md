@@ -1140,3 +1140,9 @@
 - [x] Add 9 aiNative stubs to trpc.standalone.ts
 - [x] Run pnpm test — 85/85 pass
 - [x] Save checkpoint
+
+## Auto Publish Notification — Round 45
+
+- [x] Create server/checkpointNotifier.ts — fires notifyOwner on every production cold-start
+- [x] Wire fireCheckpointPublishedNotification() into server/\_core/index.ts startup
+- [x] 85/85 tests pass, prettier clean

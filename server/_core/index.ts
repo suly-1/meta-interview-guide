@@ -14,6 +14,7 @@ import { startWeeklyAnalyticsCron } from "../weeklyAnalytics";
 import { startDailyAlertCron } from "../dailyAlert";
 import { startInactivityAlertCron } from "../inactivityAlert";
 import { startBlockExpiryCron } from "../blockExpiryJob";
+import { fireCheckpointPublishedNotification } from "../checkpointNotifier";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -146,6 +147,9 @@ async function startServer() {
   startDailyAlertCron();
   startInactivityAlertCron();
   startBlockExpiryCron();
+
+  // Notify owner whenever a new checkpoint goes live in production
+  void fireCheckpointPublishedNotification();
 }
 
 startServer().catch(console.error);
