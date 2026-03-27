@@ -33,7 +33,7 @@ const LOGO_ICON = IS_METAGUIDE_BLOG ? (
 );
 const WORDMARK = IS_METAGUIDE_BLOG
   ? "Staff Eng Prep"
-  : "Screen Interview Prep Guide";
+  : "Screen Interview Guide: Meta Style";
 const BADGE_TEXT = IS_METAGUIDE_BLOG ? "L4–L7" : "L6/L7";
 const BADGE_CLS = IS_METAGUIDE_BLOG ? "badge-green" : "badge-blue";
 const ACTIVE_TAB_CLS = IS_METAGUIDE_BLOG
