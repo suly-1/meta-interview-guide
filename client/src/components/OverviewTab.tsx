@@ -191,9 +191,13 @@ function ReadinessDashboard() {
 
   // AI-Native readiness: average of best scores across all drills, normalised to 0–1
   // A score of 7+/10 counts as "ready" for a drill
-  const bestScores = aiNativeBestScores.data ?? [];
+  // getBestScoresByDrill returns Record<string, {overallScore, coreSkill, drillLabel}> — convert to array
+  const bestScoresRecord = aiNativeBestScores.data ?? {};
+  const bestScoresArray = Object.values(bestScoresRecord);
   const AI_NATIVE_DRILL_COUNT = 9; // 9 scored drills (excluding flashcards)
-  const aiNativeReadyDrills = bestScores.filter(s => s.bestScore >= 7).length;
+  const aiNativeReadyDrills = bestScoresArray.filter(
+    s => s.overallScore >= 7
+  ).length;
   const aiNativePct = aiNativeReadyDrills / AI_NATIVE_DRILL_COUNT;
 
   // Rebalanced weights: coding 50%, behavioral 30%, AI-Native 20%

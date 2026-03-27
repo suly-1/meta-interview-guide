@@ -1184,3 +1184,10 @@
 - [x] Wire LearningPathTab in Home.tsx
 - [x] 85/85 tests pass, build clean
 - [ ] Save checkpoint
+
+## Bugfix — bestScores.filter crash (Round 48 hotfix)
+
+- [x] Fix TypeError: bestScores.filter is not a function in ReadinessDashboard (OverviewTab)
+- [x] getBestScoresByDrill returns Record<string,{overallScore,coreSkill,drillLabel}> — converted to Object.values() array, fixed field name bestScore→overallScore
+- [x] 85/85 tests pass
+- [ ] Save checkpoint
