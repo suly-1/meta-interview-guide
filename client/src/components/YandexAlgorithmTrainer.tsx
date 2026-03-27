@@ -671,7 +671,11 @@ export default function YandexAlgorithmTrainer() {
   const [hintThreshold, setHintThreshold] = useState<HintThreshold>(() => loadHintThreshold());
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Collect all unique tags across all problems
+  const allTags = Array.from(new Set(PROBLEMS.flatMap((p) => p.tags))).sort();
 
   const problem = PROBLEMS[problemIdx];
   const timeLimit = problem.timeLimit;
@@ -876,8 +880,37 @@ export default function YandexAlgorithmTrainer() {
             <button onClick={() => setActive(true)} className="px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-all">Enter Arena</button>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {PROBLEMS.map((p) => {
+        {/* Tag filter chips */}
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setSelectedTag(null)}
+            className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold transition-all ${
+              selectedTag === null
+                ? "bg-red-600 border-red-500 text-white"
+                : "bg-secondary/40 border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            All ({PROBLEMS.length})
+          </button>
+          {allTags.map((tag) => {
+            const count = PROBLEMS.filter((p) => p.tags.includes(tag)).length;
+            return (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold transition-all ${
+                  selectedTag === tag
+                    ? "bg-red-600 border-red-500 text-white"
+                    : "bg-secondary/40 border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tag} ({count})
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {PROBLEMS.filter((p) => selectedTag === null || p.tags.includes(selectedTag)).map((p) => {
             const streak = getProblemStreak(p.id);
             const best = getProblemBestTime(p.id);
             const attempts = history[p.id]?.attempts.length ?? 0;

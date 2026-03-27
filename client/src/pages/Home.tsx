@@ -15,7 +15,6 @@ import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
 import TopNav, { CountdownBar } from "@/components/TopNav";
 import HeroSection from "@/components/HeroSection";
 import CommunityBanner from "@/components/CommunityBanner";
-import OnboardingModal from "@/components/OnboardingModal";
 import { StartHereOnboarding } from "@/components/StartHereOnboarding";
 import { GeneralFeedback } from "@/components/GeneralFeedback";
 import NotificationBanner from "@/components/NotificationBanner";

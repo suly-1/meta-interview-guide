@@ -57,7 +57,7 @@ interface ArchiveEntry {
   verdict?: string;
   icLevel?: string;
   details: string;
-  raw?: unknown;
+  raw?: VerdictRecord | ReplaySession | WeakSignalAnalysis | Record<string, unknown>;
 }
 
 function loadArchive(): ArchiveEntry[] {
@@ -440,7 +440,7 @@ export default function CandidateReportArchive() {
                     <div className="text-[10px] text-muted-foreground">
                       <span className="font-semibold">Date:</span> {formatDate(entry.date)}
                     </div>
-                    {entry.type === "verdict" && entry.raw && (
+                    {entry.type === "verdict" && !!entry.raw && (
                       <>
                         {(entry.raw as VerdictRecord).strengths?.length > 0 && (
                           <div className="text-[10px] text-muted-foreground">
@@ -462,7 +462,7 @@ export default function CandidateReportArchive() {
                         )}
                       </>
                     )}
-                    {entry.type === "weak-signal" && entry.raw && (
+                    {entry.type === "weak-signal" && !!entry.raw && (
                       <>
                         {(entry.raw as WeakSignalAnalysis).topWeakSignals?.map((s, i) => (
                           <div key={i} className="text-[10px] text-muted-foreground">

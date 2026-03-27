@@ -945,3 +945,11 @@
 - [ ] Add hint unlock threshold toggle (configurable: 25%, 50%, 75%, or timer-end)
 - [ ] Add per-problem attempt history with pass/fail streak badges in localStorage
 - [ ] Add leaderboard mode with personal best solve times per problem
+
+## 5 Follow-up Items (Mar 26 2026)
+- [ ] Add GitHub Actions workflow for auto-deploy to metaengguide.pro on push to main
+- [ ] Fix TS warning: OnboardingModal missing onDismiss prop in Home.tsx
+- [ ] Fix TS warning: GlobalSearch open/onClose props don't exist in Home.tsx
+- [ ] Add tag filter control to YandexAlgorithmTrainer lobby
+- [ ] Connect InstantVerdictCard to real VerdictEngine rubric scores
+- [ ] Add GitHub Actions workflow to meta-prep-guide for metaguide.blog auto-deploy

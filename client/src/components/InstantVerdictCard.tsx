@@ -41,6 +41,68 @@ interface VerdictResult {
   nextSteps: string[];
 }
 
+// Full RUBRIC definition mirrored from VerdictEngineTab so InstantVerdictCard
+// can build a properly-structured ratings array using the same dimension IDs.
+const RUBRIC_META = [
+  { id: "problem_solving", name: "Problem Solving", category: "coding", weight: 3,
+    ic5Bar: "Solves medium problems with hints. Brute force first, then optimizes when prompted.",
+    ic6Bar: "Solves medium-hard problems independently. Identifies optimal approach before coding. States complexity unprompted.",
+    ic7Bar: "Solves hard problems elegantly. Identifies multiple approaches, explains tradeoffs, and chooses optimal without prompting." },
+  { id: "code_quality", name: "Code Quality", category: "coding", weight: 2,
+    ic5Bar: "Functional code with minor issues. Some variable naming issues. Handles main cases.",
+    ic6Bar: "Clean, readable code. Good naming. Handles edge cases. Modular structure.",
+    ic7Bar: "Production-quality code. Excellent abstractions. Comprehensive edge cases. Could be merged as-is." },
+  { id: "system_design_breadth", name: "System Design Breadth", category: "system_design", weight: 3,
+    ic5Bar: "Covers main components. Misses some NFRs. Basic scalability discussion.",
+    ic6Bar: "Covers all major components. States NFRs upfront. Discusses scalability, availability, consistency tradeoffs.",
+    ic7Bar: "Comprehensive design. Deep NFR analysis. Proactively identifies failure modes. Discusses operational concerns." },
+  { id: "system_design_depth", name: "System Design Depth", category: "system_design", weight: 3,
+    ic5Bar: "Can explain components at high level. Struggles with deep dives.",
+    ic6Bar: "Can go 2-3 levels deep on any component. Knows internal workings of chosen technologies.",
+    ic7Bar: "Expert-level depth. Can discuss implementation details, failure modes, and operational concerns for every component." },
+  { id: "behavioral_impact", name: "Behavioral: Impact", category: "behavioral", weight: 2,
+    ic5Bar: "Describes projects. Impact is vague ('improved performance', 'team was happy').",
+    ic6Bar: "Quantified impact with metrics. Clear before/after. Business outcome stated.",
+    ic7Bar: "Exceptional impact. Cross-org influence. Metrics that moved business KPIs." },
+  { id: "behavioral_ownership", name: "Behavioral: Ownership", category: "behavioral", weight: 2,
+    ic5Bar: "Uses 'we' frequently. Hard to separate individual contribution from team effort.",
+    ic6Bar: "Clear 'I' ownership. Explains specific decisions made. Acknowledges team but owns contribution.",
+    ic7Bar: "Drives org-wide initiatives. Owns outcomes beyond their team. Influences without authority." },
+  { id: "communication", name: "Communication", category: "behavioral", weight: 2,
+    ic5Bar: "Answers questions but doesn't volunteer structure. Sometimes unclear.",
+    ic6Bar: "Clear, structured communication. Signals transitions ('Now I'll discuss X'). Checks for alignment.",
+    ic7Bar: "Exceptional clarity. Adapts communication style. Makes complex ideas simple. Leads the conversation." },
+  { id: "leadership", name: "Leadership & Influence", category: "leadership", weight: 2,
+    ic5Bar: "Executes well on assigned work. Limited cross-team collaboration.",
+    ic6Bar: "Influences team decisions. Mentors others. Drives projects with ambiguous scope.",
+    ic7Bar: "Org-level influence. Defines technical direction. Grows other engineers. Drives cultural change." },
+];
+
+interface StoredDimensionRating {
+  dimensionId: string;
+  rating: number;
+  evidence: string[];
+  notes: string;
+}
+
+/**
+ * Attempt to load ratings saved by VerdictEngineTab (localStorage key: verdict-engine-ratings).
+ * Returns null if no data is found or it's malformed.
+ */
+function loadVerdictEngineRatings(): StoredDimensionRating[] | null {
+  try {
+    const raw = localStorage.getItem("verdict-engine-ratings");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredDimensionRating[];
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    // Verify at least one dimension has a non-default rating
+    const hasRealData = parsed.some((r) => r.rating > 1 || r.evidence.length > 0 || r.notes.trim() !== "");
+    return hasRealData ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 function gatherProgressData() {
   const data: Record<string, unknown> = {};
 
@@ -171,7 +233,112 @@ export default function InstantVerdictCard() {
     setLoading(true);
     setResult(null);
     const progressData = gatherProgressData();
-    generateVerdict.mutate({ progressData });
+
+    // ── Primary path: use VerdictEngine rubric ratings if the user has filled them in ──
+    const savedRatings = loadVerdictEngineRatings();
+    if (savedRatings) {
+      const ratings = savedRatings.map((r) => {
+        const dim = RUBRIC_META.find((d) => d.id === r.dimensionId);
+        return {
+          dimensionId: r.dimensionId,
+          dimensionName: dim?.name ?? r.dimensionId,
+          category: dim?.category ?? "general",
+          weight: dim?.weight ?? 2,
+          rating: Math.min(5, Math.max(1, Math.round(r.rating))) as 1 | 2 | 3 | 4 | 5,
+          evidence: r.evidence,
+          notes: r.notes,
+          ic5Bar: dim?.ic5Bar ?? "",
+          ic6Bar: dim?.ic6Bar ?? "",
+          ic7Bar: dim?.ic7Bar ?? "",
+        };
+      });
+      generateVerdict.mutate({ ratings });
+      return;
+    }
+
+    // ── Fallback path: derive ratings heuristically from other localStorage keys ──
+    const ratings = [
+      {
+        dimensionId: "coding-patterns",
+        dimensionName: "Coding Patterns",
+        category: "Technical",
+        weight: 0.30,
+        rating: Math.min(5, Math.max(1, Math.round((progressData.avgPatternRating as number) || 2))),
+        evidence: [
+          `${progressData.patternsRated ?? 0} patterns rated`,
+          `${progressData.strongPatterns ?? 0} strong (4-5★)`,
+          `${progressData.weakPatterns ?? 0} weak (1-2★)`,
+        ],
+        notes: `CTCI solved: ${progressData.ctciSolved ?? 0}`,
+        ic5Bar: "Solves easy patterns independently",
+        ic6Bar: "Solves medium patterns fluently, explains trade-offs",
+        ic7Bar: "Solves hard patterns, optimises proactively",
+      },
+      {
+        dimensionId: "coding-speed",
+        dimensionName: "Coding Speed & Efficiency",
+        category: "Technical",
+        weight: 0.15,
+        rating: progressData.codingSessions
+          ? Math.min(5, Math.max(1, Math.round((progressData.codingSessions as number) / 5)))
+          : 2,
+        evidence: [
+          `${progressData.codingSessions ?? 0} coding sessions`,
+          `Avg time: ${progressData.avgCodingTimeMin ?? "unknown"} min`,
+        ],
+        notes: `Streak: ${progressData.currentStreak ?? 0} days`,
+        ic5Bar: "Completes easy problems in 30 min",
+        ic6Bar: "Completes medium problems in 25 min",
+        ic7Bar: "Completes hard problems in 35 min with full analysis",
+      },
+      {
+        dimensionId: "behavioral",
+        dimensionName: "Behavioral & STAR Stories",
+        category: "Behavioral",
+        weight: 0.25,
+        rating: Math.min(5, Math.max(1, Math.round(((progressData.starStoriesWritten as number) || 0) / 4))),
+        evidence: [
+          `${progressData.starStoriesWritten ?? 0} STAR stories written`,
+        ],
+        notes: "",
+        ic5Bar: "4+ stories covering core Meta values",
+        ic6Bar: "8+ stories with measurable impact",
+        ic7Bar: "12+ stories with org-level scope",
+      },
+      {
+        dimensionId: "consistency",
+        dimensionName: "Consistency & Preparation Depth",
+        category: "Process",
+        weight: 0.15,
+        rating: Math.min(5, Math.max(1, Math.round(((progressData.currentStreak as number) || 0) / 3) + 1)),
+        evidence: [
+          `${progressData.currentStreak ?? 0}-day streak`,
+          `${progressData.srDueCount ?? 0} SR items due`,
+        ],
+        notes: `Previous verdicts: ${progressData.prevVerdictCount ?? 0}`,
+        ic5Bar: "7-day streak, SR up to date",
+        ic6Bar: "14-day streak, all SR reviewed",
+        ic7Bar: "21+ day streak, proactive gap closure",
+      },
+      {
+        dimensionId: "verdict-trend",
+        dimensionName: "Mock Verdict Trend",
+        category: "Assessment",
+        weight: 0.15,
+        rating: progressData.prevVerdictAvg
+          ? Math.min(5, Math.max(1, Math.round((progressData.prevVerdictAvg as number) / 20)))
+          : 1,
+        evidence: [
+          `Avg verdict score: ${progressData.prevVerdictAvg ?? "none"}`,
+          `${progressData.prevVerdictCount ?? 0} verdicts run`,
+        ],
+        notes: "",
+        ic5Bar: "Score >= 50",
+        ic6Bar: "Score >= 70",
+        ic7Bar: "Score >= 85",
+      },
+    ];
+    generateVerdict.mutate({ ratings });
   };
 
   const verdictConfig = result
@@ -186,6 +353,8 @@ export default function InstantVerdictCard() {
       : "text-red-400"
     : "text-muted-foreground";
 
+  const hasVerdictEngineData = loadVerdictEngineRatings() !== null;
+
   return (
     <div className="prep-card p-5 space-y-4">
       {/* Header */}
@@ -199,6 +368,15 @@ export default function InstantVerdictCard() {
             <p className="text-xs text-muted-foreground mt-0.5">
               One-click readiness check · Hire / No-Hire · IC level estimate
             </p>
+            {hasVerdictEngineData ? (
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-400 font-semibold">
+                ✓ Using Verdict Engine rubric scores
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-400 font-semibold">
+                ⚡ Using heuristic scores — fill Verdict Engine for precision
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
