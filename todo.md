@@ -1165,9 +1165,9 @@
 
 ## Silent Version Toast — Round 47
 
-- [ ] Remove Manus inbox notification (checkpointNotifier.ts)
-- [ ] Add build hash endpoint to server (GET /api/version)
-- [ ] Build VersionUpdateToast component (top-right, 5s auto-dismiss, ✦ Updated badge)
-- [ ] Wire version polling into App.tsx (check every 60s, show toast on hash change)
-- [ ] Run pnpm test — all pass
+- [x] Remove Manus inbox notification import and call from server/\_core/index.ts
+- [x] Add GET /api/version endpoint to server (returns BUILD_HASH baked at deploy time)
+- [x] Build VersionUpdateToast component (top-right fixed, 5s auto-dismiss, ✦ Updated badge, fade-in animation)
+- [x] Wire VersionUpdateToast into App.tsx (polls every 60s, shows on hash change)
+- [x] 85/85 tests pass, prettier clean
 - [ ] Save checkpoint

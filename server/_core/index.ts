@@ -14,7 +14,6 @@ import { startWeeklyAnalyticsCron } from "../weeklyAnalytics";
 import { startDailyAlertCron } from "../dailyAlert";
 import { startInactivityAlertCron } from "../inactivityAlert";
 import { startBlockExpiryCron } from "../blockExpiryJob";
-import { fireCheckpointPublishedNotification } from "../checkpointNotifier";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -113,6 +112,16 @@ async function startServer() {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Version endpoint — returns a build hash so the frontend can detect new deployments
+  // The hash is baked in at build time via VITE_BUILD_HASH env var; falls back to startup time
+  const BUILD_HASH =
+    process.env.VITE_BUILD_HASH ??
+    process.env.CHECKPOINT_VERSION ??
+    Date.now().toString(36);
+  app.get("/api/version", (_req, res) => {
+    res.json({ hash: BUILD_HASH });
+  });
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API
@@ -147,9 +156,6 @@ async function startServer() {
   startDailyAlertCron();
   startInactivityAlertCron();
   startBlockExpiryCron();
-
-  // Notify owner whenever a new checkpoint goes live in production
-  void fireCheckpointPublishedNotification();
 }
 
 startServer().catch(console.error);

@@ -6,6 +6,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import VersionUpdateToast from "./components/VersionUpdateToast";
 
 // Inject site identity onto <body> so CSS overrides in index.css can target it.
 // "metaengguide-pro" → deep blue + gold (default, no attribute needed)
@@ -40,6 +41,7 @@ function App() {
         <TooltipProvider>
           <SiteIdentityInjector />
           <Toaster />
+          <VersionUpdateToast />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
