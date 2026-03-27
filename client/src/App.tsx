@@ -19,7 +19,7 @@ import AdminSettings from "@/pages/AdminSettings";
 import AdminStats from "@/pages/AdminStats";
 import AdminDocs from "@/pages/AdminDocs";
 import AdminAnalytics from "@/pages/AdminAnalytics";
-import AdminGate from "@/components/AdminGate";
+import AdminPinGate from "@/components/AdminPinGate";
 import CollabRoom from "@/pages/CollabRoom";
 import AdminAccess from "@/pages/AdminAccess";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
@@ -93,28 +93,28 @@ function App() {
         <Route path="/terms" component={TermsOfUse} />
         <Route path="/shared-plan/:token" component={SharedPlanView} />
         <Route path="/admin/feedback">
-          <AdminGate><AdminFeedback /></AdminGate>
+          <AdminPinGate><AdminFeedback /></AdminPinGate>
         </Route>
         <Route path="/admin/disclaimer">
-          <AdminGate><AdminDisclaimerReport /></AdminGate>
+          <AdminPinGate><AdminDisclaimerReport /></AdminPinGate>
         </Route>
         <Route path="/admin/users">
-          <AdminGate><AdminUsers /></AdminGate>
+          <AdminPinGate><AdminUsers /></AdminPinGate>
         </Route>
         <Route path="/admin/settings">
-          <AdminGate><AdminSettings /></AdminGate>
+          <AdminPinGate><AdminSettings /></AdminPinGate>
         </Route>
         <Route path="/admin/stats">
-          <AdminGate><AdminStats /></AdminGate>
+          <AdminPinGate><AdminStats /></AdminPinGate>
         </Route>
         <Route path="/admin/docs">
-          <AdminGate><AdminDocs /></AdminGate>
+          <AdminPinGate><AdminDocs /></AdminPinGate>
         </Route>
         <Route path="/admin/analytics">
-          <AdminGate><AdminAnalytics /></AdminGate>
+          <AdminPinGate><AdminAnalytics /></AdminPinGate>
         </Route>
         <Route path="/admin/access">
-          <AdminGate><AdminAccess /></AdminGate>
+          <AdminPinGate><AdminAccess /></AdminPinGate>
         </Route>
                 {/* All other routes go through DisclaimerGate */}
                 <Route>

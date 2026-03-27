@@ -912,8 +912,8 @@ export default function TopNav({
                 <span className="hidden sm:inline">Sign in</span>
               </a>
             )}
-            {/* Admin Panel — owner only, live app only (hidden in standalone static build) */}
-            {isOwner && !import.meta.env.VITE_STANDALONE && (
+            {/* Admin Panel — always visible in live app; PIN gate protects the actual panel */}
+            {!import.meta.env.VITE_STANDALONE && (
               <a
                 href="/admin/feedback"
                 title={
