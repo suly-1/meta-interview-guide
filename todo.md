@@ -1060,3 +1060,14 @@
 - [ ] Add L-level selector to Peer Benchmark Mode (filter percentile by L4/L5/L6/L7)
 - [ ] Add "Practice This Question" button to Meta Question Bank (links to relevant simulator)
 - [ ] Add streak-based unlock to Readiness Certificate (require 5-day streak + Strong Hire verdict)
+
+## AI-Enabled Coding Mock Interview (Round 40)
+
+- [x] Add server-side AI procedures: nerfed AI chat, phase evaluation scoring (aiCodingMock router)
+- [x] Build MetaAICodingMock component: 3-panel layout (file tree + code editor + AI chat)
+- [x] Implement 3-phase flow: Phase 1 bug fix (15 min), Phase 2 feature impl (25 min), Phase 3 optimization (15 min)
+- [x] Build post-interview debrief: 4-dimension rubric scoring (Problem Solving, Code Dev, Verification, Communication)
+- [x] Add session history: persist completed mock sessions, review past attempts
+- [x] Add "🤖 AI Mock" tab to TopNav and wire in Home.tsx
+- [x] Write vitest tests for new AI procedures (12 tests passing)
+- [x] Add aiCodingMock stubs to trpc.standalone.ts (v25)

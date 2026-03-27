@@ -14,6 +14,7 @@ const TABS = [
   { id: "coding", label: "Coding" },
   { id: "behavioral", label: "Behavioral" },
   { id: "design", label: "System Design" },
+  { id: "ai-coding", label: "🤖 AI Mock" },
 ];
 
 // Site identity — injected at build time via VITE_SITE_ID

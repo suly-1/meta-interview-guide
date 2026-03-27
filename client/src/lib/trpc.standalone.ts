@@ -1,4 +1,4 @@
-// v24 — full procedure coverage: listEvents, checkInactiveUsers, siteAccess stubs
+// v25 — full procedure coverage: aiCodingMock stubs added
 /**
  * Standalone tRPC mock — used in the self-contained HTML export.
  * All server calls are replaced with localStorage-only implementations
@@ -927,6 +927,48 @@ export const trpc = {
     },
   },
 
+  // ── aiCodingMock ─────────────────────────────────────────────────────────────────────────────
+  // AI-enabled coding mock requires server; return empty data in standalone mode
+  aiCodingMock: {
+    getProblems: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
+    },
+    chat: {
+      useMutation: () =>
+        makeMutation(() => ({
+          content:
+            "⚠️ AI Coding Mock requires the online version at metaengguide.pro",
+        })),
+    },
+    scorePhase: {
+      useMutation: () =>
+        makeMutation(() => ({
+          problemSolving: 0,
+          codeDevelopment: 0,
+          verificationDebugging: 0,
+          technicalCommunication: 0,
+          phaseVerdict: "⚠️ AI scoring requires the online version.",
+          aiUsageAssessment: "",
+          keyStrengths: [],
+          keyImprovements: [],
+          summary: "⚠️ AI scoring requires the online version.",
+        })),
+    },
+    scoreSession: {
+      useMutation: () =>
+        makeMutation(() => ({
+          hiringRecommendation: "⚠️ AI scoring requires the online version.",
+          levelAssessment: "",
+          executiveSummary: "",
+          dimensionScores: {},
+          aiCollaborationScore: "",
+          strengths: [],
+          gaps: [],
+          nextSteps: [],
+        })),
+    },
+  },
+
   // ── system ─────────────────────────────────────────────────────────────────────────────────────
   system: {
     notifyOwner: {
@@ -942,6 +984,7 @@ export const trpc = {
     onboarding: { get: { invalidate: () => {} } },
     leaderboard: { getTop: { invalidate: () => {} } },
     siteAccess: { getDisclaimerEnabled: { invalidate: () => {} } },
+    aiCodingMock: { getProblems: { invalidate: () => {} } },
     adminUsers: {
       listUsers: { invalidate: () => {} },
       listEvents: { invalidate: () => {} },

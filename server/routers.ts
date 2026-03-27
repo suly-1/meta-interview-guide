@@ -8,6 +8,7 @@ import { collabRouter } from "./routers/collab";
 import { leaderboardRouter } from "./routers/leaderboard";
 import { ctciRouter } from "./routers/ctci";
 import { aiRouter } from "./routers/ai";
+import { aiCodingMockRouter } from "./routers/aiCodingMock";
 import { onboardingRouter } from "./routers/onboarding";
 import { ratingsRouter } from "./routers/ratings";
 import { ctciProgressRouter } from "./routers/ctciProgress";
@@ -53,6 +54,7 @@ export const appRouter = router({
   system: systemRouter,
   ctci: ctciRouter,
   ai: aiRouter,
+  aiCodingMock: aiCodingMockRouter,
   auth: router({
     me: publicProcedure.query(opts => {
       const u = opts.ctx.user;
