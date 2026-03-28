@@ -1641,7 +1641,7 @@ export const trpc = {
     heartbeat: {
       useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
     },
-    getLiveStats: {
+    getStats: {
       useQuery: (_?: unknown, _opts?: unknown) =>
         makeQuery({ total: 0, active: 0, byCohort: [] }),
     },

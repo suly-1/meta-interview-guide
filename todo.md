@@ -1391,3 +1391,9 @@
 - [ ] Admin dashboard widget: total/active/today/week + per-code breakdown
 - [ ] 30-second auto-refresh on admin widget
 - [ ] Tests for heartbeat and session query procedures
+
+## Phase 64 — Real-time tracking widget, AdminInviteCodes wiring, Cohort Reset button
+
+- [ ] Build live-stats widget in AdminStats.tsx (total/active users, per-code breakdown)
+- [x] Wire AdminInviteCodes to real inviteCodes table via inviteGate router
+- [ ] Add cohort reset confirmation dialog + button to AdminSettings

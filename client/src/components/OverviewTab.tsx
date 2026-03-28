@@ -33,6 +33,8 @@ import {
   useInterviewDate,
   useStarNotes,
   useStreak,
+  useCodePracticeSolvedCount,
+  CODE_PRACTICE_TOTAL,
 } from "@/hooks/useLocalStorage";
 import { toast } from "sonner";
 import { PassFailVerdictEngine } from "@/components/PassFailVerdictEngine";

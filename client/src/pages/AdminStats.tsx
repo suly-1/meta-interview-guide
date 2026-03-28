@@ -23,6 +23,8 @@ import {
   ShieldCheck,
   CalendarClock,
   UserCheck,
+  Radio,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +69,13 @@ export default function AdminStats() {
 
   const { data: aggData, isLoading } =
     trpc.userScores.getAggregateStats.useQuery(undefined, { enabled: isAdmin });
+
+  // Live visitor stats — auto-refresh every 30 s
+  const { data: liveStats, dataUpdatedAt } =
+    trpc.visitorTracking.getStats.useQuery(undefined, {
+      enabled: isAdmin,
+      refetchInterval: 30_000,
+    });
 
   const { data: feedbackStats } = trpc.feedback.adminStats.useQuery(undefined, {
     enabled: isAdmin,
@@ -390,6 +399,104 @@ export default function AdminStats() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Live Visitor Stats Widget */}
+        <div className="prep-card p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Radio size={14} className="text-green-400 animate-pulse" />
+            <h2
+              className="text-sm font-bold"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              Live Visitors
+            </h2>
+            <span className="ml-auto text-[10px] text-muted-foreground">
+              {dataUpdatedAt
+                ? `Updated ${new Date(dataUpdatedAt).toLocaleTimeString()}`
+                : "Refreshes every 30 s"}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="bg-secondary/50 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-green-400">
+                {liveStats?.active ?? 0}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Active now
+              </p>
+              <p className="text-[9px] text-muted-foreground">(last 5 min)</p>
+            </div>
+            <div className="bg-secondary/50 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-blue-400">
+                {liveStats?.today ?? 0}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Today</p>
+            </div>
+            <div className="bg-secondary/50 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-purple-400">
+                {liveStats?.week ?? 0}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                This week
+              </p>
+            </div>
+            <div className="bg-secondary/50 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-foreground">
+                {liveStats?.total ?? 0}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                All time
+              </p>
+            </div>
+          </div>
+          {/* Per invite-code breakdown */}
+          {(liveStats?.perCode?.length ?? 0) > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity size={12} className="text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  Sessions by invite code
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                {(liveStats?.perCode ?? [])
+                  .sort((a, b) => b.count - a.count)
+                  .slice(0, 10)
+                  .map(row => {
+                    const maxCount = Math.max(
+                      ...(liveStats?.perCode ?? []).map(r => r.count)
+                    );
+                    const pct =
+                      maxCount > 0
+                        ? Math.round((row.count / maxCount) * 100)
+                        : 0;
+                    return (
+                      <div key={row.code} className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-foreground w-24 truncate shrink-0">
+                          {row.code}
+                        </span>
+                        <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-blue-500 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground w-6 text-right">
+                          {row.count}
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+          {(liveStats?.perCode?.length ?? 0) === 0 && (
+            <p className="text-[11px] text-muted-foreground text-center py-2">
+              No sessions recorded yet. Visitors will appear here once they load
+              the site.
+            </p>
+          )}
         </div>
 
         {/* Feature usage vs mastery comparison */}

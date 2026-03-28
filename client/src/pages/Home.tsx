@@ -26,6 +26,8 @@ import { GamificationHub } from "@/components/GamificationHub";
 import CodePracticeTab from "@/components/CodePracticeTab";
 import OnboardingModal from "@/components/OnboardingModal";
 import { AlertTriangle, X } from "lucide-react";
+import { useVisitorHeartbeat } from "@/hooks/useVisitorHeartbeat";
+import { getStoredInviteCode } from "@/components/InviteGate";
 
 // Simple confetti burst
 function triggerConfetti() {
@@ -46,6 +48,10 @@ function triggerConfetti() {
 }
 
 export default function Home() {
+  // Fire heartbeat every 30 s so admin can see live visitor counts
+  useVisitorHeartbeat({
+    inviteCode: getStoredInviteCode() ?? undefined,
+  });
   const [activeTab, setActiveTab] = useState(() => {
     // Support deep-linking from MetaQuestionBank via ?tab= URL param
     const params = new URLSearchParams(window.location.search);
