@@ -90,7 +90,7 @@ function buildAlertHtml(
   ${itemsHtml}
 
   <div class="footer">
-    <a href="https://www.metaguide.blog/admin/feedback">Open Feedback Dashboard →</a>
+    <span>Feedback received</span>
     <br><br>
     MetaGuide Admin Alert · You receive this because ${count}+ items are unactioned.
   </div>
@@ -109,7 +109,7 @@ function buildAlertHtml(
         `${idx + 1}. [${i.category}] ${i.page ?? "?"} — ${i.message.slice(0, 100)}${i.message.length > 100 ? "…" : ""}`
     ),
     ``,
-    `Open dashboard: https://www.metaguide.blog/admin/feedback`,
+    ``,
   ].join("\n");
 
   return { subject, html, text };

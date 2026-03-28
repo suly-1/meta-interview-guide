@@ -22,7 +22,6 @@ import {
   X,
   RefreshCw,
   Download,
-  ExternalLink,
   ThumbsUp,
   AlertCircle,
   CheckCircle2,
@@ -292,26 +291,6 @@ function ShareModal({
           >
             {copied ? <Check size={12} /> : <Copy size={12} />}
             {copied ? "Copied!" : "Copy"}
-          </button>
-        </div>
-
-        <div className="flex gap-2">
-          <a
-            href={`mailto:?subject=My 7-Day Meta Interview Sprint Plan&body=Check out my personalized sprint plan: ${shareUrl}`}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
-          >
-            <ExternalLink size={11} /> Email
-          </a>
-          <button
-            onClick={() => {
-              window.open(
-                `https://twitter.com/intent/tweet?text=Just generated my 7-day Meta interview sprint plan! ${shareUrl}`,
-                "_blank"
-              );
-            }}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border text-xs text-muted-foreground hover:bg-secondary transition-all"
-          >
-            <Share2 size={11} /> Post
           </button>
         </div>
       </div>

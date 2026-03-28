@@ -190,9 +190,9 @@ function buildAnalyticsHtml(data: {
 
   <div class="footer">
     Meta Prep Guide · Analytics Report ·
-    <a href="https://www.metaguide.blog/admin/analytics">View Dashboard →</a>
+    
     &nbsp;|&nbsp;
-    <a href="https://www.metaguide.blog/admin/feedback">Feedback →</a>
+    
   </div>
 </div>
 </body>
@@ -219,8 +219,8 @@ function buildAnalyticsHtml(data: {
         `  #${i + 1} [${item.category}] ${item.message.slice(0, 100)}`
     ),
     ``,
-    `View analytics: https://www.metaguide.blog/admin/analytics`,
-    `View feedback: https://www.metaguide.blog/admin/feedback`,
+    ``,
+    ``,
   ].join("\n");
 
   return { subject, html, text };

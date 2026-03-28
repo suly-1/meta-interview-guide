@@ -122,7 +122,7 @@ async function sendInstantAlert(opts: {
   </div>
   <div class="message-box">${opts.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
   <div class="footer">
-    <a href="https://www.metaguide.blog/admin/feedback">View in Dashboard →</a>
+    <span>Feedback received via site form</span>
   </div>
 </div>
 </body>
@@ -137,7 +137,6 @@ async function sendInstantAlert(opts: {
     ``,
     opts.message,
     ``,
-    `View: https://www.metaguide.blog/admin/feedback`,
   ]
     .filter(Boolean)
     .join("\n");

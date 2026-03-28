@@ -211,7 +211,7 @@ function buildDigestHtml(
 
   html += `
   <div class="footer">
-    Meta Prep Guide · Admin Digest · <a href="https://www.metaguide.blog/admin/feedback" style="color:#58a6ff;">View Dashboard →</a>
+    Meta Prep Guide · Admin Digest · 
   </div>
 </div>
 </body>
@@ -232,7 +232,7 @@ function buildDigestHtml(
         `[${i.category}][${i.status}] ${i.page ?? "?"} — ${i.message.slice(0, 120)}${i.message.length > 120 ? "…" : ""}`
     ),
     ``,
-    `View full dashboard: https://www.metaguide.blog/admin/feedback`,
+    ``,
   ].join("\n");
 
   return { subject, html, text };

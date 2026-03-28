@@ -15,7 +15,6 @@ import { ratingsRouter } from "./routers/ratings";
 import { ctciProgressRouter } from "./routers/ctciProgress";
 import { mockHistoryRouter } from "./routers/mockHistory";
 import { disclaimerRouter } from "./routers/disclaimer";
-import { deployStatusRouter } from "./routers/deployStatus";
 import { feedbackRouter } from "./routers/feedback";
 import { userScoresRouter } from "./routers/userScores";
 import { sprintPlanRouter } from "./routers/sprintPlan";
@@ -228,7 +227,6 @@ export const appRouter = router({
   ctciProgress: ctciProgressRouter,
   mockHistory: mockHistoryRouter,
   disclaimer: disclaimerRouter,
-  deployStatus: deployStatusRouter,
   feedback: feedbackRouter,
   userScores: userScoresRouter,
   sprintPlan: sprintPlanRouter,

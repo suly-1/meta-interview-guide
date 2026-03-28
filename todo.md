@@ -1306,3 +1306,10 @@
 ## Bug Fix — Round 53b
 
 - [x] Fix TypeError: (a.data ?? []).map is not a function — getBestScoresByDrill returns a Record object; AINativeHubTab.tsx now uses bestEntry?.overallScore instead of calling .map() on the result
+
+## Privacy Cleanup — Round 54
+
+- [x] Remove DeployStatusBadge component and its server-side deployStatus router entirely
+- [x] Remove metaguide.blog links from the feedback email template in server/routers/feedback.ts (also cleaned dailyAlert.ts, weeklyAnalytics.ts, weeklyDigest.ts)
+- [x] Remove Twitter/Email share buttons from SevenDaySprintPlan (keep Copy Link only)
+- [x] Remove GitHub API call from trpc.standalone.ts
