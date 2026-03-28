@@ -3,17 +3,15 @@
  * Visitors must enter a valid invite code to proceed.
  * Once accepted, the code is stored in localStorage so they aren't prompted again.
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Lock, ArrowRight, Loader2 } from "lucide-react";
 
 const STORAGE_KEY = "mg_invite_unlocked_v1";
 
 export function useInviteGate() {
   const { data, isLoading } = trpc.inviteGate.isEnabled.useQuery(undefined, {
-    staleTime: 5 * 60 * 1000, // cache 5 min
+    staleTime: 5 * 60 * 1000,
   });
 
   const [unlocked, setUnlocked] = useState<boolean>(() => {
@@ -76,51 +74,62 @@ export default function InviteGate({ onUnlock }: InviteGateProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background">
-      {/* Subtle grid background */}
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      style={{ backgroundColor: "#000000" }}
+    >
+      {/* Subtle dot-grid background */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
+            "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
         }}
       />
 
-      <div className="relative z-10 w-full max-w-sm mx-4">
+      {/* Card */}
+      <div
+        className="relative z-10 w-full max-w-md mx-4 rounded-2xl p-10"
+        style={{ backgroundColor: "#1a1d27", border: "1px solid rgba(255,255,255,0.07)" }}
+      >
         {/* Lock icon */}
-        <div className="flex justify-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-primary" />
+        <div className="flex justify-center mb-7">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{ backgroundColor: "#2a3a8c" }}
+          >
+            <Lock className="w-7 h-7 text-white" />
           </div>
         </div>
 
         {/* Heading */}
         <div className="text-center mb-8">
-          <h1 className="text-xl font-bold text-foreground mb-2">
-            Access Required
+          <h1 className="text-2xl font-bold text-white mb-3">
+            Private Resource
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            This resource is shared privately. Enter your invite code to
-            continue.
+          <p className="text-sm leading-relaxed" style={{ color: "#9ca3af" }}>
+            This is a community study resource. Enter your invite code to continue.
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div
-            className={`transition-transform ${shake ? "animate-[shake_0.4s_ease-in-out]" : ""}`}
-          >
-            <Input
+          <div className={shake ? "animate-[shake_0.4s_ease-in-out]" : ""}>
+            <input
               value={code}
               onChange={e => {
                 setCode(e.target.value.toUpperCase());
                 setError(null);
               }}
               placeholder="Enter invite code"
-              className={`text-center text-lg font-mono tracking-widest h-12 uppercase ${
-                error ? "border-destructive focus-visible:ring-destructive" : ""
-              }`}
+              className="w-full h-14 rounded-xl px-5 text-center text-base font-mono tracking-widest uppercase outline-none transition-all"
+              style={{
+                backgroundColor: "#0d0f18",
+                border: error ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.08)",
+                color: "#ffffff",
+                caretColor: "#ffffff",
+              }}
               autoFocus
               autoComplete="off"
               spellCheck={false}
@@ -129,26 +138,32 @@ export default function InviteGate({ onUnlock }: InviteGateProps) {
           </div>
 
           {error && (
-            <p className="text-xs text-destructive text-center">{error}</p>
+            <p className="text-xs text-red-400 text-center">{error}</p>
           )}
 
-          <Button
+          <button
             type="submit"
-            className="w-full h-11"
             disabled={!code.trim() || verify.isPending}
+            className="w-full h-14 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-opacity disabled:opacity-50"
+            style={{ backgroundColor: "#2a4fd6", color: "#ffffff" }}
           >
             {verify.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                Continue <ArrowRight className="w-4 h-4 ml-1" />
+                Continue <ArrowRight className="w-5 h-5" />
               </>
             )}
-          </Button>
+          </button>
         </form>
 
-        <p className="text-center text-[11px] text-muted-foreground/50 mt-6">
-          Community resource · For educational purposes only
+        {/* Disclaimer */}
+        <p
+          className="text-center text-xs mt-7 leading-relaxed"
+          style={{ color: "#4b5563" }}
+        >
+          Community-compiled resource. No affiliation with any employer or company.
+          Content synthesized from public sources.
         </p>
       </div>
 
