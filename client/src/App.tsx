@@ -23,6 +23,7 @@ import AdminPinGate from "@/components/AdminPinGate";
 import CollabRoom from "@/pages/CollabRoom";
 import AdminAccess from "@/pages/AdminAccess";
 import AdminInviteCodes from "@/pages/AdminInviteCodes";
+import AdminSessions from "@/pages/AdminSessions";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
@@ -128,6 +129,9 @@ function App() {
         </Route>
         <Route path="/admin/invite-codes">
           <AdminPinGate><AdminInviteCodes /></AdminPinGate>
+        </Route>
+        <Route path="/admin/sessions">
+          <AdminPinGate><AdminSessions /></AdminPinGate>
         </Route>
                 {/* All other routes go through DisclaimerGate */}
                 <Route>

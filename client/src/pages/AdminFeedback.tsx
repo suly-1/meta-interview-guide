@@ -10,7 +10,7 @@ import {
   Star, Filter, ArrowLeft, RefreshCw, BarChart2,
   TrendingUp, MessageSquare, Clock, Users, Trophy, Zap,
   Download, Bell, Send, Search, Lock, ChevronDown,
-  Eye, X, Mail, CheckCircle
+  Eye, X, Mail, CheckCircle, Activity
 } from "lucide-react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -391,6 +391,12 @@ export default function AdminFeedback() {
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
                 <Users size={13} />
                 <span className="hidden sm:inline">Users</span>
+              </button>
+            </Link>
+            <Link href="/admin/sessions">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-white hover:bg-gray-800 rounded-lg transition-all">
+                <Activity size={13} />
+                <span className="hidden sm:inline">Sessions</span>
               </button>
             </Link>
           </div>

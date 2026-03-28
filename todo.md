@@ -1090,3 +1090,13 @@
 - [ ] Frontend API-failure fallback: gate defaults to locked when isEnabled call fails (network error / sandbox restart)
 - [ ] Sandbox keep-alive ping every 20 minutes (scheduled task pings port 3001 to prevent hibernation)
 - [ ] Verify and fix panic button end-to-end (lockNow / unlock in AdminSettings)
+
+## Active Sessions Admin Feature
+- [x] Add `active_sessions` table to schema (id, codeId, sessionToken, ipAddress, userAgent, firstSeenAt, lastSeenAt, isRevoked)
+- [x] Add `lastSeenAt` heartbeat update to `checkCodeAccess` procedure
+- [x] Add `listActiveSessions` admin query (join with invite_codes, show code, masked IP, last seen, window expiry)
+- [x] Add `revokeSession` admin mutation (mark session revoked, force re-auth on next heartbeat)
+- [x] Add `restoreSession` and `purgeOldSessions` admin mutations
+- [x] Build AdminSessions page with live table, auto-refresh, revoke/restore buttons, summary cards
+- [x] Add route /admin/sessions in App.tsx with AdminPinGate
+- [x] Add Sessions nav link to AdminFeedback header

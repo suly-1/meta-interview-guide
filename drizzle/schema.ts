@@ -404,3 +404,20 @@ export const inviteGateSettings = mysqlTable("invite_gate_settings", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type InviteGateSettings = typeof inviteGateSettings.$inferSelect;
+
+// Active sessions — one row per browser that has successfully unlocked the invite gate.
+// The client generates a random sessionToken stored in localStorage and sends it with every
+// checkCodeAccess heartbeat. The server upserts this row to keep lastSeenAt fresh.
+// Admin can revoke a session (isRevoked=1) which causes the next heartbeat to deny access.
+export const activeSessions = mysqlTable("active_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionToken: varchar("sessionToken", { length: 64 }).notNull().unique(),
+  codeId: int("codeId").notNull(),               // FK → invite_codes.id
+  code: varchar("code", { length: 32 }).notNull(), // denormalized for display
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  userAgent: varchar("userAgent", { length: 256 }),
+  firstSeenAt: timestamp("firstSeenAt").defaultNow().notNull(),
+  lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(),
+  isRevoked: tinyint("isRevoked").notNull().default(0), // 1 = admin revoked this session
+});
+export type ActiveSession = typeof activeSessions.$inferSelect;

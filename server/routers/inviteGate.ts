@@ -18,8 +18,8 @@
 import { z } from "zod";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { inviteCodes, inviteGateSettings, inviteAttempts } from "../../drizzle/schema";
-import { eq, desc, and, gte, count, lt } from "drizzle-orm";
+import { inviteCodes, inviteGateSettings, inviteAttempts, activeSessions } from "../../drizzle/schema";
+import { eq, desc, and, gte, count, lt, sql } from "drizzle-orm";
 
 const MAX_ATTEMPTS = 3;
 const WINDOW_MS    = 5 * 60 * 1000; // 5 minutes
@@ -184,10 +184,14 @@ export const inviteGateRouter = router({
   /**
    * Re-check access for a code that's already stored in the browser.
    * Called on every page load to enforce expiry and blocks without re-entering the code.
+   * Also upserts an active_sessions heartbeat row so admins can see who is currently online.
    */
   checkCodeAccess: publicProcedure
-    .input(z.object({ code: z.string().min(1).max(32) }))
-    .query(async ({ input }) => {
+    .input(z.object({
+      code:         z.string().min(1).max(32),
+      sessionToken: z.string().max(64).optional(), // browser-generated random token
+    }))
+    .query(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) return { ok: true as const }; // fail open if DB unavailable
 
@@ -209,6 +213,40 @@ export const inviteGateRouter = router({
       });
       if (windowExpiry && windowExpiry < new Date())
         return { ok: false as const, reason: "window_expired" as const, windowExpiresAt: windowExpiry.toISOString() };
+
+      // ── Session heartbeat ──────────────────────────────────────────────────
+      // If the client sends a sessionToken, upsert the active_sessions row.
+      // If the session has been admin-revoked, deny access immediately.
+      if (input.sessionToken) {
+        const ip = getClientIp(ctx.req as Parameters<typeof getClientIp>[0]);
+        const ua = (ctx.req.headers["user-agent"] as string | undefined)?.slice(0, 256) ?? null;
+        try {
+          await db.insert(activeSessions).values({
+            sessionToken: input.sessionToken,
+            codeId:       row.id,
+            code:         row.code,
+            ipAddress:    ip,
+            userAgent:    ua,
+            firstSeenAt:  new Date(),
+            lastSeenAt:   new Date(),
+            isRevoked:    0,
+          }).onDuplicateKeyUpdate({
+            set: { lastSeenAt: sql`NOW()` },
+          });
+
+          // Check if this session was revoked by an admin
+          const [session] = await db
+            .select({ isRevoked: activeSessions.isRevoked })
+            .from(activeSessions)
+            .where(eq(activeSessions.sessionToken, input.sessionToken))
+            .limit(1);
+          if (session?.isRevoked === 1) {
+            return { ok: false as const, reason: "revoked" as const };
+          }
+        } catch {
+          // Heartbeat failure is non-fatal — don't block access
+        }
+      }
 
       return {
         ok: true as const,
@@ -439,6 +477,90 @@ export const inviteGateRouter = router({
         const cutoff = new Date(Date.now() - input.olderThanDays * 86_400_000);
         await db.delete(inviteAttempts).where(lt(inviteAttempts.createdAt, cutoff));
       }
+      return { ok: true };
+    }),
+
+  // ── Active Sessions ───────────────────────────────────────────────────────
+
+  /**
+   * List all active sessions.
+   * A session is considered "active" if its lastSeenAt is within the last 10 minutes.
+   * Returns all sessions (including recently inactive ones) ordered by lastSeenAt desc.
+   */
+  listActiveSessions: adminProcedure
+    .input(z.object({
+      includeInactive: z.boolean().default(false), // if true, include sessions older than 10 min
+      limit: z.number().int().min(1).max(500).default(200),
+    }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+
+      const cutoff = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes
+
+      const rows = await db
+        .select()
+        .from(activeSessions)
+        .orderBy(desc(activeSessions.lastSeenAt))
+        .limit(input.limit);
+
+      return rows
+        .filter((r) => input.includeInactive || r.lastSeenAt >= cutoff)
+        .map((r) => ({
+          id:           r.id,
+          sessionToken: r.sessionToken.slice(0, 8) + "…", // show only prefix for display
+          code:         r.code,
+          codeId:       r.codeId,
+          ipMasked:     maskIp(r.ipAddress),
+          userAgent:    r.userAgent ?? null,
+          firstSeenAt:  r.firstSeenAt,
+          lastSeenAt:   r.lastSeenAt,
+          isRevoked:    r.isRevoked === 1,
+          isActive:     r.lastSeenAt >= cutoff && r.isRevoked === 0,
+        }));
+    }),
+
+  /**
+   * Revoke a session by ID.
+   * The session holder will be denied on their next heartbeat (within 2 minutes).
+   */
+  revokeSession: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { ok: false };
+      await db
+        .update(activeSessions)
+        .set({ isRevoked: 1 })
+        .where(eq(activeSessions.id, input.id));
+      return { ok: true };
+    }),
+
+  /**
+   * Restore a previously revoked session.
+   */
+  restoreSession: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { ok: false };
+      await db
+        .update(activeSessions)
+        .set({ isRevoked: 0 })
+        .where(eq(activeSessions.id, input.id));
+      return { ok: true };
+    }),
+
+  /**
+   * Purge old session records (older than N days, default 30).
+   */
+  purgeOldSessions: adminProcedure
+    .input(z.object({ olderThanDays: z.number().int().min(1).max(365).default(30) }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { ok: false };
+      const cutoff = new Date(Date.now() - input.olderThanDays * 86_400_000);
+      await db.delete(activeSessions).where(lt(activeSessions.lastSeenAt, cutoff));
       return { ok: true };
     }),
 });

@@ -19,10 +19,26 @@ import {
 } from "lucide-react";
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
-const STORAGE_KEY       = "mg_invite_unlocked_v2";  // bumped v1→v2 to invalidate all existing tokens
-const CODE_KEY          = "mg_invite_code_v2";       // store the actual code for re-validation
-const ATTEMPTS_KEY      = "mg_invite_attempts_v2";
-const LOCKOUT_UNTIL_KEY = "mg_invite_lockout_until_v2";
+const STORAGE_KEY         = "mg_invite_unlocked_v2";  // bumped v1→v2 to invalidate all existing tokens
+const CODE_KEY            = "mg_invite_code_v2";       // store the actual code for re-validation
+const ATTEMPTS_KEY        = "mg_invite_attempts_v2";
+const LOCKOUT_UNTIL_KEY   = "mg_invite_lockout_until_v2";
+const SESSION_TOKEN_KEY   = "mg_invite_session_token_v1"; // stable per-browser random token for session tracking
+
+/** Get or create a stable per-browser session token stored in localStorage */
+function getOrCreateSessionToken(): string {
+  try {
+    const existing = localStorage.getItem(SESSION_TOKEN_KEY);
+    if (existing) return existing;
+    // Generate a random 32-char hex token
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, "0")).join("");
+    localStorage.setItem(SESSION_TOKEN_KEY, token);
+    return token;
+  } catch {
+    return "unknown";
+  }
+}
 
 // Clean up old v1 keys so they don't linger in storage
 try {
@@ -104,10 +120,13 @@ export function useInviteGate() {
   const [forceGate, setForceGate] = useState(false); // set true when server revokes access
 
   const storedCode = getStoredStr(CODE_KEY);
+  // Stable per-browser token — created once, persists in localStorage
+  const sessionToken = storedCode ? getOrCreateSessionToken() : "";
 
-  // Re-validate stored code on mount (catches admin blocks / expiry)
+  // Re-validate stored code on mount (catches admin blocks / expiry).
+  // Also sends a heartbeat to the server so admins can see active sessions.
   const { data: accessCheck } = trpc.inviteGate.checkCodeAccess.useQuery(
-    { code: storedCode ?? "" },
+    { code: storedCode ?? "", sessionToken: sessionToken || undefined },
     {
       enabled: !!storedCode && unlocked && (data?.enabled ?? false),
       staleTime: 60 * 1000, // re-check every minute
