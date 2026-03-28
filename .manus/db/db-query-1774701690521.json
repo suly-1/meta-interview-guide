@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE invite_codes SET code = 'GO000' WHERE code = 'GO0000';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute UPDATE invite_codes SET code = 'GO000' WHERE code = 'GO0000';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 66
+}

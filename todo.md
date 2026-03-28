@@ -1051,3 +1051,8 @@
 - [ ] Seed honeypot invite code (secret, never shared)
 - [ ] Enhance analytics dashboard with richer metrics (top pages, device breakdown, hourly activity, invite code usage)
 - [ ] Rebuild and redeploy to Cloudflare Pages
+
+## Round 4 — Invite Gate UX (Mar 28)
+- [x] 3-attempt lockout with 30-second cooldown on invite gate
+- [x] Rename gate title from "Private Resource" to "Study Group Access"
+- [x] Show welcome message after successful code entry
