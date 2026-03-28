@@ -367,3 +367,24 @@ export const pushSubscriptions = mysqlTable("push_subscriptions", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+
+// Invite codes — controls access to the site when invite gate is enabled
+export const inviteCodes = mysqlTable("invite_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 32 }).notNull().unique(),
+  label: varchar("label", { length: 128 }), // optional note (e.g. "Batch Jan 2026")
+  maxUses: int("maxUses").default(0), // 0 = unlimited
+  useCount: int("useCount").notNull().default(0),
+  isActive: tinyint("isActive").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"), // null = never expires
+});
+export type InviteCode = typeof inviteCodes.$inferSelect;
+
+// Invite gate settings — single-row config for the access gate
+export const inviteGateSettings = mysqlTable("invite_gate_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  enabled: tinyint("enabled").notNull().default(0),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type InviteGateSettings = typeof inviteGateSettings.$inferSelect;

@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO invite_codes (code, label, maxUses, useCount, isActive, createdAt) VALUES ('GO000', 'Primary invite code', 0, 0, 1, NOW()) ON DUPLICATE KEY UPDATE isActive = 1, useCount = 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute INSERT INTO invite_codes (code, label, maxUses, useCount, isActive, createdAt) VALUES ('GO000', 'Primary invite code', 0, 0, 1, NOW()) ON DUPLICATE KEY UPDATE isActive = 1, useCount = 0;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 123
+}

@@ -1039,3 +1039,9 @@
 - [x] Remove "Send Weekly Digest" button from OverviewTab
 - [x] Remove metaguide.one links from StandaloneAdminGate and AdminAccess
 - [x] Rebuild and redeploy to Cloudflare Pages
+
+## Round 2 improvements (Mar 28)
+- [ ] Add footer disclaimer text (educational purposes, anonymous)
+- [ ] Audit and remove Share Prep State if it leaks owner data
+- [ ] Add custom favicon (neutral coding/target icon, no Manus branding)
+- [ ] Restore hidden admin access via secret URL (e.g. /#/admin/access) without visible nav button

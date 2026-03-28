@@ -22,12 +22,14 @@ import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminPinGate from "@/components/AdminPinGate";
 import CollabRoom from "@/pages/CollabRoom";
 import AdminAccess from "@/pages/AdminAccess";
+import AdminInviteCodes from "@/pages/AdminInviteCodes";
 import DisclaimerGate, { useDisclaimerGate } from "./components/DisclaimerGate";
 import PatternUnlockCelebration from "./components/PatternUnlockCelebration";
 import { FocusModeProvider } from "./components/FocusMode";
 import { useAuth } from "./_core/hooks/useAuth";
 import { ShieldOff } from "lucide-react";
 import SiteLockGate from "./components/SiteLockGate";
+import InviteGate, { useInviteGate } from "./components/InviteGate";
 
 function BannedGate({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -58,6 +60,13 @@ function DisclaimerGateWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function InviteGateWrapper({ children }: { children: React.ReactNode }) {
+  const { showGate, isLoading, unlock } = useInviteGate();
+  if (isLoading) return null;
+  if (showGate) return <InviteGate onUnlock={unlock} />;
+  return <>{children}</>;
+}
+
 function AppRouter() {
   return (
     <Switch>
@@ -85,6 +94,7 @@ function App() {
             <Toaster />
             {/* Use hash-based routing so the standalone HTML file works without a server */}
             <Router hook={useHashLocation}>
+              <InviteGateWrapper>
               <BannedGate>
               <SiteLockGate>
               <Switch>
@@ -116,6 +126,9 @@ function App() {
         <Route path="/admin/access">
           <AdminPinGate><AdminAccess /></AdminPinGate>
         </Route>
+        <Route path="/admin/invite-codes">
+          <AdminPinGate><AdminInviteCodes /></AdminPinGate>
+        </Route>
                 {/* All other routes go through DisclaimerGate */}
                 <Route>
                   <DisclaimerGateWrapper>
@@ -126,6 +139,7 @@ function App() {
               </Switch>
               </SiteLockGate>
               </BannedGate>
+              </InviteGateWrapper>
             </Router>
           </TooltipProvider>
           </FocusModeProvider>

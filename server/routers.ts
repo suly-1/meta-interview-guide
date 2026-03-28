@@ -27,6 +27,7 @@ import { progressRouter } from "./routers/progress";
 import { sprintPlanRouter } from "./routers/sprintPlan";
 import { userScoresRouter } from "./routers/userScores";
 import { pushRouter } from "./routers/push";
+import { inviteGateRouter } from "./routers/inviteGate";
 import { ENV } from "./_core/env";
 
 export const appRouter = router({
@@ -1838,5 +1839,6 @@ ${input.currentCode ? "\`\`\`\n" + input.currentCode + "\n\`\`\`" : "(No code su
   sprintPlan: sprintPlanRouter,
   userScores: userScoresRouter,
   push: pushRouter,
+  inviteGate: inviteGateRouter,
 });
 export type AppRouter = typeof appRouter;

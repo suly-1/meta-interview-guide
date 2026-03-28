@@ -438,25 +438,16 @@ export default function Home() {
       {!focusMode && (
         <footer className="border-t border-border py-6 mt-8">
           <div className="container text-center text-xs text-muted-foreground space-y-2">
-            {/* #2 — Author byline */}
+            {/* Byline */}
             <div className="font-medium text-foreground/70">
-              Engineering Interview Prep
+              Software Engineering Interview Prep
             </div>
             <div>
-              By{" "}
-              <span className="text-foreground/80 font-medium">
-                Community Contributors
-              </span>{" "}
-              · Published March 2026 · All progress saved locally in your
-              browser
+              Community-compiled resource · Updated March 2026 · All progress saved locally in your browser
             </div>
-            {/* #5 — Version E relaxed distribution note */}
+            {/* Disclaimer */}
             <div className="max-w-xl mx-auto text-[11px] text-muted-foreground/70 leading-relaxed border-t border-border/50 pt-2 mt-1">
-              This is a community guide for self-directed learners. If you're a
-              recruiter or hiring manager thinking about sharing it — totally
-              your call, but it's worth checking your company's guidelines on
-              external resources first. This guide works best when candidates
-              discover it on their own anyway.
+              <strong>For educational purposes only.</strong> Content synthesized from publicly available sources including NeetCode, HelloInterview, Glassdoor, Blind, Taro, and community interview reports. This guide has no affiliation with any employer, company, or recruiting organization. No proprietary or confidential information is included.
             </div>
             {/* Keyboard shortcuts + Terms link */}
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1">
