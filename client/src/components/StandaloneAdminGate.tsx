@@ -5,7 +5,7 @@
  * of ADMIN_PIN is injected at build time via vite.standalone.config.ts.
  * The user's input is hashed client-side and compared to that value.
  *
- * On success: redirects to https://metaguide.one/#/admin/feedback
+ * On success: redirects to the local admin panel
  * On failure: shake animation + error message
  * After 5 wrong attempts: 15-minute lockout (localStorage-based)
  */
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShieldAlert, KeyRound, Loader2, ExternalLink } from "lucide-react";
 
-const LIVE_ADMIN_URL = "https://metaguide.one/#/admin/feedback";
+const LIVE_ADMIN_URL = "/#/admin/feedback";
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 const LOCKOUT_KEY = "standalone_admin_lockout";

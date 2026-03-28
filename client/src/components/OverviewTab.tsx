@@ -3006,7 +3006,7 @@ export default function OverviewTab({ onTabChange }: OverviewTabProps = {}) {
       <ReadinessGoalSetter />
       <CTCIDivergenceReport />
       <MostHintedBadge />
-      <WeeklyDigest />
+      {/* WeeklyDigest removed for public deployment — notifyOwner sends to owner account */}
       <SharePrepState />
       <div className="flex justify-start">
         <ProgressExport />

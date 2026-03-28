@@ -277,28 +277,7 @@ export default function AdminAccess() {
         </div>
       </div>
 
-      {/* Static-build warning — settings cannot be saved on GitHub Pages */}
-      {import.meta.env.VITE_STANDALONE === "true" && (
-        <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-3">
-          <div className="container max-w-2xl flex items-start gap-3">
-            <AlertTriangle className="w-4 h-4 text-amber-900 shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800">
-              <span className="font-semibold">Read-only mode.</span> You are
-              viewing the static build (metaguide.blog). Settings cannot be
-              saved here — visit{" "}
-              <a
-                href="https://metaguide.one/admin/access"
-                className="underline font-medium hover:text-amber-200"
-                target="_blank"
-                rel="noreferrer"
-              >
-                metaguide.one/admin/access
-              </a>{" "}
-              to manage the live site lock.
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Static-build warning removed for public deployment */}
 
       <div className="container py-8 max-w-2xl space-y-6">
         {/* Quick Toggle Card */}

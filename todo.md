@@ -1032,3 +1032,10 @@
 - [x] Set owner DB record to role=admin (Suly Kamara, id=1 — already admin)
 - [x] Remove admin PIN entry modal from AdminGate.tsx entirely
 - [x] Remove KeyRound re-lock button and clearAdminToken from TopNav
+
+## Privacy / De-identification for metaguide.blog public deployment
+- [x] Remove Sign-in (→ LogIn) button from TopNav
+- [x] Remove Admin shield icon from TopNav
+- [x] Remove "Send Weekly Digest" button from OverviewTab
+- [x] Remove metaguide.one links from StandaloneAdminGate and AdminAccess
+- [x] Rebuild and redeploy to Cloudflare Pages

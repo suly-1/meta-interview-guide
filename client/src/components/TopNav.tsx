@@ -901,36 +901,7 @@ export default function TopNav({
               <span>{streak.currentStreak}d</span>
             </div>
 
-            {/* Sign-in button — shown only when not authenticated with app server */}
-            {!user && !import.meta.env.VITE_STANDALONE && (
-              <a
-                href={getLoginUrl()}
-                title="Sign in to sync progress & access admin features"
-                className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              >
-                <LogIn size={13} />
-                <span className="hidden sm:inline">Sign in</span>
-              </a>
-            )}
-            {/* Admin Panel — always visible in live app; PIN gate protects the actual panel */}
-            {!import.meta.env.VITE_STANDALONE && (
-              <a
-                href="/#/admin/feedback"
-                title={
-                  newFeedbackCount > 0
-                    ? `Admin Panel · ${newFeedbackCount} new in last 7 days`
-                    : "Admin Panel"
-                }
-                className="relative w-8 h-8 rounded-md flex items-center justify-center text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition-all"
-              >
-                <ShieldCheck size={15} />
-                {newFeedbackCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 ring-1 ring-background flex items-center justify-center text-[9px] font-bold text-white leading-none">
-                    {newFeedbackCount > 99 ? "99+" : newFeedbackCount}
-                  </span>
-                )}
-              </a>
-            )}
+            {/* Sign-in and Admin Panel buttons removed for public deployment */}
             {/* Dark mode toggle */}
             <button
               onClick={onToggleDark}
