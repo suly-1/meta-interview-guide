@@ -1,0 +1,15 @@
+{
+  "query": "SELECT * FROM invite_gate_settings LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute SELECT * FROM invite_gate_settings LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "enabled": "1",
+      "updatedAt": "2026-03-28 11:50:41"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tenabled\tupdatedAt\n1\t1\t2026-03-28 11:50:41\n",
+  "stderr": "",
+  "execution_time_ms": 109
+}

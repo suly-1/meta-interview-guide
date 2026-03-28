@@ -1078,3 +1078,7 @@
 
 ## Round 8 — Site Name Update (Mar 28)
 - [x] Rename site from "Meta IC6/IC7 Interview Guide" to "L4/L7 Community Study Resource" across all files (index.html title/OG, Hero h1, OnboardingTour welcome, SiteLockGate, AdminDocs, ArchitectPicks)
+
+## Round 9 — Critical Bug Fix (Mar 28)
+- [x] Fix invite gate: site is accessible without entering an invite code
+- [x] Root cause: Manus platform layer blocks unauthenticated API calls with 401; Worker now proxies /api/ to dev server tunnel which has no auth layer
