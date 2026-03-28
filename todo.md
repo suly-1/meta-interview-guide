@@ -1100,3 +1100,9 @@
 - [x] Build AdminSessions page with live table, auto-refresh, revoke/restore buttons, summary cards
 - [x] Add route /admin/sessions in App.tsx with AdminPinGate
 - [x] Add Sessions nav link to AdminFeedback header
+
+## Version Update Banner (Mar 28)
+- [x] Add /api/version and /api/changelog routes to server/_core/index.ts
+- [x] Create client/src/components/VersionUpdateToast.tsx
+- [x] Mount <VersionUpdateToast /> in client/src/App.tsx
+- [x] Rebuild production server and verify endpoints respond correctly

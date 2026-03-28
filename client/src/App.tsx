@@ -31,6 +31,7 @@ import { useAuth } from "./_core/hooks/useAuth";
 import { ShieldOff } from "lucide-react";
 import SiteLockGate from "./components/SiteLockGate";
 import InviteGate, { useInviteGate } from "./components/InviteGate";
+import VersionUpdateToast from "./components/VersionUpdateToast";
 
 function BannedGate({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -93,6 +94,7 @@ function App() {
           <FocusModeProvider>
           <TooltipProvider>
             <Toaster />
+            <VersionUpdateToast />
             {/* Use hash-based routing so the standalone HTML file works without a server */}
             <Router hook={useHashLocation}>
               <InviteGateWrapper>

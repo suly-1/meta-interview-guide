@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE 'active_sessions';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute SHOW TABLES LIKE 'active_sessions';",
+  "rows": [
+    {
+      "Tables_in_HSV5ymGbFhd3N83JKd7NgT (active_sessions)": "active_sessions"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_HSV5ymGbFhd3N83JKd7NgT (active_sessions)\nactive_sessions\n",
+  "stderr": "",
+  "execution_time_ms": 75
+}

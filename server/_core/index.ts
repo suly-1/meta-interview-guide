@@ -36,6 +36,28 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // ── Version / Changelog endpoints ─────────────────────────────────────────
+  // BUILD_HASH is baked in at deploy time. Falls back to server start time so
+  // every cold-start produces a new hash even without a CI pipeline.
+  const BUILD_HASH =
+    process.env.VITE_BUILD_HASH ??
+    process.env.CHECKPOINT_VERSION ??
+    Date.now().toString(36);
+
+  app.get("/api/version", (_req, res) => {
+    res.json({ hash: BUILD_HASH });
+  });
+
+  // Update CHANGELOG_MESSAGE in your environment variables whenever you deploy
+  // a meaningful update. The frontend toast will display this string.
+  const CHANGELOG_MESSAGE =
+    process.env.CHANGELOG_MESSAGE ?? "New features and improvements deployed.";
+
+  app.get("/api/changelog", (_req, res) => {
+    res.json({ message: CHANGELOG_MESSAGE, hash: BUILD_HASH });
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

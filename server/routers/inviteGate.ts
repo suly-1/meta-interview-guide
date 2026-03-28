@@ -16,7 +16,7 @@
  * Every attempt is logged (IP, submitted code, outcome, reason).
  */
 import { z } from "zod";
-import { adminProcedure, publicProcedure, router } from "../_core/trpc";
+import { adminProcedure, tokenAdminProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { inviteCodes, inviteGateSettings, inviteAttempts, activeSessions } from "../../drizzle/schema";
 import { eq, desc, and, gte, count, lt, sql } from "drizzle-orm";
@@ -259,7 +259,7 @@ export const inviteGateRouter = router({
   // ── Admin ─────────────────────────────────────────────────────────────────
 
   /** Toggle the invite gate on or off */
-  setEnabled: adminProcedure
+  setEnabled: tokenAdminProcedure
     .input(z.object({ enabled: z.boolean() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -277,7 +277,7 @@ export const inviteGateRouter = router({
     }),
 
   /** List all invite codes with computed window expiry */
-  listCodes: adminProcedure.query(async () => {
+  listCodes: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db.select().from(inviteCodes).orderBy(desc(inviteCodes.createdAt));
@@ -300,7 +300,7 @@ export const inviteGateRouter = router({
   }),
 
   /** Create a new invite code */
-  createCode: adminProcedure
+  createCode: tokenAdminProcedure
     .input(
       z.object({
         code:             z.string().min(3).max(32).optional(),
@@ -332,7 +332,7 @@ export const inviteGateRouter = router({
     }),
 
   /** Update label, welcome message, and access window for a code */
-  updateCode: adminProcedure
+  updateCode: tokenAdminProcedure
     .input(
       z.object({
         id:               z.number(),
@@ -356,7 +356,7 @@ export const inviteGateRouter = router({
    * Block a specific invite code immediately.
    * The code holder will see a "blocked" screen on next page load.
    */
-  blockCode: adminProcedure
+  blockCode: tokenAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -369,7 +369,7 @@ export const inviteGateRouter = router({
    * Unblock a specific invite code.
    * The code holder regains access immediately (subject to expiry/window).
    */
-  unblockCode: adminProcedure
+  unblockCode: tokenAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -384,7 +384,7 @@ export const inviteGateRouter = router({
    * - extendDays: adds N days to the current window expiry
    * - setWindowDays: change the window length going forward
    */
-  extendAccess: adminProcedure
+  extendAccess: tokenAdminProcedure
     .input(
       z.object({
         id:           z.number(),
@@ -422,7 +422,7 @@ export const inviteGateRouter = router({
     }),
 
   /** Deactivate (soft-delete) an invite code */
-  deactivateCode: adminProcedure
+  deactivateCode: tokenAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -432,7 +432,7 @@ export const inviteGateRouter = router({
     }),
 
   /** Hard-delete an invite code */
-  deleteCode: adminProcedure
+  deleteCode: tokenAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -445,7 +445,7 @@ export const inviteGateRouter = router({
    * List recent invite attempt log entries (newest first).
    * Includes IP (partially masked), submitted code, outcome, and timestamp.
    */
-  listAttempts: adminProcedure
+  listAttempts: tokenAdminProcedure
     .input(z.object({ limit: z.number().int().min(1).max(500).default(100) }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -466,7 +466,7 @@ export const inviteGateRouter = router({
     }),
 
   /** Clear attempt log entries older than N days (default: clear all) */
-  clearAttempts: adminProcedure
+  clearAttempts: tokenAdminProcedure
     .input(z.object({ olderThanDays: z.number().int().min(0).default(0) }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -487,7 +487,7 @@ export const inviteGateRouter = router({
    * A session is considered "active" if its lastSeenAt is within the last 10 minutes.
    * Returns all sessions (including recently inactive ones) ordered by lastSeenAt desc.
    */
-  listActiveSessions: adminProcedure
+  listActiveSessions: tokenAdminProcedure
     .input(z.object({
       includeInactive: z.boolean().default(false), // if true, include sessions older than 10 min
       limit: z.number().int().min(1).max(500).default(200),
@@ -524,7 +524,7 @@ export const inviteGateRouter = router({
    * Revoke a session by ID.
    * The session holder will be denied on their next heartbeat (within 2 minutes).
    */
-  revokeSession: adminProcedure
+  revokeSession: tokenAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -539,7 +539,7 @@ export const inviteGateRouter = router({
   /**
    * Restore a previously revoked session.
    */
-  restoreSession: adminProcedure
+  restoreSession: tokenAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -554,7 +554,7 @@ export const inviteGateRouter = router({
   /**
    * Purge old session records (older than N days, default 30).
    */
-  purgeOldSessions: adminProcedure
+  purgeOldSessions: tokenAdminProcedure
     .input(z.object({ olderThanDays: z.number().int().min(1).max(365).default(30) }))
     .mutation(async ({ input }) => {
       const db = await getDb();
