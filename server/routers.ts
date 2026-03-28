@@ -28,6 +28,10 @@ import { drillSessionsRouter } from "./routers/drillSessions";
 import { failureDrillsRouter } from "./routers/failureDrills";
 import { engagementRouter } from "./routers/engagement";
 import { inviteRouter } from "./routers/invite";
+import { visitorTrackingRouter } from "./routers/visitorTracking";
+import { adminPinRouter } from "./routers/adminPin";
+import { siteSettingsRouter } from "./routers/siteSettings";
+import { inviteGateRouter } from "./routers/inviteGate";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "./db";
 import { pinAttempts } from "../drizzle/schema";
@@ -238,6 +242,10 @@ export const appRouter = router({
   adminUsers: adminUsersRouter,
   aiNativeHistory: aiNativeHistoryRouter,
   invite: inviteRouter,
+  visitorTracking: visitorTrackingRouter,
+  adminPin: adminPinRouter,
+  siteSettings: siteSettingsRouter,
+  inviteGate: inviteGateRouter,
 });
 
 export type AppRouter = typeof appRouter;

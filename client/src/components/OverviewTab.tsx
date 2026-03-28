@@ -302,11 +302,16 @@ function ReadinessDashboard() {
   ).length;
   const aiNativePct = aiNativeReadyDrills / AI_NATIVE_DRILL_COUNT;
 
-  // Rebalanced weights: coding 50%, behavioral 30%, AI-Native 20%
+  // Code Practice solved count
+  const cpSolved = useCodePracticeSolvedCount();
+  const cpPct = cpSolved / CODE_PRACTICE_TOTAL;
+
+  // Rebalanced weights: coding 40%, behavioral 25%, AI-Native 20%, Code Practice 15%
   const overallPct = Math.round(
-    ((masteredPatterns / PATTERNS.length) * 0.5 +
-      (readyStories / BEHAVIORAL_QUESTIONS.length) * 0.3 +
-      aiNativePct * 0.2) *
+    ((masteredPatterns / PATTERNS.length) * 0.4 +
+      (readyStories / BEHAVIORAL_QUESTIONS.length) * 0.25 +
+      aiNativePct * 0.2 +
+      cpPct * 0.15) *
       100
   );
 
@@ -342,9 +347,9 @@ function ReadinessDashboard() {
           />
         </div>
         <div className="text-xs text-muted-foreground mb-3">
-          Coding 50% · Behavioral 30% · AI-Native 20%
+          Coding 40% · Behavioral 25% · AI-Native 20% · Code Practice 15%
         </div>
-        <div className="grid grid-cols-4 gap-3 mt-4">
+        <div className="grid grid-cols-5 gap-3 mt-4">
           <div className="text-center">
             <div className="stat-num text-lg text-blue-400">
               {masteredPatterns}/{PATTERNS.length}
@@ -368,6 +373,12 @@ function ReadinessDashboard() {
               {aiNativeReadyDrills}/{AI_NATIVE_DRILL_COUNT}
             </div>
             <div className="text-xs text-muted-foreground">AI-Native</div>
+          </div>
+          <div className="text-center">
+            <div className="stat-num text-lg text-cyan-400">
+              {cpSolved}/{CODE_PRACTICE_TOTAL}
+            </div>
+            <div className="text-xs text-muted-foreground">Code Practice</div>
           </div>
         </div>
       </div>

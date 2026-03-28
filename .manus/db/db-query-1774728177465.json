@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `visitor_sessions` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `sessionId` varchar(128) NOT NULL,\n  `inviteCode` varchar(64),\n  `userAgent` varchar(512),\n  `currentTab` varchar(64),\n  `firstSeenAt` timestamp NOT NULL DEFAULT (now()),\n  `lastHeartbeatAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `visitor_sessions_id` PRIMARY KEY(`id`),\n  CONSTRAINT `visitor_sessions_sessionId_unique` UNIQUE(`sessionId`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute CREATE TABLE IF NOT EXISTS `visitor_sessions` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `sessionId` varchar(128) NOT NULL,\n  `inviteCode` varchar(64),\n  `userAgent` varchar(512),\n  `currentTab` varchar(64),\n  `firstSeenAt` timestamp NOT NULL DEFAULT (now()),\n  `lastHeartbeatAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `visitor_sessions_id` PRIMARY KEY(`id`),\n  CONSTRAINT `visitor_sessions_sessionId_unique` UNIQUE(`sessionId`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 628
+}

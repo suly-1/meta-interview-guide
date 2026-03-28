@@ -1593,7 +1593,60 @@ export const trpc = {
     },
   },
 
-  // ── Provider (passthrough) ────────────────────────────────────────────────────────────────────────────────────────
+  // ── inviteGate (no-op stubs for standalone) ──────────────────────────────
+  inviteGate: {
+    listCodes: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    createCode: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    toggleCode: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    deleteCode: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    listSessions: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    revokeSession: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    restoreSession: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    purgeOldSessions: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ deleted: 0 })),
+    },
+  },
+  // ── siteSettings (no-op stubs for standalone) ──────────────────────────────
+  siteSettings: {
+    getStatus: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ locked: false, reason: "no_expiry", daysRemaining: null }),
+    },
+    getSettings: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery(null),
+    },
+    updateSettings: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    setDisclaimerEnabled: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    cohortReset: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({ success: true, usersReset: 0 })),
+    },
+  },
+  // ── visitorTracking (no-op stubs for standalone) ──────────────────────────
+  visitorTracking: {
+    heartbeat: {
+      useMutation: (_?: unknown) => makeMutation(() => ({ success: true })),
+    },
+    getLiveStats: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ total: 0, active: 0, byCohort: [] }),
+    },
+  },
+  // ── Provider (passthrough) ──
   Provider: ({ children }: { children: React.ReactNode }) => children,
   createClient: () => ({}),
 };

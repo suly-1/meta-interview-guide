@@ -130,6 +130,20 @@ async function startServer() {
     res.json({ message: CHANGELOG_MESSAGE, hash: BUILD_HASH });
   });
 
+  // Changelog history — prepend a new entry here before each publish
+  // Format: { hash, date, title, items: string[] }
+  const CHANGELOG_HISTORY = [
+    {
+      hash: BUILD_HASH,
+      date: new Date().toISOString().slice(0, 10),
+      title: "Latest release",
+      items: [CHANGELOG_MESSAGE],
+    },
+  ];
+  app.get("/api/changelog/history", (_req, res) => {
+    res.json(CHANGELOG_HISTORY);
+  });
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API

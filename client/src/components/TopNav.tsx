@@ -1,7 +1,11 @@
 // Design: Bold Engineering Dashboard — dark charcoal, Space Grotesk, blue accent
 import { useState } from "react";
 import { Sun, Moon, BookOpen, Leaf, X } from "lucide-react";
-import { useStreak } from "@/hooks/useLocalStorage";
+import {
+  useStreak,
+  useCodePracticeSolvedCount,
+  CODE_PRACTICE_TOTAL,
+} from "@/hooks/useLocalStorage";
 
 interface TopNavProps {
   activeTab: string;
@@ -46,6 +50,7 @@ const ACTIVE_TAB_CLS = IS_METAGUIDE_BLOG
   ? "bg-emerald-500/18 text-emerald-300 border border-emerald-500/35 font-semibold"
   : "bg-blue-500/18 text-blue-300 border border-blue-500/35 font-semibold";
 
+// NOTE: The "code-practice" tab label is rendered dynamically below using the hook.
 export default function TopNav({
   activeTab,
   onTabChange,
@@ -53,6 +58,7 @@ export default function TopNav({
   onToggleDark,
 }: TopNavProps) {
   const streak = useStreak();
+  const cpSolved = useCodePracticeSolvedCount();
 
   const [bannerDismissed, setBannerDismissed] = useState(() => {
     try {
@@ -141,7 +147,9 @@ export default function TopNav({
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}
                 >
-                  {tab.label}
+                  {tab.id === "code-practice"
+                    ? `💻 Code Practice (${cpSolved}/${CODE_PRACTICE_TOTAL})`
+                    : tab.label}
                 </button>
               ))}
             </nav>
@@ -186,7 +194,9 @@ export default function TopNav({
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
               >
-                {tab.label}
+                {tab.id === "code-practice"
+                  ? `💻 ${cpSolved}/${CODE_PRACTICE_TOTAL}`
+                  : tab.label}
               </button>
             ))}
           </div>

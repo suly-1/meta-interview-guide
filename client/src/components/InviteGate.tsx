@@ -29,6 +29,7 @@ import { trpc } from "@/lib/trpc";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY = "invite_gate_unlocked";
+const CODE_STORAGE_KEY = "invite_gate_code";
 const LOCKOUT_SECONDS = 300; // mirrors server
 const WELCOME_DURATION_MS = 5000;
 const GATE_ENABLED = Boolean(import.meta.env.VITE_INVITE_CODE);
@@ -70,10 +71,20 @@ function isAlreadyUnlocked(): boolean {
   }
 }
 
-function markUnlocked(): void {
+function markUnlocked(code?: string): void {
   try {
     localStorage.setItem(STORAGE_KEY, "1");
+    if (code) localStorage.setItem(CODE_STORAGE_KEY, code);
   } catch {}
+}
+
+/** Returns the invite code the current visitor used to unlock the gate. */
+export function getStoredInviteCode(): string | null {
+  try {
+    return localStorage.getItem(CODE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 // ── Colour map ─────────────────────────────────────────────────────────────────
@@ -198,7 +209,7 @@ export default function InviteGate({ children }: InviteGateProps) {
   // ── Verify mutation ────────────────────────────────────────────────────────
   const verifyMutation = trpc.invite.verifyCode.useMutation({
     onSuccess: data => {
-      markUnlocked();
+      markUnlocked(input.trim());
       setWelcomeData({
         cohortName: data.cohortName,
         welcomeMessage: data.welcomeMessage,

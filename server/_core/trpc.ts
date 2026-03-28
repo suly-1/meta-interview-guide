@@ -109,3 +109,41 @@ export const ownerProcedure = t.procedure.use(requireUser).use(
     });
   })
 );
+
+/**
+ * tokenAdminProcedure — accepts EITHER:
+ *  1. A valid Manus OAuth session with role=admin, OR
+ *  2. A matching x-admin-token HTTP header (ENV.adminSecretToken)
+ *
+ * Required for admin panel procedures because the panel uses a localStorage
+ * token (not an OAuth session). Using adminProcedure would cause FORBIDDEN
+ * errors for token-only access.
+ */
+export const tokenAdminProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+    const tokenHeader = ctx.req.headers["x-admin-token"] as string | undefined;
+    const tokenValid =
+      Boolean(ENV.adminSecretToken) && tokenHeader === ENV.adminSecretToken;
+    const sessionAdmin = ctx.user && ctx.user.role === "admin";
+    if (!tokenValid && !sessionAdmin) {
+      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+    }
+    const effectiveUser = ctx.user ?? {
+      id: 0,
+      openId: "token-admin",
+      name: "Admin",
+      email: null,
+      loginMethod: null,
+      role: "admin" as const,
+      blocked: 0,
+      blockReason: null,
+      blockedUntil: null,
+      disclaimerAcknowledgedAt: null,
+      lastSignedIn: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return next({ ctx: { ...ctx, user: effectiveUser } });
+  })
+);

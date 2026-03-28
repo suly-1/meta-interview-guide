@@ -1,5 +1,20 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
+/**
+ * route(path) — returns the correct href for a given path.
+ * In standalone/hash-router mode it prepends "#"; in server mode it returns the path as-is.
+ */
+export function route(path: string): string {
+  if (typeof window !== "undefined") {
+    const isHashMode =
+      window.location.pathname.endsWith(".html") ||
+      (window.location.hash.startsWith("#/") &&
+        window.location.pathname === "/");
+    if (isHashMode) return `#${path}`;
+  }
+  return path;
+}
+
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;

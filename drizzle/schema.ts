@@ -604,3 +604,51 @@ export const seasonScores = mysqlTable("season_scores", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SeasonScore = typeof seasonScores.$inferSelect;
+
+// ── Visitor Sessions (real-time user tracking) ────────────────────────────────
+export const visitorSessions = mysqlTable("visitor_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 128 }).notNull().unique(),
+  inviteCode: varchar("inviteCode", { length: 64 }),
+  userAgent: varchar("userAgent", { length: 512 }),
+  currentTab: varchar("currentTab", { length: 64 }),
+  firstSeenAt: timestamp("firstSeenAt").defaultNow().notNull(),
+  lastHeartbeatAt: timestamp("lastHeartbeatAt")
+    .defaultNow()
+    .onUpdateNow()
+    .notNull(),
+});
+export type VisitorSession = typeof visitorSessions.$inferSelect;
+
+// ── Invite Attempts — Rate Limiting Log ───────────────────────────────────────
+export const inviteAttempts = mysqlTable("invite_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  submittedCode: varchar("submittedCode", { length: 64 }),
+  success: boolean("success").notNull().default(false),
+  reason: varchar("reason", { length: 32 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InviteAttempt = typeof inviteAttempts.$inferSelect;
+
+// ── Invite Gate Settings — Single-Row Config ──────────────────────────────────
+export const inviteGateSettings = mysqlTable("invite_gate_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  enabled: boolean("enabled").notNull().default(false),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type InviteGateSetting = typeof inviteGateSettings.$inferSelect;
+
+// ── Active Sessions — Live Browser Session Tracking ───────────────────────────
+export const activeSessions = mysqlTable("active_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionToken: varchar("sessionToken", { length: 64 }).notNull().unique(),
+  codeId: int("codeId").notNull(),
+  code: varchar("code", { length: 32 }).notNull(),
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  userAgent: varchar("userAgent", { length: 256 }),
+  firstSeenAt: timestamp("firstSeenAt").defaultNow().notNull(),
+  lastSeenAt: timestamp("lastSeenAt").defaultNow().onUpdateNow().notNull(),
+  isRevoked: boolean("isRevoked").notNull().default(false),
+});
+export type ActiveSession = typeof activeSessions.$inferSelect;

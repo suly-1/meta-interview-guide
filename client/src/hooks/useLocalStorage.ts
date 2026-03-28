@@ -184,3 +184,13 @@ export interface AIReviewRecord {
 export function useAIReviewHistory() {
   return useLocalStorage<AIReviewRecord[]>("meta_ai_review_history_v1", []);
 }
+
+// ── Code Practice solved count (for TopNav badge + readiness dashboard) ───────
+export function useCodePracticeSolvedCount(): number {
+  const [solved] = useLocalStorage<Record<string, boolean>>(
+    "meta_code_practice_solved_v1",
+    {}
+  );
+  return Object.values(solved).filter(Boolean).length;
+}
+export const CODE_PRACTICE_TOTAL = 50;

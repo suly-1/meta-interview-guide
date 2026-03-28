@@ -176,6 +176,20 @@
       "when": 1774702624939,
       "tag": "0024_empty_pete_wisdom",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1774728136466,
+      "tag": "0025_sturdy_psynapse",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1774731129961,
+      "tag": "0026_spooky_masque",
+      "breakpoints": true
     }
   ]
 }

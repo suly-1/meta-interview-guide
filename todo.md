@@ -1380,3 +1380,14 @@
 - [x] Verify Monaco editor works (already installed)
 - [x] Fix any TypeScript/import errors
 - [x] All tests passing
+
+## Phase 64 — Three Improvements
+
+- [ ] Solved-count badge on Code Practice tab in TopNav (reads localStorage, shows X/50)
+- [ ] Code Practice completion % as 4th readiness dimension in OverviewTab
+- [ ] visitor_sessions DB table + schema migration
+- [ ] tRPC heartbeat endpoint (upsert session, 30s TTL)
+- [ ] Session creation on invite gate pass
+- [ ] Admin dashboard widget: total/active/today/week + per-code breakdown
+- [ ] 30-second auto-refresh on admin widget
+- [ ] Tests for heartbeat and session query procedures

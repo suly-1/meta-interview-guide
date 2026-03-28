@@ -5,12 +5,38 @@
  * deployment detected), fetches /api/changelog for a human-readable update
  * message, then shows a top-right toast for 10 seconds with a countdown
  * progress bar. No browser permissions required.
+ *
+ * Upgrades over v1:
+ * - Seen-hashes dedup: each hash is only shown once per session (stored in
+ *   sessionStorage so it resets on tab close but not on soft navigation).
+ * - Two action buttons: "View Changelog" (navigates to /changelog) and
+ *   "Reload" (hard-reloads the page to pick up the new build).
  */
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X, RefreshCw, BookOpen } from "lucide-react";
 
 const POLL_INTERVAL_MS = 60_000;
 const TOAST_DURATION_MS = 10_000;
+const SEEN_KEY = "vut_seen_hashes";
+
+function getSeenHashes(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem(SEEN_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markHashSeen(hash: string): void {
+  try {
+    const seen = getSeenHashes();
+    seen.add(hash);
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
+  } catch {
+    // sessionStorage unavailable — silently ignore
+  }
+}
 
 async function fetchBuildHash(): Promise<string | null> {
   try {
@@ -49,7 +75,21 @@ export default function VersionUpdateToast() {
     if (progressRef.current) clearInterval(progressRef.current);
   };
 
-  const showToast = async () => {
+  const handleViewChangelog = () => {
+    dismiss();
+    window.location.href = "/changelog";
+  };
+
+  const handleReload = () => {
+    dismiss();
+    window.location.reload();
+  };
+
+  const showToast = async (hash: string) => {
+    // Dedup: skip if this hash was already shown this session
+    if (getSeenHashes().has(hash)) return;
+    markHashSeen(hash);
+
     const msg = await fetchChangelog();
     setBuildTime(
       new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -83,6 +123,8 @@ export default function VersionUpdateToast() {
     // Capture the hash on first mount — this is the "current" version
     fetchBuildHash().then(hash => {
       baselineRef.current = hash;
+      // Also mark the initial hash as seen so we never show a toast for it
+      if (hash) markHashSeen(hash);
     });
 
     const interval = setInterval(async () => {
@@ -91,12 +133,13 @@ export default function VersionUpdateToast() {
 
       if (baselineRef.current === null) {
         baselineRef.current = latest;
+        if (latest) markHashSeen(latest);
         return;
       }
 
       if (latest !== baselineRef.current) {
         baselineRef.current = latest;
-        showToast();
+        showToast(latest);
       }
     }, POLL_INTERVAL_MS);
 
@@ -112,7 +155,7 @@ export default function VersionUpdateToast() {
 
   return (
     <div
-      className="fixed top-4 right-4 z-[9999] w-72 rounded-xl border border-blue-500/25 bg-card shadow-xl overflow-hidden"
+      className="fixed top-4 right-4 z-[9999] w-80 rounded-xl border border-blue-500/25 bg-card shadow-xl overflow-hidden"
       style={{ animation: "vut-slide-in 0.3s cubic-bezier(0.16,1,0.3,1)" }}
     >
       <style>{`
@@ -123,7 +166,7 @@ export default function VersionUpdateToast() {
       `}</style>
 
       {/* Body */}
-      <div className="flex items-start gap-2.5 px-3 py-3">
+      <div className="flex items-start gap-2.5 px-3 pt-3 pb-2">
         <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center mt-0.5">
           <Sparkles size={13} className="text-blue-400" />
         </div>
@@ -146,6 +189,25 @@ export default function VersionUpdateToast() {
           aria-label="Dismiss"
         >
           <X size={13} />
+        </button>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex items-center gap-2 px-3 pb-2.5">
+        <button
+          onClick={handleViewChangelog}
+          className="flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 transition-colors font-medium"
+        >
+          <BookOpen size={11} />
+          View Changelog
+        </button>
+        <span className="text-muted-foreground/40 text-[11px]">·</span>
+        <button
+          onClick={handleReload}
+          className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <RefreshCw size={11} />
+          Reload
         </button>
       </div>
 
