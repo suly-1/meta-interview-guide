@@ -1111,3 +1111,9 @@
 - [x] Set CHANGELOG_MESSAGE secret to describe latest changes
 - [x] Reduce POLL_INTERVAL_MS from 60s to 30s in VersionUpdateToast.tsx
 - [x] Add "Reload now" button to VersionUpdateToast that calls window.location.reload()
+
+## Version Update Banner — Round 2 (Mar 28)
+- [x] Add /changelog route with a What's New page showing past update history
+- [x] Add changelog history endpoint /api/changelog/history (server-side static list)
+- [x] Persist seen hashes in localStorage — suppress toast if hash already seen
+- [x] Link toast "What's new →" to /changelog page; keep "Reload now" as secondary action

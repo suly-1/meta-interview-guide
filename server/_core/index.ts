@@ -58,6 +58,61 @@ async function startServer() {
     res.json({ message: CHANGELOG_MESSAGE, hash: BUILD_HASH });
   });
 
+  // Static changelog history — prepend a new entry here before each publish.
+  // The frontend /changelog page reads this endpoint to build the What's New list.
+  const CHANGELOG_HISTORY: Array<{ date: string; title: string; items: string[] }> = [
+    {
+      date: "2026-03-28",
+      title: "Active Sessions, Version Banner & Security",
+      items: [
+        "Added Active Sessions admin dashboard — view all live browser sessions, revoke individual access",
+        "Version Update Banner — users see a toast within 30 s of a new deployment going live",
+        "Invite gate security: server-side rate limiting, 5-min IP lockout after 3 failed attempts",
+        "Per-code 60-day access windows with admin extend / reset controls",
+        "Panic button in Admin Settings — site-wide LOCK NOW / Unlock",
+        "Animated feature tour on welcome screen after invite code entry",
+        "Per-code custom welcome messages",
+      ],
+    },
+    {
+      date: "2026-03-27",
+      title: "Code Practice & Game Modes",
+      items: [
+        "Speed Run, Tournament, Blitz, and Chaos game modes in Code Practice tab",
+        "Monaco editor with Judge0 CE code execution (Python, JavaScript, Java, C++)",
+        "Three-level AI hint system (nudge → approach → walkthrough)",
+        "FAANG-style coding screen simulator",
+        "Stats dashboard: problems solved, streaks, topic breakdown",
+      ],
+    },
+    {
+      date: "2026-03-26",
+      title: "System Design, Collab Room & Behavioral",
+      items: [
+        "System Design tab with HLD/LLD frameworks and Meta-specific patterns",
+        "Real-time Collab Room with shared whiteboard, timer, and chat",
+        "Behavioral interview guide with STAR answer templates",
+        "Tell Stories tab with structured narrative builder",
+        "Drill Patterns reference with complexity cheat-sheets",
+      ],
+    },
+    {
+      date: "2026-03-25",
+      title: "Initial Launch",
+      items: [
+        "Private invite-gate launch for L4–L7 study group",
+        "Coding interview guide with 50-problem curated list",
+        "AI-enabled round preparation content",
+        "Study timeline and readiness tracker",
+        "Dark / light theme toggle",
+      ],
+    },
+  ];
+
+  app.get("/api/changelog/history", (_req, res) => {
+    res.json(CHANGELOG_HISTORY);
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

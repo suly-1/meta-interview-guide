@@ -1,16 +1,47 @@
 /**
  * VersionUpdateToast
  *
- * Polls /api/version every 60 seconds. When the build hash changes (new
+ * Polls /api/version every 30 seconds. When the build hash changes (new
  * deployment detected), fetches /api/changelog for a human-readable update
  * message, then shows a top-right toast for 10 seconds with a countdown
- * progress bar. No browser permissions required.
+ * progress bar.
+ *
+ * Seen hashes are persisted in localStorage so the toast never fires twice
+ * for the same deployment — even across new tabs or page reloads.
  */
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X } from "lucide-react";
+import { useLocation } from "wouter";
 
 const POLL_INTERVAL_MS = 30_000;   // how often to check for a new version
 const TOAST_DURATION_MS = 10_000;  // how long the toast stays visible
+const SEEN_HASHES_KEY = "vut:seen_hashes"; // localStorage key
+
+// ── localStorage helpers ───────────────────────────────────────────────────
+
+function getSeenHashes(): Set<string> {
+  try {
+    const raw = localStorage.getItem(SEEN_HASHES_KEY);
+    if (!raw) return new Set();
+    return new Set(JSON.parse(raw) as string[]);
+  } catch {
+    return new Set();
+  }
+}
+
+function markHashSeen(hash: string): void {
+  try {
+    const seen = getSeenHashes();
+    seen.add(hash);
+    // Keep at most 20 entries to avoid unbounded growth
+    const trimmed = Array.from(seen).slice(-20);
+    localStorage.setItem(SEEN_HASHES_KEY, JSON.stringify(trimmed));
+  } catch {
+    // localStorage unavailable — silently ignore
+  }
+}
+
+// ── API helpers ────────────────────────────────────────────────────────────
 
 async function fetchBuildHash(): Promise<string | null> {
   try {
@@ -34,7 +65,10 @@ async function fetchChangelog(): Promise<string> {
   }
 }
 
+// ── Component ─────────────────────────────────────────────────────────────
+
 export default function VersionUpdateToast() {
+  const [, navigate] = useLocation();
   const [visible, setVisible] = useState(false);
   const [buildTime, setBuildTime] = useState<string>("");
   const [changelogMsg, setChangelogMsg] = useState<string>("");
@@ -49,7 +83,15 @@ export default function VersionUpdateToast() {
     if (progressRef.current) clearInterval(progressRef.current);
   };
 
-  const showToast = async () => {
+  const handleViewChangelog = () => {
+    dismiss();
+    navigate("/changelog");
+  };
+
+  const showToast = async (hash: string) => {
+    // Mark this hash as seen immediately so other tabs don't show it again
+    markHashSeen(hash);
+
     const msg = await fetchChangelog();
     setBuildTime(
       new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -80,9 +122,14 @@ export default function VersionUpdateToast() {
   };
 
   useEffect(() => {
-    // Capture the hash on first mount — this is the "current" version baseline
+    // Capture the hash on first mount — this is the "current" version baseline.
+    // If it's already in the seen set, we skip it (page was reloaded after update).
     fetchBuildHash().then(hash => {
-      baselineRef.current = hash;
+      if (hash) {
+        baselineRef.current = hash;
+        // Silently mark the initial hash as seen so a reload doesn't re-trigger
+        markHashSeen(hash);
+      }
     });
 
     const interval = setInterval(async () => {
@@ -91,12 +138,18 @@ export default function VersionUpdateToast() {
 
       if (baselineRef.current === null) {
         baselineRef.current = latest;
+        markHashSeen(latest);
         return;
       }
 
       if (latest !== baselineRef.current) {
         baselineRef.current = latest;
-        showToast();
+
+        // Only show if this hash hasn't been seen before (e.g., another tab already showed it)
+        const seen = getSeenHashes();
+        if (!seen.has(latest)) {
+          showToast(latest);
+        }
       }
     }, POLL_INTERVAL_MS);
 
@@ -139,13 +192,21 @@ export default function VersionUpdateToast() {
           <p className="text-[11px] text-muted-foreground leading-snug mt-1">
             {changelogMsg}
           </p>
-          {/* Reload now button */}
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-2 text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            Reload now →
-          </button>
+          {/* Action buttons */}
+          <div className="flex items-center gap-3 mt-2">
+            <button
+              onClick={handleViewChangelog}
+              className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              What's new →
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Reload now
+            </button>
+          </div>
         </div>
         <button
           onClick={dismiss}

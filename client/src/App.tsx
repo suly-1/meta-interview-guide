@@ -32,6 +32,7 @@ import { ShieldOff } from "lucide-react";
 import SiteLockGate from "./components/SiteLockGate";
 import InviteGate, { useInviteGate } from "./components/InviteGate";
 import VersionUpdateToast from "./components/VersionUpdateToast";
+import Changelog from "./pages/Changelog";
 
 function BannedGate({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -103,6 +104,7 @@ function App() {
               <Switch>
                 {/* /discover is accessible without DisclaimerGate — it IS the discovery page */}
                 <Route path="/discover" component={CandidateDiscovery} />
+        <Route path="/changelog" component={Changelog} />
         <Route path="/terms" component={TermsOfUse} />
         <Route path="/shared-plan/:token" component={SharedPlanView} />
         <Route path="/admin/feedback">
