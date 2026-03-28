@@ -1357,3 +1357,16 @@
 - [x] Per-code welcome messages: seed default GO000 code with welcome text, surface on welcome screen
 - [x] Animated fade/slide transition from welcome screen into the main app
 - [x] Animated feature tour on welcome screen (4-slide auto-advance tour)
+
+## InviteGate Follow-up — Round 62
+
+- [x] Add Cohort 2 invite code (code: COHORT2) to invite_codes table in the database
+- [x] Query and display invite_attempt_log to show access attempt history (0 rows — log is clean, no failed attempts yet)
+
+## Real-Time User Tracking — Round 63
+
+- [ ] Add visitor_sessions DB table (sessionId, ip, inviteCode, firstSeen, lastSeen, userAgent)
+- [ ] Record session on successful invite gate pass in invite router
+- [ ] Add /api/heartbeat endpoint to update lastSeen every 30s
+- [ ] Add admin stats tRPC query (total unique, active now, active today, active this week, per-code breakdown)
+- [ ] Build live stats widget in admin dashboard (auto-refreshes every 30s)

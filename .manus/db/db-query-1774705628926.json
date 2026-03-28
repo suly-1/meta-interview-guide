@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO invite_codes (code, cohortName, welcomeMessage, active) VALUES ('COHORT2', 'Cohort 2', 'Welcome, Cohort 2! You have access to the full IC6/IC7 study guide — coding patterns, behavioral prep, system design, and AI mock interviews. Good luck!', true);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute INSERT INTO invite_codes (code, cohortName, welcomeMessage, active) VALUES ('COHORT2', 'Cohort 2', 'Welcome, Cohort 2! You have access to the full IC6/IC7 study guide — coding patterns, behavioral prep, system design, and AI mock interviews. Good luck!', true);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 355
+}

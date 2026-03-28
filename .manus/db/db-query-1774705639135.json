@@ -1,0 +1,9 @@
+{
+  "query": "SELECT ip, codeTried, success, createdAt FROM invite_attempt_log ORDER BY createdAt DESC LIMIT 50;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute SELECT ip, codeTried, success, createdAt FROM invite_attempt_log ORDER BY createdAt DESC LIMIT 50;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 364
+}

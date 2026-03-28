@@ -1,0 +1,24 @@
+{
+  "query": "SELECT code, cohortName, welcomeMessage, active, createdAt FROM invite_codes ORDER BY createdAt ASC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute SELECT code, cohortName, welcomeMessage, active, createdAt FROM invite_codes ORDER BY createdAt ASC;",
+  "rows": [
+    {
+      "code": "GO000",
+      "cohortName": "Study Group",
+      "welcomeMessage": "Welcome! You now have full access to the community prep resource. Good luck with your preparation.",
+      "active": "1",
+      "createdAt": "2026-03-28 12:58:03"
+    },
+    {
+      "code": "COHORT2",
+      "cohortName": "Cohort 2",
+      "welcomeMessage": "Welcome, Cohort 2! You have access to the full IC6/IC7 study guide — coding patterns, behavioral prep, system design, and AI mock interviews. Good luck!",
+      "active": "1",
+      "createdAt": "2026-03-28 13:47:08"
+    }
+  ],
+  "messages": [],
+  "stdout": "code\tcohortName\twelcomeMessage\tactive\tcreatedAt\nGO000\tStudy Group\tWelcome! You now have full access to the community prep resource. Good luck with your preparation.\t1\t2026-03-28 12:58:03\nCOHORT2\tCohort 2\tWelcome, Cohort 2! You have access to the full IC6/IC7 study guide — coding patterns, behavioral prep, system design, and AI mock interviews. Good luck!\t1\t2026-03-28 13:47:08\n",
+  "stderr": "",
+  "execution_time_ms": 346
+}
