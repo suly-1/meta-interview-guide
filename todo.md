@@ -1336,3 +1336,10 @@
 - [x] Remove insider-language from content (replace with public-source framing)
 - [x] Build invite-code access gate (env-var: VITE_INVITE_CODE, currently GO0000)
 - [x] Wire up Umami analytics script in index.html using existing env vars
+
+## InviteGate Enhancements — Round 59
+
+- [x] Rotate invite code to GO000 (update VITE_INVITE_CODE secret)
+- [x] Add 3-attempt lockout with 30-second cooldown timer
+- [x] Rename gate title from "Private Resource" to "Study Group Access"
+- [x] Show welcome message after successful code entry (3.5s auto-dismiss with feature highlights)
