@@ -1075,3 +1075,6 @@
 - [x] Panic button in AdminSettings (prominent red LOCK SITE NOW / green Unlock Site Now)
 - [x] Fix site lock: manual_lock_enabled flag is independent of 60-day timer
 - [x] Reset lock_start_date to today (Mar 28) — fresh 60-day window, site is open
+
+## Round 8 — Site Name Update (Mar 28)
+- [x] Rename site from "Meta IC6/IC7 Interview Guide" to "L4/L7 Community Study Resource" across all files (index.html title/OG, Hero h1, OnboardingTour welcome, SiteLockGate, AdminDocs, ArchitectPicks)

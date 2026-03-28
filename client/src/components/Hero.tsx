@@ -230,7 +230,7 @@ function DisclaimerBanner() {
   );
 }
 
-const SHARE_MESSAGE = `I came across this community-built study resource online — the Independent Study Guide. It covers general SWE interview patterns for L4–L7 levels. It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
+const SHARE_MESSAGE = `I came across this community-built study resource online — the L4/L7 Community Study Resource. It covers general SWE interview patterns for L4–L7 levels. It's independent, not affiliated with any company, and clearly marked as a community resource. Totally optional — just sharing as a supplement to the official prep materials your recruiter sent: https://metaengguide.pro`;
 
 function ShareButton() {
   const [copied, setCopied] = useState(false);
@@ -361,7 +361,7 @@ export default function Hero() {
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight mb-4"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            <span className="text-[#4d9fff]">Independent Study Guide</span>
+            <span className="text-[#4d9fff]">L4/L7 Community Study Resource</span>
           </h1>
 
           <p className="text-[#93c5fd] text-base md:text-lg max-w-2xl mb-4 leading-relaxed">

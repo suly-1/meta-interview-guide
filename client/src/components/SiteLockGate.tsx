@@ -38,7 +38,7 @@ export default function SiteLockGate({ children }: SiteLockGateProps) {
 
         {/* Description */}
         <p className="text-gray-600 text-sm leading-relaxed mb-6">
-          The Meta IC6/IC7 Interview Guide has reached the end of its current cohort period.
+          The L4/L7 Community Study Resource has reached the end of its current cohort period.
           The guide is periodically opened for new cohorts of candidates.
         </p>
 

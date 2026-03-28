@@ -109,7 +109,7 @@ export default function AdminDocs() {
             </div>
             <div>
               <h1 className="text-xl font-bold">Admin Access & Deployment Guide</h1>
-              <p className="text-indigo-200 text-xs mt-0.5">Meta IC6/IC7 Interview Guide — metaengguide.pro</p>
+              <p className="text-indigo-200 text-xs mt-0.5">L4/L7 Community Study Resource — metaengguide.pro</p>
             </div>
           </div>
           {hasToken && (
@@ -309,7 +309,7 @@ export default function AdminDocs() {
 
       {/* Footer */}
       <footer className="border-t border-gray-200 dark:border-gray-800 py-6 text-center text-xs text-gray-600">
-        Meta IC6/IC7 Interview Guide — Admin Documentation · Last updated March 2026
+        L4/L7 Community Study Resource — Admin Documentation · Last updated March 2026
       </footer>
     </div>
   );

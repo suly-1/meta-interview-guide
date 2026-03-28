@@ -266,7 +266,7 @@ export default function ArchitectPicks({ onTabChange }: ArchitectPicksProps) {
         {/* Subtle divider note */}
         <p className="text-center text-xs text-white/30 mt-4">
           {isNewUser
-            ? "Curated by The Architect · Based on analysis of the most common failure patterns at Meta IC6/IC7"
+            ? "Curated by The Architect · Based on analysis of the most common failure patterns at L4–L7"
             : "Personalized based on your ratings and progress · Data stored locally in your browser"}
         </p>
       </div>

@@ -36,7 +36,7 @@ const HIGH_IMPACT_TOOLS = [
 const STEPS = [
   {
     id: "welcome",
-    title: "Welcome to the Meta IC6/IC7 Interview Guide",
+    title: "Welcome to the L4/L7 Community Study Resource",
     subtitle: "Designed by The Architect — a Meta engineer. Let's get you to 7/10 pass rate.",
     content: null,
   },
