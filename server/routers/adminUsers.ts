@@ -1,21 +1,21 @@
 /**
  * adminUsers router — owner-only user management.
  *
- * listUsers          (ownerProcedure) → user list with blocked status, reason, blockedUntil
- * blockUser          (ownerProcedure) → block user, optional reason + auto-expiry, audit log, notify
- * unblockUser        (ownerProcedure) → unblock user, audit log, notify
- * reBlockUser        (ownerProcedure) → re-apply block from audit log row (supports expiryDays)
- * extendBlock         (ownerProcedure) → modify blockedUntil on an already-blocked user
- * listEvents         (ownerProcedure) → audit log (last 200 events)
- * exportAuditLogCsv  (ownerProcedure) → full audit log as CSV string
- * getUserLoginHistory(ownerProcedure) → last 5 login timestamps per user
+ * listUsers          (tokenAdminProcedure) → user list with blocked status, reason, blockedUntil
+ * blockUser          (tokenAdminProcedure) → block user, optional reason + auto-expiry, audit log, notify
+ * unblockUser        (tokenAdminProcedure) → unblock user, audit log, notify
+ * reBlockUser        (tokenAdminProcedure) → re-apply block from audit log row (supports expiryDays)
+ * extendBlock         (tokenAdminProcedure) → modify blockedUntil on an already-blocked user
+ * listEvents         (tokenAdminProcedure) → audit log (last 200 events)
+ * exportAuditLogCsv  (tokenAdminProcedure) → full audit log as CSV string
+ * getUserLoginHistory(tokenAdminProcedure) → last 5 login timestamps per user
  */
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, desc, inArray, gte, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { users, userEvents, loginEvents } from "../../drizzle/schema";
-import { ownerProcedure, router } from "../_core/trpc";
+import { tokenAdminProcedure, router } from "../_core/trpc";
 import { notifyOwner } from "../_core/notification";
 
 /** Helper: write an audit log row */
@@ -45,7 +45,7 @@ export const adminUsersRouter = router({
    * Cohort health summary — total users, weekly active, currently blocked.
    * "Weekly active" = logged in at least once in the last 7 days.
    */
-  getUserStats: ownerProcedure.query(async () => {
+  getUserStats: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return { total: 0, weeklyActive: 0, blocked: 0 };
 
@@ -72,7 +72,7 @@ export const adminUsersRouter = router({
   }),
 
   /** List all registered users (owner only) */
-  listUsers: ownerProcedure.query(async () => {
+  listUsers: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     return db
@@ -92,7 +92,7 @@ export const adminUsersRouter = router({
   }),
 
   /** Block a user by ID — optional reason + optional auto-expiry */
-  blockUser: ownerProcedure
+  blockUser: tokenAdminProcedure
     .input(
       z.object({
         userId: z.number().int().positive(),
@@ -166,7 +166,7 @@ export const adminUsersRouter = router({
     }),
 
   /** Unblock a user by ID — restores full access immediately */
-  unblockUser: ownerProcedure
+  unblockUser: tokenAdminProcedure
     .input(z.object({ userId: z.number().int().positive() }))
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
@@ -215,7 +215,7 @@ export const adminUsersRouter = router({
    * Re-block a user directly from an audit log row.
    * Accepts the targetId from an "unblock" event and re-applies the block.
    */
-  reBlockUser: ownerProcedure
+  reBlockUser: tokenAdminProcedure
     .input(
       z.object({
         userId: z.number().int().positive(),
@@ -285,7 +285,7 @@ export const adminUsersRouter = router({
    * Can also convert a permanent block to a temporary one and vice-versa.
    * Does NOT change the blockReason unless a new reason is provided.
    */
-  extendBlock: ownerProcedure
+  extendBlock: tokenAdminProcedure
     .input(
       z.object({
         userId: z.number().int().positive(),
@@ -367,7 +367,7 @@ export const adminUsersRouter = router({
     }),
 
   /** Audit log — last 200 block/unblock events (owner only) */
-  listEvents: ownerProcedure.query(async () => {
+  listEvents: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     return db
@@ -381,7 +381,7 @@ export const adminUsersRouter = router({
    * Export the full audit log as a CSV string.
    * Returns { csv: string } — the client triggers a download.
    */
-  exportAuditLogCsv: ownerProcedure.query(async () => {
+  exportAuditLogCsv: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return { csv: "" };
 
@@ -426,7 +426,7 @@ export const adminUsersRouter = router({
    * Get the last 5 login timestamps for each user ID in the list.
    * Returns a map of userId → Date[].
    */
-  getUserLoginHistory: ownerProcedure
+  getUserLoginHistory: tokenAdminProcedure
     .input(z.object({ userIds: z.array(z.number().int().positive()) }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -454,7 +454,7 @@ export const adminUsersRouter = router({
    * notification to the owner listing them. Designed to be called by a
    * scheduled cron job or manually from the admin panel.
    */
-  checkInactiveUsers: ownerProcedure.mutation(async () => {
+  checkInactiveUsers: tokenAdminProcedure.mutation(async () => {
     const db = await getDb();
     if (!db) return { notified: false, count: 0 };
 

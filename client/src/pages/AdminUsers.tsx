@@ -14,6 +14,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getAdminToken } from "@/components/AdminPinGate";
 import { useLocation } from "wouter";
 import {
   ShieldOff,
@@ -432,14 +433,12 @@ export default function AdminUsers() {
     null
   );
 
-  const isOwnerQuery = trpc.auth.isOwner.useQuery(undefined, {
-    enabled: !!user,
-  });
+  const isAdmin = !!getAdminToken();
 
   const { data: usersData, isLoading } = trpc.adminUsers.listUsers.useQuery(
     undefined,
     {
-      enabled: isOwnerQuery.data?.isOwner === true,
+      enabled: isAdmin,
       // Refresh every 30 s so expired blocks show up without a manual reload
       refetchInterval: 30_000,
     }
@@ -447,7 +446,7 @@ export default function AdminUsers() {
 
   const { data: auditEvents, refetch: refetchAudit } =
     trpc.adminUsers.listEvents.useQuery(undefined, {
-      enabled: isOwnerQuery.data?.isOwner === true && showAuditLog,
+      enabled: isAdmin && showAuditLog,
     });
 
   // Fetch login history for all user IDs once we have the user list
@@ -457,7 +456,7 @@ export default function AdminUsers() {
   );
   const { data: loginHistory } = trpc.adminUsers.getUserLoginHistory.useQuery(
     { userIds: allUserIds },
-    { enabled: allUserIds.length > 0 && isOwnerQuery.data?.isOwner === true }
+    { enabled: allUserIds.length > 0 && isAdmin }
   );
 
   const { data: csvData, refetch: fetchCsv } =
@@ -467,7 +466,7 @@ export default function AdminUsers() {
 
   // Cohort health summary stats
   const { data: statsData } = trpc.adminUsers.getUserStats.useQuery(undefined, {
-    enabled: isOwnerQuery.data?.isOwner === true,
+    enabled: isAdmin,
     refetchInterval: 30_000,
   });
 
@@ -534,7 +533,7 @@ export default function AdminUsers() {
   });
 
   // Auth loading
-  if (authLoading || isOwnerQuery.isLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-muted-foreground text-sm animate-pulse">
@@ -544,14 +543,14 @@ export default function AdminUsers() {
     );
   }
 
-  // Not owner
-  if (!isOwnerQuery.data?.isOwner) {
+  // Not admin
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="text-center space-y-3">
           <ShieldOff size={40} className="text-red-400 mx-auto" />
           <p className="text-muted-foreground text-sm">
-            Owner access required to view this page.
+            Admin PIN required. Please enter your PIN at /admin.
           </p>
           <button
             onClick={() => navigate("/")}

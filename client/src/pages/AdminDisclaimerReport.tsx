@@ -5,6 +5,7 @@
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getAdminToken } from "@/components/AdminPinGate";
 import { Link } from "wouter";
 import { route } from "@/const";
 import {
@@ -38,17 +39,14 @@ export default function AdminDisclaimerReport() {
   );
   const [search, setSearch] = useState("");
 
-  const { data: ownerData } = trpc.auth.isOwner.useQuery(undefined, {
-    enabled: !!user,
-  });
-  const isOwner = ownerData?.isOwner ?? false;
+  const isAdmin = !!getAdminToken();
 
   const {
     data: rows = [],
     isLoading,
     error,
   } = trpc.disclaimer.adminReport.useQuery(undefined, {
-    enabled: !!user && isOwner,
+    enabled: isAdmin,
   });
 
   const handleSort = (key: SortKey) => {
@@ -150,7 +148,7 @@ export default function AdminDisclaimerReport() {
   }
 
   // Not owner — show 404-style access denied
-  if (!loading && (!user || !isOwner)) {
+  if (!loading && !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-8">
         <ShieldAlert size={40} className="text-amber-400" />

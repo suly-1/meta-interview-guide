@@ -1,7 +1,7 @@
 import {
   protectedProcedure,
   publicProcedure,
-  ownerProcedure,
+  tokenAdminProcedure,
   router,
 } from "../_core/trpc";
 import { getDb } from "../db";
@@ -49,7 +49,7 @@ export const disclaimerRouter = router({
    * Only the account matching OWNER_OPEN_ID can call this.
    * Sorted by acknowledgedAt desc (acknowledged first), then by createdAt asc.
    */
-  adminReport: ownerProcedure.query(async () => {
+  adminReport: tokenAdminProcedure.query(async () => {
     const db = await getDb();
     if (!db) return [];
     const rows = await db

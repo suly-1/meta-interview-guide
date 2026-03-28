@@ -12,6 +12,7 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getAdminToken } from "@/components/AdminPinGate";
 import { useLocation } from "wouter";
 import { route } from "@/const";
 import {
@@ -123,11 +124,7 @@ export default function AdminAccess() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
 
-  // Owner check
-  const { data: ownerData, isLoading: ownerLoading } =
-    trpc.auth.isOwner.useQuery(undefined, {
-      enabled: !!user,
-    });
+  const isAdmin = !!getAdminToken();
 
   // Current settings
   const {
@@ -135,7 +132,7 @@ export default function AdminAccess() {
     isLoading: settingsLoading,
     refetch,
   } = trpc.siteAccess.getSettings.useQuery(undefined, {
-    enabled: !!ownerData?.isOwner,
+    enabled: isAdmin,
   });
 
   // Current access state (for live preview)
@@ -199,7 +196,7 @@ export default function AdminAccess() {
   });
 
   // Auth guard
-  if (loading || ownerLoading || settingsLoading) {
+  if (loading || settingsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -207,7 +204,7 @@ export default function AdminAccess() {
     );
   }
 
-  if (!user || !ownerData?.isOwner) {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-3">

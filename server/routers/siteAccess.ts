@@ -2,11 +2,11 @@
  * siteAccess router — manages the hybrid access gate.
  *
  * checkAccess    (public)         → { locked, reason, message, daysRemaining }
- * getSettings    (ownerProcedure) → full site_settings row
- * updateSettings (ownerProcedure) → update lock config
+ * getSettings    (tokenAdminProcedure) → full site_settings row
+ * updateSettings (tokenAdminProcedure) → update lock config
  */
 import { z } from "zod";
-import { publicProcedure, ownerProcedure, router } from "../_core/trpc";
+import { publicProcedure, tokenAdminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings, users } from "../../drizzle/schema";
 import { eq, isNotNull } from "drizzle-orm";
@@ -123,7 +123,7 @@ export const siteAccessRouter = router({
   }),
 
   /** Owner-only — returns the full settings row for the admin panel. */
-  getSettings: ownerProcedure.query(async () => {
+  getSettings: tokenAdminProcedure.query(async () => {
     return getOrCreateSettings();
   }),
 
@@ -132,7 +132,7 @@ export const siteAccessRouter = router({
    * Resets the 60-day clock to today, clears all disclaimerAcknowledgedAt,
    * and sends a Manus inbox notification to the owner.
    */
-  cohortReset: ownerProcedure.mutation(async ({ ctx }) => {
+  cohortReset: tokenAdminProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
 
@@ -166,7 +166,7 @@ export const siteAccessRouter = router({
   }),
 
   /** Owner-only — update any combination of lock settings. */
-  updateSettings: ownerProcedure
+  updateSettings: tokenAdminProcedure
     .input(
       z.object({
         lockStartDate: z.string().max(16).nullable().optional(),
@@ -206,7 +206,7 @@ export const siteAccessRouter = router({
    * Owner-only — toggle the disclaimer gate on or off globally.
    * When disabled, all users skip the disclaimer regardless of their acknowledgment state.
    */
-  setDisclaimerEnabled: ownerProcedure
+  setDisclaimerEnabled: tokenAdminProcedure
     .input(z.object({ enabled: z.boolean() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
