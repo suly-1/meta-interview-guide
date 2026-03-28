@@ -113,8 +113,8 @@ export default function InviteGate({ children }: InviteGateProps) {
               Private Resource
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              This is a community study resource shared with trusted candidates
-              only. Enter your invite code to continue.
+              This is a community study resource. Enter your invite code to
+              continue.
             </p>
           </div>
 
