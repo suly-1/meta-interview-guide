@@ -1343,3 +1343,8 @@
 - [x] Add 3-attempt lockout with 30-second cooldown timer
 - [x] Rename gate title from "Private Resource" to "Study Group Access"
 - [x] Show welcome message after successful code entry (3.5s auto-dismiss with feature highlights)
+
+## InviteGate Timing — Round 60
+
+- [x] Extend lockout from 30s to 300s (5 minutes) in LOCKOUT_SECONDS
+- [x] Change welcome screen auto-dismiss from 3.5s to 5s in WELCOME_DURATION_MS

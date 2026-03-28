@@ -26,8 +26,8 @@ const STORAGE_KEY = "invite_gate_unlocked";
 const ATTEMPTS_KEY = "invite_gate_attempts";
 const LOCKOUT_KEY = "invite_gate_lockout_until";
 const MAX_ATTEMPTS = 3;
-const LOCKOUT_SECONDS = 30;
-const WELCOME_DURATION_MS = 3500;
+const LOCKOUT_SECONDS = 300;
+const WELCOME_DURATION_MS = 5000;
 const EXPECTED_CODE = import.meta.env.VITE_INVITE_CODE as string | undefined;
 
 function isAlreadyUnlocked(): boolean {
