@@ -1106,3 +1106,8 @@
 - [x] Create client/src/components/VersionUpdateToast.tsx
 - [x] Mount <VersionUpdateToast /> in client/src/App.tsx
 - [x] Rebuild production server and verify endpoints respond correctly
+
+## Version Update Banner — Improvements (Mar 28)
+- [x] Set CHANGELOG_MESSAGE secret to describe latest changes
+- [x] Reduce POLL_INTERVAL_MS from 60s to 30s in VersionUpdateToast.tsx
+- [x] Add "Reload now" button to VersionUpdateToast that calls window.location.reload()

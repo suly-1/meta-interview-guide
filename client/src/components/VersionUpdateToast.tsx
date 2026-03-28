@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 
-const POLL_INTERVAL_MS = 60_000;   // how often to check for a new version
+const POLL_INTERVAL_MS = 30_000;   // how often to check for a new version
 const TOAST_DURATION_MS = 10_000;  // how long the toast stays visible
 
 async function fetchBuildHash(): Promise<string | null> {
@@ -123,7 +123,7 @@ export default function VersionUpdateToast() {
       `}</style>
 
       {/* Body */}
-      <div className="flex items-start gap-2.5 px-3 py-3">
+      <div className="flex items-start gap-2.5 px-3 pt-3 pb-2">
         <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center mt-0.5">
           <Sparkles size={13} className="text-blue-400" />
         </div>
@@ -139,6 +139,13 @@ export default function VersionUpdateToast() {
           <p className="text-[11px] text-muted-foreground leading-snug mt-1">
             {changelogMsg}
           </p>
+          {/* Reload now button */}
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            Reload now →
+          </button>
         </div>
         <button
           onClick={dismiss}
