@@ -159,12 +159,13 @@ export default function TopNav({
               <button
                 onClick={onToggleDark}
                 data-testid="dark-mode-toggle"
-                className="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-secondary hover:bg-secondary/70 text-foreground font-medium text-sm transition-all select-none"
                 title={
                   darkMode ? "Switch to light mode" : "Switch to dark mode"
                 }
               >
-                {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+                {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+                <span>{darkMode ? "Light" : "Dark"}</span>
               </button>
             </div>
           </div>

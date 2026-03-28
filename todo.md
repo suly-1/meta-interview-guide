@@ -1313,3 +1313,12 @@
 - [x] Remove metaguide.blog links from the feedback email template in server/routers/feedback.ts (also cleaned dailyAlert.ts, weeklyAnalytics.ts, weeklyDigest.ts)
 - [x] Remove Twitter/Email share buttons from SevenDaySprintPlan (keep Copy Link only)
 - [x] Remove GitHub API call from trpc.standalone.ts
+
+## Privacy Cleanup — Round 55
+
+- [x] Remove NotificationBanner component (push notifications) from Home.tsx
+- [x] Build 10-second auto-dismissing update toast in top-right corner (no browser permissions)
+
+## UI Polish — Round 56
+
+- [x] Restyle dark/light mode toggle in TopNav to larger pill button with moon/sun icon + "Dark"/"Light" label

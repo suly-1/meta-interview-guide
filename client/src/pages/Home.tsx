@@ -24,7 +24,6 @@ import FailureAnalysisTab from "@/components/FailureAnalysisTab";
 import HowToUseTab from "@/components/HowToUseTab";
 import { GamificationHub } from "@/components/GamificationHub";
 import OnboardingModal from "@/components/OnboardingModal";
-import NotificationBanner from "@/components/NotificationBanner";
 import { AlertTriangle, X } from "lucide-react";
 
 // Simple confetti burst
@@ -212,9 +211,6 @@ export default function Home() {
       {!onboardingDismissed && (
         <OnboardingModal onDismiss={() => setOnboardingDismissed(true)} />
       )}
-
-      {/* Notification banner */}
-      <NotificationBanner />
     </div>
   );
 }
