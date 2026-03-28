@@ -15,7 +15,7 @@
  * Admins always bypass both.
  */
 import { z } from "zod";
-import { ownerProcedure, publicProcedure, router } from "../_core/trpc";
+import { ownerProcedure, tokenAdminProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings, users } from "../../drizzle/schema";
 import { eq, count, isNotNull } from "drizzle-orm";
@@ -117,7 +117,7 @@ export const siteSettingsRouter = router({
    * Admin: Instantly lock the site for all non-admin visitors.
    * Sets manual_lock_enabled = "1". Timer state is untouched.
    */
-  lockNow: ownerProcedure.mutation(async () => {
+  lockNow: tokenAdminProcedure.mutation(async () => {
     await setSetting("manual_lock_enabled", "1");
     return { success: true };
   }),
@@ -126,7 +126,7 @@ export const siteSettingsRouter = router({
    * Admin: Instantly unlock the site.
    * Clears the manual lock. Timer continues running normally.
    */
-  unlock: ownerProcedure.mutation(async () => {
+  unlock: tokenAdminProcedure.mutation(async () => {
     await setSetting("manual_lock_enabled", "0");
     return { success: true };
   }),
@@ -135,7 +135,7 @@ export const siteSettingsRouter = router({
    * Admin: Reset the 60-day clock to today (start a new cohort).
    * Also clears the manual lock so the site opens immediately.
    */
-  resetClock: ownerProcedure.mutation(async () => {
+  resetClock: tokenAdminProcedure.mutation(async () => {
     const today = new Date().toISOString().slice(0, 10);
     await setSetting("lock_start_date", today);
     await setSetting("lock_enabled", "1");
@@ -146,7 +146,7 @@ export const siteSettingsRouter = router({
   /**
    * Admin: Update timer settings (start date, duration, enabled toggle).
    */
-  updateLockSettings: ownerProcedure
+  updateLockSettings: tokenAdminProcedure
     .input(
       z.object({
         lockEnabled:      z.boolean().optional(),

@@ -93,8 +93,10 @@ const TOUR_SLIDES = [
 
 // ── useInviteGate hook ────────────────────────────────────────────────────────
 export function useInviteGate() {
-  const { data, isLoading } = trpc.inviteGate.isEnabled.useQuery(undefined, {
+  const { data, isLoading, isError } = trpc.inviteGate.isEnabled.useQuery(undefined, {
     staleTime: 5 * 60 * 1000,
+    retry: 2,               // retry twice before giving up
+    retryDelay: 3000,       // 3s between retries
   });
   const [unlocked, setUnlocked] = useState<boolean>(() => {
     try { return localStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
@@ -131,7 +133,9 @@ export function useInviteGate() {
     setForceGate(false);
   };
 
-  const gateEnabled = data?.enabled ?? false;
+  // If the API call fails (network error, sandbox restart), default to LOCKED
+  // so the gate is a second layer of protection independent of the server.
+  const gateEnabled = isError ? true : (data?.enabled ?? false);
   const showGate = !isLoading && gateEnabled && (!unlocked || forceGate);
   const revokeReason = accessCheck && !accessCheck.ok ? accessCheck.reason : null;
 

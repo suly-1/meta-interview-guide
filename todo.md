@@ -1085,3 +1085,8 @@
 
 ## Round 10 — Force Re-authentication (Mar 28)
 - [x] Bump localStorage key version to invalidate all existing unlock tokens (force everyone to re-enter invite code)
+
+## Round 11 — Hardening & Keep-Alive (Mar 28)
+- [ ] Frontend API-failure fallback: gate defaults to locked when isEnabled call fails (network error / sandbox restart)
+- [ ] Sandbox keep-alive ping every 20 minutes (scheduled task pings port 3001 to prevent hibernation)
+- [ ] Verify and fix panic button end-to-end (lockNow / unlock in AdminSettings)
