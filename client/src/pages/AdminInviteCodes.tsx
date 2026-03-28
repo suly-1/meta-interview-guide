@@ -16,6 +16,7 @@ import {
   ToggleRight,
   Trash2,
   Users,
+  ShieldOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,6 +72,14 @@ export default function AdminInviteCodes() {
   const deleteMutation = trpc.inviteGate.deleteCode.useMutation({
     onSuccess: () => {
       toast.success("Code deleted");
+      refetch();
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  const revokeAllMutation = trpc.inviteGate.revokeAllForCode.useMutation({
+    onSuccess: data => {
+      toast.success(`Revoked ${data.revoked} session(s)`);
       refetch();
     },
     onError: e => toast.error(e.message),
@@ -207,9 +216,16 @@ export default function AdminInviteCodes() {
                           {code.cohortName}
                         </span>
                       )}
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Users size={12} />
-                        {code.sessionCount} sessions
+                      <span
+                        className={`flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                          (code.sessionCount ?? 0) > 0
+                            ? "bg-blue-500/15 text-blue-400"
+                            : "text-muted-foreground"
+                        }`}
+                        title={`${code.sessionCount ?? 0} active session(s)`}
+                      >
+                        <Users size={11} />
+                        {code.sessionCount ?? 0}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -242,6 +258,27 @@ export default function AdminInviteCodes() {
                           </>
                         )}
                       </Button>
+                      {(code.sessionCount ?? 0) > 0 && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xs gap-1 text-amber-400 hover:text-amber-300"
+                          title="Revoke all active sessions for this code"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Revoke all ${code.sessionCount} active session(s) for "${code.code}"? Users will be kicked out immediately.`
+                              )
+                            ) {
+                              revokeAllMutation.mutate({ codeId: code.id });
+                            }
+                          }}
+                          disabled={revokeAllMutation.isPending}
+                        >
+                          <ShieldOff size={13} />
+                          Revoke all
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="ghost"

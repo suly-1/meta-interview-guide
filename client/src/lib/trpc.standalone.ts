@@ -1615,6 +1615,10 @@ export const trpc = {
     purgeOldSessions: {
       useMutation: (_?: unknown) => makeMutation(() => ({ deleted: 0 })),
     },
+    revokeAllForCode: {
+      useMutation: (_?: unknown) =>
+        makeMutation(() => ({ success: true, revoked: 0 })),
+    },
   },
   // ── siteSettings (no-op stubs for standalone) ──────────────────────────────
   siteSettings: {
@@ -1634,6 +1638,12 @@ export const trpc = {
     cohortReset: {
       useMutation: (_?: unknown) =>
         makeMutation(() => ({ success: true, usersReset: 0 })),
+    },
+  },
+  // u2500u2500 adminPin (no-op stubs for standalone) u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500u2500
+  adminPin: {
+    getPinAttemptChart: {
+      useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ days: [] }),
     },
   },
   // ── visitorTracking (no-op stubs for standalone) ──────────────────────────

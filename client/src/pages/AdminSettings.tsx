@@ -17,7 +17,17 @@ import {
   Calendar,
   Shield,
   AlertTriangle,
+  ShieldAlert,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -85,6 +95,11 @@ export default function AdminSettings() {
     },
     onError: e => toast.error(e.message),
   });
+
+  const { data: pinChart } = trpc.adminPin.getPinAttemptChart.useQuery(
+    undefined,
+    { enabled: isAdmin, refetchInterval: 60_000 }
+  );
 
   if (!isAdmin) {
     return (
@@ -288,6 +303,59 @@ export default function AdminSettings() {
                 }
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* PIN Attempt Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldAlert size={16} className="text-amber-400" />
+              Admin PIN Attempts — Last 7 Days
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!pinChart || pinChart.days.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                No PIN attempts recorded in the last 7 days.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart
+                  data={pinChart.days}
+                  margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={d => d.slice(5)}
+                  />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 6,
+                      fontSize: 12,
+                    }}
+                    labelFormatter={d => `Date: ${d}`}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar
+                    dataKey="failed"
+                    name="Failed"
+                    fill="#ef4444"
+                    radius={[3, 3, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="succeeded"
+                    name="Succeeded"
+                    fill="#10b981"
+                    radius={[3, 3, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 

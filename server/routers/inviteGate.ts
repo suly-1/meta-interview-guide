@@ -267,6 +267,24 @@ export const inviteGateRouter = router({
     return { enabled: row?.enabled ?? false };
   }),
 
+  /** Revoke all active sessions for a specific invite code. */
+  revokeAllForCode: tokenAdminProcedure
+    .input(z.object({ codeId: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return { success: false, revoked: 0 };
+      const result = await db
+        .update(activeSessions)
+        .set({ isRevoked: true })
+        .where(
+          and(
+            eq(activeSessions.codeId, input.codeId),
+            eq(activeSessions.isRevoked, false)
+          )
+        );
+      return { success: true, revoked: result[0]?.affectedRows ?? 0 };
+    }),
+
   /** Toggle the invite gate on/off globally. */
   setGateEnabled: tokenAdminProcedure
     .input(z.object({ enabled: z.boolean() }))

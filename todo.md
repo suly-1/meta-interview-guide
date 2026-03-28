@@ -1400,7 +1400,15 @@
 
 ## Phase 64 — Admin Invite Codes + PIN Chart
 
-- [ ] Add revokeAllForCode procedure to inviteGate router
+- [x] Add revokeAllForCode procedure to inviteGate router
 - [ ] Add sessions count column to AdminInviteCodes table
-- [ ] Add revoke-all-sessions button per code in AdminInviteCodes
+- [x] Add revoke-all-sessions button per code in AdminInviteCodes
 - [ ] Wire adminPin.getPinAttemptChart into AdminSettings as a 7-day bar chart
+
+## Phase 65 — Session Badges + PIN Chart
+
+- [x] Add revokeAllForCode procedure to inviteGate router
+- [x] Add session count to listCodes return value
+- [x] Add session count badge to each invite code row in AdminInviteCodes
+- [x] Add revoke-all-sessions button per code in AdminInviteCodes
+- [x] Wire adminPin.getPinAttemptChart into AdminSettings as 7-day bar chart
