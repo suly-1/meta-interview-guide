@@ -12,7 +12,7 @@ import {
   analyticsEvents,
 } from "../../drizzle/schema";
 import { gte, desc, sql, eq, and } from "drizzle-orm";
-import { feedback } from "../../drizzle/schema";
+import { feedback, inviteCodes } from "../../drizzle/schema";
 import { notifyOwner } from "../_core/notification";
 
 // ── Ingest procedures (public — fire-and-forget from client) ─────────────────
@@ -307,6 +307,49 @@ export const analyticsRouter = router({
       }
       const dailyActive = Object.entries(dayMap).sort((a, b) => a[0].localeCompare(b[0])).map(([date, count]) => ({ date, count }));
       return { sessions: allSessions.length, loggedInUsers, pageViews: allPv.length, avgSessionMinutes, totalTimeHours, dailyActive };
+    }),
+
+  /** Hourly activity breakdown for the last N days */
+  getHourlyActivity: adminProcedure
+    .input(z.object({ days: z.number().int().min(1).max(30).default(7) }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      const since = new Date(Date.now() - input.days * 86400_000);
+      const sessions = await db.select().from(analyticsSessions).where(gte(analyticsSessions.startedAt, since));
+      const hourMap: Record<number, number> = {};
+      for (let h = 0; h < 24; h++) hourMap[h] = 0;
+      for (const s of sessions) {
+        const h = new Date(s.startedAt).getHours();
+        hourMap[h] = (hourMap[h] ?? 0) + 1;
+      }
+      return Object.entries(hourMap).map(([hour, count]) => ({ hour: Number(hour), count }));
+    }),
+
+  /** Top pages visited */
+  getTopPages: adminProcedure
+    .input(z.object({ days: z.number().int().min(1).max(90).default(7), limit: z.number().int().min(1).max(50).default(10) }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      const since = new Date(Date.now() - input.days * 86400_000);
+      const pageViews = await db.select().from(analyticsPageViews).where(gte(analyticsPageViews.createdAt, since));
+      const pvMap: Record<string, number> = {};
+      for (const pv of pageViews) {
+        pvMap[pv.page] = (pvMap[pv.page] ?? 0) + 1;
+      }
+      return Object.entries(pvMap)
+        .map(([page, count]) => ({ page, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, input.limit);
+    }),
+
+  /** Invite code usage stats */
+  getInviteCodeStats: adminProcedure
+    .query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(inviteCodes).orderBy(desc(inviteCodes.useCount));
     }),
 
   /** Top unactioned feedback items */

@@ -1045,3 +1045,9 @@
 - [ ] Audit and remove Share Prep State if it leaks owner data
 - [ ] Add custom favicon (neutral coding/target icon, no Manus branding)
 - [ ] Restore hidden admin access via secret URL (e.g. /#/admin/access) without visible nav button
+
+## Round 3 — Invite Gate & Analytics (Mar 28)
+- [ ] Enable invite gate ON by default in database
+- [ ] Seed honeypot invite code (secret, never shared)
+- [ ] Enhance analytics dashboard with richer metrics (top pages, device breakdown, hourly activity, invite code usage)
+- [ ] Rebuild and redeploy to Cloudflare Pages
