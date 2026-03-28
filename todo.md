@@ -1370,3 +1370,13 @@
 - [ ] Add /api/heartbeat endpoint to update lastSeen every 30s
 - [ ] Add admin stats tRPC query (total unique, active now, active today, active this week, per-code breakdown)
 - [ ] Build live stats widget in admin dashboard (auto-refreshes every 30s)
+
+## Phase 63 — Code Practice Tab (from uploaded ZIP)
+
+- [x] Copy CodePracticeTab.tsx into client/src/components/
+- [x] Copy CodePracticeAIStatic.tsx into client/src/components/
+- [x] Add "💻 Code Practice" tab to TopNav TABS array
+- [x] Add tab render in Home.tsx
+- [x] Verify Monaco editor works (already installed)
+- [x] Fix any TypeScript/import errors
+- [x] All tests passing

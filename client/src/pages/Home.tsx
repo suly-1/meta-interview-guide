@@ -23,6 +23,7 @@ import LearningPathTab from "@/components/LearningPathTab";
 import FailureAnalysisTab from "@/components/FailureAnalysisTab";
 import HowToUseTab from "@/components/HowToUseTab";
 import { GamificationHub } from "@/components/GamificationHub";
+import CodePracticeTab from "@/components/CodePracticeTab";
 import OnboardingModal from "@/components/OnboardingModal";
 import { AlertTriangle, X } from "lucide-react";
 
@@ -184,6 +185,7 @@ export default function Home() {
         {activeTab === "failure-analysis" && <FailureAnalysisTab />}
         {activeTab === "guide" && <HowToUseTab />}
         {activeTab === "challenges" && <GamificationHub />}
+        {activeTab === "code-practice" && <CodePracticeTab />}
       </main>
 
       {/* Footer */}

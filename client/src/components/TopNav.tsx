@@ -22,6 +22,7 @@ const TABS = [
   { id: "failure-analysis", label: "⚠️ Failure Analysis" },
   { id: "guide", label: "📖 Guide" },
   { id: "challenges", label: "🎮 Challenges" },
+  { id: "code-practice", label: "💻 Code Practice" },
 ];
 
 // Site identity — injected at build time via VITE_SITE_ID

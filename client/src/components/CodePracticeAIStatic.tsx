@@ -108,7 +108,7 @@ export function AISolutionReviewer({ problem, code, language }: Props) {
         difficulty: problem.difficulty,
         date: new Date().toISOString(),
         score: 3,
-        level: "L6",
+        icLevel: "IC6",
         verdict: text.slice(0, 80),
         correctness: 3,
         complexity: 3,
@@ -141,7 +141,7 @@ export function AISolutionReviewer({ problem, code, language }: Props) {
             AI Solution Reviewer
           </span>
           <span className="text-xs text-muted-foreground">
-            L6/L7 rubric scoring
+            IC6/IC7 rubric scoring
           </span>
         </div>
         {open ? (
@@ -446,7 +446,7 @@ export function ComplexityAnalyzer({ problem, code, language }: Props) {
           {
             role: "system",
             content:
-              "You are an expert engineer analyzing time and space complexity. Be precise and concise. Format: Time: O(...) — explanation. Space: O(...) — explanation. Optimal: O(...) — how to achieve it.",
+              "You are a Meta engineer analyzing time and space complexity. Be precise and concise. Format: Time: O(...) — explanation. Space: O(...) — explanation. Optimal: O(...) — how to achieve it.",
           },
           {
             role: "user",

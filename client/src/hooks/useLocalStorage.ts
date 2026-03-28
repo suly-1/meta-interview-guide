@@ -163,3 +163,24 @@ export interface DebuggingSession {
 export function useDebuggingHistory() {
   return useLocalStorage<DebuggingSession[]>("meta_debugging_history_v1", []);
 }
+
+// ── AI Review History (Code Practice tab) ─────────────────────────────────
+export interface AIReviewRecord {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  topic: string;
+  difficulty: string;
+  date: string; // ISO
+  score: number; // 0-5
+  level: string; // L5/L6/L7
+  verdict: string;
+  correctness: number;
+  complexity: number;
+  edgeCases: number;
+  codeQuality: number;
+  coaching: string;
+}
+export function useAIReviewHistory() {
+  return useLocalStorage<AIReviewRecord[]>("meta_ai_review_history_v1", []);
+}
