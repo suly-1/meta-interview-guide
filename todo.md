@@ -1082,3 +1082,6 @@
 ## Round 9 — Critical Bug Fix (Mar 28)
 - [x] Fix invite gate: site is accessible without entering an invite code
 - [x] Root cause: Manus platform layer blocks unauthenticated API calls with 401; Worker now proxies /api/ to dev server tunnel which has no auth layer
+
+## Round 10 — Force Re-authentication (Mar 28)
+- [x] Bump localStorage key version to invalidate all existing unlock tokens (force everyone to re-enter invite code)

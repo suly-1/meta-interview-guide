@@ -19,10 +19,18 @@ import {
 } from "lucide-react";
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
-const STORAGE_KEY       = "mg_invite_unlocked_v1";
-const CODE_KEY          = "mg_invite_code_v1";       // store the actual code for re-validation
-const ATTEMPTS_KEY      = "mg_invite_attempts_v1";
-const LOCKOUT_UNTIL_KEY = "mg_invite_lockout_until_v1";
+const STORAGE_KEY       = "mg_invite_unlocked_v2";  // bumped v1→v2 to invalidate all existing tokens
+const CODE_KEY          = "mg_invite_code_v2";       // store the actual code for re-validation
+const ATTEMPTS_KEY      = "mg_invite_attempts_v2";
+const LOCKOUT_UNTIL_KEY = "mg_invite_lockout_until_v2";
+
+// Clean up old v1 keys so they don't linger in storage
+try {
+  localStorage.removeItem("mg_invite_unlocked_v1");
+  localStorage.removeItem("mg_invite_code_v1");
+  localStorage.removeItem("mg_invite_attempts_v1");
+  localStorage.removeItem("mg_invite_lockout_until_v1");
+} catch { /* ignore */ }
 
 const MAX_ATTEMPTS = 3;
 const COOLDOWN_MS  = 5 * 60 * 1000; // 5 minutes
