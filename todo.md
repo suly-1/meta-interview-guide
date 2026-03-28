@@ -1328,3 +1328,11 @@
 - [x] Mobile-responsive dark/light toggle: icon-only on small screens, full pill on md+
 - [x] Add /api/changelog endpoint returning latest update message
 - [x] Wire changelog message into VersionUpdateToast so it shows what changed
+
+## Privacy Protections — Round 58
+
+- [x] Remove platform branding (Manus/generator meta tags) from HTML source
+- [x] Strengthen public-resource disclaimer in TopNav banner and footer
+- [x] Remove insider-language from content (replace with public-source framing)
+- [x] Build invite-code access gate (env-var: VITE_INVITE_CODE, currently GO0000)
+- [x] Wire up Umami analytics script in index.html using existing env vars

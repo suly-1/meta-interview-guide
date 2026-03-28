@@ -109,10 +109,10 @@ export function WhyCompanyStoryBuilder() {
       {expanded && (
         <div className="px-5 pb-5 space-y-4 border-t border-rose-500/20">
           <div className="mt-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300">
-            Meta interviewers score "Operating at Meta" as a real signal.
-            Generic answers like "I love the scale" or "Meta's mission is
-            inspiring" are red flags. This tool builds a specific, authentic
-            narrative from your actual motivations.
+            Interviewers score "Operating at Meta" as a real signal. Generic
+            answers like "I love the scale" or "Meta's mission is inspiring" are
+            red flags. This tool builds a specific, authentic narrative from
+            your actual motivations.
           </div>
 
           <div className="grid grid-cols-2 gap-3">

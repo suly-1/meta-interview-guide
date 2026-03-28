@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import VersionUpdateToast from "./components/VersionUpdateToast";
+import InviteGate from "./components/InviteGate";
 
 // Inject site identity onto <body> so CSS overrides in index.css can target it.
 // "metaengguide-pro" → deep blue + gold (default, no attribute needed)
@@ -38,12 +39,14 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <SiteIdentityInjector />
-          <Toaster />
-          <VersionUpdateToast />
-          <Router />
-        </TooltipProvider>
+        <InviteGate>
+          <TooltipProvider>
+            <SiteIdentityInjector />
+            <Toaster />
+            <VersionUpdateToast />
+            <Router />
+          </TooltipProvider>
+        </InviteGate>
       </ThemeProvider>
     </ErrorBoundary>
   );

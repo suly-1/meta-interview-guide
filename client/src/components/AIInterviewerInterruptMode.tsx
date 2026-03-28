@@ -229,7 +229,7 @@ export function AIInterviewerInterruptMode() {
       {!expanded && (
         <div className="px-4 py-3">
           <p className="text-xs text-muted-foreground">
-            Real Meta interviewers interrupt constantly. Practice pivoting
+            Interviewers commonly interrupt constantly. Practice pivoting
             mid-thought under pressure — the #1 reason candidates fail system
             design.
           </p>

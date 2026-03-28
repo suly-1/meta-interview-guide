@@ -174,8 +174,8 @@ export function ComplexityProofTrainer() {
       {expanded && (
         <div className="px-5 pb-5 space-y-4 border-t border-blue-500/20">
           <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300">
-            Meta interviewers specifically probe complexity. Saying "O(n log n)"
-            is not enough — you need to walk through the reasoning. This trainer
+            Interviewers commonly probe complexity. Saying "O(n log n)" is not
+            enough — you need to walk through the reasoning. This trainer
             evaluates your proof, not just your answer.
           </div>
 

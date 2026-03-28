@@ -82,7 +82,7 @@ const FAILURE_DISTRIBUTION = [
 const SYSTEM_DESIGN_FAILURE_MODES = [
   {
     title: "Cannot Handle Interruptions",
-    detail: `Meta interviewers interrupt deliberately. They cut off your explanation mid-sentence, ask "but what happens when the DB goes down?", and redirect you to a component you haven't reached yet. Candidates who have only practiced monologue-style design reviews collapse when interrupted.`,
+    detail: `Interviewers commonly interrupt deliberately (per reported interview experiences). They cut off your explanation mid-sentence, ask "but what happens when the DB goes down?", and redirect you to a component you haven't reached yet. Candidates who have only practiced monologue-style design reviews collapse when interrupted.`,
   },
   {
     title: "No Back-of-Envelope Instinct",
@@ -101,7 +101,7 @@ const SYSTEM_DESIGN_WEAK_SIGNALS = [
     num: 1,
     title: "Non-Functional Requirements (NFR)",
     detail:
-      "Consistently skipping scalability, availability, latency, and reliability requirements before diving into implementation. Meta interviewers flag candidates who jump to DB schema without stating QPS targets, who never mention SLAs or error budgets, and who skip capacity estimation entirely.",
+      "Consistently skipping scalability, availability, latency, and reliability requirements before diving into implementation. Interviewers flag (per reported interview experiences) candidates who jump to DB schema without stating QPS targets, who never mention SLAs or error budgets, and who skip capacity estimation entirely.",
     drill:
       "For the next system design question, spend the first 5 minutes ONLY on non-functional requirements. State: expected QPS, storage per day, read/write ratio, latency SLA, availability target. Do not draw any boxes until you have written all 5.",
   },
@@ -109,7 +109,7 @@ const SYSTEM_DESIGN_WEAK_SIGNALS = [
     id: "sd2",
     num: 2,
     title: "Tradeoff Articulation",
-    detail: `Stating design choices without explaining the tradeoffs. Meta interviewers specifically look for "why not X" reasoning. Saying "I'll use Cassandra" without explaining why not MySQL, choosing eventual consistency without mentioning when strong consistency would be needed, or picking microservices without discussing operational overhead are all red flags.`,
+    detail: `Stating design choices without explaining the tradeoffs. Interviewers commonly look for "why not X" reasoning. Saying "I'll use Cassandra" without explaining why not MySQL, choosing eventual consistency without mentioning when strong consistency would be needed, or picking microservices without discussing operational overhead are all red flags.`,
     drill:
       'For every design decision you make today, force yourself to say: "I chose X over Y because... The downside of X is... I\'d switch to Y if..." Practice this on 3 decisions: database choice, caching strategy, and API design.',
   },
@@ -944,7 +944,7 @@ const PROCESS_WEAK_SIGNALS = [
     num: 9,
     title: "Requirements Clarification",
     detail:
-      "Jumping to implementation before clarifying scope. Meta interviewers flag candidates who assume rather than ask. Starting to code before asking about edge cases, designing a full system when a simpler scope was intended, and not asking about scale (1K vs 1B users) are all red flags.",
+      "Jumping to implementation before clarifying scope. Interviewers flag (per reported interview experiences) candidates who assume rather than ask. Starting to code before asking about edge cases, designing a full system when a simpler scope was intended, and not asking about scale (1K vs 1B users) are all red flags.",
     drill:
       "Before answering any question today, write down 3 clarifying questions you would ask the interviewer. Only start answering after you have written all 3.",
   },

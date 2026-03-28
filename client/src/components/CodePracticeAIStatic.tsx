@@ -446,7 +446,7 @@ export function ComplexityAnalyzer({ problem, code, language }: Props) {
           {
             role: "system",
             content:
-              "You are a Meta engineer analyzing time and space complexity. Be precise and concise. Format: Time: O(...) — explanation. Space: O(...) — explanation. Optimal: O(...) — how to achieve it.",
+              "You are an expert engineer analyzing time and space complexity. Be precise and concise. Format: Time: O(...) — explanation. Space: O(...) — explanation. Optimal: O(...) — how to achieve it.",
           },
           {
             role: "user",

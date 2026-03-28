@@ -815,7 +815,7 @@ export default function CodingTab() {
             ],
             [
               "Edge Cases",
-              "Meta interviewers specifically probe edge cases. Always check: empty input, single element, duplicates, negative numbers, overflow.",
+              "Interviewers commonly probe edge cases. Always check: empty input, single element, duplicates, negative numbers, overflow.",
             ],
             [
               "NeetCode 150",

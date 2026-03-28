@@ -414,8 +414,8 @@ function AIChatPanel({
             just like the real Meta interview. Continue solving without AI.
           </p>
           <p className="text-amber-400/80 text-[10px]">
-            💡 This is intentional training. Meta interviewers flag candidates
-            who over-rely on AI.
+            💡 This is intentional training. Interviewers flag (per reported
+            interview experiences) candidates who over-rely on AI.
           </p>
         </div>
       ) : (

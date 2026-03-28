@@ -72,7 +72,7 @@ const FAILURE_REASONS = [
     description:
       "Jumping straight into architecture without asking about scale, constraints, or use cases. Leads to designing the wrong system entirely.",
     metaFeedback:
-      '"You assumed traffic numbers." — Real Meta interviewer feedback',
+      '"You assumed traffic numbers." — Reported interviewer feedback (Glassdoor/Blind)',
     fix: "Spend the first 5–10 minutes asking: What is the scale? What is the acceptable latency? What can we trade off? Never assume — always ask.",
     ic7Signal:
       "L7 candidates define success metrics (e.g., p99 < 200ms, 99.95% uptime) before drawing a single box.",
@@ -142,7 +142,7 @@ const FAILURE_REASONS = [
     description:
       "Designing the happy path only. No discussion of what happens when a dependency is slow, a node fails, or traffic spikes 10x.",
     metaFeedback:
-      '"Ignores overload/cascades/metrics" = weak signal on the Beyz AI rubric used by Meta interviewers',
+      '"Ignores overload/cascades/metrics" = weak signal on the Beyz AI rubric reported in interview feedback on Glassdoor/Blind',
     fix: "For every critical dependency, add: 'If this slows down, we need a timeout + circuit breaker + degraded path.'",
     ic7Signal:
       "L7 proactively names what to monitor: 'I'd alert on p99 latency > 500ms, queue depth > 10K, and error rate > 0.1%.'",
@@ -596,8 +596,8 @@ function InterviewerPerspectiveSimulator() {
       </div>
       <p className="text-xs text-muted-foreground">
         Paste a summary of your system design (2–5 sentences). The AI responds
-        as a Meta interviewer, identifying which failure patterns it detected
-        and scoring each rubric axis.
+        as a FAANG-style interviewer, identifying which failure patterns it
+        detected and scoring each rubric axis.
       </p>
       <textarea
         value={designSummary}

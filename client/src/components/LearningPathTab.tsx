@@ -137,7 +137,7 @@ const WEAK_SIGNALS = {
     {
       signal: "Clarifying Questions",
       detail:
-        "Starting to design or code before asking about scale, scope, and constraints. Meta interviewers flag candidates who assume rather than ask.",
+        "Starting to design or code before asking about scale, scope, and constraints. Interviewers flag (per reported interview experiences) candidates who assume rather than ask.",
     },
     {
       signal: "Time Management",
@@ -416,7 +416,7 @@ const HIGH_IMPACT_FEATURES = [
     stat: "Doesn't Exist Anywhere Else",
     statColor: "text-red-400",
     description:
-      "Real Meta interviewers interrupt every 3–5 minutes. This is the only tool that simulates that. Design freely — then defend your choices under fire. The 42% system design rejection rate is driven primarily by candidates who have never practiced defending an interrupted design.",
+      "Interviewers commonly interrupt every 3–5 minutes. This is the only tool that simulates that. Design freely — then defend your choices under fire. The 42% system design rejection rate is driven primarily by candidates who have never practiced defending an interrupted design.",
   },
   {
     title: "Adversarial Design Review",

@@ -77,12 +77,12 @@ export default function TopNav({
             <div className="flex-1 space-y-0.5">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span className="text-white font-medium">
-                  A community-sourced, independent study resource — not
-                  affiliated with Meta.
+                  Community-compiled study resource — no affiliation with any
+                  employer, recruiter, or company.
                 </span>
                 <span className="text-blue-300">
-                  Covers L4–L7 Behavioral &amp; Coding rounds, including the
-                  AI-Enabled Coding Round.
+                  Content synthesized from public sources: NeetCode,
+                  HelloInterview, Glassdoor, Blind, LeetCode discussions.
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
@@ -91,7 +91,8 @@ export default function TopNav({
                   have received.
                 </span>
                 <span className="text-blue-300/90">
-                  No affiliation with Meta · Updated March 2026
+                  Independent resource · Not endorsed by any employer · March
+                  2026
                 </span>
               </div>
             </div>
