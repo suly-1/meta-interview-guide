@@ -1397,3 +1397,10 @@
 - [ ] Build live-stats widget in AdminStats.tsx (total/active users, per-code breakdown)
 - [x] Wire AdminInviteCodes to real inviteCodes table via inviteGate router
 - [ ] Add cohort reset confirmation dialog + button to AdminSettings
+
+## Phase 64 — Admin Invite Codes + PIN Chart
+
+- [ ] Add revokeAllForCode procedure to inviteGate router
+- [ ] Add sessions count column to AdminInviteCodes table
+- [ ] Add revoke-all-sessions button per code in AdminInviteCodes
+- [ ] Wire adminPin.getPinAttemptChart into AdminSettings as a 7-day bar chart

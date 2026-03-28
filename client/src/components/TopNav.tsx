@@ -1,6 +1,6 @@
 // Design: Bold Engineering Dashboard — dark charcoal, Space Grotesk, blue accent
 import { useState } from "react";
-import { Sun, Moon, BookOpen, Leaf, X } from "lucide-react";
+import { Sun, Moon, BookOpen, Leaf, X, ShieldCheck } from "lucide-react";
 import {
   useStreak,
   useCodePracticeSolvedCount,
@@ -164,6 +164,16 @@ export default function TopNav({
                 <span>{streak.currentStreak > 0 ? "🔥" : "💤"}</span>
                 <span>{streak.currentStreak}d</span>
               </div>
+
+              {/* Admin hub button */}
+              <a
+                href="/admin"
+                className="flex items-center gap-2 px-3 py-2 md:px-4 rounded-full border border-border bg-secondary hover:bg-secondary/70 text-muted-foreground hover:text-foreground font-medium text-sm transition-all select-none"
+                title="Admin panel"
+              >
+                <ShieldCheck size={16} />
+                <span className="hidden md:inline">Admin</span>
+              </a>
 
               {/* Dark mode toggle */}
               <button

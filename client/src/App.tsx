@@ -23,6 +23,7 @@ const AdminInviteCodes = lazy(() => import("./pages/AdminInviteCodes"));
 const AdminSessions = lazy(() => import("./pages/AdminSessions"));
 const AdminDocs = lazy(() => import("./pages/AdminDocs"));
 const Changelog = lazy(() => import("./pages/Changelog"));
+const AdminHub = lazy(() => import("./pages/AdminHub"));
 
 // Inject site identity onto <body> so CSS overrides in index.css can target it.
 // "metaengguide-pro" → deep blue + gold (default, no attribute needed)
@@ -49,6 +50,9 @@ function Router() {
 
         {/* Public pages */}
         <Route path={"/changelog"} component={Changelog} />
+
+        {/* Admin hub — single entry point */}
+        <Route path={"/admin"} component={AdminHub} />
 
         {/* Admin pages — all protected by AdminPinGate inside each page */}
         <Route path={"/admin/feedback"} component={AdminFeedback} />
