@@ -122,6 +122,14 @@ async function startServer() {
     res.json({ hash: BUILD_HASH });
   });
 
+  // Changelog endpoint — returns the latest update message shown in the update toast
+  // Update CHANGELOG_MESSAGE whenever you deploy a meaningful update
+  const CHANGELOG_MESSAGE =
+    process.env.CHANGELOG_MESSAGE ?? "New features and improvements deployed.";
+  app.get("/api/changelog", (_req, res) => {
+    res.json({ message: CHANGELOG_MESSAGE, hash: BUILD_HASH });
+  });
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API

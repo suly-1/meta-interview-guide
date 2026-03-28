@@ -1,10 +1,10 @@
 /**
  * VersionUpdateToast
  *
- * Silently polls /api/version every 60 seconds. When the build hash changes
- * (i.e. a new checkpoint has been published), a subtle top-right toast appears
- * for 10 seconds with a countdown progress bar, then auto-dismisses.
- * No browser permissions, no push notifications, no external links.
+ * Polls /api/version every 60 seconds. When the build hash changes (new
+ * deployment detected), fetches /api/changelog for a human-readable update
+ * message, then shows a top-right toast for 10 seconds with a countdown
+ * progress bar. No browser permissions required.
  */
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X } from "lucide-react";
@@ -23,9 +23,21 @@ async function fetchBuildHash(): Promise<string | null> {
   }
 }
 
+async function fetchChangelog(): Promise<string> {
+  try {
+    const res = await fetch("/api/changelog", { cache: "no-store" });
+    if (!res.ok) return "New features and improvements deployed.";
+    const data = (await res.json()) as { message?: string };
+    return data.message ?? "New features and improvements deployed.";
+  } catch {
+    return "New features and improvements deployed.";
+  }
+}
+
 export default function VersionUpdateToast() {
   const [visible, setVisible] = useState(false);
   const [buildTime, setBuildTime] = useState<string>("");
+  const [changelogMsg, setChangelogMsg] = useState<string>("");
   const [progress, setProgress] = useState(100);
   const baselineRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,10 +49,12 @@ export default function VersionUpdateToast() {
     if (progressRef.current) clearInterval(progressRef.current);
   };
 
-  const showToast = () => {
+  const showToast = async () => {
+    const msg = await fetchChangelog();
     setBuildTime(
       new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     );
+    setChangelogMsg(msg);
     setProgress(100);
     setVisible(true);
 
@@ -58,7 +72,7 @@ export default function VersionUpdateToast() {
       });
     }, 100);
 
-    // Auto-dismiss
+    // Auto-dismiss after 10 seconds
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setVisible(false);
@@ -98,7 +112,7 @@ export default function VersionUpdateToast() {
 
   return (
     <div
-      className="fixed top-4 right-4 z-[9999] w-64 rounded-xl border border-blue-500/25 bg-card shadow-xl overflow-hidden"
+      className="fixed top-4 right-4 z-[9999] w-72 rounded-xl border border-blue-500/25 bg-card shadow-xl overflow-hidden"
       style={{ animation: "vut-slide-in 0.3s cubic-bezier(0.16,1,0.3,1)" }}
     >
       <style>{`
@@ -109,21 +123,26 @@ export default function VersionUpdateToast() {
       `}</style>
 
       {/* Body */}
-      <div className="flex items-center gap-2.5 px-3 py-2.5">
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
+      <div className="flex items-start gap-2.5 px-3 py-3">
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center mt-0.5">
           <Sparkles size={13} className="text-blue-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-foreground leading-tight">
-            Site updated
-          </p>
-          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-            New version deployed at {buildTime}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-foreground leading-tight">
+              Site updated
+            </p>
+            <span className="text-[11px] text-muted-foreground shrink-0">
+              {buildTime}
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-snug mt-1">
+            {changelogMsg}
           </p>
         </div>
         <button
           onClick={dismiss}
-          className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+          className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors mt-0.5"
           aria-label="Dismiss"
         >
           <X size={13} />

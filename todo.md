@@ -1322,3 +1322,9 @@
 ## UI Polish — Round 56
 
 - [x] Restyle dark/light mode toggle in TopNav to larger pill button with moon/sun icon + "Dark"/"Light" label
+
+## UI Polish — Round 57
+
+- [x] Mobile-responsive dark/light toggle: icon-only on small screens, full pill on md+
+- [x] Add /api/changelog endpoint returning latest update message
+- [x] Wire changelog message into VersionUpdateToast so it shows what changed
