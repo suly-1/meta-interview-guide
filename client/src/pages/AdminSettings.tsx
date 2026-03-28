@@ -169,6 +169,56 @@ export default function AdminSettings() {
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
+        {/* ── PANIC BUTTON ─────────────────────────────────────────────────────── */}
+        <div className={`rounded-2xl border-2 p-5 transition-all ${
+          lockStatus?.isLocked
+            ? "bg-emerald-950/30 border-emerald-600/60"
+            : "bg-red-950/30 border-red-600/60"
+        }`}>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <AlertOctagon size={18} className={lockStatus?.isLocked ? "text-emerald-400" : "text-red-400"} />
+                <span className="font-bold text-white text-base">
+                  {lockStatus?.isLocked ? "Site is LOCKED" : "Emergency Lock"}
+                </span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                  lockStatus?.isLocked ? "bg-emerald-900/60 text-emerald-300" : "bg-red-900/60 text-red-300"
+                }`}>
+                  {lockStatus?.isLocked ? "ACTIVE" : "READY"}
+                </span>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "#9ca3af" }}>
+                {lockStatus?.isLocked
+                  ? "All non-admin visitors are blocked right now. You can browse normally as admin. Tap Unlock to restore access."
+                  : "Instantly block every non-admin visitor with one tap. You keep full admin access. Use this if the site needs to go dark immediately."}
+              </p>
+            </div>
+            <div className="flex-shrink-0 w-full sm:w-auto">
+              {lockStatus?.isLocked ? (
+                <button
+                  onClick={() => setConfirmUnlock(true)}
+                  disabled={unlock.isPending}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                  style={{ backgroundColor: "#059669", color: "#ffffff", boxShadow: "0 0 20px rgba(5,150,105,0.4)" }}
+                >
+                  {unlock.isPending ? <RefreshCw size={16} className="animate-spin" /> : <Unlock size={16} />}
+                  Unlock Site Now
+                </button>
+              ) : (
+                <button
+                  onClick={() => setConfirmLock(true)}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: "#dc2626", color: "#ffffff", boxShadow: "0 0 20px rgba(220,38,38,0.5)" }}
+                >
+                  <Lock size={16} />
+                  LOCK SITE NOW
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Lock success banner */}
         {lockSuccess && (
           <div className="flex items-center gap-3 px-4 py-3 bg-red-900/40 border border-red-700/50 rounded-xl text-sm text-red-200">

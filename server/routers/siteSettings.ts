@@ -1,47 +1,74 @@
+/**
+ * siteSettings router
+ *
+ * Lock model (two independent axes):
+ *
+ *   1. manual_lock  (key: "manual_lock_enabled", "1"/"0")
+ *      Instant on/off switch. When "1" the site is locked RIGHT NOW regardless
+ *      of the timer. Admins see "LOCKED (manual)" in the UI.
+ *
+ *   2. 60-day timer (keys: "lock_enabled", "lock_start_date", "lock_duration_days")
+ *      Auto-expires the cohort after N days from the start date.
+ *      Completely independent of the manual lock.
+ *
+ * A non-admin visitor is locked out if EITHER axis is active.
+ * Admins always bypass both.
+ */
 import { z } from "zod";
 import { ownerProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { siteSettings, users } from "../../drizzle/schema";
 import { eq, count, isNotNull } from "drizzle-orm";
 
-// Helper: get a setting value by key
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
 async function getSetting(key: string): Promise<string | null> {
   const db = await getDb();
   if (!db) return null;
-  const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+  const [row] = await db
+    .select({ value: siteSettings.value })
+    .from(siteSettings)
+    .where(eq(siteSettings.key, key))
+    .limit(1);
   return row?.value ?? null;
 }
 
-// Helper: set a setting value
 async function setSetting(key: string, value: string): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  await db.insert(siteSettings).values({ key, value }).onDuplicateKeyUpdate({ set: { value } });
+  await db
+    .insert(siteSettings)
+    .values({ key, value })
+    .onDuplicateKeyUpdate({ set: { value } });
 }
+
+// ── Router ───────────────────────────────────────────────────────────────────
 
 export const siteSettingsRouter = router({
   /**
    * Public: Get the current lock status.
-   * Returns whether the site is locked, when it started, and how many days remain.
-   *
-   * IMPORTANT: `isLocked` reflects the TRUE lock state for non-admin users.
-   * Admins bypass the gate (see SiteLockGate), but we still report the real
-   * state so the AdminSettings UI can show whether the site is actually locked.
-   * The `isOwner` flag tells the UI that the admin is bypassing the lock.
+   * isLocked = true if manual lock OR timer has expired.
+   * lockReason = "manual" | "timer_expired" | "none"
    */
   getLockStatus: publicProcedure.query(async ({ ctx }) => {
-    const lockEnabled = (await getSetting("lock_enabled")) === "1";
-    const lockStartDate = await getSetting("lock_start_date");
-    const lockDurationDays = parseInt((await getSetting("lock_duration_days")) ?? "60", 10);
+    const [manualLock, lockEnabled, lockStartDate, lockDurationDaysRaw] = await Promise.all([
+      getSetting("manual_lock_enabled"),
+      getSetting("lock_enabled"),
+      getSetting("lock_start_date"),
+      getSetting("lock_duration_days"),
+    ]);
 
     const isOwner = ctx.user?.role === "admin";
+    const lockDurationDays = parseInt(lockDurationDaysRaw ?? "60", 10);
 
-    if (!lockEnabled || !lockStartDate) {
+    // ── Manual lock ──────────────────────────────────────────────────────────
+    if (manualLock === "1") {
       return {
-        isLocked: false,
+        isLocked: true,
+        lockReason: "manual" as const,
         isOwner,
-        lockEnabled,
-        lockStartDate,
+        lockEnabled: lockEnabled === "1",
+        lockStartDate: lockStartDate ?? null,
         lockDurationDays,
         daysRemaining: null,
         daysElapsed: null,
@@ -49,79 +76,96 @@ export const siteSettingsRouter = router({
       };
     }
 
-    const startMs = new Date(lockStartDate).getTime();
-    const nowMs = Date.now();
-    const daysElapsed = Math.floor((nowMs - startMs) / (1000 * 60 * 60 * 24));
-    const daysRemaining = Math.max(0, lockDurationDays - daysElapsed);
-    const isExpired = daysElapsed >= lockDurationDays;
+    // ── Timer-based lock ─────────────────────────────────────────────────────
+    if (lockEnabled === "1" && lockStartDate) {
+      const startMs = new Date(lockStartDate).getTime();
+      const nowMs = Date.now();
+      const daysElapsed = Math.floor((nowMs - startMs) / 86_400_000);
+      const daysRemaining = Math.max(0, lockDurationDays - daysElapsed);
+      const isExpired = daysElapsed >= lockDurationDays;
 
+      return {
+        isLocked: isExpired,
+        lockReason: isExpired ? ("timer_expired" as const) : ("none" as const),
+        isOwner,
+        lockEnabled: true,
+        lockStartDate,
+        lockDurationDays,
+        daysRemaining,
+        daysElapsed,
+        lockedAt: isExpired
+          ? new Date(startMs + lockDurationDays * 86_400_000).toISOString()
+          : null,
+      };
+    }
+
+    // ── No lock active ───────────────────────────────────────────────────────
     return {
-      // True lock state — admins bypass it in SiteLockGate, but the UI
-      // should still show "LOCKED" so the admin knows the site is closed.
-      isLocked: isExpired,
+      isLocked: false,
+      lockReason: "none" as const,
       isOwner,
-      lockEnabled,
-      lockStartDate,
+      lockEnabled: lockEnabled === "1",
+      lockStartDate: lockStartDate ?? null,
       lockDurationDays,
-      daysRemaining,
-      daysElapsed,
-      lockedAt: isExpired ? new Date(startMs + lockDurationDays * 24 * 60 * 60 * 1000).toISOString() : null,
+      daysRemaining: null,
+      daysElapsed: null,
+      lockedAt: null,
     };
   }),
 
   /**
-   * Admin: Update lock settings.
+   * Admin: Instantly lock the site for all non-admin visitors.
+   * Sets manual_lock_enabled = "1". Timer state is untouched.
    */
-  updateLockSettings: ownerProcedure
-    .input(z.object({
-      lockEnabled: z.boolean().optional(),
-      lockStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD").optional(),
-      lockDurationDays: z.number().int().min(1).max(365).optional(),
-    }))
-    .mutation(async ({ input }) => {
-      if (input.lockEnabled !== undefined) {
-        await setSetting("lock_enabled", input.lockEnabled ? "1" : "0");
-      }
-      if (input.lockStartDate !== undefined) {
-        await setSetting("lock_start_date", input.lockStartDate);
-      }
-      if (input.lockDurationDays !== undefined) {
-        await setSetting("lock_duration_days", String(input.lockDurationDays));
-      }
-      return { success: true };
-    }),
+  lockNow: ownerProcedure.mutation(async () => {
+    await setSetting("manual_lock_enabled", "1");
+    return { success: true };
+  }),
+
+  /**
+   * Admin: Instantly unlock the site.
+   * Clears the manual lock. Timer continues running normally.
+   */
+  unlock: ownerProcedure.mutation(async () => {
+    await setSetting("manual_lock_enabled", "0");
+    return { success: true };
+  }),
 
   /**
    * Admin: Reset the 60-day clock to today (start a new cohort).
+   * Also clears the manual lock so the site opens immediately.
    */
   resetClock: ownerProcedure.mutation(async () => {
     const today = new Date().toISOString().slice(0, 10);
     await setSetting("lock_start_date", today);
     await setSetting("lock_enabled", "1");
+    await setSetting("manual_lock_enabled", "0");
     return { success: true, newStartDate: today };
   }),
 
   /**
-   * Admin: Immediately lock the site (manual override).
-   * Sets the start date 61 days in the past so the cohort is immediately expired.
+   * Admin: Update timer settings (start date, duration, enabled toggle).
    */
-  lockNow: ownerProcedure.mutation(async () => {
-    const pastDate = new Date(Date.now() - 61 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    await setSetting("lock_start_date", pastDate);
-    await setSetting("lock_enabled", "1");
-    return { success: true };
-  }),
+  updateLockSettings: ownerProcedure
+    .input(
+      z.object({
+        lockEnabled:      z.boolean().optional(),
+        lockStartDate:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD").optional(),
+        lockDurationDays: z.number().int().min(1).max(730).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      if (input.lockEnabled !== undefined)
+        await setSetting("lock_enabled", input.lockEnabled ? "1" : "0");
+      if (input.lockStartDate !== undefined)
+        await setSetting("lock_start_date", input.lockStartDate);
+      if (input.lockDurationDays !== undefined)
+        await setSetting("lock_duration_days", String(input.lockDurationDays));
+      return { success: true };
+    }),
 
   /**
-   * Admin: Unlock the site immediately.
-   */
-  unlock: ownerProcedure.mutation(async () => {
-    await setSetting("lock_enabled", "0");
-    return { success: true };
-  }),
-
-  /**
-   * Admin: Cohort health summary — total users, % acknowledged disclaimer, days remaining.
+   * Admin: Cohort health summary.
    */
   getCohortHealth: ownerProcedure.query(async () => {
     const db = await getDb();
@@ -130,9 +174,9 @@ export const siteSettingsRouter = router({
         totalUsers: 0, acknowledgedCount: 0, acknowledgedPct: 0,
         daysRemaining: null, daysElapsed: null,
         lockEnabled: false, lockStartDate: null, lockDurationDays: 60,
+        manualLock: false,
       };
     }
-    // User counts
     const [{ total }] = await db.select({ total: count() }).from(users);
     const [{ acked }] = await db
       .select({ acked: count() })
@@ -141,18 +185,24 @@ export const siteSettingsRouter = router({
     const totalUsers = Number(total);
     const acknowledgedCount = Number(acked);
     const acknowledgedPct = totalUsers > 0 ? Math.round((acknowledgedCount / totalUsers) * 100) : 0;
-    // Lock / cohort window
-    const lockEnabled = (await getSetting("lock_enabled")) === "1";
+
+    const lockEnabled   = (await getSetting("lock_enabled")) === "1";
+    const manualLock    = (await getSetting("manual_lock_enabled")) === "1";
     const lockStartDate = await getSetting("lock_start_date");
     const lockDurationDays = parseInt((await getSetting("lock_duration_days")) ?? "60", 10);
+
     let daysRemaining: number | null = null;
     let daysElapsed: number | null = null;
     if (lockEnabled && lockStartDate) {
-      const elapsed = Math.floor((Date.now() - new Date(lockStartDate).getTime()) / (1000 * 60 * 60 * 24));
+      const elapsed = Math.floor((Date.now() - new Date(lockStartDate).getTime()) / 86_400_000);
       daysElapsed = elapsed;
       daysRemaining = Math.max(0, lockDurationDays - elapsed);
     }
-    return { totalUsers, acknowledgedCount, acknowledgedPct, daysRemaining, daysElapsed, lockEnabled, lockStartDate, lockDurationDays };
+    return {
+      totalUsers, acknowledgedCount, acknowledgedPct,
+      daysRemaining, daysElapsed,
+      lockEnabled, lockStartDate, lockDurationDays, manualLock,
+    };
   }),
 
   /**
@@ -160,7 +210,6 @@ export const siteSettingsRouter = router({
    */
   getDisclaimerEnabled: publicProcedure.query(async () => {
     const val = await getSetting("disclaimer_enabled");
-    // Default to enabled ("1") if not set
     return { enabled: val !== "0" };
   }),
 

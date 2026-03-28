@@ -1056,3 +1056,22 @@
 - [x] 3-attempt lockout with 30-second cooldown on invite gate
 - [x] Rename gate title from "Private Resource" to "Study Group Access"
 - [x] Show welcome message after successful code entry
+
+## Round 5 — Invite Gate Security & UX (Mar 28)
+- [x] Extend lockout from 30s to 5 minutes (300s) in InviteGate.tsx
+- [x] Server-side rate limiting by IP (3 attempts → 5-min block, stored in DB)
+- [x] Animated success transition (fade/slide from welcome screen to main app)
+- [x] Per-code custom welcome message (DB column + admin UI + welcome screen display)
+
+## Round 6 — Invite Gate Security & Tour (Mar 28)
+- [x] Server-side failed-attempt logging visible in admin panel
+- [x] Animated feature tour on welcome screen (step-through cards with progress dots)
+
+## Round 7 — Per-code Expiry + Panic Button (Mar 28)
+- [x] Per-code 60-day access window (firstUsedAt + accessWindowDays columns in DB)
+- [x] Per-code block/unblock from AdminInviteCodes (instant lockout, no site-wide impact)
+- [x] checkCodeAccess on every page load (server revokes access → user sees blocked/expired screen)
+- [x] Extend access window per code (add N days or reset window from admin panel)
+- [x] Panic button in AdminSettings (prominent red LOCK SITE NOW / green Unlock Site Now)
+- [x] Fix site lock: manual_lock_enabled flag is independent of 60-day timer
+- [x] Reset lock_start_date to today (Mar 28) — fresh 60-day window, site is open

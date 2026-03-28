@@ -1,0 +1,8 @@
+{
+  "query": "SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('manual_lock_enabled','lock_enabled','lock_start_date','lock_duration_days');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('manual_lock_enabled','lock_enabled','lock_start_date','lock_duration_days');",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'setting_key' in 'where clause'"
+  ]
+}

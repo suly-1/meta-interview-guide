@@ -373,13 +373,29 @@ export const inviteCodes = mysqlTable("invite_codes", {
   id: int("id").autoincrement().primaryKey(),
   code: varchar("code", { length: 32 }).notNull().unique(),
   label: varchar("label", { length: 128 }), // optional note (e.g. "Batch Jan 2026")
+  welcomeMessage: varchar("welcomeMessage", { length: 256 }), // optional custom greeting shown after unlock
   maxUses: int("maxUses").default(0), // 0 = unlimited
   useCount: int("useCount").notNull().default(0),
   isActive: tinyint("isActive").notNull().default(1),
+  isBlocked: tinyint("isBlocked").notNull().default(0), // admin manual block — 1 = blocked regardless of expiry
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  expiresAt: timestamp("expiresAt"), // null = never expires
+  firstUsedAt: timestamp("firstUsedAt"),               // set on first successful use — starts the access window
+  expiresAt: timestamp("expiresAt"),                   // absolute override expiry (null = use window instead)
+  accessWindowDays: int("accessWindowDays").default(60), // days from firstUsedAt before auto-expiry (0 = no window)
 });
 export type InviteCode = typeof inviteCodes.$inferSelect;
+
+// Invite attempt log — server-side rate limiting by IP (3 failures → 5-min block)
+// Also used as an audit log: every attempt is recorded with the submitted code and reason.
+export const inviteAttempts = mysqlTable("invite_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  submittedCode: varchar("submittedCode", { length: 64 }), // the code the visitor typed
+  success: tinyint("success").notNull().default(0), // 0 = failed, 1 = success
+  reason: varchar("reason", { length: 32 }), // 'ok' | 'invalid' | 'inactive' | 'expired' | 'exhausted' | 'rate_limited'
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InviteAttempt = typeof inviteAttempts.$inferSelect;
 
 // Invite gate settings — single-row config for the access gate
 export const inviteGateSettings = mysqlTable("invite_gate_settings", {

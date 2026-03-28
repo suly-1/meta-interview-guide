@@ -61,9 +61,9 @@ function DisclaimerGateWrapper({ children }: { children: React.ReactNode }) {
 }
 
 function InviteGateWrapper({ children }: { children: React.ReactNode }) {
-  const { showGate, isLoading, unlock } = useInviteGate();
+  const { showGate, isLoading, unlock, revokeReason } = useInviteGate();
   if (isLoading) return null;
-  if (showGate) return <InviteGate onUnlock={unlock} />;
+  if (showGate) return <InviteGate onUnlock={unlock} revokeReason={revokeReason} />;
   return <>{children}</>;
 }
 

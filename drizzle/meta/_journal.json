@@ -127,6 +127,27 @@
       "when": 1774696634606,
       "tag": "0017_lame_korvac",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1774702541562,
+      "tag": "0018_tired_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1774702643844,
+      "tag": "0019_wise_mentallo",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1774703019733,
+      "tag": "0020_nervous_nemesis",
+      "breakpoints": true
     }
   ]
 }

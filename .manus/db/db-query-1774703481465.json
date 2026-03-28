@@ -1,0 +1,26 @@
+{
+  "query": "SELECT `key`, `value` FROM site_settings WHERE `key` IN ('manual_lock_enabled','lock_enabled','lock_start_date','lock_duration_days');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.122d6f8d6c82 --database HSV5ymGbFhd3N83JKd7NgT --execute SELECT `key`, `value` FROM site_settings WHERE `key` IN ('manual_lock_enabled','lock_enabled','lock_start_date','lock_duration_days');",
+  "rows": [
+    {
+      "key": "manual_lock_enabled",
+      "value": "0"
+    },
+    {
+      "key": "lock_enabled",
+      "value": "1"
+    },
+    {
+      "key": "lock_start_date",
+      "value": "2026-03-28"
+    },
+    {
+      "key": "lock_duration_days",
+      "value": "60"
+    }
+  ],
+  "messages": [],
+  "stdout": "key\tvalue\nmanual_lock_enabled\t0\nlock_enabled\t1\nlock_start_date\t2026-03-28\nlock_duration_days\t60\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}
