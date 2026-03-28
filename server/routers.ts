@@ -27,6 +27,7 @@ import { aiNativeHistoryRouter } from "./routers/aiNativeHistory";
 import { drillSessionsRouter } from "./routers/drillSessions";
 import { failureDrillsRouter } from "./routers/failureDrills";
 import { engagementRouter } from "./routers/engagement";
+import { inviteRouter } from "./routers/invite";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "./db";
 import { pinAttempts } from "../drizzle/schema";
@@ -236,6 +237,7 @@ export const appRouter = router({
   siteAccess: siteAccessRouter,
   adminUsers: adminUsersRouter,
   aiNativeHistory: aiNativeHistoryRouter,
+  invite: inviteRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1348,3 +1348,12 @@
 
 - [x] Extend lockout from 30s to 300s (5 minutes) in LOCKOUT_SECONDS
 - [x] Change welcome screen auto-dismiss from 3.5s to 5s in WELCOME_DURATION_MS
+
+## InviteGate Advanced — Round 61
+
+- [x] DB schema: inviteAttemptLog table (ip, code_tried, success, timestamp) + inviteCodes table (code, welcome_message, cohort_name)
+- [x] Server-side rate limiting: tRPC verifyInviteCode procedure with IP-based 3-attempt lockout (5 min cooldown)
+- [x] Server-side logging: record every failed attempt to inviteAttemptLog
+- [x] Per-code welcome messages: seed default GO000 code with welcome text, surface on welcome screen
+- [x] Animated fade/slide transition from welcome screen into the main app
+- [x] Animated feature tour on welcome screen (4-slide auto-advance tour)

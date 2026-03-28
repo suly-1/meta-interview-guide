@@ -571,6 +571,28 @@ export const interviewSeasons = mysqlTable("interview_seasons", {
 });
 export type InterviewSeason = typeof interviewSeasons.$inferSelect;
 
+// ── Invite Codes ────────────────────────────────────────────────────────────
+export const inviteCodes = mysqlTable("invite_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 64 }).notNull().unique(),
+  cohortName: varchar("cohortName", { length: 128 }),
+  welcomeMessage: text("welcomeMessage"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InviteCode = typeof inviteCodes.$inferSelect;
+
+// ── Invite Attempt Log ────────────────────────────────────────────────────────
+export const inviteAttemptLog = mysqlTable("invite_attempt_log", {
+  id: int("id").autoincrement().primaryKey(),
+  ip: varchar("ip", { length: 64 }).notNull(),
+  codeTried: varchar("codeTried", { length: 64 }).notNull(),
+  success: boolean("success").notNull().default(false),
+  userAgent: varchar("userAgent", { length: 256 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InviteAttemptLog = typeof inviteAttemptLog.$inferSelect;
+
 // ── Season Scores ─────────────────────────────────────────────────────────────
 export const seasonScores = mysqlTable("season_scores", {
   id: int("id").autoincrement().primaryKey(),

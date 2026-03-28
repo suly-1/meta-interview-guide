@@ -169,6 +169,13 @@
       "when": 1774647558594,
       "tag": "0023_sad_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1774702624939,
+      "tag": "0024_empty_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `invite_attempt_log` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `ip` varchar(64) NOT NULL,\n  `codeTried` varchar(64) NOT NULL,\n  `success` boolean NOT NULL DEFAULT false,\n  `userAgent` varchar(256),\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  CONSTRAINT `invite_attempt_log_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE IF NOT EXISTS `invite_codes` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `code` varchar(64) NOT NULL,\n  `cohortName` varchar(128),\n  `welcomeMessage` text,\n  `active` boolean NOT NULL DEFAULT true,\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  CONSTRAINT `invite_codes_id` PRIMARY KEY(`id`),\n  CONSTRAINT `invite_codes_code_unique` UNIQUE(`code`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute CREATE TABLE IF NOT EXISTS `invite_attempt_log` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `ip` varchar(64) NOT NULL,\n  `codeTried` varchar(64) NOT NULL,\n  `success` boolean NOT NULL DEFAULT false,\n  `userAgent` varchar(256),\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  CONSTRAINT `invite_attempt_log_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE IF NOT EXISTS `invite_codes` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `code` varchar(64) NOT NULL,\n  `cohortName` varchar(128),\n  `welcomeMessage` text,\n  `active` boolean NOT NULL DEFAULT true,\n  `createdAt` timestamp NOT NULL DEFAULT (now()),\n  CONSTRAINT `invite_codes_id` PRIMARY KEY(`id`),\n  CONSTRAINT `invite_codes_code_unique` UNIQUE(`code`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 560
+}

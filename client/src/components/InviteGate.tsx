@@ -5,12 +5,14 @@
  * correct invite code to proceed.
  *
  * Features:
- * - 3-attempt lockout with 30-second countdown cooldown
- * - Welcome screen shown for 3 seconds after successful entry
- * - localStorage persistence so returning visitors skip the gate
- * - Controlled by VITE_INVITE_CODE env var; gate disabled if unset
+ * - Server-side IP-based 3-attempt lockout (5-minute cooldown via tRPC)
+ * - Client-side localStorage mirror for instant UX (no flicker on return visits)
+ * - Per-code custom welcome message fetched from the database
+ * - Animated feature tour on the welcome screen
+ * - Smooth fade+slide transition into the main app
+ * - Gate disabled automatically if VITE_INVITE_CODE env var is unset
  */
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Lock,
   ArrowRight,
@@ -20,16 +22,46 @@ import {
   BookOpen,
   Brain,
   Target,
+  Zap,
+  ChevronRight,
 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
+// ── Constants ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY = "invite_gate_unlocked";
-const ATTEMPTS_KEY = "invite_gate_attempts";
-const LOCKOUT_KEY = "invite_gate_lockout_until";
-const MAX_ATTEMPTS = 3;
-const LOCKOUT_SECONDS = 300;
+const LOCKOUT_SECONDS = 300; // mirrors server
 const WELCOME_DURATION_MS = 5000;
-const EXPECTED_CODE = import.meta.env.VITE_INVITE_CODE as string | undefined;
+const GATE_ENABLED = Boolean(import.meta.env.VITE_INVITE_CODE);
 
+// ── Feature tour slides ────────────────────────────────────────────────────────
+const TOUR_SLIDES = [
+  {
+    icon: Brain,
+    color: "blue",
+    title: "Coding Patterns",
+    desc: "20 essential patterns with difficulty ratings and spaced-repetition tracking.",
+  },
+  {
+    icon: Target,
+    color: "amber",
+    title: "Behavioral Prep",
+    desc: "STAR-format question bank with AI feedback and readiness scoring.",
+  },
+  {
+    icon: BookOpen,
+    color: "purple",
+    title: "System Design",
+    desc: "End-to-end design walkthroughs with Meta-style evaluation rubrics.",
+  },
+  {
+    icon: Zap,
+    color: "emerald",
+    title: "AI Mock Sessions",
+    desc: "Live AI-powered mock interviews with real-time coaching and scoring.",
+  },
+];
+
+// ── localStorage helpers ───────────────────────────────────────────────────────
 function isAlreadyUnlocked(): boolean {
   try {
     return localStorage.getItem(STORAGE_KEY) === "1";
@@ -41,143 +73,196 @@ function isAlreadyUnlocked(): boolean {
 function markUnlocked(): void {
   try {
     localStorage.setItem(STORAGE_KEY, "1");
-    localStorage.removeItem(ATTEMPTS_KEY);
-    localStorage.removeItem(LOCKOUT_KEY);
   } catch {}
 }
 
-function getAttempts(): number {
-  try {
-    return parseInt(localStorage.getItem(ATTEMPTS_KEY) ?? "0", 10);
-  } catch {
-    return 0;
-  }
-}
+// ── Colour map ─────────────────────────────────────────────────────────────────
+const colorMap: Record<string, { bg: string; border: string; icon: string }> = {
+  blue: {
+    bg: "bg-blue-500/8",
+    border: "border-blue-500/15",
+    icon: "text-blue-400",
+  },
+  amber: {
+    bg: "bg-amber-500/8",
+    border: "border-amber-500/15",
+    icon: "text-amber-400",
+  },
+  purple: {
+    bg: "bg-purple-500/8",
+    border: "border-purple-500/15",
+    icon: "text-purple-400",
+  },
+  emerald: {
+    bg: "bg-emerald-500/8",
+    border: "border-emerald-500/15",
+    icon: "text-emerald-400",
+  },
+};
 
-function incrementAttempts(): number {
-  const next = getAttempts() + 1;
-  try {
-    localStorage.setItem(ATTEMPTS_KEY, String(next));
-  } catch {}
-  return next;
-}
-
-function getLockoutUntil(): number {
-  try {
-    return parseInt(localStorage.getItem(LOCKOUT_KEY) ?? "0", 10);
-  } catch {
-    return 0;
-  }
-}
-
-function setLockout(): void {
-  try {
-    localStorage.setItem(
-      LOCKOUT_KEY,
-      String(Date.now() + LOCKOUT_SECONDS * 1000)
-    );
-    localStorage.setItem(ATTEMPTS_KEY, "0");
-  } catch {}
-}
-
+// ── Component ──────────────────────────────────────────────────────────────────
 interface InviteGateProps {
   children: React.ReactNode;
 }
 
 export default function InviteGate({ children }: InviteGateProps) {
-  const gateEnabled = Boolean(EXPECTED_CODE);
-
+  // If gate is disabled, render children immediately
   const [unlocked, setUnlocked] = useState<boolean>(
-    !gateEnabled || isAlreadyUnlocked()
+    !GATE_ENABLED || isAlreadyUnlocked()
   );
   const [showWelcome, setShowWelcome] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false); // triggers fade-out before unmount
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
-  const [lockedOut, setLockedOut] = useState<boolean>(
-    () => getLockoutUntil() > Date.now()
-  );
-  const [countdown, setCountdown] = useState<number>(0);
+  const [tourSlide, setTourSlide] = useState(0);
+  const [welcomeData, setWelcomeData] = useState<{
+    cohortName: string | null;
+    welcomeMessage: string | null;
+  } | null>(null);
+
+  // Client-side lockout mirror (for instant feedback before server responds)
+  const [clientLockedOut, setClientLockedOut] = useState(false);
+  const [clientCountdown, setClientCountdown] = useState(0);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Focus input on mount
+  // ── Server-side lockout status ─────────────────────────────────────────────
+  const lockoutQuery = trpc.invite.getLockoutStatus.useQuery(undefined, {
+    enabled: GATE_ENABLED && !unlocked,
+    refetchInterval: showWelcome ? false : 10_000,
+  });
+
+  const serverLockedOut = lockoutQuery.data?.lockedOut ?? false;
+  const serverSecondsRemaining = lockoutQuery.data?.secondsRemaining ?? 0;
+
+  // Sync server lockout into client state
   useEffect(() => {
-    if (!unlocked && !showWelcome && !lockedOut && inputRef.current) {
-      inputRef.current.focus();
+    if (serverLockedOut && serverSecondsRemaining > 0) {
+      setClientLockedOut(true);
+      setClientCountdown(serverSecondsRemaining);
     }
-  }, [unlocked, showWelcome, lockedOut]);
+  }, [serverLockedOut, serverSecondsRemaining]);
 
-  // Countdown tick when locked out
+  // ── Countdown tick ─────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!lockedOut) return;
+    if (!clientLockedOut) return;
 
-    const tick = () => {
-      const remaining = Math.ceil((getLockoutUntil() - Date.now()) / 1000);
-      if (remaining <= 0) {
-        setLockedOut(false);
-        setCountdown(0);
-        if (timerRef.current) clearInterval(timerRef.current);
-      } else {
-        setCountdown(remaining);
-      }
-    };
+    countdownRef.current = setInterval(() => {
+      setClientCountdown(prev => {
+        if (prev <= 1) {
+          setClientLockedOut(false);
+          if (countdownRef.current) clearInterval(countdownRef.current);
+          lockoutQuery.refetch();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    tick();
-    timerRef.current = setInterval(tick, 500);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  }, [lockedOut]);
+  }, [clientLockedOut]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-dismiss welcome screen
+  // ── Tour auto-advance ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!showWelcome) return;
+    const t = setInterval(() => {
+      setTourSlide(s => (s + 1) % TOUR_SLIDES.length);
+    }, 1200);
+    return () => clearInterval(t);
+  }, [showWelcome]);
+
+  // ── Welcome auto-dismiss ───────────────────────────────────────────────────
   useEffect(() => {
     if (!showWelcome) return;
     const t = setTimeout(() => {
-      setShowWelcome(false);
-      setUnlocked(true);
+      // Start fade-out animation, then unmount
+      setFadeOut(true);
+      setTimeout(() => {
+        setShowWelcome(false);
+        setUnlocked(true);
+      }, 400); // matches CSS transition duration
     }, WELCOME_DURATION_MS);
     return () => clearTimeout(t);
   }, [showWelcome]);
 
-  if (unlocked) return <>{children}</>;
+  // ── Focus input ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!unlocked && !showWelcome && !clientLockedOut && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [unlocked, showWelcome, clientLockedOut]);
 
-  const attempt = () => {
-    if (lockedOut) return;
-
-    if (input.trim().toUpperCase() === EXPECTED_CODE!.trim().toUpperCase()) {
+  // ── Verify mutation ────────────────────────────────────────────────────────
+  const verifyMutation = trpc.invite.verifyCode.useMutation({
+    onSuccess: data => {
       markUnlocked();
+      setWelcomeData({
+        cohortName: data.cohortName,
+        welcomeMessage: data.welcomeMessage,
+      });
+      setFadeOut(false);
       setShowWelcome(true);
-    } else {
-      const attempts = incrementAttempts();
-      const remaining = MAX_ATTEMPTS - attempts;
-
-      if (attempts >= MAX_ATTEMPTS) {
-        setLockout();
-        setLockedOut(true);
+    },
+    onError: err => {
+      if (err.data?.code === "TOO_MANY_REQUESTS") {
+        setClientLockedOut(true);
+        setClientCountdown(LOCKOUT_SECONDS);
         setError(null);
       } else {
-        setError(
-          remaining === 1
-            ? "Incorrect code. 1 attempt remaining before lockout."
-            : `Incorrect code. ${remaining} attempts remaining.`
-        );
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+        // Count remaining attempts from server lockout data
+        const used = (lockoutQuery.data?.attemptsUsed ?? 0) + 1;
+        const remaining = Math.max(0, 3 - used);
+        if (remaining === 0) {
+          setClientLockedOut(true);
+          setClientCountdown(LOCKOUT_SECONDS);
+          setError(null);
+        } else {
+          setError(
+            remaining === 1
+              ? "Incorrect code. 1 attempt remaining before lockout."
+              : `Incorrect code. ${remaining} attempts remaining.`
+          );
+          setShake(true);
+          setTimeout(() => setShake(false), 500);
+        }
       }
       setInput("");
-    }
-  };
+      lockoutQuery.refetch();
+    },
+  });
+
+  const attempt = useCallback(() => {
+    if (clientLockedOut || verifyMutation.isPending) return;
+    if (!input.trim()) return;
+    verifyMutation.mutate({ code: input.trim() });
+  }, [clientLockedOut, input, verifyMutation]);
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") attempt();
     if (error) setError(null);
   };
 
-  // --- Welcome screen ---
+  // ── Render: already unlocked ───────────────────────────────────────────────
+  if (unlocked) return <>{children}</>;
+
+  // ── Render: welcome screen ─────────────────────────────────────────────────
   if (showWelcome) {
+    const slide = TOUR_SLIDES[tourSlide];
+    const colors = colorMap[slide.color];
+    const SlideIcon = slide.icon;
+
     return (
-      <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-background">
+      <div
+        className="fixed inset-0 z-[99999] flex items-center justify-center bg-background"
+        style={{
+          transition: "opacity 0.4s ease, transform 0.4s ease",
+          opacity: fadeOut ? 0 : 1,
+          transform: fadeOut ? "scale(0.97)" : "scale(1)",
+        }}
+      >
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -195,32 +280,50 @@ export default function InviteGate({ children }: InviteGateProps) {
 
             <div className="space-y-1.5">
               <h1 className="text-xl font-bold text-foreground tracking-tight">
-                Welcome to the Study Group
+                {welcomeData?.cohortName
+                  ? `Welcome, ${welcomeData.cohortName}!`
+                  : "Welcome to the Study Group"}
               </h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                You now have access to the full interview prep resource.
+                {welcomeData?.welcomeMessage ??
+                  "You now have access to the full interview prep resource."}
               </p>
             </div>
 
-            {/* Feature highlights */}
-            <div className="w-full grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-blue-500/8 border border-blue-500/15 p-3 flex flex-col items-center gap-2">
-                <Brain size={18} className="text-blue-400" />
-                <span className="text-xs text-foreground/80 font-medium leading-tight">
-                  Coding Patterns
-                </span>
+            {/* Animated feature tour */}
+            <div className="w-full">
+              <div
+                className={`rounded-xl ${colors.bg} border ${colors.border} p-4 flex items-start gap-3 text-left`}
+                style={{ minHeight: "80px" }}
+              >
+                <div
+                  className={`w-9 h-9 rounded-lg ${colors.bg} border ${colors.border} flex items-center justify-center shrink-0`}
+                >
+                  <SlideIcon size={18} className={colors.icon} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {slide.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                    {slide.desc}
+                  </p>
+                </div>
               </div>
-              <div className="rounded-xl bg-amber-500/8 border border-amber-500/15 p-3 flex flex-col items-center gap-2">
-                <Target size={18} className="text-amber-400" />
-                <span className="text-xs text-foreground/80 font-medium leading-tight">
-                  Behavioral Prep
-                </span>
-              </div>
-              <div className="rounded-xl bg-purple-500/8 border border-purple-500/15 p-3 flex flex-col items-center gap-2">
-                <BookOpen size={18} className="text-purple-400" />
-                <span className="text-xs text-foreground/80 font-medium leading-tight">
-                  System Design
-                </span>
+
+              {/* Slide dots */}
+              <div className="flex items-center justify-center gap-1.5 mt-3">
+                {TOUR_SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setTourSlide(i)}
+                    className={`rounded-full transition-all duration-300 ${
+                      i === tourSlide
+                        ? "w-4 h-1.5 bg-foreground/60"
+                        : "w-1.5 h-1.5 bg-foreground/20"
+                    }`}
+                  />
+                ))}
               </div>
             </div>
 
@@ -250,7 +353,12 @@ export default function InviteGate({ children }: InviteGateProps) {
     );
   }
 
-  // --- Gate screen ---
+  // ── Render: gate screen ────────────────────────────────────────────────────
+  const isLocked = clientLockedOut || serverLockedOut;
+  const displayCountdown = clientLockedOut
+    ? clientCountdown
+    : serverSecondsRemaining;
+
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-background">
       {/* Subtle grid background */}
@@ -280,12 +388,12 @@ export default function InviteGate({ children }: InviteGateProps) {
           {/* Icon */}
           <div
             className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-              lockedOut
+              isLocked
                 ? "bg-red-500/10 border border-red-500/20"
                 : "bg-blue-500/10 border border-blue-500/20"
             }`}
           >
-            {lockedOut ? (
+            {isLocked ? (
               <Timer size={24} className="text-red-400" />
             ) : (
               <Lock size={24} className="text-blue-400" />
@@ -295,34 +403,35 @@ export default function InviteGate({ children }: InviteGateProps) {
           {/* Heading */}
           <div className="text-center space-y-1.5">
             <h1 className="text-xl font-bold text-foreground tracking-tight">
-              {lockedOut ? "Too Many Attempts" : "Study Group Access"}
+              {isLocked ? "Too Many Attempts" : "Study Group Access"}
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {lockedOut
-                ? `Please wait ${countdown}s before trying again.`
+              {isLocked
+                ? `Please wait ${displayCountdown}s before trying again.`
                 : "This is a community study resource. Enter your invite code to continue."}
             </p>
           </div>
 
           {/* Lockout countdown bar */}
-          {lockedOut && (
+          {isLocked && (
             <div className="w-full space-y-2">
               <div className="w-full h-2 rounded-full bg-border overflow-hidden">
                 <div
-                  className="h-full bg-red-500 rounded-full transition-all duration-500"
+                  className="h-full bg-red-500 rounded-full transition-all duration-1000"
                   style={{
-                    width: `${(countdown / LOCKOUT_SECONDS) * 100}%`,
+                    width: `${(displayCountdown / LOCKOUT_SECONDS) * 100}%`,
                   }}
                 />
               </div>
               <p className="text-center text-xs text-muted-foreground">
-                {countdown} second{countdown !== 1 ? "s" : ""} remaining
+                {displayCountdown} second{displayCountdown !== 1 ? "s" : ""}{" "}
+                remaining
               </p>
             </div>
           )}
 
           {/* Input — hidden during lockout */}
-          {!lockedOut && (
+          {!isLocked && (
             <div className="w-full space-y-2">
               <input
                 ref={inputRef}
@@ -337,7 +446,8 @@ export default function InviteGate({ children }: InviteGateProps) {
                 maxLength={20}
                 autoComplete="off"
                 spellCheck={false}
-                className={`w-full px-4 py-3 rounded-xl border text-center text-base font-mono tracking-widest bg-background text-foreground placeholder:text-muted-foreground/50 placeholder:font-sans placeholder:tracking-normal outline-none transition-all ${
+                disabled={verifyMutation.isPending}
+                className={`w-full px-4 py-3 rounded-xl border text-center text-base font-mono tracking-widest bg-background text-foreground placeholder:text-muted-foreground/50 placeholder:font-sans placeholder:tracking-normal outline-none transition-all disabled:opacity-60 ${
                   error
                     ? "border-red-500/70 focus:border-red-500"
                     : "border-border focus:border-blue-500/60"
@@ -353,16 +463,31 @@ export default function InviteGate({ children }: InviteGateProps) {
           )}
 
           {/* Button */}
-          {!lockedOut && (
+          {!isLocked && (
             <button
               onClick={attempt}
-              disabled={input.trim().length === 0}
+              disabled={input.trim().length === 0 || verifyMutation.isPending}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm transition-all"
             >
-              Continue
-              <ArrowRight size={15} />
+              {verifyMutation.isPending ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Verifying…
+                </>
+              ) : (
+                <>
+                  Continue
+                  <ArrowRight size={15} />
+                </>
+              )}
             </button>
           )}
+
+          {/* "Next slide" hint on welcome — shown on gate for context */}
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground/50">
+            <ChevronRight size={10} />
+            <span>Trusted study group members only</span>
+          </div>
 
           {/* Footer disclaimer */}
           <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed">

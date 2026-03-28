@@ -1,0 +1,9 @@
+{
+  "query": "INSERT IGNORE INTO `invite_codes` (`code`, `cohortName`, `welcomeMessage`, `active`)\nVALUES ('GO000', 'Study Group', 'Welcome! You now have full access to the community prep resource. Good luck with your preparation.', true);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user LS6oXFmEKtYAwQA.root --database cRTBYDQNffnDPa87zbUz9b --execute INSERT IGNORE INTO `invite_codes` (`code`, `cohortName`, `welcomeMessage`, `active`)\nVALUES ('GO000', 'Study Group', 'Welcome! You now have full access to the community prep resource. Good luck with your preparation.', true);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 379
+}

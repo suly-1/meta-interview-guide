@@ -1177,36 +1177,6 @@ export const trpc = {
       useMutation: (_?: unknown) => makeMutation(() => ({ id: 1 })),
     },
     getBestScoresByWeek: {
-      useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]),
-    },
-    evaluatePersonaTurn: {
-      useMutation: (_?: unknown) =>
-        makeMutation(() => ({
-          content: JSON.stringify({
-            challenge: "⚠️ AI Persona Stress Test requires the online version.",
-            score: 0,
-            feedback: "AI features are not available in the static build.",
-            betterResponse: "",
-          }),
-        })),
-    },
-    generatePersonaScorecard: {
-      useMutation: (_?: unknown) =>
-        makeMutation(() => ({
-          content: JSON.stringify({
-            overallScore: 0,
-            resilienceRating: "N/A",
-            strengths: [],
-            weaknesses: [],
-            summary: "⚠️ AI scoring requires the online version.",
-          }),
-        })),
-    },
-  },
-
-  // ── drillSessions ───────────────────────────────────────────────────────────────────────────────────────
-  drillSessions: {
-    getBestScoresByWeek: {
       useQuery: () => makeQuery({} as Record<number, number>),
     },
     getSessionHistory: { useQuery: () => makeQuery([] as unknown[]) },
@@ -1602,9 +1572,28 @@ export const trpc = {
       listUsers: { invalidate: () => {} },
       listEvents: { invalidate: () => {} },
     },
+    invite: {
+      getLockoutStatus: { invalidate: () => {} },
+    },
   }),
 
-  // ── Provider (passthrough) ────────────────────────────────────────────────────────────────
+  // ── invite (standalone: always allow, no server-side lockout) ────────────────────────────────
+  invite: {
+    verifyCode: {
+      useMutation: () =>
+        makeMutation(() => ({
+          valid: true as const,
+          cohortName: null,
+          welcomeMessage: null,
+        })),
+    },
+    getLockoutStatus: {
+      useQuery: (_?: unknown, _opts?: unknown) =>
+        makeQuery({ lockedOut: false, secondsRemaining: 0, attemptsUsed: 0 }),
+    },
+  },
+
+  // ── Provider (passthrough) ────────────────────────────────────────────────────────────────────────────────────────
   Provider: ({ children }: { children: React.ReactNode }) => children,
   createClient: () => ({}),
 };
