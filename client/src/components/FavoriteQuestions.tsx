@@ -16,7 +16,6 @@ import {
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
-import { getLoginUrl } from "@/const";
 
 type QuestionType = "coding" | "behavioral" | "design" | "ctci";
 
@@ -95,19 +94,12 @@ export function FavoriteQuestions() {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center space-y-3">
         <Heart size={32} className="text-rose-400 mx-auto" />
-        <p className="font-semibold text-foreground">
-          Sign in to save favorites
-        </p>
+        <p className="font-semibold text-foreground">Favorites</p>
         <p className="text-sm text-muted-foreground">
           Bookmark coding patterns, behavioral questions, and system design
-          topics for focused practice.
+          topics for focused practice. Progress is saved locally in your
+          browser.
         </p>
-        <a
-          href={getLoginUrl()}
-          className="inline-block mt-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 transition-colors"
-        >
-          Sign in
-        </a>
       </div>
     );
   }
