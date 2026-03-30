@@ -14,6 +14,7 @@ import { TRPCError } from "@trpc/server";
 import { sendWeeklyDigest, sendEmail } from "../weeklyDigest";
 import { checkAndSendDailyAlert } from "../dailyAlert";
 import { invokeLLM, withLLMFallback } from "../_core/llm";
+import { ENV } from "../_core/env";
 
 // ── Sentiment tagging ────────────────────────────────────────────────────────
 type Sentiment = "positive" | "neutral" | "negative";
@@ -63,7 +64,7 @@ async function tagSentiment(message: string): Promise<Sentiment> {
   );
 }
 
-const DIGEST_EMAIL = process.env.DIGEST_EMAIL ?? "";
+const DIGEST_EMAIL = ENV.digestEmail;
 
 // ── Instant alert email ──────────────────────────────────────────────────────
 async function sendInstantAlert(opts: {

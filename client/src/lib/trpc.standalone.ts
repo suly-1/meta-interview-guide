@@ -617,6 +617,17 @@ export const trpc = {
       getDisclaimerEnabled: { invalidate: () => {} },
       getSettings: { invalidate: () => {} },
     },
+    favorites: {
+      list: {
+        invalidate: () => {},
+        setData: (_input: unknown, _updater: unknown) => {},
+      },
+    },
+    inviteGate: {
+      isEnabled: { invalidate: () => {} },
+      listCodes: { invalidate: () => {} },
+      listActiveSessions: { invalidate: () => {} },
+    },
   }),
 
   // ── Provider (no-op in standalone) ───────────────────────────────────────

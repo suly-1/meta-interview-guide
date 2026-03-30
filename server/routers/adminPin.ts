@@ -120,7 +120,7 @@ export const adminPinRouter = router({
             // Manus inbox notification (always)
             notifyOwner({ title: alertTitle, content: alertBody }).catch(() => {});
             // SMTP email alert (if configured)
-            const recipientEmail = process.env.DIGEST_RECIPIENT_EMAIL;
+            const recipientEmail = ENV.digestRecipientEmail || undefined;
             if (recipientEmail) {
               sendEmail({
                 to: recipientEmail,

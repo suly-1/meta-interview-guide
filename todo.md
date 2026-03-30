@@ -1124,3 +1124,18 @@
 - [x] Add missing inviteGate (16 procs) and analytics (3 procs) stubs to trpc.standalone.ts
 - [x] All 369 tests pass (0 failures) — pnpm test is green
 - [x] Test runs as part of CI (pnpm test) to catch missing stubs on every build
+
+## TypeScript Fixes + Stub Test Extension (Mar 30)
+- [x] Confirmed Home.tsx lines 551/625 errors are stale LSP cache — fresh tsc shows 0 errors in Home.tsx
+- [x] Extend server/stub-presence.test.ts with useUtils() invalidation key coverage (11 new assertions)
+- [x] Add favorites.list.{invalidate,setData} and inviteGate.{isEnabled,listCodes,listActiveSessions} to trpc.standalone.ts useUtils()
+- [x] All 380 tests pass (0 failures) — up from 369
+
+## Security & Crash-Prevention Audit Suite (Mar 30)
+- [x] Layer 1: Auth/Access Control audit test — verify every procedure uses the correct procedure type
+- [x] Layer 2: Data Exposure audit test — verify no procedure leaks private fields or unfiltered rows
+- [x] Layer 3: Input Validation/Injection audit test — verify all mutations have Zod schemas, no raw SQL interpolation
+- [x] Layer 4: Secret/Env audit test — verify no secrets hardcoded, no .env files committed, no secrets logged
+- [x] Run pnpm test and confirm all new audit tests pass (531 tests, 0 failures)
+- [x] Fixed 2 real issues found by audit: adminPin.ts and feedback.ts used process.env directly in router files
+- [x] Added digestRecipientEmail and digestEmail to ENV in env.ts for centralised access

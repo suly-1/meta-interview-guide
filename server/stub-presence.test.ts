@@ -362,3 +362,68 @@ assertNamespace("systemDesign", [
 assertNamespace("aiRound", [
   "debrief",
 ]);
+
+// ---------------------------------------------------------------------------
+// useUtils() invalidation key coverage
+//
+// Every utils.namespace.procedure.invalidate() / setData() / refetch() call
+// used in the frontend must have a matching entry in trpc.standalone.ts's
+// useUtils() return object.  This block verifies the standalone mock is
+// complete so a missing invalidation key never causes a silent runtime crash.
+//
+// Source: grep -rn "invalidate()\|setData(\|\.refetch()" client/src --include="*.tsx"
+// Collected: Mar 30 2026
+// ---------------------------------------------------------------------------
+
+import { trpc as standaloneTrpc } from "../client/src/lib/trpc.standalone";
+
+describe("useUtils() invalidation key coverage", () => {
+  const utils = standaloneTrpc.useUtils();
+
+  // ── auth ──────────────────────────────────────────────────────────────────
+  it("utils.auth.me.setData exists", () => {
+    expect(typeof (utils as any).auth?.me?.setData).toBe("function");
+  });
+
+  // ── disclaimer ────────────────────────────────────────────────────────────
+  it("utils.disclaimer.status.invalidate exists", () => {
+    expect(typeof (utils as any).disclaimer?.status?.invalidate).toBe("function");
+  });
+
+  // ── favorites ─────────────────────────────────────────────────────────────
+  it("utils.favorites.list.invalidate exists", () => {
+    expect(typeof (utils as any).favorites?.list?.invalidate).toBe("function");
+  });
+  it("utils.favorites.list.setData exists", () => {
+    expect(typeof (utils as any).favorites?.list?.setData).toBe("function");
+  });
+
+  // ── feedback ──────────────────────────────────────────────────────────────
+  it("utils.feedback.getAllSiteFeedback.invalidate exists", () => {
+    expect(typeof (utils as any).feedback?.getAllSiteFeedback?.invalidate).toBe("function");
+  });
+
+  // ── siteAccess ────────────────────────────────────────────────────────────
+  it("utils.siteAccess.checkAccess.invalidate exists", () => {
+    expect(typeof (utils as any).siteAccess?.checkAccess?.invalidate).toBe("function");
+  });
+  it("utils.siteAccess.getDisclaimerEnabled.invalidate exists", () => {
+    expect(typeof (utils as any).siteAccess?.getDisclaimerEnabled?.invalidate).toBe("function");
+  });
+
+  // ── siteSettings ──────────────────────────────────────────────────────────
+  it("utils.siteSettings.getLockStatus.invalidate exists", () => {
+    expect(typeof (utils as any).siteSettings?.getLockStatus?.invalidate).toBe("function");
+  });
+
+  // ── inviteGate ────────────────────────────────────────────────────────────
+  it("utils.inviteGate.isEnabled.invalidate exists", () => {
+    expect(typeof (utils as any).inviteGate?.isEnabled?.invalidate).toBe("function");
+  });
+  it("utils.inviteGate.listCodes.invalidate exists", () => {
+    expect(typeof (utils as any).inviteGate?.listCodes?.invalidate).toBe("function");
+  });
+  it("utils.inviteGate.listActiveSessions.invalidate exists", () => {
+    expect(typeof (utils as any).inviteGate?.listActiveSessions?.invalidate).toBe("function");
+  });
+});
