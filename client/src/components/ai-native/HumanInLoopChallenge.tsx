@@ -55,7 +55,7 @@ export default function HumanInLoopChallenge() {
     save.mutate({
       drillId: "human-in-loop",
       drillLabel: "Human-in-the-Loop Challenge",
-      coreSkill: "Responsible AI Use",
+      coreSkill: "responsible",
       overallScore: Math.round(res.overall * 2),
       scores: { overall: res.overall },
       feedback: res.feedback,

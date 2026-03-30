@@ -1418,3 +1418,9 @@
 - [x] Fix platform-level OAuth redirect: intercept /manus-oauth/callback and redirect to / silently
 - [x] Remove useAuth dependency from admin pages — replace with PIN-only auth
 - [x] Remove "Sign in to save" toasts from FavoriteButton and InterviewProgressTracker
+
+## Hardening — Test Coverage & Security
+
+- [x] Add pnpm test step to publish checklist (PUBLISH_CHECKLIST.md)
+- [x] Extend stub test to cover useUtils invalidation keys (second describe block)
+- [ ] Implement CAPTCHA challenge on /manus-oauth/callback route

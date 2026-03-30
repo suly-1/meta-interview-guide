@@ -80,7 +80,7 @@ export default function EpistemicHumilityCoach() {
     save.mutate({
       drillId: "epistemic-humility",
       drillLabel: "Epistemic Humility Coach",
-      coreSkill: "Continuous AI Learning",
+      coreSkill: "continuous",
       overallScore: Math.round(res.overall * 2),
       scores: { overall: res.overall },
       feedback: res.feedback,

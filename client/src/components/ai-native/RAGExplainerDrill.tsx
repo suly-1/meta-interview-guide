@@ -40,7 +40,7 @@ export default function RAGExplainerDrill() {
     save.mutate({
       drillId: "rag-explainer",
       drillLabel: "RAG Explainer",
-      coreSkill: "AI Fluency and Tool Orchestration",
+      coreSkill: "fluency",
       overallScore: Math.round(res.overall * 2),
       scores: {
         correctness: res.correctness,

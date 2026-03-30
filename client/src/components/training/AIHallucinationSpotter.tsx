@@ -24,7 +24,8 @@ export default function AIHallucinationSpotter() {
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState<{
     correct: boolean;
-    explanation: string;
+    score: number;
+    feedback: string;
     hint: string;
   } | null>(null);
   const [sessionScore, setSessionScore] = useState({ correct: 0, total: 0 });
@@ -41,6 +42,7 @@ export default function AIHallucinationSpotter() {
     const result = await checkMutation.mutateAsync({
       scenarioId: scenario.id,
       userAnswer: userAnswer.trim(),
+      timeSpent: 0,
     });
     setScore(result);
     setSessionScore(prev => ({
@@ -117,7 +119,7 @@ export default function AIHallucinationSpotter() {
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {scenario.context}
+            {scenario.description}
           </p>
         </CardHeader>
         <CardContent className="px-4 pb-3">
@@ -125,7 +127,7 @@ export default function AIHallucinationSpotter() {
             The AI assistant returned this code. Find the bug:
           </p>
           <pre className="bg-background/80 rounded-md p-3 text-xs font-mono overflow-x-auto border border-border whitespace-pre-wrap leading-relaxed">
-            {scenario.aiCode}
+            {scenario.buggyCode}
           </pre>
         </CardContent>
       </Card>
@@ -163,7 +165,7 @@ export default function AIHallucinationSpotter() {
           </div>
           {revealed && (
             <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-md px-3 py-2">
-              💡 Hint: {scenario.hint}
+              💡 Hint: look at line {scenario.bugLine}
             </div>
           )}
         </div>
@@ -189,14 +191,15 @@ export default function AIHallucinationSpotter() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                {score?.explanation}
+                {score?.feedback}
               </p>
               <div className="mt-2 pt-2 border-t border-border">
                 <p className="text-xs text-muted-foreground font-medium mb-1">
                   Correct answer:
                 </p>
                 <pre className="text-xs font-mono bg-background/60 rounded p-2 border border-border whitespace-pre-wrap">
-                  {scenario.correctCode}
+                  {/* Correct code revealed after answer */}
+                  {score?.feedback}
                 </pre>
               </div>
             </CardContent>

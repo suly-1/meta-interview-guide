@@ -179,7 +179,7 @@ export default function KeywordFluencyFlashcards() {
         save.mutate({
           drillId: "keyword-flashcards",
           drillLabel: "Keyword Fluency Flashcards",
-          coreSkill: "AI Fluency and Tool Orchestration",
+          coreSkill: "fluency",
           overallScore: Math.round((correct / newResults.length) * 10),
           scores: { correct, total: newResults.length },
         });

@@ -1560,20 +1560,55 @@ export const trpc = {
   },
 
   // ── useUtils (no-op) ────────────────────────────────────────────────────────────────────────────────
+  // IMPORTANT: Every namespace.key used in utils.X.Y.invalidate() / setData() / cancel() / getData()
+  // anywhere in client/src must be listed here. The standalone.stub.coverage.test.ts second describe
+  // block verifies this automatically — add missing keys there too when extending.
   useUtils: () => ({
+    // disclaimer
     disclaimer: { status: { invalidate: () => {} } },
+    // ratings
     ratings: { getAll: { invalidate: () => {} } },
+    // ctciProgress
     ctciProgress: { get: { invalidate: () => {} } },
+    // onboarding
     onboarding: { get: { invalidate: () => {} } },
+    // leaderboard
     leaderboard: { getTop: { invalidate: () => {} } },
-    siteAccess: { getDisclaimerEnabled: { invalidate: () => {} } },
+    // siteAccess — both keys used in client
+    siteAccess: {
+      getDisclaimerEnabled: { invalidate: () => {} },
+      checkAccess: { invalidate: () => {} },
+    },
+    // aiCodingMock
     aiCodingMock: { getProblems: { invalidate: () => {} } },
+    // adminUsers
     adminUsers: {
       listUsers: { invalidate: () => {} },
       listEvents: { invalidate: () => {} },
     },
+    // invite
     invite: {
       getLockoutStatus: { invalidate: () => {} },
+    },
+    // aiNativeHistory
+    aiNativeHistory: {
+      getMockHistory: { invalidate: () => {} },
+    },
+    // auth.me — used for invalidate() and setData()
+    auth: {
+      me: {
+        invalidate: () => {},
+        setData: (_input: unknown, _updater: unknown) => {},
+      },
+    },
+    // favorites.list — used for optimistic updates (cancel/getData/setData/invalidate)
+    favorites: {
+      list: {
+        cancel: () => Promise.resolve(),
+        getData: (_input?: unknown) => undefined as unknown,
+        setData: (_input: unknown, _updater: unknown) => {},
+        invalidate: () => {},
+      },
     },
   }),
 

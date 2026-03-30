@@ -194,3 +194,63 @@ export function useCodePracticeSolvedCount(): number {
   return Object.values(solved).filter(Boolean).length;
 }
 export const CODE_PRACTICE_TOTAL = 50;
+
+// ── Readiness Trend (InterviewProgressTracker) ────────────────────────────────────
+export interface ReadinessTrendEntry {
+  date: string; // ISO date string e.g. "2024-03-15"
+  pct: number; // 0-100 readiness percentage
+}
+export function useReadinessTrend() {
+  return useLocalStorage<ReadinessTrendEntry[]>("meta_readiness_trend_v1", []);
+}
+
+// ── Simulator History (MockInterviewSimulator) ────────────────────────────────
+export interface SimulatorSession {
+  id: string;
+  date: string; // ISO date string
+  icTarget: string;
+  codingProblem: string;
+  codingNotes: string;
+  bq1Question: string;
+  bq1Answer: string;
+  bq2Question: string;
+  bq2Answer: string;
+  totalTimeUsed: number; // seconds
+  overallVerdict: string;
+  overallScore: number;
+  codingScore: number;
+  behavioralScore: number;
+  levelAssessment: string;
+  codingAssessment: string;
+  behavioralAssessment: string;
+  topStrengths: string[];
+  criticalGaps: string[];
+  nextSteps: string[];
+}
+export function useSimulatorHistory() {
+  return useLocalStorage<SimulatorSession[]>("meta_simulator_history_v1", []);
+}
+
+// ── Daily Study Checklist (OverviewExtras) ──────────────────────────────────
+export function useDailyChecklist() {
+  return useLocalStorage<Record<string, boolean>>(
+    "meta_daily_checklist_v1",
+    {}
+  );
+}
+
+// ── Onboarding Progress (OverviewExtras) ────────────────────────────────────
+export function useOnboardingProgress() {
+  return useLocalStorage<Record<string, boolean>>(
+    "meta_onboarding_progress_v1",
+    {}
+  );
+}
+
+// ── Flash Card Spaced Repetition due dates (SystemDesignExtras) ──────────────────
+export function useFlashCardSRDue() {
+  return useLocalStorage<Record<string, string>>(
+    "meta_flashcard_sr_due_v1",
+    {}
+  );
+}

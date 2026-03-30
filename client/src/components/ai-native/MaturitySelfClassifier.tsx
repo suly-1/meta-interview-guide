@@ -115,17 +115,37 @@ export default function MaturitySelfClassifier() {
     save.mutate({
       drillId: "maturity-classifier",
       drillLabel: "Maturity Self-Classifier",
-      coreSkill: "Continuous AI Learning",
+      coreSkill: "continuous",
       overallScore: levelToScore[res.overallAssessedLevel] ?? 5,
       scores: {
-        fluency: res.fluencyAssessedLevel,
-        impact: res.impactAssessedLevel,
-        responsibleAI: res.responsibleAIAssessedLevel,
-        continuousLearning: res.continuousLearningAssessedLevel,
+        fluency: levelToScore[res.fluencyAssessedLevel] ?? 5,
+        impact: levelToScore[res.impactAssessedLevel] ?? 5,
+        responsibleAI: levelToScore[res.responsibleAIAssessedLevel] ?? 5,
+        continuousLearning:
+          levelToScore[res.continuousLearningAssessedLevel] ?? 5,
       },
       feedback: res.gapAnalysis,
     });
-    saveLevel.mutate({ level: res.overallAssessedLevel });
+    const levelIndex = Math.max(
+      0,
+      (levelToScore[res.overallAssessedLevel] ?? 2) / 2 - 1
+    );
+    saveLevel.mutate({
+      level: res.overallAssessedLevel as
+        | "Traditionalist"
+        | "AI Aware"
+        | "AI Enabled"
+        | "AI First"
+        | "AI Native",
+      levelIndex,
+      scores: {
+        fluency: levelToScore[res.fluencyAssessedLevel] ?? 5,
+        impact: levelToScore[res.impactAssessedLevel] ?? 5,
+        responsibleAI: levelToScore[res.responsibleAIAssessedLevel] ?? 5,
+        continuousLearning:
+          levelToScore[res.continuousLearningAssessedLevel] ?? 5,
+      },
+    });
   };
 
   const reset = () => {

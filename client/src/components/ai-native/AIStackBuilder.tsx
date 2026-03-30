@@ -78,7 +78,7 @@ export default function AIStackBuilder() {
     save.mutate({
       drillId: "ai-stack-builder",
       drillLabel: "AI Stack Builder",
-      coreSkill: "AI Fluency and Tool Orchestration",
+      coreSkill: "fluency",
       overallScore: Math.round(res.overall * 2),
       scores: {
         modelLayer: res.modelLayer,

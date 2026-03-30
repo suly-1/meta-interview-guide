@@ -24,7 +24,10 @@ export default function CodeNavigationSpeedTest() {
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<{
     correct: boolean;
-    explanation: string;
+    feedback: string;
+    correctAnswer: string;
+    fileHint: string;
+    lineHint: number;
   } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [started, setStarted] = useState(false);
@@ -50,7 +53,7 @@ export default function CodeNavigationSpeedTest() {
 
   const handleStart = () => {
     setStarted(true);
-    setSelectedFile(challenge?.files[0]?.name ?? null);
+    setSelectedFile(Object.keys(challenge?.files ?? {})[0] ?? null);
   };
 
   const handleSubmit = async () => {
@@ -59,7 +62,7 @@ export default function CodeNavigationSpeedTest() {
     const res = await checkMutation.mutateAsync({
       challengeId: challenge.id,
       questionId: question.id,
-      answer: answer.trim(),
+      userAnswer: answer.trim(),
     });
     setResult(res);
     setSessionStats(prev => ({
@@ -139,19 +142,16 @@ export default function CodeNavigationSpeedTest() {
             <CardTitle className="text-sm text-yellow-400">
               {challenge.title}
             </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              {challenge.description}
-            </p>
           </CardHeader>
           <CardContent className="px-4 pb-3">
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {challenge.files.map(f => (
+              {Object.keys(challenge.files).map(fname => (
                 <Badge
-                  key={f.name}
+                  key={fname}
                   variant="secondary"
                   className="text-xs font-mono"
                 >
-                  {f.name}
+                  {fname}
                 </Badge>
               ))}
             </div>
@@ -171,18 +171,18 @@ export default function CodeNavigationSpeedTest() {
             <p className="text-xs text-muted-foreground font-medium mb-1.5">
               Files:
             </p>
-            {challenge.files.map(f => (
+            {Object.keys(challenge.files).map(fname => (
               <button
-                key={f.name}
-                onClick={() => setSelectedFile(f.name)}
+                key={fname}
+                onClick={() => setSelectedFile(fname)}
                 className={`w-full text-left text-xs px-2 py-1.5 rounded flex items-center gap-1.5 transition-all ${
-                  selectedFile === f.name
+                  selectedFile === fname
                     ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
                     : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
                 <ChevronRight size={10} />
-                <span className="font-mono">{f.name}</span>
+                <span className="font-mono">{fname}</span>
               </button>
             ))}
           </div>
@@ -195,8 +195,8 @@ export default function CodeNavigationSpeedTest() {
                   {selectedFile}
                 </p>
                 <pre className="bg-background/80 rounded-md p-2 text-xs font-mono overflow-auto border border-border max-h-48 whitespace-pre-wrap leading-relaxed">
-                  {challenge.files.find(f => f.name === selectedFile)
-                    ?.content ?? ""}
+                  {(challenge.files as Record<string, string>)[selectedFile] ??
+                    ""}
                 </pre>
               </div>
             )}
@@ -246,10 +246,10 @@ export default function CodeNavigationSpeedTest() {
                   )}
                   {result?.correct
                     ? "Correct!"
-                    : `Incorrect — correct answer: ${question.answer}`}
+                    : `Incorrect — correct answer: ${result?.correctAnswer ?? "see feedback"}`}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {result?.explanation}
+                  {result?.feedback}
                 </p>
                 <Button
                   onClick={handleNextQuestion}

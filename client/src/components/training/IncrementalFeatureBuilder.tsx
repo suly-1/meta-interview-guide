@@ -50,7 +50,7 @@ export default function IncrementalFeatureBuilder() {
   }, [started]);
 
   useEffect(() => {
-    if (step) setCode(step.starterCode ?? "");
+    if (challenge) setCode(challenge.baseCode ?? "");
   }, [step]);
 
   const handleStart = () => {
@@ -66,7 +66,6 @@ export default function IncrementalFeatureBuilder() {
       challengeId: challenge.id,
       stepId: step.id,
       code: code.trim(),
-      timeSpent: elapsed,
     });
     setResult(res);
     if (res.passed) setCompletedSteps(prev => [...prev, stepIdx]);
@@ -158,32 +157,17 @@ export default function IncrementalFeatureBuilder() {
               {challenge.difficulty}
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {challenge.description}
-          </p>
           <div className="border-t border-border pt-2">
             <p className="text-xs font-medium text-foreground mb-1">
               <ChevronRight size={10} className="inline mr-1" />
-              Step {stepIdx + 1}: {step.title}
+              Step {stepIdx + 1}
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {step.instructions}
+              {step.instruction}
             </p>
           </div>
         </CardContent>
       </Card>
-
-      {/* Existing code (read-only context) */}
-      {step.contextCode && (
-        <div className="space-y-1">
-          <p className="text-xs text-muted-foreground font-medium">
-            Existing codebase (read-only):
-          </p>
-          <pre className="bg-background/80 rounded-md p-3 text-xs font-mono overflow-x-auto border border-border max-h-36 whitespace-pre-wrap leading-relaxed text-muted-foreground">
-            {step.contextCode}
-          </pre>
-        </div>
-      )}
 
       {/* Code editor */}
       {!started ? (
@@ -203,7 +187,7 @@ export default function IncrementalFeatureBuilder() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setCode(step.starterCode ?? "")}
+              onClick={() => setCode(challenge?.baseCode ?? "")}
               className="text-xs gap-1"
             >
               <RotateCcw size={10} /> Reset

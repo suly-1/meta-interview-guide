@@ -63,6 +63,8 @@ interface NodeDatum extends d3.SimulationNodeDatum {
   desc: string;
   examples: string[];
   keyIdea: string;
+  x?: number;
+  y?: number;
 }
 interface LinkDatum extends d3.SimulationLinkDatum<NodeDatum> {
   label: string;

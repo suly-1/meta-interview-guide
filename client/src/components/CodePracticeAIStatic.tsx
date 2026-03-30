@@ -108,7 +108,7 @@ export function AISolutionReviewer({ problem, code, language }: Props) {
         difficulty: problem.difficulty,
         date: new Date().toISOString(),
         score: 3,
-        icLevel: "IC6",
+        level: "IC6",
         verdict: text.slice(0, 80),
         correctness: 3,
         complexity: 3,

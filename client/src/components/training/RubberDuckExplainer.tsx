@@ -62,10 +62,10 @@ export default function RubberDuckExplainer() {
   const [explanation, setExplanation] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<{
-    score: number;
     clarity: number;
     structure: number;
-    technicalAccuracy: number;
+    correctness: number;
+    overall: number;
     feedback: string;
     improvements: string[];
     strongPoints: string[];
@@ -79,11 +79,12 @@ export default function RubberDuckExplainer() {
     if (!explanation.trim()) return;
     setSubmitted(true);
     const result = await scoreMutation.mutateAsync({
-      promptId: prompt.id,
+      problemTitle: prompt.title,
       explanation: explanation.trim(),
+      targetLevel: "L5",
     });
     setScore(result);
-    if (result.score > sessionBest) setSessionBest(result.score);
+    if (result.overall > sessionBest) setSessionBest(result.overall);
   };
 
   const handleNext = () => {
@@ -172,9 +173,9 @@ export default function RubberDuckExplainer() {
             <CardContent className="px-4 py-3 space-y-3">
               <div className="flex items-center gap-3">
                 <div
-                  className={`text-3xl font-bold ${SCORE_COLORS[score?.score ?? 0]}`}
+                  className={`text-3xl font-bold ${SCORE_COLORS[score?.overall ?? 0]}`}
                 >
-                  {score?.score}/10
+                  {score?.overall}/10
                 </div>
                 <div className="flex-1 space-y-1">
                   {[
@@ -182,7 +183,7 @@ export default function RubberDuckExplainer() {
                     { label: "Structure", val: score?.structure ?? 0 },
                     {
                       label: "Technical Accuracy",
-                      val: score?.technicalAccuracy ?? 0,
+                      val: score?.correctness ?? 0,
                     },
                   ].map(({ label, val }) => (
                     <div key={label} className="flex items-center gap-2">

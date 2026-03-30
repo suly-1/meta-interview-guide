@@ -42,8 +42,10 @@ export default function ComplexityFlashcardTrainer() {
   const [result, setResult] = useState<{
     timeCorrect: boolean;
     spaceCorrect: boolean;
+    correctTimeComplexity: string;
+    correctSpaceComplexity: string;
     explanation: string;
-    commonMistake: string;
+    score: number;
   } | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [sessionStats, setSessionStats] = useState({ correct: 0, total: 0 });
@@ -59,8 +61,9 @@ export default function ComplexityFlashcardTrainer() {
     setSubmitted(true);
     const res = await checkMutation.mutateAsync({
       cardId: card.id,
-      timeComplexity: timeGuess,
-      spaceComplexity: spaceGuess,
+      userTimeComplexity: timeGuess,
+      userSpaceComplexity: spaceGuess,
+      userExplanation: "",
     });
     setResult(res);
     const bothCorrect = res.timeCorrect && res.spaceCorrect;
@@ -138,9 +141,6 @@ export default function ComplexityFlashcardTrainer() {
               {card.category}
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {card.description}
-          </p>
         </CardHeader>
         <CardContent className="px-4 pb-3">
           <pre className="bg-background/80 rounded-md p-3 text-xs font-mono overflow-x-auto border border-border whitespace-pre-wrap leading-relaxed">
@@ -271,11 +271,6 @@ export default function ComplexityFlashcardTrainer() {
                 <p className="text-xs text-foreground leading-relaxed">
                   {result?.explanation}
                 </p>
-                {result?.commonMistake && (
-                  <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-2 py-1.5">
-                    ⚠ Common mistake: {result.commonMistake}
-                  </p>
-                )}
               </CardContent>
             </Card>
           )}

@@ -25,10 +25,11 @@ export default function RequirementsClarificationDrill() {
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<{
     score: number;
-    covered: string[];
-    missed: string[];
+    coverage: number;
+    prioritization: number;
+    missedQuestions: string[];
     feedback: string;
-    tip: string;
+    strongPoints: string[];
   } | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [timerActive, setTimerActive] = useState(false);
@@ -69,9 +70,15 @@ export default function RequirementsClarificationDrill() {
     setTimerActive(false);
     clearInterval(timerRef.current!);
     setSubmitted(true);
+    const questionList = questions
+      .trim()
+      .split("\n")
+      .map(q => q.trim())
+      .filter(Boolean);
     const result = await scoreMutation.mutateAsync({
       scenarioId: scenario.id,
-      questions: questions.trim(),
+      questions: questionList,
+      timeSpent: TIMER_SECONDS - timeLeft,
     });
     setScore(result);
     if (result.score > sessionBest) setSessionBest(result.score);
@@ -149,13 +156,13 @@ export default function RequirementsClarificationDrill() {
               {scenario.title}
             </CardTitle>
             <Badge className="text-xs ml-auto" variant="secondary">
-              {scenario.category}
+              {scenario.difficulty}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="px-4 pb-3">
           <p className="text-sm text-foreground leading-relaxed">
-            {scenario.problemStatement}
+            {scenario.prompt}
           </p>
           <p className="text-xs text-muted-foreground mt-2 italic">
             The interviewer has given you this problem. You have 2 minutes to
@@ -236,13 +243,13 @@ export default function RequirementsClarificationDrill() {
               </div>
 
               {/* Covered */}
-              {(score?.covered?.length ?? 0) > 0 && (
+              {(score?.strongPoints?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-xs font-medium text-emerald-400 mb-1">
-                    ✓ Covered ({score!.covered.length}):
+                    ✓ Strong Points ({score!.strongPoints.length}):
                   </p>
                   <ul className="space-y-0.5">
-                    {score!.covered.map((q, i) => (
+                    {score!.strongPoints.map((q, i) => (
                       <li
                         key={i}
                         className="text-xs text-muted-foreground flex gap-1"
@@ -259,13 +266,13 @@ export default function RequirementsClarificationDrill() {
               )}
 
               {/* Missed */}
-              {(score?.missed?.length ?? 0) > 0 && (
+              {(score?.missedQuestions?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-xs font-medium text-amber-400 mb-1">
-                    ⚠ Missed ({score!.missed.length}):
+                    ⚠ Missed Questions ({score!.missedQuestions.length}):
                   </p>
                   <ul className="space-y-0.5">
-                    {score!.missed.map((q, i) => (
+                    {score!.missedQuestions.map((q, i) => (
                       <li key={i} className="text-xs text-muted-foreground">
                         • {q}
                       </li>
@@ -275,7 +282,7 @@ export default function RequirementsClarificationDrill() {
               )}
 
               <p className="text-xs text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded px-2 py-1.5">
-                💡 {score?.tip}
+                💡 {score?.feedback}
               </p>
             </CardContent>
           </Card>

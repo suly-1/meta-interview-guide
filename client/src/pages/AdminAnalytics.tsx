@@ -33,6 +33,7 @@ import {
   Activity,
   TrendingUp,
   Send,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 

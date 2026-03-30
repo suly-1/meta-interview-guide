@@ -166,7 +166,7 @@ describe("SectionErrorBoundary smoke test", () => {
   it("renders an error card when a child throws", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    function Bomb() {
+    function Bomb(): never {
       throw new Error("Simulated AI component crash");
     }
 
@@ -189,7 +189,7 @@ describe("SectionErrorBoundary smoke test", () => {
   it("shows Try Again button on first failure", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    function Bomb() {
+    function Bomb(): never {
       throw new Error("boom");
     }
 
@@ -206,7 +206,7 @@ describe("SectionErrorBoundary smoke test", () => {
   it("shows Show details toggle button", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    function Bomb() {
+    function Bomb(): never {
       throw new Error("boom");
     }
 

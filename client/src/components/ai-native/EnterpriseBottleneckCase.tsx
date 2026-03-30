@@ -63,7 +63,7 @@ export default function EnterpriseBottleneckCase() {
     save.mutate({
       drillId: "enterprise-bottleneck",
       drillLabel: "Enterprise Bottleneck Case",
-      coreSkill: "AI-Driven Impact",
+      coreSkill: "impact",
       overallScore: Math.round(res.systemsThinking * 2),
       scores: {
         dataLayer: res.dataLayer,

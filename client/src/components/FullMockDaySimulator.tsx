@@ -1135,11 +1135,11 @@ export function FullMockDaySimulator() {
   ${verdictSection}
   <div class="section">
     <h2>Strengths</h2>
-    <ul>${scorecard.strengths.map((s: string) => `<li>${s}</li>`).join("")}</ul>
+    <ul>${scorecard.topStrengths.map((s: string) => `<li>${s}</li>`).join("")}</ul>
   </div>
   <div class="section">
     <h2>Areas for Improvement</h2>
-    <ul>${scorecard.improvements.map((s: string) => `<li>${s}</li>`).join("")}</ul>
+    <ul>${scorecard.topImprovements.map((s: string) => `<li>${s}</li>`).join("")}</ul>
   </div>
   <div class="section">
     <h2>2-Week Remediation Plan</h2>

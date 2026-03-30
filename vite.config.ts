@@ -166,12 +166,6 @@ export default defineConfig({
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
-    // Ensure node_modules are resolved from project root, not client/ subdirectory
-    // This is critical for deployment environments that use --shamefully-hoist
-    modules: [
-      path.resolve(import.meta.dirname, "node_modules"),
-      "node_modules",
-    ],
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),

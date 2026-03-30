@@ -49,7 +49,7 @@ export default function AgentEvalDesigner() {
     save.mutate({
       drillId: "agent-eval-designer",
       drillLabel: "Agent Eval Designer",
-      coreSkill: "AI Fluency and Tool Orchestration",
+      coreSkill: "fluency",
       overallScore: Math.round(res.overallRigor * 2),
       scores: { overallRigor: res.overallRigor },
       feedback: res.feedback,

@@ -90,7 +90,7 @@ export default function MetaValuesAlignmentCheck() {
     save.mutate({
       drillId: "meta-values-alignment",
       drillLabel: "Meta Values Alignment Check",
-      coreSkill: "Responsible AI Use",
+      coreSkill: "responsible",
       overallScore: Math.round(res.overall * 2),
       scores: { overall: res.overall },
       feedback: res.overallVerdict,
@@ -112,7 +112,7 @@ export default function MetaValuesAlignmentCheck() {
     ? VALUES.map(v => ({
         label: v.label,
         icon: v.icon,
-        val: (result as Record<string, number>)[v.id] as number,
+        val: (result as unknown as Record<string, number>)[v.id] as number,
         verdict: result.verdicts[v.id],
       }))
     : [];
