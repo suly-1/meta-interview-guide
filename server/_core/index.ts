@@ -7,8 +7,7 @@ import rateLimit from "express-rate-limit";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { sdk } from "./sdk";
-import { issueNonce, consumeNonce, NONCE_COOKIE } from "./oauthNonce";
-import { parse as parseCookies } from "cookie";
+
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -150,66 +149,16 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
 
-  // ── /manus-oauth/init ──────────────────────────────────────────────────────
-  // Called by the Manus platform edge before it redirects the browser to the
-  // OAuth provider.  We issue a short-lived nonce and set it as an HttpOnly
-  // cookie so /manus-oauth/callback can verify it later.
-  //
-  // If the platform never calls this endpoint (e.g. direct bot requests), the
-  // nonce cookie will be absent and the callback will reject with 403.
-  app.get("/manus-oauth/init", (req, res) => {
-    const nonce = issueNonce();
-    res.cookie(NONCE_COOKIE, nonce, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 5 * 60 * 1000, // 5 minutes — matches nonce TTL
-      path: "/manus-oauth",
-    });
-    // Redirect to / so the browser continues its normal flow
-    res.redirect(302, "/");
-  });
-
   // ── /manus-oauth/callback ──────────────────────────────────────────────────
-  // The Manus hosting layer redirects every unauthenticated request to
-  // manus.im/app-auth which then calls back here.  We:
-  //   1. Verify the nonce cookie (CSRF / replay protection).
-  //   2. Complete the OAuth handshake silently.
-  //   3. Redirect to / so the user sees the invite-code gate, never a login screen.
+  // The Manus hosting layer intercepts every unauthenticated request at the
+  // Cloudflare edge and redirects to manus.im/app-auth, which then calls back
+  // here with a code + state.  We silently complete the OAuth handshake and
+  // redirect to / so the user sees the invite-code gate — never a login screen.
   //
-  // Requests without a valid nonce cookie are rejected with 403.  This prevents
-  // bots from hitting the callback URL directly with a forged code parameter.
+  // IMPORTANT: No nonce/CSRF check here.  The platform calls this URL directly
+  // from its own OAuth flow — there is no prior /init step in the platform's
+  // flow, so a nonce requirement would always reject legitimate users.
   app.get("/manus-oauth/callback", async (req, res) => {
-    // ── CSRF / replay protection ──────────────────────────────────────────────
-    const rawCookies = parseCookies(req.headers.cookie ?? "");
-    const nonceCookie = rawCookies[NONCE_COOKIE] as string | undefined;
-    const nonceValid = consumeNonce(nonceCookie);
-
-    if (!nonceValid) {
-      // Log the rejection for monitoring but do not expose details to the caller
-      console.warn(
-        "[manus-oauth/callback] rejected: missing or invalid nonce cookie",
-        {
-          ip: req.ip,
-          ua: req.headers["user-agent"]?.slice(0, 80),
-        }
-      );
-      // Clear any stale nonce cookie
-      res.clearCookie(NONCE_COOKIE, { path: "/manus-oauth" });
-      // Return 403 — do NOT redirect to / to avoid open-redirect abuse
-      res
-        .status(403)
-        .send(
-          "Forbidden: invalid or expired session token. " +
-            "Please reload the page to start a fresh session."
-        );
-      return;
-    }
-
-    // Clear the consumed nonce cookie
-    res.clearCookie(NONCE_COOKIE, { path: "/manus-oauth" });
-
-    // ── OAuth handshake ───────────────────────────────────────────────────────
     try {
       const code = req.query.code as string | undefined;
       const state = req.query.state as string | undefined;
@@ -244,10 +193,11 @@ async function startServer() {
         }
       }
     } catch (err) {
+      // Non-fatal — even if the handshake fails, redirect to / so the user
+      // reaches the invite-code gate rather than being stuck on a login screen.
       console.warn("[manus-oauth/callback] handshake failed (non-fatal):", err);
     }
-    // Always redirect to / regardless of OAuth success or failure — the
-    // invite-code gate handles access control from here.
+    // Always redirect to / — the invite-code gate handles access control.
     res.redirect(302, "/");
   });
   // tRPC API

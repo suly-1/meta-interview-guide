@@ -1424,3 +1424,8 @@
 - [x] Add pnpm test step to publish checklist (PUBLISH_CHECKLIST.md)
 - [x] Extend stub test to cover useUtils invalidation keys (second describe block)
 - [ ] Implement CAPTCHA challenge on /manus-oauth/callback route
+
+## Critical Fix — Production OAuth Loop
+
+- [x] Fix nonce CSRF breaking production: remove nonce requirement, keep simple passthrough callback
+- [x] Fix "Invalid invite code" error caused by nonce rejection
