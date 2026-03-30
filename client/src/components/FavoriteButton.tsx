@@ -78,10 +78,7 @@ export function FavoriteButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isAuthenticated) {
-      toast.info("Sign in to save favorites");
-      return;
-    }
+    if (!isAuthenticated) return;
     toggle.mutate({ questionId, questionType, questionText });
   };
 

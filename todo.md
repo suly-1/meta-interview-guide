@@ -1412,3 +1412,9 @@
 - [x] Add session count badge to each invite code row in AdminInviteCodes
 - [x] Add revoke-all-sessions button per code in AdminInviteCodes
 - [x] Wire adminPin.getPinAttemptChart into AdminSettings as 7-day bar chart
+
+## Critical Fix — OAuth Redirect
+
+- [x] Fix platform-level OAuth redirect: intercept /manus-oauth/callback and redirect to / silently
+- [x] Remove useAuth dependency from admin pages — replace with PIN-only auth
+- [x] Remove "Sign in to save" toasts from FavoriteButton and InterviewProgressTracker

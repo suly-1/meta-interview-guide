@@ -5,7 +5,6 @@
  */
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import {
   ArrowLeft,
@@ -203,7 +202,6 @@ function formatDate(d: Date | string | null | undefined): string {
 }
 
 export default function AdminFeedback() {
-  const { user, loading } = useAuth();
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [catFilter, setCatFilter] = useState("all");
@@ -213,8 +211,6 @@ export default function AdminFeedback() {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
   const [noteText, setNoteText] = useState<Record<number, string>>({});
-
-  const isAdmin = user?.role === "admin";
 
   const updateNote = trpc.feedback.updateNote.useMutation({
     onSuccess: () => {
@@ -262,20 +258,15 @@ export default function AdminFeedback() {
   });
 
   const { data, isLoading, refetch, error } =
-    trpc.feedback.adminGetAll.useQuery(
-      {
-        limit: 200,
-        category: "all",
-        feedbackType: "all",
-        sortBy: "createdAt",
-        sortDir: "desc",
-      },
-      { enabled: isAdmin }
-    );
+    trpc.feedback.adminGetAll.useQuery({
+      limit: 200,
+      category: "all",
+      feedbackType: "all",
+      sortBy: "createdAt",
+      sortDir: "desc",
+    });
 
-  const { data: stats } = trpc.feedback.adminStats.useQuery(undefined, {
-    enabled: isAdmin,
-  });
+  const { data: stats } = trpc.feedback.adminStats.useQuery(undefined);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => (d === "asc" ? "desc" : "asc"));
@@ -361,53 +352,6 @@ export default function AdminFeedback() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  // Auth guard
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <RefreshCw size={20} className="animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground text-sm mb-3">
-            Please log in to access this page.
-          </p>
-          <Link
-            href={route("/")}
-            className="text-blue-400 text-sm hover:underline"
-          >
-            ← Back to home
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-2xl mb-2">🔒</p>
-          <p className="text-foreground font-bold mb-1">Access Denied</p>
-          <p className="text-muted-foreground text-sm mb-3">
-            This page is restricted to admins only.
-          </p>
-          <Link
-            href={route("/")}
-            className="text-blue-400 text-sm hover:underline"
-          >
-            ← Back to home
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

@@ -6,6 +6,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { sdk } from "./sdk";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -146,6 +147,52 @@ async function startServer() {
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // Platform-level OAuth intercept — the Manus hosting layer redirects every
+  // unauthenticated request to manus.im/app-auth which then calls back to
+  // /manus-oauth/callback. We complete the handshake silently and immediately
+  // redirect to / so the user sees the invite-code gate, never a login screen.
+  app.get("/manus-oauth/callback", async (req, res) => {
+    try {
+      const code = req.query.code as string | undefined;
+      const state = req.query.state as string | undefined;
+      if (code && state) {
+        // Exchange code for token and set session cookie so the platform is satisfied
+        const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+        const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+        if (userInfo.openId) {
+          const { upsertUser, getUserByOpenId, recordLoginEvent } =
+            await import("../db");
+          await upsertUser({
+            openId: userInfo.openId,
+            name: userInfo.name || null,
+            email: userInfo.email ?? null,
+            loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+            lastSignedIn: new Date(),
+          });
+          const freshUser = await getUserByOpenId(userInfo.openId);
+          if (freshUser) recordLoginEvent(freshUser.id).catch(() => {});
+          const { COOKIE_NAME, ONE_YEAR_MS } = await import(
+            "../../shared/const"
+          );
+          const sessionToken = await sdk.createSessionToken(userInfo.openId, {
+            name: userInfo.name || "",
+            expiresInMs: ONE_YEAR_MS,
+          });
+          const { getSessionCookieOptions } = await import("./cookies");
+          res.cookie(COOKIE_NAME, sessionToken, {
+            ...getSessionCookieOptions(req),
+            maxAge: ONE_YEAR_MS,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("[manus-oauth/callback] handshake failed (non-fatal):", err);
+    }
+    // Always redirect to / regardless of success or failure — the invite-code
+    // gate will handle access control from here.
+    res.redirect(302, "/");
+  });
   // tRPC API
   app.use(
     "/api/trpc",

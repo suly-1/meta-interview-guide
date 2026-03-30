@@ -3,45 +3,37 @@
  *
  * Behaviour:
  * - Calls siteAccess.checkAccess on load (public endpoint).
- * - If locked AND the current user is NOT the owner → shows a "closed" screen.
- * - Owner always bypasses the gate (checked via auth.isOwner).
+ * - If locked AND the visitor does NOT have a valid admin PIN token → shows a "closed" screen.
+ * - Admin PIN holders always bypass the gate.
  * - While loading, renders children (fail-open to avoid flash of lock screen).
+ *
+ * NOTE: No Manus OAuth / sign-in logic here. Access control is PIN-only.
  */
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { getAdminToken } from "@/components/AdminPinGate";
 import { Lock, Clock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getLoginUrl } from "@/const";
 
 interface AccessGateProps {
   children: React.ReactNode;
 }
 
 export default function AccessGate({ children }: AccessGateProps) {
-  const { user, loading: authLoading } = useAuth();
-
-  // Check if current user is the owner — owner always bypasses the gate
-  const { data: ownerData, isLoading: ownerLoading } =
-    trpc.auth.isOwner.useQuery(undefined, {
-      enabled: !!user,
-      retry: false,
-    });
-
   // Check site access state
   const { data: accessData, isLoading: accessLoading } =
     trpc.siteAccess.checkAccess.useQuery(undefined, {
       retry: false,
-      staleTime: 30 * 1000, // re-check every 30s so lock changes take effect quickly
-      refetchInterval: 60 * 1000, // poll every 60s in background
+      staleTime: 30 * 1000,
+      refetchInterval: 60 * 1000,
     });
 
-  // While any loading is in progress, render children (fail-open)
-  if (authLoading || accessLoading || (user && ownerLoading)) {
+  // While loading, render children (fail-open)
+  if (accessLoading) {
     return <>{children}</>;
   }
 
-  // Owner always gets through
-  if (user && ownerData?.isOwner) {
+  // Admin PIN holders always bypass the gate
+  if (getAdminToken()) {
     return <>{children}</>;
   }
 
@@ -77,20 +69,6 @@ export default function AccessGate({ children }: AccessGateProps) {
 
           {/* Actions */}
           <div className="space-y-3">
-            {!user && (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  Are you the guide owner? Sign in to access.
-                </p>
-                <Button
-                  variant="default"
-                  className="w-full"
-                  onClick={() => (window.location.href = getLoginUrl())}
-                >
-                  Sign In
-                </Button>
-              </div>
-            )}
             <Button
               variant="outline"
               size="sm"

@@ -11,7 +11,6 @@
  */
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { getAdminToken } from "@/components/AdminPinGate";
 import { useLocation } from "wouter";
 import { route } from "@/const";
@@ -120,7 +119,6 @@ function DisclaimerToggleCard() {
 }
 
 export default function AdminAccess() {
-  const { user, loading } = useAuth();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
 
@@ -195,8 +193,7 @@ export default function AdminAccess() {
     onError: err => toast.error(`Failed: ${err.message}`),
   });
 
-  // Auth guard
-  if (loading || settingsLoading) {
+  if (settingsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />

@@ -5,7 +5,6 @@
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import { route } from "@/const";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,6 @@ import {
   Eye,
   Clock,
   Monitor,
-  AlertCircle,
   Activity,
   TrendingUp,
   Send,
@@ -80,20 +78,15 @@ function KpiCard({
 }
 
 export default function AdminAnalytics() {
-  const { user, loading } = useAuth();
   const [days, setDays] = useState(7);
   const [dauDays, setDauDays] = useState(7);
 
-  const { data, isLoading, refetch } = trpc.analytics.adminReport.useQuery(
-    { days },
-    { enabled: !!user && (user as { role?: string }).role === "admin" }
-  );
+  const { data, isLoading, refetch } = trpc.analytics.adminReport.useQuery({
+    days,
+  });
 
   const { data: dauData, isLoading: dauLoading } =
-    trpc.analytics.dauTrend.useQuery(
-      { days: dauDays },
-      { enabled: !!user && (user as { role?: string }).role === "admin" }
-    );
+    trpc.analytics.dauTrend.useQuery({ days: dauDays });
 
   const sendReport = trpc.analytics.sendReportNow.useMutation({
     onSuccess: () =>
@@ -103,32 +96,6 @@ export default function AdminAnalytics() {
     onError: () =>
       toast.error("Failed to send", { description: "Check server logs." }),
   });
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Loading…</div>
-      </div>
-    );
-  }
-
-  if (!user || (user as { role?: string }).role !== "admin") {
-    return (
-      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <Card className="bg-[#161b22] border-[#30363d] p-8 text-center">
-          <AlertCircle className="mx-auto mb-3 text-red-400" size={32} />
-          <p className="text-sm text-muted-foreground">
-            Admin access required.
-          </p>
-          <Link href={route("/")}>
-            <Button variant="outline" size="sm" className="mt-4">
-              Go Home
-            </Button>
-          </Link>
-        </Card>
-      </div>
-    );
-  }
 
   const s = data?.summary;
 

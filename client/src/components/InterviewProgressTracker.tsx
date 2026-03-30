@@ -230,10 +230,7 @@ export function InterviewProgressTracker() {
   ];
 
   const handleSaveSnapshot = async () => {
-    if (!isAuthenticated) {
-      toast.info("Sign in to save progress snapshots to the server");
-      return;
-    }
+    if (!isAuthenticated) return;
     setIsSaving(true);
     try {
       await saveSnapshot.mutateAsync({

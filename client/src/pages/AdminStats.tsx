@@ -5,7 +5,6 @@
  */
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import { route } from "@/const";
 import { PATTERNS, BEHAVIORAL_QUESTIONS } from "@/lib/data";
@@ -64,34 +63,22 @@ function StatBar({
 }
 
 export default function AdminStats() {
-  const { user, loading } = useAuth();
-  const isAdmin = user?.role === "admin";
-
   const { data: aggData, isLoading } =
-    trpc.userScores.getAggregateStats.useQuery(undefined, { enabled: isAdmin });
+    trpc.userScores.getAggregateStats.useQuery(undefined);
 
   // Live visitor stats — auto-refresh every 30 s
   const { data: liveStats, dataUpdatedAt } =
     trpc.visitorTracking.getStats.useQuery(undefined, {
-      enabled: isAdmin,
       refetchInterval: 30_000,
     });
 
-  const { data: feedbackStats } = trpc.feedback.adminStats.useQuery(undefined, {
-    enabled: isAdmin,
-  });
+  const { data: feedbackStats } = trpc.feedback.adminStats.useQuery(undefined);
 
   // Cohort Health data
-  const { data: userStats } = trpc.adminUsers.getUserStats.useQuery(undefined, {
-    enabled: isAdmin,
-  });
-  const { data: disclaimerReport } = trpc.disclaimer.adminReport.useQuery(
-    undefined,
-    { enabled: isAdmin }
-  );
-  const { data: accessData } = trpc.siteAccess.checkAccess.useQuery(undefined, {
-    enabled: isAdmin,
-  });
+  const { data: userStats } = trpc.adminUsers.getUserStats.useQuery(undefined);
+  const { data: disclaimerReport } =
+    trpc.disclaimer.adminReport.useQuery(undefined);
+  const { data: accessData } = trpc.siteAccess.checkAccess.useQuery(undefined);
 
   // Derived cohort health metrics
   const totalUsers = userStats?.total ?? 0;
@@ -149,35 +136,6 @@ export default function AdminStats() {
   const weakPatterns = [...patternStats]
     .sort((a, b) => a.avg - b.avg)
     .slice(0, 5);
-
-  // Auth guard
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <RefreshCw size={20} className="animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-2xl mb-2">🔒</p>
-          <p className="text-foreground font-bold mb-1">Access Denied</p>
-          <p className="text-muted-foreground text-sm mb-3">
-            This page is restricted to admins only.
-          </p>
-          <Link
-            href={route("/")}
-            className="text-blue-400 text-sm hover:underline"
-          >
-            ← Back to home
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
