@@ -1117,3 +1117,10 @@
 - [x] Add changelog history endpoint /api/changelog/history (server-side static list)
 - [x] Persist seen hashes in localStorage — suppress toast if hash already seen
 - [x] Link toast "What's new →" to /changelog page; keep "Reload now" as secondary action
+
+## Automated Testing for Stub Presence (Mar 30)
+- [x] Audit all tRPC routers and identify every procedure namespace + name that must exist
+- [x] Write server/stub-presence.test.ts covering all router namespaces and procedures
+- [x] Add missing inviteGate (16 procs) and analytics (3 procs) stubs to trpc.standalone.ts
+- [x] All 369 tests pass (0 failures) — pnpm test is green
+- [x] Test runs as part of CI (pnpm test) to catch missing stubs on every build

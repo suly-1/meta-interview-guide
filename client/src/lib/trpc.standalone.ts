@@ -499,12 +499,35 @@ export const trpc = {
     save: { useMutation: () => makeMutation(() => ({ success: true })) },
   },
 
+  // ── inviteGate ────────────────────────────────────────────────────────────
+  inviteGate: {
+    isEnabled: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery(false) },
+    verifyCode: { useMutation: () => makeMutation(() => ({ ok: true, expiresAt: null })) },
+    checkCodeAccess: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery({ ok: true, reason: null }) },
+    listCodes: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    createCode: { useMutation: () => makeMutation(() => ({ success: true })) },
+    deleteCode: { useMutation: () => makeMutation(() => ({ success: true })) },
+    blockCode: { useMutation: () => makeMutation(() => ({ success: true })) },
+    unblockCode: { useMutation: () => makeMutation(() => ({ success: true })) },
+    extendAccess: { useMutation: () => makeMutation(() => ({ success: true })) },
+    setEnabled: { useMutation: () => makeMutation(() => ({ success: true })) },
+    clearAttempts: { useMutation: () => makeMutation(() => ({ success: true })) },
+    listAttempts: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    listActiveSessions: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    revokeSession: { useMutation: () => makeMutation(() => ({ success: true })) },
+    restoreSession: { useMutation: () => makeMutation(() => ({ success: true })) },
+    purgeOldSessions: { useMutation: () => makeMutation(() => ({ purged: 0 })) },
+  },
+
   // ── analytics ──────────────────────────────────────────────────────────
   analytics: {
     endSession: { useMutation: () => makeMutation(() => ({ success: true })) },
     featureClicksToday: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
     startSession: { useMutation: () => makeMutation(() => ({ sessionId: 0 })) },
     trackEvent: { useMutation: () => makeMutation(() => ({ success: true })) },
+    getHourlyActivity: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    getInviteCodeStats: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
+    getTopPages: { useQuery: (_?: unknown, _opts?: unknown) => makeQuery([]) },
     getSiteAnalytics: {
       useQuery: (_?: unknown, _opts?: unknown) => makeQuery({
         sessions: 0,
