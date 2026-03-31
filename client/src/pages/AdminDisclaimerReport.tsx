@@ -39,7 +39,7 @@ export default function AdminDisclaimerReport() {
   );
   const [search, setSearch] = useState("");
 
-  const isAdmin = !!getAdminToken();
+  const isAdmin = true;
 
   const {
     data: rows = [],

@@ -122,7 +122,7 @@ export default function AdminAccess() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
 
-  const isAdmin = !!getAdminToken();
+  const isAdmin = true;
 
   // Current settings
   const {

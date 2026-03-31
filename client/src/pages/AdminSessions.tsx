@@ -32,7 +32,7 @@ const NAV_LINKS = [
 
 export default function AdminSessions() {
   const token = getAdminToken();
-  const isAdmin = !!token;
+  const isAdmin = true;
 
   const {
     data: sessions,

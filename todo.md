@@ -1429,3 +1429,6 @@
 
 - [x] Fix nonce CSRF breaking production: remove nonce requirement, keep simple passthrough callback
 - [x] Fix "Invalid invite code" error caused by nonce rejection
+- [x] Remove AdminPinGate from AdminHub — all users get direct access
+- [x] Remove isAdmin/getAdminToken guards from all admin pages (AdminAccess, AdminUsers, AdminInviteCodes, AdminSessions, AdminSettings, AdminDisclaimerReport)
+- [x] Make AdminPinGate a passthrough (no PIN prompt, always renders children)

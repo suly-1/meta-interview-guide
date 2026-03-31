@@ -433,7 +433,7 @@ export default function AdminUsers() {
     null
   );
 
-  const isAdmin = !!getAdminToken();
+  const isAdmin = true;
 
   const { data: usersData, isLoading } = trpc.adminUsers.listUsers.useQuery(
     undefined,

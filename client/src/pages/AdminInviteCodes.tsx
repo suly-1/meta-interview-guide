@@ -37,7 +37,7 @@ const NAV_LINKS = [
 
 export default function AdminInviteCodes() {
   const token = getAdminToken();
-  const isAdmin = !!token;
+  const isAdmin = true;
 
   const { data: codes, refetch } = trpc.inviteGate.listCodes.useQuery(
     undefined,
